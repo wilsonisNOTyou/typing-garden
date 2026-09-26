@@ -1685,13 +1685,13 @@ const WORDS_HARD = [
     Realtime Database を使用。databaseURL 必須)
 ===================================================== */
 const firebaseConfig = {
-  apiKey: "AIzaSyBlnTCURyBlivxJlKgcPhxq3irPySRxA-c",
-  authDomain: "nejiuchi-c4249.firebaseapp.com",
-  databaseURL: "https://nejiuchi-c4249-default-rtdb.firebaseio.com",
-  projectId: "nejiuchi-c4249",
-  storageBucket: "nejiuchi-c4249.firebasestorage.app",
-  messagingSenderId: "299129471044",
-  appId: "1:299129471044:web:c2a338200c068bfae83c11"
+  apiKey: "",
+  authDomain: "",
+  databaseURL: "",        // ← Realtime Database の URL を入れるとランキング・同期が有効になる
+  projectId: "",
+  storageBucket: "",
+  messagingSenderId: "",
+  appId: ""
 };
 const MAX_ENTRIES_PER_PLAYER = 2;  // ランキング掲載は1人2件まで
 const RANKING_SIZE = 20;           // 表示件数
@@ -1709,11 +1709,13 @@ try{
    (ブラウザを閉じても消えない)。使えない環境では
    window.storage → メモリの順にフォールバック */
 const memStore={};
+/* デバッグ用の合言葉で解放した記録は、ランキング・番付・みんなの統計に載せない */
+const isDebugSave = () => { try{ return localStorage.getItem("typinggarden:debug")==="1"; }catch(e){ return false; } };
 const store={
   async get(key){
     try{
       if(typeof localStorage!=="undefined"){
-        const v=localStorage.getItem("nejiuchi:"+key);
+        const v=localStorage.getItem("typinggarden:"+key);
         if(v!==null) return {value:v};
       }
     }catch(e){}
@@ -1729,7 +1731,7 @@ const store={
     memStore[key]=value;
     try{
       if(typeof localStorage!=="undefined"){
-        localStorage.setItem("nejiuchi:"+key,value);
+        localStorage.setItem("typinggarden:"+key,value);
         return;
       }
     }catch(e){}
@@ -2030,7 +2032,7 @@ function sendToGarden(keys,screws){
   keys=keys|0; screws=screws|0;
   if(keys<=0 && screws<=0) return;
   try{
-    const K="nejiuchi:garden:inbox";
+    const K="typinggarden:garden:inbox";
     const cur=JSON.parse(localStorage.getItem(K)||"{}")||{};
     cur.keys=(cur.keys|0)+Math.max(0,keys);
     cur.screws=(cur.screws|0)+Math.max(0,screws);
@@ -2447,7 +2449,7 @@ function betterRecord(a,b,d){
 /* 登録: 1人(同名)につき MAX_ENTRIES_PER_PLAYER 件まで。
    既に上限なら、自分の一番弱い記録を上回った時だけ入れ替える */
 async function submitScore(name,d,extra){
-  const ref=db.ref("nejiuchi/scores/"+d);
+  const ref=db.ref("typinggarden/scores/"+d);
   const snap=await ref.orderByChild("n").equalTo(name).once("value");
   const mine=[];
   snap.forEach(c=>{ const v=c.val(); mine.push({key:c.key, s:v.s, e:v.e, m:v.m}); });
@@ -2469,7 +2471,7 @@ async function submitScore(name,d,extra){
 
 async function fetchRanking(d){
   // タイム系は昇順に並べたいので、取得は全件から上位を選ぶ
-  const ref = isGardenRank(d) ? db.ref("nejiuchi/garden/"+d.slice(2)) : db.ref("nejiuchi/scores/"+d);
+  const ref = isGardenRank(d) ? db.ref("typinggarden/garden/"+d.slice(2)) : db.ref("typinggarden/scores/"+d);
   const snap = isTimeRanked(d)
     ? await ref.orderByChild("e").limitToFirst(RANKING_SIZE).once("value")
     : await ref.orderByChild("s").limitToLast(RANKING_SIZE).once("value");
@@ -2533,6 +2535,7 @@ $("regBtn").addEventListener("click",async()=>{
     const extra={s:score};
     if(isTA(diff)){ extra.e=Number(elapsed.toFixed(2)); extra.m=miss; }
     else if(diff==="oneshot"){ extra.e=Number(elapsed.toFixed(2)); }
+    if(isDebugSave()){ $("regStatus").textContent="デバッグ用の記録はランキングに登録できません"; return; }
     const res=await submitScore(name,diff,extra);
     if(res.saved){
       $("regStatus").textContent="登録しました!";
@@ -2632,10 +2635,10 @@ async function recordStats(screws){
     await store.set("stats",JSON.stringify(s));
   }catch(e){}
   // Firebaseに全プレイヤー合算で記録(ランキング登録不要)
-  if(db){
+  if(db && !isDebugSave()){
     try{
-      db.ref("nejiuchi/stats/plays").transaction(v=>(v||0)+1);
-      db.ref("nejiuchi/stats/screws").transaction(v=>(v||0)+screws);
+      db.ref("typinggarden/stats/plays").transaction(v=>(v||0)+1);
+      db.ref("typinggarden/stats/screws").transaction(v=>(v||0)+screws);
     }catch(e){}
   }
 }
@@ -2644,7 +2647,7 @@ async function refreshStatsLine(){
   if(!el) return;
   if(db){
     try{
-      const snap=await db.ref("nejiuchi/stats").once("value");
+      const snap=await db.ref("typinggarden/stats").once("value");
       const v=snap.val()||{};
       el.textContent=`みんなの記録 — 総プレイ ${v.plays||0}回 / 抜かれたネジ 累計${v.screws||0}本`;
       return;
@@ -2668,8 +2671,8 @@ const Garden=(()=>{
 /* ---------- 調整用の数値 ---------- */
 const MIN_PER_KEY = 5;              // 正しい1打鍵で進む分数(案山子1体ごとに+1)
 const HOUR = 3600e3;
-const SAVE_KEY  = "nejiuchi:garden:save";
-const INBOX_KEY = "nejiuchi:garden:inbox";   // ネジ打ち本編から届く {keys, screws}
+const SAVE_KEY  = "typinggarden:garden:save";
+const INBOX_KEY = "typinggarden:garden:inbox";   // ネジ打ち本編から届く {keys, screws}
 const START_MONEY = 30;
 const CROW_AFTER    = 12*HOUR;  // 実ってからこれだけ放置された作物がカラスに狙われる
 const CROW_CHANCE   = 0.5;      // 狙われたときに実際に持っていかれる確率
@@ -2680,7 +2683,7 @@ const VIL_COST      = 5000;     // 村人1人を雇う値段(にんじん専門)
 /* 村人の入荷条件: お店の中でいちばん厳しく、最後に解放される */
 const VIL_UNLOCK    = { sales:50000, harvest:1000, fields:3 };
 const VIL_SLOTS     = 9;        // 村人1人が世話できる区画数(27区画=3人でちょうど埋まる)
-const RANK_PATH     = "nejiuchi/garden";   // 番付(Firebase)の保存先
+const RANK_PATH     = "typinggarden/garden";   // 番付(Firebase)の保存先
 
 /* 畑の区画(キーボードの並び)
    P は案山子置き場(畑ではない)。, と . は K・L の真下にあり、JIS配列でもUS配列でも同じ位置。
@@ -3148,7 +3151,7 @@ function newState(){
 let S = newState();
 
 /* ---------- 保存 ---------- */
-function save(){ if(window.nejiReplacing) return; try{ localStorage.setItem(SAVE_KEY, JSON.stringify(S)); }catch(e){} }
+function save(){ if(window.tgReplacing) return; try{ localStorage.setItem(SAVE_KEY, JSON.stringify(S)); }catch(e){} }
 function isValidState(o){
   return o && typeof o==="object" && typeof o.money==="number" && Array.isArray(o.fields) && o.fields.length>0;
 }
@@ -3357,7 +3360,7 @@ function applySkip(minutes){
    タイトル画面に戻った時点でも受け取るので、庭に入る前から畑の状態が最新になる。
    お知らせは庭に入ったときにまとめて出す(タイトルでは画面に出せないため) */
 function consumeInbox(){
-  if(window.nejiReplacing) return;
+  if(window.tgReplacing) return;
   let box;
   try{ box=JSON.parse(localStorage.getItem(INBOX_KEY)||"null"); }catch(e){ box=null; }
   if(!box) return;
@@ -4630,6 +4633,7 @@ $("g-bookList").addEventListener("click",e=>{
    名前ごとに1件。自分の庭の印(owner)で、同じ名前の別人の記録を上書きしないようにする */
 const rankKey = name => encodeURIComponent(name).replace(/\./g,"%2E");
 async function pushRank(name){
+  if(isDebugSave()) return {ok:false, msg:"デバッグ用の記録は番付に載せられません"};
   const key=rankKey(name);
   const refM=db.ref(`${RANK_PATH}/money/${key}`), refH=db.ref(`${RANK_PATH}/harvest/${key}`);
   const old=(await refM.once("value")).val();
@@ -4825,10 +4829,10 @@ function openGarden(){ show("garden"); Garden.enter(); }
 
 /* =====================================================
    記録の引き継ぎ(ネジ打ち全体)
-   このブラウザに保存している「nejiuchi:」で始まる記録を
+   このブラウザに保存している「typinggarden:」で始まる記録を
    すべてまとめて1つの文字列にする。読み込んだらページを読み直して反映。
 ===================================================== */
-const LS_PREFIX="nejiuchi:";
+const LS_PREFIX="typinggarden:";
 let backupOpen=false;
 function collectAll(){
   try{ Garden.summary(); }catch(e){}   // 庭の最新の状態を保存してから集める
@@ -4839,7 +4843,7 @@ function collectAll(){
       if(k && k.startsWith(LS_PREFIX) && !k.startsWith(LS_PREFIX+"sync:")) data[k.slice(LS_PREFIX.length)]=localStorage.getItem(k);
     }
   }catch(e){}
-  return { app:"nejiuchi", v:1, at:Date.now(), data };
+  return { app:"typinggarden", v:1, at:Date.now(), data };
 }
 const b64enc = s => btoa(unescape(encodeURIComponent(s)));
 const b64dec = s => decodeURIComponent(escape(atob(s.trim())));
@@ -4863,7 +4867,7 @@ function backupImport(){
   const note=$("bkImportNote"), str=$("bkImport").value;
   if(!str.trim()){ note.textContent="記録文字列を貼り付けてください(I で貼り付け欄へ)"; return; }
   // デバッグ用の合言葉: すべての要素を解放した状態にする
-  if(str.trim().toLowerCase()==="nejiuchi-debug"){
+  if(str.trim().toLowerCase()==="typinggarden-debug"){
     if(!confirm("デバッグ用: すべての要素を解放した記録に置き換えます。今の記録は消えます。よろしいですか?")) return;
     try{
       // ネジ打ち側: 自己ベスト・辞典・名前・統計
@@ -4879,6 +4883,7 @@ function backupImport(){
       localStorage.setItem(LS_PREFIX+"playerName","デバッグ");
       localStorage.setItem(LS_PREFIX+"stats", JSON.stringify({plays:100,screws:5000}));
       localStorage.setItem(LS_PREFIX+"garden:inbox", JSON.stringify({keys:0,screws:0}));
+      localStorage.setItem(LS_PREFIX+"debug","1");   // この記録はランキングに載せない
       Garden.debugUnlock();     // 庭: 作物・道具・畑・村人・貴重品をすべて解放
     }catch(e){ note.textContent="うまくいきませんでした"; return; }
     note.textContent="すべて解放しました。画面を読み直します…";
@@ -4888,11 +4893,11 @@ function backupImport(){
   let o;
   try{ o=JSON.parse(b64dec(str)); }catch(e){ note.textContent="読み込めませんでした。文字列が途中で切れていないか確認してください"; return; }
   // ネジ打ち全体の記録
-  if(o && o.app==="nejiuchi" && o.data && typeof o.data==="object"){
+  if(o && o.app==="typinggarden" && o.data && typeof o.data==="object"){
     if(!confirm("このブラウザの記録を、すべて読み込んだ記録に置き換えます。よろしいですか?")) return;
     try{
       const old=[]; for(let i=0;i<localStorage.length;i++){ const k=localStorage.key(i); if(k&&k.startsWith(LS_PREFIX)) old.push(k); }
-      window.nejiReplacing=true;
+      window.tgReplacing=true;
       old.forEach(k=>localStorage.removeItem(k));
       for(const [k,v] of Object.entries(o.data)) localStorage.setItem(LS_PREFIX+k, String(v));
     }catch(e){ note.textContent="保存できませんでした。ブラウザの設定を確認してください"; return; }
@@ -4903,7 +4908,7 @@ function backupImport(){
   // 庭の「記録」でコピーした、庭だけの文字列
   if(o && typeof o.money==="number" && Array.isArray(o.fields)){
     if(!confirm("ネジ抜きの庭の記録を、読み込んだ庭に置き換えます(ほかの記録はそのまま)。よろしいですか?")) return;
-    try{ window.nejiReplacing=true; localStorage.setItem(LS_PREFIX+"garden:save", JSON.stringify(o)); }catch(e){ note.textContent="保存できませんでした"; return; }
+    try{ window.tgReplacing=true; localStorage.setItem(LS_PREFIX+"garden:save", JSON.stringify(o)); }catch(e){ note.textContent="保存できませんでした"; return; }
     note.textContent="庭を読み込みました。画面を読み直します…";
     setTimeout(()=>location.reload(),600);
     return;
@@ -4919,7 +4924,7 @@ function backupImport(){
      持ち主はそのコードで最後に「こちらで遊ぶ」を選んだブラウザ。
      持ち主が閉じられたら、残ったほうが自動で持ち主になる
 ===================================================== */
-const SYNC_PATH="nejiuchi/saves", SYNC_KEEP=5, SYNC_ALIVE=45000;
+const SYNC_PATH="typinggarden/saves", SYNC_KEEP=5, SYNC_ALIVE=45000;
 const SYNC_BACKUP_EVERY=10*60*1000;   // バックアップは10分に1回まで(細かく送っても古い記録が残るように)
 const SYNC_DEBOUNCE=2500;             // 操作が止まってから送るまで
 let syncPushing=false, syncPushAgain=false, syncBackupAt=null, syncDirtyTimer=null;
@@ -4932,7 +4937,7 @@ let syncCode=null, syncDevice=null, syncLastT=0, syncReadOnly=false;
 let syncMetaRef=null, syncOwnerRef=null, syncLiveRef=null, syncHeart=null;
 let syncPending=false, syncPushAt=0, syncOwner=null, syncLive={}, syncOwnerLoaded=false, syncLiveLoaded=false;
 /* 記録をまるごと置き換えて読み直す途中は、古い状態を書き戻さない */
-window.nejiReplacing=false;
+window.tgReplacing=false;
 const lsGet = k => { try{ return localStorage.getItem(LS_PREFIX+k); }catch(e){ return null; } };
 const lsSet = (k,v) => { try{ localStorage.setItem(LS_PREFIX+k,v); }catch(e){} };
 const lsDel = k => { try{ localStorage.removeItem(LS_PREFIX+k); }catch(e){} };
@@ -4955,7 +4960,7 @@ function syncInit(){
   syncLastT=+(lsGet("sync:t")||0);
   // 開いたブラウザで遊ぶ(記録を取り込むための読み直しのときは、持ち主を取らない)
   let reloaded=false;
-  try{ reloaded=sessionStorage.getItem("nejiuchi:synced")==="1"; sessionStorage.removeItem("nejiuchi:synced"); }catch(e){}
+  try{ reloaded=sessionStorage.getItem("typinggarden:synced")==="1"; sessionStorage.removeItem("typinggarden:synced"); }catch(e){}
   if(syncCode && hasDB()){ syncConnect(); if(!reloaded) syncActivate(); }
   renderSyncState();
 }
@@ -4975,7 +4980,7 @@ function syncClaim(){
   setReadOnly(false);
   const base=syncBase();
   try{ base.child("live/"+syncDevice).set(Date.now()); }catch(e){}   // 開いている印を先に
-  return base.child("owner").set(syncOwner).catch(e=>console.warn("[nejiuchi sync]",e));
+  return base.child("owner").set(syncOwner).catch(e=>console.warn("[typinggarden sync]",e));
 }
 function setReadOnly(v){
   if(syncReadOnly===v) return;
@@ -4996,7 +5001,7 @@ function syncMaybePull(){
 }
 /* 操作したら、少し待ってから送る(持ち主のときだけ) */
 function syncMarkDirty(){
-  if(!syncCode||syncReadOnly||window.nejiReplacing) return;
+  if(!syncCode||syncReadOnly||window.tgReplacing) return;
   syncDirty=true;
   clearTimeout(syncDirtyTimer);
   syncDirtyTimer=setTimeout(()=>{ if(!syncBusyScene()) syncPush(false); }, SYNC_DEBOUNCE);
@@ -5047,7 +5052,7 @@ function syncStop(){
 /* 今さわっているブラウザを持ち主にする(開いたとき・画面に出たとき・見るだけのときにさわったとき)。
    持ち主が別のブラウザなら引き継ぎ、クラウドの記録のほうが新しければ取り込む */
 async function syncActivate(){
-  if(!syncCode||!hasDB()||syncActivating||window.nejiReplacing) return;
+  if(!syncCode||!hasDB()||syncActivating||window.tgReplacing) return;
   if(document.visibilityState==="hidden") return;
   syncActivating=true;
   try{
@@ -5057,7 +5062,7 @@ async function syncActivate(){
     if(!o || o.device!==syncDevice){ syncOwner=o; syncReadOnly=true; await syncClaim(); }
     if(m && m.t>syncLastT && m.by!==syncDevice){ syncPending=true; renderSyncState(); }
     syncMaybePull();
-  }catch(e){ console.warn("[nejiuchi sync]",e); }
+  }catch(e){ console.warn("[typinggarden sync]",e); }
   finally{ syncActivating=false; }
 }
 /* 見るだけのブラウザを持ち主にする */
@@ -5070,13 +5075,13 @@ async function syncTakeOver(){
 function syncErrText(e){
   const m=String(e&&(e.code||e.message)||"");
   return /permission/i.test(m)
-    ? "※クラウドへの保存が拒否されました(Firebaseのルールで nejiuchi/saves を許可してください)"
+    ? "※クラウドへの保存が拒否されました(Firebaseのルールで typinggarden/saves を許可してください)"
     : "※クラウドに保存できませんでした。通信環境を確認してください";
 }
 /* force: 操作がなくても送る / urgent: 間隔をあけずに送る(閉じる・隠れる・持ち主を渡すとき)
    handoff: 持ち主を渡す直前の最後の送信(もう持ち主でなくても送る) */
 async function syncPush(force,urgent,handoff){
-  if(!hasDB()||!syncCode||window.nejiReplacing) return true;
+  if(!hasDB()||!syncCode||window.tgReplacing) return true;
   if(syncReadOnly && !handoff) return true;
   if(!force && !syncDirty) return true;
   if(syncPushing){ syncPushAgain=true; return true; }     // 送っている途中なら、終わってからもう一度
@@ -5111,7 +5116,7 @@ async function syncPush(force,urgent,handoff){
     return true;
   }catch(e){
     syncDirty=syncDirty||wasDirty;
-    console.warn("[nejiuchi sync] 保存できませんでした",e);
+    console.warn("[typinggarden sync] 保存できませんでした",e);
     const n=$("bkSyncNote");
     if(n) n.textContent=syncErrText(e);
     return false;
@@ -5149,7 +5154,7 @@ async function syncPull(joining){
     }
     if(applyBundleString(data)){
       lsSet("sync:t",String(m.t));
-      try{ sessionStorage.setItem("nejiuchi:return", scene==="garden"?"garden":""); sessionStorage.setItem("nejiuchi:synced","1"); }catch(e){}
+      try{ sessionStorage.setItem("typinggarden:return", scene==="garden"?"garden":""); sessionStorage.setItem("typinggarden:synced","1"); }catch(e){}
       location.reload();
     }
   }catch(e){}
@@ -5158,7 +5163,7 @@ function applyBundleString(s){
   let o;
   try{ o=JSON.parse(b64dec(s)); }catch(e){ return false; }
   if(!o||typeof o!=="object") return false;
-  window.nejiReplacing=true;
+  window.tgReplacing=true;
   try{
     const old=[];
     for(let i=0;i<localStorage.length;i++){
@@ -5167,7 +5172,7 @@ function applyBundleString(s){
     }
     old.forEach(k=>localStorage.removeItem(k));
     for(const [k,v] of Object.entries(o)) localStorage.setItem(LS_PREFIX+k,String(v));
-  }catch(e){ window.nejiReplacing=false; return false; }
+  }catch(e){ window.tgReplacing=false; return false; }
   return true;
 }
 /* ---- クラウドのバックアップから戻す ---- */
@@ -5251,10 +5256,10 @@ async function syncJoin(){
     }
     renderSyncState();
   }catch(e){
-    console.warn("[nejiuchi sync] 読み込めませんでした",e);
+    console.warn("[typinggarden sync] 読み込めませんでした",e);
     syncCode=null; lsDel("sync:code");
     note.textContent=/permission/i.test(String(e&&(e.code||e.message)||""))
-      ? "※クラウドの読み込みが拒否されました(Firebaseのルールで nejiuchi/saves を許可してください)"
+      ? "※クラウドの読み込みが拒否されました(Firebaseのルールで typinggarden/saves を許可してください)"
       : "つなげませんでした。通信環境を確認してください";
   }
 }
@@ -5319,7 +5324,7 @@ document.addEventListener("keyup",syncMarkDirty,true);
 /* 見るだけのブラウザをさわったら、まずこちらに切り替える(その1回の操作は切り替えに使う)。
    記録の引き継ぎ画面の中は、同期を止めたりできるようにそのまま通す */
 function syncGuardInput(e){
-  if(!syncCode||!syncReadOnly||window.nejiReplacing) return;
+  if(!syncCode||!syncReadOnly||window.tgReplacing) return;
   if(e.target && e.target.closest && e.target.closest("#backup")) return;
   if(e.type==="keydown" && (e.ctrlKey||e.metaKey||e.altKey||e.key==="Shift")) return;
   e.preventDefault(); e.stopPropagation();
@@ -5350,15 +5355,15 @@ refreshGardenStat();
 syncInit();
 // 取り込みで読み直したときは、庭にいたなら庭に戻す
 try{
-  if(sessionStorage.getItem("nejiuchi:return")==="garden") openGarden();
-  sessionStorage.removeItem("nejiuchi:return");
+  if(sessionStorage.getItem("typinggarden:return")==="garden") openGarden();
+  sessionStorage.removeItem("typinggarden:return");
 }catch(e){}
 window.addEventListener("beforeunload",()=>{ try{ syncPush(false,true); }catch(e){} });
 // スマホはアプリの切り替えで閉じられることが多いので、隠れたときにも保存して送る
 // 戻ってきたときは、届いている記録を取り込む
 // 画面に戻ってきたブラウザが持ち主になる(隠れるときは、操作していた分を送っておく)
 document.addEventListener("visibilitychange",()=>{
-  if(window.nejiReplacing) return;
+  if(window.tgReplacing) return;
   if(document.visibilityState==="visible"){ syncActivate(); return; }
   try{ Garden.summary(); }catch(e){}
   try{ clearTimeout(syncDirtyTimer); syncPush(false,true); }catch(e){}
