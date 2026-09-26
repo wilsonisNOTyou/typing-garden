@@ -323,7 +323,7 @@ h2.rank-title{color:var(--amber); letter-spacing:.2em; margin-bottom:1rem; text-
 @keyframes scoreflash{0%,60%{color:var(--miss)}100%{color:var(--amber)}}
 .rank-row .pname.locked{color:#596170; letter-spacing:.25em}
 
-/* ---- 一本勝負: 段階が上がるほど熱を帯びる演出 ----
+/* ---- ノーミス勝負: 段階が上がるほど熱を帯びる演出 ----
    本数に応じて body に os1〜os4 が付き、色味と発光だけが強まる。
    振動や明滅は使わず、目に負担をかけないようにしている。 */
 #heatLayer{
@@ -386,7 +386,7 @@ body.os4 .hud b#score{color:#ff7a3c; text-shadow:0 0 18px rgba(255,90,40,.65)}
   100%{opacity:0; transform:translate(-50%,-10px) scale(1)}
 }
 
-/* 一本勝負の終了演出 */
+/* ノーミス勝負の終了演出 */
 .word-panel.fatal{animation:fatalflash .6s ease-out}
 @keyframes fatalflash{
   0%{border-color:var(--miss); box-shadow:0 0 30px rgba(255,92,92,.7)}
@@ -1236,15 +1236,15 @@ html.mobile #screen-garden .tlist{grid-template-columns:1fr}
       <div class="diff-row">
         <button class="diff-btn ta" data-diff="ta-easy">
           <div class="name">イージー<span class="kbd">4</span></div>
-          <div class="desc">8文字以下を15本<br>ミスしてもOK</div>
+          <div class="desc">8文字以下を15語<br>ミスしてもOK</div>
         </button>
         <button class="diff-btn ta" data-diff="ta-normal">
           <div class="name">ノーマル<span class="kbd">5</span></div>
-          <div class="desc">9〜13文字を10本<br>ミスしてもOK</div>
+          <div class="desc">9〜13文字を10語<br>ミスしてもOK</div>
         </button>
         <button class="diff-btn ta" data-diff="ta-hard">
           <div class="name">ハード<span class="kbd">6</span></div>
-          <div class="desc">14文字以上を5本<br>ミスしてもOK</div>
+          <div class="desc">14文字以上を5語<br>ミスしてもOK</div>
         </button>
       </div>
     </div>
@@ -1252,7 +1252,7 @@ html.mobile #screen-garden .tlist{grid-template-columns:1fr}
     <div class="mode-group">
       <div class="diff-row">
         <button class="diff-btn oneshot" data-diff="oneshot">
-          <div class="name">一本勝負<span class="kbd">7</span></div>
+          <div class="name">ノーミス勝負<span class="kbd">7</span></div>
           <div class="desc">時間無制限・1ミスで即終了<br>進むほど長いことばが混ざる</div>
         </button>
         <button class="diff-btn books" data-diff="books">
@@ -1274,11 +1274,11 @@ html.mobile #screen-garden .tlist{grid-template-columns:1fr}
     <div class="btn-row" style="margin-top:.2rem">
       <button class="btn" id="rankBtn">ランキングを見る <span class="kbdh">R</span></button>
       <button class="btn" id="dictBtn">ことば図鑑 <span class="kbdh">D</span></button>
-      <button class="btn" id="backupBtn">記録の引き継ぎ <span class="kbdh">K</span></button>
+      <button class="btn" id="backupBtn">別端末と同期 <span class="kbdh">K</span></button>
       <button class="btn" id="fbBtn">要望・バグ報告 <span class="kbdh">F</span></button>
       <button class="btn" id="tutBtn">遊び方ガイド <span class="kbdh">H</span></button>
     </div>
-    <p class="hint">キー 1〜9 でモードを選んで開始 ・ G 庭 ・ R ランキング ・ D 図鑑 ・ K 記録の引き継ぎ / ローマ字入力(shi・si どちらもOK)<br>8 単語帳 ・ N 名前 ・ F 要望・バグ報告 ・ H 遊び方ガイド ・ Esc でいつでもタイトルに戻る</p>
+    <p class="hint">キー 1〜9 でモードを選んで開始 ・ G 庭 ・ R ランキング ・ D 図鑑 ・ K 別端末と同期 / ローマ字入力(shi・si どちらもOK)<br>8 単語帳 ・ N 名前 ・ F 要望・バグ報告 ・ H 遊び方ガイド ・ Esc でいつでもタイトルに戻る</p>
     <div class="hazard" aria-hidden="true"><span class="k">Q</span><span class="s">🌱</span><span class="k">W</span><span class="k">E</span><span class="s">🥕</span><span class="k">R</span><span class="k">T</span><span class="s">🌿</span><span class="k">Y</span><span class="k">U</span><span class="s">🍅</span><span class="k">I</span><span class="k">O</span><span class="s">🌽</span><span class="k">P</span><span class="s">🍓</span></div>
   </section>
 
@@ -1337,17 +1337,18 @@ html.mobile #screen-garden .tlist{grid-template-columns:1fr}
     </div>
     <p class="tab-group-label">タイムアタック(タイム)</p>
     <div class="rank-tabs">
-      <button class="btn ta" id="tab-ta-easy">イージー15本</button>
-      <button class="btn ta" id="tab-ta-normal">ノーマル10本</button>
-      <button class="btn ta" id="tab-ta-hard">ハード5本</button>
+      <button class="btn ta" id="tab-ta-easy">イージー15語</button>
+      <button class="btn ta" id="tab-ta-normal">ノーマル10語</button>
+      <button class="btn ta" id="tab-ta-hard">ハード5語</button>
     </div>
     <div class="rank-tabs" style="margin-top:.6rem">
-      <button class="btn" id="tab-oneshot">一本勝負</button>
+      <button class="btn" id="tab-oneshot">ノーミス勝負</button>
     </div>
     <p class="tab-group-label">キーボード農園</p>
     <div class="rank-tabs">
       <button class="btn gtab" id="tab-g-money">所持キー</button>
       <button class="btn gtab" id="tab-g-harvest">累計収穫</button>
+      <button class="btn gtab" id="tab-g-book">図鑑</button>
     </div>
     <ol class="rank-list" id="rankList"></ol>
     <p class="reg-status" id="rankStatus"></p>
@@ -1370,7 +1371,7 @@ html.mobile #screen-garden .tlist{grid-template-columns:1fr}
       <button class="tbtn treas" id="g-treasBtn">貴重品<span class="kb">8</span></button>
       <button class="tbtn" id="g-bookBtn">図鑑<span class="kb">Space</span></button>
       <button class="tbtn" id="g-rankOpenBtn">番付<span class="kb">9</span></button>
-      <button class="tbtn goal" id="g-goalBtn">目標<span class="gbadge" id="g-goalBadge"></span><span class="kb">0</span></button>
+      <button class="tbtn goal" id="g-goalBtn">実績<span class="gbadge" id="g-goalBadge"></span><span class="kb">0</span></button>
       <button class="tbtn" id="g-backBtn">タイトルへ<span class="kb">Esc</span></button>
     </div>
 
@@ -1408,7 +1409,7 @@ html.mobile #screen-garden .tlist{grid-template-columns:1fr}
     </p>
     <p class="help pc-only">
       <b>1〜6</b> 道具の持ち替え ・ <b>← →</b> 種や設置物を選ぶ ・ <b>↑ ↓</b> 畑を移る ・ <b>英字と , .</b> その区画で作業(<b>P</b> は案山子置き場)<br>
-      <b>Tab</b> お店 ・ <b>7</b> ガチャ ・ <b>8</b> 貴重品 ・ <b>Space</b> 図鑑 ・ <b>9</b> 番付 ・ <b>Esc</b> タイトルへ(記録の引き継ぎはタイトルの <b>K</b>)<br>
+      <b>Tab</b> お店 ・ <b>7</b> ガチャ ・ <b>8</b> 貴重品 ・ <b>Space</b> 図鑑 ・ <b>9</b> 番付 ・ <b>Esc</b> タイトルへ(別端末との同期はタイトルの <b>K</b>)<br>
       作物は水が効いている間だけ育ちます。タイピングで正しく打った1打ごとに、水の効いている作物の時間が進みます。
     </p>
   </div>
@@ -1476,15 +1477,15 @@ html.mobile #screen-garden .tlist{grid-template-columns:1fr}
     </div>
   </div>
 
-  <!-- 目標 -->
+  <!-- 実績 -->
   <div class="modal" id="g-goal">
     <div class="panel">
       <div class="phead">
-        <h2>目標</h2>
+        <h2>実績</h2>
         <div class="money" id="g-goalRate"></div>
         <button class="sbtn xbtn" data-close>閉じる ✕</button>
       </div>
-      <p class="tnote">目標を達成すると、ごほうびのキーを受け取れます。次に何をするか迷ったら、ここを見てください。</p>
+      <p class="tnote">実績を解除すると、ごほうびのキーを受け取れます。次に何をするか迷ったら、ここを見てください。</p>
       <div id="g-goalBody" class="plist"></div>
       <div class="keyhint"><b>↑ ↓</b> 選ぶ ・ <b>Enter</b> ごほうびを受け取る ・ <b>0</b> / <b>Esc</b> 閉じる</div>
     </div>
@@ -1495,16 +1496,17 @@ html.mobile #screen-garden .tlist{grid-template-columns:1fr}
     <div class="panel savebox">
       <div class="phead"><h2>番付</h2><button class="sbtn xbtn" data-close style="margin-left:auto">閉じる ✕</button></div>
       <p id="g-rankNow"></p>
-      <p>所持キーと累計収穫数の番付(ランキング)です。プレイヤー名で自動で載り、庭を出るたびに更新されます。名前を書きかえて Enter で、ランキングと番付の名前をまとめて変えられます。</p>
+      <p>所持キー・累計収穫数・図鑑の番付(ランキング)です。プレイヤー名で自動で載り、庭を出るたびに更新されます。名前を書きかえて Enter で、ランキングと番付の名前をまとめて変えられます。</p>
       <input id="g-rankName" class="rk-input" maxlength="10" placeholder="庭主の名前" autocomplete="off">
       <div class="pfoot"><span class="note" id="g-rankNote"></span><button class="sbtn main" id="g-rankBtn">決める(Enter)</button></div>
       <div class="tabs grk-tabs" id="g-rankTabs">
         <button class="tab" data-rk="g-money">所持キー</button>
         <button class="tab" data-rk="g-harvest">累計収穫</button>
+        <button class="tab" data-rk="g-book">図鑑</button>
       </div>
       <ol class="grk-list" id="g-rankList"></ol>
       <p class="grk-note" id="g-rankListNote"></p>
-      <div class="keyhint"><b>N</b> 名前を書きかえる → <b>Enter</b> ・ 入力欄の <b>Esc</b> で入力をやめる ・ <b>← →</b> 所持キー / 累計収穫 ・ <b>9</b> / <b>Esc</b> 閉じる</div>
+      <div class="keyhint"><b>N</b> 名前を書きかえる → <b>Enter</b> ・ 入力欄の <b>Esc</b> で入力をやめる ・ <b>← →</b> 所持キー / 累計収穫 / 図鑑 ・ <b>9</b> / <b>Esc</b> 閉じる</div>
     </div>
   </div>
 
@@ -1576,7 +1578,7 @@ html.mobile #screen-garden .tlist{grid-template-columns:1fr}
     <p>スマホで遊べるのは <b>キーボード農園</b> と <b>タイピング単語帳</b>(単語帳づくり)です。タイピングはパソコンで遊んでください。パソコンで打った分だけ、スマホの農園も育ちます。</p>
     <ol>
       <li>パソコンでタイピングガーデンを開く</li>
-      <li>タイトルの「記録の引き継ぎ」→「同期を始める」を押す</li>
+      <li>タイトルの「別端末と同期」→「同期を始める」を押す</li>
       <li>出てきた英数字16文字のコードを、下に入れる</li>
     </ol>
     <input id="mgCode" class="bk-codein" maxlength="24" placeholder="英数字16文字のコード" autocomplete="off" autocapitalize="characters">
@@ -1626,13 +1628,10 @@ html.mobile #screen-garden .tlist{grid-template-columns:1fr}
 <!-- 記録の引き継ぎ(タイピングガーデン全体) -->
 <div id="backup" class="bk-modal">
   <div class="bk-panel">
-    <div class="bk-head"><h2>記録の引き継ぎ</h2><button class="btn bk-x" id="bkClose">閉じる ✕</button></div>
-    <p class="bk-p">別のパソコンやブラウザで続きを遊ぶための記録です。自己ベスト・ことば図鑑・プレイヤー名・統計・キーボード農園・まだ庭で受け取っていないタイピングの分まで、まとめて移せます。ランキングはもともとネット上にあるので、移さなくても同じです。</p>
-    <h3>このブラウザの記録文字列</h3>
-    <textarea class="bk-code" id="bkExport" readonly tabindex="-1"></textarea>
-    <div class="bk-foot"><span class="bk-note" id="bkCopyNote"></span><button class="btn primary" id="bkCopy">コピーする (C)</button></div>
+    <div class="bk-head"><h2>別端末と同期</h2><button class="btn bk-x" id="bkClose">閉じる ✕</button></div>
     <h3>ブラウザ間の同期</h3>
-    <p class="bk-p" id="bkSyncState">同期していません。パソコンとスマホなど、複数のブラウザで同じ記録を使えます。</p>
+    <p class="bk-p">パソコンとスマホなど、別の端末(ブラウザ)で同じ記録を使えます。自己ベスト・ことば図鑑・プレイヤー名・統計・キーボード農園・単語帳まで、自動で同じになります。ランキングはもともとネット上にあるので、同期しなくても同じです。</p>
+    <p class="bk-p" id="bkSyncState">同期していません。</p>
     <div class="bk-foot" style="justify-content:flex-start; flex-wrap:wrap">
       <button class="btn" id="bkSyncStart">同期を始める (S)</button>
       <input id="bkCode" class="bk-codein" maxlength="24" placeholder="英数字16文字のコード (J)" autocomplete="off">
@@ -1643,6 +1642,10 @@ html.mobile #screen-garden .tlist{grid-template-columns:1fr}
     </div>
     <div id="bkBackups" class="bk-backups"></div>
 
+    <h3>記録の引き継ぎ(記録文字列)</h3>
+    <p class="bk-p">同期を使わずに、記録を文字列にして別のブラウザへ移すこともできます。</p>
+    <textarea class="bk-code" id="bkExport" readonly tabindex="-1"></textarea>
+    <div class="bk-foot"><span class="bk-note" id="bkCopyNote"></span><button class="btn primary" id="bkCopy">コピーする (C)</button></div>
     <h3>記録文字列から読み込む</h3>
     <p class="bk-p">読み込むと、このブラウザにある記録はすべて置き換わります。読み込んだあとは自動で画面を読み直します。</p>
     <textarea class="bk-code" id="bkImport" placeholder="I を押してから Ctrl+V で貼り付け、Enter で読み込み"></textarea>
@@ -1658,7 +1661,7 @@ html.mobile #screen-garden .tlist{grid-template-columns:1fr}
   { t: "", k: "" },
    イージー: 8文字以下 / ノーマル: 9〜13文字 / ハード: 14文字以上
    ※「タイムアタック」は同じリストから規定本数を重複なしで出題
-   ※「一本勝負」は進行度に応じて3つを混ぜて出題(pickOneshotSet 参照)
+   ※「ノーミス勝負」は進行度に応じて3つを混ぜて出題(pickOneshotSet 参照)
 ===================================================== */
 const WORDS_EASY = [
   { t: "花火", k: "はなび" },
@@ -1918,7 +1921,7 @@ const WORDS_HARD = [
   { t: "ホームポジションに指をそっと置く", k: "ほーむぽじしょんにゆびをそっとおく" },
   { t: "キーボードを見ないで打てるようになった", k: "きーぼーどをみないでうてるようになった" },
   { t: "長い文章も落ち着いて打てばこわくない", k: "ながいぶんしょうもおちついてうてばこわくない" },
-  { t: "一本勝負はひとつのミスも許されない", k: "いっぽんしょうぶはひとつのみすもゆるされない" },
+  { t: "ノーミス勝負はひとつのミスも許されない", k: "のーみすしょうぶはひとつのみすもゆるされない" },
   { t: "ガチャを回して珍しい種を手に入れた", k: "がちゃをまわしてめずらしいたねをてにいれた" },
   { t: "肥料をまいたら作物が一気に育った", k: "ひりょうをまいたらさくもつがいっきにそだった" },
   { t: "スプリンクラーが畑一面に水をまく", k: "すぷりんくらーがはたけいちめんにみずをまく" },
@@ -1995,14 +1998,15 @@ const WORD_SETS = { easy: WORDS_EASY, normal: WORDS_NORMAL, hard: WORDS_HARD };
 const DIFF_LABEL = {
   easy:"イージー", normal:"ノーマル", hard:"ハード",
   "ta-easy":"タイムアタック イージー", "ta-normal":"タイムアタック ノーマル", "ta-hard":"タイムアタック ハード",
-  oneshot:"一本勝負"
+  oneshot:"ノーミス勝負"
 };
 const MISS_PENALTY = { easy: 10, normal: 7, hard: 5 }; // このミス数ごとにキー-1本
 const DICT_TABS = ["easy","normal","hard"];            // 辞典に並べる難易度
-/* ランキングのタブ: スコアアタック → タイムアタック → 一本勝負 の順 */
-const RANK_TABS = ["easy","normal","hard","ta-easy","ta-normal","ta-hard","oneshot", "g-money","g-harvest"];
-const isGardenRank = d => d==="g-money" || d==="g-harvest";
-DIFF_LABEL["g-money"]="キーボード農園 所持キー"; DIFF_LABEL["g-harvest"]="キーボード農園 累計収穫";
+/* ランキングのタブ: スコアアタック → タイムアタック → ノーミス勝負 の順 */
+const RANK_TABS = ["easy","normal","hard","ta-easy","ta-normal","ta-hard","oneshot", "g-money","g-harvest","g-book"];
+const isGardenRank = d => d==="g-money" || d==="g-harvest" || d==="g-book";
+const gRankUnit = d => d==="g-money" ? "キー" : (d==="g-book" ? "項目" : "個");
+DIFF_LABEL["g-money"]="キーボード農園 所持キー"; DIFF_LABEL["g-harvest"]="キーボード農園 累計収穫"; DIFF_LABEL["g-book"]="キーボード農園 図鑑";
 
 /* タイムアタック: モードごとの出題元と規定本数 */
 const TA_MODES = {
@@ -2016,12 +2020,12 @@ const isQ = d => isTA(d) || d==="book";
 /* タイム系(小さいほど良い)のモードか */
 const isTimeRanked = d => isTA(d);
 
-/* 一本勝負の出題ミックス
+/* ノーミス勝負の出題ミックス
    抜いた本数が増えるほどノーマル→ハードの比率が上がり、
    ONESHOT_FULL_MIX 本でイージー:ノーマル:ハード = 1:1:1 に到達する */
 const ONESHOT_FULL_MIX = 30;   // ここで1:1:1
 const ONESHOT_HARD_FROM = 10;  // ハードが混ざり始める本数
-/* 一本勝負の緊張段階: この本数に到達するたびに色味と発光が一段強まる */
+/* ノーミス勝負の緊張段階: この本数に到達するたびに色味と発光が一段強まる */
 const ONESHOT_STAGES = [10,20,30,40];
 
 /* ---------- ローマ字テーブル ---------- */
@@ -2215,7 +2219,7 @@ function beep(freq,dur,type,gain){
   }catch(e){}
 }
 const sndType=()=>beep(1400,.04,"square",.03);
-/* 一本勝負は段階が上がるほど打鍵音のピッチが上がる */
+/* ノーミス勝負は段階が上がるほど打鍵音のピッチが上がる */
 const sndTypeStage=()=>beep(1400+oneshotStage*130,.04,"square",.03);
 const sndStageUp=()=>{beep(660,.1,"square",.06); setTimeout(()=>beep(880,.1,"square",.06),100); setTimeout(()=>beep(1170,.22,"square",.07),210);};
 const sndDone=()=>{beep(700,.09,"square",.06); setTimeout(()=>beep(1050,.12,"square",.06),70);};
@@ -2265,9 +2269,10 @@ function show(name){
 
 let diff="normal", words=[], score=0, miss=0, timeLeft=GAME_SECONDS;
 let timerId=null, cdId=null, lastWordKey=null, plateScrews=0, running=false, currentWord=null;
-let elapsed=0;          // 一本勝負/タイムアタックの経過秒
+const usedWords=new Set();   // スコアアタックで、このプレイ中に出したことば
+let elapsed=0;          // ノーミス勝負/タイムアタックの経過秒
 let taQueue=[], taGoal=0, nextWord=null; // タイムアタック用の出題キュー
-let oneshotStage=0;     // 一本勝負の緊張段階(0〜4)
+let oneshotStage=0;     // ノーミス勝負の緊張段階(0〜4)
 let gardenKeys=0;       // このプレイで正しく打った打鍵数(キーボード農園の時短に使う)
 
 /* キーボード農園へ「正しい打鍵数」と「外したキー」を届ける(庭を開いたときに受け取られる) */
@@ -2287,11 +2292,11 @@ async function refreshBestLine(){
   const [e,n,h,o]=await Promise.all([loadBest("easy"),loadBest("normal"),loadBest("hard"),loadBest("oneshot")]);
   const num=v=>(v==null?0:v);
   $("bestLine").textContent=
-    `自己ベスト(外したキー) — イージー: ${num(e)}個 / ノーマル: ${num(n)}個 / ハード: ${num(h)}個 / 一本勝負: ${num(o)}個`;
+    `自己ベスト(外したキー) — イージー: ${num(e)}個 / ノーマル: ${num(n)}個 / ハード: ${num(h)}個 / ノーミス勝負: ${num(o)}個`;
   const [te,tn,th]=await Promise.all([loadBest("ta-easy"),loadBest("ta-normal"),loadBest("ta-hard")]);
   const tm=v=>(v==null?"--":fmtTime(v));
   $("bestLineTa").textContent=
-    `自己ベスト(タイム) — イージー15本: ${tm(te)} / ノーマル10本: ${tm(tn)} / ハード5本: ${tm(th)}`;
+    `自己ベスト(タイム) — イージー15語: ${tm(te)} / ノーマル10語: ${tm(tn)} / ハード5語: ${tm(th)}`;
 }
 
 function buildPlate(){
@@ -2333,7 +2338,7 @@ function reviveScrew(){
   setTimeout(()=>s.classList.remove("back"),600);
 }
 
-/* ---------- 一本勝負の緊張段階 ---------- */
+/* ---------- ノーミス勝負の緊張段階 ---------- */
 function applyStageClass(){
   const b=document.body;
   b.classList.remove("os1","os2","os3","os4");
@@ -2360,7 +2365,7 @@ function updateOneshotStage(){
   }
 }
 
-/* 一本勝負: 抜いた本数に応じて出題元の難易度を抽選する
+/* ノーミス勝負: 抜いた本数に応じて出題元の難易度を抽選する
    score=0 → イージー100% / score>=30 → 1:1:1 */
 function pickOneshotSet(){
   const pn=Math.min(Math.max(score,0)/ONESHOT_FULL_MIX,1);
@@ -2398,7 +2403,7 @@ function renderNextWord(){
     el.innerHTML='<span class="lbl">NEXT</span>';
     el.appendChild(document.createTextNode(nextWord.t));
   }else{
-    el.innerHTML='<span class="lbl">NEXT</span>— ラスト1本 —';
+    el.innerHTML='<span class="lbl">NEXT</span>— ラスト1語 —';
   }
 }
 
@@ -2414,9 +2419,17 @@ function pickWord(){
   }
   const pool = (diff==="oneshot") ? pickOneshotSet() : words;
   let w;
-  for(let tries=0;tries<12;tries++){
-    w=pool[Math.floor(Math.random()*pool.length)];
-    if(pool.length<=1 || w.k!==lastWordKey) break;
+  if(diff==="oneshot"){
+    for(let tries=0;tries<12;tries++){
+      w=pool[Math.floor(Math.random()*pool.length)];
+      if(pool.length<=1 || w.k!==lastWordKey) break;
+    }
+  }else{
+    // スコアアタック: 1回のプレイで一度打ったことばは出さない(全部出たら、直前の語以外からまた選ぶ)
+    let left=pool.filter(x=>!usedWords.has(x.k));
+    if(!left.length){ usedWords.clear(); left=pool.filter(x=>x.k!==lastWordKey); if(!left.length) left=pool; }
+    w=left[Math.floor(Math.random()*left.length)];
+    usedWords.add(w.k);
   }
   lastWordKey=w.k;
   setCurrentWord(w);
@@ -2441,7 +2454,7 @@ function startGame(d){
   const ta=isQ(d), oneshot=(d==="oneshot");
   if(d==="book" && !(bookPlay && bookPlay.words && bookPlay.words.length)) return;
   words = (ta||oneshot) ? [] : WORD_SETS[d];
-  score=0; miss=0; timeLeft=GAME_SECONDS; elapsed=0; lastWordKey=null; running=false;
+  score=0; miss=0; timeLeft=GAME_SECONDS; elapsed=0; lastWordKey=null; running=false; usedWords.clear();
   taQueue=[]; taGoal=0;
   gardenKeys=0;
   resetStage();
@@ -2452,7 +2465,7 @@ function startGame(d){
   else if(ta) buildTaQueue(d);
   // HUD/タイムバーをモードごとに切り替え
   $("scoreLabel").textContent = ta ? "残り " : "外したキー ";
-  $("scoreUnit").textContent = ta ? "本" : "個";
+  $("scoreUnit").textContent = ta ? "語" : "個";
   $("score").textContent = ta ? taGoal : 0;
   $("missWrap").style.display = oneshot ? "none" : "";
   $("miss").textContent="0";
@@ -2523,7 +2536,7 @@ async function endGame(){
   $("resultDiff").textContent=`— ${DIFF_LABEL[diff]} —`;
   $("resultCount").classList.toggle("ta",ta);
   if(ta){
-    $("resultCaption").textContent=`${taGoal}本タイム`;
+    $("resultCaption").textContent=`${taGoal}語タイム`;
     $("resultScore").textContent=elapsed.toFixed(2);
     $("resultUnit").textContent="秒";
     $("resultSubLine").textContent=`ミス ${miss}回 / 自己ベスト ${fmtTime(shownBest)}`;
@@ -2652,7 +2665,7 @@ document.addEventListener("keydown",e=>{
     miss++; $("miss").textContent=miss;
     const p=$("wordPanel");
     p.classList.remove("shake"); void p.offsetWidth; p.classList.add("shake");
-    // 一本勝負: 1ミスで即終了
+    // ノーミス勝負: 1ミスで即終了
     if(diff==="oneshot"){
       running=false;
       sndFatal();
@@ -2727,7 +2740,7 @@ try{ playerName=localStorage.getItem("typinggarden:playerName")||""; }catch(e){}
 
 /* 記録の優劣比較(正なら a のほうが上位)
    タイムアタック: タイムが短いほど上、同タイムはミスが少ないほど上
-   一本勝負: 本数が多いほど上、同本数はタイムが短いほど上
+   ノーミス勝負: 本数が多いほど上、同本数はタイムが短いほど上
    スコアアタック: 本数が多いほど上 */
 function betterRecord(a,b,d){
   if(isTimeRanked(d)){
@@ -2803,7 +2816,7 @@ async function openRanking(d,highlight){
       li.className="rank-row"+(i===0?" top1":"")+(highlight&&r.n===highlight?" me":"");
       let scoreText;
       if(isGardenRank(d)){
-        scoreText = Math.floor(r.s).toLocaleString("ja-JP") + (d==="g-money"?"キー":"個");
+        scoreText = Math.floor(r.s).toLocaleString("ja-JP") + gRankUnit(d);
       }else if(isTimeRanked(d)){
         const missText = (r.m==null) ? "" : ` <span style="color:var(--steel);font-size:.85em">ミス${r.m}</span>`;
         scoreText = `${r.e==null?"--":fmtTime(r.e)}${missText}`;
@@ -5235,12 +5248,17 @@ const bookSeen = c => c.treasure ? tre(c.id)>0 : (isUnlocked(c)||S.harvestBy[c.i
 let bookCur=0, bookTier=0;
 const qCount = (id,t) => (S.harvestQ[id]&&S.harvestQ[id][t])||0;
 const loreOf = (c,t) => t===0 ? c.lore : (t===3 ? MUTANT[c.id].lore : LORE_Q[c.id][t-1]);
-function renderBook(){
-  let gotAll=0, allEntries=0;
+/* 図鑑の埋まり具合: got 埋まった項目 / all 全項目(作物×品質・変異・貴重品) */
+function bookProgress(){
+  let got=0, all=0;
   for(const c of BOOK_CROPS){
-    if(c.treasure){ allEntries++; if(tre(c.id)>0) gotAll++; continue; }
-    for(let t=0;t<(hasMut(c.id)?4:3);t++){ allEntries++; if(qCount(c.id,t)>0) gotAll++; }
+    if(c.treasure){ all++; if(tre(c.id)>0) got++; continue; }
+    for(let t=0;t<(hasMut(c.id)?4:3);t++){ all++; if(qCount(c.id,t)>0) got++; }
   }
+  return { got, all };
+}
+function renderBook(){
+  const { got:gotAll, all:allEntries }=bookProgress();
   $("g-bookRate").textContent=`図鑑 ${gotAll} / ${allEntries} ・ 累計収穫 ${fmtNum(S.totalHarvest)}個`;
   $("g-bookList").innerHTML=BOOK_CROPS.map((c,i)=>{
     const known=bookSeen(c);
@@ -5322,38 +5340,71 @@ $("g-bookList").addEventListener("click",e=>{
 /* ---------- 目標 ----------
    達成するとごほうびのキーを受け取れる(S.goals に受け取り済みを記録) */
 const anyQ = t => Object.values(S.harvestQ||{}).some(a=>(a&&a[t])>0);
-const bookCount = () => Object.values(S.harvestQ||{}).reduce((n,a)=>n+(a||[]).filter(x=>x>0).length,0);
-/* 目標はジャンル(cat)ごとに、やさしい順に並べる */
+const kindsQ = t => Object.values(S.harvestQ||{}).filter(a=>(a&&a[t])>0).length;          // その品質で収穫した作物の種類数
+const kinds = () => Object.values(S.harvestQ||{}).filter(a=>a&&a.some(x=>x>0)).length;    // 収穫した作物の種類数
+const gotRarity = r => CROPS.some(c=>c.r===r && !c.treasure && (S.got||{})[c.id]>0) ? 1 : 0;   // ガチャで引いたことがあるか
+const treasKinds = () => Object.values(S.treas||{}).filter(n=>n>0).length;
+const TREAS_ALL = CROPS.filter(c=>c.treasure).length;
+/* 実績(中身の名前は goal のまま)。ジャンル(cat)ごとに、やさしい順に並べる。need は数か、数を返す関数 */
 const GOALS = [
-  { cat:"収穫", id:"h1",   ic:"🧺", nm:"はじめての収穫",       ds:"作物を1個収穫する",            need:1,      now:()=>S.totalHarvest,       rw:50 },
-  { cat:"収穫", id:"h10",  ic:"🧺", nm:"かごいっぱい",         ds:"作物を10個収穫する",           need:10,     now:()=>S.totalHarvest,       rw:150 },
-  { cat:"収穫", id:"h100", ic:"🧺", nm:"収穫名人",             ds:"作物を100個収穫する",          need:100,    now:()=>S.totalHarvest,       rw:1000 },
-  { cat:"収穫", id:"h1000",ic:"🧺", nm:"伝説の収穫",           ds:"作物を1,000個収穫する",        need:1000,   now:()=>S.totalHarvest,       rw:10000 },
-  { cat:"売上", id:"s1k",  ic:"💰", nm:"はじめての商い",       ds:"累計売上 1,000キー",           need:1000,   now:()=>S.totalSales,         rw:200 },
-  { cat:"売上", id:"s10k", ic:"💰", nm:"売れっ子農家",         ds:"累計売上 10,000キー",          need:10000,  now:()=>S.totalSales,         rw:1000 },
-  { cat:"売上", id:"s100k",ic:"💰", nm:"大農園",               ds:"累計売上 100,000キー",         need:100000, now:()=>S.totalSales,         rw:8000 },
-  { cat:"実りの質", id:"q1",   ic:"⭐", nm:"腕が上がった",         ds:"☆の作物を収穫する",            need:1,      now:()=>anyQ(1)?1:0,          rw:300 },
-  { cat:"実りの質", id:"q2",   ic:"🌟", nm:"極上の実り",           ds:"☆☆の作物を収穫する",          need:1,      now:()=>anyQ(2)?1:0,          rw:2000 },
-  { cat:"実りの質", id:"m1",   ic:"✦",  nm:"変わりだね",           ds:"変異の作物を収穫する",         need:1,      now:()=>anyQ(3)?1:0,          rw:5000 },
-  { cat:"ガチャ", id:"g1",   ic:"🎰", nm:"はじめてのガチャ",     ds:"ガチャを1回引く",              need:1,      now:()=>S.gachaCount||0,      rw:100 },
-  { cat:"ガチャ", id:"g11",  ic:"🎰", nm:"ガチャ好き",           ds:"ガチャを合計11回引く",         need:11,     now:()=>S.gachaCount||0,      rw:500 },
-  { cat:"農園づくり", id:"o1",   ic:"💦", nm:"畑の道具",             ds:"スプリンクラーか案山子を置く", need:1,      now:()=>S.fields.some(f=>KEYS.some(k=>f[k].obj))?1:0, rw:500 },
-  { cat:"農園づくり", id:"f2",   ic:"🎫", nm:"畑を広げる",           ds:"畑を2枚にする",                need:2,      now:()=>S.fields.length,      rw:1000 },
-  { cat:"農園づくり", id:"v1",   ic:"👩‍🌾", nm:"なかまができた",     ds:"村人を雇う",                   need:1,      now:()=>S.villagers,          rw:3000 },
-  { cat:"あつめる", id:"b10",  ic:"📖", nm:"図鑑づくり",           ds:"図鑑を10項目うめる",           need:10,     now:bookCount,                rw:1000 },
-  { cat:"あつめる", id:"t1",   ic:"✨", nm:"たからもの",           ds:"貴重品を手に入れる",           need:1,      now:()=>Object.values(S.treas||{}).some(n=>n>0)?1:0, rw:10000 },
+  { cat:"収穫", id:"h1",    ic:"🧺", nm:"はじめての収穫",   ds:"作物を1個収穫する",            need:1,      now:()=>S.totalHarvest, rw:50 },
+  { cat:"収穫", id:"h10",   ic:"🧺", nm:"かごいっぱい",     ds:"作物を10個収穫する",           need:10,     now:()=>S.totalHarvest, rw:150 },
+  { cat:"収穫", id:"h100",  ic:"🧺", nm:"収穫名人",         ds:"作物を100個収穫する",          need:100,    now:()=>S.totalHarvest, rw:1000 },
+  { cat:"収穫", id:"h1000", ic:"🧺", nm:"伝説の収穫",       ds:"作物を1,000個収穫する",        need:1000,   now:()=>S.totalHarvest, rw:10000 },
+  { cat:"収穫", id:"h5000", ic:"🧺", nm:"収穫の神様",       ds:"作物を5,000個収穫する",        need:5000,   now:()=>S.totalHarvest, rw:30000 },
+  { cat:"収穫", id:"h10000",ic:"🧺", nm:"一万の実り",       ds:"作物を10,000個収穫する",       need:10000,  now:()=>S.totalHarvest, rw:60000 },
+  { cat:"作物の種類", id:"k5",  ic:"🥕", nm:"いろいろ育てる",   ds:"5種類の作物を収穫する",   need:5,  now:kinds, rw:500 },
+  { cat:"作物の種類", id:"k15", ic:"🥕", nm:"畑のレパートリー", ds:"15種類の作物を収穫する",  need:15, now:kinds, rw:3000 },
+  { cat:"作物の種類", id:"k25", ic:"🥕", nm:"なんでも育てる",   ds:"25種類の作物を収穫する",  need:25, now:kinds, rw:10000 },
+  { cat:"作物の種類", id:"k30", ic:"🥕", nm:"農園の主",         ds:"30種類の作物を収穫する",  need:30, now:kinds, rw:30000 },
+  { cat:"売上", id:"s1k",   ic:"💰", nm:"はじめての商い",   ds:"累計売上 1,000キー",           need:1000,     now:()=>S.totalSales, rw:200 },
+  { cat:"売上", id:"s10k",  ic:"💰", nm:"売れっ子農家",     ds:"累計売上 10,000キー",          need:10000,    now:()=>S.totalSales, rw:1000 },
+  { cat:"売上", id:"s100k", ic:"💰", nm:"大農園",           ds:"累計売上 100,000キー",         need:100000,   now:()=>S.totalSales, rw:8000 },
+  { cat:"売上", id:"s1m",   ic:"💰", nm:"百万長者",         ds:"累計売上 1,000,000キー",       need:1000000,  now:()=>S.totalSales, rw:30000 },
+  { cat:"売上", id:"s10m",  ic:"💰", nm:"キーボード財閥",   ds:"累計売上 10,000,000キー",      need:10000000, now:()=>S.totalSales, rw:150000 },
+  { cat:"実りの質", id:"q1",   ic:"⭐", nm:"腕が上がった",   ds:"☆の作物を収穫する",            need:1,  now:()=>anyQ(1)?1:0, rw:300 },
+  { cat:"実りの質", id:"q2",   ic:"🌟", nm:"極上の実り",     ds:"☆☆の作物を収穫する",          need:1,  now:()=>anyQ(2)?1:0, rw:2000 },
+  { cat:"実りの質", id:"q2k10",ic:"🌟", nm:"極上コレクション", ds:"☆☆の作物を10種類収穫する", need:10, now:()=>kindsQ(2),   rw:10000 },
+  { cat:"実りの質", id:"m1",   ic:"✦",  nm:"変わりだね",     ds:"変異の作物を収穫する",         need:1,  now:()=>anyQ(3)?1:0, rw:5000 },
+  { cat:"実りの質", id:"m5",   ic:"✦",  nm:"変異ハンター",   ds:"変異の作物を5種類収穫する",    need:5,  now:()=>kindsQ(3),   rw:20000 },
+  { cat:"実りの質", id:"m20",  ic:"✦",  nm:"変異の研究者",   ds:"変異の作物を20種類収穫する",   need:20, now:()=>kindsQ(3),   rw:80000 },
+  { cat:"ガチャ", id:"g1",    ic:"🎰", nm:"はじめてのガチャ", ds:"ガチャを1回引く",             need:1,     now:()=>S.gachaCount||0, rw:100 },
+  { cat:"ガチャ", id:"g11",   ic:"🎰", nm:"ガチャ好き",       ds:"ガチャを合計11回引く",        need:11,    now:()=>S.gachaCount||0, rw:500 },
+  { cat:"ガチャ", id:"g100",  ic:"🎰", nm:"ガチャ通",         ds:"ガチャを合計100回引く",       need:100,   now:()=>S.gachaCount||0, rw:3000 },
+  { cat:"ガチャ", id:"g1000", ic:"🎰", nm:"ガチャの達人",     ds:"ガチャを合計1,000回引く",     need:1000,  now:()=>S.gachaCount||0, rw:20000 },
+  { cat:"ガチャ", id:"g10000",ic:"🎰", nm:"ガチャの王",       ds:"ガチャを合計10,000回引く",    need:10000, now:()=>S.gachaCount||0, rw:100000 },
+  { cat:"ガチャ", id:"rSR",   ic:"💎", nm:"キラリと光る",     ds:"ガチャでSRの種を引く",        need:1, now:()=>gotRarity("SR"),  rw:1000 },
+  { cat:"ガチャ", id:"rHR",   ic:"💎", nm:"ひと味ちがう",     ds:"ガチャでHRの種を引く",        need:1, now:()=>gotRarity("HR"),  rw:3000 },
+  { cat:"ガチャ", id:"rUR",   ic:"💎", nm:"ウルトラレア",     ds:"ガチャでURの種を引く",        need:1, now:()=>gotRarity("UR"),  rw:10000 },
+  { cat:"ガチャ", id:"rGSR",  ic:"👑", nm:"黄金の引き",       ds:"ガチャでGSRの種を引く",       need:1, now:()=>gotRarity("GSR"), rw:30000 },
+  { cat:"図鑑", id:"b10",  ic:"📖", nm:"図鑑づくり",       ds:"図鑑を10項目うめる",           need:10,  now:()=>bookProgress().got, rw:1000 },
+  { cat:"図鑑", id:"b30",  ic:"📖", nm:"図鑑が育ってきた", ds:"図鑑を30項目うめる",           need:30,  now:()=>bookProgress().got, rw:3000 },
+  { cat:"図鑑", id:"b60",  ic:"📖", nm:"分厚い図鑑",       ds:"図鑑を60項目うめる",           need:60,  now:()=>bookProgress().got, rw:10000 },
+  { cat:"図鑑", id:"b100", ic:"📚", nm:"図鑑の大家",       ds:"図鑑を100項目うめる",          need:100, now:()=>bookProgress().got, rw:30000 },
+  { cat:"図鑑", id:"bAll", ic:"🏆", nm:"図鑑コンプリート", ds:"図鑑をすべてうめる",           need:()=>bookProgress().all, now:()=>bookProgress().got, rw:300000 },
+  { cat:"農園づくり", id:"o1", ic:"💦", nm:"畑の道具",     ds:"スプリンクラーか案山子を置く", need:1, now:()=>S.fields.some(f=>KEYS.some(k=>f[k].obj))?1:0, rw:500 },
+  { cat:"農園づくり", id:"f2", ic:"🎫", nm:"畑を広げる",   ds:"畑を2枚にする",                need:2, now:()=>S.fields.length, rw:1000 },
+  { cat:"農園づくり", id:"f3", ic:"🎫", nm:"広い農園",     ds:"畑を3枚にする",                need:3, now:()=>S.fields.length, rw:5000 },
+  { cat:"農園づくり", id:"f5", ic:"🎫", nm:"見渡すかぎりの畑", ds:"畑を5枚にする",            need:5, now:()=>S.fields.length, rw:30000 },
+  { cat:"農園づくり", id:"f10",ic:"🎫", nm:"キーボード大陸",   ds:"畑を10枚にする",            need:10, now:()=>S.fields.length, rw:100000 },
+  { cat:"農園づくり", id:"v1", ic:"👩‍🌾", nm:"なかまができた", ds:"村人を雇う",               need:1, now:()=>S.villagers, rw:3000 },
+  { cat:"農園づくり", id:"v3", ic:"👩‍🌾", nm:"にぎやかな村",   ds:"村人を3人雇う",            need:3, now:()=>S.villagers, rw:20000 },
+  { cat:"貴重品", id:"t1",  ic:"✨", nm:"たからもの",       ds:"貴重品を手に入れる",           need:1, now:treasKinds, rw:10000 },
+  { cat:"貴重品", id:"t3",  ic:"✨", nm:"宝物庫",           ds:"貴重品を3種類手に入れる",      need:3, now:treasKinds, rw:50000 },
+  { cat:"貴重品", id:"tAll",ic:"🏆", nm:"すべての宝",       ds:"貴重品をすべて手に入れる",     need:()=>TREAS_ALL, now:treasKinds, rw:300000 },
 ];
+const needOf = g => typeof g.need==="function" ? g.need() : g.need;
 let goalCur=0;
-const goalDone = g => g.now()>=g.need;
+const goalDone = g => g.now()>=needOf(g);
 const goalClaimed = g => !!(S.goals && S.goals[g.id]);
 const goalsReady = () => GOALS.filter(g=>goalDone(g) && !goalClaimed(g)).length;
 function renderGoalBadge(){ const n=goalsReady(); $("g-goalBadge").textContent = n ? n : ""; }
 function renderGoals(){
   const done=GOALS.filter(goalClaimed).length;
-  $("g-goalRate").textContent=`達成 ${done} / ${GOALS.length}`;
+  $("g-goalRate").textContent=`解除 ${done} / ${GOALS.length}`;
   goalCur=Math.max(0,Math.min(goalCur,GOALS.length-1));
   $("g-goalBody").innerHTML=GOALS.map((g,i)=>{
-    const now=Math.min(g.now(),g.need), ok=goalDone(g), got=goalClaimed(g);
+    const need=needOf(g), now=Math.min(g.now(),need), ok=goalDone(g), got=goalClaimed(g);
     const cat=GOALS.filter(x=>x.cat===g.cat), head = i===0 || GOALS[i-1].cat!==g.cat
       ? `<div class="ghead">${esc(g.cat)}<span>${cat.filter(goalClaimed).length} / ${cat.length}</span></div>` : "";
     const right = got ? '<span class="goalok">受け取り済み</span>'
@@ -5361,8 +5412,8 @@ function renderGoals(){
       : `<span>ごほうび ${fmtNum(g.rw)}キー</span>`;
     return head+`<div class="rowi ${i===goalCur?"cur":""} ${got?"claimed":""}" data-i="${i}">
       <div class="ic">${g.ic}</div>
-      <div><div class="nm">${esc(g.nm)}</div><div class="ds">${esc(g.ds)} ・ ${fmtNum(now)} / ${fmtNum(g.need)}</div>
-        <div class="gprog"><i style="width:${Math.floor(now/g.need*100)}%"></i></div></div>
+      <div><div class="nm">${esc(g.nm)}</div><div class="ds">${esc(g.ds)} ・ ${fmtNum(now)} / ${fmtNum(need)}</div>
+        <div class="gprog"><i style="width:${Math.floor(now/need*100)}%"></i></div></div>
       <div class="keyk">${right}</div></div>`;
   }).join("");
   keepVisible($("g-goalBody"));
@@ -5370,10 +5421,10 @@ function renderGoals(){
 }
 function claimGoal(i){
   const g=GOALS[i]; if(!g || goalClaimed(g)) return;
-  if(!goalDone(g)){ sfx.nope(); toast("まだ達成していません","warn"); return; }
+  if(!goalDone(g)){ sfx.nope(); toast("まだ解除していません","warn"); return; }
   S.goals=S.goals||{}; S.goals[g.id]=Date.now();
   S.money+=g.rw; sfx.buy();
-  toast(`目標「${esc(g.nm)}」達成! ごほうび +${fmtNum(g.rw)}キー`,"good",3600,true);
+  toast(`実績「${esc(g.nm)}」解除! ごほうび +${fmtNum(g.rw)}キー`,"good",3600,true);
   save(); renderAll();
   if(modal==="goal") renderGoals();
 }
@@ -5428,17 +5479,18 @@ const rankKey = name => encodeURIComponent(name).replace(/\./g,"%2E");
 async function pushRank(name){
   if(isDebugSave()) return {ok:false, msg:"デバッグ用の記録は番付に載せられません"};
   const key=rankKey(name);
-  const refM=db.ref(`${RANK_PATH}/money/${key}`), refH=db.ref(`${RANK_PATH}/harvest/${key}`);
+  const refM=db.ref(`${RANK_PATH}/money/${key}`), refH=db.ref(`${RANK_PATH}/harvest/${key}`), refB=db.ref(`${RANK_PATH}/book/${key}`);
   const old=(await refM.once("value")).val();
   if(old && old.o && old.o!==S.owner) return {ok:false, msg:"その名前は別の庭が使っています。別の名前にしてください"};
   const t=(old&&old.t)||Date.now();
   await refM.set({ n:name, s:Math.floor(S.money), o:S.owner, t });
   await refH.set({ n:name, s:S.totalHarvest,      o:S.owner, t });
+  try{ await refB.set({ n:name, s:bookProgress().got, o:S.owner, t }); }catch(e){}   // ルールが古いと書けないので、失敗しても続ける
   return {ok:true};
 }
 const hasDb = () => { try{ return !!db; }catch(e){ return false; } };
 function prepareRankNow(){
-  $("g-rankNow").innerHTML=`所持キー <b>${fmtNum(S.money)}</b> ・ 累計収穫 <b>${fmtNum(S.totalHarvest)}</b>個`+
+  $("g-rankNow").innerHTML=`所持キー <b>${fmtNum(S.money)}</b> ・ 累計収穫 <b>${fmtNum(S.totalHarvest)}</b>個 ・ 図鑑 <b>${bookProgress().got}</b>項目`+
     (S.rankName?`<br>「${esc(S.rankName)}」として載っています。庭を出るたびに自動で更新されます`:"");
 }
 function prepareRank(){
@@ -5465,13 +5517,15 @@ async function renderGardenRank(){
     note.textContent=rows.length?"":"まだ誰も載っていません。一番乗りのチャンス!";
     list.innerHTML=rows.map((r,i)=>{
       const me=r.o===S.owner;
-      const val=fmtNum(Math.floor(r.s||0))+(tab==="g-money"?"キー":"個");
+      const val=fmtNum(Math.floor(r.s||0))+gRankUnit(tab);
       return `<li class="${i<3?"top"+(i+1):""}${me?" me":""}"><span class="pos">${i+1}位</span><span class="pn">${esc(r.n||"")}${me?' <small>(あなた)</small>':""}</span><span class="ps">${val}</span></li>`;
     }).join("");
   }catch(e){ if(req===gRankReq) note.textContent="読み込めませんでした。通信環境を確認してください"; }
 }
+const G_RANK_TABS=["g-money","g-harvest","g-book"];
 function switchGardenRank(dir){
-  gRankTab = gRankTab==="g-money" ? "g-harvest" : "g-money";
+  const i=G_RANK_TABS.indexOf(gRankTab), n=G_RANK_TABS.length;
+  gRankTab = G_RANK_TABS[(i+(dir<0?-1:1)+n)%n];
   sfx.tab(); renderGardenRank();
 }
 root.querySelectorAll("#g-rankTabs .tab").forEach(t=>t.addEventListener("click",()=>{ gRankTab=t.dataset.rk; sfx.tab(); renderGardenRank(); }));
@@ -5495,9 +5549,11 @@ async function useName(name, old){
   if(!hasDb() || isDebugSave()) return;
   if(old && old!==name){
     const k=rankKey(old);
-    for(const m of ["money","harvest"]){
-      const ref=db.ref(`${RANK_PATH}/${m}/${k}`), v=(await ref.once("value")).val();
-      if(v && v.o===S.owner) await ref.remove();
+    for(const m of ["money","harvest","book"]){
+      try{
+        const ref=db.ref(`${RANK_PATH}/${m}/${k}`), v=(await ref.once("value")).val();
+        if(v && v.o===S.owner) await ref.remove();
+      }catch(e){ if(m!=="book") throw e; }   // 図鑑はルールが古いと消せないので、失敗しても続ける
     }
   }
   const r=await pushRank(name);
@@ -5524,7 +5580,7 @@ function onKey(e){
     if(e.key==="Escape"||e.key==="9"){ e.preventDefault(); closeModal(); }
     else if(e.key==="Enter"){ e.preventDefault(); submitRank(); }
     else if(e.key==="n"||e.key==="N"){ e.preventDefault(); const i=$("g-rankName"); i.focus(); i.select(); }
-    else if(e.key==="ArrowLeft"||e.key==="ArrowRight"){ e.preventDefault(); switchGardenRank(); }
+    else if(e.key==="ArrowLeft"||e.key==="ArrowRight"){ e.preventDefault(); switchGardenRank(e.key==="ArrowLeft"?-1:1); }
     else if(e.key==="ArrowUp"||e.key==="ArrowDown"){ e.preventDefault(); $("g-rankList").scrollBy(0, e.key==="ArrowDown"?60:-60); }
     return;
   }
@@ -6127,7 +6183,7 @@ function renderSyncState(){
   const el=$("bkSyncState");
   const who = syncOwner && syncOwner.label ? `(${syncOwner.label})` : "";
   if(el){
-    if(!syncCode) el.innerHTML="同期していません。パソコンとスマホなど、複数のブラウザで同じ記録を使えます。";
+    if(!syncCode) el.innerHTML="同期していません。";
     else if(syncPreparing) el.innerHTML="同期の準備中です。コードはクラウドへの保存が終わると表示されます…";
     else if(syncReadOnly) el.innerHTML=`同期中 <b>${showSyncCode(syncCode)}</b> ・ <b style="color:#ffb38a">見るだけ</b>(別のブラウザ${who.replace(/[<>&"]/g,"")}で遊んでいます。この画面をさわると、こちらに切り替わって最新の記録を取り込みます)`;
     else el.innerHTML=`同期中 <b>${showSyncCode(syncCode)}</b> ・ 自動で保存しています${syncPending?" ・ 新しい記録が届いています(タイトルに戻ると取り込みます)":""}`;
@@ -6357,7 +6413,7 @@ function tutView(){
       const what = st.modal==="gacha" ? "ガチャ" : "開いている画面";
       if(g && st.modal) return { sel:null, text: M ? `${got}「閉じる」で${what}を閉じよう` : `${got}${what}を閉じよう(Esc)` };
       return { sel: g ? "#g-goalBtn" : null,
-               text:`${got}これで基本はおしまいです。植えて、タイピングで育てて、キーを増やしていこう。次に何をするか迷ったら「目標」${M?"":"(キー 0)"}を見てね`,
+               text:`${got}これで基本はおしまいです。植えて、タイピングで育てて、キーを増やしていこう。次に何をするか迷ったら「実績」${M?"":"(キー 0)"}を見てね`,
                acts:[["ガイドをおわる", ()=>tutEnd(), g ? "Enter" : null]] };
   }
   return { sel:null, text:"" };
