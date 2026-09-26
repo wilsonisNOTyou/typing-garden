@@ -399,6 +399,20 @@ body.os4 .hud b#score{color:#ff7a3c; text-shadow:0 0 18px rgba(255,90,40,.65)}
   100%{border-color:var(--line); box-shadow:inset 0 1px 0 rgba(255,255,255,.08), 0 10px 30px rgba(0,0,0,.4)}
 }
 
+/* ---- はじめてガイド ---- */
+#tutRing{position:fixed; display:none; z-index:70; pointer-events:none; border-radius:12px;
+  border:3px solid #ffd75e; box-shadow:0 0 0 4px rgba(255,215,94,.25), 0 0 24px rgba(255,215,94,.7);
+  animation:tutpulse 1.4s ease-in-out infinite; transition:left .2s, top .2s, width .2s, height .2s}
+@keyframes tutpulse{0%,100%{box-shadow:0 0 0 4px rgba(255,215,94,.25), 0 0 18px rgba(255,215,94,.55)}50%{box-shadow:0 0 0 8px rgba(255,215,94,.15), 0 0 30px rgba(255,215,94,.85)}}
+#tutBubble{position:fixed; display:none; z-index:71; width:min(380px,calc(100vw - 16px)); text-align:left;
+  background:#fffaf0; color:#2f2a1f; border:3px solid #c79100; border-radius:12px; padding:.7rem .9rem .75rem;
+  box-shadow:0 6px 0 #8a6a10, 0 12px 30px rgba(0,0,0,.45); font-family:'M PLUS Rounded 1c','Hiragino Maru Gothic ProN',sans-serif}
+#tutStep{font-size:.72rem; font-weight:800; color:#a8801c; letter-spacing:.08em; margin-bottom:.25rem}
+#tutText{font-size:.95rem; font-weight:700; line-height:1.65}
+#tutActs{display:flex; gap:.4rem; justify-content:flex-end; margin-top:.55rem; flex-wrap:wrap}
+#tutActs .btn{padding:.35rem .9rem; font-size:.85rem; font-family:inherit}
+#tutActs .btn.tut-skip{background:none; color:#8a7a60; border-color:#d9ccb0; box-shadow:none}
+@media (prefers-reduced-motion:reduce){ #tutRing{animation:none; transition:none} }
 /* ---- タイピング単語帳 ---- */
 .diff-btn.books{border-color:#5b6f9a; width:min(220px,90vw)}
 .diff-btn.books .name{color:#a9c4ff}
@@ -517,6 +531,12 @@ body.garden #app{width:min(960px,96vw); padding:1.2rem 0 2rem}
 #screen-garden .tbtn:hover, #screen-garden .tbtn:focus-visible{background:#fff; outline:none}
 #screen-garden .tbtn:active{transform:translateY(2px); box-shadow:0 1px 0 var(--wood-d)}
 #screen-garden .tbtn .kb{color:var(--ink-l); font-size:.78rem; margin-left:.3rem}
+#screen-garden .tbtn.goal{position:relative}
+#screen-garden .tbtn.goal .gbadge:not(:empty){display:inline-grid; place-items:center; min-width:1.3em; height:1.3em; margin-left:.3rem; padding:0 .3em; border-radius:999px; background:var(--alert); color:#fff; font-size:.75rem}
+#screen-garden .rowi .goalok{color:#2e7d32; font-weight:800}
+#screen-garden .rowi.claimed{opacity:.55}
+#screen-garden .rowi .gprog{height:6px; border-radius:3px; background:#e7dfcc; margin-top:.3rem; overflow:hidden}
+#screen-garden .rowi .gprog i{display:block; height:100%; background:#8fbf5a}
 #screen-garden .tbtn.shop{background:var(--sun); border-color:#a8801c; box-shadow:0 3px 0 #a8801c}
 #screen-garden .bar-row{display:flex; align-items:stretch; gap:.6rem; flex-wrap:wrap; margin-bottom:.9rem}
 #screen-garden .slot{
@@ -1223,8 +1243,9 @@ html.mobile #screen-garden .tlist{grid-template-columns:1fr}
       <button class="btn" id="dictBtn">ことば図鑑 <span class="kbdh">D</span></button>
       <button class="btn" id="backupBtn">記録の引き継ぎ <span class="kbdh">K</span></button>
       <button class="btn" id="fbBtn">要望・バグ報告 <span class="kbdh">F</span></button>
+      <button class="btn" id="tutBtn">遊び方ガイド <span class="kbdh">H</span></button>
     </div>
-    <p class="hint">キー 1〜9 でモードを選んで開始 ・ G 庭 ・ R ランキング ・ D 図鑑 ・ K 記録の引き継ぎ / ローマ字入力(shi・si どちらもOK)<br>8 単語帳 ・ F 要望・バグ報告 ・ Esc でいつでもタイトルに戻る</p>
+    <p class="hint">キー 1〜9 でモードを選んで開始 ・ G 庭 ・ R ランキング ・ D 図鑑 ・ K 記録の引き継ぎ / ローマ字入力(shi・si どちらもOK)<br>8 単語帳 ・ F 要望・バグ報告 ・ H 遊び方ガイド ・ Esc でいつでもタイトルに戻る</p>
     <div class="hazard" aria-hidden="true"><span class="k">Q</span><span class="s">🌱</span><span class="k">W</span><span class="k">E</span><span class="s">🥕</span><span class="k">R</span><span class="k">T</span><span class="s">🌿</span><span class="k">Y</span><span class="k">U</span><span class="s">🍅</span><span class="k">I</span><span class="k">O</span><span class="s">🌽</span><span class="k">P</span><span class="s">🍓</span></div>
   </section>
 
@@ -1315,6 +1336,7 @@ html.mobile #screen-garden .tlist{grid-template-columns:1fr}
       <button class="tbtn treas" id="g-treasBtn">貴重品<span class="kb">8</span></button>
       <button class="tbtn" id="g-bookBtn">図鑑<span class="kb">Space</span></button>
       <button class="tbtn" id="g-rankOpenBtn">番付<span class="kb">9</span></button>
+      <button class="tbtn goal" id="g-goalBtn">目標<span class="gbadge" id="g-goalBadge"></span><span class="kb">0</span></button>
       <button class="tbtn" id="g-backBtn">タイトルへ<span class="kb">Esc</span></button>
     </div>
 
@@ -1420,6 +1442,20 @@ html.mobile #screen-garden .tlist{grid-template-columns:1fr}
     </div>
   </div>
 
+  <!-- 目標 -->
+  <div class="modal" id="g-goal">
+    <div class="panel">
+      <div class="phead">
+        <h2>目標</h2>
+        <div class="money" id="g-goalRate"></div>
+        <button class="sbtn xbtn" data-close>閉じる ✕</button>
+      </div>
+      <p class="tnote">目標を達成すると、ごほうびのキーを受け取れます。次に何をするか迷ったら、ここを見てください。</p>
+      <div id="g-goalBody" class="plist"></div>
+      <div class="keyhint"><b>↑ ↓</b> 選ぶ ・ <b>Enter</b> ごほうびを受け取る ・ <b>0</b> / <b>Esc</b> 閉じる</div>
+    </div>
+  </div>
+
   <!-- 番付に載せる -->
   <div class="modal" id="g-rank">
     <div class="panel savebox">
@@ -1497,6 +1533,9 @@ html.mobile #screen-garden .tlist{grid-template-columns:1fr}
 </div>
 
 <div id="heatLayer"></div>
+<!-- はじめてガイド -->
+<div id="tutRing"></div>
+<div id="tutBubble"><div id="tutStep"></div><div id="tutText"></div><div id="tutActs"></div></div>
 <div id="stagePop"></div>
 <div id="countdown"></div>
 
@@ -2488,6 +2527,7 @@ document.addEventListener("keydown",e=>{
     if(e.key==="k"||e.key==="K") openBackup();
     if(e.key==="8") openBooks();
     if(e.key==="f"||e.key==="F") openFeedback();
+    if(e.key==="h"||e.key==="H") tutStart();
     if((e.key==="t"||e.key==="T") && syncReadOnly) syncTakeOver();
     if(e.key==="9"||e.key==="g"||e.key==="G") openGarden();
     return;
@@ -4157,9 +4197,10 @@ function renderBar(){
   $("g-rate").textContent=`タイピング1打で ${minPerKey()}分 進む`;
 }
 function renderAll(){
-  renderBar(); renderField(); renderInfo(); renderBasket();
+  renderBar(); renderField(); renderInfo(); renderBasket(); renderGoalBadge();
   if(modal==="shop") renderShop();
   if(modal==="book") renderBook();
+  if(modal==="goal") renderGoals();
 }
 
 /* ---------- 作業 ---------- */
@@ -4353,6 +4394,7 @@ function openModal(name){
   if(name==="treas") renderTreas();
   if(name==="book") renderBook();
   if(name==="rank") prepareRank();
+  if(name==="goal") renderGoals();
 }
 function closeModal(silent){
   if(!modal) return;
@@ -4731,6 +4773,7 @@ function drawGacha(n){
   S.money-=cost;
   const res=[];
   for(let i=0;i<n;i++) res.push(drawOne(0));
+  if(window.tutGachaEggplant && n===1){ window.tutGachaEggplant=false; res[0]={ r:"R", id:"eggplant" }; }   // はじめてガイドの1回はなす
   // 11回ごとにSR以上を1つ確定(111回なら10回分)
   if(n>=11){
     for(let b=0; b+11<=n; b+=11){
@@ -5079,6 +5122,94 @@ $("g-bookList").addEventListener("click",e=>{
   bookCur=+row.dataset.i; renderBook();
 });
 
+/* ---------- 目標 ----------
+   達成するとごほうびのキーを受け取れる(S.goals に受け取り済みを記録) */
+const anyQ = t => Object.values(S.harvestQ||{}).some(a=>(a&&a[t])>0);
+const bookCount = () => Object.values(S.harvestQ||{}).reduce((n,a)=>n+(a||[]).filter(x=>x>0).length,0);
+const GOALS = [
+  { id:"h1",   ic:"🧺", nm:"はじめての収穫",       ds:"作物を1個収穫する",            need:1,      now:()=>S.totalHarvest,       rw:50 },
+  { id:"g1",   ic:"🎰", nm:"はじめてのガチャ",     ds:"ガチャを1回引く",              need:1,      now:()=>S.gachaCount||0,      rw:100 },
+  { id:"h10",  ic:"🧺", nm:"かごいっぱい",         ds:"作物を10個収穫する",           need:10,     now:()=>S.totalHarvest,       rw:150 },
+  { id:"s1k",  ic:"💰", nm:"はじめての商い",       ds:"累計売上 1,000キー",           need:1000,   now:()=>S.totalSales,         rw:200 },
+  { id:"q1",   ic:"⭐", nm:"腕が上がった",         ds:"☆の作物を収穫する",            need:1,      now:()=>anyQ(1)?1:0,          rw:300 },
+  { id:"g11",  ic:"🎰", nm:"ガチャ好き",           ds:"ガチャを合計11回引く",         need:11,     now:()=>S.gachaCount||0,      rw:500 },
+  { id:"o1",   ic:"💦", nm:"畑の道具",             ds:"スプリンクラーか案山子を置く", need:1,      now:()=>S.fields.some(f=>KEYS.some(k=>f[k].obj))?1:0, rw:500 },
+  { id:"b10",  ic:"📖", nm:"図鑑づくり",           ds:"図鑑を10項目うめる",           need:10,     now:bookCount,                rw:1000 },
+  { id:"f2",   ic:"🎫", nm:"畑を広げる",           ds:"畑を2枚にする",                need:2,      now:()=>S.fields.length,      rw:1000 },
+  { id:"s10k", ic:"💰", nm:"売れっ子農家",         ds:"累計売上 10,000キー",          need:10000,  now:()=>S.totalSales,         rw:1000 },
+  { id:"h100", ic:"🧺", nm:"収穫名人",             ds:"作物を100個収穫する",          need:100,    now:()=>S.totalHarvest,       rw:1000 },
+  { id:"q2",   ic:"🌟", nm:"極上の実り",           ds:"☆☆の作物を収穫する",          need:1,      now:()=>anyQ(2)?1:0,          rw:2000 },
+  { id:"v1",   ic:"👩‍🌾", nm:"なかまができた",     ds:"村人を雇う",                   need:1,      now:()=>S.villagers,          rw:3000 },
+  { id:"m1",   ic:"✦",  nm:"変わりだね",           ds:"変異の作物を収穫する",         need:1,      now:()=>anyQ(3)?1:0,          rw:5000 },
+  { id:"s100k",ic:"💰", nm:"大農園",               ds:"累計売上 100,000キー",         need:100000, now:()=>S.totalSales,         rw:8000 },
+  { id:"t1",   ic:"✨", nm:"たからもの",           ds:"貴重品を手に入れる",           need:1,      now:()=>Object.values(S.treas||{}).some(n=>n>0)?1:0, rw:10000 },
+  { id:"h1000",ic:"🧺", nm:"伝説の収穫",           ds:"作物を1,000個収穫する",        need:1000,   now:()=>S.totalHarvest,       rw:10000 },
+];
+let goalCur=0;
+const goalDone = g => g.now()>=g.need;
+const goalClaimed = g => !!(S.goals && S.goals[g.id]);
+const goalsReady = () => GOALS.filter(g=>goalDone(g) && !goalClaimed(g)).length;
+function renderGoalBadge(){ const n=goalsReady(); $("g-goalBadge").textContent = n ? n : ""; }
+function renderGoals(){
+  const done=GOALS.filter(goalClaimed).length;
+  $("g-goalRate").textContent=`達成 ${done} / ${GOALS.length}`;
+  goalCur=Math.max(0,Math.min(goalCur,GOALS.length-1));
+  $("g-goalBody").innerHTML=GOALS.map((g,i)=>{
+    const now=Math.min(g.now(),g.need), ok=goalDone(g), got=goalClaimed(g);
+    const right = got ? '<span class="goalok">受け取り済み</span>'
+      : ok ? `<button class="sbtn main" data-claim="${i}">受け取る +${fmtNum(g.rw)}</button>`
+      : `<span>ごほうび ${fmtNum(g.rw)}キー</span>`;
+    return `<div class="rowi ${i===goalCur?"cur":""} ${got?"claimed":""}" data-i="${i}">
+      <div class="ic">${g.ic}</div>
+      <div><div class="nm">${esc(g.nm)}</div><div class="ds">${esc(g.ds)} ・ ${fmtNum(now)} / ${fmtNum(g.need)}</div>
+        <div class="gprog"><i style="width:${Math.floor(now/g.need*100)}%"></i></div></div>
+      <div class="keyk">${right}</div></div>`;
+  }).join("");
+  keepVisible($("g-goalBody"));
+  renderGoalBadge();
+}
+function claimGoal(i){
+  const g=GOALS[i]; if(!g || goalClaimed(g)) return;
+  if(!goalDone(g)){ sfx.nope(); toast("まだ達成していません","warn"); return; }
+  S.goals=S.goals||{}; S.goals[g.id]=Date.now();
+  S.money+=g.rw; sfx.buy();
+  toast(`目標「${esc(g.nm)}」達成! ごほうび +${fmtNum(g.rw)}キー`,"good",3600,true);
+  save(); renderAll();
+  if(modal==="goal") renderGoals();
+}
+function goalKey(e){
+  const k=e.key;
+  if(k==="Escape"||k==="0"){ e.preventDefault(); closeModal(); return; }
+  if(k==="ArrowUp"||k==="ArrowDown"){ e.preventDefault(); goalCur=(goalCur+(k==="ArrowDown"?1:-1)+GOALS.length)%GOALS.length; sfx.cursor(); renderGoals(); return; }
+  if(k==="Enter"){ e.preventDefault(); claimGoal(goalCur); }
+}
+$("g-goalBody").addEventListener("click",e=>{
+  const b=e.target.closest("[data-claim]"); if(b){ claimGoal(+b.dataset.claim); return; }
+  const row=e.target.closest(".rowi"); if(row){ goalCur=+row.dataset.i; renderGoals(); }
+});
+
+/* ---------- はじめてガイドのための窓口(ガイド本体は庭の外) ---------- */
+function tutState(){
+  const now=Date.now(); let soil=0, crops=0, wet=0, ripe=0;
+  S.fields.forEach((f,fi)=>{
+    const cov=covered(fi);
+    for(const k of KEYS){
+      const p=f[k]; if(p.vil || p.s==="post") continue;
+      if(p.s==="soil") soil++;
+      if(p.crop){ crops++; if(isRipe(p)) ripe++; else if(isWet(fi,k,now,cov)) wet++; }
+    }
+  });
+  return { soil, crops, wet, ripe, harvest:S.totalHarvest, sales:S.totalSales, gacha:S.gachaCount||0,
+           money:S.money, tool:S.tool, modal, shopTab, fresh:!S.totalHarvest && !S.gachaCount && !S.totalSales };
+}
+function tutGive(n){ S.money+=n; save(); if(document.body.classList.contains("garden")) renderAll(); }
+/* スマホはタイピングできないので、ガイドの間だけ植えた作物を実らせる */
+function tutGrow(){
+  tick();
+  S.fields.forEach(f=>{ for(const k of KEYS){ const p=f[k]; if(p.crop && !p.vil && !isRipe(p)) grow(p, need(p.crop)-p.crop.grown, Date.now()); } });
+  save(); if(document.body.classList.contains("garden")) renderAll();
+}
+
 /* ---------- 番付(所持キー・累計収穫) ----------
    名前ごとに1件。自分の庭の印(owner)で、同じ名前の別人の記録を上書きしないようにする */
 const rankKey = name => encodeURIComponent(name).replace(/\./g,"%2E");
@@ -5159,6 +5290,7 @@ function onKey(e){
   if(modal==="gacha"){ gachaKey(e); return; }
   if(modal==="treas"){ treasKey(e); return; }
   if(modal==="book"){ bookKey(e); return; }
+  if(modal==="goal"){ goalKey(e); return; }
   if(modal==="rank"){
     if(e.key==="Escape"||e.key==="9"){ e.preventDefault(); closeModal(); }
     else if(e.key==="Enter"){ e.preventDefault(); submitRank(); }
@@ -5174,6 +5306,7 @@ function onKey(e){
   if(k==="8"){ e.preventDefault(); openModal("treas"); return; }
   if(k===" "){ e.preventDefault(); openModal("book"); return; }
   if(k==="9"){ e.preventDefault(); openModal("rank"); return; }
+  if(k==="0"){ e.preventDefault(); openModal("goal"); return; }
   if(k==="Escape"){ backToTitle(); return; }
   if(/^[1-6]$/.test(k)){ setTool(+k); return; }
   if(k==="ArrowLeft"){ e.preventDefault(); cycleSel(-1); return; }
@@ -5198,6 +5331,7 @@ $("g-treasBtn").addEventListener("click",()=>openModal("treas"));
 $("g-bookBtn").addEventListener("click",()=>openModal("book"));
 $("g-backBtn").addEventListener("click",()=>backToTitle());
 $("g-rankOpenBtn").addEventListener("click",()=>openModal("rank"));
+$("g-goalBtn").addEventListener("click",()=>openModal("goal"));
 // マウスでも閉じられるように: 閉じるボタンと、ウィンドウの外側のクリック
 root.querySelectorAll("[data-close]").forEach(b=>b.addEventListener("click",()=>closeModal()));
 root.querySelectorAll(".modal").forEach(m=>m.addEventListener("click",e=>{ if(e.target===m) closeModal(); }));
@@ -5272,7 +5406,7 @@ function debugUnlock(){
   S.lastTick=Date.now();
   save();
 }
-return { enter, leave, onKey, summary, debugUnlock };
+return { enter, leave, onKey, summary, debugUnlock, tutState, tutGive, tutGrow, openModal };
 })();
 
 function openGarden(){ show("garden"); Garden.enter(); }
@@ -5839,6 +5973,156 @@ function refreshGardenStat(){
 $("gardenStat").addEventListener("click",openGarden);
 $("toGardenBtn").addEventListener("click",openGarden);
 
+/* =====================================================
+   はじめてガイド(遊びながら進む「最初の1日」)
+   タイピング → キーが外れる → 農園で耕す・植える・水をやる → タイピングで育つ
+   → 収穫 → 売る → ガチャ(100キーを渡して1回。なすが出る) の順に、画面を光らせて案内する。
+   進み具合は保存するので、途中でやめても続きから。タイトルの H でいつでも見直せる
+===================================================== */
+const TUT_KEY="typinggarden:tut";
+const TUT_STEPS=["type","plate","toGarden","till","plant","water","grow","harvest","sell","gacha","done"];
+let tut=null, tutTimer=null;
+function tutLoad(){ try{ tut=JSON.parse(localStorage.getItem(TUT_KEY)||"null"); }catch(e){ tut=null; } }
+function tutSave(){ try{ localStorage.setItem(TUT_KEY, JSON.stringify(tut)); }catch(e){} }
+const tutStep = () => tut && !tut.done ? TUT_STEPS[tut.step] : null;
+function tutGo(i){
+  tut.step=i; tut.base=Garden.tutState();
+  if(TUT_STEPS[i]==="gacha" && !tut.gave){ tut.gave=true; Garden.tutGive(100); }
+  tutSave(); tutRender();
+}
+const tutNext = () => tutGo(tut.step+1);
+function tutStart(){
+  tut={ step:0, done:false, gave:false };
+  tutGo(window.IS_MOBILE ? TUT_STEPS.indexOf("toGarden") : 0);   // スマホはタイピングの部分をとばす
+  clearInterval(tutTimer); tutTimer=setInterval(tutTick,300);
+}
+function tutEnd(){
+  if(tut){ tut.done=true; tutSave(); }
+  window.tutGachaEggplant=false;
+  clearInterval(tutTimer); tutTimer=null;
+  $("tutRing").style.display="none"; $("tutBubble").style.display="none";
+}
+/* 進んだかどうかを見る */
+function tutTick(){
+  const id=tutStep(); if(!id){ tutEnd(); return; }
+  const st=Garden.tutState(), b=tut.base||st;
+  switch(id){
+    case "type":     if(scene==="game") return tutNext(); break;
+    case "plate":    if(scene==="result") return tutNext(); if(scene==="title") return tutGo(0); break;
+    case "toGarden": if(scene==="garden") return tutNext(); break;
+    case "till":     if(st.soil>b.soil) return tutNext(); break;
+    case "plant":    if(st.crops>b.crops) return tutNext(); break;
+    case "water":    if(st.wet>b.wet || st.ripe>0) return tutNext(); break;
+    case "grow":     if(st.ripe>0) return tutNext(); break;
+    case "harvest":  if(st.harvest>b.harvest) return tutNext(); break;
+    case "sell":     if(st.sales>b.sales) return tutNext(); break;
+    case "gacha":    window.tutGachaEggplant = st.gacha<=b.gacha;
+                     if(st.gacha>b.gacha && !(document.querySelector("#g-gacha .gmachine.shake"))) return tutNext(); break;
+  }
+  tutRender();
+}
+/* いま見せる案内: { sel: 光らせる場所, text, acts: [[ボタン名, 処理]] } */
+function tutView(){
+  const id=tutStep(), st=Garden.tutState(), g=scene==="garden";
+  const toFarm = { sel: scene==="result" ? "#toGardenBtn" : (scene==="title" ? ".diff-btn.garden" : null),
+                   text:"キーボード農園へ行こう(タイトルでは 9、結果画面では G)" };
+  const M=!!window.IS_MOBILE;
+  const hold = (tool,name) => st.tool!==tool ? { sel:`.slot[data-tool="${tool}"]`, text: M ? `まずは${name}を持とう。ここをタップ` : `まずは${name}(${tool})を持とう。キー ${tool} か、ここをクリック` } : null;
+  switch(id){
+    case "type":
+      return scene==="title"
+        ? { sel:'.diff-btn[data-diff="easy"]', text:"ようこそ、タイピングガーデンへ! まずは1回タイピングしてみよう。イージーを押すか、キー 1 で始まります" }
+        : { sel:null, text:"タイトルに戻って、イージー(キー 1)を始めよう" };
+    case "plate":
+      return scene==="game"
+        ? { sel:"#plate", text:"正しく打つと、キーボードのキーが外れて跡から芽が出ます。外したキーは農園のお金になります。60秒がんばろう!" }
+        : { sel:null, text:"タイピングを最後まで遊んでみよう" };
+    case "toGarden":
+      return scene==="result" ? { sel:"#toGardenBtn", text:"おつかれさま! 外したキーが農園に届きました。庭へ行ってみよう(G)" }
+           : scene==="title" ? { sel:".diff-btn.garden", text: window.IS_MOBILE ? "ようこそ、タイピングガーデンへ! まずはキーボード農園を開こう" : "キーボード農園を開こう(キー 9)" }
+           : { sel:null, text:"キーボード農園へ行こう" };
+    case "till":
+      if(!g) return toFarm;
+      return hold(2,"クワ") || { sel:"#g-planter .plot.grass", text: M ? "草むらの区画をタップして耕そう" : "草むらの区画をクリックして耕そう(区画に書いてある英字のキーでもOK)" };
+    case "plant":
+      if(!g) return toFarm;
+      return hold(4,"種") || { sel:"#g-planter .plot.soil:not(.growing):not(.ripe):not(.obj)", text:"耕した区画に、にんじんの種を植えよう" };
+    case "water":
+      if(!g) return toFarm;
+      return hold(3,"じょうろ") || { sel:"#g-planter .plot.growing:not(.wet)", text:"植えた区画に水をあげよう。作物は水が効いている間だけ育ちます" };
+    case "grow":
+      if(window.IS_MOBILE){
+        return { sel: g ? "#g-planter .plot.growing" : null,
+                 text:"作物は、パソコンでタイピングするほど早く育ちます(1打で数分ぶん)。スマホでは打てないので、今回は特別に時間を進めましょう",
+                 acts:[["時間を進める", ()=>{ Garden.tutGrow(); }]] };
+      }
+      if(g) return { sel:"#g-backBtn", text:"水が効いている作物は、タイピングするほど早く育ちます(1打で数分ぶん)。タイトルに戻って(Esc)、もう1回打ってみよう" };
+      if(scene==="title") return { sel:'.diff-btn[data-diff="easy"]', text:"もう1回タイピングして、作物の時間を進めよう(にんじんは72打ほどで実ります)" };
+      if(scene==="game")  return { sel:null, text:"打つほど畑の時間が進んでいます!" };
+      if(scene==="result")return { sel:"#toGardenBtn", text:"庭で作物のようすを見てみよう(G)。まだ実っていなければ、もう1回打とう" };
+      return { sel:null, text:"タイピングで作物を育てよう" };
+    case "harvest":
+      if(!g) return toFarm;
+      return hold(1,"素手") || { sel:"#g-planter .plot.ripe", text:"実った! 光っている区画を押して収穫しよう" };
+    case "sell":
+      if(!g) return toFarm;
+      if(st.modal!=="shop") return { sel:"#g-shopBtn", text: M ? "収穫した作物はお店で売れます。お店を開こう" : "収穫した作物はお店で売れます。お店を開こう(Tab)" };
+      if(st.shopTab!==3) return { sel:'#g-shopTabs .tab[data-tab="3"]', text: M ? "「売る」タブを開こう" : "「売る」タブを開こう(→ キーでも切り替えられます)" };
+      return { sel:"#g-shopBody .rowi", text: M ? "にんじんを売ろう。「1つ売る」か「全部売る」を押してね" : "にんじんを売ろう。Enter で1つ、Shift+Enter で全部売れます(ボタンでもOK)" };
+    case "gacha":
+      if(!g) return toFarm;
+      if(st.modal!=="gacha") return { sel:"#g-gachaBtn", text: M ? "最後はガチャ! ごほうびに 100キー をプレゼントしました。ガチャを開こう" : "最後はガチャ! ごほうびに 100キー をプレゼントしました。ガチャを開こう(キー 7)" };
+      return { sel:"#g-gachaHint", text: window.IS_MOBILE ? "「1回」を押して、種を1つ引いてみよう" : "Enter で1回引いてみよう。ガチャからは、お店にない種も出ます" };
+    case "done":
+      if(g && st.modal) return { sel:null, text: M ? "なすの種が出た! 「閉じる」でガチャを閉じよう" : "なすの種が出た! ガチャを閉じよう(Esc)", acts:[["ガイドをおわる", ()=>tutEnd()]] };
+      return { sel: g ? "#g-goalBtn" : null,
+               text:`なすの種が出た! これで基本はおしまいです。植えて、タイピングで育てて、キーを増やしていこう。次に何をするか迷ったら「目標」${M?"":"(キー 0)"}を見てね`,
+               acts:[["ガイドをおわる", ()=>tutEnd()]] };
+  }
+  return { sel:null, text:"" };
+}
+/* 光らせる枠と吹き出しを描く */
+function tutRender(){
+  const id=tutStep(); if(!id) return;
+  const v=tutView(), ring=$("tutRing"), bub=$("tutBubble");
+  const el = v.sel ? [...document.querySelectorAll(v.sel)].find(x=>x.offsetParent!==null && x.getBoundingClientRect().width>0) : null;
+  const i=TUT_STEPS.indexOf(id)+1, total=TUT_STEPS.length;
+  const key=id+"|"+v.text+"|"+(v.acts||[]).map(a=>a[0]).join();
+  if(bub.dataset.key!==key){
+    bub.dataset.key=key;
+    $("tutStep").textContent=`はじめてガイド ${i} / ${total}`;
+    $("tutText").textContent=v.text;
+    const acts=$("tutActs"); acts.innerHTML="";
+    for(const [label,fn] of (v.acts||[])){ const btn=document.createElement("button"); btn.className="btn primary"; btn.textContent=label; btn.onclick=fn; acts.appendChild(btn); }
+    if(id!=="done"){ const sk=document.createElement("button"); sk.className="btn tut-skip"; sk.textContent="スキップ"; sk.onclick=()=>{ if(confirm("ガイドを終わりますか?(タイトルの H でいつでも見直せます)")) tutEnd(); }; acts.appendChild(sk); }
+  }
+  bub.style.display="block";
+  const W=window.innerWidth, H=window.innerHeight, bw=bub.offsetWidth, bh=bub.offsetHeight;
+  if(el){
+    const r=el.getBoundingClientRect();
+    ring.style.display="block";
+    Object.assign(ring.style,{ left:(r.left-6)+"px", top:(r.top-6)+"px", width:(r.width+12)+"px", height:(r.height+12)+"px" });
+    let top = r.bottom+14+bh < H ? r.bottom+14 : Math.max(8, r.top-14-bh);
+    let left = Math.min(Math.max(8, r.left+r.width/2-bw/2), W-bw-8);
+    bub.style.left=left+"px"; bub.style.top=top+"px";
+  }else{
+    ring.style.display="none";
+    bub.style.left=Math.max(8,(W-bw)/2)+"px"; bub.style.top=(H-bh-16)+"px";
+  }
+}
+window.addEventListener("resize",()=>{ if(tutStep()) tutRender(); });
+window.addEventListener("scroll",()=>{ if(tutStep()) tutRender(); }, true);
+$("tutBtn").addEventListener("click",tutStart);
+/* はじめて遊ぶ人には自動で始める(もう遊んでいる人には出さない) */
+function tutBoot(){
+  tutLoad();
+  if(!tut){
+    if(Garden.tutState().fresh){ tutStart(); return; }
+    tut={ step:0, done:true }; tutSave(); return;
+  }
+  if(!tut.done){ clearInterval(tutTimer); tutTimer=setInterval(tutTick,300); tutRender(); }
+}
+
 refreshBestLine();
 refreshStatsLine();
 refreshGardenStat();
@@ -5848,6 +6132,7 @@ try{
   if(sessionStorage.getItem("typinggarden:return")==="garden") openGarden();
   sessionStorage.removeItem("typinggarden:return");
 }catch(e){}
+tutBoot();   // はじめて遊ぶ人にはガイドを出す
 window.addEventListener("beforeunload",()=>{ try{ syncPush(false,true); }catch(e){} });
 // スマホはアプリの切り替えで閉じられることが多いので、隠れたときにも保存して送る
 // 戻ってきたときは、届いている記録を取り込む
