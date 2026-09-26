@@ -553,6 +553,10 @@ body.garden #app{width:min(960px,96vw); padding:1.2rem 0 2rem}
 #screen-garden .rowi.claimed{opacity:.55}
 #screen-garden .rowi .gprog{height:6px; border-radius:3px; background:#e7dfcc; margin-top:.3rem; overflow:hidden}
 #screen-garden .rowi .gprog i{display:block; height:100%; background:#8fbf5a}
+#g-goalBody .ghead{display:flex; justify-content:space-between; align-items:baseline; margin:.7rem .2rem .25rem; padding-bottom:.2rem;
+  border-bottom:2px solid #d9ccb0; font-weight:800; color:#6b5a3a; font-size:.9rem}
+#g-goalBody .ghead:first-child{margin-top:.1rem}
+#g-goalBody .ghead span{font-size:.78rem; color:#9a8a6a; font-weight:700}
 #screen-garden .tbtn.shop{background:var(--sun); border-color:#a8801c; box-shadow:0 3px 0 #a8801c}
 #screen-garden .bar-row{display:flex; align-items:stretch; gap:.6rem; flex-wrap:wrap; margin-bottom:.9rem}
 #screen-garden .slot{
@@ -5291,24 +5295,25 @@ $("g-bookList").addEventListener("click",e=>{
    達成するとごほうびのキーを受け取れる(S.goals に受け取り済みを記録) */
 const anyQ = t => Object.values(S.harvestQ||{}).some(a=>(a&&a[t])>0);
 const bookCount = () => Object.values(S.harvestQ||{}).reduce((n,a)=>n+(a||[]).filter(x=>x>0).length,0);
+/* 目標はジャンル(cat)ごとに、やさしい順に並べる */
 const GOALS = [
-  { id:"h1",   ic:"🧺", nm:"はじめての収穫",       ds:"作物を1個収穫する",            need:1,      now:()=>S.totalHarvest,       rw:50 },
-  { id:"g1",   ic:"🎰", nm:"はじめてのガチャ",     ds:"ガチャを1回引く",              need:1,      now:()=>S.gachaCount||0,      rw:100 },
-  { id:"h10",  ic:"🧺", nm:"かごいっぱい",         ds:"作物を10個収穫する",           need:10,     now:()=>S.totalHarvest,       rw:150 },
-  { id:"s1k",  ic:"💰", nm:"はじめての商い",       ds:"累計売上 1,000キー",           need:1000,   now:()=>S.totalSales,         rw:200 },
-  { id:"q1",   ic:"⭐", nm:"腕が上がった",         ds:"☆の作物を収穫する",            need:1,      now:()=>anyQ(1)?1:0,          rw:300 },
-  { id:"g11",  ic:"🎰", nm:"ガチャ好き",           ds:"ガチャを合計11回引く",         need:11,     now:()=>S.gachaCount||0,      rw:500 },
-  { id:"o1",   ic:"💦", nm:"畑の道具",             ds:"スプリンクラーか案山子を置く", need:1,      now:()=>S.fields.some(f=>KEYS.some(k=>f[k].obj))?1:0, rw:500 },
-  { id:"b10",  ic:"📖", nm:"図鑑づくり",           ds:"図鑑を10項目うめる",           need:10,     now:bookCount,                rw:1000 },
-  { id:"f2",   ic:"🎫", nm:"畑を広げる",           ds:"畑を2枚にする",                need:2,      now:()=>S.fields.length,      rw:1000 },
-  { id:"s10k", ic:"💰", nm:"売れっ子農家",         ds:"累計売上 10,000キー",          need:10000,  now:()=>S.totalSales,         rw:1000 },
-  { id:"h100", ic:"🧺", nm:"収穫名人",             ds:"作物を100個収穫する",          need:100,    now:()=>S.totalHarvest,       rw:1000 },
-  { id:"q2",   ic:"🌟", nm:"極上の実り",           ds:"☆☆の作物を収穫する",          need:1,      now:()=>anyQ(2)?1:0,          rw:2000 },
-  { id:"v1",   ic:"👩‍🌾", nm:"なかまができた",     ds:"村人を雇う",                   need:1,      now:()=>S.villagers,          rw:3000 },
-  { id:"m1",   ic:"✦",  nm:"変わりだね",           ds:"変異の作物を収穫する",         need:1,      now:()=>anyQ(3)?1:0,          rw:5000 },
-  { id:"s100k",ic:"💰", nm:"大農園",               ds:"累計売上 100,000キー",         need:100000, now:()=>S.totalSales,         rw:8000 },
-  { id:"t1",   ic:"✨", nm:"たからもの",           ds:"貴重品を手に入れる",           need:1,      now:()=>Object.values(S.treas||{}).some(n=>n>0)?1:0, rw:10000 },
-  { id:"h1000",ic:"🧺", nm:"伝説の収穫",           ds:"作物を1,000個収穫する",        need:1000,   now:()=>S.totalHarvest,       rw:10000 },
+  { cat:"収穫", id:"h1",   ic:"🧺", nm:"はじめての収穫",       ds:"作物を1個収穫する",            need:1,      now:()=>S.totalHarvest,       rw:50 },
+  { cat:"収穫", id:"h10",  ic:"🧺", nm:"かごいっぱい",         ds:"作物を10個収穫する",           need:10,     now:()=>S.totalHarvest,       rw:150 },
+  { cat:"収穫", id:"h100", ic:"🧺", nm:"収穫名人",             ds:"作物を100個収穫する",          need:100,    now:()=>S.totalHarvest,       rw:1000 },
+  { cat:"収穫", id:"h1000",ic:"🧺", nm:"伝説の収穫",           ds:"作物を1,000個収穫する",        need:1000,   now:()=>S.totalHarvest,       rw:10000 },
+  { cat:"売上", id:"s1k",  ic:"💰", nm:"はじめての商い",       ds:"累計売上 1,000キー",           need:1000,   now:()=>S.totalSales,         rw:200 },
+  { cat:"売上", id:"s10k", ic:"💰", nm:"売れっ子農家",         ds:"累計売上 10,000キー",          need:10000,  now:()=>S.totalSales,         rw:1000 },
+  { cat:"売上", id:"s100k",ic:"💰", nm:"大農園",               ds:"累計売上 100,000キー",         need:100000, now:()=>S.totalSales,         rw:8000 },
+  { cat:"実りの質", id:"q1",   ic:"⭐", nm:"腕が上がった",         ds:"☆の作物を収穫する",            need:1,      now:()=>anyQ(1)?1:0,          rw:300 },
+  { cat:"実りの質", id:"q2",   ic:"🌟", nm:"極上の実り",           ds:"☆☆の作物を収穫する",          need:1,      now:()=>anyQ(2)?1:0,          rw:2000 },
+  { cat:"実りの質", id:"m1",   ic:"✦",  nm:"変わりだね",           ds:"変異の作物を収穫する",         need:1,      now:()=>anyQ(3)?1:0,          rw:5000 },
+  { cat:"ガチャ", id:"g1",   ic:"🎰", nm:"はじめてのガチャ",     ds:"ガチャを1回引く",              need:1,      now:()=>S.gachaCount||0,      rw:100 },
+  { cat:"ガチャ", id:"g11",  ic:"🎰", nm:"ガチャ好き",           ds:"ガチャを合計11回引く",         need:11,     now:()=>S.gachaCount||0,      rw:500 },
+  { cat:"農園づくり", id:"o1",   ic:"💦", nm:"畑の道具",             ds:"スプリンクラーか案山子を置く", need:1,      now:()=>S.fields.some(f=>KEYS.some(k=>f[k].obj))?1:0, rw:500 },
+  { cat:"農園づくり", id:"f2",   ic:"🎫", nm:"畑を広げる",           ds:"畑を2枚にする",                need:2,      now:()=>S.fields.length,      rw:1000 },
+  { cat:"農園づくり", id:"v1",   ic:"👩‍🌾", nm:"なかまができた",     ds:"村人を雇う",                   need:1,      now:()=>S.villagers,          rw:3000 },
+  { cat:"あつめる", id:"b10",  ic:"📖", nm:"図鑑づくり",           ds:"図鑑を10項目うめる",           need:10,     now:bookCount,                rw:1000 },
+  { cat:"あつめる", id:"t1",   ic:"✨", nm:"たからもの",           ds:"貴重品を手に入れる",           need:1,      now:()=>Object.values(S.treas||{}).some(n=>n>0)?1:0, rw:10000 },
 ];
 let goalCur=0;
 const goalDone = g => g.now()>=g.need;
@@ -5321,10 +5326,12 @@ function renderGoals(){
   goalCur=Math.max(0,Math.min(goalCur,GOALS.length-1));
   $("g-goalBody").innerHTML=GOALS.map((g,i)=>{
     const now=Math.min(g.now(),g.need), ok=goalDone(g), got=goalClaimed(g);
+    const cat=GOALS.filter(x=>x.cat===g.cat), head = i===0 || GOALS[i-1].cat!==g.cat
+      ? `<div class="ghead">${esc(g.cat)}<span>${cat.filter(goalClaimed).length} / ${cat.length}</span></div>` : "";
     const right = got ? '<span class="goalok">受け取り済み</span>'
       : ok ? `<button class="sbtn main" data-claim="${i}">受け取る +${fmtNum(g.rw)}</button>`
       : `<span>ごほうび ${fmtNum(g.rw)}キー</span>`;
-    return `<div class="rowi ${i===goalCur?"cur":""} ${got?"claimed":""}" data-i="${i}">
+    return head+`<div class="rowi ${i===goalCur?"cur":""} ${got?"claimed":""}" data-i="${i}">
       <div class="ic">${g.ic}</div>
       <div><div class="nm">${esc(g.nm)}</div><div class="ds">${esc(g.ds)} ・ ${fmtNum(now)} / ${fmtNum(g.need)}</div>
         <div class="gprog"><i style="width:${Math.floor(now/g.need*100)}%"></i></div></div>
@@ -5355,17 +5362,35 @@ $("g-goalBody").addEventListener("click",e=>{
 
 /* ---------- はじめてガイドのための窓口(ガイド本体は庭の外) ---------- */
 function tutState(){
-  const now=Date.now(); let soil=0, crops=0, wet=0, ripe=0;
+  const now=Date.now(); let soil=0, crops=0, wet=0, ripe=0, grass=0, empty=0, dry=0;
   S.fields.forEach((f,fi)=>{
     const cov=covered(fi);
     for(const k of KEYS){
       const p=f[k]; if(p.vil || p.s==="post") continue;
       if(p.s==="soil") soil++;
-      if(p.crop){ crops++; if(isRipe(p)) ripe++; else if(isWet(fi,k,now,cov)) wet++; }
+      if(p.obj) continue;
+      if(p.s==="grass") grass++;
+      else if(p.s==="soil" && !p.crop) empty++;
+      if(p.crop){ crops++; if(isRipe(p)) ripe++; else if(isWet(fi,k,now,cov)) wet++; else dry++; }
     }
   });
-  return { soil, crops, wet, ripe, harvest:S.totalHarvest, sales:S.totalSales, gacha:S.gachaCount||0,
-           money:S.money, tool:S.tool, modal, shopTab, fresh:!S.totalHarvest && !S.gachaCount && !S.totalSales };
+  const seeds=Object.values(S.seeds||{}).reduce((a,n)=>a+(n||0),0);
+  const sellable=Object.entries(S.inv||{}).reduce((a,[id,q])=>a+(Array.isArray(q)?q.reduce((x,y)=>x+(y||0),0):0),0);
+  return { soil, crops, wet, ripe, grass, empty, dry, seeds, sellable, seedId:S.seedId,
+           harvest:S.totalHarvest, sales:S.totalSales, gacha:S.gachaCount||0,
+           money:S.money, tool:S.tool, modal, shopTab, gift:!!S.tutGift,
+           fresh:!S.totalHarvest && !S.gachaCount && !S.totalSales };
+}
+/* ガイドのガチャ用のプレゼントは、1つの庭につき1回だけ */
+function tutGift(){
+  if(S.tutGift) return false;
+  S.tutGift=Date.now(); tutGive(100); return true;
+}
+function tutMarkGift(){ if(!S.tutGift){ S.tutGift=Date.now(); save(); } }
+/* 2回目以降のガイドで種が1つもないときは、にんじんの種を1つ渡す */
+function tutSeed(){
+  S.seeds.carrot=(S.seeds.carrot||0)+1; S.seedId="carrot"; save();
+  if(document.body.classList.contains("garden")) renderAll();
 }
 function tutGive(n){ S.money+=n; save(); if(document.body.classList.contains("garden")) renderAll(); }
 /* スマホはタイピングできないので、ガイドの間だけ植えた作物を実らせる */
@@ -5594,7 +5619,7 @@ function debugUnlock(){
   S.lastTick=Date.now();
   save();
 }
-return { enter, leave, onKey, summary, debugUnlock, tutState, tutGive, tutGrow, openModal, ownerId, useName };
+return { enter, leave, onKey, summary, debugUnlock, tutState, tutGive, tutGrow, tutGift, tutMarkGift, tutSeed, openModal, ownerId, useName };
 })();
 
 function openGarden(){ show("garden"); Garden.enter(); }
@@ -6175,11 +6200,13 @@ function tutSave(){ try{ localStorage.setItem(TUT_KEY, JSON.stringify(tut)); }ca
 const tutStep = () => tut && !tut.done ? TUT_STEPS[tut.step] : null;
 function tutGo(i){
   tut.step=i; tut.base=Garden.tutState();
-  if(TUT_STEPS[i]==="gacha" && !tut.gave){ tut.gave=true; Garden.tutGive(100); }
+  if(TUT_STEPS[i]==="gacha" && !tut.gave){ tut.gave=true; tut.gift=Garden.tutGift(); }
   tutSave(); tutRender();
 }
+const tutTo = id => tutGo(TUT_STEPS.indexOf(id));
 const tutNext = () => tutGo(tut.step+1);
 function tutStart(){
+  if(tut && tut.gave) Garden.tutMarkGift();   // 前の版のガイドで100キーを受け取った人
   tut={ step:0, done:false, gave:false };
   tutGo(window.IS_MOBILE ? TUT_STEPS.indexOf("name") : 0);   // スマホはタイピングの部分をとばす
   clearInterval(tutTimer); tutTimer=setInterval(tutTick,300);
@@ -6199,14 +6226,28 @@ function tutTick(){
     case "plate":    if(scene==="result") return tutNext(); if(scene==="title") return tutGo(0); break;
     case "name":     if(playerName || !db) return tutNext(); break;   // 名前が決まったら次へ(ランキングが使えないときはとばす)
     case "toGarden": if(scene==="garden") return tutNext(); break;
-    case "till":     if(st.soil>b.soil) return tutNext(); break;
-    case "plant":    if(st.crops>b.crops) return tutNext(); break;
-    case "water":    if(st.wet>b.wet || st.ripe>0) return tutNext(); break;
-    case "grow":     if(st.ripe>0) return tutNext(); break;
-    case "harvest":  if(st.harvest>b.harvest) return tutNext(); break;
-    case "sell":     if(st.sales>b.sales) return tutNext(); break;
-    case "gacha":    window.tutGachaEggplant = st.gacha<=b.gacha;
-                     if(st.gacha>b.gacha && !(document.querySelector("#g-gacha .gmachine.shake"))) return tutNext(); break;
+    // 2回目以降のガイドでは、畑のようすによってできない手順があるので、そのときはとばす
+    case "till":     if(st.soil>b.soil) return tutNext();
+                     if(st.empty>0 || st.grass===0) return tutNext();   // もう耕した区画がある・耕せる草むらがない
+                     break;
+    case "plant":    if(st.crops>b.crops) return tutNext();
+                     if(st.empty===0) return tutNext();                  // 植えられる区画がない
+                     if(st.seeds===0 && !b.seedGift){ b.seedGift=true; tutSave(); Garden.tutSeed(); }   // 種がなければ1つ渡す
+                     break;
+    case "water":    if(st.wet>b.wet || st.ripe>0 || st.dry===0) return tutNext(); break;
+    case "grow":     if(st.ripe>0) return tutNext();
+                     if(st.crops===0) return tutTo("sell");              // 育てる作物がない
+                     break;
+    case "harvest":  if(st.harvest>b.harvest) return tutNext();
+                     if(st.ripe===0 && st.crops===0) return tutNext();
+                     break;
+    case "sell":     if(st.sales>b.sales) return tutNext();
+                     if(st.sellable===0 && st.modal!=="shop") return tutNext();   // 売る物がない(自動売却など)
+                     break;
+    case "gacha":    window.tutGachaEggplant = !!tut.gift && st.gacha<=b.gacha;   // なす確定はプレゼントのときだけ
+                     if(st.gacha>b.gacha && !(document.querySelector("#g-gacha .gmachine.shake"))) return tutNext();
+                     if(!tut.gift && st.money<100 && st.modal!=="gacha") return tutNext();   // 引けるキーがない
+                     break;
   }
   tutRender();
 }
@@ -6243,7 +6284,8 @@ function tutView(){
       return hold(2,"クワ") || { sel:"#g-planter .plot.grass", text: M ? "草むらの区画をタップして耕そう" : "草むらの区画をクリックして耕そう(区画に書いてある英字のキーでもOK)" };
     case "plant":
       if(!g) return toFarm;
-      return hold(4,"種") || { sel:"#g-planter .plot.soil:not(.growing):not(.ripe):not(.obj)", text:"耕した区画に、にんじんの種を植えよう" };
+      return hold(4,"種") || { sel:"#g-planter .plot.soil:not(.growing):not(.ripe):not(.obj)",
+        text: st.seedId==="carrot" ? "耕した区画に、にんじんの種を植えよう" : "耕した区画に、種を植えよう(← → で種を選べます)" };
     case "water":
       if(!g) return toFarm;
       return hold(3,"じょうろ") || { sel:"#g-planter .plot.growing:not(.wet)", text:"植えた区画に水をあげよう。作物は水が効いている間だけ育ちます" };
@@ -6265,17 +6307,22 @@ function tutView(){
       if(!g) return toFarm;
       if(st.modal!=="shop") return { sel:"#g-shopBtn", text: M ? "収穫した作物はお店で売れます。お店を開こう" : "収穫した作物はお店で売れます。お店を開こう(Tab)" };
       if(st.shopTab!==3) return { sel:'#g-shopTabs .tab[data-tab="3"]', text: M ? "「売る」タブを開こう" : "「売る」タブを開こう(→ キーでも切り替えられます)" };
-      return { sel:"#g-shopBody .rowi", text: M ? "にんじんを売ろう。「1つ売る」か「全部売る」を押してね" : "にんじんを売ろう。Enter で1つ、Shift+Enter で全部売れます(ボタンでもOK)" };
+      return { sel:"#g-shopBody .rowi", text: M ? "収穫した作物を売ろう。「1つ売る」か「全部売る」を押してね" : "収穫した作物を売ろう。Enter で1つ、Shift+Enter で全部売れます(ボタンでもOK)" };
     case "gacha":
       if(!g) return toFarm;
       if(st.modal && st.modal!=="gacha") return { sel:`#g-${st.modal} [data-close]`,
         text: M ? "売れた! 次はガチャを紹介します。まずは「閉じる」でお店を閉じよう" : "売れた! 次はガチャを紹介します。まずはお店を閉じよう(Esc)" };
-      if(st.modal!=="gacha") return { sel:"#g-gachaBtn", text: M ? "最後はガチャ! ごほうびに 100キー をプレゼントしました。ガチャを開こう" : "最後はガチャ! ごほうびに 100キー をプレゼントしました。ガチャを開こう(キー 7)" };
+      if(st.modal!=="gacha"){
+        const head = tut.gift ? "最後はガチャ! ごほうびに 100キー をプレゼントしました。" : "最後はガチャ! 1回 100キー で種が引けます。";
+        return { sel:"#g-gachaBtn", text: head + (M ? "ガチャを開こう" : "ガチャを開こう(キー 7)") };
+      }
       return { sel:"#g-gachaHint", text: window.IS_MOBILE ? "「1回」を押して、種を1つ引いてみよう" : "Enter で1回引いてみよう。ガチャからは、お店にない種も出ます" };
     case "done":
-      if(g && st.modal) return { sel:null, text: M ? "なすの種が出た! 「閉じる」でガチャを閉じよう" : "なすの種が出た! ガチャを閉じよう(Esc)" };
+      const got = tut.gift && st.gacha>0 ? "なすの種が出た! " : "";
+      const what = st.modal==="gacha" ? "ガチャ" : "開いている画面";
+      if(g && st.modal) return { sel:null, text: M ? `${got}「閉じる」で${what}を閉じよう` : `${got}${what}を閉じよう(Esc)` };
       return { sel: g ? "#g-goalBtn" : null,
-               text:`なすの種が出た! これで基本はおしまいです。植えて、タイピングで育てて、キーを増やしていこう。次に何をするか迷ったら「目標」${M?"":"(キー 0)"}を見てね`,
+               text:`${got}これで基本はおしまいです。植えて、タイピングで育てて、キーを増やしていこう。次に何をするか迷ったら「目標」${M?"":"(キー 0)"}を見てね`,
                acts:[["ガイドをおわる", ()=>tutEnd(), g ? "Enter" : null]] };
   }
   return { sel:null, text:"" };
