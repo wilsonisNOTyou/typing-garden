@@ -411,6 +411,7 @@ body.os4 .hud b#score{color:#ff7a3c; text-shadow:0 0 18px rgba(255,90,40,.65)}
 #tutText{font-size:.95rem; font-weight:700; line-height:1.65}
 #tutActs{display:flex; gap:.4rem; justify-content:flex-end; margin-top:.55rem; flex-wrap:wrap}
 #tutActs .btn{padding:.35rem .9rem; font-size:.85rem; font-family:inherit}
+#tutActs .kbdh{background:rgba(0,0,0,.12); color:inherit; opacity:.8; border:none}
 #tutActs .btn.tut-skip{background:none; color:#8a7a60; border-color:#d9ccb0; box-shadow:none}
 #tutBubble.mini{width:min(560px,calc(100vw - 16px)); padding:.4rem .75rem .45rem; opacity:.96}
 #tutBubble.mini #tutText{font-size:.85rem; line-height:1.5}
@@ -6250,7 +6251,7 @@ function tutView(){
       if(window.IS_MOBILE){
         return { sel: g ? "#g-planter .plot.growing" : null,
                  text:"作物は、パソコンでタイピングするほど早く育ちます(1打で数分ぶん)。スマホでは打てないので、今回は特別に時間を進めましょう",
-                 acts:[["時間を進める", ()=>{ Garden.tutGrow(); }]] };
+                 acts:[["時間を進める", ()=>{ Garden.tutGrow(); }, "Enter"]] };
       }
       if(g) return { sel:"#g-backBtn", text:"水が効いている作物は、タイピングするほど早く育ちます(1打で数分ぶん)。タイトルに戻って(Esc)、もう1回打ってみよう" };
       if(scene==="title") return { sel:'.diff-btn[data-diff="easy"]', text:"もう1回タイピングして、作物の時間を進めよう(にんじんは72打ほどで実ります)" };
@@ -6267,16 +6268,29 @@ function tutView(){
       return { sel:"#g-shopBody .rowi", text: M ? "にんじんを売ろう。「1つ売る」か「全部売る」を押してね" : "にんじんを売ろう。Enter で1つ、Shift+Enter で全部売れます(ボタンでもOK)" };
     case "gacha":
       if(!g) return toFarm;
+      if(st.modal && st.modal!=="gacha") return { sel:`#g-${st.modal} [data-close]`,
+        text: M ? "売れた! 次はガチャを紹介します。まずは「閉じる」でお店を閉じよう" : "売れた! 次はガチャを紹介します。まずはお店を閉じよう(Esc)" };
       if(st.modal!=="gacha") return { sel:"#g-gachaBtn", text: M ? "最後はガチャ! ごほうびに 100キー をプレゼントしました。ガチャを開こう" : "最後はガチャ! ごほうびに 100キー をプレゼントしました。ガチャを開こう(キー 7)" };
       return { sel:"#g-gachaHint", text: window.IS_MOBILE ? "「1回」を押して、種を1つ引いてみよう" : "Enter で1回引いてみよう。ガチャからは、お店にない種も出ます" };
     case "done":
-      if(g && st.modal) return { sel:null, text: M ? "なすの種が出た! 「閉じる」でガチャを閉じよう" : "なすの種が出た! ガチャを閉じよう(Esc)", acts:[["ガイドをおわる", ()=>tutEnd()]] };
+      if(g && st.modal) return { sel:null, text: M ? "なすの種が出た! 「閉じる」でガチャを閉じよう" : "なすの種が出た! ガチャを閉じよう(Esc)" };
       return { sel: g ? "#g-goalBtn" : null,
                text:`なすの種が出た! これで基本はおしまいです。植えて、タイピングで育てて、キーを増やしていこう。次に何をするか迷ったら「目標」${M?"":"(キー 0)"}を見てね`,
-               acts:[["ガイドをおわる", ()=>tutEnd()]] };
+               acts:[["ガイドをおわる", ()=>tutEnd(), g ? "Enter" : null]] };
   }
   return { sel:null, text:"" };
 }
+function tutSkip(){ if(confirm("ガイドを終わりますか?(タイトルの H でいつでも見直せます)")) tutEnd(); }
+/* 吹き出しのボタンをキーで押す: Backspace でスキップ、ボタンに書いてあるキー(Enter)でそのボタン
+   入力欄に書いているときは何もしない */
+document.addEventListener("keydown",e=>{
+  const id=tutStep(); if(!id) return;
+  const t=e.target, tag=(t&&t.tagName)||"";
+  if(tag==="INPUT"||tag==="TEXTAREA"||e.isComposing) return;
+  if(e.key==="Backspace" && id!=="done"){ e.preventDefault(); e.stopImmediatePropagation(); tutSkip(); return; }
+  const act=(tutView().acts||[]).find(a=>a[2]===e.key);
+  if(act){ e.preventDefault(); e.stopImmediatePropagation(); act[1](); tutRender(); }
+},true);
 /* 光らせる枠と吹き出しを描く */
 function tutRender(){
   const id=tutStep(); if(!id) return;
@@ -6289,8 +6303,9 @@ function tutRender(){
     $("tutStep").textContent=`はじめてガイド ${i} / ${total}`;
     $("tutText").textContent=v.text;
     const acts=$("tutActs"); acts.innerHTML="";
-    for(const [label,fn] of (v.acts||[])){ const btn=document.createElement("button"); btn.className="btn primary"; btn.textContent=label; btn.onclick=fn; acts.appendChild(btn); }
-    if(id!=="done"){ const sk=document.createElement("button"); sk.className="btn tut-skip"; sk.textContent="スキップ"; sk.onclick=()=>{ if(confirm("ガイドを終わりますか?(タイトルの H でいつでも見直せます)")) tutEnd(); }; acts.appendChild(sk); }
+    const M=!!window.IS_MOBILE;
+    for(const [label,fn,key] of (v.acts||[])){ const btn=document.createElement("button"); btn.className="btn primary"; btn.innerHTML=label+(key&&!M?` <span class="kbdh">${key}</span>`:""); btn.onclick=fn; acts.appendChild(btn); }
+    if(id!=="done"){ const sk=document.createElement("button"); sk.className="btn tut-skip"; sk.innerHTML="スキップ"+(M?"":' <span class="kbdh">Backspace</span>'); sk.onclick=tutSkip; acts.appendChild(sk); }
   }
   bub.style.display="block";
   const mini = scene==="game";
