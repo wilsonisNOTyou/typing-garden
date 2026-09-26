@@ -408,7 +408,7 @@ body.os4 .hud b#score{color:#ff7a3c; text-shadow:0 0 18px rgba(255,90,40,.65)}
   background:#fffaf0; color:#2f2a1f; border:3px solid #c79100; border-radius:12px; padding:.7rem .9rem .75rem;
   box-shadow:0 6px 0 #8a6a10, 0 12px 30px rgba(0,0,0,.45); font-family:'M PLUS Rounded 1c','Hiragino Maru Gothic ProN',sans-serif}
 #tutStep{font-size:.72rem; font-weight:800; color:#a8801c; letter-spacing:.08em; margin-bottom:.25rem}
-#tutText{font-size:.95rem; font-weight:700; line-height:1.65}
+#tutText{font-size:.95rem; font-weight:700; line-height:1.65; white-space:pre-line}
 #tutActs{display:flex; gap:.4rem; justify-content:flex-end; margin-top:.55rem; flex-wrap:wrap}
 #tutActs .btn{padding:.35rem .9rem; font-size:.85rem; font-family:inherit}
 #tutActs .kbdh{background:rgba(0,0,0,.12); color:inherit; opacity:.8; border:none}
@@ -418,6 +418,18 @@ body.os4 .hud b#score{color:#ff7a3c; text-shadow:0 0 18px rgba(255,90,40,.65)}
 #tutBubble.mini #tutStep{margin-bottom:.1rem}
 #tutBubble.mini #tutActs{margin-top:.3rem}
 @media (prefers-reduced-motion:reduce){ #tutRing{animation:none; transition:none} }
+#tutBubble.ask{width:min(440px,calc(100vw - 16px)); box-shadow:0 6px 0 #8a6a10, 0 0 0 100vmax rgba(8,10,14,.55)}
+#tutBubble.ask #tutText{font-size:1rem}
+/* ---- スマホの同期画面 ---- */
+#mGate{display:none; position:fixed; inset:0; z-index:60; overflow:auto; background:var(--bg,#12181a); padding:24px 16px}
+html.mobile.gated #mGate{display:block}
+html.mobile.gated body{overflow:hidden}
+#mGate .mg-panel{max-width:460px; margin:0 auto; text-align:left; line-height:1.7}
+#mGate h2{text-align:center; margin:.4rem 0 1rem; color:#9ed36a}
+#mGate .mg-lead{font-weight:800; font-size:1.1rem; text-align:center}
+#mGate ol{padding-left:1.4rem; margin:.6rem 0 1rem}
+#mGate .bk-codein{width:100%; box-sizing:border-box; font-size:1.1rem; margin-bottom:.6rem}
+#mGate .btn{width:100%}
 /* ---- プレイヤー名 ---- */
 .name-line{margin:.3rem 0 0; font-size:.9rem; color:var(--steel)}
 .name-line .btn{padding:.25rem .8rem; font-size:.82rem; margin-left:.4rem}
@@ -1254,7 +1266,7 @@ html.mobile #screen-garden .tlist{grid-template-columns:1fr}
       </div>
     </div>
 
-    <p class="mnote m-only">タイピングのモードはパソコンで遊べます。スマホでは農園・単語帳づくり・ランキング・図鑑・記録の引き継ぎ・要望の送信が使えます</p>
+    <p class="mnote m-only">スマホでは、パソコンと同期した記録で <b>キーボード農園</b> と <b>タイピング単語帳</b>(単語帳づくり)が遊べます。タイピングはパソコンで遊んでください</p>
     <p class="best-line" id="bestLine"></p>
     <p class="best-line" id="bestLineTa"></p>
     <p class="best-line" id="statsLine"></p>
@@ -1556,6 +1568,22 @@ html.mobile #screen-garden .tlist{grid-template-columns:1fr}
 
 <div id="heatLayer"></div>
 <!-- はじめてガイド -->
+<!-- スマホ: 同期していないときは、この画面だけ -->
+<div id="mGate">
+  <div class="mg-panel">
+    <h2>タイピングガーデン</h2>
+    <p class="mg-lead">スマホでは、パソコンの記録を同期して遊びます</p>
+    <p>スマホで遊べるのは <b>キーボード農園</b> と <b>タイピング単語帳</b>(単語帳づくり)です。タイピングはパソコンで遊んでください。パソコンで打った分だけ、スマホの農園も育ちます。</p>
+    <ol>
+      <li>パソコンでタイピングガーデンを開く</li>
+      <li>タイトルの「記録の引き継ぎ」→「同期を始める」を押す</li>
+      <li>出てきた英数字16文字のコードを、下に入れる</li>
+    </ol>
+    <input id="mgCode" class="bk-codein" maxlength="24" placeholder="英数字16文字のコード" autocomplete="off" autocapitalize="characters">
+    <button class="btn primary" id="mgJoin">同期する</button>
+    <p class="bk-note" id="mgNote"></p>
+  </div>
+</div>
 <div id="tutRing"></div>
 <div id="tutBubble"><div id="tutStep"></div><div id="tutText"></div><div id="tutActs"></div></div>
 <div id="stagePop"></div>
@@ -2569,7 +2597,7 @@ document.addEventListener("keydown",e=>{
     if(e.key==="k"||e.key==="K") openBackup();
     if(e.key==="8") openBooks();
     if(e.key==="f"||e.key==="F") openFeedback();
-    if(e.key==="h"||e.key==="H") tutStart();
+    if(e.key==="h"||e.key==="H") tutAsk(false);
     if(e.key==="n"||e.key==="N"){ e.preventDefault(); openNameWin(); }
     if((e.key==="t"||e.key==="T") && syncReadOnly) syncTakeOver();
     if(e.key==="9"||e.key==="g"||e.key==="G") openGarden();
@@ -5378,15 +5406,9 @@ function tutState(){
   const sellable=Object.entries(S.inv||{}).reduce((a,[id,q])=>a+(Array.isArray(q)?q.reduce((x,y)=>x+(y||0),0):0),0);
   return { soil, crops, wet, ripe, grass, empty, dry, seeds, sellable, seedId:S.seedId,
            harvest:S.totalHarvest, sales:S.totalSales, gacha:S.gachaCount||0,
-           money:S.money, tool:S.tool, modal, shopTab, gift:!!S.tutGift,
+           money:S.money, tool:S.tool, modal, shopTab,
            fresh:!S.totalHarvest && !S.gachaCount && !S.totalSales };
 }
-/* ガイドのガチャ用のプレゼントは、1つの庭につき1回だけ */
-function tutGift(){
-  if(S.tutGift) return false;
-  S.tutGift=Date.now(); tutGive(100); return true;
-}
-function tutMarkGift(){ if(!S.tutGift){ S.tutGift=Date.now(); save(); } }
 /* 2回目以降のガイドで種が1つもないときは、にんじんの種を1つ渡す */
 function tutSeed(){
   S.seeds.carrot=(S.seeds.carrot||0)+1; S.seedId="carrot"; save();
@@ -5619,7 +5641,7 @@ function debugUnlock(){
   S.lastTick=Date.now();
   save();
 }
-return { enter, leave, onKey, summary, debugUnlock, tutState, tutGive, tutGrow, tutGift, tutMarkGift, tutSeed, openModal, ownerId, useName };
+return { enter, leave, onKey, summary, debugUnlock, tutState, tutGive, tutGrow, tutSeed, openModal, ownerId, useName };
 })();
 
 function openGarden(){ show("garden"); Garden.enter(); }
@@ -6051,9 +6073,9 @@ async function syncBegin(){
   $("bkSyncNote").textContent="同期を始めました。別のブラウザでこのコード(英数字16文字)を入力してください";
   renderSyncState();
 }
-async function syncJoin(){
-  const code=normSyncCode($("bkCode").value);
-  const note=$("bkSyncNote");
+async function syncJoin(inp, noteEl){
+  const code=normSyncCode((inp&&inp.value!=null ? inp : $("bkCode")).value);
+  const note=noteEl || $("bkSyncNote");
   if(!code){ note.textContent="コードを入れてください"; return; }
   if(code.length!==16){ note.textContent=`コードは英数字16文字です(いま${code.length}文字)`; return; }
   if(!hasDB()){ note.textContent="※Firebase未設定のため同期できません"; return; }
@@ -6079,7 +6101,8 @@ async function syncJoin(){
       location.reload();
       return;
     }
-    // このコードにまだ記録がない: このブラウザの記録を置く
+    // このコードにまだ記録がない: このブラウザの記録を置く(スマホは同期される側だけなので置かない)
+    if(window.IS_MOBILE){ note.textContent="このコードの記録が見つかりません。パソコンで「同期を始める」を押して出たコードを入れてください"; return; }
     if(syncCode) syncStop();
     syncCode=code; lsSet("sync:code",code); syncReadOnly=false;
     syncLastT=0; lsSet("sync:t","0");
@@ -6126,9 +6149,20 @@ function renderSyncState(){
   if(tk) tk.style.display = syncCode && syncReadOnly ? "" : "none";
   const rb=$("bkRestore");
   if(rb) rb.style.display = syncCode ? "" : "none";
+  renderMGate();
 }
 $("bkSyncStart").addEventListener("click",()=>{ syncCode?syncStop():syncBegin(); });
-$("bkJoin").addEventListener("click",syncJoin);
+$("bkJoin").addEventListener("click",()=>syncJoin());
+/* スマホは同期される側だけ。同期していないときは同期の画面だけを出す */
+const mGated = () => !!window.IS_MOBILE && !syncCode;
+function renderMGate(){
+  document.documentElement.classList.toggle("gated", mGated());
+  if(!mGated()) return;
+  $("mgNote").textContent = hasDB() ? "" : "※Firebase未設定のため同期できません";
+  try{ if(tutStep()) tutEnd(); tutAskHide(); }catch(e){}
+}
+$("mgJoin").addEventListener("click",()=>syncJoin($("mgCode"),$("mgNote")));
+$("mgCode").addEventListener("keydown",e=>{ if(e.key==="Enter"){ e.preventDefault(); e.stopPropagation(); syncJoin($("mgCode"),$("mgNote")); } });
 $("bkTake").addEventListener("click",syncTakeOver);
 $("bkRestore").addEventListener("click",syncShowBackups);
 
@@ -6198,15 +6232,16 @@ let tut=null, tutTimer=null;
 function tutLoad(){ try{ tut=JSON.parse(localStorage.getItem(TUT_KEY)||"null"); }catch(e){ tut=null; } }
 function tutSave(){ try{ localStorage.setItem(TUT_KEY, JSON.stringify(tut)); }catch(e){} }
 const tutStep = () => tut && !tut.done ? TUT_STEPS[tut.step] : null;
-function tutGo(i){
-  tut.step=i; tut.base=Garden.tutState();
-  if(TUT_STEPS[i]==="gacha" && !tut.gave){ tut.gave=true; tut.gift=Garden.tutGift(); }
+function tutGo(i, skipped){
+  tut.step=i; tut.base=Garden.tutState(); tut.skipped=!!skipped;   // skipped: 前の手順を自動でとばした
+  if(TUT_STEPS[i]==="gacha" && !tut.gave){ tut.gave=true; tut.gift=true; Garden.tutGive(100); }   // ガイドのたびに100キー
   tutSave(); tutRender();
 }
-const tutTo = id => tutGo(TUT_STEPS.indexOf(id));
+const tutTo = id => tutGo(TUT_STEPS.indexOf(id), true);
+const tutPass = () => tutGo(tut.step+1, true);   // できない手順をとばす
 const tutNext = () => tutGo(tut.step+1);
 function tutStart(){
-  if(tut && tut.gave) Garden.tutMarkGift();   // 前の版のガイドで100キーを受け取った人
+  tutAskHide();
   tut={ step:0, done:false, gave:false };
   tutGo(window.IS_MOBILE ? TUT_STEPS.indexOf("name") : 0);   // スマホはタイピングの部分をとばす
   clearInterval(tutTimer); tutTimer=setInterval(tutTick,300);
@@ -6228,25 +6263,25 @@ function tutTick(){
     case "toGarden": if(scene==="garden") return tutNext(); break;
     // 2回目以降のガイドでは、畑のようすによってできない手順があるので、そのときはとばす
     case "till":     if(st.soil>b.soil) return tutNext();
-                     if(st.empty>0 || st.grass===0) return tutNext();   // もう耕した区画がある・耕せる草むらがない
+                     if(st.empty>0 || st.grass===0) return tutPass();   // もう耕した区画がある・耕せる草むらがない
                      break;
     case "plant":    if(st.crops>b.crops) return tutNext();
-                     if(st.empty===0) return tutNext();                  // 植えられる区画がない
+                     if(st.empty===0) return tutPass();                  // 植えられる区画がない
                      if(st.seeds===0 && !b.seedGift){ b.seedGift=true; tutSave(); Garden.tutSeed(); }   // 種がなければ1つ渡す
                      break;
-    case "water":    if(st.wet>b.wet || st.ripe>0 || st.dry===0) return tutNext(); break;
+    case "water":    if(st.wet>b.wet) return tutNext();
+                     if(st.ripe>0 || st.dry===0) return tutPass(); break;
     case "grow":     if(st.ripe>0) return tutNext();
                      if(st.crops===0) return tutTo("sell");              // 育てる作物がない
                      break;
     case "harvest":  if(st.harvest>b.harvest) return tutNext();
-                     if(st.ripe===0 && st.crops===0) return tutNext();
+                     if(st.ripe===0 && st.crops===0) return tutPass();
                      break;
     case "sell":     if(st.sales>b.sales) return tutNext();
-                     if(st.sellable===0 && st.modal!=="shop") return tutNext();   // 売る物がない(自動売却など)
+                     if(st.sellable===0 && st.modal!=="shop") return tutPass();   // 売る物がない(自動売却など)
                      break;
-    case "gacha":    window.tutGachaEggplant = !!tut.gift && st.gacha<=b.gacha;   // なす確定はプレゼントのときだけ
+    case "gacha":    window.tutGachaEggplant = st.gacha<=b.gacha;   // ガイドの1回目はなすが出る
                      if(st.gacha>b.gacha && !(document.querySelector("#g-gacha .gmachine.shake"))) return tutNext();
-                     if(!tut.gift && st.money<100 && st.modal!=="gacha") return tutNext();   // 引けるキーがない
                      break;
   }
   tutRender();
@@ -6257,11 +6292,13 @@ function tutView(){
   const toFarm = { sel: scene==="result" ? "#toGardenBtn" : (scene==="title" ? ".diff-btn.garden" : null),
                    text:"キーボード農園へ行こう(タイトルでは 9、結果画面では G)" };
   const M=!!window.IS_MOBILE;
-  const hold = (tool,name) => st.tool!==tool ? { sel:`.slot[data-tool="${tool}"]`, text: M ? `まずは${name}を持とう。ここをタップ` : `まずは${name}(${tool})を持とう。キー ${tool} か、ここをクリック` } : null;
+  // 道具を持ちかえる案内(lead: その手順でやること)
+  const hold = (tool,name,lead) => st.tool!==tool ? { sel:`.slot[data-tool="${tool}"]`,
+    text: M ? `${lead}。${name}に持ちかえよう(ここをタップ)` : `${lead}。${name}に持ちかえよう(キー ${tool} か、ここをクリック)` } : null;
   switch(id){
     case "type":
       return scene==="title"
-        ? { sel:'.diff-btn[data-diff="easy"]', text:"ようこそ、タイピングガーデンへ! まずは1回タイピングしてみよう。イージーを押すか、キー 1 で始まります" }
+        ? { sel:'.diff-btn[data-diff="easy"]', text:"ようこそ、タイピングガーデンへ! 最初に1回タイピングしてみよう。イージーを押すか、キー 1 で始まります" }
         : { sel:null, text:"タイトルに戻って、イージー(キー 1)を始めよう" };
     case "plate":
       return scene==="game"
@@ -6272,23 +6309,23 @@ function tutView(){
         text:"記録をランキングに載せよう! 名前を入れて Enter。次からはこの名前で自動で登録され、農園の番付にも載ります(タイトルの N で変えられます)" };
       if(nmOpen) return { sel:"#nm .nm-panel", text: M ? "名前を入れて「決める」を押そう" : "名前を入れて Enter で決めよう" };
       if(scene==="title") return { sel:"#nameBtn",
-        text: M ? "ようこそ、タイピングガーデンへ! まずはランキングと農園の番付に使う名前を決めよう。「名前を決める」を押してね"
+        text: M ? "ようこそ、タイピングガーデンへ! 最初に、ランキングと農園の番付に使う名前を決めよう。「名前を決める」を押してね"
                 : "ランキングと農園の番付に使う名前を決めよう。「名前を決める」を押すか、キー N" };
       return { sel:null, text:"タイトルで名前を決めよう" };
     case "toGarden":
       return scene==="result" ? { sel:"#toGardenBtn", text:"外したキーは農園に届いています。庭へ行ってみよう(G)" }
-           : scene==="title" ? { sel:".diff-btn.garden", text: window.IS_MOBILE ? "次はキーボード農園を開こう" : "キーボード農園を開こう(キー 9)" }
+           : scene==="title" ? { sel:".diff-btn.garden", text: window.IS_MOBILE ? "キーボード農園を開こう" : "キーボード農園を開こう(キー 9)" }
            : { sel:null, text:"キーボード農園へ行こう" };
     case "till":
       if(!g) return toFarm;
-      return hold(2,"クワ") || { sel:"#g-planter .plot.grass", text: M ? "草むらの区画をタップして耕そう" : "草むらの区画をクリックして耕そう(区画に書いてある英字のキーでもOK)" };
+      return hold(2,"クワ","畑を耕すところから始めよう") || { sel:"#g-planter .plot.grass", text: M ? "草むらの区画をタップして耕そう" : "草むらの区画をクリックして耕そう(区画に書いてある英字のキーでもOK)" };
     case "plant":
       if(!g) return toFarm;
-      return hold(4,"種") || { sel:"#g-planter .plot.soil:not(.growing):not(.ripe):not(.obj)",
+      return hold(4,"種", tut.skipped ? "耕した区画に種をまこう" : "耕せた! 次は種まき") || { sel:"#g-planter .plot.soil:not(.growing):not(.ripe):not(.obj)",
         text: st.seedId==="carrot" ? "耕した区画に、にんじんの種を植えよう" : "耕した区画に、種を植えよう(← → で種を選べます)" };
     case "water":
       if(!g) return toFarm;
-      return hold(3,"じょうろ") || { sel:"#g-planter .plot.growing:not(.wet)", text:"植えた区画に水をあげよう。作物は水が効いている間だけ育ちます" };
+      return hold(3,"じょうろ", tut.skipped ? "植えた作物に水をあげよう" : "植えられた! 次は水やり") || { sel:"#g-planter .plot.growing:not(.wet)", text:"植えた区画に水をあげよう。作物は水が効いている間だけ育ちます" };
     case "grow":
       if(window.IS_MOBILE){
         return { sel: g ? "#g-planter .plot.growing" : null,
@@ -6302,7 +6339,7 @@ function tutView(){
       return { sel:null, text:"タイピングで作物を育てよう" };
     case "harvest":
       if(!g) return toFarm;
-      return hold(1,"素手") || { sel:"#g-planter .plot.ripe", text:"実った! 光っている区画を押して収穫しよう" };
+      return hold(1,"素手","実った! 収穫しよう") || { sel:"#g-planter .plot.ripe", text:"光っている区画を押して収穫しよう" };
     case "sell":
       if(!g) return toFarm;
       if(st.modal!=="shop") return { sel:"#g-shopBtn", text: M ? "収穫した作物はお店で売れます。お店を開こう" : "収穫した作物はお店で売れます。お店を開こう(Tab)" };
@@ -6311,14 +6348,12 @@ function tutView(){
     case "gacha":
       if(!g) return toFarm;
       if(st.modal && st.modal!=="gacha") return { sel:`#g-${st.modal} [data-close]`,
-        text: M ? "売れた! 次はガチャを紹介します。まずは「閉じる」でお店を閉じよう" : "売れた! 次はガチャを紹介します。まずはお店を閉じよう(Esc)" };
-      if(st.modal!=="gacha"){
-        const head = tut.gift ? "最後はガチャ! ごほうびに 100キー をプレゼントしました。" : "最後はガチャ! 1回 100キー で種が引けます。";
-        return { sel:"#g-gachaBtn", text: head + (M ? "ガチャを開こう" : "ガチャを開こう(キー 7)") };
-      }
+        text: M ? "売れた! 最後にガチャを紹介します。「閉じる」でお店を閉じてね" : "売れた! 最後にガチャを紹介します。お店を閉じてね(Esc)" };
+      if(st.modal!=="gacha")
+        return { sel:"#g-gachaBtn", text: "ごほうびに 100キー をプレゼントしました。ガチャを開いて、1回引いてみよう" + (M ? "" : "(キー 7)") };
       return { sel:"#g-gachaHint", text: window.IS_MOBILE ? "「1回」を押して、種を1つ引いてみよう" : "Enter で1回引いてみよう。ガチャからは、お店にない種も出ます" };
     case "done":
-      const got = tut.gift && st.gacha>0 ? "なすの種が出た! " : "";
+      const got = "なすの種が出た! ";
       const what = st.modal==="gacha" ? "ガチャ" : "開いている画面";
       if(g && st.modal) return { sel:null, text: M ? `${got}「閉じる」で${what}を閉じよう` : `${got}${what}を閉じよう(Esc)` };
       return { sel: g ? "#g-goalBtn" : null,
@@ -6327,10 +6362,54 @@ function tutView(){
   }
   return { sel:null, text:"" };
 }
+/* 始める前に「はじめますか?」と聞く(auto: 初めて開いたときに自動で聞いた) */
+let tutAsking=null;
+const tutMin = () => window.IS_MOBILE ? 2 : 4;
+function tutAsk(auto){
+  if(tutStep()) tutEnd();
+  tutAsking={ auto:!!auto };
+  const bub=$("tutBubble"), M=!!window.IS_MOBILE;
+  bub.dataset.key="ask"; bub.classList.remove("mini"); bub.classList.add("ask");
+  $("tutRing").style.display="none";
+  $("tutStep").textContent="はじめてガイド";
+  $("tutText").textContent = `はじめてガイド(約${tutMin()}分)を始めますか?\n` +
+    (M ? "農園での畑づくりから収穫・ガチャまで、実際に遊びながら覚えられます。"
+       : "タイピングから農園での畑づくり・収穫・ガチャまで、実際に遊びながら覚えられます。");
+  const acts=$("tutActs"); acts.innerHTML="";
+  const yes=document.createElement("button"); yes.className="btn primary"; yes.innerHTML="はじめる"+(M?"":' <span class="kbdh">Enter</span>'); yes.onclick=tutStart;
+  const no=document.createElement("button"); no.className="btn tut-skip"; no.innerHTML="あとで"+(M?"":' <span class="kbdh">Esc</span>'); no.onclick=tutDecline;
+  acts.append(yes,no);
+  bub.style.display="block";
+  tutAskPlace();
+}
+function tutAskPlace(){
+  const bub=$("tutBubble");
+  bub.style.left=Math.max(8,(window.innerWidth-bub.offsetWidth)/2)+"px";
+  bub.style.top=Math.max(8,(window.innerHeight-bub.offsetHeight)/2)+"px";
+}
+function tutAskHide(){
+  if(!tutAsking) return;
+  tutAsking=null;
+  const bub=$("tutBubble"); bub.classList.remove("ask"); bub.dataset.key=""; bub.style.display="none";
+}
+/* 「あとで」: 自動で聞いたときは、次からは聞かない(タイトルの H でいつでも始められる) */
+function tutDecline(){
+  const auto=tutAsking && tutAsking.auto;
+  tutAskHide();
+  if(auto){ tut={ step:0, done:true }; tutSave(); }
+}
 function tutSkip(){ if(confirm("ガイドを終わりますか?(タイトルの H でいつでも見直せます)")) tutEnd(); }
 /* 吹き出しのボタンをキーで押す: Backspace でスキップ、ボタンに書いてあるキー(Enter)でそのボタン
    入力欄に書いているときは何もしない */
 document.addEventListener("keydown",e=>{
+  if(tutAsking){   // 「始めますか?」の間は、Enter と Esc だけ受け付ける(ほかのキーでゲームが始まらないように)
+    const tag=(e.target&&e.target.tagName)||"";
+    if(tag==="INPUT"||tag==="TEXTAREA") return;
+    e.preventDefault(); e.stopImmediatePropagation();
+    if(e.key==="Enter") tutStart();
+    else if(e.key==="Escape"||e.key==="Backspace") tutDecline();
+    return;
+  }
   const id=tutStep(); if(!id) return;
   const t=e.target, tag=(t&&t.tagName)||"";
   if(tag==="INPUT"||tag==="TEXTAREA"||e.isComposing) return;
@@ -6378,14 +6457,15 @@ function tutRender(){
     bub.style.left=Math.max(8,(W-bw)/2)+"px"; bub.style.top=(H-bh-16)+"px";
   }
 }
-window.addEventListener("resize",()=>{ if(tutStep()) tutRender(); });
+window.addEventListener("resize",()=>{ if(tutAsking) tutAskPlace(); else if(tutStep()) tutRender(); });
 window.addEventListener("scroll",()=>{ if(tutStep()) tutRender(); }, true);
-$("tutBtn").addEventListener("click",tutStart);
+$("tutBtn").addEventListener("click",()=>tutAsk(false));
 /* はじめて遊ぶ人には自動で始める(もう遊んでいる人には出さない) */
 function tutBoot(){
+  if(mGated()) return;   // 同期していないスマホは、同期の画面だけ
   tutLoad();
   if(!tut){
-    if(Garden.tutState().fresh){ tutStart(); return; }
+    if(Garden.tutState().fresh){ tutAsk(true); return; }
     tut={ step:0, done:true }; tutSave();
   }
   if(tut.done){
