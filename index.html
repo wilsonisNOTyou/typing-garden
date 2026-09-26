@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>ネジ打ち</title>
+<title>タイピングガーデン</title>
 <script>
 /* スマホ・タブレット判定。?mobile=1 / ?pc=1 で切り替えて確かめられる */
 (function(){
@@ -22,25 +22,30 @@
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
 <style>
 :root{
-  --bg:#14171c;          /* 工場の暗がり */
-  --panel:#2a2f38;       /* 鋼板 */
-  --panel-hi:#3a414d;
-  --line:#4a5262;
-  --amber:#f5b301;       /* 安全色のイエロー */
-  --amber-dim:#8a6a10;
-  --steel:#aeb8c6;
+  --bg:#131c16;          /* 夜の畑 */
+  --panel:#27312b;       /* キーボードの筐体 */
+  --panel-hi:#36443b;
+  --line:#4b5d50;
+  --amber:#f2c14e;       /* ひまわりの黄色 */
+  --amber-dim:#8a6f22;
+  --steel:#b3c2b5;
   --ok:#5fd08a;
   --miss:#ff5c5c;
   --cyan:#5fc9d0;        /* タイムアタック */
   --ink:#e8ecf2;
   font-size:16px;
 }
+/* 通貨「キー」のアイコン(小さなキーキャップ) */
+.kicon{display:inline-block; width:1em; height:.92em; border-radius:.2em; vertical-align:-.1em; margin-right:.15em;
+  background:linear-gradient(180deg,#fbf8ee,#d6d0bd); box-shadow:0 .12em 0 #8f8a7a, inset 0 -.06em 0 rgba(0,0,0,.08); position:relative}
+.kicon::after{content:'K'; position:absolute; inset:0; display:grid; place-items:center; font:800 .55em/1 'M PLUS Rounded 1c',sans-serif; color:#4a5a4e}
 *{margin:0;padding:0;box-sizing:border-box}
 body{
   background:var(--bg);
   background-image:
-    repeating-linear-gradient(45deg, transparent 0 34px, rgba(255,255,255,.015) 34px 36px),
-    radial-gradient(ellipse at 50% -10%, #232a35 0%, var(--bg) 60%);
+    linear-gradient(rgba(255,255,255,.018) 1px, transparent 1px) 0 0/44px 44px,
+    linear-gradient(90deg, rgba(255,255,255,.018) 1px, transparent 1px) 0 0/44px 44px,
+    radial-gradient(ellipse at 50% -10%, #24382a 0%, var(--bg) 60%);
   color:var(--ink);
   font-family:'DotGothic16','Hiragino Kaku Gothic ProN','Noto Sans JP',sans-serif;
   min-height:100vh;
@@ -55,10 +60,15 @@ body{
 
 /* ---- タイトル ---- */
 .hazard{
-  display:inline-block;
-  background:repeating-linear-gradient(-45deg,var(--amber) 0 14px,#111 14px 28px);
-  height:10px; width:min(520px,80vw); border-radius:2px; opacity:.9;
+  display:flex; justify-content:center; align-items:flex-end; gap:6px; margin:0 auto;
+  width:min(560px,92vw); height:30px;
 }
+.hazard .k{
+  width:26px; height:24px; border-radius:5px; font-size:.7rem; line-height:22px; color:#56645a;
+  background:linear-gradient(180deg,#f4f1e6,#d9d4c3); box-shadow:0 3px 0 #9d9888, inset 0 -2px 0 rgba(0,0,0,.08);
+}
+.hazard .s{font-size:1.1rem; line-height:1; transform:translateY(-2px)}
+@media (max-width:520px){ .hazard .k:nth-child(n+11){display:none} .hazard .s:nth-child(n+11){display:none} }
 h1{
   font-size:clamp(2.6rem,8vw,4.4rem);
   letter-spacing:.12em;
@@ -66,6 +76,20 @@ h1{
   text-shadow:0 3px 0 #6b4e00, 0 6px 18px rgba(0,0,0,.6);
   margin:.3em 0 .1em;
 }
+/* ロゴ: 「タイピング」はキーキャップ、「ガーデン」は葉の色で芽が出ている */
+h1.logo{display:flex; flex-wrap:wrap; justify-content:center; align-items:flex-end; gap:.12em; letter-spacing:0; text-shadow:none; font-size:clamp(1.9rem,6.4vw,3.4rem)}
+h1.logo .cap{
+  display:inline-grid; place-items:center; width:1.18em; height:1.12em; border-radius:.16em;
+  color:#2c3a2f; background:linear-gradient(180deg,#fbf8ee,#dcd6c4);
+  box-shadow:0 .1em 0 #9d9888, 0 .16em .3em rgba(0,0,0,.45), inset 0 -.05em 0 rgba(0,0,0,.08);
+  font-size:.8em; transform:translateY(0); animation:capbob 3.2s ease-in-out infinite;
+}
+h1.logo .cap:nth-child(2){animation-delay:.2s} h1.logo .cap:nth-child(3){animation-delay:.4s}
+h1.logo .cap:nth-child(4){animation-delay:.6s} h1.logo .cap:nth-child(5){animation-delay:.8s}
+@keyframes capbob{0%,80%,100%{transform:translateY(0)}88%{transform:translateY(-.12em)}}
+h1.logo .gd{position:relative; color:#8fd16a; margin-left:.25em; text-shadow:0 3px 0 #3f6b2c, 0 6px 18px rgba(0,0,0,.6); letter-spacing:.08em}
+h1.logo .gd::after{content:'🌱'; position:absolute; right:-.55em; top:-.55em; font-size:.55em}
+@media (prefers-reduced-motion:reduce){ h1.logo .cap{animation:none} }
 .subtitle{color:var(--steel); letter-spacing:.25em; margin-bottom:1.6rem}
 .mode-group{margin-bottom:1.3rem}
 .mode-head{
@@ -110,18 +134,18 @@ h1{
 .timebar>i.ta{background:linear-gradient(90deg,var(--cyan),#9fe4e8); transition:width .25s ease}
 
 .word-panel{
-  background:linear-gradient(180deg,#333a45,#262c36 55%,#2b323d);
+  background:linear-gradient(180deg,#33423a,#26302a 55%,#2b362f);
   border:2px solid var(--line); border-radius:10px;
   padding:1.6rem 1rem 1.4rem; margin-bottom:1rem;
   box-shadow:inset 0 1px 0 rgba(255,255,255,.08), 0 10px 30px rgba(0,0,0,.4);
   position:relative;
 }
-/* 四隅のネジ(飾り) */
+/* 四隅の小さなキー(飾り) */
 .word-panel::before,.word-panel::after,
 .word-panel .corner::before,.word-panel .corner::after{
-  content:''; position:absolute; width:14px; height:14px; border-radius:50%;
-  background:radial-gradient(circle at 35% 30%, #cfd6e0, #7d8794 55%, #4c5563);
-  box-shadow:inset 0 -1px 2px rgba(0,0,0,.6);
+  content:''; position:absolute; width:14px; height:13px; border-radius:3px;
+  background:linear-gradient(180deg,#eeeadc,#bdb8a6);
+  box-shadow:0 2px 0 #6f6b5e;
 }
 .word-panel::before{top:8px;left:8px}
 .word-panel::after{top:8px;right:8px}
@@ -136,40 +160,41 @@ h1{
 .word-panel.shake{animation:shake .18s}
 @keyframes shake{25%{transform:translateX(-6px)}75%{transform:translateX(6px)}}
 
-/* 次の語録の先読み(タイムアタック) */
+/* 次のことばの先読み(タイムアタック) */
 #nextWord{
   color:#6b7484; font-size:.9rem; min-height:1.4em; margin-bottom:.9rem;
   overflow:hidden; text-overflow:ellipsis; white-space:nowrap;
 }
 #nextWord .lbl{color:#525a68; margin-right:.5em; letter-spacing:.15em}
 
-/* ---- ネジ板(シグネチャ) ---- */
+/* ---- キーボード(シグネチャ): 打つほどキーが外れ、跡から芽が出る ---- */
 .plate{
   background:
-    repeating-linear-gradient(0deg, rgba(255,255,255,.02) 0 2px, transparent 2px 4px),
-    linear-gradient(180deg,#4a5261,#3a414d);
-  border:2px solid var(--line); border-radius:8px;
-  padding:1.1rem 1rem; display:flex; justify-content:center; gap:clamp(.5rem,3vw,1.4rem);
-  box-shadow:0 6px 0 #10131a;
+    linear-gradient(180deg,rgba(255,255,255,.05),transparent 40%),
+    linear-gradient(180deg,#3d4a41,#2c362f);
+  border:2px solid var(--line); border-radius:12px;
+  padding:1.1rem 1rem 1.2rem; display:flex; justify-content:center; gap:clamp(.35rem,2vw,.8rem);
+  box-shadow:0 6px 0 #0c120e, inset 0 2px 0 rgba(255,255,255,.06);
 }
-.screw{
-  width:clamp(30px,6vw,44px); height:clamp(30px,6vw,44px); border-radius:50%;
-  background:radial-gradient(circle at 35% 30%, #e3e9f2, #97a1af 50%, #59616e 85%);
-  box-shadow:inset 0 -2px 4px rgba(0,0,0,.55), 0 1px 3px rgba(0,0,0,.5);
-  position:relative; transition:opacity .2s;
+.screw{   /* キー1つ(くぼみ + キーキャップ) */
+  width:clamp(34px,7vw,52px); height:clamp(34px,7vw,52px); border-radius:9px; position:relative;
+  background:radial-gradient(ellipse at 50% 60%, #1c241e 0 55%, #232d26 70%); box-shadow:inset 0 3px 6px rgba(0,0,0,.6);
 }
-.screw::before,.screw::after{
-  content:''; position:absolute; background:#3c434e; border-radius:2px;
-  top:50%; left:50%;
+.screw .cap{
+  position:absolute; inset:0; border-radius:9px; display:grid; place-items:center;
+  font-family:'M PLUS Rounded 1c',sans-serif; font-weight:800; font-size:clamp(.8rem,2.2vw,1.1rem); color:#3a4a3e;
+  background:linear-gradient(180deg,#fbf8ee,#d9d3c1);
+  box-shadow:0 4px 0 #8f8a7a, 0 6px 8px rgba(0,0,0,.4), inset 0 -3px 0 rgba(0,0,0,.07);
+  transform:translateY(-4px);
 }
-.screw::before{width:62%; height:12%; transform:translate(-50%,-50%)}
-.screw::after{width:12%; height:62%; transform:translate(-50%,-50%)}
-.screw.gone{visibility:hidden}
-.screw.out{animation:unscrew .55s ease-in forwards}
-@keyframes unscrew{
-  0%{transform:rotate(0) translateY(0); opacity:1}
-  45%{transform:rotate(540deg) translateY(-14px); opacity:1}
-  100%{transform:rotate(900deg) translateY(-70px); opacity:0}
+.screw .sprout{position:absolute; left:50%; bottom:18%; transform:translateX(-50%) scale(0); font-size:clamp(1rem,3vw,1.4rem); line-height:1; transition:transform .35s cubic-bezier(.2,.9,.3,1.4)}
+.screw.gone .sprout{transform:translateX(-50%) scale(1)}
+.screw.gone .cap{visibility:hidden}
+.screw.out .cap{animation:keypop .55s ease-in forwards}
+@keyframes keypop{
+  0%{transform:translateY(-4px) rotate(0); opacity:1}
+  35%{transform:translateY(-30px) rotate(-18deg); opacity:1}
+  100%{transform:translate(26px,-80px) rotate(160deg); opacity:0}
 }
 .plate.drop{animation:platedrop .5s ease-in}
 @keyframes platedrop{
@@ -277,11 +302,11 @@ h2.rank-title{color:var(--amber); letter-spacing:.2em; margin-bottom:1rem; text-
 .rank-row.top1 .pos{font-size:1.25em}
 
 /* ---- ペナルティ / 辞典 ---- */
-.screw.back{animation:screwin .55s ease-out}
-@keyframes screwin{
-  0%{transform:rotate(-900deg) translateY(-70px); opacity:0}
-  55%{transform:rotate(-360deg) translateY(-10px); opacity:1}
-  100%{transform:rotate(0) translateY(0); opacity:1}
+.screw.back .cap{animation:keyback .55s ease-out}
+@keyframes keyback{
+  0%{transform:translate(26px,-80px) rotate(160deg); opacity:0}
+  60%{transform:translateY(-10px) rotate(-6deg); opacity:1}
+  100%{transform:translateY(-4px) rotate(0); opacity:1}
 }
 #penaltyPop{
   position:absolute; left:50%; top:-1.5em; transform:translateX(-50%);
@@ -333,11 +358,11 @@ body.os2 .word-panel{border-color:#8a5a2a; box-shadow:inset 0 1px 0 rgba(255,255
 body.os3 .word-panel{border-color:#a4522a; box-shadow:inset 0 1px 0 rgba(255,255,255,.08), 0 0 34px rgba(255,110,40,.36), 0 10px 30px rgba(0,0,0,.5)}
 body.os4 .word-panel{border-color:#c2452a; box-shadow:inset 0 1px 0 rgba(255,255,255,.08), 0 0 44px rgba(255,80,40,.46), 0 10px 30px rgba(0,0,0,.55)}
 .word-panel{transition:border-color 1s ease, box-shadow 1s ease}
-/* ネジ板と HUD の数字も段階に合わせて色づく */
+/* キーボードと HUD の数字も段階に合わせて色づく */
 .plate{transition:box-shadow 1s ease, border-color 1s ease}
-body.os2 .plate{border-color:#6a5340; box-shadow:0 6px 0 #10131a, 0 0 20px rgba(255,140,50,.14)}
-body.os3 .plate{border-color:#7d5238; box-shadow:0 6px 0 #10131a, 0 0 28px rgba(255,110,45,.2)}
-body.os4 .plate{border-color:#94472f; box-shadow:0 6px 0 #10131a, 0 0 36px rgba(255,80,40,.28)}
+body.os2 .plate{border-color:#6a5340; box-shadow:0 6px 0 #0c120e, 0 0 20px rgba(255,140,50,.14)}
+body.os3 .plate{border-color:#7d5238; box-shadow:0 6px 0 #0c120e, 0 0 28px rgba(255,110,45,.2)}
+body.os4 .plate{border-color:#94472f; box-shadow:0 6px 0 #0c120e, 0 0 36px rgba(255,80,40,.28)}
 .hud b#score{transition:color .8s ease, text-shadow .8s ease}
 body.os2 .hud b#score{color:#ffc24a}
 body.os3 .hud b#score{color:#ff9a3c; text-shadow:0 0 12px rgba(255,140,50,.5)}
@@ -375,7 +400,7 @@ body.os4 .hud b#score{color:#ff7a3c; text-shadow:0 0 18px rgba(255,90,40,.65)}
 }
 
 /* =====================================================
-   ネジ抜きの庭 — 庭の画面(#screen-garden)の中だけに効くスタイル
+   キーボード農園 — 庭の画面(#screen-garden)の中だけに効くスタイル
 ===================================================== */
 body.garden{
   background:
@@ -1068,9 +1093,9 @@ html.mobile #screen-garden .tlist{grid-template-columns:1fr}
 
   <!-- タイトル画面 -->
   <section id="screen-title" class="screen active">
-    <div class="hazard"></div>
-    <h1>ネジ打ち</h1>
-    <p class="subtitle">— 打てば打つほど、ネジが抜ける —</p>
+    <div class="hazard" aria-hidden="true"><span class="k">Q</span><span class="s">🌱</span><span class="k">W</span><span class="k">E</span><span class="s">🥕</span><span class="k">R</span><span class="k">T</span><span class="s">🌿</span><span class="k">Y</span><span class="k">U</span><span class="s">🍅</span><span class="k">I</span><span class="k">O</span><span class="s">🌽</span><span class="k">P</span><span class="s">🍓</span></div>
+    <h1 class="logo" aria-label="タイピングガーデン"><span class="cap">タ</span><span class="cap">イ</span><span class="cap">ピ</span><span class="cap">ン</span><span class="cap">グ</span><span class="gd">ガーデン</span></h1>
+    <p class="subtitle">— 打つほどキーが外れて、畑が育つ —</p>
     <div class="gstat" id="gardenStat"></div>
     <div class="syncnote" id="syncNote" style="display:none"></div>
 
@@ -1079,15 +1104,15 @@ html.mobile #screen-garden .tlist{grid-template-columns:1fr}
       <div class="diff-row">
         <button class="diff-btn" data-diff="easy">
           <div class="name">イージー<span class="kbd">1</span></div>
-          <div class="desc">8文字以下・60秒<br>10ミスでネジ-1本</div>
+          <div class="desc">8文字以下・60秒<br>10ミスでキー-1個</div>
         </button>
         <button class="diff-btn" data-diff="normal">
           <div class="name">ノーマル<span class="kbd">2</span></div>
-          <div class="desc">9〜13文字・60秒<br>7ミスでネジ-1本</div>
+          <div class="desc">9〜13文字・60秒<br>7ミスでキー-1個</div>
         </button>
         <button class="diff-btn" data-diff="hard">
           <div class="name">ハード<span class="kbd">3</span></div>
-          <div class="desc">14文字以上・60秒<br>5ミスでネジ-1本</div>
+          <div class="desc">14文字以上・60秒<br>5ミスでキー-1個</div>
         </button>
       </div>
     </div>
@@ -1114,11 +1139,11 @@ html.mobile #screen-garden .tlist{grid-template-columns:1fr}
       <div class="diff-row">
         <button class="diff-btn oneshot" data-diff="oneshot">
           <div class="name">一本勝負<span class="kbd">7</span></div>
-          <div class="desc">時間無制限・1ミスで即終了<br>進むほど長い語録が混ざる</div>
+          <div class="desc">時間無制限・1ミスで即終了<br>進むほど長いことばが混ざる</div>
         </button>
         <button class="diff-btn garden" data-diff="garden">
-          <div class="name">ネジ抜きの庭<span class="kbd">9</span></div>
-          <div class="desc">作物を育ててネジを増やす<br>ここで打つほど庭の時間が進む</div>
+          <div class="name">キーボード農園<span class="kbd">9</span></div>
+          <div class="desc">作物を育ててキーを増やす<br>ここで打つほど庭の時間が進む</div>
         </button>
       </div>
     </div>
@@ -1129,17 +1154,17 @@ html.mobile #screen-garden .tlist{grid-template-columns:1fr}
     <p class="best-line" id="statsLine"></p>
     <div class="btn-row" style="margin-top:.2rem">
       <button class="btn" id="rankBtn">ランキングを見る <span class="kbdh">R</span></button>
-      <button class="btn" id="dictBtn">ネジ抜き辞典 <span class="kbdh">D</span></button>
+      <button class="btn" id="dictBtn">ことば図鑑 <span class="kbdh">D</span></button>
       <button class="btn" id="backupBtn">記録の引き継ぎ <span class="kbdh">K</span></button>
     </div>
-    <p class="hint">キー 1〜9 でモードを選んで開始 ・ G 庭 ・ R ランキング ・ D 辞典 ・ K 記録の引き継ぎ / ローマ字入力(shi・si どちらもOK)<br>Esc でいつでもタイトルに戻る</p>
-    <div class="hazard"></div>
+    <p class="hint">キー 1〜9 でモードを選んで開始 ・ G 庭 ・ R ランキング ・ D 図鑑 ・ K 記録の引き継ぎ / ローマ字入力(shi・si どちらもOK)<br>Esc でいつでもタイトルに戻る</p>
+    <div class="hazard" aria-hidden="true"><span class="k">Q</span><span class="s">🌱</span><span class="k">W</span><span class="k">E</span><span class="s">🥕</span><span class="k">R</span><span class="k">T</span><span class="s">🌿</span><span class="k">Y</span><span class="k">U</span><span class="s">🍅</span><span class="k">I</span><span class="k">O</span><span class="s">🌽</span><span class="k">P</span><span class="s">🍓</span></div>
   </section>
 
   <!-- ゲーム画面 -->
   <section id="screen-game" class="screen">
     <div class="hud">
-      <span id="scoreWrap"><span id="scoreLabel">抜いたネジ </span><b id="score">0</b>本</span>
+      <span id="scoreWrap"><span id="scoreLabel">外したキー </span><b id="score">0</b><span id="scoreUnit">個</span></span>
       <span id="missWrap">ミス <b id="miss" style="color:var(--miss)">0</b></span>
       <span><span id="timeLabel">残り </span><b id="time">60</b>秒</span>
     </div>
@@ -1147,7 +1172,7 @@ html.mobile #screen-garden .tlist{grid-template-columns:1fr}
 
     <div class="word-panel" id="wordPanel">
       <span class="corner"></span>
-      <div id="penaltyPop">ミス上限! ネジが1本戻った…</div>
+      <div id="penaltyPop">ミス上限! キーが1個はまった…</div>
       <div id="wordText">&nbsp;</div>
       <div id="wordKana">&nbsp;</div>
       <div id="romaji">&nbsp;</div>
@@ -1160,8 +1185,8 @@ html.mobile #screen-garden .tlist{grid-template-columns:1fr}
   <!-- リザルト画面 -->
   <section id="screen-result" class="screen">
     <p class="subtitle" id="resultDiff"></p>
-    <p class="result-sub" id="resultCaption">抜いたネジ</p>
-    <div class="result-count" id="resultCount"><span id="resultScore">0</span><span style="font-size:.35em" id="resultUnit">本</span></div>
+    <p class="result-sub" id="resultCaption">外したキー</p>
+    <div class="result-count" id="resultCount"><span id="resultScore">0</span><span style="font-size:.35em" id="resultUnit">個</span></div>
     <p class="result-sub" id="resultSubLine"></p>
     <p class="result-new" id="resultNew"></p>
     <div class="register" id="registerBox">
@@ -1181,8 +1206,8 @@ html.mobile #screen-garden .tlist{grid-template-columns:1fr}
 
   <!-- ランキング画面 -->
   <section id="screen-ranking" class="screen">
-    <h2 class="rank-title">ネジ抜きランキング</h2>
-    <p class="tab-group-label">スコアアタック(本数)</p>
+    <h2 class="rank-title">ランキング</h2>
+    <p class="tab-group-label">スコアアタック(外したキー)</p>
     <div class="rank-tabs">
       <button class="btn" id="tab-easy">イージー</button>
       <button class="btn" id="tab-normal">ノーマル</button>
@@ -1197,9 +1222,9 @@ html.mobile #screen-garden .tlist{grid-template-columns:1fr}
     <div class="rank-tabs" style="margin-top:.6rem">
       <button class="btn" id="tab-oneshot">一本勝負</button>
     </div>
-    <p class="tab-group-label">ネジ抜きの庭</p>
+    <p class="tab-group-label">キーボード農園</p>
     <div class="rank-tabs">
-      <button class="btn gtab" id="tab-g-money">所持ネジ</button>
+      <button class="btn gtab" id="tab-g-money">所持キー</button>
       <button class="btn gtab" id="tab-g-harvest">累計収穫</button>
     </div>
     <ol class="rank-list" id="rankList"></ol>
@@ -1210,12 +1235,12 @@ html.mobile #screen-garden .tlist{grid-template-columns:1fr}
     </div>
   </section>
 
-  <!-- ネジ抜きの庭 -->
+  <!-- キーボード農園 -->
   <section id="screen-garden" class="screen">
   <div>
     <div class="top">
-      <div class="sign">ネジ抜きの庭</div>
-      <div class="money">🔩 <span id="g-money">0</span><small>ネジ</small></div>
+      <div class="sign">キーボード農園</div>
+      <div class="money"><span class="kicon"></span><span id="g-money">0</span><small>キー</small></div>
       <div class="rate" id="g-rate"></div>
       <div class="sp"></div>
       <button class="tbtn shop" id="g-shopBtn">お店<span class="kb">Tab</span></button>
@@ -1256,12 +1281,12 @@ html.mobile #screen-garden .tlist{grid-template-columns:1fr}
 
     <p class="help m-only">
       道具を選んで区画をタップ ・ <b>◀ ▶</b> 種や設置物を選ぶ ・ <b>▲ ▼</b> 畑を移る<br>
-      作物は水が効いている間だけ育ちます。パソコンのネジ打ちで正しく打った1打ごとに、水の効いている作物の時間が進みます。
+      作物は水が効いている間だけ育ちます。パソコンのタイピングで正しく打った1打ごとに、水の効いている作物の時間が進みます。
     </p>
     <p class="help pc-only">
       <b>1〜6</b> 道具の持ち替え ・ <b>← →</b> 種や設置物を選ぶ ・ <b>↑ ↓</b> 畑を移る ・ <b>英字と , .</b> その区画で作業(<b>P</b> は案山子置き場)<br>
       <b>Tab</b> お店 ・ <b>7</b> ガチャ ・ <b>8</b> 貴重品 ・ <b>Space</b> 図鑑 ・ <b>9</b> 番付 ・ <b>Esc</b> タイトルへ(記録の引き継ぎはタイトルの <b>K</b>)<br>
-      作物は水が効いている間だけ育ちます。ネジ打ちで正しく打った1打ごとに、水の効いている作物の時間が進みます。
+      作物は水が効いている間だけ育ちます。タイピングで正しく打った1打ごとに、水の効いている作物の時間が進みます。
     </p>
   </div>
 
@@ -1270,7 +1295,7 @@ html.mobile #screen-garden .tlist{grid-template-columns:1fr}
     <div class="panel">
       <div class="phead">
         <h2>お店</h2>
-        <div class="money">🔩 <span id="g-shopMoney">0</span><small>ネジ</small></div>
+        <div class="money"><span class="kicon"></span><span id="g-shopMoney">0</span><small>キー</small></div>
         <button class="sbtn xbtn" data-close>閉じる ✕</button>
       </div>
       <div class="tabs" id="g-shopTabs">
@@ -1290,7 +1315,7 @@ html.mobile #screen-garden .tlist{grid-template-columns:1fr}
     <div class="panel gachapanel">
       <div class="phead">
         <h2>種ガチャ</h2>
-        <div class="money">🔩 <span id="g-gachaMoney">0</span><small>ネジ</small></div>
+        <div class="money"><span class="kicon"></span><span id="g-gachaMoney">0</span><small>キー</small></div>
         <button class="sbtn xbtn" data-close>閉じる ✕</button>
       </div>
       <div id="g-gachaBody" class="gbody-scroll"></div>
@@ -1333,25 +1358,25 @@ html.mobile #screen-garden .tlist{grid-template-columns:1fr}
     <div class="panel savebox">
       <div class="phead"><h2>番付</h2><button class="sbtn xbtn" data-close style="margin-left:auto">閉じる ✕</button></div>
       <p id="g-rankNow"></p>
-      <p>所持ネジと累計収穫数の番付(ランキング)に載せます。名前ごとに1件で、一度載せると庭を出るたびに自動で更新されます。</p>
+      <p>所持キーと累計収穫数の番付(ランキング)に載せます。名前ごとに1件で、一度載せると庭を出るたびに自動で更新されます。</p>
       <input id="g-rankName" class="rk-input" maxlength="10" placeholder="庭主の名前" autocomplete="off">
       <div class="pfoot"><span class="note" id="g-rankNote"></span><button class="sbtn main" id="g-rankBtn">載せる(Enter)</button></div>
       <div class="tabs grk-tabs" id="g-rankTabs">
-        <button class="tab" data-rk="g-money">所持ネジ</button>
+        <button class="tab" data-rk="g-money">所持キー</button>
         <button class="tab" data-rk="g-harvest">累計収穫</button>
       </div>
       <ol class="grk-list" id="g-rankList"></ol>
       <p class="grk-note" id="g-rankListNote"></p>
-      <div class="keyhint">名前を入れて <b>Enter</b> ・ 入力欄の <b>Esc</b> で入力をやめる ・ <b>← →</b> 所持ネジ / 累計収穫 ・ <b>9</b> / <b>Esc</b> 閉じる</div>
+      <div class="keyhint">名前を入れて <b>Enter</b> ・ 入力欄の <b>Esc</b> で入力をやめる ・ <b>← →</b> 所持キー / 累計収穫 ・ <b>9</b> / <b>Esc</b> 閉じる</div>
     </div>
   </div>
 
   <div id="g-toasts"></div>
   </section>
 
-  <!-- ネジ抜き辞典画面 -->
+  <!-- ことば図鑑画面 -->
   <section id="screen-dict" class="screen">
-    <h2 class="rank-title">ネジ抜き辞典</h2>
+    <h2 class="rank-title">ことば図鑑</h2>
     <p class="reg-status" id="dictRate"></p>
     <div class="rank-tabs">
       <button class="btn" id="dtab-easy">イージー</button>
@@ -1370,11 +1395,11 @@ html.mobile #screen-garden .tlist{grid-template-columns:1fr}
 <div id="stagePop"></div>
 <div id="countdown"></div>
 
-<!-- 記録の引き継ぎ(ネジ打ち全体) -->
+<!-- 記録の引き継ぎ(タイピングガーデン全体) -->
 <div id="backup" class="bk-modal">
   <div class="bk-panel">
     <div class="bk-head"><h2>記録の引き継ぎ</h2><button class="btn bk-x" id="bkClose">閉じる ✕</button></div>
-    <p class="bk-p">別のパソコンやブラウザで続きを遊ぶための記録です。自己ベスト・ネジ抜き辞典・プレイヤー名・統計・ネジ抜きの庭・まだ庭で受け取っていないタイピングの分まで、まとめて移せます。ランキングはもともとネット上にあるので、移さなくても同じです。</p>
+    <p class="bk-p">別のパソコンやブラウザで続きを遊ぶための記録です。自己ベスト・ことば図鑑・プレイヤー名・統計・キーボード農園・まだ庭で受け取っていないタイピングの分まで、まとめて移せます。ランキングはもともとネット上にあるので、移さなくても同じです。</p>
     <h3>このブラウザの記録文字列</h3>
     <textarea class="bk-code" id="bkExport" readonly tabindex="-1"></textarea>
     <div class="bk-foot"><span class="bk-note" id="bkCopyNote"></span><button class="btn primary" id="bkCopy">コピーする (C)</button></div>
@@ -1744,12 +1769,12 @@ const DIFF_LABEL = {
   "ta-easy":"タイムアタック イージー", "ta-normal":"タイムアタック ノーマル", "ta-hard":"タイムアタック ハード",
   oneshot:"一本勝負"
 };
-const MISS_PENALTY = { easy: 10, normal: 7, hard: 5 }; // このミス数ごとにネジ-1本
+const MISS_PENALTY = { easy: 10, normal: 7, hard: 5 }; // このミス数ごとにキー-1本
 const DICT_TABS = ["easy","normal","hard"];            // 辞典に並べる難易度
-/* ランキングのタブ: スコアアタック → タイムアタック → 一本勝負 → ネジの詩 の順 */
+/* ランキングのタブ: スコアアタック → タイムアタック → 一本勝負 の順 */
 const RANK_TABS = ["easy","normal","hard","ta-easy","ta-normal","ta-hard","oneshot", "g-money","g-harvest"];
 const isGardenRank = d => d==="g-money" || d==="g-harvest";
-DIFF_LABEL["g-money"]="ネジ抜きの庭 所持ネジ"; DIFF_LABEL["g-harvest"]="ネジ抜きの庭 累計収穫";
+DIFF_LABEL["g-money"]="キーボード農園 所持キー"; DIFF_LABEL["g-harvest"]="キーボード農園 累計収穫";
 
 /* タイムアタック: モードごとの出題元と規定本数 */
 const TA_MODES = {
@@ -1969,7 +1994,7 @@ const sndPenalty=()=>{beep(220,.18,"sawtooth",.09); setTimeout(()=>beep(150,.25,
 const sndPlate=()=>beep(90,.3,"triangle",.12);
 const sndFatal=()=>{beep(300,.2,"sawtooth",.1); setTimeout(()=>beep(200,.25,"sawtooth",.1),160); setTimeout(()=>beep(110,.5,"sawtooth",.11),330);};
 const sndClear=()=>{beep(880,.1,"square",.07); setTimeout(()=>beep(1170,.1,"square",.07),110); setTimeout(()=>beep(1560,.28,"square",.08),220);};
-/* ネジの詩用: 柔らかいサイン波の音 */
+/* 柔らかいサイン波の音 */
 const sndBrush=()=>beep(990,.035,"sine",.04);
 const sndInk=()=>beep(210,.14,"triangle",.07);
 const sndLine=()=>{beep(1320,.55,"sine",.05); setTimeout(()=>beep(1980,.4,"sine",.02),30);};
@@ -2013,9 +2038,9 @@ let timerId=null, cdId=null, lastWordKey=null, plateScrews=0, running=false, cur
 let elapsed=0;          // 一本勝負/タイムアタックの経過秒
 let taQueue=[], taGoal=0, nextWord=null; // タイムアタック用の出題キュー
 let oneshotStage=0;     // 一本勝負の緊張段階(0〜4)
-let gardenKeys=0;       // このプレイで正しく打った打鍵数(ネジ抜きの庭の時短に使う)
+let gardenKeys=0;       // このプレイで正しく打った打鍵数(キーボード農園の時短に使う)
 
-/* ネジ抜きの庭へ「正しい打鍵数」と「抜いたネジ」を届ける(庭を開いたときに受け取られる) */
+/* キーボード農園へ「正しい打鍵数」と「外したキー」を届ける(庭を開いたときに受け取られる) */
 function sendToGarden(keys,screws){
   keys=keys|0; screws=screws|0;
   if(keys<=0 && screws<=0) return;
@@ -2032,7 +2057,7 @@ async function refreshBestLine(){
   const [e,n,h,o]=await Promise.all([loadBest("easy"),loadBest("normal"),loadBest("hard"),loadBest("oneshot")]);
   const num=v=>(v==null?0:v);
   $("bestLine").textContent=
-    `自己ベスト(本数) — イージー: ${num(e)}本 / ノーマル: ${num(n)}本 / ハード: ${num(h)}本 / 一本勝負: ${num(o)}本`;
+    `自己ベスト(外したキー) — イージー: ${num(e)}個 / ノーマル: ${num(n)}個 / ハード: ${num(h)}個 / 一本勝負: ${num(o)}個`;
   const [te,tn,th]=await Promise.all([loadBest("ta-easy"),loadBest("ta-normal"),loadBest("ta-hard")]);
   const tm=v=>(v==null?"--":fmtTime(v));
   $("bestLineTa").textContent=
@@ -2043,10 +2068,12 @@ function buildPlate(){
   const plate=$("plate");
   plate.classList.remove("drop");
   plate.innerHTML="";
+  const letters="QWERTYUIOPASDFGHJKLZXCVBNM", sprouts=["🌱","🌿","🍀","🌼","🌷"];
+  const row=[...letters].sort(()=>Math.random()-.5).slice(0,SCREWS_PER_PLATE);
   for(let i=0;i<SCREWS_PER_PLATE;i++){
     const s=document.createElement("div");
     s.className="screw";
-    s.style.transform=`rotate(${Math.floor(Math.random()*90)}deg)`;
+    s.innerHTML=`<span class="sprout">${sprouts[Math.floor(Math.random()*sprouts.length)]}</span><span class="cap">${row[i]}</span>`;
     plate.appendChild(s);
   }
   plateScrews=SCREWS_PER_PLATE;
@@ -2098,7 +2125,7 @@ function updateOneshotStage(){
   if(lv>oneshotStage){
     oneshotStage=lv;
     applyStageClass();
-    showStagePop(ONESHOT_STAGES[lv-1]+"本");
+    showStagePop(ONESHOT_STAGES[lv-1]+"個");
     sndStageUp();
   }
 }
@@ -2192,7 +2219,8 @@ function startGame(d){
   $("wordPanel").classList.remove("fatal","clear");
   if(ta) buildTaQueue(d);
   // HUD/タイムバーをモードごとに切り替え
-  $("scoreLabel").textContent = ta ? "残り " : "抜いたネジ ";
+  $("scoreLabel").textContent = ta ? "残り " : "外したキー ";
+  $("scoreUnit").textContent = ta ? "本" : "個";
   $("score").textContent = ta ? taGoal : 0;
   $("missWrap").style.display = oneshot ? "none" : "";
   $("miss").textContent="0";
@@ -2264,12 +2292,12 @@ async function endGame(){
     $("resultUnit").textContent="秒";
     $("resultSubLine").textContent=`ミス ${miss}回 / 自己ベスト ${fmtTime(shownBest)}`;
   }else{
-    $("resultCaption").textContent="抜いたネジ";
+    $("resultCaption").textContent="外したキー";
     $("resultScore").textContent=score;
-    $("resultUnit").textContent="本";
+    $("resultUnit").textContent="個";
     $("resultSubLine").textContent = diff==="oneshot"
-      ? `記録 ${elapsed.toFixed(1)}秒 / 自己ベスト ${shownBest==null?0:shownBest}本`
-      : `ミス ${miss}回 / 自己ベスト ${shownBest==null?0:shownBest}本`;
+      ? `記録 ${elapsed.toFixed(1)}秒 / 自己ベスト ${shownBest==null?0:shownBest}個`
+      : `ミス ${miss}回 / 自己ベスト ${shownBest==null?0:shownBest}個`;
   }
   $("resultNew").textContent=isNew?"★ 自己ベスト更新! ★":"";
   $("nameInput").value=playerName;
@@ -2362,7 +2390,7 @@ document.addEventListener("keydown",e=>{
     sndMiss();
     // タイムアタックはミスしてもペナルティ無し(回数だけ記録)
     if(isTA(diff)) return;
-    // ミス上限でネジが1本戻る
+    // ミス上限でキーが1個はまる
     if(miss % MISS_PENALTY[diff]===0 && score>0){
       score--; $("score").textContent=score;
       reviveScrew();
@@ -2493,14 +2521,14 @@ async function openRanking(d,highlight){
       li.className="rank-row"+(i===0?" top1":"")+(highlight&&r.n===highlight?" me":"");
       let scoreText;
       if(isGardenRank(d)){
-        scoreText = Math.floor(r.s).toLocaleString("ja-JP") + (d==="g-money"?"ネジ":"個");
+        scoreText = Math.floor(r.s).toLocaleString("ja-JP") + (d==="g-money"?"キー":"個");
       }else if(isTimeRanked(d)){
         const missText = (r.m==null) ? "" : ` <span style="color:var(--steel);font-size:.85em">ミス${r.m}</span>`;
         scoreText = `${r.e==null?"--":fmtTime(r.e)}${missText}`;
       }else if(d==="oneshot" && r.e!=null){
-        scoreText = `${r.s}本 <span style="color:var(--steel);font-size:.85em">${Number(r.e).toFixed(1)}秒</span>`;
+        scoreText = `${r.s}個 <span style="color:var(--steel);font-size:.85em">${Number(r.e).toFixed(1)}秒</span>`;
       }else{
-        scoreText = `${r.s}本`;
+        scoreText = `${r.s}個`;
       }
       li.innerHTML=`<span class="pos">${i+1}位</span><span class="pname"></span><span class="pscore">${scoreText}</span>`;
       li.querySelector(".pname").textContent=r.n; // XSS対策でtextContent
@@ -2548,7 +2576,7 @@ for(const t of RANK_TABS){
 }
 $("rankBackBtn").addEventListener("click",()=>show("title"));
 
-/* ---------- ネジ抜き辞典 ----------
+/* ---------- ことば図鑑 ----------
    開放記録は「読み(k)」単位のひとつの集合で管理する。
    これにより単語の難易度を移動しても開放状態が引き継がれる。
    旧形式(easy/normal/hardごとに別集合)のデータがあれば
@@ -2608,7 +2636,7 @@ for(const t of DICT_TABS){
 }
 $("dictBackBtn").addEventListener("click",()=>show("title"));
 
-/* ---------- 全体統計(総プレイ回数・抜いたネジ累計) ---------- */
+/* ---------- 全体統計(総プレイ回数・外したキー累計) ---------- */
 async function recordStats(screws){
   sendToGarden(gardenKeys, screws); gardenKeys=0;
   // 端末ローカルにも記録(オフライン時のフォールバック用)
@@ -2637,19 +2665,19 @@ async function refreshStatsLine(){
     try{
       const snap=await db.ref("typinggarden/stats").once("value");
       const v=snap.val()||{};
-      el.textContent=`みんなの記録 — 総プレイ ${v.plays||0}回 / 抜かれたネジ 累計${v.screws||0}本`;
+      el.textContent=`みんなの記録 — 総プレイ ${v.plays||0}回 / 外されたキー 累計${v.screws||0}個`;
       return;
     }catch(e){}
   }
   try{
     const r=await store.get("stats");
     const s=r&&r.value?JSON.parse(r.value):{plays:0,screws:0};
-    el.textContent=`この端末の記録 — 総プレイ ${s.plays||0}回 / 抜いたネジ 累計${s.screws||0}本`;
+    el.textContent=`この端末の記録 — 総プレイ ${s.plays||0}回 / 外したキー 累計${s.screws||0}個`;
   }catch(e){ el.textContent=""; }
 }
 
 /* =====================================================
-   ネジ抜きの庭(同じページ内の一画面として動く)
+   キーボード農園(同じページ内の一画面として動く)
    本編の変数と混ざらないよう、まるごと Garden の中に閉じ込めている
    第2段階: 大きなクワ / 肥料 / スプリンクラー / 案山子とカラス / 作物図鑑
    すべての操作はキーボードだけで完結する
@@ -2660,7 +2688,7 @@ const Garden=(()=>{
 const MIN_PER_KEY = 5;              // 正しい1打鍵で進む分数(案山子1体ごとに+1)
 const HOUR = 3600e3;
 const SAVE_KEY  = "typinggarden:garden:save";
-const INBOX_KEY = "typinggarden:garden:inbox";   // ネジ打ち本編から届く {keys, screws}
+const INBOX_KEY = "typinggarden:garden:inbox";   // タイピングから届く {keys, screws}
 const START_MONEY = 30;
 const CROW_AFTER    = 12*HOUR;  // 実ってからこれだけ放置された作物がカラスに狙われる
 const CROW_CHANCE   = 0.5;      // 狙われたときに実際に持っていかれる確率
@@ -2703,13 +2731,13 @@ function around(k,area){
 const CROPS = [
   { id:"carrot", r:"N", name:"にんじん", icon:"🥕", cost:5, hours:6, price:12,
     desc:"最初の一本。6時間で抜ける手軽さ。",
-    lore:"ネジ抜きの庭で最初に抜かれるもの。引き抜くときの手応えがネジに似ていると言い出した者がいて、それ以来この庭では「一本目」と呼ばれている。" },
+    lore:"キーボード農園で最初に抜かれるもの。引き抜くときの手応えがキーを外すのに似ていると言い出した者がいて、それ以来この農園では「一本目」と呼ばれている。" },
   { id:"potato", r:"N", name:"じゃがいも", icon:"🥔", cost:10, hours:12, price:26,
     desc:"半日で育つ。地味だが裏切らない。",
     lore:"掘るまで何個ついているか分からない。期待しすぎず、がっかりもしない。庭仕事の心構えは全部こいつから教わった。" },
   { id:"tomato", r:"N", name:"トマト", icon:"🍅", cost:20, hours:24, price:55,
     unlock:{sales:100}, desc:"赤くなるまで一日。",
-    lore:"一日かけて赤くなる。朝に植えて、夜にネジ打ちで時間を進めて、寝る前に収穫する。そういう生活リズムを作った元凶。" },
+    lore:"一日かけて赤くなる。朝に植えて、夜にタイピングで時間を進めて、寝る前に収穫する。そういう生活リズムを作った元凶。" },
   { id:"corn", r:"N", name:"とうもろこし", icon:"🌽", cost:40, hours:36, price:110,
     unlock:{sales:400}, desc:"背が伸びるほど嬉しくなる。",
     lore:"キーボードの上で一番背が高くなる作物。隣の区画を覗き込むように育つので、置き場所を考えるのが楽しい。" },
@@ -2725,9 +2753,9 @@ const CROPS = [
   { id:"melon", r:"HR", name:"メロン", icon:"🍈", cost:600, hours:120, price:1900,
     unlock:{sales:15000, fields:3}, desc:"五日がかりの高級品。",
     lore:"五日がかりの高級品。網目が一本ずつ入っていく様子を、スプリンクラーの音を聞きながら眺めるのが通の楽しみ方。" },
-  { id:"nejitree", r:"UR", name:"ネジの木", icon:"🌳", cost:2000, hours:168, price:7000,
-    unlock:{sales:50000, harvest:300}, desc:"一週間で実るネジ。抜くのが本業。",
-    lore:"一週間かけて、枝先に一本のネジが実る。抜いたネジを植えるとネジが実る。この庭がネジ抜きの庭と呼ばれる理由の、最後のひとつ。" },
+  { id:"keytree", r:"UR", name:"キーの木", icon:"🌳", cost:2000, hours:168, price:7000,
+    unlock:{sales:50000, harvest:300}, desc:"一週間で実るキー。打つのが本業。",
+    lore:"一週間かけて、枝先にひとつずつキーが実る。外したキーを植えるとキーが実る。この農園がキーボード農園と呼ばれる理由の、最後のひとつ。" },
 
   /* ここから下は曜日限定の種(day: 0=日 1=月 … 6=土 の曜日だけお店に並ぶ) */
   { id:"mushroom", day:1, name:"マッシュルーム", icon:"🍄", cost:60, hours:10, price:150,
@@ -2803,7 +2831,7 @@ const CROPS = [
     lore:"必ず二つ並んで実る。どちらかだけ穫ろうとすると、決まって両方落ちる。" },
   { id:"coconut", r:"UR", gacha:true, name:"ヤシの実", icon:"🥥", cost:0, hours:160, price:7000,
     desc:"ガチャ限定。固いが中身は甘い。",
-    lore:"割るのに一番力がいる作物。ネジを抜くより手間がかかると、この庭では言われている。" },
+    lore:"割るのに一番力がいる作物。キーを外すより手間がかかると、この農園では言われている。" },
   { id:"olive", r:"UR", gacha:true, name:"黄金オリーブ", icon:"🫒", cost:0, hours:170, price:7100,
     desc:"ガチャ限定。搾ると金色の油になる。",
     lore:"搾った油は金色で、畑の道具に差すとよく回る。もったいないので誰もやらない。" },
@@ -2823,34 +2851,34 @@ const CROPS = [
     desc:"シークレット。土の中で紫に染まる。",
     lore:"掘り出すまで何色か分からない。切った瞬間の濃い紫を見るために、十日を待つ価値がある。" },
   /* ここから下は GHR(貴重品)。収穫すると売れないかわりに、庭にずっと効く力を授ける */
-  { id:"blackvelvet", r:"GHR", gacha:true, treasure:true, name:"バスブラックベルベット", icon:"🎀", cost:0, hours:48, price:0,
+  { id:"blackvelvet", r:"GHR", gacha:true, treasure:true, name:"ブラックベルベット", icon:"🎀", cost:0, hours:48, price:0,
     eff:{ key:"sell", per:1, unit:"%", text:"売却価格 +1%" },
     desc:"貴重品。黒天鵞絨のリボン。", lore:"低く響く声のように、静かに値を押し上げる。" },
-  { id:"navyblue", r:"GHR", gacha:true, treasure:true, name:"バスネイビーブルー", icon:"💧", cost:0, hours:48, price:0,
+  { id:"navyblue", r:"GHR", gacha:true, treasure:true, name:"ネイビーブルー", icon:"💧", cost:0, hours:48, price:0,
     eff:{ key:"double", per:1, unit:"%", cap:100, text:"2個穫れる確率 +1%" },
     desc:"貴重品。深い藍の雫。", lore:"ひとつのはずのものが、ときどきふたつになる。" },
-  { id:"browneyes", r:"GHR", gacha:true, treasure:true, name:"バスブラウンアイズ", icon:"👁️", cost:0, hours:48, price:0,
+  { id:"browneyes", r:"GHR", gacha:true, treasure:true, name:"ブラウンアイズ", icon:"👁️", cost:0, hours:48, price:0,
     eff:{ key:"minute", per:1, unit:"分", text:"1打の時短 +1分" },
     desc:"貴重品。茶色の瞳。", lore:"打鍵のひとつひとつを、この瞳がしっかり数えている。" },
-  { id:"redflash", r:"GHR", gacha:true, treasure:true, name:"ソプラノレッドフラッシュ", icon:"⚡", cost:0, hours:48, price:0,
+  { id:"redflash", r:"GHR", gacha:true, treasure:true, name:"レッドフラッシュ", icon:"⚡", cost:0, hours:48, price:0,
     eff:{ key:"growth", per:1, unit:"%", text:"成長の速さ +1%" },
     desc:"貴重品。赤い閃光。", lore:"畑の時間が、ほんの少しだけ前のめりになる。" },
-  { id:"whitewizard", r:"GHR", gacha:true, treasure:true, name:"ソプラノホワイトウィザード", icon:"🎩", cost:0, hours:48, price:0,
+  { id:"whitewizard", r:"GHR", gacha:true, treasure:true, name:"ホワイトウィザード", icon:"🎩", cost:0, hours:48, price:0,
     eff:{ key:"water", per:2, unit:"時間", text:"水やりの持続 +2時間" },
     desc:"貴重品。白い魔法使いの帽子。", lore:"一度まいた水が、なかなか乾かなくなる。" },
-  { id:"pinkprincess", r:"GHR", gacha:true, treasure:true, name:"ソプラノピンクプリンセス", icon:"👑", cost:0, hours:48, price:0,
+  { id:"pinkprincess", r:"GHR", gacha:true, treasure:true, name:"ピンクプリンセス", icon:"👑", cost:0, hours:48, price:0,
     eff:{ key:"mutant", per:1, unit:"%", cap:30, text:"変異の確率 +1%(最大 +30%)" },
     desc:"貴重品。桃色の王冠。", lore:"この王冠のある庭では、作物がときどき思いもよらない姿で実る。" },
-  { id:"yellowghost", r:"GHR", gacha:true, treasure:true, name:"アルトイエローゴースト", icon:"👻", cost:0, hours:48, price:0,
+  { id:"yellowghost", r:"GHR", gacha:true, treasure:true, name:"イエローゴースト", icon:"👻", cost:0, hours:48, price:0,
     eff:{ key:"vilgrowth", per:2, unit:"%", text:"村人の畑の成長 +2%" },
     desc:"貴重品。黄色い幽霊。", lore:"畑の隅に立って、村人の手をそっと速める。怖がられているのか慕われているのか、誰も知らない。" },
-  { id:"greennecklace", r:"GHR", gacha:true, treasure:true, name:"アルトグリーンネックレス", icon:"📿", cost:0, hours:48, price:0,
+  { id:"greennecklace", r:"GHR", gacha:true, treasure:true, name:"グリーンネックレス", icon:"📿", cost:0, hours:48, price:0,
     eff:{ key:"seed", per:1, unit:"%", cap:75, text:"種の値段 −1%(最大 −75%)" },
     desc:"貴重品。緑の首飾り。", lore:"これを提げて店に行くと、なぜか値引きしてもらえる。" },
-  { id:"silverstar", r:"GHR", gacha:true, treasure:true, name:"テナーシルバースター", icon:"⭐", cost:0, hours:48, price:0,
+  { id:"silverstar", r:"GHR", gacha:true, treasure:true, name:"シルバースター", icon:"⭐", cost:0, hours:48, price:0,
     eff:{ key:"gacha", per:1, unit:"%", cap:75, text:"ガチャの値段 −1%(最大 −75%)" },
     desc:"貴重品。銀の星。", lore:"星を持つ者には、ガチャの主人も少しだけ甘くなる。" },
-  { id:"blueamaryllis", r:"GHR", gacha:true, treasure:true, name:"テナーブルーアマリリス", icon:"🌸", cost:0, hours:48, price:0,
+  { id:"blueamaryllis", r:"GHR", gacha:true, treasure:true, name:"ブルーアマリリス", icon:"🌸", cost:0, hours:48, price:0,
     eff:{ key:"fert", per:1, unit:"%", cap:20, text:"肥料の効果 +1%(最大 +20%)" },
     desc:"貴重品。青いアマリリス。", lore:"この花のそばでまいた肥料は、驚くほどよく効く。" },
 ];
@@ -2858,7 +2886,7 @@ const CROP = Object.fromEntries(CROPS.map(c=>[c.id,c]));
 /* UR以上の作物と貴重品は、絵文字ではなく描き起こした絵を使う
    (文字だけの場所では c.icon の絵文字を使う) */
 const ART = {
-  nejitree:`<svg viewBox="0 0 32 32"><rect x="14.2" y="17" width="3.6" height="10" rx="1.2" fill="#7a5230"/><circle cx="16" cy="12" r="9" fill="#4f8a3a"/><circle cx="10.5" cy="14" r="5" fill="#63a349"/><circle cx="21.5" cy="14" r="4.5" fill="#3f7530"/><g fill="#c3ccd8"><rect x="14.4" y="9.5" width="3.2" height="7" rx="1.3"/><rect x="12.4" y="7" width="7.2" height="3.2" rx="1.5"/></g><g stroke="#8a97a6" stroke-width=".7"><path d="M14.6 11.5h2.8M14.6 13.2h2.8"/></g></svg>`,
+  keytree:`<svg viewBox="0 0 32 32"><rect x="14.2" y="17" width="3.6" height="10" rx="1.2" fill="#7a5230"/><circle cx="16" cy="12" r="9" fill="#4f8a3a"/><circle cx="10.5" cy="14" r="5" fill="#63a349"/><circle cx="21.5" cy="14" r="4.5" fill="#3f7530"/><g fill="#fbf8ee" stroke="#8f8a7a" stroke-width=".7"><rect x="8.2" y="10.2" width="5.2" height="4.8" rx="1"/><rect x="17.6" y="6.8" width="5.2" height="4.8" rx="1"/><rect x="13.8" y="13.4" width="5.2" height="4.8" rx="1"/></g><g fill="#4a5a4e" font-size="3.4" font-weight="700" font-family="sans-serif" text-anchor="middle"><text x="10.8" y="13.8">A</text><text x="20.2" y="10.4">S</text><text x="16.4" y="17">D</text></g></svg>`,
   dragonfruit:`<svg viewBox="0 0 32 32"><ellipse cx="16" cy="18" rx="8" ry="10" fill="#dd3f77"/><ellipse cx="13" cy="15" rx="3" ry="5" fill="#f06f9c" opacity=".55"/><g fill="#8fd16a"><path d="M8 12L3 9l6 1z"/><path d="M24 12l5-3-6 1z"/><path d="M9 20l-5 2 5 1z"/><path d="M23 20l5 2-5 1z"/><path d="M16 4c2.2 2 3 3.4 3 5.6L16 8l-3 1.6C13 7.4 13.8 6 16 4z"/></g><g fill="#fff" opacity=".55"><circle cx="15" cy="18" r=".8"/><circle cx="18" cy="21" r=".8"/></g></svg>`,
   lychee:`<svg viewBox="0 0 32 32"><circle cx="15" cy="19" r="8.5" fill="#f4e5d4"/><circle cx="12" cy="16" r="3" fill="#fff" opacity=".7"/><g fill="#e2c8ad"><circle cx="11.5" cy="21" r="1.3"/><circle cx="16.5" cy="23" r="1.3"/><circle cx="19" cy="18" r="1.3"/><circle cx="14" cy="15.5" r="1.1"/></g><path d="M23 5a5 5 0 1 0 4.2 6.2A4 4 0 0 1 23 5z" fill="#ffe789"/></svg>`,
   coconut:`<svg viewBox="0 0 32 32"><circle cx="16" cy="19" r="8.6" fill="#8a5a33"/><path d="M7.6 17.5A8.6 8.6 0 0 1 24.2 15z" fill="#a3703f"/><g fill="#3c2415"><circle cx="12.8" cy="16.5" r="1.4"/><circle cx="19.2" cy="16.5" r="1.4"/><circle cx="16" cy="20.5" r="1.4"/></g><path d="M16 10.5C18.5 5.5 23 4 27 5c-3.4 1-6.6 2.6-8.4 5.8z" fill="#4f8a3a"/><path d="M16 10.5C13.5 6.5 9.5 5.5 6 6.6c3.2.6 6 2 8 4.4z" fill="#63a349"/></svg>`,
@@ -2891,7 +2919,7 @@ const MUTANT = {
     art:`<svg viewBox="0 0 32 32"><g fill="#4f8a3a"><path d="M20 10c-1-4 0-7 2-8 0 3 .4 5 0 8z"/><path d="M21 11c2-4 5-5.5 8-5-2 2-4 4-6.5 6z"/><path d="M19 10.5c-3-2.6-4-5-3.4-7.4 1.6 2 3.4 3.6 5 6z"/></g><path d="M22.5 11.5c-3.5-3.5-9-2-10 2L5 28c-.6 1.2.6 2 1.6 1.2L20.8 20c3.8-2 5.2-5 1.7-8.5z" fill="#e8b923"/><path d="M13 13.5l-2.5 5.2M16 17.8l-3.2 1.8M12 22.6l-2.4 1.2" stroke="#b8860b" stroke-width="1.2" stroke-linecap="round"/><path d="M14.5 12.8c1.8-1.2 4-1.2 5.6 0" stroke="#fff4b0" stroke-width="1.4" fill="none" stroke-linecap="round"/><path d="M26 22l.8 2 2 .8-2 .8-.8 2-.8-2-2-.8 2-.8z" fill="#fff6c2"/></svg>` },
   potato:{ name:"隕石じゃがいも", lore:"夜のうちに空から落ちてきたのか、土の中で燃えていたのか。掘った手がほんのり温かい。",
     art:`<svg viewBox="0 0 32 32"><path d="M25 4l-4 4M28 7l-3 3" stroke="#ffb35c" stroke-width="1.4" stroke-linecap="round" opacity=".8"/><path d="M6 17c0-6 5-10 11-10s10 4 9.5 9.5C26 23 21 27 15 26.5 9 26 6 22.5 6 17z" fill="#3e3a44"/><path d="M9 14c1.5-3.5 5-5.5 9-5" stroke="#5c5764" stroke-width="2" fill="none" stroke-linecap="round"/><g fill="#ff9d3b"><ellipse cx="12" cy="18" rx="2.4" ry="1.8"/><ellipse cx="19.5" cy="15" rx="1.8" ry="1.4"/><ellipse cx="18" cy="22" rx="1.6" ry="1.2"/></g><g fill="#ffe08a"><ellipse cx="12" cy="18" rx="1.1" ry=".8"/><ellipse cx="19.5" cy="15" rx=".8" ry=".6"/><ellipse cx="18" cy="22" rx=".7" ry=".5"/></g></svg>` },
-  tomato:{ name:"ランタントマト", lore:"中で小さな火がともっている。夜の畑に置いておくと、虫ではなく迷子のネジが集まってくる。",
+  tomato:{ name:"ランタントマト", lore:"中で小さな火がともっている。夜の畑に置いておくと、虫ではなく迷子のキーが集まってくる。",
     art:`<svg viewBox="0 0 32 32"><path d="M13.6 8.6C13.6 5 18.4 5 18.4 8.6" stroke="#6b604e" stroke-width="1.4" fill="none"/><circle cx="16" cy="19" r="10" fill="#ff7a3c" opacity=".92"/><circle cx="16" cy="19" r="10" fill="none" stroke="#d9421f" stroke-width="1.4"/><path d="M16 11.5v15M10 13.5c-2 3.5-2 7.5 0 11M22 13.5c2 3.5 2 7.5 0 11" stroke="#d9421f" stroke-width="1" fill="none" opacity=".6"/><path d="M16 15c2.4 2.6 2.8 4.6 2.8 6a2.8 2.8 0 0 1-5.6 0c0-1.4.4-3.4 2.8-6z" fill="#ffe27a"/><path d="M16 18.5c1 1.2 1.2 2 1.2 2.6a1.2 1.2 0 0 1-2.4 0c0-.6.2-1.4 1.2-2.6z" fill="#fff"/><path d="M11.5 9.5L16 11l4.5-1.5L19 8l-3 1.5L13 8z" fill="#4f8a3a"/></svg>` },
   corn:{ name:"ガラス玉コーン", lore:"一粒ずつ色が違い、光に透かすと畑に虹が落ちる。食べるにはもったいない、と誰もが言う。",
     art:`<svg viewBox="0 0 32 32"><path d="M9 26c-2-4-1-9 2-10l5 12c-3 1-5.5 0-7-2z" fill="#6f9a3e"/><path d="M23 26c2-4 1-9-2-10l-5 12c3 1 5.5 0 7-2z" fill="#4f8a3a"/><ellipse cx="16" cy="15" rx="6" ry="11" fill="#e9dfc8"/><circle cx="13.5" cy="8" r="1.5" fill="#e2589b"/><circle cx="16.5" cy="7.2" r="1.5" fill="#4f9ed6"/><circle cx="18.5" cy="9.6" r="1.5" fill="#7fc46a"/><circle cx="12.4" cy="11.4" r="1.5" fill="#f4c542"/><circle cx="15.4" cy="10.8" r="1.5" fill="#a274d8"/><circle cx="19.4" cy="13" r="1.5" fill="#e4903a"/><circle cx="12" cy="15" r="1.5" fill="#5fc9d0"/><circle cx="15" cy="14.4" r="1.5" fill="#ef5b5b"/><circle cx="18" cy="16.4" r="1.5" fill="#f4c542"/><circle cx="12.6" cy="18.6" r="1.5" fill="#a274d8"/><circle cx="15.8" cy="18.2" r="1.5" fill="#7fc46a"/><circle cx="19" cy="19.8" r="1.4" fill="#4f9ed6"/><circle cx="14" cy="22" r="1.4" fill="#e2589b"/><circle cx="17" cy="22.4" r="1.3" fill="#e4903a"/><g fill="#fff" opacity=".75"><circle cx="13" cy="7.5" r=".5"/><circle cx="16" cy="6.7" r=".5"/><circle cx="12" cy="10.9" r=".5"/><circle cx="14.6" cy="13.9" r=".5"/><circle cx="17.5" cy="15.9" r=".5"/><circle cx="15.3" cy="17.7" r=".5"/></g></svg>` },
@@ -2905,7 +2933,7 @@ const MUTANT = {
     art:`<svg viewBox="0 0 32 32"><path d="M16 29c-5-2.5-10-8-10-13.5C6 11 9.5 9.5 12 10c1.6.3 2.8 1 4 1s2.4-.7 4-1c2.5-.5 6 1 6 5.5 0 5.5-5 11-10 13.5z" fill="#fbf7f2" stroke="#e2d6c6" stroke-width="1"/><g fill="#e0413a"><circle cx="11" cy="15" r=".9"/><circle cx="16" cy="15" r=".9"/><circle cx="21" cy="15" r=".9"/><circle cx="13.5" cy="19" r=".9"/><circle cx="18.5" cy="19" r=".9"/><circle cx="16" cy="23" r=".9"/><circle cx="11.5" cy="21" r=".8"/><circle cx="20.5" cy="21" r=".8"/></g><path d="M9 10c2 .5 4 .2 5-1.5 1 2 3 2 4 .5 1 1.5 3 2 5 1-1.4-2-3.4-3-5.2-3L16 5l-1.8 2c-2 0-3.8 1-5.2 3z" fill="#4f8a3a"/><ellipse cx="11.5" cy="12.6" rx="1.6" ry=".9" fill="#fff"/></svg>` },
   chili:{ name:"マグマとうがらし", lore:"ひびの奥で溶岩が脈打っている。素手で持つのは一瞬だけにしておくこと。",
     art:`<svg viewBox="0 0 32 32"><path d="M21 8c3 1.5 4 5 2.5 9-2.4 6.5-9 11-16 11.5 5-2.4 8.5-6.5 10-11 1-3 .8-6 3.5-9.5z" fill="#3a1a14"/><path d="M20.5 10.5l-1.5 3.5 2 1-2.5 4M17 20l-2.5 1.4.8 1.6-3 1.6" stroke="#ff6a1f" stroke-width="1.4" fill="none" stroke-linecap="round" stroke-linejoin="round"/><path d="M20.5 10.5l-1.5 3.5 2 1" stroke="#ffd36a" stroke-width=".6" fill="none" stroke-linecap="round"/><path d="M21 8c.2-2 1.6-3.6 3.6-4" stroke="#4f8a3a" stroke-width="2" stroke-linecap="round" fill="none"/><circle cx="9" cy="26" r="1" fill="#ff6a1f"/><circle cx="6.5" cy="23.5" r=".6" fill="#ffb35c"/></svg>` },
-  cucumber:{ name:"螺旋きゅうり", lore:"ネジのようにきっちり右巻きにねじれている。この庭の土がなにを育てているのか、思い出させる一本。",
+  cucumber:{ name:"螺旋きゅうり", lore:"ばねのようにきっちり右巻きにねじれている。キーボードの中から出てきたと言われても信じてしまう一本。",
     art:`<svg viewBox="0 0 32 32"><g transform="rotate(20 16 16)"><rect x="12" y="3" width="8" height="26" rx="4" fill="#3f8a3a"/><g stroke="#8fd16a" stroke-width="1.6" stroke-linecap="round"><path d="M12.4 7l7.2-2.4M12.4 11l7.2-2.4M12.4 15l7.2-2.4M12.4 19l7.2-2.4M12.4 23l7.2-2.4M12.6 27l6.8-2.2"/></g><g fill="#2c6a2a"><circle cx="14" cy="9" r=".6"/><circle cx="18" cy="13" r=".6"/><circle cx="14" cy="17" r=".6"/><circle cx="18" cy="21" r=".6"/></g></g><path d="M22 3.5c1.6-.4 3 0 4 1.4" stroke="#e4c341" stroke-width="1.6" fill="none" stroke-linecap="round"/></svg>` },
   garlic:{ name:"魔除けにんにく", lore:"銀色の皮に、誰が巻いたのかわからないお札がついている。畑の端に吊るすと、カラスが寄りつかない気がする。",
     art:`<svg viewBox="0 0 32 32"><path d="M16 4c.6 3 1.4 4.6 4 6.4 4.4 3 6.4 6 6.4 9.6 0 4.6-4.6 7.6-10.4 7.6S5.6 24.6 5.6 20c0-3.6 2-6.6 6.4-9.6C14.6 8.6 15.4 7 16 4z" fill="#d7dde6"/><path d="M16 8c-2 4-5 6-5 11.6 0 3.4 2.2 6 5 7M16 8c2 4 5 6 5 11.6 0 3.4-2.2 6-5 7" stroke="#aab4c3" stroke-width="1" fill="none"/><ellipse cx="11.6" cy="16" rx="1.4" ry="2.6" fill="#fff" opacity=".85"/><path d="M8 14.5c5 1.6 11 1.6 16 0" stroke="#c0392b" stroke-width="1.4" fill="none"/><g transform="rotate(8 20 20)"><rect x="18" y="15.4" width="4.4" height="9" rx=".4" fill="#f7f0d8"/><path d="M19.2 17.6h2.2M19.2 19.6h2.2M19.2 21.6h2" stroke="#c0392b" stroke-width=".8"/></g></svg>` },
@@ -2931,8 +2959,8 @@ const MUTANT = {
     art:`<svg viewBox="0 0 32 32"><path d="M8 20c-2-7 3-13 10-13 6 0 9 4 8.5 9-.6 7-7 12-12 11.5C11 27 9 24.5 8 20z" fill="#e0412a"/><path d="M10.5 22c1-4 3-5 5.5-6.5-2 3-2.4 5-2 8M14 23.5c1.4-3.6 3.6-5 6.4-6-2 2.6-2.6 4.6-2.6 7M18.6 22.4c1.4-2.4 3.4-3.6 5.6-4-1.4 2-2 3.4-2 5" fill="#ffb03a"/><path d="M12.4 21.6c.6-2 1.6-3 3-4-1 1.6-1.4 2.6-1.2 4.4z" fill="#ffe27a"/><path d="M18 7c.4-2 1.8-3.4 4-3.6-.6 1.8-1.8 3-4 3.6z" fill="#4f8a3a"/><ellipse cx="13" cy="12" rx="2.4" ry="1.4" fill="#fff" opacity=".45" transform="rotate(-30 13 12)"/></svg>` },
   cherry:{ name:"恋結びさくらんぼ", lore:"二本の軸が、ハートの形に結ばれている。ほどこうとすると、なぜか前より固く結び直される。",
     art:`<svg viewBox="0 0 32 32"><path d="M10 21C9 14 12 8 16 7.5M22 21c1-7-2-13-6-13.5" stroke="#5a7a2a" stroke-width="1.6" fill="none" stroke-linecap="round"/><path d="M16 12.5c-1.6-2.4-5-2-5 .8 0 2 2.6 3.6 5 5.4 2.4-1.8 5-3.4 5-5.4 0-2.8-3.4-3.2-5-.8z" fill="#ffd0e2" stroke="#e2589b" stroke-width="1.4"/><circle cx="10" cy="23" r="5" fill="#d61f3a"/><circle cx="22" cy="23" r="5" fill="#d61f3a"/><circle cx="8.4" cy="21.4" r="1.4" fill="#ff8a9a"/><circle cx="20.4" cy="21.4" r="1.4" fill="#ff8a9a"/><path d="M16 7.5c1.4-1.8 3.6-2.4 5.6-2-1.2 1.8-3.2 2.4-5.6 2z" fill="#4f8a3a"/></svg>` },
-  nejitree:{ name:"千年ネジの木", lore:"幹がまるごとネジ山になっていて、枝にはボルトとナットが実る。千年この庭を支えてきた、と言われても信じてしまう。",
-    art:`<svg viewBox="0 0 32 32"><path d="M13.6 17h4.8v11h-4.8z" fill="#8a9aae"/><g stroke="#5c6b80" stroke-width="1.1"><path d="M13.6 19l4.8-1M13.6 21.4l4.8-1M13.6 23.8l4.8-1M13.6 26.2l4.8-1"/></g><path d="M10 29.4c2-1.6 4-1.6 6-1.6s4 0 6 1.6" stroke="#7a5230" stroke-width="1.4" fill="none" stroke-linecap="round"/><circle cx="16" cy="11" r="9.4" fill="#2f6a2a"/><circle cx="9.6" cy="13.6" r="5" fill="#3f8a3a"/><circle cx="22.4" cy="13.6" r="5" fill="#2a5e26"/><circle cx="14" cy="7" r="3.6" fill="#4f9a3e"/><g fill="#d6dde8" stroke="#6b7a8e" stroke-width=".6"><path d="M9 11.6l1.4-.8 1.4.8v1.6l-1.4.8-1.4-.8z"/><path d="M20.4 8.4l1.4-.8 1.4.8V10l-1.4.8-1.4-.8z"/><path d="M15 13.8l1.4-.8 1.4.8v1.6l-1.4.8-1.4-.8z"/></g><g fill="#6b7a8e"><circle cx="10.4" cy="12.4" r=".5"/><circle cx="21.8" cy="9.2" r=".5"/><circle cx="16.4" cy="14.6" r=".5"/></g><g fill="#e3c341"><rect x="21" y="15" width="1.2" height="3.4" rx=".4"/><rect x="20.2" y="14.4" width="2.8" height="1.2" rx=".4"/><rect x="11.8" y="6" width="1.2" height="3" rx=".4"/><rect x="11" y="5.4" width="2.8" height="1.1" rx=".4"/></g></svg>` },
+  keytree:{ name:"千年キーの木", lore:"幹にはキーの刻印がびっしり並び、枝にはエンターキーとスペースキーが実る。千年この農園の打鍵を支えてきた、と言われても信じてしまう。",
+    art:`<svg viewBox="0 0 32 32"><path d="M13.6 17h4.8v11h-4.8z" fill="#7a5230"/><g fill="#fbf8ee" stroke="#8f8a7a" stroke-width=".5"><rect x="14" y="18.4" width="4" height="2" rx=".5"/><rect x="14" y="21.4" width="4" height="2" rx=".5"/><rect x="14" y="24.4" width="4" height="2" rx=".5"/></g><path d="M10 29.4c2-1.6 4-1.6 6-1.6s4 0 6 1.6" stroke="#7a5230" stroke-width="1.4" fill="none" stroke-linecap="round"/><circle cx="16" cy="11" r="9.4" fill="#2f6a2a"/><circle cx="9.6" cy="13.6" r="5" fill="#3f8a3a"/><circle cx="22.4" cy="13.6" r="5" fill="#2a5e26"/><circle cx="14" cy="7" r="3.6" fill="#4f9a3e"/><path d="M19 6.6h4.6v6h-2.8v-2.6H19z" fill="#f3d36a" stroke="#a8801c" stroke-width=".6"/><rect x="6.6" y="13.4" width="8.8" height="2.8" rx=".8" fill="#fbf8ee" stroke="#8f8a7a" stroke-width=".6"/><rect x="16.6" y="14.2" width="3.4" height="3.2" rx=".7" fill="#fbf8ee" stroke="#8f8a7a" stroke-width=".6"/><g fill="#fff6c2"><circle cx="5" cy="6" r=".8"/><circle cx="27" cy="5" r=".7"/><circle cx="27.6" cy="20" r=".6"/></g></svg>` },
   dragonfruit:{ name:"不死鳥フルーツ", lore:"皮のひだが炎の翼になって、今にも飛び立ちそう。売っても、いつかまた畑に戻ってくるらしい。",
     art:`<svg viewBox="0 0 32 32"><g fill="#ffc23a"><path d="M9 14C4 12 2 8 2.5 5c2 2.6 4.6 4 8 5z"/><path d="M9.4 19C5 19 2.4 16.6 1.6 14c2.6 1.4 5 1.8 8 1.6z"/><path d="M23 14c5-2 7-6 6.5-9-2 2.6-4.6 4-8 5z"/><path d="M22.6 19c4.4 0 7-2.4 7.8-5-2.6 1.4-5 1.8-8 1.6z"/></g><g fill="#ffe8a0"><path d="M9 14C6 12.6 4.4 10.4 4 8.6c1.6 1.4 3.4 2.4 6 2.8z"/><path d="M23 14c3-1.4 4.6-3.6 5-5.4-1.6 1.4-3.4 2.4-6 2.8z"/></g><ellipse cx="16" cy="19" rx="7.4" ry="9" fill="#ff5a2a"/><ellipse cx="13.4" cy="16" rx="2.6" ry="4.4" fill="#ff9a5a" opacity=".6"/><path d="M16 4c2.4 2 3.2 4 3 6.4L16 9l-3 1.4C12.8 8 13.6 6 16 4z" fill="#ffc23a"/><g fill="#fff" opacity=".6"><circle cx="14" cy="21" r=".7"/><circle cx="18" cy="23" r=".7"/><circle cx="17" cy="17.6" r=".7"/></g></svg>` },
   lychee:{ name:"日輪ライチ", lore:"月光ライチと対になる、光の輪をまとった実。真昼の畑でいちばんまぶしい。",
@@ -2951,7 +2979,7 @@ const MUTANT = {
     art:`<svg viewBox="0 0 32 32"><circle cx="16" cy="17" r="11" fill="#5fae6a"/><g fill="#8ad07a"><circle cx="16" cy="9.4" r="3.6"/><circle cx="23" cy="13.6" r="3.2"/><circle cx="22.4" cy="21.4" r="2.8"/><circle cx="16.6" cy="25" r="2.4"/><circle cx="11" cy="22" r="2"/><circle cx="9.4" cy="16.6" r="1.7"/><circle cx="11.6" cy="12.6" r="1.4"/><circle cx="15" cy="13.4" r="1.1"/><circle cx="17.2" cy="16" r=".9"/><circle cx="16" cy="18.2" r=".7"/></g><g fill="#c9f0a8"><circle cx="16" cy="9.4" r="1.5"/><circle cx="23" cy="13.6" r="1.3"/><circle cx="22.4" cy="21.4" r="1.1"/><circle cx="16.6" cy="25" r="1"/><circle cx="11" cy="22" r=".8"/><circle cx="9.4" cy="16.6" r=".7"/></g></svg>` },
   shadowqueen:{ name:"シャドーキング", lore:"シャドークイーンの畑に、ごくまれに現れる影の王。足もとで影がゆらめき、王冠だけが光っている。",
     art:`<svg viewBox="0 0 32 32"><path d="M5 26c3-1.4 5 .6 8-.6M19 26.6c3 .8 5-.8 8 .2" stroke="#6c3c92" stroke-width="1.4" fill="none" stroke-linecap="round" opacity=".7"/><ellipse cx="16" cy="20" rx="9.6" ry="7.6" fill="#241133"/><ellipse cx="12.4" cy="17.6" rx="3" ry="2.1" fill="#51306e" opacity=".9"/><g fill="#b45cff"><circle cx="12.6" cy="21.6" r="1"/><circle cx="19.4" cy="21.6" r="1"/></g><path d="M8.5 12.6l2.6-5 2.6 3.4L16 5.4l2.3 5.6 2.6-3.4 2.6 5z" fill="#e3c341"/><rect x="8.5" y="12" width="15" height="2.2" rx=".6" fill="#c9a52a"/><g fill="#d9421f"><circle cx="16" cy="10.6" r="1"/><circle cx="11.6" cy="12.8" r=".6"/><circle cx="20.4" cy="12.8" r=".6"/></g></svg>` },
-  mushroom:{ name:"発光マッシュルーム", lore:"月の出ている夜、かさが青白く光りはじめる。暗い畑で道しるべにすると、なぜか必ずネジの落ちている場所に着く。",
+  mushroom:{ name:"発光マッシュルーム", lore:"月の出ている夜、かさが青白く光りはじめる。暗い畑で道しるべにすると、なぜか必ず外れたキーの落ちている場所に着く。",
     art:`<svg viewBox="0 0 32 32"><circle cx="16" cy="14" r="12" fill="#bfefff" opacity=".35"/><path d="M13 17h6l1.4 10c.2 1.2-.8 2-2 2h-4.8c-1.2 0-2.2-.8-2-2z" fill="#eef6f4"/><path d="M4.5 16C5 9.5 10 5 16 5s11 4.5 11.5 11c-3.6 1.6-7.4 2.2-11.5 2.2S8.1 17.6 4.5 16z" fill="#6fd6f0"/><path d="M8 13.6c1.2-3.6 4.4-6 8-6.4" stroke="#e8fbff" stroke-width="1.6" fill="none" stroke-linecap="round"/><g fill="#e8fbff"><circle cx="12" cy="11" r="1.2"/><circle cx="19.6" cy="9.4" r="1"/><circle cx="22.4" cy="13.4" r="1.3"/></g><g fill="#fff6c2"><circle cx="5" cy="6" r=".8"/><circle cx="27" cy="5" r=".7"/><circle cx="28" cy="22" r=".6"/><circle cx="4" cy="24" r=".6"/></g></svg>` },
   paprika:{ name:"氷結パプリカ", lore:"ファイアパプリカの畑に、ごくまれに凍ったまま実る。かじると口の中で吹雪が起きる(比喩ではない)。",
     art:`<svg viewBox="0 0 32 32"><path d="M9 11c-3 2-3.6 7-2.6 11 1 4 3.6 6.6 6.2 6.6 1.4 0 2.2-.8 3.4-.8s2 .8 3.4.8c2.6 0 5.2-2.6 6.2-6.6 1-4 .4-9-2.6-11-2-1.4-4.4-.6-7-.6s-5-.8-7 .6z" fill="#8fd6f5"/><path d="M16 11v17" stroke="#5fb3e0" stroke-width="1.2" opacity=".8"/><path d="M10 14c-1.6 2.4-1.8 6-1 9" stroke="#e8fbff" stroke-width="1.8" fill="none" stroke-linecap="round"/><path d="M7.6 12.4l1.4 2 1.2-1.6 1.4 2 1.4-1.8 1.4 1.8 1.6-2 1.6 2 1.4-1.8 1.4 1.8 1.4-2 1.2 1.6 1.4-2" stroke="#fff" stroke-width="1.2" fill="none" stroke-linejoin="round"/><path d="M16 10.6c0-2.6 1.2-4.6 3.4-5.6" stroke="#4f8a3a" stroke-width="2" stroke-linecap="round" fill="none"/><g stroke="#fff" stroke-width=".9" stroke-linecap="round"><path d="M25 3.5v5M22.5 6h5M23.2 4.2l3.6 3.6M26.8 4.2l-3.6 3.6"/></g></svg>` },
@@ -3007,7 +3035,7 @@ const LORE_Q = {
   potato:     ["掘るたびに数が揃ってくる。裏切らないうえに、期待にも応え始めた。",
                "皮まで薄く、形が丸い。百回掘った手にしか見えない芋のつき方がある。"],
   tomato:     ["赤みにむらがない。一日の水やりを十回繰り返すと、トマトも生活リズムを覚えるらしい。",
-               "へたの緑まで艶がある。夜のネジ打ちで熟させたものは特に甘い、という噂がある。"],
+               "へたの緑まで艶がある。夜のタイピングで熟させたものは特に甘い、という噂がある。"],
   corn:       ["粒の並びが揃ってきた。隣の区画を覗き込む角度も、心なしか品が良い。",
                "一粒の欠けもない。キーボードの上に立つ黄金の柱。"],
   eggplant:   ["皮の紫が深い。二枚目の畑の主にふさわしい落ち着き。",
@@ -3018,8 +3046,8 @@ const LORE_Q = {
                "叩くと澄んだ音がする。収穫した日の打鍵は、いつもより一段丁寧になる。"],
   melon:      ["網目が細かく均一になった。スプリンクラーの音を聞き分けられるようになった者の品。",
                "網目の一本一本に迷いがない。五日を百回重ねた者にだけ許された香り。"],
-  nejitree:   ["実ったネジの溝がまっすぐ切れている。抜くのが気持ちいい。",
-               "締めても抜いても手応えが変わらない、理想のネジ。ネジ抜きの庭の、終わりのない終わり。"],
+  keytree:   ["実ったキーの刻印がくっきりしている。押すと気持ちのいい音がする。",
+               "何万回押しても打鍵感が変わらない、理想のキー。キーボード農園の、終わりのない終わり。"],
   mushroom:   ["かさの開きが揃ってきた。月曜の朝が少し楽しみになる。",
                "百本目。もはや畑のほうから、月曜になると生やしてくれている気がする。"],
   paprika:    ["色つやが増して、切ると中まで赤い。",
@@ -3252,7 +3280,7 @@ function tick(now=Date.now()){
 const vilUsed = () => S.fields.reduce((a,f)=>a+KEYS.filter(k=>f[k].vil).length,0);
 const vilFree = () => S.villagers*VIL_SLOTS - vilUsed();
 /* 村人が育てる作物。元気の種を買うたびに、お店にいつも並ぶ作物の中で1段上がる */
-const VIL_LADDER = ["carrot","potato","tomato","corn","eggplant","strawberry","pumpkin","melon","nejitree"];
+const VIL_LADDER = ["carrot","potato","tomato","corn","eggplant","strawberry","pumpkin","melon","keytree"];
 const VIL_UP_PRICES = [30000,60000,120000,250000,500000,1000000,2000000,4000000];
 const vilCropId = () => VIL_LADDER[Math.min(S.vilLv||0, VIL_LADDER.length-1)];
 const vilUpPrice = () => VIL_UP_PRICES[Math.min(S.vilLv||0, VIL_UP_PRICES.length-1)];
@@ -3303,7 +3331,7 @@ function recordHarvest(id,t,quiet){
   S.totalHarvest++;
   const after=tierOf(id);
   if(after>before){
-    const msg=`${ico(CROP[id])} ${esc(CROP[id].name)}の品質が上がりました。これからは「${esc(qName(id,after))}」が穫れます(売値 ${priceOf(id,after)}ネジ)`;
+    const msg=`${ico(CROP[id])} ${esc(CROP[id].name)}の品質が上がりました。これからは「${esc(qName(id,after))}」が穫れます(売値 ${priceOf(id,after)}キー)`;
     if(quiet){ S.vLog.up=S.vLog.up||[]; S.vLog.up.push(msg); } else { toast(msg,"good",5200,true); sfx.vil(); }
   }
 }
@@ -3316,7 +3344,7 @@ function reportVillagers(){
   }
   const parts=Object.entries(L.h||{}).map(([id,n])=>`${ico(CROP[id])}×${n}`);
   if(parts.length){
-    toast(`村人が ${parts.join(" ")} を収穫して売りました(売上 ${fmtNum(L.earn||0)} ・ 種代 ${fmtNum(L.spent||0)} ネジ)`,"good",6000,true);
+    toast(`村人が ${parts.join(" ")} を収穫して売りました(売上 ${fmtNum(L.earn||0)} ・ 種代 ${fmtNum(L.spent||0)} キー)`,"good",6000,true);
     sfx.vil();
   }
   for(const m of (L.up||[])) toast(m,"good",5200,true);
@@ -3343,8 +3371,8 @@ function applySkip(minutes){
   });
   return n;
 }
-/* ネジ打ち本編から届いた分を受け取る */
-/* ネジ打ちで遊んだ分を受け取る。
+/* タイピングから届いた分を受け取る */
+/* タイピングで遊んだ分を受け取る。
    タイトル画面に戻った時点でも受け取るので、庭に入る前から畑の状態が最新になる。
    お知らせは庭に入ったときにまとめて出す(タイトルでは画面に出せないため) */
 function consumeInbox(){
@@ -3370,8 +3398,8 @@ function flushInboxReport(){
   if(!m || (!m.min && !m.screws)) return;
   const parts=[];
   if(m.min>0) parts.push(`時間が ${fmtDur(m.min*60000)} 進みました(水の効いている${m.plots}区画)`);
-  if(m.screws>0) parts.push(`抜いたネジ ${fmtNum(m.screws)}本 が届きました`);
-  toast("ネジ打ちから — "+parts.join(" / "), "good", 5200);
+  if(m.screws>0) parts.push(`外したキー ${fmtNum(m.screws)}個 が届きました`);
+  toast("タイピングから — "+parts.join(" / "), "good", 5200);
   if(m.min>0 && m.plots===0) toast("水の効いている作物が無かったので、時間は使われませんでした", "warn", 5200);
   S.inMsg=null; save();
 }
@@ -3509,7 +3537,7 @@ const gachaText = () => "種ガチャから出ます";
 const dayText = c => `毎週${DAY_NAMES[c.day]}曜だけお店に並びます`;
 function unlockText(u){
   const a=[];
-  if(u.sales)   a.push(`累計売上 ${fmtNum(u.sales)}ネジ`);
+  if(u.sales)   a.push(`累計売上 ${fmtNum(u.sales)}キー`);
   if(u.fields)  a.push(`畑 ${u.fields}枚`);
   if(u.harvest) a.push(`累計収穫 ${fmtNum(u.harvest)}個`);
   return a.join("・")+" で入荷";
@@ -3609,7 +3637,7 @@ function renderInfo(){
       sub.push(`${ico(c)} ${esc(c.name)} 育成 ${Math.floor(p.crop.grown/need(p.crop)*100)}% ・ あと ${fmtDur(need(p.crop)-p.crop.grown)}`);
     }else if(p.vWait){
       const c=CROP[vilCropId()];
-      sub.push(`種代(${c?c.cost:"?"}ネジ)が足りず、ネジが貯まるのを待っています`);
+      sub.push(`種代(${c?c.cost:"?"}キー)が足りず、キーが貯まるのを待っています`);
     }
     sub.push("植える・水やり・収穫・売却まで自動 ・ 6 で村人を持ってこの区画を押すと外せます");
   }else if(p.s==="grass"){
@@ -3623,7 +3651,7 @@ function renderInfo(){
     if(isRipe(p)){
       const t=p.crop.mut?3:tierOf(c.id);
       big=`${selKey} ・ ${icoQ(c,t)} ${esc(qName(c.id,t))} 収穫できます${t===3?"(変異)":""}`;
-      sub.push(`素手(1)で収穫 ・ 売値 ${fmtNum(priceOf(c.id,t))}ネジ${t===3?" ・ 変異は自動売却されません":""}`);
+      sub.push(`素手(1)で収穫 ・ 売値 ${fmtNum(priceOf(c.id,t))}キー${t===3?" ・ 変異は自動売却されません":""}`);
       if(t<2){ const left=QUALITY[t+1].need-(S.harvestBy[c.id]||0); sub.push(`あと ${left}個 収穫すると「${qName(c.id,t+1)}」が穫れるようになります`); }
     }else{
       const pct=Math.floor(p.crop.grown/need(p.crop)*100);
@@ -3692,7 +3720,7 @@ function renderBar(){
   $("g-fieldNo").textContent=S.cur+1; $("g-fieldMax").textContent=S.fields.length;
   $("g-fieldHint").textContent = S.fields.length>5 ? "Shiftで5枚送り" : "";
   $("g-money").textContent=fmtNum(S.money);
-  $("g-rate").textContent=`ネジ打ち1打で ${minPerKey()}分 進む`;
+  $("g-rate").textContent=`タイピング1打で ${minPerKey()}分 進む`;
 }
 function renderAll(){
   renderBar(); renderField(); renderInfo(); renderBasket();
@@ -3924,8 +3952,8 @@ function shopRows(){
       rows.push({
         locked:!ok,
         ic: ok?ico(c):"❔",
-        nm: ok?`${c.name}の種 <span style="color:var(--ink-l)">${seedCost(c)}ネジ${seedCost(c)<c.cost?`<s style="opacity:.5;margin-left:.3em">${c.cost}</s>`:""}</span>`:"？？？",
-        ds: ok?`${tag}育つまで ${fmtDur(c.hours*HOUR)} ・ 売値 ${c.price}ネジ(☆${priceOf(c.id,1)}・☆☆${priceOf(c.id,2)}) ・ 今の品質 ${QUALITY[tierOf(c.id)].mark||"ふつう"} ・ 手持ち ${have}<br>${esc(c.desc)}`:unlockText(c.unlock),
+        nm: ok?`${c.name}の種 <span style="color:var(--ink-l)">${seedCost(c)}キー${seedCost(c)<c.cost?`<s style="opacity:.5;margin-left:.3em">${c.cost}</s>`:""}</span>`:"？？？",
+        ds: ok?`${tag}育つまで ${fmtDur(c.hours*HOUR)} ・ 売値 ${c.price}キー(☆${priceOf(c.id,1)}・☆☆${priceOf(c.id,2)}) ・ 今の品質 ${QUALITY[tierOf(c.id)].mark||"ふつう"} ・ 手持ち ${have}<br>${esc(c.desc)}`:unlockText(c.unlock),
         keys: ok?`<b>Enter</b> 1つ ${money>=seedCost(c)?"":"(不足)"}<br><b>Shift+Enter</b> 10個`:"",
         enter: ()=>ok && buySeed(c.id,1),
         shift: ()=>ok && buySeed(c.id,10),
@@ -3933,32 +3961,32 @@ function shopRows(){
     }
   }else if(shopTab===1){
     const nc=CANS[S.canLv];
-    rows.push({ ic:"💧", nm: nc?`${nc.name} <span style="color:var(--ink-l)">${fmtNum(nc.cost)}ネジ</span>`:canInfo().name,
+    rows.push({ ic:"💧", nm: nc?`${nc.name} <span style="color:var(--ink-l)">${fmtNum(nc.cost)}キー</span>`:canInfo().name,
       ds: nc?`一度に ${nc.what} に水やりでき、水が ${nc.hours}時間 保ちます(今は ${canInfo().what}・${canInfo().hours}時間)`:`最高のじょうろです。一度に ${canInfo().what}、水は ${canInfo().hours}時間 保ちます`,
       keys: nc?"<b>Enter</b> 買う":"", enter:()=>nc&&buyCan(), shift:()=>nc&&buyCan() });
     const ns=SICKLES[(S.sickLv||1)];
-    rows.push({ ic:"✋", nm: ns?`${ns.name} <span style="color:var(--ink-l)">${fmtNum(ns.cost)}ネジ</span>`:sickleInfo().name,
+    rows.push({ ic:"✋", nm: ns?`${ns.name} <span style="color:var(--ink-l)">${fmtNum(ns.cost)}キー</span>`:sickleInfo().name,
       ds: ns?`一度に ${ns.what} の実った作物をまとめて収穫できます(今は ${sickleInfo().what})`:`最高のカマです。${sickleInfo().what}を一度に収穫できます`,
       keys: ns?"<b>Enter</b> 買う":"", enter:()=>ns&&buySickle(), shift:()=>ns&&buySickle() });
     const nh=HOES[S.hoeLv];
-    rows.push({ ic:"⛏️", nm: nh?`${nh.name} <span style="color:var(--ink-l)">${fmtNum(nh.cost)}ネジ</span>`:hoeInfo().name,
+    rows.push({ ic:"⛏️", nm: nh?`${nh.name} <span style="color:var(--ink-l)">${fmtNum(nh.cost)}キー</span>`:hoeInfo().name,
       ds: nh?`一度に ${nh.what} を耕せます(今は ${hoeInfo().what})`:`最高のクワです。${hoeInfo().what}を一度に耕せます`,
       keys: nh?"<b>Enter</b> 買う":"", enter:()=>nh&&buyHoe(), shift:()=>nh&&buyHoe() });
     const fOk=meets(FERT.unlock);
     rows.push({ locked:!fOk, ic: fOk?FERT.icon:"❔",
-      nm: fOk?`${FERT.name} <span style="color:var(--ink-l)">${FERT.cost}ネジ</span>`:"？？？",
+      nm: fOk?`${FERT.name} <span style="color:var(--ink-l)">${FERT.cost}キー</span>`:"？？？",
       ds: fOk?`育成中の作物にまくと、必要な時間の${Math.round(effFert()*100)}%ぶん一気に育ちます(5 で持つ)。1つの作物には2回まで ・ 手持ち ${S.fert}`:unlockText(FERT.unlock),
       keys: fOk?"<b>Enter</b> 1つ<br><b>Shift+Enter</b> 10個":"", enter:()=>fOk&&buyFert(1), shift:()=>fOk&&buyFert(10) });
     for(const id of OBJ_ORDER){
       const o=OBJS[id], ok=meets(o.unlock);
       rows.push({ locked:!ok, ic: ok?o.icon:"❔",
-        nm: ok?`${o.name} <span style="color:var(--ink-l)">${fmtNum(o.cost)}ネジ</span>`:"？？？",
+        nm: ok?`${o.name} <span style="color:var(--ink-l)">${fmtNum(o.cost)}キー</span>`:"？？？",
         ds: ok?`${esc(o.what)}(6 で持って区画に置く) ・ 手持ち ${S.objs[id]||0}`:unlockText(o.unlock),
         keys: ok?"<b>Enter</b> 買う":"", enter:()=>ok&&buyObj(id), shift:()=>ok&&buyObj(id) });
     }
     const vOk=meets(VIL_UNLOCK);
     rows.push({ locked:!vOk, ic: vOk?"👩‍🌾":"❔",
-      nm: vOk?`村人 <span style="color:var(--ink-l)">${fmtNum(VIL_COST)}ネジ</span>`:"？？？",
+      nm: vOk?`村人 <span style="color:var(--ink-l)">${fmtNum(VIL_COST)}キー</span>`:"？？？",
       ds: vOk?`指定した${VIL_SLOTS}区画で、${CROP[vilCropId()].icon}${CROP[vilCropId()].name}を植え・水やり・収穫・売却まで自動で行います。6 で村人を持って区画を押して指定(もう一度押すと外す)。庭を閉じている間の分も、次に開いたときにまとめて処理されます ・ 雇っている村人 ${S.villagers}人(あと ${vilFree()}区画)`
             : unlockText(VIL_UNLOCK),
       keys: vOk?"<b>Enter</b> 雇う":"", enter:()=>vOk&&buyVil(), shift:()=>vOk&&buyVil() });
@@ -3966,13 +3994,13 @@ function shopRows(){
     if(S.villagers>0){
       const up=vilUpPrice(), now=CROP[vilCropId()], next=VIL_LADDER[(S.vilLv||0)+1];
       rows.push({ ic:"✨",
-        nm: next?`元気の種 <span style="color:var(--ink-l)">${fmtNum(up)}ネジ</span>`:"元気の種",
+        nm: next?`元気の種 <span style="color:var(--ink-l)">${fmtNum(up)}キー</span>`:"元気の種",
         ds: next?`村人が育てる作物が ${now.icon}${now.name} から ${CROP[next].icon}${CROP[next].name} に上がります(雇っている村人 全員に効きます)。買うたびに次の値段が上がります`
                 :`村人は ${now.icon}${now.name} を育てています。これ以上は上がりません`,
         keys: next?"<b>Enter</b> 買う":"", enter:()=>next&&buyVilUp(), shift:()=>next&&buyVilUp() });
     }
     const nf=S.fields.length, price=FIELD_PRICES[nf];
-    rows.push({ ic:"🎫", nm: price!=null?`畑チケット <span style="color:var(--ink-l)">${fmtNum(price)}ネジ</span>`:"畑チケット",
+    rows.push({ ic:"🎫", nm: price!=null?`畑チケット <span style="color:var(--ink-l)">${fmtNum(price)}キー</span>`:"畑チケット",
       ds: price!=null?`27区画の畑をもう1枚増やします(今は ${nf}枚)。↑↓ で行き来できます`:`畑はこれ以上増やせません(${nf}枚)`,
       keys: price!=null?"<b>Enter</b> 買う":"", enter:()=>price!=null&&buyField(), shift:()=>price!=null&&buyField() });
   }else if(shopTab===2){
@@ -3994,9 +4022,9 @@ function shopRows(){
         locked: !a && !ready,
         ic: ico(c),
         nm: a?`${c.name}の自動売却 <span style="color:var(--ink-l)">購入済み</span>`
-             :(ready?`${c.name}の自動売却 <span style="color:var(--ink-l)">${fmtNum(autoCost(c.id))}ネジ</span>`
+             :(ready?`${c.name}の自動売却 <span style="color:var(--ink-l)">${fmtNum(autoCost(c.id))}キー</span>`
                     :`${c.name}の自動売却 <span style="color:var(--ink-l)">未解禁</span>`),
-        ds: a?`収穫物 ${on(a.c)}(売値 ${priceOf(c.id,tierOf(c.id))}ネジ) ・ ガチャで出た種 ${on(a.s)}(売値 ${seedPrice(c)}ネジ)<br>穫れた${c.name}と、ガチャから出た${c.name}の種を、その場で自動で売ります`
+        ds: a?`収穫物 ${on(a.c)}(売値 ${priceOf(c.id,tierOf(c.id))}キー) ・ ガチャで出た種 ${on(a.s)}(売値 ${seedPrice(c)}キー)<br>穫れた${c.name}と、ガチャから出た${c.name}の種を、その場で自動で売ります`
              :(ready?`収穫した${c.name}と、ガチャから出た${c.name}の種を、その場で自動で売れるようになります(それぞれオンオフできます)`
                     :`${c.name}が ${QUALITY[2].mark} になると買えるようになります(${c.name}をあと ${fmtNum(left)}個 収穫 ・ 今 ${fmtNum(S.harvestBy[c.id]||0)}/${QUALITY[2].need}個)`),
         keys: a?"<b>Enter</b> 収穫物のオンオフ<br><b>Shift+Enter</b> 種のオンオフ":(ready?"<b>Enter</b> 買う":""),
@@ -4008,15 +4036,15 @@ function shopRows(){
     for(const n of GACHA_BIG){
       const has=gachaPass(n);
       rows.push({ ic:"🎟️",
-        nm: `${fmtNum(n)}連ガチャの権利 <span style="color:var(--ink-l)">${has?"購入済み":fmtNum(GACHA_PASS_PRICE[n])+"ネジ"}</span>`,
-        ds: `種ガチャで ${fmtNum(n)}連 が引けるようになります(1回 ${fmtNum(gachaCost(n))}ネジ・11回ごとにSR以上1つ確定)。一度買えばずっと使えます${has?"":" ・ 結果は作物ごとにまとめて表示します"}`,
+        nm: `${fmtNum(n)}連ガチャの権利 <span style="color:var(--ink-l)">${has?"購入済み":fmtNum(GACHA_PASS_PRICE[n])+"キー"}</span>`,
+        ds: `種ガチャで ${fmtNum(n)}連 が引けるようになります(1回 ${fmtNum(gachaCost(n))}キー・11回ごとにSR以上1つ確定)。一度買えばずっと使えます${has?"":" ・ 結果は作物ごとにまとめて表示します"}`,
         keys: has?"":"<b>Enter</b> 買う", enter:()=>buyGachaPass(n), shift:()=>buyGachaPass(n) });
     }
   }else{
     for(const c of CROPS) for(let t=0;t<4;t++){
       const n=invN(c.id,t); if(n<=0) continue;
       const pr=priceOf(c.id,t);
-      rows.push({ ic:icoQ(c,t), nm:`${t===3?'<span class="mutnm">✦ ':""}${qName(c.id,t)}${t===3?"</span>":""} ×${n}`, ds:`1つ ${fmtNum(pr)}ネジ ・ 全部で ${fmtNum(n*pr)}ネジ${t===3?" ・ 変異(「すべて売る」では売りません)":""}`,
+      rows.push({ ic:icoQ(c,t), nm:`${t===3?'<span class="mutnm">✦ ':""}${qName(c.id,t)}${t===3?"</span>":""} ×${n}`, ds:`1つ ${fmtNum(pr)}キー ・ 全部で ${fmtNum(n*pr)}キー${t===3?" ・ 変異(「すべて売る」では売りません)":""}`,
         keys:"<b>Enter</b> 1つ売る<br><b>Shift+Enter</b> 全部売る",
         enter:()=>sell(c.id,t,1), shift:()=>sell(c.id,t,"all") });
     }
@@ -4025,7 +4053,7 @@ function shopRows(){
     for(const c of seedRows){
       const n=S.seeds[c.id]||0;
       const pr=seedPrice(c);
-      rows.push({ ic:"🌱", nm:`${ico(c)} ${c.name}の種 ×${n}`, ds:`1つ ${pr}ネジ ・ 全部で ${fmtNum(n*pr)}ネジ`,
+      rows.push({ ic:"🌱", nm:`${ico(c)} ${c.name}の種 ×${n}`, ds:`1つ ${pr}キー ・ 全部で ${fmtNum(n*pr)}キー`,
         keys:"<b>Enter</b> 1つ売る<br><b>Shift+Enter</b> 全部売る",
         enter:()=>sellSeed(c.id,1), shift:()=>sellSeed(c.id,"all") });
     }
@@ -4051,13 +4079,13 @@ function renderShop(){
   const total=invTotal().v;
   if(window.IS_MOBILE){
     $("g-shopHint").innerHTML = shopTab===3 && total>0
-      ? `<button class="sbtn main" data-sellall>作物をすべて売る(${fmtNum(total)}ネジ・種と変異は売りません)</button>` : "";
+      ? `<button class="sbtn main" data-sellall>作物をすべて売る(${fmtNum(total)}キー・種と変異は売りません)</button>` : "";
     keepVisible(body);
     return;
   }
   $("g-shopHint").innerHTML =
     `<b>← →</b> ${SHOP_TABS.map((t,i)=>i===shopTab?`「${t}」`:t).join(" / ")} ・ <b>↑ ↓</b> 選ぶ ・ <b>Enter</b> / <b>Shift+Enter</b> 決定`+
-    (shopTab===3 && total>0 ? ` ・ <b>A</b> 作物をすべて売る(${fmtNum(total)}ネジ・種と変異は売りません)` : "")+
+    (shopTab===3 && total>0 ? ` ・ <b>A</b> 作物をすべて売る(${fmtNum(total)}キー・種と変異は売りません)` : "")+
     ` ・ <b>Tab</b> / <b>Esc</b> 閉じる`;
   keepVisible(body);
 }
@@ -4090,7 +4118,7 @@ function shopKey(e){
   if(shopTab===3 && (k==="a"||k==="A")){ sellAll(); return; }
 }
 function spend(cost){
-  if(S.money<cost){ sfx.nope(); toast("ネジが足りません","warn"); return false; }
+  if(S.money<cost){ sfx.nope(); toast("キーが足りません","warn"); return false; }
   S.money-=cost; sfx.buy(); return true;
 }
 function buyVil(){
@@ -4178,7 +4206,7 @@ function sellSeed(id,n){
   S.seeds[id]=have-k;
   const gain=k*seedPrice(c);
   S.money+=gain; S.totalSales+=gain; sfx.sell();
-  toast(`${ico(c)} ${esc(c.name)}の種を ${k}つ 売りました(+${fmtNum(gain)}ネジ)`,"good",2600,true);
+  toast(`${ico(c)} ${esc(c.name)}の種を ${k}つ 売りました(+${fmtNum(gain)}キー)`,"good",2600,true);
   if(!(S.seeds[S.seedId]>0)) S.seedId=nextSeed(S.seedId);
   save(); renderAll();
 }
@@ -4188,7 +4216,7 @@ function sell(id,t,n){
   S.inv[id][t]=have-k;
   const gain=k*priceOf(id,t);
   S.money+=gain; S.totalSales+=gain; sfx.sell();
-  toast(`${icoQ(c,t)} ${esc(qName(id,t))}を ${k}つ 売りました(+${fmtNum(gain)}ネジ)`,"good",2600,true);
+  toast(`${icoQ(c,t)} ${esc(qName(id,t))}を ${k}つ 売りました(+${fmtNum(gain)}キー)`,"good",2600,true);
   checkUnlocks();
   save(); renderAll();
 }
@@ -4198,7 +4226,7 @@ function sellAll(){
   for(const c of CROPS) for(let t=0;t<3;t++){ const n=invN(c.id,t); if(n>0){ gain+=n*priceOf(c.id,t); S.inv[c.id][t]=0; } }
   if(!gain){ sfx.nope(); toast("売れる作物がありません(種と変異は A では売れません)","warn"); return; }
   S.money+=gain; S.totalSales+=gain; sfx.sell();
-  toast(`すべて売りました(+${fmtNum(gain)}ネジ)`,"good");
+  toast(`すべて売りました(+${fmtNum(gain)}キー)`,"good");
   checkUnlocks();
   save(); renderAll();
 }
@@ -4265,7 +4293,7 @@ function drawGacha(n){
   if(gachaBusy()) return;                     // 演出中は引けない
   if(GACHA_BIG.includes(n) && !gachaPass(n)){ sfx.nope(); toast(`${fmtNum(n)}連は、お店(効率化)で権利を買うと引けます`,"warn",3200); return; }
   const cost=gachaCost(n);
-  if(S.money<cost){ sfx.nope(); toast("ネジが足りません","warn"); return; }
+  if(S.money<cost){ sfx.nope(); toast("キーが足りません","warn"); return; }
   S.money-=cost;
   const res=[];
   for(let i=0;i<n;i++) res.push(drawOne(0));
@@ -4464,7 +4492,7 @@ function gachaBigHTML(){
       : `<div class="gspot plain">今回は HR 以上・NEW はありませんでした。また挑戦しましょう</div>`;
   }
   return `<div class="gsum">
-    <div class="gsumtop">${fmtNum(B.n)}連の結果${B.done?` ・ NEW ${B.newKinds}種${B.soldAll?` ・ 種の自動売却 +${fmtNum(B.soldAll)}ネジ`:""}`:" ・ 開封中…"}</div>
+    <div class="gsumtop">${fmtNum(B.n)}連の結果${B.done?` ・ NEW ${B.newKinds}種${B.soldAll?` ・ 種の自動売却 +${fmtNum(B.soldAll)}キー`:""}`:" ・ 開封中…"}</div>
     ${secs}${spot}
   </div>`;
 }
@@ -4489,7 +4517,7 @@ function gachaHTML(){
         <div class="gneck"></div>
         <div class="gbody"><span class="gknob"></span><span class="gout"></span></div>
       </div>
-      <div class="gcost">1回 <b>${fmtNum(gachaCost(1))}</b>ネジ<br>11回 <b>${fmtNum(gachaCost(11))}</b>ネジ<br>111回 <b>${fmtNum(gachaCost(111))}</b>ネジ${GACHA_BIG.filter(gachaPass).map(n=>`<br>${fmtNum(n)}回 <b>${fmtNum(gachaCost(n))}</b>ネジ`).join("")}<small>11回ごとにSR以上1つ確定${effGacha()<1?` ・ 割引 ${Math.round((1-effGacha())*100)}%`:""}</small></div>
+      <div class="gcost">1回 <b>${fmtNum(gachaCost(1))}</b>キー<br>11回 <b>${fmtNum(gachaCost(11))}</b>キー<br>111回 <b>${fmtNum(gachaCost(111))}</b>キー${GACHA_BIG.filter(gachaPass).map(n=>`<br>${fmtNum(n)}回 <b>${fmtNum(gachaCost(n))}</b>キー`).join("")}<small>11回ごとにSR以上1つ確定${effGacha()<1?` ・ 割引 ${Math.round((1-effGacha())*100)}%`:""}</small></div>
       <div class="gtotal">これまで ${fmtNum(S.gachaCount||0)}回</div>
     </div>
     <div class="gright">
@@ -4585,7 +4613,7 @@ function renderBook(){
       <div class="bnm">${t===3&&!mutKnown?"？？？":qName(c.id,t)}</div>
       <dl>
         <dt>${t===3?"変異の収穫":"この品質の収穫"}</dt><dd>${fmtNum(n)}個</dd>
-        <dt>売値</dt><dd>${fmtNum(priceOf(c.id,t))}ネジ${t===3?"(☆☆の3倍・自動売却されません)":(t?`(ふつうの${Math.round((QUALITY[t].mult-1)*100)}%増し)`:"")}</dd>
+        <dt>売値</dt><dd>${fmtNum(priceOf(c.id,t))}キー${t===3?"(☆☆の3倍・自動売却されません)":(t?`(ふつうの${Math.round((QUALITY[t].mult-1)*100)}%増し)`:"")}</dd>
         <dt>育つまで</dt><dd>${fmtDur(c.hours*HOUR)}</dd>
         <dt>穫れる条件</dt><dd>${cond}</dd>
       </dl>
@@ -4617,7 +4645,7 @@ $("g-bookList").addEventListener("click",e=>{
   bookCur=+row.dataset.i; renderBook();
 });
 
-/* ---------- 番付(所持ネジ・累計収穫) ----------
+/* ---------- 番付(所持キー・累計収穫) ----------
    名前ごとに1件。自分の庭の印(owner)で、同じ名前の別人の記録を上書きしないようにする */
 const rankKey = name => encodeURIComponent(name).replace(/\./g,"%2E");
 async function pushRank(name){
@@ -4634,7 +4662,7 @@ async function pushRank(name){
 const hasDb = () => { try{ return !!db; }catch(e){ return false; } };
 function prepareRank(){
   tick();
-  $("g-rankNow").innerHTML=`所持ネジ <b>${fmtNum(S.money)}</b> ・ 累計収穫 <b>${fmtNum(S.totalHarvest)}</b>個`+
+  $("g-rankNow").innerHTML=`所持キー <b>${fmtNum(S.money)}</b> ・ 累計収穫 <b>${fmtNum(S.totalHarvest)}</b>個`+
     (S.rankName?`<br>「${esc(S.rankName)}」として載っています。庭を出るたびに自動で更新されます`:"");
   let nm=S.rankName; try{ nm=nm||playerName||""; }catch(e){}
   $("g-rankName").value=nm;
@@ -4642,7 +4670,7 @@ function prepareRank(){
   setTimeout(()=>{ const i=$("g-rankName"); i.focus(); i.select&&i.select(); },30);
   renderGardenRank();
 }
-/* 番付の中で、所持ネジ・累計収穫のランキングを見る */
+/* 番付の中で、所持キー・累計収穫のランキングを見る */
 let gRankTab="g-money", gRankReq=0;
 async function renderGardenRank(){
   const tab=gRankTab, req=++gRankReq;
@@ -4657,7 +4685,7 @@ async function renderGardenRank(){
     note.textContent=rows.length?"":"まだ誰も載っていません。一番乗りのチャンス!";
     list.innerHTML=rows.map((r,i)=>{
       const me=r.o===S.owner;
-      const val=fmtNum(Math.floor(r.s||0))+(tab==="g-money"?"ネジ":"個");
+      const val=fmtNum(Math.floor(r.s||0))+(tab==="g-money"?"キー":"個");
       return `<li class="${i<3?"top"+(i+1):""}${me?" me":""}"><span class="pos">${i+1}位</span><span class="pn">${esc(r.n||"")}${me?' <small>(あなた)</small>':""}</span><span class="ps">${val}</span></li>`;
     }).join("");
   }catch(e){ if(req===gRankReq) note.textContent="読み込めませんでした。通信環境を確認してください"; }
@@ -4742,7 +4770,7 @@ root.querySelectorAll(".modal").forEach(m=>m.addEventListener("click",e=>{ if(e.
 // ボタンにフォーカスが残って Enter/Space が二重に効かないようにする
 root.querySelectorAll("button").forEach(b=>b.setAttribute("tabindex","-1"));
 
-/* ---------- 画面の出入り(ネジ打ち本編から呼ばれる) ---------- */
+/* ---------- 画面の出入り(タイピングから呼ばれる) ---------- */
 let loopId=null, saveId=null, welcomed=false;
 const hadSave=load();
 tick(); checkUnlocks(); buildPlanter();
@@ -4816,7 +4844,7 @@ return { enter, leave, onKey, summary, debugUnlock };
 function openGarden(){ show("garden"); Garden.enter(); }
 
 /* =====================================================
-   記録の引き継ぎ(ネジ打ち全体)
+   記録の引き継ぎ(タイピングガーデン全体)
    このブラウザに保存している「typinggarden:」で始まる記録を
    すべてまとめて1つの文字列にする。読み込んだらページを読み直して反映。
 ===================================================== */
@@ -4858,7 +4886,7 @@ function backupImport(){
   if(str.trim().toLowerCase()==="typinggarden-debug"){
     if(!confirm("デバッグ用: すべての要素を解放した記録に置き換えます。今の記録は消えます。よろしいですか?")) return;
     try{
-      // ネジ打ち側: 自己ベスト・辞典・名前・統計
+      // タイピング側: 自己ベスト・辞典・名前・統計
       const words=[...WORDS_EASY,...WORDS_NORMAL,...WORDS_HARD].map(w=>w.k);
       localStorage.setItem(LS_PREFIX+"dict", JSON.stringify(words));
       localStorage.setItem(LS_PREFIX+"best-easy","40");
@@ -4880,7 +4908,7 @@ function backupImport(){
   }
   let o;
   try{ o=JSON.parse(b64dec(str)); }catch(e){ note.textContent="読み込めませんでした。文字列が途中で切れていないか確認してください"; return; }
-  // ネジ打ち全体の記録
+  // タイピングガーデン全体の記録
   if(o && o.app==="typinggarden" && o.data && typeof o.data==="object"){
     if(!confirm("このブラウザの記録を、すべて読み込んだ記録に置き換えます。よろしいですか?")) return;
     try{
@@ -4895,13 +4923,13 @@ function backupImport(){
   }
   // 庭の「記録」でコピーした、庭だけの文字列
   if(o && typeof o.money==="number" && Array.isArray(o.fields)){
-    if(!confirm("ネジ抜きの庭の記録を、読み込んだ庭に置き換えます(ほかの記録はそのまま)。よろしいですか?")) return;
+    if(!confirm("キーボード農園の記録を、読み込んだ庭に置き換えます(ほかの記録はそのまま)。よろしいですか?")) return;
     try{ window.tgReplacing=true; localStorage.setItem(LS_PREFIX+"garden:save", JSON.stringify(o)); }catch(e){ note.textContent="保存できませんでした"; return; }
     note.textContent="庭を読み込みました。画面を読み直します…";
     setTimeout(()=>location.reload(),600);
     return;
   }
-  note.textContent="ネジ打ちの記録ではないようです";
+  note.textContent="タイピングの記録ではないようです";
 }
 /* =====================================================
    ブラウザ間の同期(Firebase)
@@ -5171,7 +5199,7 @@ function bundleSummary(s){
     const g=JSON.parse(o["garden:save"]||"null");
     const st=JSON.parse(o.stats||"null");
     const parts=[];
-    if(g && typeof g.money==="number") parts.push(`🔩 ${Math.floor(g.money).toLocaleString("ja-JP")}`);
+    if(g && typeof g.money==="number") parts.push(`<span class="kicon"></span>${Math.floor(g.money).toLocaleString("ja-JP")}`);
     if(st && st.plays) parts.push(`${st.plays}回プレイ`);
     return parts.join(" ・ ")||"記録";
   }catch(e){ return "読めない記録"; }
@@ -5300,7 +5328,7 @@ $("bkClose").addEventListener("click",closeBackup);
 $("bkCopy").addEventListener("click",backupCopy);
 $("bkLoad").addEventListener("click",backupImport);
 $("backup").addEventListener("click",e=>{ if(e.target===$("backup")) closeBackup(); });
-/* タイトル画面に、所持ネジと庭でやること(収穫・水切れ)を出す */
+/* タイトル画面に、所持キーと庭でやること(収穫・水切れ)を出す */
 function syncOnTitle(){
   if(!syncCode) return;
   if(syncPending) syncPull();
@@ -5324,7 +5352,7 @@ function refreshGardenStat(){
   const el=$("gardenStat"); if(!el) return;
   let s; try{ s=Garden.summary(); }catch(e){ return; }
   const fmt=n=>Math.floor(n).toLocaleString("ja-JP");
-  let t=`🔩 所持ネジ<b>${fmt(s.money)}</b>`;
+  let t=`<span class="kicon"></span>所持キー<b>${fmt(s.money)}</b>`;
   if(s.pending) t+=`<small>(+${fmt(s.pending)} 受け取り待ち)</small>`;
   const todo=[];
   if(s.ripe) todo.push(`<span class="todoi">🧺 収穫できる作物 <b>${s.ripe}</b></span>`);
