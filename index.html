@@ -412,7 +412,22 @@ body.os4 .hud b#score{color:#ff7a3c; text-shadow:0 0 18px rgba(255,90,40,.65)}
 #tutActs{display:flex; gap:.4rem; justify-content:flex-end; margin-top:.55rem; flex-wrap:wrap}
 #tutActs .btn{padding:.35rem .9rem; font-size:.85rem; font-family:inherit}
 #tutActs .btn.tut-skip{background:none; color:#8a7a60; border-color:#d9ccb0; box-shadow:none}
+#tutBubble.mini{width:min(560px,calc(100vw - 16px)); padding:.4rem .75rem .45rem; opacity:.96}
+#tutBubble.mini #tutText{font-size:.85rem; line-height:1.5}
+#tutBubble.mini #tutStep{margin-bottom:.1rem}
+#tutBubble.mini #tutActs{margin-top:.3rem}
 @media (prefers-reduced-motion:reduce){ #tutRing{animation:none; transition:none} }
+/* ---- プレイヤー名 ---- */
+.name-line{margin:.3rem 0 0; font-size:.9rem; color:var(--steel)}
+.name-line .btn{padding:.25rem .8rem; font-size:.82rem; margin-left:.4rem}
+.reg-as{margin:.2rem 0 .4rem; font-size:1rem}
+.reg-as b{font-size:1.15rem; color:var(--accent,#ffd75e)}
+#regStatus .btn{padding:.25rem .8rem; font-size:.82rem; margin-left:.4rem}
+.nm-panel{max-width:460px}
+#imeWarn{position:fixed; left:50%; top:38%; transform:translate(-50%,-50%); z-index:72; display:none;
+  background:#fff3cd; color:#5a4300; border:3px solid #c79100; border-radius:12px; padding:.7rem 1rem;
+  font-weight:800; max-width:min(520px,calc(100vw - 24px)); text-align:center; box-shadow:0 8px 24px rgba(0,0,0,.4)}
+#imeWarn.show{display:block}
 /* ---- タイピング単語帳 ---- */
 .diff-btn.books{border-color:#5b6f9a; width:min(220px,90vw)}
 .diff-btn.books .name{color:#a9c4ff}
@@ -1238,6 +1253,7 @@ html.mobile #screen-garden .tlist{grid-template-columns:1fr}
     <p class="best-line" id="bestLine"></p>
     <p class="best-line" id="bestLineTa"></p>
     <p class="best-line" id="statsLine"></p>
+    <p class="name-line"><span id="nameLineText"></span> <button class="btn" id="nameBtn">名前を決める <span class="kbdh">N</span></button></p>
     <div class="btn-row" style="margin-top:.2rem">
       <button class="btn" id="rankBtn">ランキングを見る <span class="kbdh">R</span></button>
       <button class="btn" id="dictBtn">ことば図鑑 <span class="kbdh">D</span></button>
@@ -1245,7 +1261,7 @@ html.mobile #screen-garden .tlist{grid-template-columns:1fr}
       <button class="btn" id="fbBtn">要望・バグ報告 <span class="kbdh">F</span></button>
       <button class="btn" id="tutBtn">遊び方ガイド <span class="kbdh">H</span></button>
     </div>
-    <p class="hint">キー 1〜9 でモードを選んで開始 ・ G 庭 ・ R ランキング ・ D 図鑑 ・ K 記録の引き継ぎ / ローマ字入力(shi・si どちらもOK)<br>8 単語帳 ・ F 要望・バグ報告 ・ H 遊び方ガイド ・ Esc でいつでもタイトルに戻る</p>
+    <p class="hint">キー 1〜9 でモードを選んで開始 ・ G 庭 ・ R ランキング ・ D 図鑑 ・ K 記録の引き継ぎ / ローマ字入力(shi・si どちらもOK)<br>8 単語帳 ・ N 名前 ・ F 要望・バグ報告 ・ H 遊び方ガイド ・ Esc でいつでもタイトルに戻る</p>
     <div class="hazard" aria-hidden="true"><span class="k">Q</span><span class="s">🌱</span><span class="k">W</span><span class="k">E</span><span class="s">🥕</span><span class="k">R</span><span class="k">T</span><span class="s">🌿</span><span class="k">Y</span><span class="k">U</span><span class="s">🍅</span><span class="k">I</span><span class="k">O</span><span class="s">🌽</span><span class="k">P</span><span class="s">🍓</span></div>
   </section>
 
@@ -1278,6 +1294,7 @@ html.mobile #screen-garden .tlist{grid-template-columns:1fr}
     <p class="result-sub" id="resultSubLine"></p>
     <p class="result-new" id="resultNew"></p>
     <div class="register" id="registerBox">
+      <p class="reg-as" id="regAs" style="display:none"><b id="regAsName"></b> としてランキングに登録します</p>
       <input id="nameInput" class="name-input" maxlength="10" placeholder="プレイヤー名" autocomplete="off">
       <div class="btn-row" style="margin-top:.8rem">
         <button class="btn primary" id="regBtn">ランキングに登録 <span class="kbdh">Enter</span></button>
@@ -1461,16 +1478,16 @@ html.mobile #screen-garden .tlist{grid-template-columns:1fr}
     <div class="panel savebox">
       <div class="phead"><h2>番付</h2><button class="sbtn xbtn" data-close style="margin-left:auto">閉じる ✕</button></div>
       <p id="g-rankNow"></p>
-      <p>所持キーと累計収穫数の番付(ランキング)に載せます。名前ごとに1件で、一度載せると庭を出るたびに自動で更新されます。</p>
+      <p>所持キーと累計収穫数の番付(ランキング)です。プレイヤー名で自動で載り、庭を出るたびに更新されます。名前を書きかえて Enter で、ランキングと番付の名前をまとめて変えられます。</p>
       <input id="g-rankName" class="rk-input" maxlength="10" placeholder="庭主の名前" autocomplete="off">
-      <div class="pfoot"><span class="note" id="g-rankNote"></span><button class="sbtn main" id="g-rankBtn">載せる(Enter)</button></div>
+      <div class="pfoot"><span class="note" id="g-rankNote"></span><button class="sbtn main" id="g-rankBtn">決める(Enter)</button></div>
       <div class="tabs grk-tabs" id="g-rankTabs">
         <button class="tab" data-rk="g-money">所持キー</button>
         <button class="tab" data-rk="g-harvest">累計収穫</button>
       </div>
       <ol class="grk-list" id="g-rankList"></ol>
       <p class="grk-note" id="g-rankListNote"></p>
-      <div class="keyhint">名前を入れて <b>Enter</b> ・ 入力欄の <b>Esc</b> で入力をやめる ・ <b>← →</b> 所持キー / 累計収穫 ・ <b>9</b> / <b>Esc</b> 閉じる</div>
+      <div class="keyhint"><b>N</b> 名前を書きかえる → <b>Enter</b> ・ 入力欄の <b>Esc</b> で入力をやめる ・ <b>← →</b> 所持キー / 累計収穫 ・ <b>9</b> / <b>Esc</b> 閉じる</div>
     </div>
   </div>
 
@@ -1538,6 +1555,7 @@ html.mobile #screen-garden .tlist{grid-template-columns:1fr}
 <div id="tutBubble"><div id="tutStep"></div><div id="tutText"></div><div id="tutActs"></div></div>
 <div id="stagePop"></div>
 <div id="countdown"></div>
+<div id="imeWarn">日本語入力がオンになっています。<b>半角英数</b>(「英数」キーや「半角/全角」キー)に切り替えてください</div>
 
 <!-- 要望・バグ報告 -->
 <div id="fb" class="bk-modal">
@@ -1558,6 +1576,17 @@ html.mobile #screen-garden .tlist{grid-template-columns:1fr}
     <input class="bk-codein fb-name" id="fbName" maxlength="20" placeholder="名前(なくても大丈夫です)" autocomplete="off">
     <div class="bk-foot"><span class="bk-note" id="fbNote"></span><button class="btn primary" id="fbSend">送る</button></div>
     <p class="keynav"><b>1〜6</b> 種類 ・ <b>T</b> 内容を書く ・ <b>N</b> 名前 ・ <b>Ctrl+Enter</b> / <b>Enter</b>(入力欄の外) 送る ・ 入力中の <b>Esc</b> で入力をやめる ・ <b>Esc</b> 閉じる</p>
+  </div>
+</div>
+
+<!-- プレイヤー名 -->
+<div id="nm" class="bk-modal">
+  <div class="bk-panel nm-panel">
+    <div class="bk-head"><h2>プレイヤー名</h2><button class="btn bk-x" id="nmClose">閉じる ✕</button></div>
+    <p class="bk-p" id="nmNow"></p>
+    <input class="bk-codein" id="nmInput" maxlength="10" placeholder="名前(10文字まで)" autocomplete="off">
+    <div class="bk-foot"><span class="bk-note" id="nmNote"></span><button class="btn primary" id="nmSave">決める</button></div>
+    <p class="keynav"><b>Enter</b> 決める ・ <b>Esc</b> 閉じる</p>
   </div>
 </div>
 
@@ -2446,11 +2475,11 @@ function finishTa(){
 }
 async function endGame(){
   clearInterval(timerId); clearInterval(cdId); cdId=null; running=false;
+  $("imeWarn").classList.remove("show");
   resetStage();   // 背景の熱演出を戻す
   recordStats(score); // ランキング登録の有無に関係なく記録
   if(diff==="book"){ endBookGame(); return; }
   $("registerBox").style.display="";
-  $("resultKeys").innerHTML='<b>N</b> 名前を入力 → <b>Enter</b> で登録 ・ 入力中の <b>Esc</b> で入力をやめる';
   $("titleBtn").textContent="タイトルへ (Esc)";
   const ta=isTA(diff);
   const value = ta ? Number(elapsed.toFixed(2)) : score;
@@ -2477,7 +2506,9 @@ async function endGame(){
   $("nameInput").value=playerName;
   $("regBtn").disabled=false;
   $("regStatus").textContent=db?"":"※Firebase未設定のためランキング登録はできません";
-  show("result");
+  showRegName();
+  show("result"); resultAt=Date.now();
+  if(playerName && db) registerResult();   // 名前が決まっていれば自動で登録
   refreshBestLine();
 }
 
@@ -2488,6 +2519,12 @@ document.addEventListener("keydown",e=>{
   // 引き継ぎウィンドウが開いているときは、そちらだけを操作
   if(backupOpen && !(e.target && (e.target.tagName==="TEXTAREA"||e.target.tagName==="INPUT"))){
     backupKey(e); return;
+  }
+  // 名前のウィンドウ: Enter で決める、Esc で閉じる
+  if(nmOpen){
+    if(e.key==="Enter"){ e.preventDefault(); nmSave(); }
+    else if(e.key==="Escape"){ e.preventDefault(); closeNameWin(); }
+    return;
   }
   // 要望・バグ報告のウィンドウが開いているときは、Esc で閉じるだけ
   if(fbOpen && !(e.target && (e.target.tagName==="TEXTAREA"||e.target.tagName==="INPUT"))){
@@ -2528,6 +2565,7 @@ document.addEventListener("keydown",e=>{
     if(e.key==="8") openBooks();
     if(e.key==="f"||e.key==="F") openFeedback();
     if(e.key==="h"||e.key==="H") tutStart();
+    if(e.key==="n"||e.key==="N"){ e.preventDefault(); openNameWin(); }
     if((e.key==="t"||e.key==="T") && syncReadOnly) syncTakeOver();
     if(e.key==="9"||e.key==="g"||e.key==="G") openGarden();
     return;
@@ -2554,9 +2592,11 @@ document.addEventListener("keydown",e=>{
     return;
   }
   if(scene==="result"){
+    if(Date.now()-resultAt<800) return;   // 時間切れの直後に打ち続けたキーで、名前欄などが動かないように
     if(e.key==="Enter") startGame(diff);
     if(e.key==="Escape"){ if(diff==="book") openBooks(); else show("title"); }
-    if(e.key==="n"||e.key==="N"){ e.preventDefault(); $("nameInput").focus(); $("nameInput").select&&$("nameInput").select(); }
+    if((e.key==="n"||e.key==="N") && !playerName){ e.preventDefault(); $("nameInput").focus(); $("nameInput").select&&$("nameInput").select(); }
+    if((e.key==="r"||e.key==="R") && playerName) openRanking(diff,playerName);
     if(e.key==="g"||e.key==="G") openGarden();
     return;
   }
@@ -2571,6 +2611,7 @@ document.addEventListener("keydown",e=>{
   }
   if(!running) return;
   const key=e.key;
+  if(key==="Process" || e.isComposing){ imeWarn(); return; }
   if(!/^[a-zA-Z0-9\-'!?,.~\/%&]$/.test(key)) return;
   e.preventDefault();
   const r=handleKey(key);
@@ -2633,8 +2674,17 @@ document.querySelectorAll(".diff-btn").forEach(b=>{
 $("retryBtn").addEventListener("click",()=>startGame(diff));
 $("titleBtn").addEventListener("click",()=>{ if(diff==="book") openBooks(); else show("title"); });
 
+let resultAt=0;
+/* 日本語入力がオンのまま打つと文字が届かないので、知らせる */
+let imeWarnT=null;
+function imeWarn(){
+  const w=$("imeWarn"); w.classList.add("show");
+  clearTimeout(imeWarnT); imeWarnT=setTimeout(()=>w.classList.remove("show"),2600);
+}
+
 /* ---------- Firebase ランキング ---------- */
 let playerName="";
+try{ playerName=localStorage.getItem("typinggarden:playerName")||""; }catch(e){}
 (async()=>{
   try{
     const r=await store.get("playerName");
@@ -2669,7 +2719,7 @@ async function submitScore(name,d,extra){
   const snap=await ref.orderByChild("n").equalTo(name).once("value");
   const mine=[];
   snap.forEach(c=>{ const v=c.val(); mine.push({key:c.key, s:v.s, e:v.e, m:v.m}); });
-  const entry={n:name, s:extra.s, t:Date.now()};
+  const entry={n:name, s:extra.s, t:Date.now(), o:myId()};
   if(extra.e!=null) entry.e=extra.e;
   if(extra.m!=null) entry.m=extra.m;
   mine.sort((a,b)=>betterRecord(b,a,d));   // 良い順
@@ -2738,36 +2788,150 @@ async function openRanking(d,highlight){
   }
 }
 
-$("regBtn").addEventListener("click",async()=>{
-  const name=$("nameInput").value.trim();
-  if(!name){ $("regStatus").textContent="プレイヤー名を入れてください"; return; }
+/* 結果画面の登録。名前が決まっていなければ、ここで決める(以後はその名前で自動登録) */
+async function registerResult(){
+  if(isDebugSave()){ $("regStatus").textContent="デバッグ用の記録はランキングに登録できません"; return; }
   if(!db){ $("regStatus").textContent="※Firebase未設定のため登録できません"; return; }
-  playerName=name;
-  try{ await store.set("playerName",name); }catch(e){}
-  $("regBtn").disabled=true;
+  if(!playerName){
+    const name=$("nameInput").value.trim();
+    if(!name){ $("regStatus").textContent="プレイヤー名を入れてください"; return; }
+    $("regBtn").disabled=true;
+    $("regStatus").textContent="名前を確かめています...";
+    const r=await setPlayerName(name);
+    if(!r.ok){ $("regStatus").textContent=r.msg; $("regBtn").disabled=false; return; }
+    $("nameInput").blur();
+  }
+  const name=playerName;
+  showRegName();
   $("regStatus").textContent="登録中...";
   try{
     const extra={s:score};
     if(isTA(diff)){ extra.e=Number(elapsed.toFixed(2)); extra.m=miss; }
     else if(diff==="oneshot"){ extra.e=Number(elapsed.toFixed(2)); }
-    if(isDebugSave()){ $("regStatus").textContent="デバッグ用の記録はランキングに登録できません"; return; }
     const res=await submitScore(name,diff,extra);
     if(res.saved){
-      $("regStatus").textContent="登録しました!";
-      setTimeout(()=>openRanking(diff,name),500);
+      $("regStatus").innerHTML=`ランキングを更新しました! <button class="btn" id="regView">ランキングを見る (R)</button>`;
+      $("regView").onclick=()=>openRanking(diff,name);
     }else{
       $("regStatus").textContent = isTA(diff)
-        ? "この名前の記録より遅かったため、ランキングは更新されませんでした(1つの名前につき1件)"
+        ? "ランキングの記録(自己ベスト)より遅かったので、ランキングはそのままです"
         : (diff==="oneshot"
-            ? "この名前の記録を超えられなかったため、ランキングは更新されませんでした(同じ個数なら時間勝負)"
-            : "この名前の記録より少なかったため、ランキングは更新されませんでした(1つの名前につき1件)");
-      $("regBtn").disabled=false;
+            ? "ランキングの記録(自己ベスト)を超えられなかったので、ランキングはそのままです(同じ個数なら時間勝負)"
+            : "ランキングの記録(自己ベスト)より少なかったので、ランキングはそのままです");
     }
   }catch(e){
     $("regStatus").textContent="登録に失敗しました。通信環境を確認してください。";
-    $("regBtn").disabled=false;
   }
-});
+}
+$("regBtn").addEventListener("click",registerResult);
+/* 結果画面: 名前が決まっていれば入力欄を隠して「〇〇として登録」と出す */
+function showRegName(){
+  const has=!!playerName;
+  $("nameInput").style.display=has?"none":"";
+  $("regBtn").style.display=has?"none":"";
+  $("regAs").style.display=has?"":"none";
+  $("regAsName").textContent=playerName;
+  $("resultKeys").innerHTML = has
+    ? '<b>Enter</b> もう一回 ・ <b>Esc</b> タイトルへ ・ <b>G</b> 庭へ ・ <b>R</b> ランキング'
+    : '<b>N</b> 名前を入力 → <b>Enter</b> で登録 ・ 入力中の <b>Esc</b> で入力をやめる';
+}
+
+/* ---------- プレイヤー名(ランキングと番付で共通) ----------
+   一度決めた名前は固定。変えるときは、今までのランキングと番付の記録もまとめて新しい名前に移す */
+const SCORE_DIFFS=["easy","normal","hard","ta-easy","ta-normal","ta-hard","oneshot"];
+const myId = () => { try{ return Garden.ownerId(); }catch(e){ return ""; } };
+const nameKey = name => encodeURIComponent(name).replace(/\./g,"%2E");   // 番付の保存場所(庭の rankKey と同じ)
+const nameError = n => !n ? "名前を入れてください" : ([...n].length>10 ? "名前は10文字までです" : "");
+/* ほかの人が使っている名前か(自分の印が付いていない記録があるか) */
+async function nameTaken(name){
+  const me=myId();
+  const g=(await db.ref(`typinggarden/garden/money/${nameKey(name)}`).once("value")).val();
+  if(g && g.o && g.o!==me) return true;
+  for(const d of SCORE_DIFFS){
+    const snap=await db.ref("typinggarden/scores/"+d).orderByChild("n").equalTo(name).once("value");
+    let other=false; snap.forEach(c=>{ const v=c.val(); if(v.o && v.o!==me) other=true; });
+    if(other) return true;
+  }
+  return false;
+}
+/* ランキングの記録を新しい名前に移す(同じ名前の記録が両方にあれば良いほうを残す) */
+async function moveScores(from,to){
+  const me=myId();
+  for(const d of SCORE_DIFFS){
+    const ref=db.ref("typinggarden/scores/"+d), rows=[];
+    for(const n of [from,to]){
+      const snap=await ref.orderByChild("n").equalTo(n).once("value");
+      snap.forEach(c=>{ const v=c.val(); if(!v.o || v.o===me) rows.push({key:c.key, v}); });
+    }
+    if(!rows.length) continue;
+    rows.sort((a,b)=>betterRecord(b.v,a.v,d));
+    const best=Object.assign({}, rows[0].v, { n:to, o:me });
+    await ref.push(best);
+    for(const r of rows) await ref.child(r.key).remove();
+  }
+}
+let nameBusy=false;
+async function setPlayerName(name){
+  name=(name||"").trim();
+  const err=nameError(name); if(err) return {ok:false, msg:err};
+  if(name===playerName) return {ok:true};
+  if(nameBusy) return {ok:false, msg:"いま名前を変えています。少し待ってください"};
+  nameBusy=true;
+  const old=playerName;
+  try{
+    if(db && !isDebugSave()){
+      if(await nameTaken(name)) return {ok:false, msg:"その名前はほかの人が使っています。別の名前にしてください"};
+      if(old) await moveScores(old,name);
+    }
+    playerName=name;
+    try{ await store.set("playerName",name); }catch(e){}
+    try{ localStorage.setItem("typinggarden:nameSet","1"); }catch(e){}
+    await Garden.useName(name, old);   // 番付も同じ名前で載せる(前の名前の分は消す)
+    refreshNameLine();
+    return {ok:true, moved:!!old};
+  }catch(e){
+    console.warn("[typinggarden name]",e);
+    return {ok:false, msg:"名前を登録できませんでした。通信環境を確認してください"};
+  }finally{ nameBusy=false; }
+}
+window.setPlayerName=setPlayerName;
+/* タイトルの「名前」の行 */
+function refreshNameLine(){
+  $("nameLineText").textContent = playerName ? `プレイヤー名: ${playerName}` : "プレイヤー名: まだ決めていません";
+  $("nameBtn").innerHTML = (playerName ? "名前を変える" : "名前を決める")+' <span class="kbdh">N</span>';
+}
+/* 名前を決める・変えるウィンドウ */
+let nmOpen=false;
+function openNameWin(){
+  nmOpen=true;
+  $("nm").classList.add("open");
+  $("nmInput").value=playerName;
+  $("nmNow").textContent = playerName
+    ? `いまの名前は「${playerName}」です。変えると、ランキングと番付に載っている記録もすべて新しい名前になります。`
+    : "ランキングと農園の番付に使う名前です。一度決めると、次からはこの名前で自動で登録されます(あとで変えることもできます)。";
+  $("nmNote").textContent = db ? "" : "※Firebase未設定のため、名前はこのブラウザにだけ保存されます";
+  setTimeout(()=>{ $("nmInput").focus(); $("nmInput").select(); },30);
+}
+function closeNameWin(){
+  nmOpen=false;
+  $("nm").classList.remove("open");
+  const ae=document.activeElement; if(ae && ae.blur) ae.blur();
+}
+async function nmSave(){
+  const name=$("nmInput").value.trim(), note=$("nmNote");
+  if(name===playerName){ closeNameWin(); return; }
+  note.textContent = playerName ? "記録を新しい名前に移しています..." : "名前を確かめています...";
+  $("nmSave").disabled=true;
+  const r=await setPlayerName(name);
+  $("nmSave").disabled=false;
+  if(!r.ok){ note.textContent=r.msg; $("nmInput").focus(); return; }
+  note.textContent = r.moved ? "名前を変えました。ランキングと番付も新しい名前になりました" : "名前を決めました!";
+  setTimeout(closeNameWin,900);
+}
+$("nameBtn").addEventListener("click",openNameWin);
+$("nmSave").addEventListener("click",nmSave);
+$("nmClose").addEventListener("click",closeNameWin);
+refreshNameLine();
 
 $("rankBtn").addEventListener("click",()=>openRanking("normal",playerName));
 for(const t of RANK_TABS){
@@ -5225,14 +5389,17 @@ async function pushRank(name){
   return {ok:true};
 }
 const hasDb = () => { try{ return !!db; }catch(e){ return false; } };
-function prepareRank(){
-  tick();
+function prepareRankNow(){
   $("g-rankNow").innerHTML=`所持キー <b>${fmtNum(S.money)}</b> ・ 累計収穫 <b>${fmtNum(S.totalHarvest)}</b>個`+
     (S.rankName?`<br>「${esc(S.rankName)}」として載っています。庭を出るたびに自動で更新されます`:"");
-  let nm=S.rankName; try{ nm=nm||playerName||""; }catch(e){}
+}
+function prepareRank(){
+  tick();
+  prepareRankNow();
+  let nm=""; try{ nm=playerName||""; }catch(e){}
   $("g-rankName").value=nm;
   $("g-rankNote").textContent=hasDb()?"":"※Firebase未設定のため載せられません";
-  setTimeout(()=>{ const i=$("g-rankName"); i.focus(); i.select&&i.select(); },30);
+  if(!nm) setTimeout(()=>{ const i=$("g-rankName"); i.focus(); },30);   // 名前が決まっていないときだけ入力欄へ
   renderGardenRank();
 }
 /* 番付の中で、所持キー・累計収穫のランキングを見る */
@@ -5260,21 +5427,35 @@ function switchGardenRank(dir){
   sfx.tab(); renderGardenRank();
 }
 root.querySelectorAll("#g-rankTabs .tab").forEach(t=>t.addEventListener("click",()=>{ gRankTab=t.dataset.rk; sfx.tab(); renderGardenRank(); }));
+/* 番付の名前はプレイヤー名と同じ。ここで変えると、ランキングの名前も一緒に変わる */
 async function submitRank(){
   const name=$("g-rankName").value.trim(), note=$("g-rankNote");
   if(!name){ note.textContent="名前を入れてください"; sfx.nope(); return; }
-  if(!hasDb()){ note.textContent="※Firebase未設定のため載せられません"; return; }
-  note.textContent="記しています…";
-  try{
-    const r=await pushRank(name);
-    if(!r.ok){ note.textContent=r.msg; sfx.nope(); return; }
-    S.rankName=name; save(); sfx.buy();
-    try{ playerName=name; store.set("playerName",name); }catch(e){}
-    note.textContent="載りました。庭を出るたびに自動で更新されます";
-    $("g-rankName").blur();
-    renderGardenRank();
-  }catch(e){ note.textContent="載せられませんでした。通信環境を確認してください"; }
+  const cur=(()=>{ try{ return playerName; }catch(e){ return ""; } })();
+  note.textContent = cur && name!==cur ? "記録を新しい名前に移しています…" : "記しています…";
+  const r=await window.setPlayerName(name);
+  if(!r.ok){ note.textContent=r.msg; sfx.nope(); return; }
+  if(name===cur && hasDb() && !isDebugSave()){ try{ await pushRank(name); }catch(e){} }
+  sfx.buy();
+  note.textContent = r.moved ? "名前を変えました。ランキングと番付も新しい名前になりました" : "載っています。庭を出るたびに自動で更新されます";
+  $("g-rankName").blur();
+  prepareRankNow(); renderGardenRank();
 }
+/* プレイヤー名が決まった・変わったとき: 番付も同じ名前で載せる(前の名前の分は消す) */
+async function useName(name, old){
+  S.rankName=name; save();
+  if(!hasDb() || isDebugSave()) return;
+  if(old && old!==name){
+    const k=rankKey(old);
+    for(const m of ["money","harvest"]){
+      const ref=db.ref(`${RANK_PATH}/${m}/${k}`), v=(await ref.once("value")).val();
+      if(v && v.o===S.owner) await ref.remove();
+    }
+  }
+  const r=await pushRank(name);
+  if(!r.ok) throw new Error(r.msg);
+}
+const ownerId = () => S.owner;
 $("g-rankBtn").addEventListener("click",submitRank);
 
 /* ---------- キー操作(本編の keydown から呼ばれる) ---------- */
@@ -5294,6 +5475,7 @@ function onKey(e){
   if(modal==="rank"){
     if(e.key==="Escape"||e.key==="9"){ e.preventDefault(); closeModal(); }
     else if(e.key==="Enter"){ e.preventDefault(); submitRank(); }
+    else if(e.key==="n"||e.key==="N"){ e.preventDefault(); const i=$("g-rankName"); i.focus(); i.select(); }
     else if(e.key==="ArrowLeft"||e.key==="ArrowRight"){ e.preventDefault(); switchGardenRank(); }
     else if(e.key==="ArrowUp"||e.key==="ArrowDown"){ e.preventDefault(); $("g-rankList").scrollBy(0, e.key==="ArrowDown"?60:-60); }
     return;
@@ -5344,6 +5526,11 @@ const hadSave=load();
 tick(); checkUnlocks(); buildPlanter();
 function enter(){
   tick(); checkUnlocks(); renderAll(); save();
+  // 番付の名前をプレイヤー名にそろえる(前の名前で載っている分は移す)
+  try{
+    if(playerName && S.rankName!==playerName) useName(playerName, S.rankName).catch(()=>{});
+    else if(!playerName && S.rankName) window.setPlayerName(S.rankName);
+  }catch(e){}
   if(!hadSave && !welcomed){
     welcomed=true;
     toast("ようこそ。クワ(2)で耕し、種(4)を植え、じょうろ(3)で水をあげましょう","good",6000);
@@ -5406,7 +5593,7 @@ function debugUnlock(){
   S.lastTick=Date.now();
   save();
 }
-return { enter, leave, onKey, summary, debugUnlock, tutState, tutGive, tutGrow, openModal };
+return { enter, leave, onKey, summary, debugUnlock, tutState, tutGive, tutGrow, openModal, ownerId, useName };
 })();
 
 function openGarden(){ show("garden"); Garden.enter(); }
@@ -5980,7 +6167,7 @@ $("toGardenBtn").addEventListener("click",openGarden);
    進み具合は保存するので、途中でやめても続きから。タイトルの H でいつでも見直せる
 ===================================================== */
 const TUT_KEY="typinggarden:tut";
-const TUT_STEPS=["type","plate","toGarden","till","plant","water","grow","harvest","sell","gacha","done"];
+const TUT_STEPS=["type","plate","name","toGarden","till","plant","water","grow","harvest","sell","gacha","done"];
 let tut=null, tutTimer=null;
 function tutLoad(){ try{ tut=JSON.parse(localStorage.getItem(TUT_KEY)||"null"); }catch(e){ tut=null; } }
 function tutSave(){ try{ localStorage.setItem(TUT_KEY, JSON.stringify(tut)); }catch(e){} }
@@ -5993,7 +6180,7 @@ function tutGo(i){
 const tutNext = () => tutGo(tut.step+1);
 function tutStart(){
   tut={ step:0, done:false, gave:false };
-  tutGo(window.IS_MOBILE ? TUT_STEPS.indexOf("toGarden") : 0);   // スマホはタイピングの部分をとばす
+  tutGo(window.IS_MOBILE ? TUT_STEPS.indexOf("name") : 0);   // スマホはタイピングの部分をとばす
   clearInterval(tutTimer); tutTimer=setInterval(tutTick,300);
 }
 function tutEnd(){
@@ -6009,6 +6196,7 @@ function tutTick(){
   switch(id){
     case "type":     if(scene==="game") return tutNext(); break;
     case "plate":    if(scene==="result") return tutNext(); if(scene==="title") return tutGo(0); break;
+    case "name":     if(playerName || !db) return tutNext(); break;   // 名前が決まったら次へ(ランキングが使えないときはとばす)
     case "toGarden": if(scene==="garden") return tutNext(); break;
     case "till":     if(st.soil>b.soil) return tutNext(); break;
     case "plant":    if(st.crops>b.crops) return tutNext(); break;
@@ -6035,11 +6223,19 @@ function tutView(){
         : { sel:null, text:"タイトルに戻って、イージー(キー 1)を始めよう" };
     case "plate":
       return scene==="game"
-        ? { sel:"#plate", text:"正しく打つと、キーボードのキーが外れて跡から芽が出ます。外したキーは農園のお金になります。60秒がんばろう!" }
+        ? { sel:"#plate", text:"正しく打つとキーが外れて芽が出ます。外したキーは農園のお金に! 60秒がんばろう(日本語入力はオフで)" }
         : { sel:null, text:"タイピングを最後まで遊んでみよう" };
+    case "name":
+      if(scene==="result") return { sel:"#registerBox",
+        text:"記録をランキングに載せよう! 名前を入れて Enter。次からはこの名前で自動で登録され、農園の番付にも載ります(タイトルの N で変えられます)" };
+      if(nmOpen) return { sel:"#nm .nm-panel", text: M ? "名前を入れて「決める」を押そう" : "名前を入れて Enter で決めよう" };
+      if(scene==="title") return { sel:"#nameBtn",
+        text: M ? "ようこそ、タイピングガーデンへ! まずはランキングと農園の番付に使う名前を決めよう。「名前を決める」を押してね"
+                : "ランキングと農園の番付に使う名前を決めよう。「名前を決める」を押すか、キー N" };
+      return { sel:null, text:"タイトルで名前を決めよう" };
     case "toGarden":
-      return scene==="result" ? { sel:"#toGardenBtn", text:"おつかれさま! 外したキーが農園に届きました。庭へ行ってみよう(G)" }
-           : scene==="title" ? { sel:".diff-btn.garden", text: window.IS_MOBILE ? "ようこそ、タイピングガーデンへ! まずはキーボード農園を開こう" : "キーボード農園を開こう(キー 9)" }
+      return scene==="result" ? { sel:"#toGardenBtn", text:"外したキーは農園に届いています。庭へ行ってみよう(G)" }
+           : scene==="title" ? { sel:".diff-btn.garden", text: window.IS_MOBILE ? "次はキーボード農園を開こう" : "キーボード農園を開こう(キー 9)" }
            : { sel:null, text:"キーボード農園へ行こう" };
     case "till":
       if(!g) return toFarm;
@@ -6097,12 +6293,22 @@ function tutRender(){
     if(id!=="done"){ const sk=document.createElement("button"); sk.className="btn tut-skip"; sk.textContent="スキップ"; sk.onclick=()=>{ if(confirm("ガイドを終わりますか?(タイトルの H でいつでも見直せます)")) tutEnd(); }; acts.appendChild(sk); }
   }
   bub.style.display="block";
+  const mini = scene==="game";
+  bub.classList.toggle("mini", mini);
   const W=window.innerWidth, H=window.innerHeight, bw=bub.offsetWidth, bh=bub.offsetHeight;
+  if(mini){
+    // タイピング中は、ことばと外れるキーを隠さないように画面のいちばん上に小さく出す
+    if(el){ const r=el.getBoundingClientRect(); ring.style.display="block";
+      Object.assign(ring.style,{ left:(r.left-6)+"px", top:(r.top-6)+"px", width:(r.width+12)+"px", height:(r.height+12)+"px" }); }
+    else ring.style.display="none";
+    bub.style.left=Math.max(8,(W-bw)/2)+"px"; bub.style.top="6px";
+    return;
+  }
   if(el){
     const r=el.getBoundingClientRect();
     ring.style.display="block";
     Object.assign(ring.style,{ left:(r.left-6)+"px", top:(r.top-6)+"px", width:(r.width+12)+"px", height:(r.height+12)+"px" });
-    let top = r.bottom+14+bh < H ? r.bottom+14 : Math.max(8, r.top-14-bh);
+    let top = r.bottom+14+bh < H ? r.bottom+14 : (r.top-14-bh >= 8 ? r.top-14-bh : H-bh-8);
     let left = Math.min(Math.max(8, r.left+r.width/2-bw/2), W-bw-8);
     bub.style.left=left+"px"; bub.style.top=top+"px";
   }else{
@@ -6118,7 +6324,15 @@ function tutBoot(){
   tutLoad();
   if(!tut){
     if(Garden.tutState().fresh){ tutStart(); return; }
-    tut={ step:0, done:true }; tutSave(); return;
+    tut={ step:0, done:true }; tutSave();
+  }
+  if(tut.done){
+    let asked=false; try{ asked=localStorage.getItem("typinggarden:nameAsked")==="1"; }catch(e){}
+    if(!playerName && !asked && db && scene==="title"){
+      try{ localStorage.setItem("typinggarden:nameAsked","1"); }catch(e){}
+      openNameWin();
+    }
+    return;
   }
   if(!tut.done){ clearInterval(tutTimer); tutTimer=setInterval(tutTick,300); tutRender(); }
 }
