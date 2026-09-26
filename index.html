@@ -430,6 +430,7 @@ html.mobile.gated body{overflow:hidden}
 #mGate ol{padding-left:1.4rem; margin:.6rem 0 1rem}
 #mGate .bk-codein{width:100%; box-sizing:border-box; font-size:1.1rem; margin-bottom:.6rem}
 #mGate .btn{width:100%}
+html.mobile .bk-pconly{display:none}
 /* ---- プレイヤー名 ---- */
 .name-line{margin:.3rem 0 0; font-size:.9rem; color:var(--steel)}
 .name-line .btn{padding:.25rem .8rem; font-size:.82rem; margin-left:.4rem}
@@ -1642,6 +1643,7 @@ html.mobile #screen-garden .tlist{grid-template-columns:1fr}
     </div>
     <div id="bkBackups" class="bk-backups"></div>
 
+    <div class="bk-pconly">
     <h3>記録の引き継ぎ(記録文字列)</h3>
     <p class="bk-p">同期を使わずに、記録を文字列にして別のブラウザへ移すこともできます。</p>
     <textarea class="bk-code" id="bkExport" readonly tabindex="-1"></textarea>
@@ -1650,6 +1652,8 @@ html.mobile #screen-garden .tlist{grid-template-columns:1fr}
     <p class="bk-p">読み込むと、このブラウザにある記録はすべて置き換わります。読み込んだあとは自動で画面を読み直します。</p>
     <textarea class="bk-code" id="bkImport" placeholder="I を押してから Ctrl+V で貼り付け、Enter で読み込み"></textarea>
     <div class="bk-foot"><span class="bk-note" id="bkImportNote"></span><button class="btn" id="bkLoad">読み込む (Enter)</button></div>
+    </div>
+    <p class="bk-p m-only">記録文字列での引き継ぎは、パソコンだけで使えます。スマホは同期で記録を受け取ります。</p>
     <p class="keynav"><b>C</b> コピー ・ <b>I</b> 貼り付け欄へ ・ <b>Enter</b> 読み込む ・ <b>S</b> 同期の開始/停止 ・ <b>J</b> コード入力 ・ <b>T</b> こちらで遊ぶ ・ <b>R</b>→<b>1〜5</b> バックアップから戻す ・ <b>K</b> / <b>Esc</b> 閉じる</p>
   </div>
 </div>
@@ -5739,6 +5743,7 @@ async function backupCopy(){
   catch(e){ ta.focus(); ta.select(); try{ document.execCommand("copy"); $("bkCopyNote").textContent="コピーしました"; }catch(_){ $("bkCopyNote").textContent="選択しました。Ctrl+C でコピーしてください"; } }
 }
 function backupImport(){
+  if(window.IS_MOBILE) return;   // 記録文字列での引き継ぎはパソコンだけ
   const note=$("bkImportNote"), str=$("bkImport").value;
   if(!str.trim()){ note.textContent="記録文字列を貼り付けてください(I で貼り付け欄へ)"; return; }
   // デバッグ用の合言葉: すべての要素を解放した状態にする
@@ -6521,7 +6526,7 @@ function tutBoot(){
   if(mGated()) return;   // 同期していないスマホは、同期の画面だけ
   tutLoad();
   if(!tut){
-    if(Garden.tutState().fresh){ tutAsk(true); return; }
+    if(Garden.tutState().fresh){ tutStart(); return; }   // はじめて開いた人には、そのまま始める
     tut={ step:0, done:true }; tutSave();
   }
   if(tut.done){
