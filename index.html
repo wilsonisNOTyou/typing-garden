@@ -399,6 +399,22 @@ body.os4 .hud b#score{color:#ff7a3c; text-shadow:0 0 18px rgba(255,90,40,.65)}
   100%{border-color:var(--line); box-shadow:inset 0 1px 0 rgba(255,255,255,.08), 0 10px 30px rgba(0,0,0,.4)}
 }
 
+/* ---- キーボード農園のボタン(黄緑)・ランキングの農園タブ ---- */
+.diff-btn.garden{
+  font-family:'M PLUS Rounded 1c','Hiragino Maru Gothic ProN',sans-serif;
+  width:min(220px,90vw); color:#2f2a1f;
+  background:
+    repeating-linear-gradient(180deg, rgba(0,0,0,.1) 0 3px, transparent 3px 11px),
+    linear-gradient(180deg,#a7c96a,#7fa94a);
+  border:2px solid #4f7428; box-shadow:0 4px 0 #3b5a1c;
+}
+.diff-btn.garden .name{color:#fff8e0; font-weight:800; text-shadow:0 2px 0 rgba(40,60,15,.6)}
+.diff-btn.garden .desc{color:#253316}
+.diff-btn.garden .kbd{color:#e8f3d0}
+.diff-btn.garden:hover,.diff-btn.garden:focus-visible{border-color:#f4c542}
+.rank-tabs .btn.gtab{font-family:'M PLUS Rounded 1c',sans-serif; font-weight:700}
+.rank-tabs .btn.gtab.active{color:#1f2a10; background:linear-gradient(180deg,#b9dc7c,#8fbf5a); border-color:#5f8f32}
+
 /* =====================================================
    キーボード農園 — 庭の画面(#screen-garden)の中だけに効くスタイル
 ===================================================== */
@@ -5154,7 +5170,11 @@ async function syncPull(joining){
   try{
     const [mS,dS]=await Promise.all([ base.child("meta").once("value"), base.child("data").once("value") ]);
     const m=mS.val(), data=dS.val();
-    if(!m||!data||!m.t||m.t<=syncLastT){ syncPending=false; renderSyncState(); return; }
+    if(!m||!data||!m.t||m.t<=syncLastT){
+      syncPending=false; renderSyncState();
+      if(joining){ const n=$("bkSyncNote"); if(n) n.textContent = !data ? "※このコードには記録がまだありません。先に同期を始めたブラウザで、もう一度「同期を始める」を試してください" : "※記録の日時が読めませんでした。先に同期を始めたブラウザで何か操作してから、もう一度参加してください"; }
+      return;
+    }
     if(syncBusyScene()) return;                         // 遊んでいる最中なら、終わってから
     // こちらが持ち主で、送っていない操作がある: こちらを優先して送り直す(確認は出さない)
     if(!joining && !syncReadOnly && syncDirty){
@@ -5168,12 +5188,19 @@ async function syncPull(joining){
       const t=Date.now();
       try{ await base.child("backups/"+t).set({ data:b64enc(mine), t, from:syncDevLabel()+"(取り込み前)" }); await syncTrimBackups(base); }catch(e){}
     }
-    if(applyBundleString(data)){
+    if(!applyBundleString(data)){ const n=$("bkSyncNote"); if(n) n.textContent="※届いた記録を読めませんでした(形式が違います)"; return; }
+    {
       lsSet("sync:t",String(m.t));
       try{ sessionStorage.setItem("typinggarden:return", scene==="garden"?"garden":""); sessionStorage.setItem("typinggarden:synced","1"); }catch(e){}
       location.reload();
     }
-  }catch(e){}
+  }catch(e){
+    console.warn("[typinggarden sync] 取り込めませんでした",e);
+    const n=$("bkSyncNote");
+    if(n) n.textContent=/permission/i.test(String(e&&(e.code||e.message)||""))
+      ? "※クラウドの読み込みが拒否されました(Firebaseのルールで typinggarden/saves を許可してください)"
+      : "※記録を取り込めませんでした: "+String(e&&(e.code||e.message)||e).slice(0,80);
+  }
 }
 function applyBundleString(s){
   let o;
