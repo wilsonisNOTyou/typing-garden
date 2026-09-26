@@ -1,0 +1,44 @@
+{
+  "rules": {
+    "typinggarden": {
+      "scores": {
+        ".read": true,
+        "$diff": {
+          ".indexOn": ["n", "s", "e"],
+          "$id": {
+            ".write": true,
+            ".validate": "$diff.matches(/^(easy|normal|hard|ta-easy|ta-normal|ta-hard|oneshot)$/) && newData.hasChildren(['n', 's', 't']) && newData.child('n').isString() && newData.child('n').val().length >= 1 && newData.child('n').val().length <= 10 && newData.child('s').isNumber() && newData.child('s').val() >= 0 && newData.child('s').val() <= 20000 && (!$diff.matches(/^(easy|normal|hard)$/) || newData.child('s').val() <= 1500) && newData.child('t').isNumber() && (!newData.child('e').exists() || (newData.child('e').isNumber() && newData.child('e').val() >= 3)) && (!newData.child('m').exists() || newData.child('m').isNumber())"
+          }
+        }
+      },
+      "stats": {
+        ".read": true,
+        "plays": {
+          ".write": true,
+          ".validate": "newData.isNumber() && newData.val() >= (data.exists() ? data.val() : 0) && newData.val() <= (data.exists() ? data.val() : 0) + 1"
+        },
+        "screws": {
+          ".write": true,
+          ".validate": "newData.isNumber() && newData.val() >= (data.exists() ? data.val() : 0) && newData.val() <= (data.exists() ? data.val() : 0) + 3000"
+        }
+      },
+      "garden": {
+        ".read": true,
+        "$metric": {
+          ".indexOn": ["s"],
+          "$name": {
+            ".write": "$metric === 'money' || $metric === 'harvest'",
+            ".validate": "newData.hasChildren(['n', 's', 'o', 't']) && newData.child('n').isString() && newData.child('n').val().length >= 1 && newData.child('n').val().length <= 10 && newData.child('s').isNumber() && newData.child('s').val() >= 0 && newData.child('o').isString() && newData.child('t').isNumber() && (!data.exists() || data.child('o').val() === newData.child('o').val())"
+          }
+        }
+      },
+      "saves": {
+        "$code": {
+          ".read": true,
+          ".write": true,
+          ".validate": "$code.matches(/^[A-Z0-9]{16}$/)"
+        }
+      }
+    }
+  }
+}
