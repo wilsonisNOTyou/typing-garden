@@ -5269,12 +5269,20 @@ async function syncRestore(i){
     if(applyBundleString(b.data)){ lsSet("sync:t",String(t+1)); location.reload(); }
   }catch(e){ $("bkSyncNote").textContent=syncErrText(e); }
 }
+let syncPreparing=false;   // 最初の保存が終わるまでは、コードを見せない(途中で参加されないように)
 async function syncBegin(){
   if(!hasDB()){ $("bkSyncNote").textContent="※Firebase未設定のため同期できません"; return; }
-  syncCode=newSyncCode(); lsSet("sync:code",syncCode); syncLastT=0; syncReadOnly=false;
+  if(syncPreparing) return;
+  syncPreparing=true;
+  $("bkSyncNote").textContent="クラウドに記録を置いています…";
+  syncCode=newSyncCode(); syncLastT=0; syncReadOnly=false;
+  renderSyncState();
   syncConnect();
   await syncClaim();
-  if(!await syncPush(true)){ syncStop(); return; }
+  const ok=await syncPush(true);
+  syncPreparing=false;
+  if(!ok){ syncStop(); return; }
+  lsSet("sync:code",syncCode);             // 保存が終わってから、同期中として記録する
   $("bkSyncNote").textContent="同期を始めました。別のブラウザでこのコード(英数字16文字)を入力してください";
   renderSyncState();
 }
@@ -5332,6 +5340,7 @@ function renderSyncState(){
   const who = syncOwner && syncOwner.label ? `(${syncOwner.label})` : "";
   if(el){
     if(!syncCode) el.innerHTML="同期していません。パソコンとスマホなど、複数のブラウザで同じ記録を使えます。";
+    else if(syncPreparing) el.innerHTML="同期の準備中です。コードはクラウドへの保存が終わると表示されます…";
     else if(syncReadOnly) el.innerHTML=`同期中 <b>${showSyncCode(syncCode)}</b> ・ <b style="color:#ffb38a">見るだけ</b>(別のブラウザ${who.replace(/[<>&"]/g,"")}で遊んでいます。この画面をさわると、こちらに切り替わって最新の記録を取り込みます)`;
     else el.innerHTML=`同期中 <b>${showSyncCode(syncCode)}</b> ・ 自動で保存しています${syncPending?" ・ 新しい記録が届いています(タイトルに戻ると取り込みます)":""}`;
     el.classList.toggle("ro",!!syncReadOnly);
