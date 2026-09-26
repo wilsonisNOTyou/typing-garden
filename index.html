@@ -5188,6 +5188,7 @@ async function syncPull(joining){
       const t=Date.now();
       try{ await base.child("backups/"+t).set({ data:b64enc(mine), t, from:syncDevLabel()+"(取り込み前)" }); await syncTrimBackups(base); }catch(e){}
     }
+    saveLocalPrev(mine);
     if(!applyBundleString(data)){ const n=$("bkSyncNote"); if(n) n.textContent="※届いた記録を読めませんでした(形式が違います)"; return; }
     {
       lsSet("sync:t",String(m.t));
@@ -5239,6 +5240,7 @@ async function syncShowBackups(){
     const bk=await syncBase().child("backups").once("value");
     const list=[]; bk.forEach(c=>{ const v=c.val(); if(v&&v.data) list.push({ t:+v.t||+c.key, data:v.data, from:v.from||"" }); });
     list.sort((a,b)=>b.t-a.t);
+    try{ const lp=JSON.parse(localStorage.getItem(LS_PREFIX+"sync:prev")||"null"); if(lp&&lp.data) list.unshift({ t:lp.t, data:lp.data, from:"このブラウザの置き換え前(手元)" }); }catch(e){}
     syncBackupList=list;
     if(!list.length){ box.innerHTML="バックアップはまだありません"; return; }
     box.innerHTML="";
@@ -5284,27 +5286,45 @@ async function syncJoin(){
   if(!hasDB()){ note.textContent="※Firebase未設定のため同期できません"; return; }
   note.textContent="つないでいます…";
   try{
-    const snap=await syncBaseOf(code).child("data").once("value");
+    const base=syncBaseOf(code);
+    const [dS,mS]=await Promise.all([ base.child("data").once("value"), base.child("meta").once("value") ]);
+    const data=dS.val(), m=mS.val();
+    if(data){
+      // 先に取り込めるか確かめる。だめなら、このブラウザは何も変えない(持ち主にもならない)
+      let ok=false; try{ const o=JSON.parse(b64dec(data)); ok=!!o && typeof o==="object"; }catch(e){}
+      if(!ok){ note.textContent="※このコードの記録を読めませんでした(形式が違います)。今の記録はそのままです"; return; }
+      note.textContent="記録を取り込みます…";
+      const mine=bundleNow(), t=Date.now();
+      saveLocalPrev(mine);                       // 参加前の記録を手元にも残す
+      try{ await base.child("backups/"+t).set({ data:b64enc(mine), t, from:syncDevLabel()+"(参加前)" }); }catch(e){}
+      if(syncCode) syncStop();
+      syncCode=code; lsSet("sync:code",code); syncReadOnly=false; syncDirty=false;
+      await syncClaim();                         // 取り込めるとわかってから、参加したブラウザが持ち主になる
+      applyBundleString(data);
+      lsSet("sync:t", String((m && +m.t) || t));
+      try{ sessionStorage.setItem("typinggarden:return",""); sessionStorage.setItem("typinggarden:synced","1"); }catch(e){}
+      location.reload();
+      return;
+    }
+    // このコードにまだ記録がない: このブラウザの記録を置く
     if(syncCode) syncStop();
     syncCode=code; lsSet("sync:code",code); syncReadOnly=false;
     syncLastT=0; lsSet("sync:t","0");
-    await syncClaim();                       // 参加したブラウザで続きを遊ぶ
+    await syncClaim();
     syncConnect();
-    if(snap.val()){
-      note.textContent="記録を取り込みます…";
-      await syncPull(true);                  // 参加前の記録は確認なしで置き換える(バックアップには残す)
-    }else{
-      if(!await syncPush(true)){ syncStop(); return; }
-      note.textContent="このコードに、今の記録を置きました";
-    }
+    if(!await syncPush(true)){ syncStop(); return; }
+    note.textContent="このコードに、今の記録を置きました";
     renderSyncState();
   }catch(e){
     console.warn("[typinggarden sync] 読み込めませんでした",e);
-    syncCode=null; lsDel("sync:code");
     note.textContent=/permission/i.test(String(e&&(e.code||e.message)||""))
       ? "※クラウドの読み込みが拒否されました(Firebaseのルールで typinggarden/saves を許可してください)"
-      : "つなげませんでした。通信環境を確認してください";
+      : "つなげませんでした。通信環境を確認してください("+String(e&&(e.code||e.message)||e).slice(0,60)+")";
   }
+}
+/* 別の記録で置き換える前に、このブラウザの記録を手元に残す(クラウドのバックアップから戻せる) */
+function saveLocalPrev(bundle){
+  try{ localStorage.setItem(LS_PREFIX+"sync:prev", JSON.stringify({ t:Date.now(), data:b64enc(bundle) })); }catch(e){}
 }
 const syncBaseOf = code => db.ref(`${SYNC_PATH}/${code}`);
 function renderSyncState(){
