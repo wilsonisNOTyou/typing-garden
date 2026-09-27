@@ -3908,7 +3908,8 @@ function load(){
 }
 
 /* ---------- 水と時間の進行 ---------- */
-const need = c => CROP[c.id].hours*HOUR;
+const TUT_CROP_HOURS = 1;   // はじめてガイドで植えたにんじんは早く実る(ふつうは6時間)
+const need = c => (c.tut ? TUT_CROP_HOURS : CROP[c.id].hours)*HOUR;
 const isRipe = p => p.crop && p.crop.grown>=need(p.crop);
 /* その畑でスプリンクラーの水が届いている区画 */
 function covered(fi){
@@ -4522,6 +4523,7 @@ function act(k){
       if(n<=0){ nope(k,"種がありません。Tab でお店へ"); break; }
       S.seeds[S.seedId]=n-1;
       p.crop={ id:S.seedId, grown:0 }; p.emptySince=0;
+      if(window.tutFastCrop && S.seedId==="carrot") p.crop.tut=true;   // ガイドの「植える」で植えたにんじん
       hit(k); floatAt(k,"🌱"); sfx.plant();
       break;
     }
@@ -6319,7 +6321,7 @@ function tutStart(){
 }
 function tutEnd(){
   if(tut){ tut.done=true; tutSave(); }
-  window.tutGachaEggplant=false;
+  window.tutGachaEggplant=false; window.tutFastCrop=false;
   clearInterval(tutTimer); tutTimer=null;
   $("tutRing").style.display="none"; $("tutBubble").style.display="none";
 }
@@ -6327,6 +6329,7 @@ function tutEnd(){
 function tutTick(){
   const id=tutStep(); if(!id){ tutEnd(); return; }
   const st=Garden.tutState(), b=tut.base||st;
+  window.tutFastCrop = id==="plant";
   switch(id){
     case "type":     if(scene==="game") return tutNext(); break;
     case "plate":    if(scene==="result") return tutNext(); if(scene==="title") return tutGo(0); break;
@@ -6404,8 +6407,8 @@ function tutView(){
                  acts:[["時間を進める", ()=>{ Garden.tutGrow(); }, "Enter"]] };
       }
       if(g) return { sel:"#g-backBtn", text:"水が効いている作物は、タイピングするほど早く育ちます(1打で数分ぶん)。タイトルに戻って(Esc)、もう1回打ってみよう" };
-      if(scene==="title") return { sel:'.diff-btn[data-diff="easy"]', text:"もう1回タイピングして、作物の時間を進めよう(にんじんは72打ほどで実ります)" };
-      if(scene==="game")  return { sel:null, text:"打つほど畑の時間が進んでいます!" };
+      if(scene==="title") return { sel:'.diff-btn[data-diff="easy"]', text:"もう1回タイピングして、作物の時間を進めよう(ガイドで植えたにんじんは12打ほどで実ります)" };
+      if(scene==="game")  return { sel:null, text:"打つほど畑の時間が進みます! 12打ほど打ったら、Esc で戻って庭を見に行ってもOK" };
       if(scene==="result")return { sel:"#toGardenBtn", text:"庭で作物のようすを見てみよう(G)。まだ実っていなければ、もう1回打とう" };
       return { sel:null, text:"タイピングで作物を育てよう" };
     case "harvest":
