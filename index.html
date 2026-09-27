@@ -3855,7 +3855,17 @@ function newState(){
 let S = newState();
 
 /* ---------- 保存 ---------- */
-function save(){ if(window.tgReplacing) return; try{ localStorage.setItem(SAVE_KEY, JSON.stringify(S)); }catch(e){} }
+/* はじめてガイドの練習用の畑: ガイドの畑の手順の間だけ、S.fields をまっさらな畑1枚に入れ替える。
+   本当の畑は realFields に取っておき、保存・時間の経過・タイピングの時間は本当の畑にも届ける */
+let realFields=null, realCur=0;
+const FS = () => realFields || S.fields;   // 本当の畑(実績・案山子の時短などの計算用)
+function withReal(fn){
+  if(!realFields) return fn();
+  const sf=S.fields, sc=S.cur;
+  S.fields=realFields; S.cur=realCur;
+  try{ return fn(); } finally{ realFields=S.fields; realCur=S.cur; S.fields=sf; S.cur=sc; }
+}
+function save(){ if(window.tgReplacing) return; try{ localStorage.setItem(SAVE_KEY, JSON.stringify(realFields ? Object.assign({},S,{fields:realFields,cur:realCur}) : S)); }catch(e){} }
 function isValidState(o){
   return o && typeof o==="object" && typeof o.money==="number" && Array.isArray(o.fields) && o.fields.length>0;
 }
@@ -3934,13 +3944,20 @@ function grow(p,add,base){
   if(p.crop.grown>=n && !p.crop.ripeAt){
     p.crop.ripeAt=base+(n-before);
     // 実った瞬間に変異かどうかが決まる(畑で変異の絵が見える)
-    if(hasMut(p.crop.id) && Math.random()<effMut()) p.crop.mut=true;
+    if(hasMut(p.crop.id) && !p.crop.tut && Math.random()<effMut()) p.crop.mut=true;
     p.crop.rolled=true;
   }
 }
 function tick(now=Date.now()){
   const last=S.lastTick;
   if(now>last){
+    withReal(()=>tickFields(last,now));     // 練習用の畑の間も、本当の畑の時間を進める
+    if(realFields) tickFields(last,now);
+  }
+  S.lastTick=now;
+}
+function tickFields(last,now){
+  {
     const dt=now-last;
     S.fields.forEach((f,fi)=>{
       const cov=covered(fi);
@@ -3959,14 +3976,13 @@ function tick(now=Date.now()){
       }
     });
   }
-  S.lastTick=now;
 }
 
 /* ---------- 村人 ----------
    指定された区画で「その時に入荷している一番高級な作物」を
    植える → 水やり(いつも水あり) → 収穫 → 売却 まで自動で繰り返す。
    庭を閉じていた時間も、次に開いたときの tick() でまとめて処理される。 */
-const vilUsed = () => S.fields.reduce((a,f)=>a+KEYS.filter(k=>f[k].vil).length,0);
+const vilUsed = () => FS().reduce((a,f)=>a+KEYS.filter(k=>f[k].vil).length,0);
 const vilFree = () => S.villagers*VIL_SLOTS - vilUsed();
 /* 村人が育てる作物。元気の種を買うたびに、お店にいつも並ぶ作物の中で1段上がる */
 const VIL_LADDER = ["carrot","potato","tomato","corn","eggplant","strawberry","pumpkin","melon","keytree"];
@@ -4040,12 +4056,17 @@ function reportVillagers(){
   S.vLog={}; checkUnlocks(); save();
 }
 /* 案山子のいる畑の数(1打あたりの時短が増える) */
-const crowFields = () => S.fields.filter(f=>KEYS.some(k=>f[k].obj==="crow")).length;
+const crowFields = () => FS().filter(f=>KEYS.some(k=>f[k].obj==="crow")).length;
 const minPerKey  = () => MIN_PER_KEY + crowFields() + effMinute();
 /* タイピングで得た時間を、水の効いている作物にまとめて足す */
 function applySkip(minutes){
   const now=Date.now();
   tick(now);
+  let n=withReal(()=>skipFields(minutes,now));   // 本当の畑にも届ける
+  if(realFields) n+=skipFields(minutes,now);
+  return n;
+}
+function skipFields(minutes,now){
   let n=0;
   S.fields.forEach((f,fi)=>{
     const cov=covered(fi);
@@ -4094,6 +4115,7 @@ function flushInboxReport(){
 }
 /* カラス: 案山子のいない畑で、実ったまま長く放置された作物を持っていくことがある */
 function crowVisit(){
+  if(realFields) return;   // ガイドの練習用の畑の間は来ない
   const now=Date.now(), taken=[];
   S.fields.forEach((f,fi)=>{
     if(KEYS.some(k=>f[k].obj==="crow")) return;
@@ -4213,7 +4235,7 @@ const sickleInfo=()=>SICKLES[(S.sickLv||1)-1];
 function meets(u){
   if(!u) return true;
   if(u.sales   && S.totalSales  <u.sales)   return false;
-  if(u.fields  && S.fields.length<u.fields) return false;
+  if(u.fields  && FS().length<u.fields) return false;
   if(u.harvest && S.totalHarvest<u.harvest) return false;
   return true;
 }
@@ -4407,7 +4429,7 @@ function renderBar(){
   else if(on>0 || (S.objSel==="crow"&&crowPlaced())){ const o=OBJS[S.objSel]; $("g-objIc").innerHTML=o.icon; $("g-objNm").textContent=o.name; $("g-objCnt").textContent=on>0?("×"+on):"(回収できます)"; }
   else    { $("g-objIc").innerHTML="📦"; $("g-objNm").textContent="設置物なし"; $("g-objCnt").textContent=""; }
   $("g-fieldNo").textContent=S.cur+1; $("g-fieldMax").textContent=S.fields.length;
-  $("g-fieldHint").textContent = S.fields.length>5 ? "Shiftで5枚送り" : "";
+  $("g-fieldHint").textContent = realFields ? "ガイドの練習用の畑" : (S.fields.length>5 ? "Shiftで5枚送り" : "");
   $("g-money").textContent=fmtNum(S.money);
   $("g-rate").textContent=`タイピング1打で ${minPerKey()}分 進む`;
 }
@@ -4467,6 +4489,7 @@ function act(k){
   tick();
   const f=field(), p=f[k];
   selKey=k;
+  if(realFields && (S.tool===5 || S.tool===6)){ nope(k,"ガイドの練習用の畑では、肥料と設置物は使えません"); save(); renderAll(); return; }
   // P(案山子置き場)で触れるのは案山子だけ。収穫のときに誤って外さないよう、素手では回収できない
   if(p.s==="post" && !(S.tool===6 && S.objSel==="crow")){
     nope(k, p.obj ? "案山子を回収するには 6 で案山子を持って押します" : "P は案山子置き場です。6 で案山子を持って置けます");
@@ -4691,7 +4714,7 @@ function shopRows(){
                 :`村人は ${now.icon}${now.name} を育てています。これ以上は上がりません`,
         keys: next?"<b>Enter</b> 買う":"", enter:()=>next&&buyVilUp(), shift:()=>next&&buyVilUp() });
     }
-    const nf=S.fields.length, price=FIELD_PRICES[nf];
+    const nf=FS().length, price=FIELD_PRICES[nf];
     rows.push({ ic:"🎫", nm: price!=null?`畑チケット <span style="color:var(--ink-l)">${fmtNum(price)}キー</span>`:"畑チケット",
       ds: price!=null?`27区画の畑をもう1枚増やします(今は ${nf}枚)。↑↓ で行き来できます`:`畑はこれ以上増やせません(${nf}枚)`,
       keys: price!=null?"<b>Enter</b> 買う":"", enter:()=>price!=null&&buyField(), shift:()=>price!=null&&buyField() });
@@ -4883,6 +4906,7 @@ function toggleAuto(id,which){
   save(); renderAll();
 }
 function buyField(){
+  if(realFields){ sfx.nope(); toast("はじめてガイドの練習中は畑を買えません","warn"); return; }
   const price=FIELD_PRICES[S.fields.length]; if(price==null||!spend(price)) return;
   S.fields.push(makeField()); S.cur=S.fields.length-1;
   toast(`畑が ${S.fields.length}枚 になりました。↑↓ で行き来できます`,"good",3600);
@@ -5388,11 +5412,11 @@ const GOALS = [
   { cat:"図鑑", id:"b60",  ic:"📖", nm:"分厚い図鑑",       ds:"図鑑を60項目うめる",           need:60,  now:()=>bookProgress().got, rw:10000 },
   { cat:"図鑑", id:"b100", ic:"📚", nm:"図鑑の大家",       ds:"図鑑を100項目うめる",          need:100, now:()=>bookProgress().got, rw:30000 },
   { cat:"図鑑", id:"bAll", ic:"🏆", nm:"図鑑コンプリート", ds:"図鑑をすべてうめる",           need:()=>bookProgress().all, now:()=>bookProgress().got, rw:300000 },
-  { cat:"農園づくり", id:"o1", ic:"💦", nm:"畑の道具",     ds:"スプリンクラーか案山子を置く", need:1, now:()=>S.fields.some(f=>KEYS.some(k=>f[k].obj))?1:0, rw:500 },
-  { cat:"農園づくり", id:"f2", ic:"🎫", nm:"畑を広げる",   ds:"畑を2枚にする",                need:2, now:()=>S.fields.length, rw:1000 },
-  { cat:"農園づくり", id:"f3", ic:"🎫", nm:"広い農園",     ds:"畑を3枚にする",                need:3, now:()=>S.fields.length, rw:5000 },
-  { cat:"農園づくり", id:"f5", ic:"🎫", nm:"見渡すかぎりの畑", ds:"畑を5枚にする",            need:5, now:()=>S.fields.length, rw:30000 },
-  { cat:"農園づくり", id:"f10",ic:"🎫", nm:"キーボード大陸",   ds:"畑を10枚にする",            need:10, now:()=>S.fields.length, rw:100000 },
+  { cat:"農園づくり", id:"o1", ic:"💦", nm:"畑の道具",     ds:"スプリンクラーか案山子を置く", need:1, now:()=>FS().some(f=>KEYS.some(k=>f[k].obj))?1:0, rw:500 },
+  { cat:"農園づくり", id:"f2", ic:"🎫", nm:"畑を広げる",   ds:"畑を2枚にする",                need:2, now:()=>FS().length, rw:1000 },
+  { cat:"農園づくり", id:"f3", ic:"🎫", nm:"広い農園",     ds:"畑を3枚にする",                need:3, now:()=>FS().length, rw:5000 },
+  { cat:"農園づくり", id:"f5", ic:"🎫", nm:"見渡すかぎりの畑", ds:"畑を5枚にする",            need:5, now:()=>FS().length, rw:30000 },
+  { cat:"農園づくり", id:"f10",ic:"🎫", nm:"キーボード大陸",   ds:"畑を10枚にする",            need:10, now:()=>FS().length, rw:100000 },
   { cat:"農園づくり", id:"v1", ic:"👩‍🌾", nm:"なかまができた", ds:"村人を雇う",               need:1, now:()=>S.villagers, rw:3000 },
   { cat:"農園づくり", id:"v3", ic:"👩‍🌾", nm:"にぎやかな村",   ds:"村人を3人雇う",            need:3, now:()=>S.villagers, rw:20000 },
   { cat:"貴重品", id:"t1",  ic:"✨", nm:"たからもの",       ds:"貴重品を手に入れる",           need:1, now:treasKinds, rw:10000 },
@@ -5466,9 +5490,18 @@ function tutState(){
            money:S.money, tool:S.tool, modal, shopTab,
            fresh:!S.totalHarvest && !S.gachaCount && !S.totalSales };
 }
-/* 2回目以降のガイドで種が1つもないときは、にんじんの種を1つ渡す */
+/* ガイドの「植える」: にんじんの種がなければ1つ渡し、にんじんを選んでおく */
 function tutSeed(){
-  S.seeds.carrot=(S.seeds.carrot||0)+1; S.seedId="carrot"; save();
+  if(!(S.seeds.carrot>0)) S.seeds.carrot=1;
+  S.seedId="carrot"; save();
+  if(document.body.classList.contains("garden")) renderAll();
+}
+/* ガイドの畑の手順(耕す〜収穫)の間だけ、まっさらな練習用の畑に入れ替える */
+function tutSandbox(on){
+  if(on===!!realFields) return;
+  tick();
+  if(on){ realFields=S.fields; realCur=S.cur; S.fields=[makeField()]; S.cur=0; }
+  else{ S.fields=realFields; S.cur=realCur; realFields=null; save(); }
   if(document.body.classList.contains("garden")) renderAll();
 }
 function tutGive(n){ S.money+=n; save(); if(document.body.classList.contains("garden")) renderAll(); }
@@ -5713,7 +5746,7 @@ function debugUnlock(){
   S.lastTick=Date.now();
   save();
 }
-return { enter, leave, onKey, summary, debugUnlock, tutState, tutGive, tutGrow, tutSeed, refreshRank, openModal, ownerId, useName };
+return { enter, leave, onKey, summary, debugUnlock, tutState, tutGive, tutGrow, tutSeed, tutSandbox, refreshRank, openModal, ownerId, useName };
 })();
 
 function openGarden(){ show("garden"); Garden.enter(); }
@@ -6305,7 +6338,9 @@ let tut=null, tutTimer=null;
 function tutLoad(){ try{ tut=JSON.parse(localStorage.getItem(TUT_KEY)||"null"); }catch(e){ tut=null; } }
 function tutSave(){ try{ localStorage.setItem(TUT_KEY, JSON.stringify(tut)); }catch(e){} }
 const tutStep = () => tut && !tut.done ? TUT_STEPS[tut.step] : null;
+const TUT_FIELD_STEPS=["till","plant","water","grow","harvest"];   // 練習用の畑で行う手順
 function tutGo(i, skipped){
+  Garden.tutSandbox(TUT_FIELD_STEPS.includes(TUT_STEPS[i]));        // 先に畑を切り替えてから、今の状態を覚える
   tut.step=i; tut.base=Garden.tutState(); tut.skipped=!!skipped;   // skipped: 前の手順を自動でとばした
   if(TUT_STEPS[i]==="gacha" && !tut.gave){ tut.gave=true; tut.gift=true; Garden.tutGive(100); }   // ガイドのたびに100キー
   tutSave(); tutRender();
@@ -6322,6 +6357,7 @@ function tutStart(){
 function tutEnd(){
   if(tut){ tut.done=true; tutSave(); }
   window.tutGachaEggplant=false; window.tutFastCrop=false;
+  try{ Garden.tutSandbox(false); }catch(e){}   // 本当の畑に戻す
   clearInterval(tutTimer); tutTimer=null;
   $("tutRing").style.display="none"; $("tutBubble").style.display="none";
 }
@@ -6330,6 +6366,7 @@ function tutTick(){
   const id=tutStep(); if(!id){ tutEnd(); return; }
   const st=Garden.tutState(), b=tut.base||st;
   window.tutFastCrop = id==="plant";
+  Garden.tutSandbox(TUT_FIELD_STEPS.includes(id));
   switch(id){
     case "type":     if(scene==="game") return tutNext(); break;
     case "plate":    if(scene==="result") return tutNext(); if(scene==="title") return tutGo(0); break;
@@ -6341,7 +6378,7 @@ function tutTick(){
                      break;
     case "plant":    if(st.crops>b.crops) return tutNext();
                      if(st.empty===0) return tutPass();                  // 植えられる区画がない
-                     if(st.seeds===0 && !b.seedGift){ b.seedGift=true; tutSave(); Garden.tutSeed(); }   // 種がなければ1つ渡す
+                     if(!b.seedGift){ b.seedGift=true; tutSave(); Garden.tutSeed(); }   // にんじんの種を用意して選ぶ(なければ1つ渡す)
                      break;
     case "water":    if(st.wet>b.wet) return tutNext();
                      if(st.ripe>0 || st.dry===0) return tutPass(); break;
@@ -6392,7 +6429,7 @@ function tutView(){
            : { sel:null, text:"キーボード農園へ行こう" };
     case "till":
       if(!g) return toFarm;
-      return hold(2,"クワ","畑を耕すところから始めよう") || { sel:"#g-planter .plot.grass", text: M ? "草むらの区画をタップして耕そう" : "草むらの区画をクリックして耕そう(区画に書いてある英字のキーでもOK)" };
+      return hold(2,"クワ","ここはガイド用の練習の畑です(本当の畑はそのまま)。畑を耕すところから始めよう") || { sel:"#g-planter .plot.grass", text: M ? "草むらの区画をタップして耕そう" : "草むらの区画をクリックして耕そう(区画に書いてある英字のキーでもOK)" };
     case "plant":
       if(!g) return toFarm;
       return hold(4,"種", tut.skipped ? "耕した区画に種をまこう" : "耕せた! 次は種まき") || { sel:"#g-planter .plot.soil:not(.growing):not(.ripe):not(.obj)",
@@ -6550,7 +6587,11 @@ function tutBoot(){
     }
     return;
   }
-  if(!tut.done){ clearInterval(tutTimer); tutTimer=setInterval(tutTick,300); tutRender(); }
+  if(!tut.done){
+    // 練習用の畑は保存しないので、畑の手順の途中で開き直したときは「耕す」からやり直す
+    if(TUT_FIELD_STEPS.includes(tutStep())) tutGo(TUT_STEPS.indexOf("till"));
+    clearInterval(tutTimer); tutTimer=setInterval(tutTick,300); tutRender();
+  }
 }
 
 refreshBestLine();
