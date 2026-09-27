@@ -5489,13 +5489,22 @@ async function pushRank(name){
   const t=(old&&old.t)||Date.now();
   await refM.set({ n:name, s:Math.floor(S.money), o:S.owner, t });
   await refH.set({ n:name, s:S.totalHarvest,      o:S.owner, t });
-  try{ await refB.set({ n:name, s:bookProgress().got, o:S.owner, t }); }catch(e){}   // ルールが古いと書けないので、失敗しても続ける
+  // 図鑑はルールが古いと書けないので、失敗しても続ける(番付の画面で知らせる)
+  try{ await refB.set({ n:name, s:bookProgress().got, o:S.owner, t }); rankBookErr=""; }
+  catch(e){ rankBookErr=String(e&&(e.code||e.message)||e); console.warn("[typinggarden rank] 図鑑の番付に書き込めませんでした",e); }
   return {ok:true};
 }
 const hasDb = () => { try{ return !!db; }catch(e){ return false; } };
+let rankBookErr="";
+/* 番付を今の記録で更新する(ページを開いたとき・庭に入ったとき・出たとき) */
+function refreshRank(){
+  if(!S.rankName || !hasDb() || isDebugSave()) return Promise.resolve();
+  return pushRank(S.rankName).catch(e=>console.warn("[typinggarden rank]",e));
+}
 function prepareRankNow(){
   $("g-rankNow").innerHTML=`所持キー <b>${fmtNum(S.money)}</b> ・ 累計収穫 <b>${fmtNum(S.totalHarvest)}</b>個 ・ 図鑑 <b>${bookProgress().got}</b>項目`+
-    (S.rankName?`<br>「${esc(S.rankName)}」として載っています。庭を出るたびに自動で更新されます`:"");
+    (S.rankName?`<br>「${esc(S.rankName)}」として載っています。ページを開いたときと、庭に出入りするたびに自動で更新されます`:"")+
+    (rankBookErr?`<br><span style="color:#c0392b">※図鑑の番付に書き込めませんでした。Firebase のルールを最新の database.rules.json で公開してください(${esc(rankBookErr.slice(0,40))})</span>`:"");
 }
 function prepareRank(){
   tick();
@@ -5638,6 +5647,7 @@ function enter(){
   try{
     if(playerName && S.rankName!==playerName) useName(playerName, S.rankName).catch(()=>{});
     else if(!playerName && S.rankName) window.setPlayerName(S.rankName);
+    else refreshRank();
   }catch(e){}
   if(!hadSave && !welcomed){
     welcomed=true;
@@ -5662,7 +5672,7 @@ function leave(){
   closeModal(true);
   tick(); save();
   // 番付に載せている人は、庭を出るたびに記録を更新
-  if(S.rankName && hasDb()) pushRank(S.rankName).catch(()=>{});
+  refreshRank();
 }
 /* タイトル画面に出す庭のようす */
 function summary(){
@@ -5701,7 +5711,7 @@ function debugUnlock(){
   S.lastTick=Date.now();
   save();
 }
-return { enter, leave, onKey, summary, debugUnlock, tutState, tutGive, tutGrow, tutSeed, openModal, ownerId, useName };
+return { enter, leave, onKey, summary, debugUnlock, tutState, tutGive, tutGrow, tutSeed, refreshRank, openModal, ownerId, useName };
 })();
 
 function openGarden(){ show("garden"); Garden.enter(); }
@@ -6550,6 +6560,8 @@ try{
   sessionStorage.removeItem("typinggarden:return");
 }catch(e){}
 tutBoot();   // はじめて遊ぶ人にはガイドを出す
+// 開いたときに番付(所持キー・累計収穫・図鑑)を今の記録で更新する(同期の取り込みを待ってから)
+setTimeout(()=>{ try{ if(!window.tgReplacing && !mGated()) Garden.refreshRank(); }catch(e){} }, 4000);
 window.addEventListener("beforeunload",()=>{ try{ syncPush(false,true); }catch(e){} });
 // スマホはアプリの切り替えで閉じられることが多いので、隠れたときにも保存して送る
 // 戻ってきたときは、届いている記録を取り込む
