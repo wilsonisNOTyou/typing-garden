@@ -442,6 +442,14 @@ html.mobile .bk-pconly{display:none}
   background:#fff3cd; color:#5a4300; border:3px solid #c79100; border-radius:12px; padding:.7rem 1rem;
   font-weight:800; max-width:min(520px,calc(100vw - 24px)); text-align:center; box-shadow:0 8px 24px rgba(0,0,0,.4)}
 #imeWarn.show{display:block}
+.news-new:not(:empty){display:inline-block; margin:0 .3rem 0 .1rem; padding:0 .35em; border-radius:4px; background:#e0503c; color:#fff; font-size:.7rem; font-weight:800; letter-spacing:.05em; vertical-align:.1em}
+.news-list{max-height:60vh; overflow:auto; text-align:left}
+.news-item{padding:.6rem 0 .8rem; border-bottom:1px dashed var(--line)}
+.news-item:last-child{border-bottom:none}
+.news-item .d{color:var(--amber); font-size:.85rem}
+.news-item h3{margin:.15rem 0 .35rem; font-size:1.02rem}
+.news-item ul{margin:0; padding-left:1.2rem; line-height:1.7; font-size:.92rem}
+.result-garden{color:#9fd36a; font-size:.95rem; margin:.1rem 0 .4rem; min-height:1.2em}
 /* ---- タイピング単語帳 ---- */
 .diff-btn.books{border-color:#5b6f9a; width:min(220px,90vw)}
 .diff-btn.books .name{color:#a9c4ff}
@@ -663,6 +671,12 @@ body.garden #app{width:min(960px,96vw); padding:1.2rem 0 2rem}
 }
 @keyframes g-floatup{0%{opacity:0; transform:translate(-50%,6px)}20%{opacity:1}100%{opacity:0; transform:translate(-50%,-34px)}}
 #screen-garden .under{display:grid; grid-template-columns:1.3fr 1fr; gap:.8rem; margin-top:1.3rem}
+#screen-garden .under.has-counter{grid-template-columns:1.3fr 1fr .75fr}
+#screen-garden .counter h3 small{font-weight:500; color:var(--ink-l); font-size:.75rem}
+#screen-garden .counter .crow{display:flex; justify-content:space-between; align-items:baseline; padding:.25rem 0; border-bottom:1px dashed #e2d6bc; font-size:.9rem}
+#screen-garden .counter .crow:last-child{border-bottom:none}
+#screen-garden .counter .crow b{font-size:1.2rem}
+#screen-garden .counter .crow.hot b{color:#c0392b}
 #screen-garden .card{background:rgba(251,247,238,.9); border-radius:12px; padding:.8rem 1rem; min-height:5.2rem}
 #screen-garden .card h3{font-size:.85rem; color:var(--ink-l); font-weight:700; margin-bottom:.35rem}
 #screen-garden #g-info .big{font-weight:800; font-size:1.1rem}
@@ -838,6 +852,7 @@ body.garden #app{width:min(960px,96vw); padding:1.2rem 0 2rem}
 #screen-garden .bookdetail .bic{position:relative; display:inline-block; width:100%}
 #screen-garden .bookdetail .bic.q1{filter:drop-shadow(0 0 6px rgba(244,197,66,.55))}
 #screen-garden .bookdetail .bic.q2{filter:drop-shadow(0 0 12px rgba(244,197,66,.95))}
+#screen-garden .bookdetail .bic.q4{filter:drop-shadow(0 0 10px rgba(255,214,90,1)) drop-shadow(0 0 22px rgba(255,170,40,.85))}
 #screen-garden .bookdetail .bq{
   position:absolute; left:50%; top:0; margin-left:1.3rem; font-size:1.2rem; font-weight:800;
   color:#e0a800; text-shadow:0 1px 0 #fff;
@@ -1016,6 +1031,8 @@ body.garden #app{width:min(960px,96vw); padding:1.2rem 0 2rem}
 #screen-garden .qmarks{display:flex; gap:.15rem}
 #screen-garden .qm{font-size:.7rem; color:#d5c8ae}
 #screen-garden .qm.on{color:#e0a800}
+#screen-garden .qm.st{font-size:.85rem; margin-left:-.05em}
+#screen-garden .qm.st.on{color:#f0b400; text-shadow:0 0 5px rgba(255,190,0,.9)}
 #screen-garden .btabs{display:flex; justify-content:center; gap:.3rem; margin-bottom:.4rem}
 #screen-garden .btab{
   font-size:.75rem; font-weight:700; color:var(--ink-l);
@@ -1278,8 +1295,9 @@ html.mobile #screen-garden .tlist{grid-template-columns:1fr}
       <button class="btn" id="backupBtn">別端末と同期 <span class="kbdh">K</span></button>
       <button class="btn" id="fbBtn">要望・バグ報告 <span class="kbdh">F</span></button>
       <button class="btn" id="tutBtn">遊び方ガイド <span class="kbdh">H</span></button>
+      <button class="btn" id="newsBtn">更新情報 <span class="news-new" id="newsNew"></span><span class="kbdh">U</span></button>
     </div>
-    <p class="hint">キー 1〜9 でモードを選んで開始 ・ G 庭 ・ R ランキング ・ D 図鑑 ・ K 別端末と同期 / ローマ字入力(shi・si どちらもOK)<br>8 単語帳 ・ N 名前 ・ F 要望・バグ報告 ・ H 遊び方ガイド ・ Esc でいつでもタイトルに戻る</p>
+    <p class="hint">キー 1〜9 でモードを選んで開始 ・ G 庭 ・ R ランキング ・ D 図鑑 ・ K 別端末と同期 / ローマ字入力(shi・si どちらもOK)<br>8 単語帳 ・ N 名前 ・ F 要望・バグ報告 ・ H 遊び方ガイド ・ U 更新情報 ・ Esc でいつでもタイトルに戻る</p>
     <div class="hazard" aria-hidden="true"><span class="k">Q</span><span class="s">🌱</span><span class="k">W</span><span class="k">E</span><span class="s">🥕</span><span class="k">R</span><span class="k">T</span><span class="s">🌿</span><span class="k">Y</span><span class="k">U</span><span class="s">🍅</span><span class="k">I</span><span class="k">O</span><span class="s">🌽</span><span class="k">P</span><span class="s">🍓</span></div>
   </section>
 
@@ -1311,6 +1329,7 @@ html.mobile #screen-garden .tlist{grid-template-columns:1fr}
     <div class="result-count" id="resultCount"><span id="resultScore">0</span><span style="font-size:.35em" id="resultUnit">個</span></div>
     <p class="result-sub" id="resultSubLine"></p>
     <p class="result-new" id="resultNew"></p>
+    <p class="result-garden" id="resultGarden"></p>
     <div class="register" id="registerBox">
       <p class="reg-as" id="regAs" style="display:none"><b id="regAsName"></b> としてランキングに登録します</p>
       <input id="nameInput" class="name-input" maxlength="10" placeholder="プレイヤー名" autocomplete="off">
@@ -1348,6 +1367,7 @@ html.mobile #screen-garden .tlist{grid-template-columns:1fr}
     <p class="tab-group-label">キーボード農園</p>
     <div class="rank-tabs">
       <button class="btn gtab" id="tab-g-money">所持キー</button>
+      <button class="btn gtab" id="tab-g-earn">累計獲得キー</button>
       <button class="btn gtab" id="tab-g-harvest">累計収穫</button>
       <button class="btn gtab" id="tab-g-book">図鑑</button>
     </div>
@@ -1401,6 +1421,12 @@ html.mobile #screen-garden .tlist{grid-template-columns:1fr}
       <div class="card">
         <h3>収穫かご</h3>
         <div id="g-basket"></div>
+      </div>
+      <div class="card counter" id="g-counter" style="display:none">
+        <h3>畑のカウンタ <small>全畑</small></h3>
+        <div class="crow"><span>🌾 実っている</span><b id="g-cRipe">0</b></div>
+        <div class="crow"><span>🟫 何も植えていない</span><b id="g-cEmpty">0</b></div>
+        <div class="crow"><span>💧 水が切れている</span><b id="g-cDry">0</b></div>
       </div>
     </div>
 
@@ -1474,7 +1500,7 @@ html.mobile #screen-garden .tlist{grid-template-columns:1fr}
         <div id="g-bookList" class="plist booklist"></div>
         <div id="g-bookDetail" class="bookdetail"></div>
       </div>
-      <div class="keyhint"><b>↑ ↓</b> 作物を選ぶ ・ <b>← →</b> 品質(ふつう / ☆ / ☆☆ / 変異)を切り替え ・ <b>Space</b> / <b>Esc</b> 閉じる</div>
+      <div class="keyhint"><b>↑ ↓</b> 作物を選ぶ ・ <b>← →</b> 品質(ふつう / ☆ / ☆☆ / ☆☆☆ / 変異)を切り替え ・ <b>Space</b> / <b>Esc</b> 閉じる</div>
     </div>
   </div>
 
@@ -1497,17 +1523,18 @@ html.mobile #screen-garden .tlist{grid-template-columns:1fr}
     <div class="panel savebox">
       <div class="phead"><h2>番付</h2><button class="sbtn xbtn" data-close style="margin-left:auto">閉じる ✕</button></div>
       <p id="g-rankNow"></p>
-      <p>所持キー・累計収穫数・図鑑の番付(ランキング)です。プレイヤー名で自動で載り、庭を出るたびに更新されます。名前を書きかえて Enter で、ランキングと番付の名前をまとめて変えられます。</p>
+      <p>所持キー・累計獲得キー・累計収穫数・図鑑の番付(ランキング)です。プレイヤー名で自動で載り、庭を出るたびに更新されます。名前を書きかえて Enter で、ランキングと番付の名前をまとめて変えられます。</p>
       <input id="g-rankName" class="rk-input" maxlength="10" placeholder="庭主の名前" autocomplete="off">
       <div class="pfoot"><span class="note" id="g-rankNote"></span><button class="sbtn main" id="g-rankBtn">決める(Enter)</button></div>
       <div class="tabs grk-tabs" id="g-rankTabs">
         <button class="tab" data-rk="g-money">所持キー</button>
+        <button class="tab" data-rk="g-earn">累計獲得</button>
         <button class="tab" data-rk="g-harvest">累計収穫</button>
         <button class="tab" data-rk="g-book">図鑑</button>
       </div>
       <ol class="grk-list" id="g-rankList"></ol>
       <p class="grk-note" id="g-rankListNote"></p>
-      <div class="keyhint"><b>N</b> 名前を書きかえる → <b>Enter</b> ・ 入力欄の <b>Esc</b> で入力をやめる ・ <b>← →</b> 所持キー / 累計収穫 / 図鑑 ・ <b>9</b> / <b>Esc</b> 閉じる</div>
+      <div class="keyhint"><b>N</b> 名前を書きかえる → <b>Enter</b> ・ 入力欄の <b>Esc</b> で入力をやめる ・ <b>← →</b> 所持キー / 累計獲得 / 累計収穫 / 図鑑 ・ <b>9</b> / <b>Esc</b> 閉じる</div>
     </div>
   </div>
 
@@ -1612,6 +1639,15 @@ html.mobile #screen-garden .tlist{grid-template-columns:1fr}
     <input class="bk-codein fb-name" id="fbName" maxlength="20" placeholder="名前(なくても大丈夫です)" autocomplete="off">
     <div class="bk-foot"><span class="bk-note" id="fbNote"></span><button class="btn primary" id="fbSend">送る</button></div>
     <p class="keynav"><b>1〜6</b> 種類 ・ <b>T</b> 内容を書く ・ <b>N</b> 名前 ・ <b>Ctrl+Enter</b> / <b>Enter</b>(入力欄の外) 送る ・ 入力中の <b>Esc</b> で入力をやめる ・ <b>Esc</b> 閉じる</p>
+  </div>
+</div>
+
+<!-- 更新情報 -->
+<div id="news" class="bk-modal">
+  <div class="bk-panel">
+    <div class="bk-head"><h2>更新情報</h2><button class="btn bk-x" id="newsClose">閉じる ✕</button></div>
+    <div id="newsList" class="news-list"></div>
+    <p class="keynav"><b>↑ ↓</b> スクロール ・ <b>U</b> / <b>Esc</b> 閉じる</p>
   </div>
 </div>
 
@@ -2007,10 +2043,10 @@ const DIFF_LABEL = {
 const MISS_PENALTY = { easy: 10, normal: 7, hard: 5 }; // このミス数ごとにキー-1本
 const DICT_TABS = ["easy","normal","hard"];            // 辞典に並べる難易度
 /* ランキングのタブ: スコアアタック → タイムアタック → ノーミス勝負 の順 */
-const RANK_TABS = ["easy","normal","hard","ta-easy","ta-normal","ta-hard","oneshot", "g-money","g-harvest","g-book"];
-const isGardenRank = d => d==="g-money" || d==="g-harvest" || d==="g-book";
-const gRankUnit = d => d==="g-money" ? "キー" : (d==="g-book" ? "項目" : "個");
-DIFF_LABEL["g-money"]="キーボード農園 所持キー"; DIFF_LABEL["g-harvest"]="キーボード農園 累計収穫"; DIFF_LABEL["g-book"]="キーボード農園 図鑑";
+const RANK_TABS = ["easy","normal","hard","ta-easy","ta-normal","ta-hard","oneshot", "g-money","g-earn","g-harvest","g-book"];
+const isGardenRank = d => d==="g-money" || d==="g-harvest" || d==="g-book" || d==="g-earn";
+const gRankUnit = d => (d==="g-money"||d==="g-earn") ? "キー" : (d==="g-book" ? "項目" : "個");
+DIFF_LABEL["g-money"]="キーボード農園 所持キー"; DIFF_LABEL["g-harvest"]="キーボード農園 累計収穫"; DIFF_LABEL["g-book"]="キーボード農園 図鑑"; DIFF_LABEL["g-earn"]="キーボード農園 累計獲得キー";
 
 /* タイムアタック: モードごとの出題元と規定本数 */
 const TA_MODES = {
@@ -2281,13 +2317,14 @@ let gardenKeys=0;       // このプレイで正しく打った打鍵数(キー�
 
 /* キーボード農園へ「正しい打鍵数」と「外したキー」を届ける(庭を開いたときに受け取られる) */
 function sendToGarden(keys,screws){
-  keys=keys|0; screws=screws|0;
+  const toInt = v => Math.max(0, Math.floor(Number(v)||0));   // 大きな数(ノーミス勝負の倍々)でも壊れないように
+  keys=toInt(keys); screws=toInt(screws);
   if(keys<=0 && screws<=0) return;
   try{
     const K="typinggarden:garden:inbox";
     const cur=JSON.parse(localStorage.getItem(K)||"{}")||{};
-    cur.keys=(cur.keys|0)+Math.max(0,keys);
-    cur.screws=(cur.screws|0)+Math.max(0,screws);
+    cur.keys=toInt(cur.keys)+keys;
+    cur.screws=toInt(cur.screws)+screws;
     localStorage.setItem(K,JSON.stringify(cur));
   }catch(e){}
 }
@@ -2527,7 +2564,9 @@ async function endGame(){
   clearInterval(timerId); clearInterval(cdId); cdId=null; running=false;
   $("imeWarn").classList.remove("show");
   resetStage();   // 背景の熱演出を戻す
-  recordStats(score); // ランキング登録の有無に関係なく記録
+  const toGarden=gardenScrews(diff,score);
+  recordStats(score, toGarden); // ランキング登録の有無に関係なく記録(農園には難易度などに応じたキーを届ける)
+  showGardenScrews("resultGarden", toGarden);
   if(diff==="book"){ endBookGame(); return; }
   $("registerBox").style.display="";
   $("titleBtn").textContent="タイトルへ (Esc)";
@@ -2562,6 +2601,19 @@ async function endGame(){
   refreshBestLine();
 }
 
+/* ---------- 農園に届くキー ----------
+   スコアアタック・タイムアタック: イージー×1 / ノーマル×2 / ハード×3
+   ノーミス勝負: 1〜10語目は1語1個、11〜20語目は2個、21〜30語目は4個…と10語ごとに倍
+   単語帳: 1語1個 */
+const SCREW_MULT={ easy:1, normal:2, hard:3, "ta-easy":1, "ta-normal":2, "ta-hard":3 };
+function gardenScrews(d,n){
+  n=Math.max(0,n|0);
+  if(d==="oneshot"){ let t=0; for(let i=0;i<n;i++) t+=2**Math.floor(i/10); return t; }
+  if(d==="book") return n;
+  return n*(SCREW_MULT[d]||1);
+}
+const showGardenScrews = (el,n) => { $(el).textContent = n>0 ? `農園に ${Math.floor(n).toLocaleString("ja-JP")}キー 届きます` : ""; };
+
 /* ---------- 入力 ---------- */
 const START_KEYS={"1":"easy","2":"normal","3":"hard","4":"ta-easy","5":"ta-normal","6":"ta-hard","7":"oneshot"};
 document.addEventListener("keydown",e=>{
@@ -2574,6 +2626,12 @@ document.addEventListener("keydown",e=>{
   if(nmOpen){
     if(e.key==="Enter"){ e.preventDefault(); nmSave(); }
     else if(e.key==="Escape"){ e.preventDefault(); closeNameWin(); }
+    return;
+  }
+  // 更新情報のウィンドウ
+  if(newsOpen){
+    if(e.key==="Escape"||e.key==="u"||e.key==="U"){ e.preventDefault(); closeNews(); }
+    else if(e.key==="ArrowUp"||e.key==="ArrowDown"){ e.preventDefault(); $("newsList").scrollBy(0,e.key==="ArrowDown"?60:-60); }
     return;
   }
   // 要望・バグ報告のウィンドウが開いているときは、Esc で閉じるだけ
@@ -2614,6 +2672,7 @@ document.addEventListener("keydown",e=>{
     if(e.key==="k"||e.key==="K") openBackup();
     if(e.key==="8") openBooks();
     if(e.key==="f"||e.key==="F") openFeedback();
+    if(e.key==="u"||e.key==="U") openNews();
     if(e.key==="h"||e.key==="H") tutAsk(false);
     if(e.key==="n"||e.key==="N"){ e.preventDefault(); openNameWin(); }
     if((e.key==="t"||e.key==="T") && syncReadOnly) syncTakeOver();
@@ -3218,6 +3277,53 @@ function endBookGame(){
   show("result");
 }
 
+/* ---------- 更新情報 ----------
+   新しいものを上に足していく。d は YYYY-MM-DD */
+const NEWS=[
+  { d:"2026-10-02", t:"番付に「累計獲得キー」が登場しました", items:[
+    "これまでに手に入れたキーの合計で競う番付です。作物や種の売上(村人・自動売却を含む)、タイピングから農園に届いたキー、実績のごほうびを合わせて数えます",
+    "農園の番付(9)と、タイトルのランキングの両方で見られます。これまでの分もさかのぼって数えます",
+  ]},
+  { d:"2026-10-02", t:"お店の効率化に「村人の指示書」と「畑のカウンタ」が登場しました", items:[
+    "村人の指示書(10,000キー): 「村人の自動収穫」と「変異の自動収穫」をそれぞれオンオフできます。お店の効率化の行で、Enter が自動収穫、Shift+Enter が変異の自動収穫です",
+    "自動収穫をオフにすると、村人の畑の作物は実ったまま残ります。素手で収穫すると、村人が次を植えます",
+    "変異の自動収穫をオンにすると、村人が変異も収穫して持ち物に入れます(売りません)",
+    "畑のカウンタ(50,000キー): 農園の右下に、すべての畑の「実っている作物」「何も植えていない土」「水が切れている作物」の数を出します",
+  ]},
+  { d:"2026-10-02", t:"作物に ☆☆☆ が登場しました", items:[
+    "同じ作物を300個収穫すると、☆☆☆ が穫れるようになります。売値はふつうの1.5倍です",
+    "変異の売値は ☆☆☆ の3倍(ふつうの4.5倍)になりました",
+    "図鑑の ☆ は3つ並び、☆・☆☆・☆☆☆ を収穫するたびに1つずつ光ります。☆☆☆ の説明文も作物ごとに追加しました",
+    "実績に「☆☆☆の作物を収穫する」「☆☆☆を5種類収穫する」を追加しました",
+  ]},
+  { d:"2026-10-02", t:"農園に届くキーの数が変わりました", items:[
+    "スコアアタック・タイムアタック: イージーはそのまま、ノーマルは2倍、ハードは3倍のキーが農園に届きます",
+    "ノーミス勝負: 1〜10語目は1語1個、11〜20語目は2個、21〜30語目は4個…と、10語ごとに倍になります(上限なし)",
+    "タイピング単語帳は1語1個のキーが農園に届きます",
+    "結果画面に、農園に届くキーの数を出すようにしました",
+    "タイトルに「更新情報」(U)を追加しました",
+  ]},
+];
+const NEWS_SEEN_KEY="typinggarden:newsSeen";
+let newsOpen=false;
+function refreshNewsBadge(){
+  let seen=""; try{ seen=localStorage.getItem(NEWS_SEEN_KEY)||""; }catch(e){}
+  $("newsNew").textContent = NEWS.length && NEWS[0].d>seen ? "NEW" : "";
+}
+function openNews(){
+  newsOpen=true;
+  $("newsList").innerHTML=NEWS.map(n=>`<div class="news-item"><div class="d">${n.d.replace(/-/g,"/")}</div><h3>${escH(n.t)}</h3><ul>${n.items.map(x=>`<li>${escH(x)}</li>`).join("")}</ul></div>`).join("");
+  $("news").classList.add("open");
+  $("newsList").scrollTop=0;
+  try{ if(NEWS.length) localStorage.setItem(NEWS_SEEN_KEY, NEWS[0].d); }catch(e){}
+  refreshNewsBadge();
+}
+function closeNews(){ newsOpen=false; $("news").classList.remove("open"); }
+$("newsBtn").addEventListener("click",openNews);
+$("newsClose").addEventListener("click",closeNews);
+$("news").addEventListener("click",e=>{ if(e.target===$("news")) closeNews(); });
+refreshNewsBadge();
+
 /* ---------- 要望・バグ報告 ----------
    Firebase の typinggarden/feedback に書き込むだけ(読むのは作者だけ) */
 let fbOpen=false, fbCat="feature";
@@ -3325,8 +3431,9 @@ for(const t of DICT_TABS){
 $("dictBackBtn").addEventListener("click",()=>show("title"));
 
 /* ---------- 全体統計(総プレイ回数・外したキー累計) ---------- */
-async function recordStats(screws){
-  sendToGarden(gardenKeys, screws); gardenKeys=0;
+/* screws: 実際に外した個数(統計に数える) / toGarden: 農園に届けるキー */
+async function recordStats(screws, toGarden=screws){
+  sendToGarden(gardenKeys, toGarden); gardenKeys=0;
   // 端末ローカルにも記録(オフライン時のフォールバック用)
   try{
     let s={plays:0,screws:0};
@@ -3693,8 +3800,13 @@ const QUALITY = [
   { mark:"",   mult:1.00, need:0   },
   { mark:"☆",  mult:1.10, need:10  },
   { mark:"☆☆", mult:1.25, need:100 },
-  { mark:"✦",  mult:3.75, need:Infinity },   // 変異(☆☆の3倍)。累計では穫れず、収穫のたびに1%
+  { mark:"✦",  mult:4.50, need:Infinity },   // 3: 変異(☆☆☆の3倍)。累計では穫れず、収穫のたびに1%
+  { mark:"☆☆☆", mult:1.50, need:300 },      // 4: ☆☆☆(変異が3番なので4番に置く)
 ];
+/* 品質の並び。変異(3)を除いた順と、図鑑などで見せる順 */
+const TIERS = [0,1,2,4];
+const QORDER = [0,1,2,4,3];
+const nextTier = t => t===0?1 : t===1?2 : t===2?4 : null;
 /* 貴重品(GHR)の持っている数と、そこから決まる庭全体の効果 */
 const tre = id => (S.treas && S.treas[id]) || 0;
 const effVal = id => {
@@ -3713,7 +3825,7 @@ const effSeed    = () => 1 - effVal("greennecklace")/100;   // 種の値段の�
 const effGacha   = () => 1 - effVal("silverstar")/100;      // ガチャの値段の倍率
 const effFert    = () => FERT_BOOST + effVal("blueamaryllis")/100;  // 肥料の効き(1つで最大45%、2つで最大90%)
 
-const tierOf  = id => { const n=S.harvestBy[id]||0; return n>=QUALITY[2].need?2:(n>=QUALITY[1].need?1:0); };
+const tierOf  = id => { const n=S.harvestBy[id]||0; return n>=QUALITY[4].need?4:(n>=QUALITY[2].need?2:(n>=QUALITY[1].need?1:0)); };
 const priceOf = (id,t) => Math.round(CROP[id].price*QUALITY[t].mult*effSell());
 const qName   = (id,t) => t===3 ? (MUTANT[id] ? MUTANT[id].name : CROP[id].name+QUALITY[3].mark) : CROP[id].name+QUALITY[t].mark;
 /* 品質ごとの図鑑の説明文(ふつうの品質は CROPS の lore) */
@@ -3848,6 +3960,8 @@ function newState(){
     lastTick:Date.now(), created:Date.now(),
     fromTypingMin:0, fromTypingScrews:0,
     villagers:0, vLog:{}, vilLv:0,
+    vilOrder:false, vilAutoH:true, vilAutoM:false,   // 村人の指示書(自動収穫・変異の自動収穫)
+    counter:false,                                   // 畑のカウンタ
     owner:Math.random().toString(36).slice(2)+Date.now().toString(36),  // 番付で自分の記録を見分ける印
     rankName:"",
   };
@@ -3993,6 +4107,7 @@ function villagerAdvance(p,dt){
   let t=dt, guard=0;
   while(guard++<100000){
     if(p.crop && p.crop.mut) break;                  // 変異が実っている: 手で収穫されるまで待つ
+    if(!S.vilAutoH && p.crop && p.crop.rolled && p.crop.grown>=need(p.crop)) break;   // 実ったまま待っている(自動収穫オフ)
     if(!p.crop){
       const c=CROP[vilCropId()];
       if(S.money<c.cost){ p.vWait=true; break; }   // 種代が足りなければ待つ
@@ -4004,9 +4119,21 @@ function villagerAdvance(p,dt){
     if(t<rem){ p.crop.grown+=t; break; }
     t-=rem;
     const c=CROP[p.crop.id];
-    if(hasMut(c.id) && Math.random()<effMut()){     // 変異: 収穫せずに畑に残し、一度だけ知らせる
-      p.crop.grown=n; p.crop.mut=true;
+    if(!p.crop.rolled && hasMut(c.id) && Math.random()<effMut()){     // 変異(待っていた作物はもう抽選済み)
+      if(S.vilAutoM){                                 // 指示書: 変異も収穫して持ち物に入れる(売らない)
+        p.crop=null;
+        const num = 1 + (Math.random()<effDouble() ? 1 : 0);
+        invAdd(c.id,3,num);
+        for(let i=0;i<num;i++) recordHarvest(c.id,3,true);
+        S.vLog.mutGot=S.vLog.mutGot||[]; S.vLog.mutGot.push(c.id);
+        continue;
+      }
+      p.crop.grown=n; p.crop.mut=true;              // 収穫せずに畑に残し、一度だけ知らせる
       S.vLog.mutWait=S.vLog.mutWait||[]; S.vLog.mutWait.push(c.id);
+      break;
+    }
+    if(!S.vilAutoH){                                  // 指示書: 自動収穫オフ。実ったまま、手で収穫されるのを待つ
+      p.crop.grown=n; p.crop.ripeAt=Date.now()-t; p.crop.rolled=true;
       break;
     }
     p.crop=null;
@@ -4027,6 +4154,53 @@ const autoOf = id => S.auto[id] || null;
 const autoCrop = id => { const a=autoOf(id); return !!(a && a.c); };
 const autoSeed = id => { const a=autoOf(id); return !!(a && a.s); };
 
+/* 村人の指示書・畑のカウンタ */
+const VIL_ORDER_COST=10000, COUNTER_COST=50000;
+function buyVilOrder(){
+  if(S.vilOrder) return;
+  if(!spend(VIL_ORDER_COST)) return;
+  S.vilOrder=true; sfx.buy();
+  toast("村人の指示書を手に入れました。お店の効率化で、自動収穫と変異の自動収穫をオンオフできます","good",5200);
+  save(); renderAll();
+}
+function toggleVilOrder(w){
+  if(!S.vilOrder) return;
+  tick();   // ここまでの分は、今の設定で進めてから切り替える
+  if(w==="H") S.vilAutoH=!S.vilAutoH; else S.vilAutoM=!S.vilAutoM;
+  sfx.tool();
+  toast(w==="H" ? `村人の自動収穫を ${S.vilAutoH?"オン":"オフ"} にしました${S.vilAutoH?"":"(実った作物は畑に残ります)"}`
+                : `変異の自動収穫を ${S.vilAutoM?"オン":"オフ"} にしました${S.vilAutoM?"(変異は持ち物に入ります)":""}`,"",3000);
+  save(); renderAll();
+}
+function buyCounter(){
+  if(S.counter) return;
+  if(!spend(COUNTER_COST)) return;
+  S.counter=true; sfx.buy();
+  toast("畑のカウンタを置きました。農園の右下に、すべての畑の様子が出ます","good",4200);
+  save(); renderAll();
+}
+/* 畑のカウンタ: すべての本当の畑で数える(村人の区画・設置物は数えない。実った作物は村人の区画も数える) */
+function renderCounter(){
+  const card=$("g-counter"); if(!card) return;
+  card.style.display = S.counter ? "" : "none";
+  root.querySelector(".under").classList.toggle("has-counter", !!S.counter);
+  if(!S.counter) return;
+  const now=Date.now(); let ripe=0, empty=0, dry=0;
+  withReal(()=>S.fields.forEach((f,fi)=>{
+    const cov=covered(fi);
+    for(const k of KEYS){
+      const p=f[k]; if(p.s==="post" || p.obj) continue;
+      if(p.crop && isRipe(p)){ ripe++; continue; }
+      if(p.vil) continue;
+      if(p.s==="soil" && !p.crop) empty++;
+      else if(p.crop && !isWet(fi,k,now,cov)) dry++;
+    }
+  }));
+  $("g-cRipe").textContent=ripe; $("g-cEmpty").textContent=empty; $("g-cDry").textContent=dry;
+  $("g-cRipe").parentNode.classList.toggle("hot",ripe>0);
+  $("g-cDry").parentNode.classList.toggle("hot",dry>0);
+}
+
 /* 収穫を記録する(品質別の数・品質が上がったらお知らせ) */
 function recordHarvest(id,t,quiet){
   const before=tierOf(id);
@@ -4042,7 +4216,11 @@ function recordHarvest(id,t,quiet){
 }
 /* 村人の仕事ぶりをまとめて知らせる */
 function reportVillagers(){
-  const L=S.vLog; if(!L || (!L.h && !L.up && !L.mutWait)) return;
+  const L=S.vLog; if(!L || (!L.h && !L.up && !L.mutWait && !L.mutGot)) return;
+  for(const id of (L.mutGot||[])){
+    toast(`✦ 変異! 村人が ${icoQ(CROP[id],3)} ${esc(qName(id,3))} を収穫しました(持ち物に入れました)`,"good mut",9000,true);
+    sfx.vil();
+  }
   for(const id of (L.mutWait||[])){
     toast(`✦ 変異! 村人の畑で ${icoQ(CROP[id],3)} ${esc(qName(id,3))} が実りました。村人は収穫せずに残しています(素手で収穫できます)`,"good mut",9000,true);
     sfx.vil();
@@ -4090,7 +4268,7 @@ function consumeInbox(){
   let box;
   try{ box=JSON.parse(localStorage.getItem(INBOX_KEY)||"null"); }catch(e){ box=null; }
   if(!box) return;
-  const keys=Math.max(0, box.keys|0), screws=Math.max(0, box.screws|0);
+  const keys=Math.max(0, Math.floor(Number(box.keys)||0)), screws=Math.max(0, Math.floor(Number(box.screws)||0));
   if(!keys && !screws) return;
   try{ localStorage.setItem(INBOX_KEY, JSON.stringify({keys:0,screws:0})); }catch(e){}
   const minutes=keys*minPerKey();
@@ -4363,7 +4541,8 @@ function renderInfo(){
       const t=p.crop.mut?3:tierOf(c.id);
       big=`${selKey} ・ ${icoQ(c,t)} ${esc(qName(c.id,t))} 収穫できます${t===3?"(変異)":""}`;
       sub.push(`素手(1)で収穫 ・ 売値 ${fmtNum(priceOf(c.id,t))}キー${t===3?" ・ 変異は自動売却されません":""}`);
-      if(t<2){ const left=QUALITY[t+1].need-(S.harvestBy[c.id]||0); sub.push(`あと ${left}個 収穫すると「${qName(c.id,t+1)}」が穫れるようになります`); }
+      const nt=t===3?null:nextTier(t);
+      if(nt!=null){ const left=QUALITY[nt].need-(S.harvestBy[c.id]||0); sub.push(`あと ${left}個 収穫すると「${qName(c.id,nt)}」が穫れるようになります`); }
     }else{
       const pct=Math.floor(p.crop.grown/need(p.crop)*100);
       big=`${selKey} ・ ${ico(c)} ${esc(c.name)} 育成 ${pct}%`;
@@ -4383,7 +4562,7 @@ function renderInfo(){
 /* 収穫かご: S.inv[id] = [ふつう, ☆, ☆☆] */
 const invN = (id,t) => (S.inv[id]&&S.inv[id][t])||0;
 const invAdd = (id,t,n) => { S.inv[id]=S.inv[id]||[0,0,0]; S.inv[id][t]=(S.inv[id][t]||0)+n; };
-const invTotal = () => { let n=0,v=0; for(const c of CROPS) for(let t=0;t<3;t++){ const m=invN(c.id,t); n+=m; v+=m*priceOf(c.id,t); } return {n,v}; };
+const invTotal = () => { let n=0,v=0; for(const c of CROPS) for(const t of TIERS){ const m=invN(c.id,t); n+=m; v+=m*priceOf(c.id,t); } return {n,v}; };
 function renderBasket(){
   const b=$("g-basket"); b.innerHTML="";
   let any=false;
@@ -4434,7 +4613,7 @@ function renderBar(){
   $("g-rate").textContent=`タイピング1打で ${minPerKey()}分 進む`;
 }
 function renderAll(){
-  renderBar(); renderField(); renderInfo(); renderBasket(); renderGoalBadge();
+  renderBar(); renderField(); renderInfo(); renderBasket(); renderGoalBadge(); renderCounter();
   if(modal==="shop") renderShop();
   if(modal==="book") renderBook();
   if(modal==="goal") renderGoals();
@@ -4495,8 +4674,8 @@ function act(k){
     nope(k, p.obj ? "案山子を回収するには 6 で案山子を持って押します" : "P は案山子置き場です。6 で案山子を持って置けます");
     save(); renderAll(); return;
   }
-  // 村人の区画は、肥料と「村人を外す」以外は触れない(村人が残した変異の収穫だけはできる)
-  const vilMut = p.vil && S.tool===1 && p.crop && p.crop.mut && isRipe(p);
+  // 村人の区画は、肥料と「村人を外す」以外は触れない(実って残っている作物の収穫だけはできる)
+  const vilMut = p.vil && S.tool===1 && p.crop && isRipe(p);   // 村人が残した変異・自動収穫オフで待っている作物
   if(p.vil && !vilMut && S.tool!==5 && !(S.tool===6 && S.objSel==="vil")){
     nope(k,"村人が世話をしている区画です(6 で村人を持って押すと外せます)");
     save(); renderAll(); return;
@@ -4514,7 +4693,7 @@ function act(k){
         nope(k, p.crop ? "まだ実っていません" : null);
         break;
       }
-      const targets=[k, ...around(k,sickleInfo().area)].filter(x=>f[x].crop && isRipe(f[x]) && (!f[x].vil || f[x].crop.mut));
+      const targets=[k, ...around(k,sickleInfo().area)].filter(x=>f[x].crop && isRipe(f[x]));
       for(const x of targets) harvestOne(x);
       sfx.harvest();
       checkUnlocks();
@@ -4668,7 +4847,7 @@ function shopRows(){
         locked:!ok,
         ic: ok?ico(c):"❔",
         nm: ok?`${c.name}の種 <span style="color:var(--ink-l)">${seedCost(c)}キー${seedCost(c)<c.cost?`<s style="opacity:.5;margin-left:.3em">${c.cost}</s>`:""}</span>`:"？？？",
-        ds: ok?`${tag}育つまで ${fmtDur(c.hours*HOUR)} ・ 売値 ${c.price}キー(☆${priceOf(c.id,1)}・☆☆${priceOf(c.id,2)}) ・ 今の品質 ${QUALITY[tierOf(c.id)].mark||"ふつう"} ・ 手持ち ${have}<br>${esc(c.desc)}`:unlockText(c.unlock),
+        ds: ok?`${tag}育つまで ${fmtDur(c.hours*HOUR)} ・ 売値 ${c.price}キー(☆${priceOf(c.id,1)}・☆☆${priceOf(c.id,2)}・☆☆☆${priceOf(c.id,4)}) ・ 今の品質 ${QUALITY[tierOf(c.id)].mark||"ふつう"} ・ 手持ち ${have}<br>${esc(c.desc)}`:unlockText(c.unlock),
         keys: ok?`<b>Enter</b> 1つ ${money>=seedCost(c)?"":"(不足)"}<br><b>Shift+Enter</b> 10個`:"",
         enter: ()=>ok && buySeed(c.id,1),
         shift: ()=>ok && buySeed(c.id,10),
@@ -4747,6 +4926,20 @@ function shopRows(){
         shift: ()=>a?toggleAuto(c.id,"s"):(ready&&buyAuto(c.id)),
       });
     }
+    // 村人の指示書(自動収穫・変異の自動収穫のオンオフ)
+    {
+      const has=S.vilOrder, onoff=v=>v?'<b style="color:#2e7d32">オン</b>':'<span style="color:var(--ink-l)">オフ</span>';
+      rows.push({ ic:"📜",
+        nm: `村人の指示書 <span style="color:var(--ink-l)">${has?"購入済み":fmtNum(VIL_ORDER_COST)+"キー"}</span>`,
+        ds: has?`村人の自動収穫 ${onoff(S.vilAutoH)} ・ 変異の自動収穫 ${onoff(S.vilAutoM)}<br>自動収穫オフ: 実った作物は畑に残り、素手で収穫すると村人が次を植えます ・ 変異の自動収穫オン: 村人が変異も収穫して持ち物に入れます(売りません)`
+               :`村人の仕事を指示できるようになります。「村人の自動収穫」と「変異の自動収穫」を、それぞれオンオフできます`,
+        keys: has?"<b>Enter</b> 自動収穫のオンオフ<br><b>Shift+Enter</b> 変異の自動収穫のオンオフ":"<b>Enter</b> 買う",
+        enter: ()=>has?toggleVilOrder("H"):buyVilOrder(), shift: ()=>has?toggleVilOrder("M"):buyVilOrder() });
+      rows.push({ ic:"🧮",
+        nm: `畑のカウンタ <span style="color:var(--ink-l)">${S.counter?"購入済み":fmtNum(COUNTER_COST)+"キー"}</span>`,
+        ds: `農園の右下に、すべての畑の「実っている作物」「何も植えていない土」「水が切れている作物」の数を出します(村人の区画と設置物は数えません)`,
+        keys: S.counter?"":"<b>Enter</b> 買う", enter:()=>buyCounter(), shift:()=>buyCounter() });
+    }
     // 大連ガチャの権利(一度買えばずっと使える。ガチャ代は別)
     for(const n of GACHA_BIG){
       const has=gachaPass(n);
@@ -4756,7 +4949,7 @@ function shopRows(){
         keys: has?"":"<b>Enter</b> 買う", enter:()=>buyGachaPass(n), shift:()=>buyGachaPass(n) });
     }
   }else{
-    for(const c of CROPS) for(let t=0;t<4;t++){
+    for(const c of CROPS) for(const t of QORDER){
       const n=invN(c.id,t); if(n<=0) continue;
       const pr=priceOf(c.id,t);
       rows.push({ ic:icoQ(c,t), nm:`${t===3?'<span class="mutnm">✦ ':""}${qName(c.id,t)}${t===3?"</span>":""} ×${n}`, ds:`1つ ${fmtNum(pr)}キー ・ 全部で ${fmtNum(n*pr)}キー${t===3?" ・ 変異(「すべて売る」では売りません)":""}`,
@@ -4939,7 +5132,7 @@ function sell(id,t,n){
 /* A キー: 収穫かごの作物だけをまとめて売る(種と変異は売らない) */
 function sellAll(){
   let gain=0;
-  for(const c of CROPS) for(let t=0;t<3;t++){ const n=invN(c.id,t); if(n>0){ gain+=n*priceOf(c.id,t); S.inv[c.id][t]=0; } }
+  for(const c of CROPS) for(const t of TIERS){ const n=invN(c.id,t); if(n>0){ gain+=n*priceOf(c.id,t); S.inv[c.id][t]=0; } }
   if(!gain){ sfx.nope(); toast("売れる作物がありません(種と変異は A では売れません)","warn"); return; }
   S.money+=gain; S.totalSales+=gain; sfx.sell();
   toast(`すべて売りました(+${fmtNum(gain)}キー)`,"good");
@@ -5277,13 +5470,55 @@ const BOOK_CROPS = CROPS.slice().sort((a,b)=>(a.treasure?1:0)-(b.treasure?1:0) |
 const bookSeen = c => c.treasure ? tre(c.id)>0 : (isUnlocked(c)||S.harvestBy[c.id]>0);
 let bookCur=0, bookTier=0;
 const qCount = (id,t) => (S.harvestQ[id]&&S.harvestQ[id][t])||0;
-const loreOf = (c,t) => t===0 ? c.lore : (t===3 ? MUTANT[c.id].lore : LORE_Q[c.id][t-1]);
+/* ☆☆☆(300個目)の説明文 */
+const LORE_Q3 = {
+  carrot: "三百本目。抜く前から、土の中で先がどちらを向いているか分かる。ここまで来ると、にんじんのほうが抜かれる準備をして待っている。",
+  potato: "三百回目の芋掘り。土をひとすくいしただけで、株の下に何個眠っているか言い当てられる。",
+  tomato: "三百個目。切り口がゼリーのように光る。夜のタイピングの噂は、本当だったのかもしれない。",
+  corn: "三百本目。皮をむくと粒が光を跳ね返し、畑の一角が少しだけ明るくなる。",
+  eggplant: "三百本目。紫の奥に夜空のような深みがある。並べると、どれが一番かを決められない。",
+  strawberry: "三百粒目。ひと粒で部屋じゅうが甘い香りになる。三日待つことが、もう苦にならない。",
+  pumpkin: "三百個目。ひとつ持ち上げるたびに、四日間の打鍵の音が聞こえる気がする。",
+  melon: "三百個目。網目が地図のように細かい。切り分ける日は、誰も遅刻しない。",
+  mushroom: "三百本目。月曜の朝、畑に並ぶかさが整列した兵隊のように見える。",
+  paprika: "三百個目。切ると中から色がこぼれる。火曜の献立は、もうこれ一つで決まっている。",
+  watermelon: "三百個目。叩かなくても分かる。歩く音の響き方で、どの玉が食べ頃か当てられる。",
+  apple: "三百個目。木曜の朝、枝の下に立つと、穫られたい実のほうから手のひらに落ちてくる。",
+  kumquat: "三百個目。ひと粒の皮に、金曜の夕日と週末の予感が両方入っている。",
+  sweetpotato: "三百本目。焼きあがる前から、蜜の匂いで庭の全員が集まってくる。",
+  sunflower: "三百本目。花がみな同じ角度で揃い、日曜の畑が一枚の絵になる。",
+  onion: "三百個目。皮をむくと、透き通るほど白い。包丁を入れても、もう誰も涙を流さない。",
+  lettuce: "三百個目。葉を一枚はがすたびに、澄んだ音がする。朝いちばんの音として親しまれている。",
+  garlic: "三百個目。一片で料理がまるごと決まる。香りの届く範囲で、庭の広さを測る者もいる。",
+  peas: "三百さや目。開けなくても中の粒が透けて見える気がする。数を外したことはもうない。",
+  peach: "三百個目。触れた指の跡さえ残らない。持ち上げる手つきが、ほとんど祈りに近い。",
+  kiwi: "三百個目。切るたびに、宝石箱を開けたような歓声が上がる。外見は相変わらず地味なまま。",
+  mango: "三百個目。実の重みで枝がゆっくりお辞儀をする。収穫は、お辞儀を返すところから始まる。",
+  cherry: "三百組目。ふたつの粒が鏡に映したようにそっくりで、どちらが先に実ったのか誰にも分からない。",
+  coconut: "三百個目。二つの流派はついに和解し、割り方は「どちらでもいい」に落ち着いた。",
+  olive: "三百個目。搾った油に顔が映るほど澄んでいる。使うたびに、少しだけ手が震える。",
+  bluemoon: "三百粒目。摘んだあとも、手のひらで一晩じゅう青く光り続ける。",
+  sunlemon: "三百個目。切らなくても、置いてあるだけで部屋が明るい。夜でもそこだけ昼のようだ。",
+  chili: "三百本目。見ているだけで汗が出る。収穫かごは専用のものを使うのが、この庭の決まり。",
+  cucumber: "三百本目。並べると定規の代わりに使える。誰が測っても、一本も曲がっていない。",
+  broccoli: "三百株目。房のひとつひとつが小さな木に見える。畑に小さな森ができたようだ。",
+  avocado: "三百個目。食べ頃の日を、収穫した日に言い当てられる。もう外れたことはない。",
+  pineapple: "三百個目。葉の先まで香りが行き渡り、畑を歩くだけで南の島の気分になる。",
+  grape: "三百房目。光にかざすと粒の中に種の影が見える。房ごと飾っておきたくなる。",
+  dragonfruit: "三百個目。花の開く夜は、この庭の者が全員起きている。誰も約束していないのに。",
+  lychee: "三百個目。殻を外すと、白い実の向こうに本当に月が見える。言い張る者はもういない。全員が見ている。",
+  butternut: "三百個目。反りの曲線がどれも同じで、型で抜いたのかと疑われる。",
+  romanesco: "三百株目。渦の奥の渦の、さらに奥まで見えた気がした。見つめていると一日が終わる。",
+  shadowqueen: "三百個目。光を吸い込むような黒紫。掘り出すたびに、畑が一瞬だけ夜になる。",
+  keytree: "三百本目。どのキーも同じ深さで沈み、同じ音で戻ってくる。外す瞬間の音を聞きに、見物人が集まるようになった。"
+};
+const loreOf = (c,t) => t===0 ? c.lore : (t===3 ? MUTANT[c.id].lore : (t===4 ? LORE_Q3[c.id] : LORE_Q[c.id][t-1]));
 /* 図鑑の埋まり具合: got 埋まった項目 / all 全項目(作物×品質・変異・貴重品) */
 function bookProgress(){
   let got=0, all=0;
   for(const c of BOOK_CROPS){
     if(c.treasure){ all++; if(tre(c.id)>0) got++; continue; }
-    for(let t=0;t<(hasMut(c.id)?4:3);t++){ all++; if(qCount(c.id,t)>0) got++; }
+    for(const t of QORDER){ if(t===3 && !hasMut(c.id)) continue; all++; if(qCount(c.id,t)>0) got++; }
   }
   return { got, all };
 }
@@ -5294,13 +5529,15 @@ function renderBook(){
     const known=bookSeen(c);
     const marks=c.treasure
       ? `<span class="qm${known?" on":""}">✨</span>`
-      : [0,1,2,3].filter(t=>t<3||hasMut(c.id)).map(t=>`<span class="qm${t===3?" mut":""}${qCount(c.id,t)>0?" on":""}">${t?QUALITY[t].mark:"・"}</span>`).join("");
+      : `<span class="qm${qCount(c.id,0)>0?" on":""}">・</span>`
+        + [1,2,4].map(t=>`<span class="qm st${qCount(c.id,t)>0?" on":""}">☆</span>`).join("")   // ☆・☆☆・☆☆☆ を穫るたびに1つずつ光る
+        + (hasMut(c.id)?`<span class="qm mut${qCount(c.id,3)>0?" on":""}">✦</span>`:"");
     return `<div class="rowi ${known?"":"locked"} ${i===bookCur?"cur":""}" data-i="${i}">
       <div class="ic">${known?ico(c):"❔"}</div>
       <div class="nm">${known?c.name:"？？？"}</div>
       <div class="qmarks">${marks}</div></div>`;
   }).join("");
-  const c=BOOK_CROPS[bookCur], t=c.treasure?0:(bookTier===3&&!hasMut(c.id)?2:bookTier);
+  const c=BOOK_CROPS[bookCur], t=c.treasure?0:(bookTier===3&&!hasMut(c.id)?4:bookTier);
   const known=bookSeen(c), n=c.treasure?tre(c.id):qCount(c.id,t), total=S.harvestBy[c.id]||0;
   if(c.treasure){
     // 貴重品: 品質は無く、永続効果と説明文を載せる
@@ -5330,12 +5567,12 @@ function renderBook(){
                                 : `${c.name}を ${QUALITY[t].need}個 収穫すると穫れるようになります(あと ${QUALITY[t].need-total}個)`);
     const mutKnown = t===3 && n>0;   // 変異は一度穫れるまで名前と絵を伏せる
     $("g-bookDetail").innerHTML=`
-      <div class="btabs">${[0,1,2,3].filter(q=>q<3||hasMut(c.id)).map(q=>`<span class="btab${q===3?" mut":""}${q===t?" on":""}${qCount(c.id,q)>0?"":" dim"}" data-t="${q}">${q===3?"変異":(q?QUALITY[q].mark:"ふつう")}</span>`).join("")}</div>
-      <div class="bic q${t}">${t===3?(mutKnown?icoQ(c,3):'<span class="mutq">？</span>'):ico(c)}${t&&t<3?`<span class="bq">${QUALITY[t].mark}</span>`:""}</div>
+      <div class="btabs">${QORDER.filter(q=>q!==3||hasMut(c.id)).map(q=>`<span class="btab${q===3?" mut":""}${q===t?" on":""}${qCount(c.id,q)>0?"":" dim"}" data-t="${q}">${q===3?"変異":(q?QUALITY[q].mark:"ふつう")}</span>`).join("")}</div>
+      <div class="bic q${t}">${t===3?(mutKnown?icoQ(c,3):'<span class="mutq">？</span>'):ico(c)}${t&&t!==3?`<span class="bq">${QUALITY[t].mark}</span>`:""}</div>
       <div class="bnm">${t===3&&!mutKnown?"？？？":qName(c.id,t)}</div>
       <dl>
         <dt>${t===3?"変異の収穫":"この品質の収穫"}</dt><dd>${fmtNum(n)}個</dd>
-        <dt>売値</dt><dd>${fmtNum(priceOf(c.id,t))}キー${t===3?"(☆☆の3倍・自動売却されません)":(t?`(ふつうの${Math.round((QUALITY[t].mult-1)*100)}%増し)`:"")}</dd>
+        <dt>売値</dt><dd>${fmtNum(priceOf(c.id,t))}キー${t===3?"(☆☆☆の3倍・自動売却されません)":(t?`(ふつうの${Math.round((QUALITY[t].mult-1)*100)}%増し)`:"")}</dd>
         <dt>育つまで</dt><dd>${fmtDur(c.hours*HOUR)}</dd>
         <dt>穫れる条件</dt><dd>${cond}</dd>
       </dl>
@@ -5353,8 +5590,9 @@ function bookKey(e){
     sfx.cursor(); renderBook();
   }else if(k==="ArrowLeft"||k==="ArrowRight"){   // 同じ作物の品質を切り替える
     e.preventDefault();
-    const nq=hasMut(BOOK_CROPS[bookCur].id)?4:3;
-    bookTier=(Math.min(bookTier,nq-1)+(k==="ArrowRight"?1:-1)+nq)%nq;
+    const qs=QORDER.filter(q=>q!==3||hasMut(BOOK_CROPS[bookCur].id));   // ふつう → ☆ → ☆☆ → ☆☆☆ → 変異
+    const i=Math.max(0,qs.indexOf(bookTier));
+    bookTier=qs[(i+(k==="ArrowRight"?1:-1)+qs.length)%qs.length];
     sfx.tab(); renderBook();
   }
 }
@@ -5394,6 +5632,8 @@ const GOALS = [
   { cat:"売上", id:"s10m",  ic:"💰", nm:"キーボード財閥",   ds:"累計売上 10,000,000キー",      need:10000000, now:()=>S.totalSales, rw:150000 },
   { cat:"実りの質", id:"q1",   ic:"⭐", nm:"腕が上がった",   ds:"☆の作物を収穫する",            need:1,  now:()=>anyQ(1)?1:0, rw:300 },
   { cat:"実りの質", id:"q2",   ic:"🌟", nm:"極上の実り",     ds:"☆☆の作物を収穫する",          need:1,  now:()=>anyQ(2)?1:0, rw:2000 },
+  { cat:"実りの質", id:"q3",   ic:"💫", nm:"至高の実り",     ds:"☆☆☆の作物を収穫する",        need:1,  now:()=>anyQ(4)?1:0, rw:10000 },
+  { cat:"実りの質", id:"q3k5", ic:"💫", nm:"至高のコレクション", ds:"☆☆☆の作物を5種類収穫する", need:5,  now:()=>kindsQ(4),   rw:50000 },
   { cat:"実りの質", id:"q2k10",ic:"🌟", nm:"極上コレクション", ds:"☆☆の作物を10種類収穫する", need:10, now:()=>kindsQ(2),   rw:10000 },
   { cat:"実りの質", id:"m1",   ic:"✦",  nm:"変わりだね",     ds:"変異の作物を収穫する",         need:1,  now:()=>anyQ(3)?1:0, rw:5000 },
   { cat:"実りの質", id:"m5",   ic:"✦",  nm:"変異ハンター",   ds:"変異の作物を5種類収穫する",    need:5,  now:()=>kindsQ(3),   rw:20000 },
@@ -5512,32 +5752,50 @@ function tutGrow(){
   save(); if(document.body.classList.contains("garden")) renderAll();
 }
 
+/* 累計獲得キー: 売上(作物・種・村人・自動売却)+ タイピングから届いたキー + 受け取った実績のごほうび */
+const earnedTotal = () => (S.totalSales||0) + (S.fromTypingScrews||0) + GOALS.filter(goalClaimed).reduce((a,g)=>a+g.rw,0);
 /* ---------- 番付(所持キー・累計収穫) ----------
    名前ごとに1件。自分の庭の印(owner)で、同じ名前の別人の記録を上書きしないようにする */
 const rankKey = name => encodeURIComponent(name).replace(/\./g,"%2E");
 async function pushRank(name){
   if(isDebugSave()) return {ok:false, msg:"デバッグ用の記録は番付に載せられません"};
   const key=rankKey(name);
-  const refM=db.ref(`${RANK_PATH}/money/${key}`), refH=db.ref(`${RANK_PATH}/harvest/${key}`), refB=db.ref(`${RANK_PATH}/book/${key}`);
+  const refM=db.ref(`${RANK_PATH}/money/${key}`), refH=db.ref(`${RANK_PATH}/harvest/${key}`), refB=db.ref(`${RANK_PATH}/book/${key}`), refE=db.ref(`${RANK_PATH}/earn/${key}`);
   const old=(await refM.once("value")).val();
   if(old && old.o && old.o!==S.owner) return {ok:false, msg:"その名前は別の庭が使っています。別の名前にしてください"};
   const t=(old&&old.t)||Date.now();
   await refM.set({ n:name, s:Math.floor(S.money), o:S.owner, t });
   await refH.set({ n:name, s:S.totalHarvest,      o:S.owner, t });
   // 図鑑はルールが古いと書けないので、失敗しても続ける(番付の画面で知らせる)
+  try{ await refE.set({ n:name, s:Math.floor(earnedTotal()), o:S.owner, t }); }catch(e){ console.warn("[typinggarden rank] 累計獲得キーの番付に書き込めませんでした",e); }
   try{ await refB.set({ n:name, s:bookProgress().got, o:S.owner, t }); rankBookErr=""; }
   catch(e){ rankBookErr=String(e&&(e.code||e.message)||e); console.warn("[typinggarden rank] 図鑑の番付に書き込めませんでした",e); }
+  await dropOtherNames(key);
   return {ok:true};
+}
+/* 同じ庭(同じ持ち主の印)が別の名前でも載っていたら消す。1つの庭は番付に1つの名前だけ。
+   名前を変えたあと、同期した別の端末が古い名前で載せ直してしまったときの掃除 */
+const RANK_METRICS=["money","harvest","book","earn"];
+async function dropOtherNames(key){
+  for(const m of RANK_METRICS){
+    try{
+      const snap=await db.ref(`${RANK_PATH}/${m}`).orderByChild("o").equalTo(S.owner).once("value");
+      const olds=[]; snap.forEach(c=>{ if(c.key!==key) olds.push(c.key); });
+      for(const k of olds) await db.ref(`${RANK_PATH}/${m}/${k}`).remove();
+    }catch(e){ console.warn("[typinggarden rank] 古い名前の番付を消せませんでした",m,e); }
+  }
 }
 const hasDb = () => { try{ return !!db; }catch(e){ return false; } };
 let rankBookErr="";
 /* 番付を今の記録で更新する(ページを開いたとき・庭に入ったとき・出たとき) */
 function refreshRank(){
   if(!S.rankName || !hasDb() || isDebugSave()) return Promise.resolve();
+  // 同期中で、別の端末が持ち主(見るだけ)のときや、取り込みの途中は載せない(古い記録で上書きしないように)
+  try{ if(syncCode && (syncReadOnly || syncActivating || syncPending)) return Promise.resolve(); }catch(e){}
   return pushRank(S.rankName).catch(e=>console.warn("[typinggarden rank]",e));
 }
 function prepareRankNow(){
-  $("g-rankNow").innerHTML=`所持キー <b>${fmtNum(S.money)}</b> ・ 累計収穫 <b>${fmtNum(S.totalHarvest)}</b>個 ・ 図鑑 <b>${bookProgress().got}</b>項目`+
+  $("g-rankNow").innerHTML=`所持キー <b>${fmtNum(S.money)}</b> ・ 累計獲得 <b>${fmtNum(earnedTotal())}</b>キー ・ 累計収穫 <b>${fmtNum(S.totalHarvest)}</b>個 ・ 図鑑 <b>${bookProgress().got}</b>項目`+
     (S.rankName?`<br>「${esc(S.rankName)}」として載っています。ページを開いたときと、庭に出入りするたびに自動で更新されます`:"")+
     (rankBookErr?`<br><span style="color:#c0392b">※図鑑の番付に書き込めませんでした。Firebase のルールを最新の database.rules.json で公開してください(${esc(rankBookErr.slice(0,40))})</span>`:"");
 }
@@ -5570,7 +5828,7 @@ async function renderGardenRank(){
     }).join("");
   }catch(e){ if(req===gRankReq) note.textContent="読み込めませんでした。通信環境を確認してください"; }
 }
-const G_RANK_TABS=["g-money","g-harvest","g-book"];
+const G_RANK_TABS=["g-money","g-earn","g-harvest","g-book"];
 function switchGardenRank(dir){
   const i=G_RANK_TABS.indexOf(gRankTab), n=G_RANK_TABS.length;
   gRankTab = G_RANK_TABS[(i+(dir<0?-1:1)+n)%n];
@@ -5597,11 +5855,11 @@ async function useName(name, old){
   if(!hasDb() || isDebugSave()) return;
   if(old && old!==name){
     const k=rankKey(old);
-    for(const m of ["money","harvest","book"]){
+    for(const m of ["money","harvest","book","earn"]){
       try{
         const ref=db.ref(`${RANK_PATH}/${m}/${k}`), v=(await ref.once("value")).val();
         if(v && v.o===S.owner) await ref.remove();
-      }catch(e){ if(m!=="book") throw e; }   // 図鑑はルールが古いと消せないので、失敗しても続ける
+      }catch(e){ if(m==="money"||m==="harvest") throw e; }   // 図鑑はルールが古いと消せないので、失敗しても続ける
     }
   }
   const r=await pushRank(name);
@@ -5699,7 +5957,7 @@ function enter(){
   reportVillagers();
   crowVisit();
   clearInterval(loopId); clearInterval(saveId);
-  loopId=setInterval(()=>{ tick(); reportVillagers(); renderBar(); renderField(); renderInfo(); },1000);
+  loopId=setInterval(()=>{ tick(); reportVillagers(); renderBar(); renderField(); renderInfo(); renderCounter(); },1000);
   saveId=setInterval(save,15000);
 }
 function leave(){
@@ -5737,10 +5995,10 @@ function debugUnlock(){
   S.objs={spr:9, crow:9}; S.villagers=3; S.vilLv=VIL_LADDER.length-1;
   for(const c of CROPS){
     S.got[c.id]=1; S.seeds[c.id]=10;
-    S.harvestBy[c.id]=QUALITY[2].need+50;
-    S.harvestQ[c.id]=[50,50,10];
+    S.harvestBy[c.id]=QUALITY[4].need+50;
+    S.harvestQ[c.id]=[50,50,10,0,10];
     if(c.treasure){ S.treas[c.id]=1; }
-    else{ S.inv[c.id]=[3,3,3]; S.auto[c.id]={c:false,s:false}; }
+    else{ S.inv[c.id]=[3,3,3,0,3]; S.auto[c.id]={c:false,s:false}; }
   }
   S.known=CROPS.map(c=>c.id).concat(["fert","obj:spr","obj:crow"]);
   S.lastTick=Date.now();
@@ -6302,7 +6560,7 @@ document.addEventListener("keyup",syncMarkDirty,true);
    記録の引き継ぎ画面の中は、同期を止めたりできるようにそのまま通す */
 function syncGuardInput(e){
   if(!syncCode||!syncReadOnly||window.tgReplacing) return;
-  if(e.target && e.target.closest && e.target.closest("#backup, #fb")) return;
+  if(e.target && e.target.closest && e.target.closest("#backup, #fb, #news")) return;
   if(e.type==="keydown" && (e.ctrlKey||e.metaKey||e.altKey||e.key==="Shift")) return;
   e.preventDefault(); e.stopPropagation();
   syncActivate();
