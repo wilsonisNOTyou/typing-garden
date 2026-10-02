@@ -5527,13 +5527,28 @@ async function pushRank(name){
   // 図鑑はルールが古いと書けないので、失敗しても続ける(番付の画面で知らせる)
   try{ await refB.set({ n:name, s:bookProgress().got, o:S.owner, t }); rankBookErr=""; }
   catch(e){ rankBookErr=String(e&&(e.code||e.message)||e); console.warn("[typinggarden rank] 図鑑の番付に書き込めませんでした",e); }
+  await dropOtherNames(key);
   return {ok:true};
+}
+/* 同じ庭(同じ持ち主の印)が別の名前でも載っていたら消す。1つの庭は番付に1つの名前だけ。
+   名前を変えたあと、同期した別の端末が古い名前で載せ直してしまったときの掃除 */
+const RANK_METRICS=["money","harvest","book"];
+async function dropOtherNames(key){
+  for(const m of RANK_METRICS){
+    try{
+      const snap=await db.ref(`${RANK_PATH}/${m}`).orderByChild("o").equalTo(S.owner).once("value");
+      const olds=[]; snap.forEach(c=>{ if(c.key!==key) olds.push(c.key); });
+      for(const k of olds) await db.ref(`${RANK_PATH}/${m}/${k}`).remove();
+    }catch(e){ console.warn("[typinggarden rank] 古い名前の番付を消せませんでした",m,e); }
+  }
 }
 const hasDb = () => { try{ return !!db; }catch(e){ return false; } };
 let rankBookErr="";
 /* 番付を今の記録で更新する(ページを開いたとき・庭に入ったとき・出たとき) */
 function refreshRank(){
   if(!S.rankName || !hasDb() || isDebugSave()) return Promise.resolve();
+  // 同期中で、別の端末が持ち主(見るだけ)のときや、取り込みの途中は載せない(古い記録で上書きしないように)
+  try{ if(syncCode && (syncReadOnly || syncActivating || syncPending)) return Promise.resolve(); }catch(e){}
   return pushRank(S.rankName).catch(e=>console.warn("[typinggarden rank]",e));
 }
 function prepareRankNow(){

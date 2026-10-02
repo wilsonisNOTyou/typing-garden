@@ -30,7 +30,8 @@
         ".read": true,
         "$metric": {
           ".indexOn": [
-            "s"
+            "s",
+            "o"
           ],
           "$name": {
             ".write": "$metric === 'money' || $metric === 'harvest' || $metric === 'book'",
