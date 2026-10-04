@@ -7063,14 +7063,16 @@ const effLine = (d,g) => effKnown(d,g) ? esc(effText(d,g)) : "？？？(一度�
 /* ---- 料理の画面(0): 作る / 食べる / 仕込み ---- */
 const COOK_TABS=["作る","食べる","仕込み"];
 let cookTab=0, cookCur=[0,0,0], cookRows=[];
-const cookGrade={};   // 料理ごとに選んでいる段階
+const cookGrade={};   // 料理ごとに選んでいる段階(← → で選んだものだけ)
+/* 段階をまだ選んでいない料理は、作れる段階を出す(ふつう → 変異 → 超変異の順。どれも作れなければふつう) */
+const cookGradeOf = d => cookGrade[d.id] ?? (DISH_GRADES.find(g=>cookPlan(d.ing,g)) ?? 0);
 const eatGrade={};    // 食べる画面で、料理ごとに選んでいる段階
 function cookRowsOf(){
   const rows=[];
   if(cookTab===0){
     for(const d of DISHES){
       if(!S.recipes[d.id]) continue;
-      const g=cookGrade[d.id] ?? 0;
+      const g=cookGradeOf(d);
       const plan=cookPlan(d.ing,g);
       const gl = g===5||g===3 ? gradeName(g) : (plan ? gradeName(plan.grade) : gradeName(g));
       const min = plan ? dishMin(plan.grade) : dishMin(g);
@@ -7116,7 +7118,7 @@ function cookRowsOf(){
 const M_COLOR = { strawmilk:"ピンク", sherbet:"赤", lemonade:"黄色", melonsoda:"緑", bluetart:"青", grapejuice:"紫", chips:"濃い紫", vanillaice:"クリーム色" };
 const effText = (d,g) => { const t=isMutT(g) ? EFFS[d.eff].s : EFFS[d.eff].n; return d.eff==="M" && M_COLOR[d.id] ? t.replace("料理の色",M_COLOR[d.id]) : t; };
 function cookStep(id,dir){
-  const i=DISH_GRADES.indexOf(cookGrade[id]??0);
+  const i=DISH_GRADES.indexOf(cookGradeOf(DISH[id]));
   cookGrade[id]=DISH_GRADES[(i+dir+DISH_GRADES.length)%DISH_GRADES.length];
   sfx.tab(); renderCook();
 }
@@ -7179,7 +7181,7 @@ function buyCut(k){
 }
 function cookMake(id,times){
   const d=DISH[id]; if(!d || !S.recipes[id]) return;
-  const g=cookGrade[id]??0;
+  const g=cookGradeOf(d);
   let made=0, grade=null, extra=0, saved=0, isFirst=false;
   for(let i=0;i<times;i++){
     const plan=cookPlan(d.ing,g); if(!plan) break;
