@@ -5136,7 +5136,7 @@ const isUnlocked = c =>
   : (c.day!=null ? c.day===today() : meets(c.unlock));
 /* 料理とわくわくガチャは、キーの木がお店に並ぶのと同じ条件で解放 */
 const cookOpen = () => meets(CROP.keytree.unlock);
-const COOK_LOCK_MSG = () => `料理とわくわくガチャは、キーの木と同じ ${unlockText(CROP.keytree.unlock).replace(" で入荷","")} で解放されます`;
+const COOK_LOCK_MSG = () => `料理とわくわくガチャは、${unlockText(CROP.keytree.unlock).replace(" で入荷","")} で解放されます`;   // 条件はこの作物と同じだが、名前は出さない(ネタバレになるため)
 const gachaText = c => c && c.waku ? "わくわくガチャから出ます" : "種ガチャから出ます";
 const dayText = c => `毎週${DAY_NAMES[c.day]}曜だけお店に並びます`;
 function unlockText(u){
