@@ -863,12 +863,29 @@ body.garden #app{width:min(960px,96vw); padding:1.2rem 0 2rem}
 #screen-garden .plot.mutp .qb{color:#e9d2ff}
 #screen-garden .cart.mut svg{filter:drop-shadow(0 0 2px rgba(255,255,255,.9)) drop-shadow(0 0 5px rgba(190,120,255,.85))}
 #screen-garden .chip.q3{background:linear-gradient(135deg,#fff4fb,#f1e8ff 50%,#e8f6ff); box-shadow:inset 0 0 0 2px #b27ce8, 0 0 10px rgba(178,124,232,.55)}
+#screen-garden .chip.q4{box-shadow:inset 0 0 0 2px #f0b400, 0 0 10px rgba(240,180,0,.7); background:#fff6dc}
+#screen-garden .chip.q5{background:linear-gradient(135deg,#fffbea,#ffeaf6,#eaf6ff); box-shadow:inset 0 0 0 2px #e0a020, 0 0 12px rgba(255,200,80,.8)}
 #screen-garden .bookdetail .bic.q3{filter:drop-shadow(0 0 10px rgba(178,124,232,.9))}
 #screen-garden .bookdetail .mutq{display:inline-grid; place-items:center; width:1em; height:1em; color:#b27ce8; font-weight:800}
 #screen-garden .btab.mut{background:#efe4fb; color:#7a4ab0}
 #screen-garden .btab.mut.on{background:linear-gradient(90deg,#c58af0,#8fa8ff); color:#fff}
 #screen-garden .qm.mut.on{color:#a15ee0; text-shadow:0 0 4px rgba(178,124,232,.7)}
 #screen-garden .mutnm{color:#7a4ab0}
+#screen-garden .plot.ripe.supp{box-shadow:0 0 0 3px #f4c542, 0 0 0 5px #ff8fd0, 0 0 22px rgba(255,200,80,.95), inset 0 -4px 0 rgba(0,0,0,.18); animation:suppulse 1.6s ease-in-out infinite}
+@keyframes suppulse{50%{box-shadow:0 0 0 3px #7fd4ff, 0 0 0 5px #f4c542, 0 0 28px rgba(160,220,255,.95), inset 0 -4px 0 rgba(0,0,0,.18)}}
+#screen-garden .plot.supp .qb{color:#fff3b0}
+#screen-garden .cart.sup svg{filter:drop-shadow(0 0 2px #fff) drop-shadow(0 0 4px rgba(255,210,90,.95)) drop-shadow(0 0 7px rgba(255,140,220,.7))}
+#screen-garden .btab.sup{background:#fff4d6; color:#a8701c}
+#screen-garden .btab.sup.on{background:linear-gradient(90deg,#f4c542,#ff8fd0,#7fd4ff); color:#fff}
+#screen-garden .qm.sup{font-size:1rem; line-height:1; vertical-align:-.08em}
+#screen-garden .qm.sup.on{color:transparent; background:repeating-linear-gradient(120deg,#ff5f6d 0,#f4c542 .2em,#5fd08a .4em,#4fb3ff .6em,#b07cff .8em,#ff5f6d 1em); -webkit-background-clip:text; background-clip:text; filter:drop-shadow(0 0 1px rgba(255,255,255,.9)) drop-shadow(0 0 3px rgba(255,180,90,.9)) drop-shadow(0 0 5px rgba(180,120,255,.7)); animation:g-suprb 3s linear infinite}
+@keyframes g-suprb{to{background-position:1.155em 0}}
+@media (prefers-reduced-motion:reduce){ #screen-garden .qm.sup.on{animation:none} }
+#screen-garden .supnm{color:#b8801c}
+#screen-garden .bookdetail .mutq.supq{color:#e0a020}
+#screen-garden .bookdetail .bic.q5{filter:drop-shadow(0 0 12px rgba(255,210,90,1)) drop-shadow(0 0 22px rgba(255,140,220,.8))}
+#screen-garden .toast.sup{border-color:#e0a020; box-shadow:0 4px 0 #e0a020, 0 0 22px rgba(255,200,80,.8); background:linear-gradient(135deg,#fffbea,#ffeaf6,#eaf6ff)}
+@media (prefers-reduced-motion:reduce){ #screen-garden .plot.ripe.supp{animation:none} }
 #screen-garden .toast.mut{border-color:#9a5ed8; box-shadow:0 4px 0 #9a5ed8, 0 0 18px rgba(178,124,232,.6); background:linear-gradient(135deg,#fffaff,#f3eaff)}
 
 /* ---- 庭: 種ガチャ ---- */
@@ -1500,7 +1517,7 @@ html.mobile #screen-garden .tlist{grid-template-columns:1fr}
         <div id="g-bookList" class="plist booklist"></div>
         <div id="g-bookDetail" class="bookdetail"></div>
       </div>
-      <div class="keyhint"><b>↑ ↓</b> 作物を選ぶ ・ <b>← →</b> 品質(ふつう / ☆ / ☆☆ / ☆☆☆ / 変異)を切り替え ・ <b>Space</b> / <b>Esc</b> 閉じる</div>
+      <div class="keyhint"><b>↑ ↓</b> 作物を選ぶ ・ <b>← →</b> 品質(ふつう / ☆ / ☆☆ / ☆☆☆ / 変異 / 超変異)を切り替え ・ <b>Space</b> / <b>Esc</b> 閉じる</div>
     </div>
   </div>
 
@@ -3280,6 +3297,17 @@ function endBookGame(){
 /* ---------- 更新情報 ----------
    新しいものを上に足していく。d は YYYY-MM-DD */
 const NEWS=[
+  { d:"2026-10-03", t:"作物に「超変異」が登場しました", items:[
+    "作物が実るとき、0.1% の確率で超変異します。変異よりさらにレアで、すべての作物に専用の名前・絵・図鑑の説明文があります",
+    "超変異の売値は ☆☆☆ の10倍(ふつうの15倍)です。変異と同じく、自動売却や「すべて売る」では売りません",
+    "図鑑の印に虹色の ✦ が加わり、超変異のタブで説明文が読めます",
+    "実績に「超変異の作物を収穫する」「超変異を3種類収穫する」「超変異を10種類収穫する」「図鑑を200項目うめる」を追加しました",
+    "図鑑の実績のごほうびを増やしました(図鑑コンプリートは 5,000,000キー)。すでに受け取った分は変わりません",
+  ]},
+  { d:"2026-10-03", t:"貴重品の効果の上限を変更しました", items:[
+    "一部の貴重品の効果に、上限を設けたり、上限を変えたりしました",
+    "すでに持っている貴重品にも適用されます。上限をこえて持っている分はなくならず、効果だけが上限で止まります",
+  ]},
   { d:"2026-10-02", t:"番付に「累計獲得キー」が登場しました", items:[
     "これまでに手に入れたキーの合計で競う番付です。作物や種の売上(村人・自動売却を含む)、タイピングから農園に届いたキー、実績のごほうびを合わせて数えます",
     "農園の番付(9)と、タイトルのランキングの両方で見られます。これまでの分もさかのぼって数えます",
@@ -3647,31 +3675,31 @@ const CROPS = [
     lore:"掘り出すまで何色か分からない。切った瞬間の濃い紫を見るために、十日を待つ価値がある。" },
   /* ここから下は GHR(貴重品)。収穫すると売れないかわりに、庭にずっと効く力を授ける */
   { id:"blackvelvet", r:"GHR", gacha:true, treasure:true, name:"ブラックベルベット", icon:"🎀", cost:0, hours:48, price:0,
-    eff:{ key:"sell", per:1, unit:"%", text:"売却価格 +1%" },
+    eff:{ key:"sell", per:1, unit:"%", cap:100, text:"売却価格 +1%(最大 +100%)" },
     desc:"貴重品。黒天鵞絨のリボン。", lore:"低く響く声のように、静かに値を押し上げる。" },
   { id:"navyblue", r:"GHR", gacha:true, treasure:true, name:"ネイビーブルー", icon:"💧", cost:0, hours:48, price:0,
-    eff:{ key:"double", per:1, unit:"%", cap:100, text:"2個穫れる確率 +1%" },
+    eff:{ key:"double", per:1, unit:"%", cap:30, text:"2個穫れる確率 +1%(最大 +30%)" },
     desc:"貴重品。深い藍の雫。", lore:"ひとつのはずのものが、ときどきふたつになる。" },
   { id:"browneyes", r:"GHR", gacha:true, treasure:true, name:"ブラウンアイズ", icon:"👁️", cost:0, hours:48, price:0,
-    eff:{ key:"minute", per:1, unit:"分", text:"1打の時短 +1分" },
+    eff:{ key:"minute", per:1, unit:"分", cap:30, text:"1打の時短 +1分(最大 +30分)" },
     desc:"貴重品。茶色の瞳。", lore:"打鍵のひとつひとつを、この瞳がしっかり数えている。" },
   { id:"redflash", r:"GHR", gacha:true, treasure:true, name:"レッドフラッシュ", icon:"⚡", cost:0, hours:48, price:0,
-    eff:{ key:"growth", per:1, unit:"%", text:"成長の速さ +1%" },
+    eff:{ key:"growth", per:1, unit:"%", cap:100, text:"成長の速さ +1%(最大 +100%)" },
     desc:"貴重品。赤い閃光。", lore:"畑の時間が、ほんの少しだけ前のめりになる。" },
   { id:"whitewizard", r:"GHR", gacha:true, treasure:true, name:"ホワイトウィザード", icon:"🎩", cost:0, hours:48, price:0,
     eff:{ key:"water", per:2, unit:"時間", text:"水やりの持続 +2時間" },
     desc:"貴重品。白い魔法使いの帽子。", lore:"一度まいた水が、なかなか乾かなくなる。" },
   { id:"pinkprincess", r:"GHR", gacha:true, treasure:true, name:"ピンクプリンセス", icon:"👑", cost:0, hours:48, price:0,
-    eff:{ key:"mutant", per:1, unit:"%", cap:30, text:"変異の確率 +1%(最大 +30%)" },
+    eff:{ key:"mutant", per:0.2, unit:"%", cap:10, text:"変異の確率 +0.2%・超変異の確率 +0.02%(最大 +10%・+1%)" },
     desc:"貴重品。桃色の王冠。", lore:"この王冠のある庭では、作物がときどき思いもよらない姿で実る。" },
   { id:"yellowghost", r:"GHR", gacha:true, treasure:true, name:"イエローゴースト", icon:"👻", cost:0, hours:48, price:0,
-    eff:{ key:"vilgrowth", per:2, unit:"%", text:"村人の畑の成長 +2%" },
+    eff:{ key:"vilgrowth", per:2, unit:"%", cap:200, text:"村人の畑の成長 +2%(最大 +200%)" },
     desc:"貴重品。黄色い幽霊。", lore:"畑の隅に立って、村人の手をそっと速める。怖がられているのか慕われているのか、誰も知らない。" },
   { id:"greennecklace", r:"GHR", gacha:true, treasure:true, name:"グリーンネックレス", icon:"📿", cost:0, hours:48, price:0,
     eff:{ key:"seed", per:1, unit:"%", cap:75, text:"種の値段 −1%(最大 −75%)" },
     desc:"貴重品。緑の首飾り。", lore:"これを提げて店に行くと、なぜか値引きしてもらえる。" },
   { id:"silverstar", r:"GHR", gacha:true, treasure:true, name:"シルバースター", icon:"⭐", cost:0, hours:48, price:0,
-    eff:{ key:"gacha", per:1, unit:"%", cap:75, text:"ガチャの値段 −1%(最大 −75%)" },
+    eff:{ key:"gacha", per:1, unit:"%", cap:40, text:"ガチャの値段 −1%(最大 −40%)" },
     desc:"貴重品。銀の星。", lore:"星を持つ者には、ガチャの主人も少しだけ甘くなる。" },
   { id:"blueamaryllis", r:"GHR", gacha:true, treasure:true, name:"ブルーアマリリス", icon:"🌸", cost:0, hours:48, price:0,
     eff:{ key:"fert", per:1, unit:"%", cap:20, text:"肥料の効果 +1%(最大 +20%)" },
@@ -3788,10 +3816,97 @@ const MUTANT = {
     art:`<svg viewBox="0 0 32 32"><g stroke="#d7d0c6" stroke-width="1.4" fill="none" stroke-linecap="round" opacity=".85"><path d="M12 9c-1.4-1.6-.4-3.2.8-4.4"/><path d="M17 8c-1.4-1.6-.4-3.4.8-4.8"/><path d="M22 9.4c-1.2-1.4-.4-2.8.6-3.8"/></g><path d="M5 20c1-5 7-8.6 13-9 6-.4 10 2 9.6 6-.4 4.6-6.4 8.6-13 9-6 .4-10.6-2-9.6-6z" fill="#7a2f3e"/><path d="M8 20.6c1-3 5-5.4 9.6-5.8" stroke="#a84b5c" stroke-width="1.6" fill="none" stroke-linecap="round"/><path d="M15 22c2.6-.6 5.4-2 6.6-3.8 1 1.6-.4 3.8-3.2 5-1.6.6-2.8.2-3.4-1.2z" fill="#ffd36a"/><g fill="#3a1a14" opacity=".7"><circle cx="11" cy="21" r=".8"/><circle cx="20" cy="15.6" r=".8"/><circle cx="24" cy="18.4" r=".6"/></g><g fill="#ff8a3a"><circle cx="6" cy="12" r=".8"/><circle cx="27" cy="11" r=".7"/><circle cx="25" cy="26" r=".6"/></g></svg>` },
   sunflower:{ name:"日時計ひまわり", lore:"花の真ん中が文字盤になっていて、影で時刻がわかる。日曜の昼だけは、なぜか針が止まっている。",
     art:`<svg viewBox="0 0 32 32"><path d="M16 22v8" stroke="#4f8a3a" stroke-width="2"/><path d="M16 27c-2-2.6-5-3-7-2 1.6 2 4.4 2.6 7 2z" fill="#5fa23a"/><g fill="#f6c22a"><ellipse cx="16" cy="4.4" rx="2.4" ry="3.6"/><ellipse cx="16" cy="23.6" rx="2.4" ry="3.6"/><ellipse cx="6.4" cy="14" rx="3.6" ry="2.4"/><ellipse cx="25.6" cy="14" rx="3.6" ry="2.4"/><ellipse cx="9.2" cy="7.2" rx="2.2" ry="3.4" transform="rotate(-45 9.2 7.2)"/><ellipse cx="22.8" cy="20.8" rx="2.2" ry="3.4" transform="rotate(-45 22.8 20.8)"/><ellipse cx="22.8" cy="7.2" rx="3.4" ry="2.2" transform="rotate(-45 22.8 7.2)"/><ellipse cx="9.2" cy="20.8" rx="3.4" ry="2.2" transform="rotate(-45 9.2 20.8)"/></g><circle cx="16" cy="14" r="6.6" fill="#fbf1d6" stroke="#8a5a2a" stroke-width="1.4"/><g stroke="#8a5a2a" stroke-width="1" stroke-linecap="round"><path d="M16 8.4v1.2M16 18.4v1.2M10.4 14h1.2M20.4 14h1.2"/></g><path d="M16 14l3.6-3.2M16 14l-1.4 2.6" stroke="#3a2a14" stroke-width="1.3" stroke-linecap="round"/><circle cx="16" cy="14" r=".9" fill="#3a2a14"/></svg>` },
+};/* ---------- 超変異(収穫のとき 0.1% で穫れる、変異よりさらにレアな枠) ----------
+   品質の6番目(t=5)として扱う。名前・絵・説明文は作物ごとに別。売値は ☆☆☆ の10倍 */
+const SUP_RATE = 0.001;
+const SUPER = {
+  carrot:{ name:"ダイヤのにんじん", lore:"土から抜いた瞬間、朝日を受けて畑じゅうに虹が散った。硬すぎて、切ることも食べることもできない。",
+    art:`<svg viewBox="0 0 32 32"><g fill="#4f8a3a"><path d="M20 10c-1-4 0-7 2-8 0 3 .4 5 0 8z"/><path d="M21 11c2-4 5-5.5 8-5-2 2-4 4-6.5 6z"/><path d="M19 10.5c-3-2.6-4-5-3.4-7.4 1.6 2 3.4 3.6 5 6z"/></g><path d="M22.5 11.5c-3.5-3.5-9-2-10 2L5 28c-.6 1.2.6 2 1.6 1.2L20.8 20c3.8-2 5.2-5 1.7-8.5z" fill="#bfefff"/><path d="M12.5 13.5L17 16l5.5-4.5M17 16l-6.5 9.5M17 16l3.8 4" stroke="#6ab9d8" stroke-width="1" fill="none"/><path d="M13.6 12.6c2-1.4 5-1.6 7 0" stroke="#fff" stroke-width="1.4" fill="none" stroke-linecap="round"/><g fill="#fff"><path d="M27 20l.7 1.8 1.8.7-1.8.7-.7 1.8-.7-1.8-1.8-.7 1.8-.7z"/><path d="M5 9l.5 1.3 1.3.5-1.3.5L5 12.6l-.5-1.3-1.3-.5 1.3-.5z"/></g><path d="M8 27l2-1M24 25l2 2M3 18l2 1" stroke="#ff8fd0" stroke-width="1" stroke-linecap="round"/></svg>` },
+  potato:{ name:"彗星じゃがいも", lore:"掘り出すと、手の中で青白い尾をたなびかせる。七十六年に一度しか穫れないと言われているが、誰も数えていない。",
+    art:`<svg viewBox="0 0 32 32"><path d="M15 18L30 3M17 21L31 9M13 15L24 2" stroke="#9fd8ff" stroke-width="2.4" stroke-linecap="round" opacity=".55"/><path d="M15 18L28 6M17 20L29 10" stroke="#fff" stroke-width="1" stroke-linecap="round" opacity=".8"/><path d="M3 20c0-5 4-8.5 9-8.5s8.5 3.5 8 8C19.5 25 15.5 28 10.5 27.6 6 27.3 3 24.5 3 20z" fill="#e8f4ff"/><path d="M5.5 18c1.2-3 4-4.6 7.4-4.4" stroke="#fff" stroke-width="1.6" fill="none" stroke-linecap="round"/><g fill="#9fbad6"><circle cx="9" cy="21" r="1.1"/><circle cx="14.5" cy="19" r=".9"/><circle cx="12.5" cy="24" r=".8"/></g><circle cx="12" cy="20" r="9" fill="none" stroke="#bfe6ff" stroke-width=".8" opacity=".6"/></svg>` },
+  tomato:{ name:"鼓動トマト", lore:"手のひらに乗せると、とくん、とくん、と脈を打つ。収穫した人の鼓動と、少しずつ同じ速さになっていく。",
+    art:`<svg viewBox="0 0 32 32"><path d="M16 28C9 23 4.5 18.5 4.5 13.2 4.5 9.6 7.2 7 10.4 7c2.4 0 4.4 1.4 5.6 3.4C17.2 8.4 19.2 7 21.6 7c3.2 0 5.9 2.6 5.9 6.2C27.5 18.5 23 23 16 28z" fill="#e8343a"/><path d="M8.5 12c.4-1.8 1.8-2.8 3.4-2.8" stroke="#ff9a9a" stroke-width="1.6" fill="none" stroke-linecap="round"/><path d="M12 8l4 2 4-2-1.6-2-2.4 1.4L13.6 6z" fill="#4f8a3a"/><path d="M7 17h4l1.6-3 2.2 6 1.8-4h3.4" stroke="#fff" stroke-width="1.3" fill="none" stroke-linejoin="round" stroke-linecap="round"/><path d="M2 12c-1 2-1 4 0 6M30 12c1 2 1 4 0 6" stroke="#ff6b6b" stroke-width="1.2" fill="none" stroke-linecap="round"/></svg>` },
+  corn:{ name:"ステンドグラスコーン", lore:"一粒一粒が色ガラスで、黒い鉛の線でつながっている。日に透かすと、畑の土に教会の窓のような模様が落ちる。",
+    art:`<svg viewBox="0 0 32 32"><path d="M9 27c-2-4-1-9 2-10l5 12c-3 1-5.5 0-7-2z" fill="#6f9a3e"/><path d="M23 27c2-4 1-9-2-10l-5 12c3 1 5.5 0 7-2z" fill="#4f8a3a"/><ellipse cx="16" cy="15" rx="6.4" ry="11.4" fill="#2c2a33"/><g><path d="M12 6h4v4h-4z" fill="#e2589b"/><path d="M16 5.5h3.2v4.5H16z" fill="#4f9ed6"/><path d="M10.4 10h3v4.4h-3z" fill="#f4c542"/><path d="M13.4 10h3.2v4.4h-3.2z" fill="#7fc46a"/><path d="M16.6 10h3v4.4h-3z" fill="#a274d8"/><path d="M19.6 10h1.8v4.4h-1.8z" fill="#ef5b5b"/><path d="M10 14.4h3.4v4.4H10z" fill="#5fc9d0"/><path d="M13.4 14.4h3.2v4.4h-3.2z" fill="#ef5b5b"/><path d="M16.6 14.4h3.4v4.4h-3.4z" fill="#f4c542"/><path d="M11 18.8h3.4v4.2H11z" fill="#a274d8"/><path d="M14.4 18.8h3.2v4.2h-3.2z" fill="#4f9ed6"/><path d="M17.6 18.8h3v4.2h-3z" fill="#7fc46a"/><path d="M13 23h6v2.6h-6z" fill="#e4903a"/></g><ellipse cx="16" cy="15" rx="6.4" ry="11.4" fill="none" stroke="#2c2a33" stroke-width="1.2"/><path d="M12.5 7.5l1.2 1.2M17 7l.8.8M11.5 15.5l1 1" stroke="#fff" stroke-width=".8" stroke-linecap="round"/></svg>` },
+  eggplant:{ name:"星空なす", lore:"紫の皮の奥で、本物の星座がゆっくり回っている。夜に収穫すると、空の星がひとつ足りないことがあるらしい。",
+    art:`<svg viewBox="0 0 32 32"><path d="M20 6c3 2 4.5 5.5 3.6 9.5-1.4 6-6.4 12-12.4 12.4C7.4 28.2 4.5 25 5.4 21c1.2-5.2 6.2-6.6 9-10.4C16 8.4 17.4 5 20 6z" fill="#1d1a4a"/><path d="M18 5.5l3-3.2 1 2.6 3 .2-2.6 2.4" fill="#4f8a3a"/><path d="M18.5 6c2 0 3.6 1.4 4.4 3.4-1.8-.8-3.6-.6-5.2.4z" fill="#3f7a2e"/><g fill="#fff"><circle cx="10" cy="22" r=".9"/><circle cx="14" cy="18" r=".7"/><circle cx="17.6" cy="14" r=".9"/><circle cx="19.6" cy="10.4" r=".6"/><circle cx="12" cy="25.2" r=".5"/><circle cx="7.6" cy="24.6" r=".5"/></g><path d="M10 22l4-4 3.6-4 2-3.6" stroke="#9fb4ff" stroke-width=".6" fill="none" opacity=".8"/><path d="M8.5 19.5c1.5-2.5 3.5-4 6-5.5" stroke="#5a4fa8" stroke-width="1.2" fill="none" stroke-linecap="round"/></svg>` },
+  strawberry:{ name:"雪の女王いちご", lore:"氷の冠をかぶって実る。触れた指先から霜の花が広がるので、手袋をしないと収穫できない。",
+    art:`<svg viewBox="0 0 32 32"><path d="M16 29c-6-3-10-8-10-13 0-3.6 3-5.6 6-5.6 1.6 0 3 .6 4 1.6 1-1 2.4-1.6 4-1.6 3 0 6 2 6 5.6 0 5-4 10-10 13z" fill="#f2f7ff"/><path d="M16 29c-6-3-10-8-10-13 0-3.6 3-5.6 6-5.6 1.6 0 3 .6 4 1.6 1-1 2.4-1.6 4-1.6 3 0 6 2 6 5.6 0 5-4 10-10 13z" fill="none" stroke="#9fd0f0" stroke-width="1"/><g fill="#7fb8e0"><ellipse cx="11" cy="16" rx=".6" ry=".9"/><ellipse cx="16" cy="15" rx=".6" ry=".9"/><ellipse cx="21" cy="16" rx=".6" ry=".9"/><ellipse cx="13" cy="20" rx=".6" ry=".9"/><ellipse cx="19" cy="20" rx=".6" ry=".9"/><ellipse cx="16" cy="24" rx=".6" ry=".9"/></g><path d="M9 10l1.6-6 3 4 2.4-6 2.4 6 3-4 1.6 6z" fill="#cfefff" stroke="#6ab9d8" stroke-width=".8" stroke-linejoin="round"/><g fill="#fff"><circle cx="16" cy="3.4" r=".9"/><circle cx="10.6" cy="5" r=".7"/><circle cx="21.4" cy="5" r=".7"/></g><path d="M26 22l1 1M27 21l-2 2M4 24l1.4 1.4M5.4 24L4 25.4" stroke="#bfe6ff" stroke-width=".8" stroke-linecap="round"/></svg>` },
+  pumpkin:{ name:"かぼちゃの馬車", lore:"扉と車輪をつけて実る。真夜中の鐘が鳴っても、もとのかぼちゃには戻らない。乗れるかどうかは試した人がいない。",
+    art:`<svg viewBox="0 0 32 32"><path d="M16 6c-1-2.4.6-4 2.6-4" stroke="#4f8a3a" stroke-width="1.6" fill="none" stroke-linecap="round"/><ellipse cx="16" cy="15" rx="12" ry="9" fill="#f08a24"/><path d="M16 6.4c-3 2.6-3 14.6 0 17.2M10 7.6c-3.6 3-3.6 11.8 0 14.8M22 7.6c3.6 3 3.6 11.8 0 14.8" stroke="#c4621a" stroke-width="1" fill="none"/><path d="M13 11h6v8h-6z" fill="#ffd36a" stroke="#8a4a10" stroke-width="1"/><path d="M16 11v8M13 15h6" stroke="#8a4a10" stroke-width=".7"/><g fill="none" stroke="#e8c45a" stroke-width="1.6"><circle cx="9" cy="25" r="4"/><circle cx="23" cy="25" r="4"/></g><path d="M9 21v8M5 25h8M23 21v8M19 25h8" stroke="#e8c45a" stroke-width=".8"/><circle cx="9" cy="25" r="1" fill="#e8c45a"/><circle cx="23" cy="25" r="1" fill="#e8c45a"/></svg>` },
+  melon:{ name:"黄金郷メロン", lore:"網目をよく見ると、金色の街並みが描かれている。地図にない国の、地図にない通りまで、すべて。",
+    art:`<svg viewBox="0 0 32 32"><path d="M16 5.5c0-2 1.4-3.4 3.4-3.6" stroke="#6b604e" stroke-width="1.4" fill="none"/><circle cx="16" cy="17.5" r="11" fill="#f2c43a"/><path d="M7 21h3v-4h2v-3h2v5h2v-6h2v4h2v-2h3v6h2" stroke="#a87a10" stroke-width="1.1" fill="none" stroke-linejoin="round"/><path d="M8 13c3 2 13 2 16 0M7 17c4 1 14 1 18 0M9 25c3 1.6 11 1.6 14 0" stroke="#d9a520" stroke-width=".8" fill="none"/><path d="M10 11c1.6-2.4 4-3.6 6.6-3.6" stroke="#fff3b0" stroke-width="1.6" fill="none" stroke-linecap="round"/><path d="M25 7l.8 2 2 .8-2 .8-.8 2-.8-2-2-.8 2-.8z" fill="#fff6c2"/></svg>` },
+  keytree:{ name:"世界樹キーボード", lore:"枝葉がそのままキーボードになっていて、すべてのキーがきちんと並んでいる。この木を抜くと、世界のどこかで誰かが打ち間違えると言われている。",
+    art:`<svg viewBox="0 0 32 32"><circle cx="16" cy="13" r="15" fill="#fff4c8" opacity=".55"/><path d="M2.6 13c0-7 6-10.6 13.4-10.6S29.4 6 29.4 13c0 4.4-3 7.6-7 7.6H9.6c-4 0-7-3.2-7-7.6z" fill="#2f7a3a"/><path d="M4 9c2-4 6-5.6 12-5.6" stroke="#6fbf5a" stroke-width="1.2" fill="none" stroke-linecap="round"/><rect x="4.4" y="5.2" width="3.2" height="3" rx=".7" fill="#fbf8ee" stroke="#ffb08a" stroke-width=".7"/><rect x="4.9" y="5.6" width="2.2" height="1.2" rx=".4" fill="#ffb08a" opacity=".55"/><rect x="8.2" y="5.2" width="3.2" height="3" rx=".7" fill="#fbf8ee" stroke="#ff9ec4" stroke-width=".7"/><rect x="8.7" y="5.6" width="2.2" height="1.2" rx=".4" fill="#ff9ec4" opacity=".55"/><rect x="12.0" y="5.2" width="3.2" height="3" rx=".7" fill="#fbf8ee" stroke="#ffd86a" stroke-width=".7"/><rect x="12.5" y="5.6" width="2.2" height="1.2" rx=".4" fill="#ffd86a" opacity=".55"/><rect x="15.8" y="5.2" width="3.2" height="3" rx=".7" fill="#fbf8ee" stroke="#9fe08a" stroke-width=".7"/><rect x="16.3" y="5.6" width="2.2" height="1.2" rx=".4" fill="#9fe08a" opacity=".55"/><rect x="19.6" y="5.2" width="3.2" height="3" rx=".7" fill="#fbf8ee" stroke="#8fd0ff" stroke-width=".7"/><rect x="20.1" y="5.6" width="2.2" height="1.2" rx=".4" fill="#8fd0ff" opacity=".55"/><rect x="23.4" y="5.2" width="3.2" height="3" rx=".7" fill="#fbf8ee" stroke="#c8a8ff" stroke-width=".7"/><rect x="23.9" y="5.6" width="2.2" height="1.2" rx=".4" fill="#c8a8ff" opacity=".55"/><rect x="5.9" y="9" width="3.2" height="3" rx=".7" fill="#fbf8ee" stroke="#8fd0ff" stroke-width=".7"/><rect x="6.4" y="9.4" width="2.2" height="1.2" rx=".4" fill="#8fd0ff" opacity=".55"/><rect x="9.7" y="9" width="3.2" height="3" rx=".7" fill="#fbf8ee" stroke="#c8a8ff" stroke-width=".7"/><rect x="10.2" y="9.4" width="2.2" height="1.2" rx=".4" fill="#c8a8ff" opacity=".55"/><rect x="13.5" y="9" width="3.2" height="3" rx=".7" fill="#fbf8ee" stroke="#ffb08a" stroke-width=".7"/><rect x="14.0" y="9.4" width="2.2" height="1.2" rx=".4" fill="#ffb08a" opacity=".55"/><rect x="17.3" y="9" width="3.2" height="3" rx=".7" fill="#fbf8ee" stroke="#ff9ec4" stroke-width=".7"/><rect x="17.8" y="9.4" width="2.2" height="1.2" rx=".4" fill="#ff9ec4" opacity=".55"/><rect x="21.1" y="9" width="3.2" height="3" rx=".7" fill="#fbf8ee" stroke="#ffd86a" stroke-width=".7"/><rect x="21.6" y="9.4" width="2.2" height="1.2" rx=".4" fill="#ffd86a" opacity=".55"/><rect x="24.9" y="9" width="3.2" height="3" rx=".7" fill="#fbf8ee" stroke="#9fe08a" stroke-width=".7"/><rect x="25.4" y="9.4" width="2.2" height="1.2" rx=".4" fill="#9fe08a" opacity=".55"/><rect x="7.4" y="12.8" width="3.2" height="3" rx=".7" fill="#fbf8ee" stroke="#ff9ec4" stroke-width=".7"/><rect x="7.9" y="13.2" width="2.2" height="1.2" rx=".4" fill="#ff9ec4" opacity=".55"/><rect x="11.2" y="12.8" width="3.2" height="3" rx=".7" fill="#fbf8ee" stroke="#ffd86a" stroke-width=".7"/><rect x="11.7" y="13.2" width="2.2" height="1.2" rx=".4" fill="#ffd86a" opacity=".55"/><rect x="15.0" y="12.8" width="3.2" height="3" rx=".7" fill="#fbf8ee" stroke="#9fe08a" stroke-width=".7"/><rect x="15.5" y="13.2" width="2.2" height="1.2" rx=".4" fill="#9fe08a" opacity=".55"/><rect x="18.8" y="12.8" width="3.2" height="3" rx=".7" fill="#fbf8ee" stroke="#8fd0ff" stroke-width=".7"/><rect x="19.3" y="13.2" width="2.2" height="1.2" rx=".4" fill="#8fd0ff" opacity=".55"/><rect x="22.6" y="12.8" width="3.2" height="3" rx=".7" fill="#fbf8ee" stroke="#c8a8ff" stroke-width=".7"/><rect x="23.1" y="13.2" width="2.2" height="1.2" rx=".4" fill="#c8a8ff" opacity=".55"/><rect x="9.4" y="16.6" width="13.2" height="2.6" rx=".8" fill="#fbf8ee" stroke="#ffd86a" stroke-width=".7"/><path d="M14 20.4h4v6.6h-4z" fill="#7a5230"/><path d="M14.4 22.4h3.2M14.4 24.4h3.2" stroke="#5a3a1a" stroke-width=".6"/><path d="M8 29.4c2.4-2.4 5-2.4 8-2.4s5.6 0 8 2.4M12 27.6l-3 2M20 27.6l3 2" stroke="#7a5230" stroke-width="1.3" fill="none" stroke-linecap="round"/><g fill="#fff6c2"><path d="M28.4 2l.7 1.8 1.8.7-1.8.7-.7 1.8-.7-1.8-1.8-.7 1.8-.7z"/><path d="M3.4 22l.5 1.3 1.3.5-1.3.5-.5 1.3-.5-1.3-1.3-.5 1.3-.5z"/><circle cx="28" cy="24" r=".7"/></g></svg>` },
+  chili:{ name:"雷とうがらし", lore:"実のまわりで小さな稲妻がぱちぱちとはじける。かじった者は三日ほど、髪が逆立ったままになる。",
+    art:`<svg viewBox="0 0 32 32"><path d="M20 7c1-3 3-4.4 5.4-4" stroke="#4f8a3a" stroke-width="1.8" fill="none" stroke-linecap="round"/><path d="M17.5 8.5c4-1.4 7.4 1.4 6 5.4C21.4 20 13 27 6 28.6c-1.6.4-2.2-1.2-.8-2C11 23 13.4 17 14 12.6c.3-2 1.6-3.4 3.5-4.1z" fill="#ffd21f"/><path d="M15.6 12.4c.4-1.6 1.4-2.6 2.8-3" stroke="#fff6a8" stroke-width="1.4" fill="none" stroke-linecap="round"/><path d="M27 15l-3 4h2.6l-2.6 4.4M5 13l2.4 3H5.4l2 3.6M26 25l-1.6 2h1.4l-1.4 2.4" stroke="#7fd4ff" stroke-width="1.2" fill="none" stroke-linejoin="round" stroke-linecap="round"/></svg>` },
+  cucumber:{ name:"二重螺旋きゅうり", lore:"二本がからみ合ったまま伸びていく。ほどこうとすると、どちらが先に生えたのか分からなくなる。",
+    art:`<svg viewBox="0 0 32 32"><path d="M9 4c8 3 8 7 0 10s-8 7 0 10 8 4 4 6" stroke="#3f8a3a" stroke-width="4" fill="none" stroke-linecap="round"/><path d="M23 4c-8 3-8 7 0 10s8 7 0 10-8 4-4 6" stroke="#6fb84a" stroke-width="4" fill="none" stroke-linecap="round"/><path d="M11 9h10M11 19h10M13 4.6h6M13 14h6M13 24h6" stroke="#d9f0b0" stroke-width="1" stroke-linecap="round"/><path d="M8 4l-2-2M24 4l2-2" stroke="#f4c542" stroke-width="1.4" stroke-linecap="round"/></svg>` },
+  broccoli:{ name:"盆栽ブロッコリー", lore:"枝ぶりが整い、鉢ごと土から生えてくる。百年かけて育てたような風格だが、実際には数日しか経っていない。",
+    art:`<svg viewBox="0 0 32 32"><path d="M6 24h20l-2.4 5H8.4z" fill="#8a4e2a"/><path d="M5 23.4h22" stroke="#6a3a1e" stroke-width="1.6" stroke-linecap="round"/><path d="M16 23c0-4-3-5-2-9s4-4 6-7" stroke="#6b4a2a" stroke-width="2.2" fill="none" stroke-linecap="round"/><path d="M14.4 15c-3 0-5-1-6.4-2.6" stroke="#6b4a2a" stroke-width="1.6" fill="none" stroke-linecap="round"/><g fill="#3f8a3a"><circle cx="20" cy="6" r="3.4"/><circle cx="23.6" cy="8" r="2.8"/><circle cx="17" cy="7.6" r="2.6"/><circle cx="7.6" cy="12" r="3"/><circle cx="10.6" cy="11" r="2.4"/></g><g fill="#6fb84a"><circle cx="19.4" cy="5" r="1.2"/><circle cx="23" cy="7.2" r="1"/><circle cx="7" cy="11" r="1.1"/></g></svg>` },
+  avocado:{ name:"惑星アボカド", lore:"割ると種が青い星になっていて、果肉がマントルのようにそれを包んでいる。種をまいた人はまだいない。",
+    art:`<svg viewBox="0 0 32 32"><path d="M16 3c5 0 8 6 9.4 12C27 22 22.5 29 16 29S5 22 6.6 15C8 9 11 3 16 3z" fill="#2f4a1e"/><path d="M16 5c4 0 6.6 5 7.8 10.6C25 21.4 21.4 27 16 27S7 21.4 8.2 15.6C9.4 10 12 5 16 5z" fill="#c9e07a"/><path d="M16 9c3.4 0 5.6 4 6.2 8.4.6 4.4-2.4 7.6-6.2 7.6s-6.8-3.2-6.2-7.6C10.4 13 12.6 9 16 9z" fill="#f08a3c" opacity=".55"/><circle cx="16" cy="18" r="5.2" fill="#2f7fd8"/><path d="M13 15.6c1.4.4 2 1.6 1.4 2.8-.8 1.2-.2 2.4 1 2.8M17.6 14c.6 1 1.8 1.2 2.6 2.4M18.4 19.6c1 .2 1.6 1 1.6 2" stroke="#4fae5a" stroke-width="1.6" fill="none" stroke-linecap="round"/><path d="M13.2 15.8c.8-1.2 2-1.8 3.2-1.8" stroke="#bfe6ff" stroke-width=".8" fill="none" stroke-linecap="round"/></svg>` },
+  pineapple:{ name:"皇帝パイン", lore:"葉の冠が宝石をちりばめたティアラになっている。収穫するときは、なぜか誰もがひざまずいてしまう。",
+    art:`<svg viewBox="0 0 32 32"><path d="M9 9l2.4-6 2.4 4 2.2-5 2.2 5 2.4-4L23 9z" fill="#f4c542" stroke="#a87a10" stroke-width=".8" stroke-linejoin="round"/><g><circle cx="16" cy="3.4" r="1.1" fill="#ef5b5b"/><circle cx="11.6" cy="4.6" r=".9" fill="#4f9ed6"/><circle cx="20.4" cy="4.6" r=".9" fill="#7fc46a"/></g><path d="M9 8.6h14" stroke="#a87a10" stroke-width="1.2"/><ellipse cx="16" cy="19.5" rx="7.6" ry="9.5" fill="#e8a93a"/><path d="M9.6 14l12.8 11M9 19.4l9.6 8.4M11 11.6l11.6 10M22.4 14L9.6 25M23 19.4l-9.6 8.4M21 11.6L9.4 21.6" stroke="#b87318" stroke-width=".9"/><path d="M11.4 13.6c1.4-2 3-2.8 5-3" stroke="#ffe08a" stroke-width="1.4" fill="none" stroke-linecap="round"/></svg>` },
+  grape:{ name:"天の川ぶどう", lore:"一粒ずつが小さな星で、房ぜんたいが天の川のように流れている。七夕の夜だけ、房の端と端が近づくという。",
+    art:`<svg viewBox="0 0 32 32"><path d="M16 6c0-2 1.6-3.4 3.6-3.4M16 6c-3-1-5-.4-6 1.4" stroke="#6b604e" stroke-width="1.4" fill="none" stroke-linecap="round"/><path d="M6 9c6 4 10 11 18 20" stroke="#cfd8ff" stroke-width="7" opacity=".25" stroke-linecap="round"/><g fill="#26245e"><circle cx="11" cy="10" r="3"/><circle cx="17" cy="10" r="3"/><circle cx="22" cy="11" r="2.6"/><circle cx="14" cy="15" r="3"/><circle cx="20" cy="15.6" r="3"/><circle cx="12" cy="20" r="2.8"/><circle cx="17.6" cy="20.6" r="2.8"/><circle cx="15" cy="25.6" r="2.6"/></g><g fill="#fff"><circle cx="10" cy="9" r=".7"/><circle cx="16.2" cy="9.4" r=".5"/><circle cx="13.4" cy="14.2" r=".7"/><circle cx="19.4" cy="14.8" r=".5"/><circle cx="11.4" cy="19.2" r=".6"/><circle cx="17" cy="20" r=".7"/><circle cx="14.4" cy="25" r=".5"/><circle cx="21.6" cy="10.4" r=".5"/></g></svg>` },
+  dragonfruit:{ name:"月下美人フルーツ", lore:"一年に一度、夜にだけ咲く大輪の花ごと実る。花は朝には閉じるが、香りだけは畑に残り続ける。",
+    art:`<svg viewBox="0 0 32 32"><circle cx="26" cy="5" r="3" fill="#fff6c2"/><ellipse cx="16" cy="22" rx="7" ry="7.4" fill="#e8347a"/><path d="M10 19l-3-2 4 0M22 19l3-2-4 0M12 26l-3 1.4 3.4.6M20 26l3 1.4-3.4.6" fill="#7fc46a" stroke="#4f8a3a" stroke-width=".6"/><g fill="#fff" stroke="#e8e0f0" stroke-width=".5"><ellipse cx="16" cy="9" rx="2.4" ry="6" /><ellipse cx="16" cy="9" rx="2.4" ry="6" transform="rotate(50 16 13)"/><ellipse cx="16" cy="9" rx="2.4" ry="6" transform="rotate(-50 16 13)"/><ellipse cx="16" cy="9" rx="2.2" ry="5" transform="rotate(100 16 13)"/><ellipse cx="16" cy="9" rx="2.2" ry="5" transform="rotate(-100 16 13)"/></g><circle cx="16" cy="13" r="2.2" fill="#fff3b0"/><g fill="#f4c542"><circle cx="15" cy="12.4" r=".5"/><circle cx="17" cy="12.6" r=".5"/><circle cx="16" cy="14" r=".5"/></g></svg>` },
+  lychee:{ name:"かぐや姫ライチ", lore:"殻の内側から柔らかな光がもれ、竹の節のような模様が浮かぶ。満月の夜が近づくと、少しずつ軽くなっていく。",
+    art:`<svg viewBox="0 0 32 32"><path d="M16 1v4M6 6l2.6 2.6M26 6l-2.6 2.6M2 17h4M30 17h-4" stroke="#fff3b0" stroke-width="1.4" stroke-linecap="round"/><circle cx="16" cy="17" r="10" fill="#fffbe6"/><circle cx="16" cy="17" r="10" fill="none" stroke="#e8d27a" stroke-width="1"/><path d="M7 13.6h18M6.4 20.4h19.2" stroke="#9cc46a" stroke-width="1.6" stroke-linecap="round"/><path d="M8 12.4v2.4M24 12.4v2.4M7.4 19.2v2.4M24.6 19.2v2.4" stroke="#6f9a3e" stroke-width="1.2" stroke-linecap="round"/><circle cx="16" cy="17" r="4.6" fill="#fff6c2"/><path d="M16 14.6c.8 1.4 2 2 2 3.2a2 2 0 0 1-4 0c0-1.2 1.2-1.8 2-3.2z" fill="#f4d860"/></svg>` },
+  onion:{ name:"万華鏡たまねぎ", lore:"輪切りにすると断面が万華鏡になっていて、回すたびに模様が変わる。まだ同じ模様を二度見た人はいない。",
+    art:`<svg viewBox="0 0 32 32"><path d="M16 3c0 2-.4 3.4-1 4.4" stroke="#7fc46a" stroke-width="1.6" stroke-linecap="round"/><circle cx="16" cy="18" r="11" fill="#c79bd8"/><circle cx="16" cy="18" r="9" fill="#ffe08a"/><circle cx="16" cy="18" r="7" fill="#7fd4c8"/><circle cx="16" cy="18" r="5" fill="#ff8fb0"/><circle cx="16" cy="18" r="3" fill="#9fb4ff"/><g fill="#fff" opacity=".85"><path d="M16 9l1 3-1 1-1-1z"/><path d="M16 27l1-3-1-1-1 1z"/><path d="M7 18l3 1 1-1-1-1z"/><path d="M25 18l-3 1-1-1 1-1z"/><path d="M9.6 11.6l2.8 1.4.2 1.4-1.4-.2z"/><path d="M22.4 24.4l-2.8-1.4-.2-1.4 1.4.2z"/><path d="M22.4 11.6l-1.4 2.8-1.4.2.2-1.4z"/><path d="M9.6 24.4l1.4-2.8 1.4-.2-.2 1.4z"/></g><circle cx="16" cy="18" r="1.2" fill="#fff"/></svg>` },
+  lettuce:{ name:"花嫁レタス", lore:"いちばん外の葉が、ヴェールのように透き通って広がっている。収穫の日には、どこからか鐘の音が聞こえる。",
+    art:`<svg viewBox="0 0 32 32"><path d="M6 27c-3-6 0-13 5-16 2-1.2 3.4-1 5 0 1.6-1 3-1.2 5 0 5 3 8 10 5 16z" fill="#8fd05a"/><path d="M9 26c-1.6-4.6.4-9.4 4-11.6M23 26c1.6-4.6-.4-9.4-4-11.6M16 13v13" stroke="#5aa83a" stroke-width="1" fill="none"/><path d="M5 12c3-7 19-7 22 0 1 3-1 9-4 13 1-6-2-11-7-11s-8 5-7 11c-3-4-5-10-4-13z" fill="#fff" opacity=".7"/><path d="M5 12c3-7 19-7 22 0" stroke="#f0e6ff" stroke-width="1" fill="none"/><g fill="#ffd6e8"><circle cx="11" cy="7.6" r="1.6"/><circle cx="16" cy="6" r="1.8"/><circle cx="21" cy="7.6" r="1.6"/></g><g fill="#fff"><circle cx="11" cy="7.6" r=".6"/><circle cx="16" cy="6" r=".7"/><circle cx="21" cy="7.6" r=".6"/></g></svg>` },
+  garlic:{ name:"百鬼夜行にんにく", lore:"夜になると、ひとかけらずつ小さな足を出して、畑の端から端まで一列に歩いていく。朝には何事もなかったように元の場所にいる。",
+    art:`<svg viewBox="0 0 32 32"><path d="M2 28c9-2 19-2 28 0" stroke="#5a4a7a" stroke-width="1" stroke-dasharray="1.6 1.4"/><g><path d="M4 22c0-4 2-6 3.5-7 1.5 1 3.5 3 3.5 7 0 2.6-1.6 3.6-3.5 3.6S4 24.6 4 22z" fill="#f2ecdf"/><path d="M7.5 15v-2" stroke="#9cc46a" stroke-width="1.2" stroke-linecap="round"/><circle cx="6.4" cy="21" r=".6" fill="#2c2a33"/><circle cx="8.6" cy="21" r=".6" fill="#2c2a33"/><path d="M6 25.4l-.6 2M9 25.4l.6 2" stroke="#2c2a33" stroke-width="1" stroke-linecap="round"/></g><g><path d="M12.5 20c0-4 2-6 3.5-7 1.5 1 3.5 3 3.5 7 0 2.6-1.6 3.6-3.5 3.6s-3.5-1-3.5-3.6z" fill="#e8e0f6"/><path d="M16 13v-2" stroke="#9cc46a" stroke-width="1.2" stroke-linecap="round"/><circle cx="14.9" cy="19" r=".6" fill="#2c2a33"/><circle cx="17.1" cy="19" r=".6" fill="#2c2a33"/><path d="M14.4 23.4l-.8 2.2M17.6 23.4l.4 2.4" stroke="#2c2a33" stroke-width="1" stroke-linecap="round"/></g><g><path d="M21 22c0-4 2-6 3.5-7 1.5 1 3.5 3 3.5 7 0 2.6-1.6 3.6-3.5 3.6S21 24.6 21 22z" fill="#f2ecdf"/><path d="M24.5 15v-2" stroke="#9cc46a" stroke-width="1.2" stroke-linecap="round"/><circle cx="23.4" cy="21" r=".6" fill="#2c2a33"/><circle cx="25.6" cy="21" r=".6" fill="#2c2a33"/><path d="M23 25.4l-.4 2M26 25.4l.8 2" stroke="#2c2a33" stroke-width="1" stroke-linecap="round"/></g><path d="M26 4a4 4 0 1 0 3 6.6A4.6 4.6 0 0 1 26 4z" fill="#fff6c2"/></svg>` },
+  peas:{ name:"雲の上の豆の木", lore:"さやから伸びたつるが、そのまま雲の上まで届いている。登った人の話では、上にも畑があったという。",
+    art:`<svg viewBox="0 0 32 32"><g fill="#fff"><ellipse cx="16" cy="6" rx="9" ry="3.6"/><ellipse cx="11" cy="5" rx="4" ry="3"/><ellipse cx="20" cy="4.4" rx="4.4" ry="3.2"/></g><path d="M14 29c4-3-4-6 0-9s-4-6 0-9 0-5 2-6" stroke="#4f8a3a" stroke-width="2.2" fill="none" stroke-linecap="round"/><g fill="#7fc46a"><path d="M16 21c3-1 5 0 6 2-3 .6-5 0-6-2z"/><path d="M14 15c-3-1-5 0-6 2 3 .6 5 0 6-2z"/><path d="M15.6 10c2.6-1.2 4.6-.4 5.6 1.4-2.6.6-4.4 0-5.6-1.4z"/></g><path d="M19 23.6c1.6 0 3.4 1 4 2.6-1.8.6-3.4 0-4-2.6z" fill="#9cd06a"/><g fill="#4f8a3a"><circle cx="20.4" cy="24.6" r=".6"/><circle cx="21.6" cy="25.2" r=".6"/></g><path d="M3 29h26" stroke="#7a5a3a" stroke-width="1.6" stroke-linecap="round"/></svg>` },
+  peach:{ name:"蟠桃", lore:"三千年に一度しか実らないと言い伝えられる、平たい桃。食べると長生きするという話だが、そもそも誰も食べたことがない。",
+    art:`<svg viewBox="0 0 32 32"><g fill="#fff" opacity=".85"><ellipse cx="7" cy="25" rx="5" ry="2"/><ellipse cx="25" cy="26" rx="5" ry="2"/></g><ellipse cx="16" cy="18" rx="11" ry="7.6" fill="#ffb3c4"/><ellipse cx="16" cy="18" rx="11" ry="7.6" fill="none" stroke="#f08aa8" stroke-width="1"/><path d="M16 10.4c-1.6 3-1.6 12 0 15.2" stroke="#e8708f" stroke-width="1.2" fill="none"/><ellipse cx="16" cy="18" rx="4" ry="3" fill="#ffe08a" opacity=".6"/><path d="M8.4 15c1.4-2.4 3.6-3.6 6-3.8" stroke="#fff" stroke-width="1.4" fill="none" stroke-linecap="round"/><path d="M16 10.6c1-3 3-4.6 6-4.6-1 2.4-3 4-6 4.6z" fill="#6fae4a"/><path d="M6 6l.8 2 2 .8-2 .8-.8 2-.8-2-2-.8 2-.8z" fill="#ffe08a"/></svg>` },
+  kiwi:{ name:"渡り鳥キウイ", lore:"飛べないはずなのに、ある日、羽を広げて畑の上を一周した。季節が変わると、どこかへ渡っていくらしい。",
+    art:`<svg viewBox="0 0 32 32"><path d="M10 15C4 11 2 7 3 4c4 2 7 5 9 9z" fill="#8a6a3e"/><path d="M22 15c6-4 8-8 7-11-4 2-7 5-9 9z" fill="#8a6a3e"/><path d="M5 6.4c2 1.4 4 3.4 5.6 6M27 6.4c-2 1.4-4 3.4-5.6 6" stroke="#a88a5a" stroke-width=".8" fill="none"/><ellipse cx="16" cy="19" rx="8" ry="6.6" fill="#7a5a32"/><circle cx="16" cy="19.4" r="4.6" fill="#8fc84a"/><circle cx="16" cy="19.4" r="1.6" fill="#f2f0d0"/><g fill="#2c2a33"><circle cx="13.4" cy="17.6" r=".4"/><circle cx="18.6" cy="17.6" r=".4"/><circle cx="16" cy="22.4" r=".4"/><circle cx="13.4" cy="21" r=".4"/><circle cx="18.6" cy="21" r=".4"/></g><path d="M23.4 17.6L29 19l-5.4 1" fill="#e8c88a"/><circle cx="22" cy="16.6" r=".7" fill="#2c2a33"/></svg>` },
+  mango:{ name:"鳳凰マンゴー", lore:"五色に光る尾羽のような葉を広げて実る。この実が穫れた年は、畑に良いことが続くと言われている。",
+    art:`<svg viewBox="0 0 32 32"><g stroke-width="2.6" fill="none" stroke-linecap="round"><path d="M14 18C9 20 5 24 3 29" stroke="#ef5b5b"/><path d="M14 19c-3 3-5 6-6 10" stroke="#f4c542"/><path d="M15 20c-1 3-1 6 0 9" stroke="#7fc46a"/><path d="M16 20c1 3 3 6 6 8" stroke="#4f9ed6"/><path d="M17 19c3 2 6 4 10 5" stroke="#a274d8"/></g><path d="M20 4c5 1 8 6 7 11-1 6-7 9-12 8-4.6-.8-6.6-5-5-9.4C11.6 9 15 3 20 4z" fill="#ff9a2e"/><path d="M20 4c5 1 8 6 7 11-.6 3-2.6 5.4-5 6.6 2-3 2.4-7.6.4-11.4C21 7.4 19 5.4 20 4z" fill="#ffc94a"/><path d="M14 9c1.4-2.4 3.6-3.6 6-3.6" stroke="#fff3b0" stroke-width="1.4" fill="none" stroke-linecap="round"/><path d="M20 4c0-1.6 1-2.6 2.4-2.8" stroke="#4f8a3a" stroke-width="1.4" fill="none" stroke-linecap="round"/></svg>` },
+  cherry:{ name:"永遠の誓いさくらんぼ", lore:"二つの実をつなぐ茎が、ひとりでに結ばれて指輪の形になる。ほどこうとした人は、まだ一人もいない。",
+    art:`<svg viewBox="0 0 32 32"><circle cx="16" cy="9" r="5" fill="none" stroke="#e8c45a" stroke-width="2"/><path d="M14 3.4l2-2.4 2 2.4-2 2.2z" fill="#cfefff" stroke="#6ab9d8" stroke-width=".6"/><path d="M12.4 12.4C11 16 9.6 18.6 8.6 20M19.6 12.4c1.4 3.6 2.8 6.2 3.8 7.6" stroke="#4f8a3a" stroke-width="1.4" fill="none" stroke-linecap="round"/><circle cx="8.6" cy="23.6" r="5" fill="#d81f3c"/><circle cx="23.4" cy="23.6" r="5" fill="#d81f3c"/><path d="M6 21.4c.8-1.2 2-1.8 3.2-1.8M20.8 21.4c.8-1.2 2-1.8 3.2-1.8" stroke="#ff9aa8" stroke-width="1.2" fill="none" stroke-linecap="round"/><path d="M16 17.6c-1-1.4-3-1-3 .6 0 1.6 3 3.4 3 3.4s3-1.8 3-3.4c0-1.6-2-2-3-.6z" fill="#ff6b8a"/></svg>` },
+  coconut:{ name:"巨人のヤシの実", lore:"人が中に住めるほど大きく育ち、窓と扉までついている。中をのぞくと、なぜかもう誰かの家具が置いてある。",
+    art:`<svg viewBox="0 0 32 32"><path d="M10 7C7 3 3 3 1 4c3 0 6 1.6 8 4M22 7c3-4 7-4 9-3-3 0-6 1.6-8 4M16 6c-1-3 0-5 1.6-6" stroke="#4f8a3a" stroke-width="1.8" fill="none" stroke-linecap="round"/><ellipse cx="16" cy="18" rx="13" ry="11" fill="#7a5232"/><path d="M5 14c3-4 8-6 12-6" stroke="#9a6e48" stroke-width="1.6" fill="none" stroke-linecap="round"/><path d="M12.6 29v-7a3.4 3.4 0 0 1 6.8 0v7z" fill="#4a2e1a"/><circle cx="18" cy="25.6" r=".6" fill="#f4c542"/><path d="M6 16h4.6v4H6zM21.4 16H26v4h-4.6z" fill="#ffe08a" stroke="#4a2e1a" stroke-width=".8"/><path d="M8.3 16v4M6 18h4.6M23.7 16v4M21.4 18H26" stroke="#4a2e1a" stroke-width=".6"/><path d="M3 29h26" stroke="#6a4a2a" stroke-width="1.4" stroke-linecap="round"/></svg>` },
+  olive:{ name:"平和の鳩オリーブ", lore:"枝に白い鳩がとまったまま実る。鳩は収穫しても飛び立たず、次に実る枝へと移っていく。",
+    art:`<svg viewBox="0 0 32 32"><path d="M3 24c8-2 16-6 26-14" stroke="#6b604e" stroke-width="1.4" fill="none" stroke-linecap="round"/><g fill="#7fae4a"><path d="M8 22c-1-3 0-5 2-6 0 3-.4 4.6-2 6z"/><path d="M14 20c2 2 4 2 6 1-2-1.6-4-2-6-1z"/><path d="M22 15c-1-3 0-5 2-6 0 3-.4 4.6-2 6z"/></g><g fill="#3e5a2a"><ellipse cx="11" cy="23.6" rx="1.6" ry="2"/><ellipse cx="18" cy="17.4" rx="1.6" ry="2"/><ellipse cx="25" cy="12.6" rx="1.4" ry="1.8"/></g><path d="M9 10c2-3 6-4 9-3l3-2 1 2.4c2 .6 3 2.6 2 4.6-2 4-8 5-12 3.6-1.6-.6-3.4-2.4-3-5.6z" fill="#fff" stroke="#c8ccd6" stroke-width=".7"/><path d="M12 10c2 2 5 2.4 8 1.6" stroke="#c8ccd6" stroke-width=".8" fill="none"/><circle cx="21.6" cy="7.6" r=".6" fill="#2c2a33"/><path d="M23.6 8.4l2.4.4-2 1.2" fill="#e8a93a"/></svg>` },
+  bluemoon:{ name:"スーパームーンベリー", lore:"ふつうの実の三倍もの大きさで、満月と同じ色に光る。この実が穫れた夜は、空の月がいつもより小さく見える。",
+    art:`<svg viewBox="0 0 32 32"><circle cx="16" cy="17" r="13" fill="#fff3b0" opacity=".35"/><circle cx="16" cy="17" r="11" fill="#ffe89a"/><g fill="#f0cf6a"><circle cx="12" cy="13" r="2.6"/><circle cx="20" cy="20" r="3"/><circle cx="19.6" cy="11.4" r="1.4"/><circle cx="11" cy="21.4" r="1.6"/></g><path d="M8 13c1-3 3.6-5.4 7-6" stroke="#fffbe0" stroke-width="1.6" fill="none" stroke-linecap="round"/><path d="M15 6c-1-2.4 0-4 2-4.6M17 6.4c2-1.4 4-1 5 0" stroke="#4f8a3a" stroke-width="1.4" fill="none" stroke-linecap="round"/></svg>` },
+  sunlemon:{ name:"レモン・ド・レトワール", lore:"星の光を閉じ込めた、白金色のレモン。夜道に置いておくと、迷った人の足もとを照らしてくれる。",
+    art:`<svg viewBox="0 0 32 32"><path d="M4 17c0-6 5.4-10.6 12-10.6S28 11 28 17s-5.4 10.6-12 10.6S4 23 4 17z" fill="#f2f0e6"/><path d="M2 17c1-.6 1.6-1.4 2-2.4M30 17c-1 .6-1.6 1.4-2 2.4" stroke="#d9d4c0" stroke-width="2" stroke-linecap="round"/><path d="M4 17c0-6 5.4-10.6 12-10.6S28 11 28 17s-5.4 10.6-12 10.6S4 23 4 17z" fill="none" stroke="#c8c2a8" stroke-width="1"/><path d="M16 10.4l1.8 4 4.4.4-3.4 3 1 4.4L16 20l-3.8 2.2 1-4.4-3.4-3 4.4-.4z" fill="#fff6c2" stroke="#e8c45a" stroke-width=".8" stroke-linejoin="round"/><path d="M8 13c1.4-2.4 3.6-3.8 6.4-4.2" stroke="#fff" stroke-width="1.4" fill="none" stroke-linecap="round"/><g fill="#fff6c2"><circle cx="26" cy="7" r=".9"/><circle cx="6" cy="25" r=".7"/></g></svg>` },
+  butternut:{ name:"ロイヤルナッツかぼちゃ", lore:"王冠のような形に実り、金の縞が入っている。台の上に置くと、畑の作物がみんなそちらを向く気がする。",
+    art:`<svg viewBox="0 0 32 32"><path d="M10 7l2-5 2.4 3.4L16 1.4l1.6 4L20 2l2 5z" fill="#f4c542" stroke="#a87a10" stroke-width=".8" stroke-linejoin="round"/><circle cx="16" cy="2.4" r=".8" fill="#ef5b5b"/><path d="M12.6 7h6.8c.6 3 .6 5.6 2.4 8.6 2.4 4 3 8.6-.6 11.4-2.6 2-8.8 2-11.4 0-3.6-2.8-3-7.4-.6-11.4 1.8-3 1.8-5.6 2.4-8.6z" fill="#f0b45a"/><path d="M14 8c-.4 4-2 6-3.6 9M18 8c.4 4 2 6 3.6 9M16 8v20" stroke="#e8c45a" stroke-width="1.6" fill="none"/><path d="M11 18c-1.6 3-1.4 6 .8 7.6" stroke="#ffe8a8" stroke-width="1.4" fill="none" stroke-linecap="round"/></svg>` },
+  romanesco:{ name:"マンデルブロコ", lore:"渦をのぞき込むと、渦の中にまた同じ形があり、その奥にもまた同じ形がある。どこまで拡大しても終わりが見えない。",
+    art:`<svg viewBox="0 0 32 32"><path d="M5 26c3-12 19-12 22 0z" fill="#3f8a3a"/><path d="M16 4l11 22H5z" fill="#8fd05a"/><path d="M16 4l5.5 11h-11z" fill="#b6e07a"/><path d="M10.5 15l5.5 11H5zM21.5 15L27 26H16z" fill="#a8d86a"/><path d="M16 4l2.8 5.6h-5.6zM10.5 15l2.8 5.5H7.7zM21.5 15l2.8 5.5h-5.6z" fill="#d6f0a0"/><path d="M16 15l2.8 5.5h-5.6z" fill="#3f8a3a" opacity=".5"/><g fill="#fff"><circle cx="16" cy="6" r=".5"/><circle cx="10.5" cy="17" r=".5"/><circle cx="21.5" cy="17" r=".5"/></g></svg>` },
+  shadowqueen:{ name:"シャドーエンペラー", lore:"光をすべて吸い込む漆黒の芋。掘り出した瞬間、畑だけが一瞬夜になり、また朝に戻る。",
+    art:`<svg viewBox="0 0 32 32"><ellipse cx="16" cy="19" rx="13" ry="10" fill="#6a3aa8" opacity=".35"/><path d="M5 19c0-6 5-10 11-10s11 4 10.5 9.6C26 24.6 21 28 15 27.6 9 27.2 5 24 5 19z" fill="#0d0a14"/><path d="M8 16c1.6-3.4 5-5.4 9-5.2" stroke="#5a3a8a" stroke-width="1.6" fill="none" stroke-linecap="round"/><g fill="#a274d8"><circle cx="12" cy="20" r=".8"/><circle cx="19" cy="17" r=".7"/><circle cx="17" cy="23" r=".7"/></g><path d="M10 9l2-5 2.4 3.4L16 3l1.6 4.4L20 4l2 5z" fill="#3a2a5a" stroke="#c8a8f0" stroke-width=".8" stroke-linejoin="round"/><circle cx="16" cy="4" r=".8" fill="#e8c45a"/></svg>` },
+  mushroom:{ name:"星屑マッシュルーム", lore:"かさを揺らすと、星屑がこぼれ落ちる。こぼれた星屑が落ちた場所には、翌朝また小さなきのこが生えている。",
+    art:`<svg viewBox="0 0 32 32"><path d="M3 15C3 8 9 3 16 3s13 5 13 12z" fill="#3a3a7a"/><path d="M3 15C3 8 9 3 16 3s13 5 13 12" fill="none" stroke="#5a5aa8" stroke-width="1"/><g fill="#fff6c2"><path d="M9 8l.6 1.4 1.4.6-1.4.6L9 12l-.6-1.4L7 10l1.4-.6z"/><path d="M19 6l.5 1.2 1.2.5-1.2.5-.5 1.2-.5-1.2-1.2-.5 1.2-.5z"/><circle cx="14" cy="11" r=".8"/><circle cx="23" cy="11" r=".9"/></g><path d="M12 15h8v8c0 2-1.6 3.4-4 3.4s-4-1.4-4-3.4z" fill="#f2ecdf"/><g fill="#fff6c2"><circle cx="6" cy="20" r=".8"/><circle cx="25" cy="22" r=".9"/><circle cx="8" cy="27" r=".6"/><circle cx="24" cy="28" r=".6"/><path d="M27 17l.4 1 1 .4-1 .4-.4 1-.4-1-1-.4 1-.4z"/></g></svg>` },
+  paprika:{ name:"蒸気パプリカ", lore:"半分は燃えるように熱く、半分は凍るように冷たい。境目からはいつも湯気が立ちのぼっている。",
+    art:`<svg viewBox="0 0 32 32"><path d="M16 9c-1-3 0-5 2-6" stroke="#4f8a3a" stroke-width="1.6" fill="none" stroke-linecap="round"/><path d="M16 9c-4-2-10 0-10.4 6-.4 6 2.4 12 7.4 13 1.4.3 2.4-.4 3-1.4z" fill="#e8342a"/><path d="M16 9c4-2 10 0 10.4 6 .4 6-2.4 12-7.4 13-1.4.3-2.4-.4-3-1.4z" fill="#7fc8f0"/><path d="M8.6 14c.6-2 2-3 3.6-3.4" stroke="#ff9a8a" stroke-width="1.4" fill="none" stroke-linecap="round"/><path d="M20.4 11c1.6.4 3 1.4 3.6 3.4" stroke="#e0f6ff" stroke-width="1.4" fill="none" stroke-linecap="round"/><path d="M16 26c-1-2 1-3 0-5s1-3 0-5" stroke="#fff" stroke-width="1.2" fill="none" stroke-linecap="round" opacity=".8"/><path d="M13 6c-1-1.6 1-2.4 0-4M20 6.4c1-1.6-1-2.4 0-4" stroke="#d8dde6" stroke-width="1.2" fill="none" stroke-linecap="round"/></svg>` },
+  watermelon:{ name:"逃げ足すいか", lore:"すいか割りの気配を感じると、足を出して畑じゅうを逃げ回る。目隠しをしている人には、決して捕まらない。",
+    art:`<svg viewBox="0 0 32 32"><path d="M1 14h5M2 18h4M1 22h5" stroke="#9fb4c0" stroke-width="1.2" stroke-linecap="round"/><ellipse cx="17" cy="15" rx="10.6" ry="9" fill="#2f8a3a"/><path d="M10 7.6c-2 4-2 10 0 14.6M15 6c-1.4 5-1.4 13 0 18M20 6c1.4 5 1.4 13 0 18M24.6 8.4c1.6 4 1.6 9.6 0 13.4" stroke="#1d5a24" stroke-width="1.6" fill="none"/><circle cx="21" cy="12" r="1.6" fill="#fff"/><circle cx="25" cy="12.4" r="1.4" fill="#fff"/><circle cx="21.4" cy="12.2" r=".7" fill="#2c2a33"/><circle cx="25.3" cy="12.6" r=".6" fill="#2c2a33"/><path d="M22 17c1 .8 2.4.8 3.4 0" stroke="#fff" stroke-width=".9" fill="none" stroke-linecap="round"/><path d="M13 23.4l-3 4.6h-2M21 23.6l2.4 4.4h2.4" stroke="#2c2a33" stroke-width="1.4" fill="none" stroke-linecap="round" stroke-linejoin="round"/><path d="M28 8l1.4-1.4" stroke="#7fd4ff" stroke-width="1" stroke-linecap="round"/></svg>` },
+  apple:{ name:"知恵の実りんご", lore:"かじる前から、ほのかに考えごとの音がする。枝から離れても落ちずに、持ち主の目の高さで浮かんで待っている。",
+    art:`<svg viewBox="0 0 32 32"><circle cx="16" cy="17" r="13" fill="#fff3b0" opacity=".3"/><path d="M16 9c-3-2.4-9-1.6-10.4 4-1.4 5.6 1.4 12 5 13.4 2 .8 3.4-.4 5.4-.4s3.4 1.2 5.4.4c3.6-1.4 6.4-7.8 5-13.4C25 7.4 19 6.6 16 9z" fill="#e8c43a"/><path d="M16 9c0-3 1-5 3-6" stroke="#6b604e" stroke-width="1.4" fill="none" stroke-linecap="round"/><path d="M17 7c2-2.4 5-2.6 7-1.6-2 2-4.4 2.6-7 1.6z" fill="#4f8a3a"/><path d="M8.6 14c.8-2.4 2.6-3.6 4.6-3.8" stroke="#fff6c2" stroke-width="1.4" fill="none" stroke-linecap="round"/><circle cx="16" cy="18" r="4" fill="none" stroke="#a87a10" stroke-width="1"/><circle cx="16" cy="18" r="1.4" fill="#a87a10"/><path d="M16 13.4v-1.2M16 23.8v-1.2M11.4 18h-1.2M21.8 18h-1.2" stroke="#a87a10" stroke-width="1" stroke-linecap="round"/></svg>` },
+  kumquat:{ name:"祭囃子金柑", lore:"枝ごと提灯のように実り、風が吹くたびに笛と太鼓の音が鳴る。この木の下では、なぜか誰もが少し浮かれた気分になる。",
+    art:`<svg viewBox="0 0 32 32"><path d="M2 6c8 3 20 3 28 0" stroke="#6b4a2a" stroke-width="1.2" fill="none"/><g><path d="M7 7.6v2" stroke="#6b4a2a" stroke-width=".8"/><ellipse cx="7" cy="14" rx="3.6" ry="4.6" fill="#ff9a2e"/><path d="M4 11h6M3.6 14h6.8M4 17h6" stroke="#d9621a" stroke-width=".6"/><path d="M5.4 9.6h3.2M5.4 18.4h3.2" stroke="#2c2a33" stroke-width="1.2"/></g><g><path d="M16 8.2v2.4" stroke="#6b4a2a" stroke-width=".8"/><ellipse cx="16" cy="15.4" rx="4" ry="5" fill="#ffb03a"/><path d="M12.6 12h6.8M12.2 15.4h7.6M12.6 18.8h6.8" stroke="#d9621a" stroke-width=".6"/><path d="M14.2 10.6h3.6M14.2 20.2h3.6" stroke="#2c2a33" stroke-width="1.2"/></g><g><path d="M25 7.6v2" stroke="#6b4a2a" stroke-width=".8"/><ellipse cx="25" cy="14" rx="3.6" ry="4.6" fill="#ff9a2e"/><path d="M22 11h6M21.6 14h6.8M22 17h6" stroke="#d9621a" stroke-width=".6"/><path d="M23.4 9.6h3.2M23.4 18.4h3.2" stroke="#2c2a33" stroke-width="1.2"/></g><path d="M10 26a6 3 0 0 0 12 0v-2.6a6 3 0 0 0-12 0z" fill="#b5322a"/><ellipse cx="16" cy="23.4" rx="6" ry="2.4" fill="#f2e6c8"/><path d="M6 22l3 2M26 22l-3 2" stroke="#7a5a3a" stroke-width="1.2" stroke-linecap="round"/></svg>` },
+  sweetpotato:{ name:"大判小判さつまいも", lore:"掘り上げると、芋のかわりに金色の小判がざくざくと連なって出てくる。焼いても食べられないので、ありがたく売るしかない。",
+    art:`<svg viewBox="0 0 32 32"><path d="M4 9c4-1 6 1 8 2" stroke="#6f9a3e" stroke-width="1.4" fill="none" stroke-linecap="round"/><path d="M10 11c-2 4 0 8 4 10" stroke="#6b4a2a" stroke-width="1" fill="none"/><g><ellipse cx="9" cy="12" rx="3.4" ry="5" fill="#f2c43a" stroke="#a87a10" stroke-width=".8" transform="rotate(-30 9 12)"/><ellipse cx="17" cy="17" rx="3.6" ry="5.4" fill="#f4cf4a" stroke="#a87a10" stroke-width=".8" transform="rotate(-30 17 17)"/><ellipse cx="25" cy="23" rx="3.4" ry="5" fill="#f2c43a" stroke="#a87a10" stroke-width=".8" transform="rotate(-30 25 23)"/></g><g stroke="#c89a1a" stroke-width=".7"><path d="M7.6 9.6l3 4.6M8 11l2.6-.8M8.4 13.4l2.4-.6" transform="rotate(0)"/><path d="M15.4 14.4l3.2 5.2M15.8 16l3-.8M16.2 18.4l2.8-.8"/><path d="M23.6 20.6l3 4.6M24 22l2.6-.8M24.4 24.4l2.4-.6"/></g><path d="M5 25c2 1 4 1 6 0" stroke="#9a4a8a" stroke-width="3" stroke-linecap="round"/><g fill="#fff6c2"><path d="M28 9l.6 1.4 1.4.6-1.4.6L28 13l-.6-1.4L26 11l1.4-.6z"/></g></svg>` },
+  sunflower:{ name:"太陽系ひまわり", lore:"花の中心が小さな太陽になり、種が惑星のようにそのまわりを回っている。一番外を回る種は、一年かけてようやく一周する。",
+    art:`<svg viewBox="0 0 32 32"><g fill="#ffd21f"><ellipse cx="16" cy="3.6" rx="2.2" ry="3"/><ellipse cx="16" cy="28.4" rx="2.2" ry="3"/><ellipse cx="3.6" cy="16" rx="3" ry="2.2"/><ellipse cx="28.4" cy="16" rx="3" ry="2.2"/><ellipse cx="7.2" cy="7.2" rx="2.2" ry="3" transform="rotate(-45 7.2 7.2)"/><ellipse cx="24.8" cy="24.8" rx="2.2" ry="3" transform="rotate(-45 24.8 24.8)"/><ellipse cx="24.8" cy="7.2" rx="2.2" ry="3" transform="rotate(45 24.8 7.2)"/><ellipse cx="7.2" cy="24.8" rx="2.2" ry="3" transform="rotate(45 7.2 24.8)"/></g><circle cx="16" cy="16" r="10" fill="#1d1a4a"/><g fill="none" stroke="#5a5aa8" stroke-width=".6"><circle cx="16" cy="16" r="4"/><circle cx="16" cy="16" r="6.4"/><circle cx="16" cy="16" r="8.6"/></g><circle cx="16" cy="16" r="2.4" fill="#ffb03a"/><circle cx="16" cy="16" r="1.4" fill="#fff3b0"/><circle cx="20" cy="16" r=".9" fill="#4f9ed6"/><circle cx="11.6" cy="12" r="1" fill="#ef5b5b"/><circle cx="20.2" cy="22.6" r="1.2" fill="#e8c88a"/><ellipse cx="20.2" cy="22.6" rx="2" ry=".6" fill="none" stroke="#e8c88a" stroke-width=".4"/></svg>` },
 };
+
 const hasMut = id => !!MUTANT[id];
+const hasSup = id => !!SUPER[id];
+/* 実ったときの抽選: 先に超変異、外れたら変異。5=超変異 3=変異 0=なし */
+const rollMut = id => hasSup(id) && Math.random()<effSup() ? 5 : (hasMut(id) && Math.random()<effMut() ? 3 : 0);
+const cropQ = p => p.crop.sup ? 5 : 3;          // 実っている変異の作物の品質
 /* 品質 t の絵(変異は専用の絵) */
-const icoQ = (c,t) => t===3 && MUTANT[c.id] ? `<span class="cart mut">${MUTANT[c.id].art}</span>` : ico(c);
+const icoQ = (c,t) => t===5 && SUPER[c.id] ? `<span class="cart mut sup">${SUPER[c.id].art}</span>` : (t===3 && MUTANT[c.id] ? `<span class="cart mut">${MUTANT[c.id].art}</span>` : ico(c));
 
 
 /* 品質: 同じ作物をたくさん収穫すると、次から穫れるものの品質が上がる
@@ -3802,16 +3917,19 @@ const QUALITY = [
   { mark:"☆☆", mult:1.25, need:100 },
   { mark:"✦",  mult:4.50, need:Infinity },   // 3: 変異(☆☆☆の3倍)。累計では穫れず、収穫のたびに1%
   { mark:"☆☆☆", mult:1.50, need:300 },      // 4: ☆☆☆(変異が3番なので4番に置く)
+  { mark:"✧",  mult:15.0, need:Infinity },   // 5: 超変異(☆☆☆の10倍)。収穫のたびに0.1%
 ];
 /* 品質の並び。変異(3)を除いた順と、図鑑などで見せる順 */
 const TIERS = [0,1,2,4];
-const QORDER = [0,1,2,4,3];
+const QORDER = [0,1,2,4,3,5];
+const isMutT = t => t===3 || t===5;          // 変異・超変異(自動売却しない・「すべて売る」で売らない)
+const qOk = (id,t) => t===3 ? hasMut(id) : (t===5 ? hasSup(id) : true);
 const nextTier = t => t===0?1 : t===1?2 : t===2?4 : null;
 /* 貴重品(GHR)の持っている数と、そこから決まる庭全体の効果 */
 const tre = id => (S.treas && S.treas[id]) || 0;
 const effVal = id => {
   const c=CROP[id]; if(!c||!c.eff) return 0;
-  const v=c.eff.per*tre(id);
+  const v=Math.round(c.eff.per*tre(id)*100)/100;   // 0.2% ずつ増えるものも、表示が 0.6000001 のようにならないように
   return c.eff.cap!=null ? Math.min(c.eff.cap, v) : v;
 };
 const effSell    = () => 1 + effVal("blackvelvet")/100;     // 売却価格
@@ -3821,13 +3939,14 @@ const effGrowth  = () => 1 + effVal("redflash")/100;        // 成長の速さ(�
 const effVilGrow = () => effGrowth() * (1 + effVal("yellowghost")/100);  // 村人の区画はさらに速い
 const effWater   = () => effVal("whitewizard")*HOUR;        // 水やりの持続(ミリ秒)
 const effMut     = () => MUT_RATE + effVal("pinkprincess")/100;  // 変異の確率(1% + 貴重品)
+const effSup     = () => SUP_RATE + effVal("pinkprincess")/1000; // 超変異の確率(0.1% + 貴重品1個につき0.02%)
 const effSeed    = () => 1 - effVal("greennecklace")/100;   // 種の値段の倍率
 const effGacha   = () => 1 - effVal("silverstar")/100;      // ガチャの値段の倍率
 const effFert    = () => FERT_BOOST + effVal("blueamaryllis")/100;  // 肥料の効き(1つで最大45%、2つで最大90%)
 
 const tierOf  = id => { const n=S.harvestBy[id]||0; return n>=QUALITY[4].need?4:(n>=QUALITY[2].need?2:(n>=QUALITY[1].need?1:0)); };
 const priceOf = (id,t) => Math.round(CROP[id].price*QUALITY[t].mult*effSell());
-const qName   = (id,t) => t===3 ? (MUTANT[id] ? MUTANT[id].name : CROP[id].name+QUALITY[3].mark) : CROP[id].name+QUALITY[t].mark;
+const qName   = (id,t) => t===5 ? (SUPER[id] ? SUPER[id].name : CROP[id].name+QUALITY[5].mark) : t===3 ? (MUTANT[id] ? MUTANT[id].name : CROP[id].name+QUALITY[3].mark) : CROP[id].name+QUALITY[t].mark;
 /* 品質ごとの図鑑の説明文(ふつうの品質は CROPS の lore) */
 const LORE_Q = {
   carrot:     ["十本抜いたあたりで、抜く角度がわかってくる。そうして穫れたにんじんは、先までまっすぐ伸びている。",
@@ -4058,7 +4177,8 @@ function grow(p,add,base){
   if(p.crop.grown>=n && !p.crop.ripeAt){
     p.crop.ripeAt=base+(n-before);
     // 実った瞬間に変異かどうかが決まる(畑で変異の絵が見える)
-    if(hasMut(p.crop.id) && !p.crop.tut && Math.random()<effMut()) p.crop.mut=true;
+    const r = p.crop.tut ? 0 : rollMut(p.crop.id);
+    if(r){ p.crop.mut=true; if(r===5) p.crop.sup=true; }
     p.crop.rolled=true;
   }
 }
@@ -4119,17 +4239,18 @@ function villagerAdvance(p,dt){
     if(t<rem){ p.crop.grown+=t; break; }
     t-=rem;
     const c=CROP[p.crop.id];
-    if(!p.crop.rolled && hasMut(c.id) && Math.random()<effMut()){     // 変異(待っていた作物はもう抽選済み)
+    const mr = p.crop.rolled ? 0 : rollMut(c.id);   // 変異・超変異(待っていた作物はもう抽選済み)
+    if(mr){
       if(S.vilAutoM){                                 // 指示書: 変異も収穫して持ち物に入れる(売らない)
         p.crop=null;
         const num = 1 + (Math.random()<effDouble() ? 1 : 0);
-        invAdd(c.id,3,num);
-        for(let i=0;i<num;i++) recordHarvest(c.id,3,true);
-        S.vLog.mutGot=S.vLog.mutGot||[]; S.vLog.mutGot.push(c.id);
+        invAdd(c.id,mr,num);
+        for(let i=0;i<num;i++) recordHarvest(c.id,mr,true);
+        S.vLog.mutGot=S.vLog.mutGot||[]; S.vLog.mutGot.push(c.id+(mr===5?":5":""));
         continue;
       }
-      p.crop.grown=n; p.crop.mut=true;              // 収穫せずに畑に残し、一度だけ知らせる
-      S.vLog.mutWait=S.vLog.mutWait||[]; S.vLog.mutWait.push(c.id);
+      p.crop.grown=n; p.crop.mut=true; if(mr===5) p.crop.sup=true;   // 収穫せずに畑に残し、一度だけ知らせる
+      S.vLog.mutWait=S.vLog.mutWait||[]; S.vLog.mutWait.push(c.id+(mr===5?":5":""));
       break;
     }
     if(!S.vilAutoH){                                  // 指示書: 自動収穫オフ。実ったまま、手で収穫されるのを待つ
@@ -4217,19 +4338,18 @@ function recordHarvest(id,t,quiet){
 /* 村人の仕事ぶりをまとめて知らせる */
 function reportVillagers(){
   const L=S.vLog; if(!L || (!L.h && !L.up && !L.mutWait && !L.mutGot)) return;
-  for(const id of (L.mutGot||[])){
-    toast(`✦ 変異! 村人が ${icoQ(CROP[id],3)} ${esc(qName(id,3))} を収穫しました(持ち物に入れました)`,"good mut",9000,true);
-    sfx.vil();
-  }
-  for(const id of (L.mutWait||[])){
-    toast(`✦ 変異! 村人の畑で ${icoQ(CROP[id],3)} ${esc(qName(id,3))} が実りました。村人は収穫せずに残しています(素手で収穫できます)`,"good mut",9000,true);
-    sfx.vil();
-  }
-  const parts=Object.entries(L.h||{}).map(([id,n])=>`${ico(CROP[id])}×${n}`);
-  if(parts.length){
-    toast(`村人が ${parts.join(" ")} を収穫して売りました(売上 ${fmtNum(L.earn||0)} ・ 種代 ${fmtNum(L.spent||0)} キー)`,"good",6000,true);
-    sfx.vil();
-  }
+  const mutOf = x => { const [id,q]=String(x).split(":"); return [id, q==="5"?5:3]; };   // "carrot" は変異、"carrot:5" は超変異
+  // 変異・超変異は作物ごとにまとめて1つの知らせにする(長い時間がまとめて進むと何百個も穫れ、音が一度に鳴りすぎるため)
+  const byCrop = arr => { const m={}; for(const x of (arr||[])){ const [id,t]=mutOf(x); if(CROP[id]){ const k=id+":"+t; m[k]=(m[k]||0)+1; } } return Object.entries(m).map(([k,n])=>{ const [id,t]=mutOf(k); return [id,t,n]; }); };
+  const mutList = arr => arr.map(([id,t,n])=>`${icoQ(CROP[id],t)} ${esc(qName(id,t))}${n>1?` ×${fmtNum(n)}`:""}`).join(" ・ ");
+  const head = arr => arr.some(([,t])=>t===5) ? "✧ 超変異!" : "✦ 変異!";
+  const cls  = arr => arr.some(([,t])=>t===5) ? "good mut sup" : "good mut";
+  const got=byCrop(L.mutGot), wait=byCrop(L.mutWait);
+  if(got.length) toast(`${head(got)} 村人が ${mutList(got)} を収穫しました(持ち物に入れました)`,cls(got),9000,true);
+  if(wait.length) toast(`${head(wait)} 村人の畑で ${mutList(wait)} が実りました。村人は収穫せずに残しています(素手で収穫できます)`,cls(wait),9000,true);
+  const parts=Object.entries(L.h||{}).map(([id,n])=>`${ico(CROP[id])}×${fmtNum(n)}`);
+  if(parts.length) toast(`村人が ${parts.join(" ")} を収穫して売りました(売上 ${fmtNum(L.earn||0)} ・ 種代 ${fmtNum(L.spent||0)} キー)`,"good",6000,true);
+  if(got.length || wait.length || parts.length) sfx.vil();   // 音は1回だけ
   for(const m of (L.up||[])) toast(m,"good",5200,true);
   S.vLog={}; checkUnlocks(); save();
 }
@@ -4468,7 +4588,7 @@ function buildPlanter(){
 }
 function cropStageIcon(p){
   const c=CROP[p.crop.id];
-  if(isRipe(p)) return {ic:p.crop.mut?icoQ(c,3):ico(c), st:""};
+  if(isRipe(p)) return {ic:p.crop.mut?icoQ(c,cropQ(p)):ico(c), st:""};
   return p.crop.grown/need(p.crop)<0.4 ? {ic:"🌱", st:"st1"} : {ic:"🌿", st:"st2"};
 }
 function renderField(){
@@ -4492,8 +4612,8 @@ function renderField(){
     }
     const wet=isWet(S.cur,k,now,cov);
     const growing=p.crop && !isRipe(p);
-    el.className="plot "+p.s+(wet?" wet":"")+(growing?" growing":"")+(p.crop&&isRipe(p)?" ripe":"")+(p.crop&&p.crop.mut&&isRipe(p)?" mutp":"")+(p.vil?" vil":"")+gap+(k===selKey?" sel":"");
-    qb.textContent=(p.crop&&isRipe(p)) ? (p.crop.mut ? QUALITY[3].mark : QUALITY[tierOf(p.crop.id)].mark) : "";
+    el.className="plot "+p.s+(wet?" wet":"")+(growing?" growing":"")+(p.crop&&isRipe(p)?" ripe":"")+(p.crop&&p.crop.mut&&isRipe(p)?(p.crop.sup?" mutp supp":" mutp"):"")+(p.vil?" vil":"")+gap+(k===selKey?" sel":"");
+    qb.textContent=(p.crop&&isRipe(p)) ? (p.crop.mut ? QUALITY[cropQ(p)].mark : QUALITY[tierOf(p.crop.id)].mark) : "";
     if(p.crop){
       const {ic,st}=cropStageIcon(p);
       cropEl.innerHTML=ic; cropEl.className="crop "+st;
@@ -4519,8 +4639,9 @@ function renderInfo(){
   }else if(p.vil){
     big=`${selKey} ・ 👩‍🌾 村人が世話をしています`;
     if(p.crop && p.crop.mut && isRipe(p)){
-      big=`${selKey} ・ ${icoQ(CROP[p.crop.id],3)} ${esc(qName(p.crop.id,3))} が実っています(変異)`;
-      sub.push("村人は変異を収穫せずに残しています。素手(1)で収穫すると、村人がまた育て始めます");
+      const mq=cropQ(p), mw=mq===5?"超変異":"変異";
+      big=`${selKey} ・ ${icoQ(CROP[p.crop.id],mq)} ${esc(qName(p.crop.id,mq))} が実っています(${mw})`;
+      sub.push(`村人は${mw}を収穫せずに残しています。素手(1)で収穫すると、村人がまた育て始めます`);
     }else if(p.crop){
       const c=CROP[p.crop.id];
       sub.push(`${ico(c)} ${esc(c.name)} 育成 ${Math.floor(p.crop.grown/need(p.crop)*100)}% ・ あと ${fmtDur(need(p.crop)-p.crop.grown)}`);
@@ -4538,10 +4659,10 @@ function renderInfo(){
   }else{
     const c=CROP[p.crop.id];
     if(isRipe(p)){
-      const t=p.crop.mut?3:tierOf(c.id);
-      big=`${selKey} ・ ${icoQ(c,t)} ${esc(qName(c.id,t))} 収穫できます${t===3?"(変異)":""}`;
-      sub.push(`素手(1)で収穫 ・ 売値 ${fmtNum(priceOf(c.id,t))}キー${t===3?" ・ 変異は自動売却されません":""}`);
-      const nt=t===3?null:nextTier(t);
+      const t=p.crop.mut?cropQ(p):tierOf(c.id);
+      big=`${selKey} ・ ${icoQ(c,t)} ${esc(qName(c.id,t))} 収穫できます${t===5?"(超変異)":(t===3?"(変異)":"")}`;
+      sub.push(`素手(1)で収穫 ・ 売値 ${fmtNum(priceOf(c.id,t))}キー${isMutT(t)?` ・ ${t===5?"超変異":"変異"}は自動売却されません`:""}`);
+      const nt=isMutT(t)?null:nextTier(t);
       if(nt!=null){ const left=QUALITY[nt].need-(S.harvestBy[c.id]||0); sub.push(`あと ${left}個 収穫すると「${qName(c.id,nt)}」が穫れるようになります`); }
     }else{
       const pct=Math.floor(p.crop.grown/need(p.crop)*100);
@@ -4566,7 +4687,7 @@ const invTotal = () => { let n=0,v=0; for(const c of CROPS) for(const t of TIERS
 function renderBasket(){
   const b=$("g-basket"); b.innerHTML="";
   let any=false;
-  for(const c of CROPS) for(let t=0;t<4;t++){
+  for(const c of CROPS) for(const t of QORDER){   // ふつう → ☆ → ☆☆ → ☆☆☆ → 変異 → 超変異
     const n=invN(c.id,t); if(n<=0) continue;
     any=true;
     const s=document.createElement("span"); s.className="chip"+(t?" q"+t:"");
@@ -4635,7 +4756,7 @@ function harvestOne(k){
   const f=field(), p=f[k];
   if(!p.crop || !isRipe(p)) return;
   // 変異は実ったときに決まっている(この変更より前に実っていた作物だけ、収穫のときに決める)
-  const c=CROP[p.crop.id], cropMut=!!p.crop.mut, rolled=!!p.crop.rolled;
+  const c=CROP[p.crop.id], cropMut=!!p.crop.mut, cropSup=!!p.crop.sup, rolled=!!p.crop.rolled;
   p.crop=null; p.emptySince=Date.now();
   if(c.treasure){
     S.treas[c.id]=(S.treas[c.id]||0)+1; S.totalHarvest++;
@@ -4644,8 +4765,9 @@ function harvestOne(k){
     return;
   }
   let t=tierOf(c.id);
-  const mut = cropMut || (!rolled && hasMut(c.id) && Math.random()<effMut());
-  if(mut) t=3;
+  const mq = cropMut ? (cropSup?5:3) : (rolled ? 0 : rollMut(c.id));   // 5=超変異 3=変異
+  const mut = mq>0;
+  if(mut) t=mq;
   const num = 1 + (Math.random()<effDouble() ? 1 : 0);
   if(autoCrop(c.id) && !mut){                           // 変異は自動売却しない
     const gain=priceOf(c.id,t)*num;
@@ -4658,7 +4780,7 @@ function harvestOne(k){
   const first=!((S.harvestQ[c.id]||[])[t]>0);
   for(let i=0;i<num;i++) recordHarvest(c.id,t,false);
   if(mut){
-    toast(`✦ 変異! ${icoQ(c,3)} ${esc(qName(c.id,3))} が穫れました${first?"(図鑑に載りました)":""}`,"good mut",6000,true);
+    toast(`${t===5?"✧ 超変異!":"✦ 変異!"} ${icoQ(c,t)} ${esc(qName(c.id,t))} が穫れました${first?"(図鑑に載りました)":""}`,t===5?"good mut sup":"good mut",t===5?9000:6000,true);
     sfx.vil();
   }
   else if(first) toast(`${ico(c)} ${esc(qName(c.id,t))} を初めて収穫しました。図鑑(Space)に載りました`,"good",4000,true);
@@ -4952,7 +5074,7 @@ function shopRows(){
     for(const c of CROPS) for(const t of QORDER){
       const n=invN(c.id,t); if(n<=0) continue;
       const pr=priceOf(c.id,t);
-      rows.push({ ic:icoQ(c,t), nm:`${t===3?'<span class="mutnm">✦ ':""}${qName(c.id,t)}${t===3?"</span>":""} ×${n}`, ds:`1つ ${fmtNum(pr)}キー ・ 全部で ${fmtNum(n*pr)}キー${t===3?" ・ 変異(「すべて売る」では売りません)":""}`,
+      rows.push({ ic:icoQ(c,t), nm:`${t===5?'<span class="mutnm supnm">✧ ':(t===3?'<span class="mutnm">✦ ':"")}${qName(c.id,t)}${isMutT(t)?"</span>":""} ×${n}`, ds:`1つ ${fmtNum(pr)}キー ・ 全部で ${fmtNum(n*pr)}キー${isMutT(t)?` ・ ${t===5?"超変異":"変異"}(「すべて売る」では売りません)`:""}`,
         keys:"<b>Enter</b> 1つ売る<br><b>Shift+Enter</b> 全部売る",
         enter:()=>sell(c.id,t,1), shift:()=>sell(c.id,t,"all") });
     }
@@ -4987,13 +5109,13 @@ function renderShop(){
   const total=invTotal().v;
   if(window.IS_MOBILE){
     $("g-shopHint").innerHTML = shopTab===3 && total>0
-      ? `<button class="sbtn main" data-sellall>作物をすべて売る(${fmtNum(total)}キー・種と変異は売りません)</button>` : "";
+      ? `<button class="sbtn main" data-sellall>作物をすべて売る(${fmtNum(total)}キー・種と変異・超変異は売りません)</button>` : "";
     keepVisible(body);
     return;
   }
   $("g-shopHint").innerHTML =
     `<b>← →</b> ${SHOP_TABS.map((t,i)=>i===shopTab?`「${t}」`:t).join(" / ")} ・ <b>↑ ↓</b> 選ぶ ・ <b>Enter</b> / <b>Shift+Enter</b> 決定`+
-    (shopTab===3 && total>0 ? ` ・ <b>A</b> 作物をすべて売る(${fmtNum(total)}キー・種と変異は売りません)` : "")+
+    (shopTab===3 && total>0 ? ` ・ <b>A</b> 作物をすべて売る(${fmtNum(total)}キー・種と変異・超変異は売りません)` : "")+
     ` ・ <b>Tab</b> / <b>Esc</b> 閉じる`;
   keepVisible(body);
 }
@@ -5512,13 +5634,13 @@ const LORE_Q3 = {
   shadowqueen: "三百個目。光を吸い込むような黒紫。掘り出すたびに、畑が一瞬だけ夜になる。",
   keytree: "三百本目。どのキーも同じ深さで沈み、同じ音で戻ってくる。外す瞬間の音を聞きに、見物人が集まるようになった。"
 };
-const loreOf = (c,t) => t===0 ? c.lore : (t===3 ? MUTANT[c.id].lore : (t===4 ? LORE_Q3[c.id] : LORE_Q[c.id][t-1]));
+const loreOf = (c,t) => t===0 ? c.lore : t===5 ? SUPER[c.id].lore : (t===3 ? MUTANT[c.id].lore : (t===4 ? LORE_Q3[c.id] : LORE_Q[c.id][t-1]));
 /* 図鑑の埋まり具合: got 埋まった項目 / all 全項目(作物×品質・変異・貴重品) */
 function bookProgress(){
   let got=0, all=0;
   for(const c of BOOK_CROPS){
     if(c.treasure){ all++; if(tre(c.id)>0) got++; continue; }
-    for(const t of QORDER){ if(t===3 && !hasMut(c.id)) continue; all++; if(qCount(c.id,t)>0) got++; }
+    for(const t of QORDER){ if(!qOk(c.id,t)) continue; all++; if(qCount(c.id,t)>0) got++; }
   }
   return { got, all };
 }
@@ -5531,13 +5653,14 @@ function renderBook(){
       ? `<span class="qm${known?" on":""}">✨</span>`
       : `<span class="qm${qCount(c.id,0)>0?" on":""}">・</span>`
         + [1,2,4].map(t=>`<span class="qm st${qCount(c.id,t)>0?" on":""}">☆</span>`).join("")   // ☆・☆☆・☆☆☆ を穫るたびに1つずつ光る
-        + (hasMut(c.id)?`<span class="qm mut${qCount(c.id,3)>0?" on":""}">✦</span>`:"");
+        + (hasMut(c.id)?`<span class="qm mut${qCount(c.id,3)>0?" on":""}">✦</span>`:"")
+        + (hasSup(c.id)?`<span class="qm sup${qCount(c.id,5)>0?" on":""}">✦</span>`:"");
     return `<div class="rowi ${known?"":"locked"} ${i===bookCur?"cur":""}" data-i="${i}">
       <div class="ic">${known?ico(c):"❔"}</div>
       <div class="nm">${known?c.name:"？？？"}</div>
       <div class="qmarks">${marks}</div></div>`;
   }).join("");
-  const c=BOOK_CROPS[bookCur], t=c.treasure?0:(bookTier===3&&!hasMut(c.id)?4:bookTier);
+  const c=BOOK_CROPS[bookCur], t=c.treasure?0:(qOk(c.id,bookTier)?bookTier:4);
   const known=bookSeen(c), n=c.treasure?tre(c.id):qCount(c.id,t), total=S.harvestBy[c.id]||0;
   if(c.treasure){
     // 貴重品: 品質は無く、永続効果と説明文を載せる
@@ -5562,21 +5685,22 @@ function renderBook(){
       <div class="lore unknown">${c.gacha?`${gachaText()}(レア度 ${c.r})。引き当てると、名前がわかります。`:(c.day!=null?`${dayText(c)}。`:`${unlockText(c.unlock)}。お店に並ぶと、名前がわかります。`)}</div>`;
   }else{
     const cond = t===0 ? (c.gacha?`${gachaText()}(レア度 ${c.r})`:(c.day!=null?dayText(c):"種を植えて育てれば穫れます"))
+      : t===5 ? `${c.name}が実るたびに ${+(effSup()*100).toFixed(2)}% の確率で超変異します(村人の畑では収穫されずに残ります)`
       : t===3 ? `${c.name}を収穫するたびに ${+(effMut()*100).toFixed(1)}% の確率で変異します(村人の畑では収穫されずに残ります)`
       : (total>=QUALITY[t].need ? `${c.name}を ${QUALITY[t].need}個 収穫して穫れるようになりました`
                                 : `${c.name}を ${QUALITY[t].need}個 収穫すると穫れるようになります(あと ${QUALITY[t].need-total}個)`);
-    const mutKnown = t===3 && n>0;   // 変異は一度穫れるまで名前と絵を伏せる
+    const mutKnown = isMutT(t) && n>0;   // 変異・超変異は一度穫れるまで名前と絵を伏せる
     $("g-bookDetail").innerHTML=`
-      <div class="btabs">${QORDER.filter(q=>q!==3||hasMut(c.id)).map(q=>`<span class="btab${q===3?" mut":""}${q===t?" on":""}${qCount(c.id,q)>0?"":" dim"}" data-t="${q}">${q===3?"変異":(q?QUALITY[q].mark:"ふつう")}</span>`).join("")}</div>
-      <div class="bic q${t}">${t===3?(mutKnown?icoQ(c,3):'<span class="mutq">？</span>'):ico(c)}${t&&t!==3?`<span class="bq">${QUALITY[t].mark}</span>`:""}</div>
-      <div class="bnm">${t===3&&!mutKnown?"？？？":qName(c.id,t)}</div>
+      <div class="btabs">${QORDER.filter(q=>qOk(c.id,q)).map(q=>`<span class="btab${q===3?" mut":(q===5?" mut sup":"")}${q===t?" on":""}${qCount(c.id,q)>0?"":" dim"}" data-t="${q}">${q===5?"超変異":(q===3?"変異":(q?QUALITY[q].mark:"ふつう"))}</span>`).join("")}</div>
+      <div class="bic q${t}">${isMutT(t)?(mutKnown?icoQ(c,t):`<span class="mutq${t===5?" supq":""}">？</span>`):ico(c)}${t&&!isMutT(t)?`<span class="bq">${QUALITY[t].mark}</span>`:""}</div>
+      <div class="bnm">${isMutT(t)&&!mutKnown?"？？？":qName(c.id,t)}</div>
       <dl>
-        <dt>${t===3?"変異の収穫":"この品質の収穫"}</dt><dd>${fmtNum(n)}個</dd>
-        <dt>売値</dt><dd>${fmtNum(priceOf(c.id,t))}キー${t===3?"(☆☆☆の3倍・自動売却されません)":(t?`(ふつうの${Math.round((QUALITY[t].mult-1)*100)}%増し)`:"")}</dd>
+        <dt>${t===5?"超変異の収穫":(t===3?"変異の収穫":"この品質の収穫")}</dt><dd>${fmtNum(n)}個</dd>
+        <dt>売値</dt><dd>${fmtNum(priceOf(c.id,t))}キー${t===5?"(☆☆☆の10倍・自動売却されません)":t===3?"(☆☆☆の3倍・自動売却されません)":(t?`(ふつうの${Math.round((QUALITY[t].mult-1)*100)}%増し)`:"")}</dd>
         <dt>育つまで</dt><dd>${fmtDur(c.hours*HOUR)}</dd>
         <dt>穫れる条件</dt><dd>${cond}</dd>
       </dl>
-      <div class="lore ${n>0?"":"unknown"}">${n>0?esc(loreOf(c,t)):(t===3?`まだ変異を収穫したことがありません。${esc(c.name)}を育て続けていると、いつか姿を見せます。`:`まだ「${esc(qName(c.id,t))}」を収穫したことがありません。初めて収穫すると、ここに説明が書き込まれます。`)}</div>`;
+      <div class="lore ${n>0?"":"unknown"}">${n>0?esc(loreOf(c,t)):(t===5?`まだ超変異を収穫したことがありません。${esc(c.name)}を千回育てて、一度出会えるかどうか。`:t===3?`まだ変異を収穫したことがありません。${esc(c.name)}を育て続けていると、いつか姿を見せます。`:`まだ「${esc(qName(c.id,t))}」を収穫したことがありません。初めて収穫すると、ここに説明が書き込まれます。`)}</div>`;
   }
   keepVisible($("g-bookList"));
 }
@@ -5590,7 +5714,7 @@ function bookKey(e){
     sfx.cursor(); renderBook();
   }else if(k==="ArrowLeft"||k==="ArrowRight"){   // 同じ作物の品質を切り替える
     e.preventDefault();
-    const qs=QORDER.filter(q=>q!==3||hasMut(BOOK_CROPS[bookCur].id));   // ふつう → ☆ → ☆☆ → ☆☆☆ → 変異
+    const qs=QORDER.filter(q=>qOk(BOOK_CROPS[bookCur].id,q));   // ふつう → ☆ → ☆☆ → ☆☆☆ → 変異 → 超変異
     const i=Math.max(0,qs.indexOf(bookTier));
     bookTier=qs[(i+(k==="ArrowRight"?1:-1)+qs.length)%qs.length];
     sfx.tab(); renderBook();
@@ -5638,6 +5762,9 @@ const GOALS = [
   { cat:"実りの質", id:"m1",   ic:"✦",  nm:"変わりだね",     ds:"変異の作物を収穫する",         need:1,  now:()=>anyQ(3)?1:0, rw:5000 },
   { cat:"実りの質", id:"m5",   ic:"✦",  nm:"変異ハンター",   ds:"変異の作物を5種類収穫する",    need:5,  now:()=>kindsQ(3),   rw:20000 },
   { cat:"実りの質", id:"m20",  ic:"✦",  nm:"変異の研究者",   ds:"変異の作物を20種類収穫する",   need:20, now:()=>kindsQ(3),   rw:80000 },
+  { cat:"実りの質", id:"x1",   ic:"🌈", nm:"奇跡の実り",     ds:"超変異の作物を収穫する",       need:1,  now:()=>anyQ(5)?1:0, rw:50000 },
+  { cat:"実りの質", id:"x3",   ic:"🌈", nm:"奇跡を重ねる",   ds:"超変異の作物を3種類収穫する",  need:3,  now:()=>kindsQ(5),   rw:150000 },
+  { cat:"実りの質", id:"x10",  ic:"🌈", nm:"奇跡の収集家",   ds:"超変異の作物を10種類収穫する", need:10, now:()=>kindsQ(5),   rw:500000 },
   { cat:"ガチャ", id:"g1",    ic:"🎰", nm:"はじめてのガチャ", ds:"ガチャを1回引く",             need:1,     now:()=>S.gachaCount||0, rw:100 },
   { cat:"ガチャ", id:"g11",   ic:"🎰", nm:"ガチャ好き",       ds:"ガチャを合計11回引く",        need:11,    now:()=>S.gachaCount||0, rw:500 },
   { cat:"ガチャ", id:"g100",  ic:"🎰", nm:"ガチャ通",         ds:"ガチャを合計100回引く",       need:100,   now:()=>S.gachaCount||0, rw:3000 },
@@ -5647,11 +5774,12 @@ const GOALS = [
   { cat:"ガチャ", id:"rHR",   ic:"💎", nm:"ひと味ちがう",     ds:"ガチャでHRの種を引く",        need:1, now:()=>gotRarity("HR"),  rw:3000 },
   { cat:"ガチャ", id:"rUR",   ic:"💎", nm:"ウルトラレア",     ds:"ガチャでURの種を引く",        need:1, now:()=>gotRarity("UR"),  rw:10000 },
   { cat:"ガチャ", id:"rGSR",  ic:"👑", nm:"黄金の引き",       ds:"ガチャでGSRの種を引く",       need:1, now:()=>gotRarity("GSR"), rw:30000 },
-  { cat:"図鑑", id:"b10",  ic:"📖", nm:"図鑑づくり",       ds:"図鑑を10項目うめる",           need:10,  now:()=>bookProgress().got, rw:1000 },
-  { cat:"図鑑", id:"b30",  ic:"📖", nm:"図鑑が育ってきた", ds:"図鑑を30項目うめる",           need:30,  now:()=>bookProgress().got, rw:3000 },
-  { cat:"図鑑", id:"b60",  ic:"📖", nm:"分厚い図鑑",       ds:"図鑑を60項目うめる",           need:60,  now:()=>bookProgress().got, rw:10000 },
-  { cat:"図鑑", id:"b100", ic:"📚", nm:"図鑑の大家",       ds:"図鑑を100項目うめる",          need:100, now:()=>bookProgress().got, rw:30000 },
-  { cat:"図鑑", id:"bAll", ic:"🏆", nm:"図鑑コンプリート", ds:"図鑑をすべてうめる",           need:()=>bookProgress().all, now:()=>bookProgress().got, rw:300000 },
+  { cat:"図鑑", id:"b10",  ic:"📖", nm:"図鑑づくり",       ds:"図鑑を10項目うめる",           need:10,  now:()=>bookProgress().got, rw:3000 },
+  { cat:"図鑑", id:"b30",  ic:"📖", nm:"図鑑が育ってきた", ds:"図鑑を30項目うめる",           need:30,  now:()=>bookProgress().got, rw:10000 },
+  { cat:"図鑑", id:"b60",  ic:"📖", nm:"分厚い図鑑",       ds:"図鑑を60項目うめる",           need:60,  now:()=>bookProgress().got, rw:30000 },
+  { cat:"図鑑", id:"b100", ic:"📚", nm:"図鑑の大家",       ds:"図鑑を100項目うめる",          need:100, now:()=>bookProgress().got, rw:100000 },
+  { cat:"図鑑", id:"b200", ic:"📚", nm:"図鑑の生き字引",   ds:"図鑑を200項目うめる",          need:200, now:()=>bookProgress().got, rw:500000 },
+  { cat:"図鑑", id:"bAll", ic:"🏆", nm:"図鑑コンプリート", ds:"図鑑をすべてうめる",           need:()=>bookProgress().all, now:()=>bookProgress().got, rw:5000000 },
   { cat:"農園づくり", id:"o1", ic:"💦", nm:"畑の道具",     ds:"スプリンクラーか案山子を置く", need:1, now:()=>FS().some(f=>KEYS.some(k=>f[k].obj))?1:0, rw:500 },
   { cat:"農園づくり", id:"f2", ic:"🎫", nm:"畑を広げる",   ds:"畑を2枚にする",                need:2, now:()=>FS().length, rw:1000 },
   { cat:"農園づくり", id:"f3", ic:"🎫", nm:"広い農園",     ds:"畑を3枚にする",                need:3, now:()=>FS().length, rw:5000 },
@@ -5996,9 +6124,9 @@ function debugUnlock(){
   for(const c of CROPS){
     S.got[c.id]=1; S.seeds[c.id]=10;
     S.harvestBy[c.id]=QUALITY[4].need+50;
-    S.harvestQ[c.id]=[50,50,10,0,10];
+    S.harvestQ[c.id]=[50,50,10,10,10,5];   // ふつう・☆・☆☆・変異・☆☆☆・超変異
     if(c.treasure){ S.treas[c.id]=1; }
-    else{ S.inv[c.id]=[3,3,3,0,3]; S.auto[c.id]={c:false,s:false}; }
+    else{ S.inv[c.id]=[3,3,3,3,3,2]; S.auto[c.id]={c:false,s:false}; }
   }
   S.known=CROPS.map(c=>c.id).concat(["fert","obj:spr","obj:crow"]);
   S.lastTick=Date.now();
