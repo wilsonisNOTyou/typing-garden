@@ -5623,6 +5623,14 @@ function closeModal(silent){
   modal=null;
 }
 /* 選択中の行が見えるようにスクロール */
+/* ↑ ↓ でカーソルを動かしたときの描き直しは、1コマに1回だけにまとめる。
+   一覧が重い画面で長押しすると、描き直しが追いつかずにキーがたまり、離してもカーソルが動き続けるため */
+const soonQ=new Set();
+function renderSoon(fn){
+  if(soonQ.has(fn)) return;
+  soonQ.add(fn);
+  requestAnimationFrame(()=>{ soonQ.delete(fn); fn(); });
+}
 function keepVisible(listEl){
   const cur=listEl.querySelector(".rowi.cur");
   if(cur && cur.scrollIntoView) cur.scrollIntoView({block:"nearest"});
@@ -5843,7 +5851,7 @@ function shopKey(e){
     e.preventDefault();
     const n=shopRowCache.length; if(!n) return;
     shopCur[shopTab]=(shopCur[shopTab]+(k==="ArrowDown"?1:-1)+n)%n;
-    sfx.cursor(); renderShop(); return;
+    sfx.cursor(); renderSoon(renderShop); return;
   }
   if(k==="Enter"){
     e.preventDefault();
@@ -7329,7 +7337,7 @@ function cookKey(e){
   if(k==="Escape"||k==="0"){ e.preventDefault(); closeModal(); return; }
   if(k==="Tab"){ e.preventDefault(); cookTab=(cookTab+(e.shiftKey?-1:1)+COOK_TABS.length)%COOK_TABS.length; sfx.tab(); renderCook(); return; }
   const r=cookRows[cookCur[cookTab]];
-  if(k==="ArrowUp"||k==="ArrowDown"){ e.preventDefault(); const n=cookRows.length; if(!n) return; cookCur[cookTab]=(cookCur[cookTab]+(k==="ArrowDown"?1:-1)+n)%n; sfx.cursor(); renderCook(); return; }
+  if(k==="ArrowUp"||k==="ArrowDown"){ e.preventDefault(); const n=cookRows.length; if(!n) return; cookCur[cookTab]=(cookCur[cookTab]+(k==="ArrowDown"?1:-1)+n)%n; sfx.cursor(); renderSoon(renderCook); return; }
   if((k==="ArrowLeft"||k==="ArrowRight") && r && r.left){ e.preventDefault(); (k==="ArrowLeft"?r.left:r.right)(); return; }
   if((k==="a"||k==="A") && r && r.auto){ e.preventDefault(); r.auto(); return; }
   if(k==="Enter" && r){ e.preventDefault(); if(r.locked){ sfx.nope(); toast("材料が足りません","warn"); return; } (e.shiftKey?r.shift:r.enter)(); }
@@ -7398,7 +7406,7 @@ function dbookKey(e){
   const k=e.key;
   if(k==="Escape"||k===" "){ e.preventDefault(); closeModal(); return; }
   if(k==="Tab"){ e.preventDefault(); spaceTab(e.shiftKey?-1:1); return; }
-  if(k==="ArrowUp"||k==="ArrowDown"){ e.preventDefault(); dbookCur=(dbookCur+(k==="ArrowDown"?1:-1)+DISHES.length)%DISHES.length; sfx.cursor(); renderDbook(); }
+  if(k==="ArrowUp"||k==="ArrowDown"){ e.preventDefault(); dbookCur=(dbookCur+(k==="ArrowDown"?1:-1)+DISHES.length)%DISHES.length; sfx.cursor(); renderSoon(renderDbook); }
   else if(k==="ArrowLeft"||k==="ArrowRight"){ e.preventDefault(); const qs=[0,3,5]; dbookTier=qs[(qs.indexOf(dbookTier)+(k==="ArrowRight"?1:-1)+3)%3]; sfx.tab(); renderDbook(); }
 }
 $("g-dbookDetail").addEventListener("click",e=>{ const b=e.target.closest && e.target.closest("[data-t]"); if(!b) return; dbookTier=+b.dataset.t; sfx.tab(); renderDbook(); });
@@ -7688,7 +7696,7 @@ function bookKey(e){
   if(k==="ArrowUp"||k==="ArrowDown"){
     e.preventDefault();
     bookCur=(bookCur+(k==="ArrowDown"?1:-1)+N)%N;
-    sfx.cursor(); renderBook();
+    sfx.cursor(); renderSoon(renderBook);
   }else if(k==="ArrowLeft"||k==="ArrowRight"){   // 同じ作物の品質を切り替える
     e.preventDefault();
     if(BOOK_CROPS[bookCur].treasure) return;
@@ -7878,7 +7886,7 @@ function goalKey(e){
   const k=e.key;
   if(k==="Escape"||k===" "){ e.preventDefault(); closeModal(); return; }
   if(k==="Tab"){ e.preventDefault(); spaceTab(e.shiftKey?-1:1); return; }
-  if(k==="ArrowUp"||k==="ArrowDown"){ e.preventDefault(); const n=goalRows().length; goalCur=(goalCur+(k==="ArrowDown"?1:-1)+n)%n; sfx.cursor(); renderGoals(); return; }
+  if(k==="ArrowUp"||k==="ArrowDown"){ e.preventDefault(); const n=goalRows().length; goalCur=(goalCur+(k==="ArrowDown"?1:-1)+n)%n; sfx.cursor(); renderSoon(renderGoals); return; }
   if(k==="Enter"){ e.preventDefault(); const r=goalRows()[goalCur]; if(r) claimGoal(r.gi); }
 }
 $("g-goalBody").addEventListener("click",e=>{
