@@ -3546,6 +3546,9 @@ const NEWS=[
     "上限をこえて余っている貴重品の種は、お店の「売る」でも売れるようになりました",
     "村人の指示書2(100,000キー): 村人が収穫した作物を売るかどうかを、ふつうの作物と変異の作物それぞれで決められます。売らない作物は持ち物に入るので、料理の材料にできます(村人の指示書を持っていると並びます)",
   ]},
+  { d:"2026-10-06", t:"そのほかの変更", items:[
+    "肥料(不思議な肥料・摩訶不思議な肥料を含む)は、村人の区画にはまけなくなりました。自分で育てる畑には、これまでどおりまけます",
+  ]},
   { d:"2026-10-05", t:"料理とわくわくガチャが登場しました", items:[
     "料理(0)で作った料理を食べると、10分のあいだ農園やタイピングに効果がかかります。料理は47品あり、レシピはお店の「レシピ」で買えます",
     "変異・超変異の作物と上位種の食材だけで作ると、変異・超変異の料理になり、効果が強くなります",
@@ -4819,7 +4822,7 @@ const vilUpPrice = () => VIL_UP_PRICES[Math.min(S.vilLv||0, VIL_UP_PRICES.length
 function villagerAdvance(p,dt){
   let t=dt, guard=0;
   while(guard++<100000){
-    if(p.crop && p.crop.mut && p.crop.grown>=need(p.crop)) break;   // 変異が実っている: 手で収穫されるまで待つ
+    if(!S.vilAutoM && p.crop && p.crop.mut && p.crop.grown>=need(p.crop)) break;   // 変異が実っている(変異の自動収穫オフ): 手で収穫されるまで待つ
     if(!S.vilAutoH && p.crop && p.crop.rolled && p.crop.grown>=need(p.crop)) break;   // 実ったまま待っている(自動収穫オフ)
     if(!p.crop){
       const c=CROP[p.vil==="sg" ? sgCropId() : (eff("O") ? vilGachaCrop() : vilCropId())];   // シゴデキ村人は選んだ作物
@@ -5428,7 +5431,14 @@ function renderBar(){
   $("g-money").textContent=fmtNum(S.money);
   $("g-rate").textContent=`タイピング1打で ${minPerKey()}分 進む`;
 }
+/* キーを長押ししている間(連打のキー)は、画面の描き直しを1コマに1回にまとめる。
+   描き直しが重いので、押すたびに描き直すとキーがたまり、離したあともしばらく動き続けるため */
+let deferUI=false;
 function renderAll(){
+  if(deferUI){ renderSoon(renderAllNow); return; }
+  renderAllNow();
+}
+function renderAllNow(){
   renderBar(); renderField(); renderInfo(); renderBasket(); renderGoalBadge(); renderCounter();
   if(modal==="shop") renderShop();
   if(modal==="book") renderBook();
@@ -5498,9 +5508,11 @@ function act(k){
     nope(k, p.obj ? "案山子を回収するには 6 で案山子を持って押します" : "P は案山子置き場です。6 で案山子を持って置けます");
     save(); renderAll(); return;
   }
-  // 村人の区画は、肥料と「村人を外す」以外は触れない(実って残っている作物の収穫だけはできる)
+  // 村人の区画は、「村人を外す」以外は触れない(実って残っている作物の収穫だけはできる)
+  // 肥料(不思議な肥料・摩訶不思議な肥料を含む)もまけない: 長押しで肥料を入れ続けると、村人が収穫と植え直しを繰り返して際限なく稼げるため
+  if(p.vil && S.tool===5){ nope(k,"村人の区画には肥料をまけません"); save(); renderAll(); return; }
   const vilMut = p.vil && S.tool===1 && p.crop && isRipe(p);   // 村人が残した変異・自動収穫オフで待っている作物
-  if(p.vil && !vilMut && S.tool!==5 && !(S.tool===6 && (S.objSel==="vil"||S.objSel==="sgvil"))){
+  if(p.vil && !vilMut && !(S.tool===6 && (S.objSel==="vil"||S.objSel==="sgvil"))){
     nope(k, p.vil==="sg" ? "シゴデキ村人が世話をしている区画です(6 でシゴデキ村人を持って押すと外せます)" : "村人が世話をしている区画です(6 で村人を持って押すと外せます)");
     save(); renderAll(); return;
   }
@@ -8175,6 +8187,10 @@ $("g-rankBtn").addEventListener("click",submitRank);
 
 /* ---------- キー操作(本編の keydown から呼ばれる) ---------- */
 function onKey(e){
+  deferUI=!!e.repeat;
+  try{ onKeyMain(e); }finally{ deferUI=false; }
+}
+function onKeyMain(e){
   const tag=(e.target&&e.target.tagName)||"";
   // 貼り付け欄の中: Enter で読み込み、Esc で欄から抜ける
   if(tag==="TEXTAREA"||tag==="INPUT"){
