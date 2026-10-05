@@ -5505,9 +5505,11 @@ function act(k){
     nope(k, p.obj ? "案山子を回収するには 6 で案山子を持って押します" : "P は案山子置き場です。6 で案山子を持って置けます");
     save(); renderAll(); return;
   }
-  // 村人の区画は、肥料と「村人を外す」以外は触れない(実って残っている作物の収穫だけはできる)
+  // 村人の区画は、「村人を外す」以外は触れない(実って残っている作物の収穫だけはできる)
+  // 肥料(不思議な肥料・摩訶不思議な肥料を含む)もまけない: 長押しで肥料を入れ続けると、村人が収穫と植え直しを繰り返して際限なく稼げるため
+  if(p.vil && S.tool===5){ nope(k,"村人の区画には肥料をまけません"); save(); renderAll(); return; }
   const vilMut = p.vil && S.tool===1 && p.crop && isRipe(p);   // 村人が残した変異・自動収穫オフで待っている作物
-  if(p.vil && !vilMut && S.tool!==5 && !(S.tool===6 && (S.objSel==="vil"||S.objSel==="sgvil"))){
+  if(p.vil && !vilMut && !(S.tool===6 && (S.objSel==="vil"||S.objSel==="sgvil"))){
     nope(k, p.vil==="sg" ? "シゴデキ村人が世話をしている区画です(6 でシゴデキ村人を持って押すと外せます)" : "村人が世話をしている区画です(6 で村人を持って押すと外せます)");
     save(); renderAll(); return;
   }
