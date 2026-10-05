@@ -3540,6 +3540,12 @@ function endBookGame(){
 /* ---------- 更新情報 ----------
    新しいものを上に足していく。d は YYYY-MM-DD */
 const NEWS=[
+  { d:"2026-10-06", t:"お店の効率化に「仕分け帳」「貴重品の種の自動売却」「村人の指示書2」が登場しました", items:[
+    "仕分け帳(100,000キー): お店の「売る」で、作物・食材・種を選んだ1種類ずつ、100個・1000個残して、残りをまとめて売れるようになります",
+    "貴重品の種の自動売却(500,000キー): 効果の上限まで届く分がそろった貴重品の種を、ガチャから出たときに1つ10,000キーで売ります(オンオフできます)。上限のない貴重品は売りません",
+    "上限をこえて余っている貴重品の種は、お店の「売る」でも売れるようになりました",
+    "村人の指示書2(100,000キー): 村人が収穫した作物を売るかどうかを、ふつうの作物と変異の作物それぞれで決められます。売らない作物は持ち物に入るので、料理の材料にできます(村人の指示書を持っていると並びます)",
+  ]},
   { d:"2026-10-05", t:"料理とわくわくガチャが登場しました", items:[
     "料理(0)で作った料理を食べると、10分のあいだ農園やタイピングに効果がかかります。料理は47品あり、レシピはお店の「レシピ」で買えます",
     "変異・超変異の作物と上位種の食材だけで作ると、変異・超変異の料理になり、効果が強くなります",
@@ -4641,6 +4647,9 @@ function newState(){
     fromTypingMin:0, fromTypingScrews:0,
     villagers:0, vLog:{}, vilLv:0,
     vilOrder:false, vilAutoH:true, vilAutoM:false,   // 村人の指示書(自動収穫・変異の自動収穫)
+    vilOrder2:false, vilSellN:true, vilSellM:false,  // 村人の指示書2(収穫したあと売るか: ふつうの作物・変異の作物)
+    seedSort:false,                                  // 仕分け帳(作物・食材・種を100個・1000個残して売る)
+    treasSell:0,                                     // 貴重品の種の自動売却: 0 なし・1 買った(オフ)・2 オン
     cut:{},   // 演出カット: { cook / eat / prep : 0 なし・1 買った(演出あり)・2 カット中 }
     counter:false,                                   // 畑のカウンタ
     owner:Math.random().toString(36).slice(2)+Date.now().toString(36),  // 番付で自分の記録を見分ける印
@@ -4830,8 +4839,15 @@ function villagerAdvance(p,dt){
         const mn=p.crop.mutN||0;
         p.crop=null;
         const num = mn && mr===3 ? mn : 1 + (Math.random()<effDouble() ? 1 : 0);
-        invAdd(c.id,mr,num);
         for(let i=0;i<num;i++) recordHarvest(c.id,mr,true);
+        if(S.vilOrder2 && S.vilSellM){                // 指示書2: 変異もその場で売る
+          const price=priceOf(c.id,mr)*num;
+          S.money+=price; S.totalSales+=price;
+          S.vLog.mutSold=S.vLog.mutSold||[]; for(let i=0;i<num;i++) S.vLog.mutSold.push(c.id+(mr===5?":5":""));
+          S.vLog.mutEarn=(S.vLog.mutEarn||0)+price;
+          continue;
+        }
+        invAdd(c.id,mr,num);
         S.vLog.mutGot=S.vLog.mutGot||[]; S.vLog.mutGot.push(c.id+(mr===5?":5":""));
         continue;
       }
@@ -4846,9 +4862,14 @@ function villagerAdvance(p,dt){
     p.crop=null;
     const q=qualUp(tierOf(c.id));                   // q: 品質(t は残り時間なので別名に)
     const num = 1 + (Math.random()<effDouble() ? 1 : 0);
+    for(let i=0;i<num;i++) recordHarvest(c.id,q,true);
+    if(S.vilOrder2 && !S.vilSellN){                 // 指示書2: ふつうの作物は売らずに持ち物へ
+      invAdd(c.id,q,num);
+      S.vLog.k=S.vLog.k||{}; S.vLog.k[c.id]=(S.vLog.k[c.id]||0)+num;
+      continue;
+    }
     const price=priceOf(c.id,q)*num;
     S.money+=price; S.totalSales+=price;
-    for(let i=0;i<num;i++) recordHarvest(c.id,q,true);
     S.vLog.h=S.vLog.h||{}; S.vLog.h[c.id]=(S.vLog.h[c.id]||0)+num;
     S.vLog.earn=(S.vLog.earn||0)+price;
   }
@@ -4868,6 +4889,58 @@ function buyVilOrder(){
   if(!spend(VIL_ORDER_COST)) return;
   S.vilOrder=true; sfx.buy();
   toast("村人の指示書を手に入れました。お店の効率化で、自動収穫と変異の自動収穫をオンオフできます","good",5200);
+  save(); renderAll();
+}
+const VIL_ORDER2_COST=100000, SEED_SORT_COST=100000, TREAS_AUTO_COST=500000, TREAS_SEED_PRICE=10000;
+function buyVilOrder2(){
+  if(!S.vilOrder || S.vilOrder2) return;
+  if(!spend(VIL_ORDER2_COST)) return;
+  S.vilOrder2=true; sfx.buy();
+  toast("村人の指示書2を手に入れました。お店の効率化で、村人が収穫した作物を売るかどうかを、ふつうの作物と変異の作物それぞれで決められます","good",5600);
+  save(); renderAll();
+}
+function toggleVilSell(w){
+  if(!S.vilOrder2) return;
+  tick();   // ここまでの分は、今の設定で進めてから切り替える
+  if(w==="N") S.vilSellN=!S.vilSellN; else S.vilSellM=!S.vilSellM;
+  sfx.tool();
+  toast(w==="N" ? `村人が収穫したふつうの作物を${S.vilSellN?"売ります":"売らずに持ち物に入れます"}`
+                : `村人が収穫した変異の作物を${S.vilSellM?"売ります":"売らずに持ち物に入れます"}${S.vilSellM&&!S.vilAutoM?"(変異の自動収穫がオンのときに効きます)":""}`,"",3200);
+  save(); renderAll();
+}
+function buySeedSort(){
+  if(S.seedSort) return;
+  if(!spend(SEED_SORT_COST)) return;
+  S.seedSort=true; sfx.buy();
+  toast(`仕分け帳を手に入れました。お店の「売る」で、作物・食材・種を1種類ずつ、100個・1000個残して売れます`,"good",4600);
+  save(); renderAll();
+}
+/* 貴重品の種: 効果の上限まで届く数(上限のないものは null)。収穫済み・畑に植わっている分・手持ちの種で数える */
+const treasNeed = c => c.eff && c.eff.cap!=null ? Math.ceil(c.eff.cap/c.eff.per-1e-9) : null;
+const treasPlanted = id => FS().reduce((a,f)=>a+KEYS.filter(k=>f[k].crop && f[k].crop.id===id).length,0);
+const treasFull = c => { const nd=treasNeed(c); return nd!=null && tre(c.id)+treasPlanted(c.id)+(S.seeds[c.id]||0)>=nd; };
+const treasExtra = c => { const nd=treasNeed(c); if(nd==null) return 0; const have=S.seeds[c.id]||0; return Math.max(0, Math.min(have, tre(c.id)+treasPlanted(c.id)+have-nd)); };
+const treasSeen = () => CROPS.some(c=>c.treasure && (S.got[c.id]||0)>0);
+function buyTreasAuto(){
+  if(!S.treasSell){
+    if(!spend(TREAS_AUTO_COST)) return;
+    S.treasSell=2; sfx.buy();
+    toast(`貴重品の種の自動売却を手に入れました。上限まで届いた貴重品の種は、ガチャから出たときに 1つ ${fmtNum(TREAS_SEED_PRICE)}キー で売ります`,"good",5200);
+  }else{
+    S.treasSell = S.treasSell===2 ? 1 : 2; sfx.tool();
+    toast(`貴重品の種の自動売却を ${S.treasSell===2?"オン":"オフ"} にしました`,"",2600);
+  }
+  save(); renderAll();
+}
+/* 上限をこえて余っている貴重品の種を売る(上限まで届く分は残す) */
+function sellTreasSeed(id,n){
+  const c=CROP[id], ex=c?treasExtra(c):0; if(ex<=0) return;
+  const k = n==="all" ? ex : Math.min(ex,n);
+  S.seeds[id]-=k;
+  const gain=k*TREAS_SEED_PRICE;
+  S.money+=gain; S.totalSales+=gain; sfx.sell();
+  toast(`${ico(c)} ${esc(c.name)}の種を ${fmtNum(k)}つ 売りました(+${fmtNum(gain)}キー)`,"good",2600,true);
+  if(!(S.seeds[S.seedId]>0)) S.seedId=nextSeed(S.seedId);
   save(); renderAll();
 }
 function toggleVilOrder(w){
@@ -4923,19 +4996,22 @@ function recordHarvest(id,t,quiet){
 }
 /* 村人の仕事ぶりをまとめて知らせる */
 function reportVillagers(){
-  const L=S.vLog; if(!L || (!L.h && !L.up && !L.mutWait && !L.mutGot)) return;
+  const L=S.vLog; if(!L || (!L.h && !L.k && !L.up && !L.mutWait && !L.mutGot && !L.mutSold)) return;
   const mutOf = x => { const [id,q]=String(x).split(":"); return [id, q==="5"?5:3]; };   // "carrot" は変異、"carrot:5" は超変異
   // 変異・超変異は作物ごとにまとめて1つの知らせにする(長い時間がまとめて進むと何百個も穫れ、音が一度に鳴りすぎるため)
   const byCrop = arr => { const m={}; for(const x of (arr||[])){ const [id,t]=mutOf(x); if(CROP[id]){ const k=id+":"+t; m[k]=(m[k]||0)+1; } } return Object.entries(m).map(([k,n])=>{ const [id,t]=mutOf(k); return [id,t,n]; }); };
   const mutList = arr => arr.map(([id,t,n])=>`${icoQ(CROP[id],t)} ${esc(qName(id,t))}${n>1?` ×${fmtNum(n)}`:""}`).join(" ・ ");
   const head = arr => arr.some(([,t])=>t===5) ? "✧ 超変異!" : "✦ 変異!";
   const cls  = arr => arr.some(([,t])=>t===5) ? "good mut sup" : "good mut";
-  const got=byCrop(L.mutGot), wait=byCrop(L.mutWait);
+  const got=byCrop(L.mutGot), wait=byCrop(L.mutWait), msold=byCrop(L.mutSold);
   if(got.length) toast(`${head(got)} 村人が ${mutList(got)} を収穫しました(持ち物に入れました)`,cls(got),9000,true);
+  if(msold.length) toast(`${head(msold)} 村人が ${mutList(msold)} を収穫して売りました(+${fmtNum(L.mutEarn||0)}キー)`,cls(msold),9000,true);
   if(wait.length) toast(`${head(wait)} 村人の畑で ${mutList(wait)} が実りました。村人は収穫せずに残しています(素手で収穫できます)`,cls(wait),9000,true);
   const parts=Object.entries(L.h||{}).map(([id,n])=>`${ico(CROP[id])}×${fmtNum(n)}`);
   if(parts.length) toast(`村人が ${parts.join(" ")} を収穫して売りました(売上 ${fmtNum(L.earn||0)} ・ 種代 ${fmtNum(L.spent||0)} キー)`,"good",6000,true);
-  if(got.length || wait.length || parts.length) sfx.vil();   // 音は1回だけ
+  const kept=Object.entries(L.k||{}).map(([id,n])=>`${ico(CROP[id])}×${fmtNum(n)}`);
+  if(kept.length) toast(`村人が ${kept.join(" ")} を収穫して、持ち物に入れました`,"good",6000,true);
+  if(got.length || wait.length || msold.length || parts.length || kept.length) sfx.vil();   // 音は1回だけ
   for(const m of (L.up||[])) toast(m,"good",5200,true);
   S.vLog={}; checkUnlocks(); save();
 }
@@ -5739,15 +5815,38 @@ function shopRows(){
         shift: ()=>a?toggleAuto(c.id,"s"):(ready&&buyAuto(c.id)),
       });
     }
+    // 貴重品の種の自動売却(貴重品をはじめて手に入れてから並べる)と、仕分け帳
+    if(treasSeen()){
+      const st=S.treasSell||0;
+      rows.push({ ic:"💎",
+        nm: `貴重品の種の自動売却 <span style="color:var(--ink-l)">${st?"購入済み":fmtNum(TREAS_AUTO_COST)+"キー"}</span>`,
+        ds: (st?`自動売却 ${st===2?'<b style="color:#2e7d32">オン</b>':'<span style="color:var(--ink-l)">オフ</span>'}<br>`:"")+
+            `効果の上限まで届く分(収穫した分・畑に植わっている分・手持ちの種)がそろった貴重品の種を、ガチャから出たときに 1つ ${fmtNum(TREAS_SEED_PRICE)}キー で売ります(上限のない貴重品は売りません)`,
+        keys: st?`<b>Enter</b> ${st===2?"オフにする":"オンにする"}`:"<b>Enter</b> 買う", enter:()=>buyTreasAuto(), shift:()=>buyTreasAuto() });
+    }
+    rows.push({ ic:"🗂️",
+      nm: `仕分け帳 <span style="color:var(--ink-l)">${S.seedSort?"購入済み":fmtNum(SEED_SORT_COST)+"キー"}</span>`,
+      ds: `お店の「売る」で、作物・食材・種を選んだ1種類ずつ、100個 または 1000個 残して、残りをまとめて売れるようになります(1つ・10個ずつ売るかわりに)`,
+      keys: S.seedSort?"":"<b>Enter</b> 買う", enter:()=>buySeedSort(), shift:()=>buySeedSort() });
     // 村人の指示書(自動収穫・変異の自動収穫のオンオフ)
     {
       const has=S.vilOrder, onoff=v=>v?'<b style="color:#2e7d32">オン</b>':'<span style="color:var(--ink-l)">オフ</span>';
       rows.push({ ic:"📜",
         nm: `村人の指示書 <span style="color:var(--ink-l)">${has?"購入済み":fmtNum(VIL_ORDER_COST)+"キー"}</span>`,
-        ds: has?`村人の自動収穫 ${onoff(S.vilAutoH)} ・ 変異の自動収穫 ${onoff(S.vilAutoM)}<br>自動収穫オフ: 実った作物は畑に残り、素手で収穫すると村人が次を植えます ・ 変異の自動収穫オン: 村人が変異も収穫して持ち物に入れます(売りません)`
+        ds: has?`村人の自動収穫 ${onoff(S.vilAutoH)} ・ 変異の自動収穫 ${onoff(S.vilAutoM)}<br>自動収穫オフ: 実った作物は畑に残り、素手で収穫すると村人が次を植えます ・ 変異の自動収穫オン: 村人が変異も収穫して${S.vilOrder2&&S.vilSellM?"売ります":"持ち物に入れます(売りません)"}`
                :`村人の仕事を指示できるようになります。「村人の自動収穫」と「変異の自動収穫」を、それぞれオンオフできます`,
         keys: has?"<b>Enter</b> 自動収穫のオンオフ<br><b>Shift+Enter</b> 変異の自動収穫のオンオフ":"<b>Enter</b> 買う",
         enter: ()=>has?toggleVilOrder("H"):buyVilOrder(), shift: ()=>has?toggleVilOrder("M"):buyVilOrder() });
+      // 村人の指示書2(収穫したあと売るか)。指示書を持っていると並ぶ
+      if(has){
+        const has2=S.vilOrder2, sellTxt=v=>v?'<b style="color:#2e7d32">売る</b>':'<b style="color:#8a5a00">売らない</b>';
+        rows.push({ ic:"📜",
+          nm: `村人の指示書2 <span style="color:var(--ink-l)">${has2?"購入済み":fmtNum(VIL_ORDER2_COST)+"キー"}</span>`,
+          ds: has2?`ふつうの作物 ${sellTxt(S.vilSellN)} ・ 変異の作物 ${sellTxt(S.vilSellM)}<br>売らない作物は持ち物に入ります(料理の材料にできます)。変異の作物は「変異の自動収穫」がオンのときに効きます`
+                  :`村人が収穫した作物を売るかどうかを、ふつうの作物と変異の作物それぞれで決められるようになります`,
+          keys: has2?"<b>Enter</b> ふつうの作物を売る / 売らない<br><b>Shift+Enter</b> 変異の作物を売る / 売らない":"<b>Enter</b> 買う",
+          enter: ()=>has2?toggleVilSell("N"):buyVilOrder2(), shift: ()=>has2?toggleVilSell("M"):buyVilOrder2() });
+      }
       rows.push({ ic:"🧮",
         nm: `畑のカウンタ <span style="color:var(--ink-l)">${S.counter?"購入済み":fmtNum(COUNTER_COST)+"キー"}</span>`,
         ds: `農園の右下に、すべての畑の「実っている作物」「何も植えていない土」「水が切れている作物」の数を出します(村人の区画と設置物は数えません)`,
@@ -5779,30 +5878,42 @@ function shopRows(){
     for(const c of CROPS) for(const t of QORDER){
       const n=invN(c.id,t); if(n<=0) continue;
       const pr=priceOf(c.id,t);
-      rows.push({ ic:icoQ(c,t), nm:`${t===5?'<span class="mutnm supnm">✧ ':(t===3?'<span class="mutnm">✦ ':"")}${qName(c.id,t)}${isMutT(t)?"</span>":""} ×${n}`, ds:`1つ ${fmtNum(pr)}キー ・ 全部で ${fmtNum(n*pr)}キー${isMutT(t)?` ・ ${t===5?"超変異":"変異"}(「すべて売る」では売りません)`:""}`,
-        keys:"<b>Enter</b> 1つ売る<br><b>Shift+Enter</b> 10個売る<br><b>Ctrl+Enter</b> 全部売る",
-        enter:()=>sell(c.id,t,1), shift:()=>sell(c.id,t,10), all:()=>sell(c.id,t,"all") });
+      rows.push({ ic:icoQ(c,t), nm:`${t===5?'<span class="mutnm supnm">✧ ':(t===3?'<span class="mutnm">✦ ':"")}${qName(c.id,t)}${isMutT(t)?"</span>":""} ×${fmtNum(n)}`, ds:`1つ ${fmtNum(pr)}キー ・ 全部で ${fmtNum(n*pr)}キー${isMutT(t)?` ・ ${t===5?"超変異":"変異"}(「すべて売る」では売りません)`:""}`,
+        keys:SELL_KEYS(),
+        enter:()=>sell(c.id,t,sortN(1)), shift:()=>sell(c.id,t,sortN(10)), all:()=>sell(c.id,t,"all") });
     }
     // 食材(「すべて売る」では売らない)
     for(const f of FOODS){
       const n=foodN(f.id); if(n<=0) continue;
-      rows.push({ ic:ico(f), nm:`${f.up?'<span class="upnm">':""}${esc(f.name)}${f.up?"</span>":""} ×${n}`,
+      rows.push({ ic:ico(f), nm:`${f.up?'<span class="upnm">':""}${esc(f.name)}${f.up?"</span>":""} ×${fmtNum(n)}`,
         ds:`食材${f.up?"(上位種)":""} ・ 1つ ${fmtNum(f.price)}キー ・ 全部で ${fmtNum(n*f.price)}キー(食材は「すべて売る」では売りません)`,
-        keys:"<b>Enter</b> 1つ売る<br><b>Shift+Enter</b> 10個売る<br><b>Ctrl+Enter</b> 全部売る",
-        enter:()=>sellFood(f.id,1), shift:()=>sellFood(f.id,10), all:()=>sellFood(f.id,"all") });
+        keys:SELL_KEYS(),
+        enter:()=>sellFood(f.id,sortN(1)), shift:()=>sellFood(f.id,sortN(10)), all:()=>sellFood(f.id,"all") });
     }
     // 余った種も売れる(貴重品の種は売れない)。値段の安い順に並べる
     const seedRows=CROPS.filter(c=>!c.treasure && (S.seeds[c.id]||0)>0).sort((a,b)=>seedPrice(a)-seedPrice(b));
     for(const c of seedRows){
       const n=S.seeds[c.id]||0;
       const pr=seedPrice(c);
-      rows.push({ ic:"🌱", nm:`${ico(c)} ${c.name}の種 ×${n}`, ds:`1つ ${pr}キー ・ 全部で ${fmtNum(n*pr)}キー`,
+      rows.push({ ic:"🌱", nm:`${ico(c)} ${c.name}の種 ×${fmtNum(n)}`, ds:`1つ ${pr}キー ・ 全部で ${fmtNum(n*pr)}キー`,
+        keys:SELL_KEYS(),
+        enter:()=>sellSeed(c.id,sortN(1)), shift:()=>sellSeed(c.id,sortN(10)), all:()=>sellSeed(c.id,"all") });
+    }
+    // 貴重品の種は、効果の上限をこえて余っている分だけ売れる(ほかの種の下に並べる)
+    for(const c of CROPS.filter(c=>c.treasure)){
+      const ex=treasExtra(c); if(ex<=0) continue;
+      rows.push({ ic:"🌱", nm:`${ico(c)} ${c.name}の種 ×${fmtNum(ex)} <span style="color:var(--ink-l)">(上限をこえた分)</span>`,
+        ds:`貴重品の種 ・ 効果の上限まで届く分は残し、余っている分だけ売ります ・ 1つ ${fmtNum(TREAS_SEED_PRICE)}キー ・ 全部で ${fmtNum(ex*TREAS_SEED_PRICE)}キー`,
         keys:"<b>Enter</b> 1つ売る<br><b>Shift+Enter</b> 10個売る<br><b>Ctrl+Enter</b> 全部売る",
-        enter:()=>sellSeed(c.id,1), shift:()=>sellSeed(c.id,10), all:()=>sellSeed(c.id,"all") });
+        enter:()=>sellTreasSeed(c.id,1), shift:()=>sellTreasSeed(c.id,10), all:()=>sellTreasSeed(c.id,"all") });
     }
   }
   return rows;
 }
+/* 売るタブの操作。仕分け帳を買うと、1つ・10個のかわりに 100個・1000個残して売る(選んだ1種類だけ) */
+const SELL_KEYS = () => S.seedSort ? "<b>Enter</b> 100個残して売る<br><b>Shift+Enter</b> 1000個残して売る<br><b>Ctrl+Enter</b> 全部売る"
+                                   : "<b>Enter</b> 1つ売る<br><b>Shift+Enter</b> 10個売る<br><b>Ctrl+Enter</b> 全部売る";
+const sortN = n => S.seedSort ? { keep: n===1 ? 100 : 1000 } : n;
 let shopRowCache=[];
 function renderShop(){
   $("g-shopMoney").textContent=fmtNum(S.money);
@@ -5948,34 +6059,40 @@ function buyField(){
 }
 /* 種の売値(お店の種は買値の25%。ガチャ限定は作物の売値の30分の1。ガチャを引いて売るだけで増えないように)
  */
+/* 仕分け帳: n が {keep:100} のときは、その数を残して売る数を返す(売れないときは知らせて 0) */
+function keepSell(name,have,n){
+  if(!(n && n.keep!=null)) return n==="all" ? have : Math.min(have,n);
+  if(have<=n.keep){ sfx.nope(); toast(`${name}は ${fmtNum(have)}個 なので、売りません(${fmtNum(n.keep)}個 残します)`,"warn",2600); return 0; }
+  return have-n.keep;
+}
 const seedPrice = c => Math.max(1, c.cost>0 ? Math.round(c.cost*0.25) : Math.round(c.price/30));
 function sellSeed(id,n){
   const c=CROP[id], have=S.seeds[id]||0; if(!c||have<=0) return;
-  const k = n==="all" ? have : Math.min(have,n);
+  const k=keepSell(`${esc(c.name)}の種`,have,n); if(!k) return;
   S.seeds[id]=have-k;
   const gain=k*seedPrice(c);
   S.money+=gain; S.totalSales+=gain; sfx.sell();
-  toast(`${ico(c)} ${esc(c.name)}の種を ${k}つ 売りました(+${fmtNum(gain)}キー)`,"good",2600,true);
+  toast(`${ico(c)} ${esc(c.name)}の種を ${fmtNum(k)}つ 売りました(+${fmtNum(gain)}キー)`,"good",2600,true);
   if(!(S.seeds[S.seedId]>0)) S.seedId=nextSeed(S.seedId);
   save(); renderAll();
 }
 function sell(id,t,n){
   const c=CROP[id]; const have=invN(id,t); if(!c||have<=0) return;
-  const k = n==="all" ? have : Math.min(have, n);
+  const k=keepSell(esc(qName(id,t)),have,n); if(!k) return;
   S.inv[id][t]=have-k;
   const gain=k*priceOf(id,t);
   S.money+=gain; S.totalSales+=gain; sfx.sell();
-  toast(`${icoQ(c,t)} ${esc(qName(id,t))}を ${k}つ 売りました(+${fmtNum(gain)}キー)`,"good",2600,true);
+  toast(`${icoQ(c,t)} ${esc(qName(id,t))}を ${fmtNum(k)}つ 売りました(+${fmtNum(gain)}キー)`,"good",2600,true);
   checkUnlocks();
   save(); renderAll();
 }
 function sellFood(id,n){
   const f=FOOD[id], have=foodN(id); if(!f||have<=0) return;
-  const k = n==="all" ? have : Math.min(have,n);
+  const k=keepSell(esc(f.name),have,n); if(!k) return;
   S.food[id]=have-k;
   const gain=k*f.price;
   S.money+=gain; S.totalSales+=gain; sfx.sell();
-  toast(`${ico(f)} ${esc(f.name)}を ${k}つ 売りました(+${fmtNum(gain)}キー)`,"good",2600,true);
+  toast(`${ico(f)} ${esc(f.name)}を ${fmtNum(k)}つ 売りました(+${fmtNum(gain)}キー)`,"good",2600,true);
   checkUnlocks();
   save(); renderAll();
 }
@@ -6158,7 +6275,10 @@ function drawGacha(n){
       continue;
     }
     if(GUR[x.id]){ const m=gainGur(x.id); if(S.got[x.id]===1 || x.id==="deed" || m.includes("かわりに")) gachaNote.push(m); continue; }   // 知らせは、その宝物をはじめて手に入れたときだけ(土地の権利書は毎回)
-    if(autoSeed(x.id)){                      // 種の自動売却
+    if(S.treasSell===2 && CROP[x.id] && CROP[x.id].treasure && treasFull(CROP[x.id])){   // 貴重品の種の自動売却(上限まで届いた種)
+      x.sold=TREAS_SEED_PRICE;
+      S.money+=x.sold; S.totalSales+=x.sold;
+    }else if(autoSeed(x.id)){                      // 種の自動売却
       const two=Math.random()<ev("Q1",.2,.5,0);   // 料理: 種おかわり
       const gain=seedPrice(CROP[x.id])*(two?2:1);
       S.money+=gain; S.totalSales+=gain;
@@ -6440,7 +6560,7 @@ function gachaHTML(){
 const TREASURES = CROPS.filter(c=>c.treasure);
 let treasTab=0, kitCur=0;
 const kitAny = () => KIT_ORDER.some(id=>(S.got[id]||0)>0);   // 台所の宝物はシークレット: 1つ手に入れるまでタブを出さない
-const KIT_NOTE="わくわくガチャの GHR・GUR から出る台所の宝物です。鍋やまな板などは、重ねるほど強くなります(上限あり)。"+kb("砂時計とお弁当箱は Enter で使います。","砂時計とお弁当箱は、タップして選び、もう一度タップで使います。");
+const KIT_NOTE="わくわくガチャの GHR・GUR から出る台所の宝物です。重ねるほど強くなるものもあります(上限あり)。"+kb("使うものは、選んで Enter で使います。","使うものは、タップして選び、もう一度タップで使います。");   // ほかの宝物の名前は書かない(ネタバレになるため)
 const TREAS_NOTE="ガチャの GHR から出る種を育てると手に入ります。売ることはできませんが、持っているだけで農園にずっと効きます(同じものを重ねるほど強くなります)。";
 function kitSub(id){   // 台所の宝物の「今の状態」
   const g=GUR[id], n=kitN(id);
