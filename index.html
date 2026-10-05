@@ -4819,7 +4819,7 @@ const vilUpPrice = () => VIL_UP_PRICES[Math.min(S.vilLv||0, VIL_UP_PRICES.length
 function villagerAdvance(p,dt){
   let t=dt, guard=0;
   while(guard++<100000){
-    if(p.crop && p.crop.mut && p.crop.grown>=need(p.crop)) break;   // 変異が実っている: 手で収穫されるまで待つ
+    if(!S.vilAutoM && p.crop && p.crop.mut && p.crop.grown>=need(p.crop)) break;   // 変異が実っている(変異の自動収穫オフ): 手で収穫されるまで待つ
     if(!S.vilAutoH && p.crop && p.crop.rolled && p.crop.grown>=need(p.crop)) break;   // 実ったまま待っている(自動収穫オフ)
     if(!p.crop){
       const c=CROP[p.vil==="sg" ? sgCropId() : (eff("O") ? vilGachaCrop() : vilCropId())];   // シゴデキ村人は選んだ作物
@@ -5428,7 +5428,14 @@ function renderBar(){
   $("g-money").textContent=fmtNum(S.money);
   $("g-rate").textContent=`タイピング1打で ${minPerKey()}分 進む`;
 }
+/* キーを長押ししている間(連打のキー)は、画面の描き直しを1コマに1回にまとめる。
+   描き直しが重いので、押すたびに描き直すとキーがたまり、離したあともしばらく動き続けるため */
+let deferUI=false;
 function renderAll(){
+  if(deferUI){ renderSoon(renderAllNow); return; }
+  renderAllNow();
+}
+function renderAllNow(){
   renderBar(); renderField(); renderInfo(); renderBasket(); renderGoalBadge(); renderCounter();
   if(modal==="shop") renderShop();
   if(modal==="book") renderBook();
@@ -8175,6 +8182,10 @@ $("g-rankBtn").addEventListener("click",submitRank);
 
 /* ---------- キー操作(本編の keydown から呼ばれる) ---------- */
 function onKey(e){
+  deferUI=!!e.repeat;
+  try{ onKeyMain(e); }finally{ deferUI=false; }
+}
+function onKeyMain(e){
   const tag=(e.target&&e.target.tagName)||"";
   // 貼り付け欄の中: Enter で読み込み、Esc で欄から抜ける
   if(tag==="TEXTAREA"||tag==="INPUT"){
