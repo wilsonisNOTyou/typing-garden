@@ -5068,7 +5068,7 @@ function consumeInbox(){
   S.money+=screws;
   S.fromTypingMin+=minutes; S.fromTypingScrews+=screws;
   const m=S.inMsg||{min:0,screws:0,plots:0};
-  const per=ev("P5",100,30,0);   // 料理: 何打ごとに肥料が届くか
+  const per=ev("P5",20,5,0);   // 料理: 何打ごとに肥料が届くか
   if(per){ S.p5Keys=(S.p5Keys||0)+keys; const f=Math.floor(S.p5Keys/per); if(f>0){ S.p5Keys-=f*per; S.fert+=f; m.fert=(m.fert||0)+f; } }
   m.min+=minutes; m.screws+=screws; m.plots=Math.max(m.plots,n);
   S.inMsg=m;
@@ -5599,7 +5599,7 @@ function act(k){
       const fmax=ev("K",3,Infinity,2);
       if((p.crop.fert||0)>=fmax){ nope(k,`この作物に肥料はもう${fmax}回使っています`); break; }
       p.crop.fert=(p.crop.fert||0)+1;
-      if(Math.random()<ev("η",.3,.6,0)) floatAt(k,"🍂 減らなかった!"); else S.fert--;
+      if(Math.random()<ev("η",.5,1,0)) floatAt(k,"🍂 減らなかった!"); else S.fert--;
       grow(p, need(p.crop)*effFert(), Date.now());
       if(isRipe(p)) p.crop.ripeAt=Date.now();
       hit(k); floatAt(k,`🍂 ${p.crop.fert}/${fmax===Infinity?"∞":fmax}`); sfx.fert();
@@ -5659,7 +5659,7 @@ function magicFert(k,p,id){
     p.crop.mut=true; p.crop.mutN=3;
   }
   p.crop.rolled=true;
-  if(Math.random()<ev("η",.3,.6,0)) toast("料理の効果で、肥料が減りませんでした","good",2600); else S[id]--;
+  if(Math.random()<ev("η",.5,1,0)) toast("料理の効果で、肥料が減りませんでした","good",2600); else S[id]--;
   if(!(S[id]>0)) S.fertSel="fert";
   hit(k); floatAt(k, id==="mfert"?"✧×3":"✦×3"); sfx.vil();
   toast(`${ico(g)} ${esc(c.name)}にまきました。${id==="mfert"?"超変異で3個穫れます":"変異で3個穫れます"}`,"good mut"+(id==="mfert"?" sup":""),4200,true);
@@ -7069,7 +7069,7 @@ const EFFS = {
   "μ":{ nm:"GHR が出やすい",     n:"ガチャの GHR の確率 1.5倍",            s:"ガチャの GHR の確率 3倍" },
   "ν":{ nm:"GSR が出やすい",     n:"ガチャの GSR の確率 1.5倍",            s:"ガチャの GSR の確率 3倍" },
   "ζ":{ nm:"食材おかわり",       n:"わくわくガチャの食材が20%で2つ",       s:"わくわくガチャの食材がかならず2つ" },
-  "η":{ nm:"肥料が減らない",     n:"肥料を使っても30%で減らない",          s:"肥料を使っても60%で減らない" },
+  "η":{ nm:"肥料が減らない",     n:"肥料を使っても50%で減らない",          s:"肥料を使っても減らない" },
   "λ":{ nm:"確定枠アップ",       n:"ガチャで SR 以上が8回ごとに1つ確定",   s:"ガチャで SR 以上が5回ごとに1つ確定" },
   Z:{ nm:"村人の種代",           n:"村人の種代が半分",                     s:"村人の種代が無料" },
   P1:{ nm:"料理おかわり",        n:"料理を作ると20%でもう1つできる",       s:"料理を作ると、かならずもう1つできる" },
@@ -7077,7 +7077,7 @@ const EFFS = {
   X:{ nm:"仕込みおかわり",       n:"仕込むと20%でもう1つできる",           s:"仕込むと、かならずもう1つできる" },
   Y:{ nm:"実績のごほうび",       n:"実績のごほうび 1.5倍",                 s:"実績のごほうび 2倍" },
   P3:{ nm:"食材が上位種に化ける", n:"わくわくガチャの食材が5%で上位種に化ける", s:"わくわくガチャの食材が20%で上位種に化ける" },
-  P5:{ nm:"タイピングで肥料",      n:"タイピング100打ごとに肥料が1つ届く",     s:"タイピング30打ごとに肥料が1つ届く" },
+  P5:{ nm:"タイピングで肥料",      n:"タイピング20打ごとに肥料が1つ届く",      s:"タイピング5打ごとに肥料が1つ届く" },
   P8:{ nm:"効果を延ばす",        n:"食べた瞬間、今かかっている料理の効果が10分延びる", s:"食べた瞬間、今かかっている料理の効果が1時間延びる" },
   Q1:{ nm:"種おかわり",          n:"ガチャで出た作物の種が20%で2つ",       s:"ガチャで出た作物の種が50%で2つ" },
   Q2:{ nm:"変わり種の売値",      n:"変異・超変異の作物の売値 1.5倍",       s:"変異・超変異の作物の売値 3倍" },
