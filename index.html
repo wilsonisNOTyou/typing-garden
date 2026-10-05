@@ -3541,7 +3541,7 @@ function endBookGame(){
    新しいものを上に足していく。d は YYYY-MM-DD */
 const NEWS=[
   { d:"2026-10-06", t:"お店の効率化に「仕分け帳」「貴重品の種の自動売却」「村人の指示書2」が登場しました", items:[
-    "仕分け帳(100,000キー): お店の「売る」で、作物・食材・種を選んだ1種類ずつ、100個・1000個残して、残りをまとめて売れるようになります",
+    "仕分け帳(100,000キー): お店の「売る」で、作物・食材・種を選んだ1種類ずつ、100個・1000個残して、残りをまとめて売れるようになります(オンオフできます)",
     "貴重品の種の自動売却(500,000キー): 効果の上限まで届く分がそろった貴重品の種を、ガチャから出たときに1つ10,000キーで売ります(オンオフできます)。上限のない貴重品は売りません",
     "上限をこえて余っている貴重品の種は、お店の「売る」でも売れるようになりました",
     "村人の指示書2(100,000キー): 村人が収穫した作物を売るかどうかを、ふつうの作物と変異の作物それぞれで決められます。売らない作物は持ち物に入るので、料理の材料にできます(村人の指示書を持っていると並びます)",
@@ -4652,6 +4652,7 @@ function newState(){
     vilOrder:false, vilAutoH:true, vilAutoM:false,   // 村人の指示書(自動収穫・変異の自動収穫)
     vilOrder2:false, vilSellN:true, vilSellM:false,  // 村人の指示書2(収穫したあと売るか: ふつうの作物・変異の作物)
     seedSort:false,                                  // 仕分け帳(作物・食材・種を100個・1000個残して売る)
+    sortOn:true,                                     // 仕分け帳を使うか(オフなら 1つ・10個ずつ売る)
     treasSell:0,                                     // 貴重品の種の自動売却: 0 なし・1 買った(オフ)・2 オン
     cut:{},   // 演出カット: { cook / eat / prep : 0 なし・1 買った(演出あり)・2 カット中 }
     counter:false,                                   // 畑のカウンタ
@@ -4911,10 +4912,15 @@ function toggleVilSell(w){
                 : `村人が収穫した変異の作物を${S.vilSellM?"売ります":"売らずに持ち物に入れます"}${S.vilSellM&&!S.vilAutoM?"(変異の自動収穫がオンのときに効きます)":""}`,"",3200);
   save(); renderAll();
 }
+const sortActive = () => S.seedSort && S.sortOn!==false;
 function buySeedSort(){
-  if(S.seedSort) return;
+  if(S.seedSort){   // 買ったあとは Enter でオンオフ
+    S.sortOn = S.sortOn===false; sfx.tool();
+    toast(`仕分け帳を ${S.sortOn?"オン":"オフ"} にしました(お店の「売る」で ${S.sortOn?"100個・1000個残して売る":"1つ・10個ずつ売る"})`,"",3000);
+    save(); renderAll(); return;
+  }
   if(!spend(SEED_SORT_COST)) return;
-  S.seedSort=true; sfx.buy();
+  S.seedSort=true; S.sortOn=true; sfx.buy();
   toast(`仕分け帳を手に入れました。お店の「売る」で、作物・食材・種を1種類ずつ、100個・1000個残して売れます`,"good",4600);
   save(); renderAll();
 }
@@ -5838,8 +5844,8 @@ function shopRows(){
     }
     rows.push({ ic:"🗂️",
       nm: `仕分け帳 <span style="color:var(--ink-l)">${S.seedSort?"購入済み":fmtNum(SEED_SORT_COST)+"キー"}</span>`,
-      ds: `お店の「売る」で、作物・食材・種を選んだ1種類ずつ、100個 または 1000個 残して、残りをまとめて売れるようになります(1つ・10個ずつ売るかわりに)`,
-      keys: S.seedSort?"":"<b>Enter</b> 買う", enter:()=>buySeedSort(), shift:()=>buySeedSort() });
+      ds: (S.seedSort?`仕分け帳 ${sortActive()?'<b style="color:#2e7d32">オン</b>':'<span style="color:var(--ink-l)">オフ</span>'}<br>`:"")+`お店の「売る」で、作物・食材・種を選んだ1種類ずつ、100個 または 1000個 残して、残りをまとめて売れるようになります(1つ・10個ずつ売るかわりに)`,
+      keys: S.seedSort?`<b>Enter</b> ${sortActive()?"オフにする":"オンにする"}`:"<b>Enter</b> 買う", enter:()=>buySeedSort(), shift:()=>buySeedSort() });
     // 村人の指示書(自動収穫・変異の自動収穫のオンオフ)
     {
       const has=S.vilOrder, onoff=v=>v?'<b style="color:#2e7d32">オン</b>':'<span style="color:var(--ink-l)">オフ</span>';
@@ -5923,9 +5929,9 @@ function shopRows(){
   return rows;
 }
 /* 売るタブの操作。仕分け帳を買うと、1つ・10個のかわりに 100個・1000個残して売る(選んだ1種類だけ) */
-const SELL_KEYS = () => S.seedSort ? "<b>Enter</b> 100個残して売る<br><b>Shift+Enter</b> 1000個残して売る<br><b>Ctrl+Enter</b> 全部売る"
+const SELL_KEYS = () => sortActive() ? "<b>Enter</b> 100個残して売る<br><b>Shift+Enter</b> 1000個残して売る<br><b>Ctrl+Enter</b> 全部売る"
                                    : "<b>Enter</b> 1つ売る<br><b>Shift+Enter</b> 10個売る<br><b>Ctrl+Enter</b> 全部売る";
-const sortN = n => S.seedSort ? { keep: n===1 ? 100 : 1000 } : n;
+const sortN = n => sortActive() ? { keep: n===1 ? 100 : 1000 } : n;
 let shopRowCache=[];
 function renderShop(){
   $("g-shopMoney").textContent=fmtNum(S.money);
