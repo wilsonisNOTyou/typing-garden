@@ -2870,7 +2870,7 @@ function gardenScrews(d,n){
   if(d==="book") return n;
   return n*(SCREW_MULT[d]||1);
 }
-const showGardenScrews = (el,n) => { const m=gardenScrewMul(); $(el).textContent = n>0 ? `農園に ${Math.floor(n*m).toLocaleString("ja-JP")}キー 届きます${m>1?`(料理で×${m})`:""}` : ""; };
+const showGardenScrews = (el,n) => { const m=gardenScrewMul(); $(el).textContent = n>0 ? `農園に ${Math.floor(n*m).toLocaleString("ja-JP")}キー 届きます${m>1?`(料理で1本 ${m.toLocaleString("ja-JP")}キー)`:""}` : ""; };
 
 /* ---------- 入力 ---------- */
 const START_KEYS={"1":"easy","2":"normal","3":"hard","4":"ta-easy","5":"ta-normal","6":"ta-hard","7":"oneshot"};
@@ -6812,7 +6812,7 @@ const DISHES = [
          `<svg viewBox="0 0 32 32"><path d="M9 6h14l-2 22c-.1 1.2-1 2-2.2 2h-5.6c-1.2 0-2.1-.8-2.2-2z" fill="#fff0e8" fill-opacity=".7" stroke="#b8d4e4" stroke-width=".7"/><path d="M9.7 12h12.6l-1.5 16c-.1 1-.9 1.6-1.9 1.6h-5.8c-1 0-1.8-.6-1.9-1.6z" fill="#ff5a2a"/><ellipse cx="16" cy="12" rx="6.3" ry="1.2" fill="#ff9a3a"/><path d="M16 20c-3-1-5 0-7 2 3 0 5 1 7 3 2-2 4-3 7-3-2-2-4-3-7-2z" fill="#ffd06a" opacity=".8"/><path d="M22 8c3-2 6-1 7 1-2 0-3 1-4 2" fill="#ff6a2a"/><path d="M22 8c1-3 4-4 6-4" stroke="#ff9a2a" stroke-width="1.2" fill="none"/><path d="M19 13l4-10" stroke="#ffcf3a" stroke-width="1.6" stroke-linecap="round"/></svg>`,
          `<svg viewBox="0 0 32 32"><circle cx="16" cy="16" r="14" fill="#ffd8a0" opacity="0.45"/><path d="M9 6h14l-2 22c-.1 1.2-1 2-2.2 2h-5.6c-1.2 0-2.1-.8-2.2-2z" fill="#fff8e8" fill-opacity=".7" stroke="#b8d4e4" stroke-width=".7"/><path d="M9.7 12h12.6l-1.5 16c-.1 1-.9 1.6-1.9 1.6h-5.8c-1 0-1.8-.6-1.9-1.6z" fill="#ffcf3a"/><ellipse cx="16" cy="12" rx="6.3" ry="1.2" fill="#fff0a0"/><path d="M12 22l4-6 4 6-4-2z" fill="#ff8a2a"/><path d="M6 4c-1 3 0 5 2 6" stroke="#ff5a7a" stroke-width="1.6" fill="none" stroke-linecap="round"/><path d="M8 4c-1 3 0 5 2 6" stroke="#ffcf3a" stroke-width="1.6" fill="none" stroke-linecap="round"/><path d="M24 4c-1 3 0 5 2 6" stroke="#5fd08a" stroke-width="1.6" fill="none" stroke-linecap="round"/><path d="M26 4c-1 3 0 5 2 6" stroke="#4fb3ff" stroke-width="1.6" fill="none" stroke-linecap="round"/><path d="M19 13l4-10" stroke="#ff5a7a" stroke-width="1.6" stroke-linecap="round"/></svg>`] },
   { id:"annin", name:"月光ライチの杏仁豆腐", n3:"日輪の杏仁豆腐", n5:"かぐや姫の杏仁豆腐", icon:"🍮", ing:[["lychee", 1], ["sugarcane", 1], ["milk", 1]], eff:"β",
-    l0:"月の光のようにぷるんと白い。ひと口食べると、畑の時間が一気に六時間進む。",
+    l0:"月の光のようにぷるんと白い。ひと口食べると、畑の時間が一気に三時間進む。",
     l3:"日輪ライチの杏仁豆腐。食べた瞬間、畑にひと晩が過ぎて朝が来る。",
     l5:"かぐや姫ライチの杏仁豆腐。月へ帰る前のひとときのように、畑の時間が一日ぶん駆け抜ける。",
     art:[`<svg viewBox="0 0 32 32"><path d="M3 18h26c0 6.4-5.8 11.6-13 11.6S3 24.4 3 18z" fill="#e8f0f8"/><ellipse cx="16" cy="18" rx="13" ry="3" fill="#fffdf6"/><path d="M9 16.6l2-1.4 2 1.4-2 1.4z" fill="#ffffff" stroke="#e8e0d0" stroke-width=".4"/><path d="M14 15.6l2-1.4 2 1.4-2 1.4z" fill="#ffffff" stroke="#e8e0d0" stroke-width=".4"/><path d="M19 16.6l2-1.4 2 1.4-2 1.4z" fill="#ffffff" stroke="#e8e0d0" stroke-width=".4"/><circle cx="13.6" cy="18" r="1.6" fill="#f4f0e8" stroke="#e0d8c8" stroke-width=".4"/><path d="M24 5a3 3 0 1 0 2.4 4.6 2.4 2.4 0 1 1-2.4-4.6z" fill="#e8e0ff"/></svg>`,
@@ -6833,9 +6833,9 @@ const DISHES = [
          `<svg viewBox="0 0 32 32"><path d="M9 6h14l-2 22c-.1 1.2-1 2-2.2 2h-5.6c-1.2 0-2.1-.8-2.2-2z" fill="#fff0e8" fill-opacity=".7" stroke="#b8d4e4" stroke-width=".7"/><path d="M9.7 12h12.6l-1.5 16c-.1 1-.9 1.6-1.9 1.6h-5.8c-1 0-1.8-.6-1.9-1.6z" fill="#ff4a2a"/><ellipse cx="16" cy="12" rx="6.3" ry="1.2" fill="#ffb03a"/><path d="M12 26c0-4 2-6 4-6s4 2 4 6" fill="#ffcf3a" opacity=".8"/><path d="M16 6c-3-3-8-3-10 0 3 0 5 1 6 3 1-2 2-3 4-3zM16 6c3-3 8-3 10 0-3 0-5 1-6 3-1-2-2-3-4-3z" fill="#ff8a2a"/></svg>`,
          `<svg viewBox="0 0 32 32"><rect width="32" height="32" rx="6" fill="#1e2448"/><path d="M24 3a3 3 0 1 0 2.6 4.6 2.4 2.4 0 1 1-2.6-4.6z" fill="#f4e7a4"/><circle cx="5" cy="6" r="0.5" fill="#ffffff"/><circle cx="9" cy="3" r="0.4" fill="#ffffff"/><circle cx="28" cy="16" r="0.4" fill="#ffffff"/><path d="M9 6h14l-2 22c-.1 1.2-1 2-2.2 2h-5.6c-1.2 0-2.1-.8-2.2-2z" fill="#e8ecf8" fill-opacity=".7" stroke="#b8d4e4" stroke-width=".7"/><path d="M9.7 12h12.6l-1.5 16c-.1 1-.9 1.6-1.9 1.6h-5.8c-1 0-1.8-.6-1.9-1.6z" fill="#f8f0ff"/><ellipse cx="16" cy="12" rx="6.3" ry="1.2" fill="#ffffff"/><g fill="#3a1a1a"><circle cx="13" cy="17" r=".35"/><circle cx="17" cy="19" r=".35"/><circle cx="19" cy="23" r=".35"/><circle cx="14" cy="24" r=".35"/><circle cx="16" cy="21" r=".35"/></g><ellipse cx="9" cy="6.4" rx="1.4" ry="3" fill="#ffffff" transform="rotate(0 9 8.4)"/><ellipse cx="9" cy="6.4" rx="1.4" ry="3" fill="#ffffff" transform="rotate(45 9 8.4)"/><ellipse cx="9" cy="6.4" rx="1.4" ry="3" fill="#ffffff" transform="rotate(90 9 8.4)"/><ellipse cx="9" cy="6.4" rx="1.4" ry="3" fill="#ffffff" transform="rotate(135 9 8.4)"/><ellipse cx="9" cy="6.4" rx="1.4" ry="3" fill="#ffffff" transform="rotate(180 9 8.4)"/><ellipse cx="9" cy="6.4" rx="1.4" ry="3" fill="#ffffff" transform="rotate(225 9 8.4)"/><ellipse cx="9" cy="6.4" rx="1.4" ry="3" fill="#ffffff" transform="rotate(270 9 8.4)"/><ellipse cx="9" cy="6.4" rx="1.4" ry="3" fill="#ffffff" transform="rotate(315 9 8.4)"/><circle cx="9" cy="8.4" r="1.2" fill="#fff2a0"/></svg>`] },
   { id:"pancake", name:"キーの木シロップのパンケーキ", n3:"千年パンケーキ", n5:"世界樹パンケーキ", icon:"🥞", ing:[["keytree", 1], ["wheat", 1], ["egg", 1], ["milk", 1], ["butter", 1]], eff:"N",
-    l0:"キーの木の樹液から作ったシロップをたっぷり。一語打つごとのキーが二倍になる。",
-    l3:"千年キーの木のシロップ。打った言葉が、倍の重さのキーになって庭に届く。",
-    l5:"世界樹キーのシロップ。一語打つごとに、キーが四倍になって降ってくる。",
+    l0:"キーの木の樹液から作ったシロップをたっぷり。一語打つごとのキーが、農園でいちばん高い作物ひとつぶんの値打ちになる。",
+    l3:"千年キーの木のシロップ。打った言葉が、倍の重さのキーになって農園に届く。",
+    l5:"世界樹キーのシロップ。一語打つごとに、農園でいちばん高い作物ふたつぶんのキーが降ってくる。",
     art:[`<svg viewBox="0 0 32 32"><ellipse cx="16" cy="26" rx="14" ry="4.6" fill="#d9cfbd"/><ellipse cx="16" cy="25.2" rx="12.2" ry="3.4" fill="#f6f2ea"/><ellipse cx="16" cy="22.0" rx="10" ry="3" fill="#e8b45a"/><path d="M6 22.0c0 1.4 4.4 2.6 10 2.6s10-1.2 10-2.6" stroke="#b8803a" stroke-width=".7" fill="none"/><ellipse cx="16" cy="18.6" rx="10" ry="3" fill="#e8b45a"/><path d="M6 18.6c0 1.4 4.4 2.6 10 2.6s10-1.2 10-2.6" stroke="#b8803a" stroke-width=".7" fill="none"/><ellipse cx="16" cy="15.2" rx="10" ry="3" fill="#e8b45a"/><path d="M6 15.2c0 1.4 4.4 2.6 10 2.6s10-1.2 10-2.6" stroke="#b8803a" stroke-width=".7" fill="none"/><ellipse cx="16" cy="14.6" rx="8.6" ry="2.4" fill="#c8803a"/><rect x="14" y="12" width="4" height="2.4" rx=".4" fill="#ffe08a"/><path d="M20 13c1 2 1 4 0 7" stroke="#c8803a" stroke-width="1.4" fill="none"/><path d="M15 9v-3M17 9v-3" stroke="#a0a8b0" stroke-width="1"/></svg>`,
          `<svg viewBox="0 0 32 32"><ellipse cx="16" cy="26" rx="14" ry="4.6" fill="#d9cfbd"/><ellipse cx="16" cy="25.2" rx="12.2" ry="3.4" fill="#f6f2ea"/><ellipse cx="16" cy="22.0" rx="10" ry="3" fill="#c89a5a"/><ellipse cx="16" cy="18.6" rx="10" ry="3" fill="#c89a5a"/><ellipse cx="16" cy="15.2" rx="10" ry="3" fill="#c89a5a"/><ellipse cx="16" cy="22.0" rx="9.0" ry="2.4" fill="none" stroke="#8a5a2a" stroke-width=".5"/><ellipse cx="16" cy="22.0" rx="6.0" ry="1.6" fill="none" stroke="#8a5a2a" stroke-width=".5"/><ellipse cx="16" cy="18.6" rx="8.6" ry="2.4" fill="none" stroke="#8a5a2a" stroke-width=".5"/><ellipse cx="16" cy="18.6" rx="5.6" ry="1.6" fill="none" stroke="#8a5a2a" stroke-width=".5"/><ellipse cx="16" cy="15.2" rx="8.2" ry="2.4" fill="none" stroke="#8a5a2a" stroke-width=".5"/><ellipse cx="16" cy="15.2" rx="5.2" ry="1.6" fill="none" stroke="#8a5a2a" stroke-width=".5"/><path d="M13 15l3-2.6 3 2.6" stroke="#c3ccd8" stroke-width="1.6" fill="none"/><rect x="14.4" y="13" width="3.2" height="2" fill="#c3ccd8"/></svg>`,
          `<svg viewBox="0 0 32 32"><circle cx="16" cy="16" r="14" fill="#d0f0c0" opacity="0.4"/><ellipse cx="16" cy="28" rx="14" ry="4.6" fill="#e8c45a"/><ellipse cx="16" cy="27.2" rx="12.2" ry="3.4" fill="#fff8e0"/><ellipse cx="16" cy="22.0" rx="10" ry="3" fill="#e8b45a"/><path d="M6 22.0c0 1.4 4.4 2.6 10 2.6s10-1.2 10-2.6" stroke="#b8803a" stroke-width=".7" fill="none"/><ellipse cx="16" cy="18.6" rx="10" ry="3" fill="#e8b45a"/><path d="M6 18.6c0 1.4 4.4 2.6 10 2.6s10-1.2 10-2.6" stroke="#b8803a" stroke-width=".7" fill="none"/><ellipse cx="16" cy="15.2" rx="10" ry="3" fill="#e8b45a"/><path d="M6 15.2c0 1.4 4.4 2.6 10 2.6s10-1.2 10-2.6" stroke="#b8803a" stroke-width=".7" fill="none"/><ellipse cx="16" cy="11.8" rx="10" ry="3" fill="#e8b45a"/><path d="M6 11.8c0 1.4 4.4 2.6 10 2.6s10-1.2 10-2.6" stroke="#b8803a" stroke-width=".7" fill="none"/><ellipse cx="16" cy="11.200000000000001" rx="8.6" ry="2.4" fill="#f4c542"/><path d="M16 9V3" stroke="#7a5230" stroke-width="1.4"/><circle cx="16" cy="3.6" r="3.6" fill="#4f8a3a"/><circle cx="13" cy="5" r="2.4" fill="#63a349"/><circle cx="19" cy="5" r="2.4" fill="#3f7530"/><path d="M8 18c-1 2-1 4 0 6M24 18c1 2 1 4 0 6" stroke="#f4c542" stroke-width="1.4" fill="none"/></svg>`] },
@@ -7055,7 +7055,7 @@ const EFFS = {
   K:{ nm:"肥料の回数",           n:"1つの作物に肥料を3回まで",            s:"1つの作物に肥料を何回でも" },
   L:{ nm:"一括植え",             n:"種を植えると、その畑の空いた土ぜんぶに植わる", s:"種を植えると、すべての畑の空いた土に植わる" },
   M:{ nm:"画面の色",             n:"ホーム画面とタイピングが料理の色に染まる", s:"ホーム画面とタイピングが料理の色に鮮やかに染まり、作物が舞い、キーが料理に変わる。農園では収穫のたびに花火があがる" },
-  N:{ nm:"1語のキー",            n:"タイピングから農園に届くキー 2倍",         s:"タイピングから農園に届くキー 4倍" },
+  N:{ nm:"1語のキー",            n:"タイピングから農園に届くキー1本が、いちばん高い作物1個分の売値になる", s:"タイピングから農園に届くキー1本が、いちばん高い作物2個分の売値になる" },
   O:{ nm:"村人がガチャの作物",   n:"村人がガチャの作物(N・R)を育てる",  s:"村人がガチャの作物(SR〜UR)を育てる" },
   P:{ nm:"一括水やり",           n:"じょうろ1回で、その畑ぜんぶに水やり",  s:"じょうろ1回で、すべての畑に水やり" },
   Q:{ nm:"一括収穫",             n:"収穫すると、その畑の実りをぜんぶ収穫", s:"収穫すると、すべての畑の実りをぜんぶ収穫" },
@@ -7063,7 +7063,7 @@ const EFFS = {
   S:{ nm:"ガチャのレア度",       n:"ガチャの SR 以上が出る確率 1.2倍",     s:"ガチャの SR 以上が出る確率 1.5倍" },
   V:{ nm:"ノーミス勝負のお守り", n:"ノーミス勝負でミスしても1回まで続く(効果中はランキングに載りません)", s:"ノーミス勝負でミスしても3回まで続く(効果中はランキングに載りません)" },
   "α":{ nm:"種が戻る",           n:"収穫すると20%で同じ種が1つ戻る(貴重品は除く)", s:"収穫すると、かならず同じ種が1つ戻る(貴重品は除く)" },
-  "β":{ nm:"時間を進める",       n:"食べた瞬間、すべての畑が6時間進む",    s:"食べた瞬間、すべての畑が1日進む" },
+  "β":{ nm:"時間を進める",       n:"食べた瞬間、すべての畑が3時間進む",    s:"食べた瞬間、すべての畑が1日進む" },
   "γ":{ nm:"ガチャおかわり",     n:"ガチャ1回ごとに10%でもう1回",         s:"ガチャ1回ごとに50%でもう1回" },
   "ε":{ nm:"GUR が出やすい",     n:"わくわくガチャの GUR の確率 1.5倍",    s:"わくわくガチャの GUR の確率 3倍" },
   "μ":{ nm:"GHR が出やすい",     n:"ガチャの GHR の確率 1.5倍",            s:"ガチャの GHR の確率 3倍" },
@@ -7352,7 +7352,7 @@ function cookEat(id,g){
   const bk=bookKeyOf(g); S.dishEaten[id]=S.dishEaten[id]||{}; S.dishEaten[id][bk]=true;
   let what="";   // 演出に出す、食べて起きたこと
   if(d.eff==="β"){   // 時間を進める: その場で効く(今の効果は消えない)
-    const hours = isMutT(g) ? 24 : 6;
+    const hours = isMutT(g) ? 24 : 3;
     tick(); advanceAll(hours*HOUR);
     what=`すべての畑が ${hours>=24?hours/24+"日":hours+"時間"} 進みました`;
     toast(`${dishIco(d,g)} ${esc(dishName(d,g))}を食べました。すべての畑が ${hours>=24?hours/24+"日":hours+"時間"} 進みました`,"good",4200,true);
@@ -7657,7 +7657,10 @@ function dishFirework(k){
   }
 }
 /* タイピング本編から使う: 届くキーの倍率・ノーミス勝負のお守りの数 */
-const screwMul = () => ev("N",2,4,1);
+/* 料理「1語のキー」: タイピングから届くキー1本が、収穫したことのある作物で いちばん高い売値(今の☆の値段)の 1個分・2個分になる。
+   売値アップの料理・貴重品と変異の売値は入れない(重ねると大きくなりすぎるため) */
+const bestCropPrice = () => CROPS.reduce((m,c)=>c.treasure||!(S.harvestBy[c.id]>0) ? m : Math.max(m, Math.round(c.price*QUALITY[tierOf(c.id)].mult)), 0);
+const screwMul = () => { const x=eff("N"); return x ? Math.max(1, bestCropPrice())*(x===2?2:1) : 1; };
 const charmLives = () => ev("V",1,3,0);
 
 /* ---------- 図鑑 ----------
