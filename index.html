@@ -5045,6 +5045,23 @@ function recordHarvest(id,t,quiet){
   }
 }
 /* 村人の仕事ぶりをまとめて知らせる */
+/* 村人の知らせ: 同じ種類(key)の知らせが まだ出ていれば、その枠の中身を書き換えて時間を延ばす。
+   出ていなければ、数を0から数え直して新しく出す */
+const vilAcc={};
+function vilToast(key, add, make, cls, ms){
+  let a=vilAcc[key];
+  const live = a && a.o && liveToasts.includes(a.o);
+  if(!live) a=vilAcc[key]={ m:{}, h:{}, earn:0, spent:0, o:null };
+  add(a);
+  const html=make(a), kind=cls(a);
+  if(live){
+    a.o.el.innerHTML=html; a.o.el.className="toast "+kind;
+    clearTimeout(a.o.timer); a.o.timer=setTimeout(()=>dropToast(a.o),ms);
+  }else{
+    toast(html,kind,ms,true);
+    a.o=liveToasts.find(o=>o.key===html)||null;
+  }
+}
 function reportVillagers(){
   const L=S.vLog; if(!L || (!L.h && !L.k && !L.up && !L.mutWait && !L.mutGot && !L.mutSold)) return;
   const mutOf = x => { const [id,q]=String(x).split(":"); return [id, q==="5"?5:3]; };   // "carrot" は変異、"carrot:5" は超変異
@@ -5054,14 +5071,18 @@ function reportVillagers(){
   const head = arr => arr.some(([,t])=>t===5) ? "✧ 超変異!" : "✦ 変異!";
   const cls  = arr => arr.some(([,t])=>t===5) ? "good mut sup" : "good mut";
   const got=byCrop(L.mutGot), wait=byCrop(L.mutWait), msold=byCrop(L.mutSold);
-  if(got.length) toast(`${head(got)} 村人が ${mutList(got)} を収穫しました(持ち物に入れました)`,cls(got),9000,true);
-  if(msold.length) toast(`${head(msold)} 村人が ${mutList(msold)} を収穫して売りました(+${fmtNum(L.mutEarn||0)}キー)`,cls(msold),9000,true);
-  if(wait.length) toast(`${head(wait)} 村人の畑で ${mutList(wait)} が実りました。村人は収穫せずに残しています(素手で収穫できます)`,cls(wait),9000,true);
-  const parts=Object.entries(L.h||{}).map(([id,n])=>`${ico(CROP[id])}×${fmtNum(n)}`);
-  if(parts.length) toast(`村人が ${parts.join(" ")} を収穫して売りました(売上 ${fmtNum(L.earn||0)} ・ 種代 ${fmtNum(L.spent||0)} キー)`,"good",6000,true);
-  const kept=Object.entries(L.k||{}).map(([id,n])=>`${ico(CROP[id])}×${fmtNum(n)}`);
-  if(kept.length) toast(`村人が ${kept.join(" ")} を収穫して、持ち物に入れました`,"good",6000,true);
-  if(got.length || wait.length || msold.length || parts.length || kept.length) sfx.vil();   // 音は1回だけ
+  // 同じ種類の知らせが出ている間は、新しく積まずに その枠の数と売上を足していく(何重にも重ならないように)
+  const addMut = arr => a => { for(const [id,t,n] of arr){ const k=id+":"+t; a.m[k]=(a.m[k]||0)+n; } };
+  const mutArr = a => Object.entries(a.m).map(([k,n])=>{ const [id,t]=mutOf(k); return [id,t,n]; });
+  const addH = obj => a => { for(const [id,n] of Object.entries(obj||{})) a.h[id]=(a.h[id]||0)+n; };
+  const hList = a => Object.entries(a.h).map(([id,n])=>`${ico(CROP[id])}×${fmtNum(n)}`).join(" ");
+  if(got.length) vilToast("got", addMut(got), a=>`${head(mutArr(a))} 村人が ${mutList(mutArr(a))} を収穫しました(持ち物に入れました)`, a=>cls(mutArr(a)), 9000);
+  if(msold.length) vilToast("msold", a=>{ addMut(msold)(a); a.earn+=L.mutEarn||0; }, a=>`${head(mutArr(a))} 村人が ${mutList(mutArr(a))} を収穫して売りました(+${fmtNum(a.earn)}キー)`, a=>cls(mutArr(a)), 9000);
+  if(wait.length) vilToast("wait", addMut(wait), a=>`${head(mutArr(a))} 村人の畑で ${mutList(mutArr(a))} が実りました。村人は収穫せずに残しています(素手で収穫できます)`, a=>cls(mutArr(a)), 9000);
+  const sold=Object.keys(L.h||{}).length>0, kept=Object.keys(L.k||{}).length>0;
+  if(sold) vilToast("sold", a=>{ addH(L.h)(a); a.earn+=L.earn||0; a.spent+=L.spent||0; }, a=>`村人が ${hList(a)} を収穫して売りました(売上 ${fmtNum(a.earn)} ・ 種代 ${fmtNum(a.spent)} キー)`, ()=>"good", 6000);
+  if(kept) vilToast("kept", addH(L.k), a=>`村人が ${hList(a)} を収穫して、持ち物に入れました`, ()=>"good", 6000);
+  if(got.length || wait.length || msold.length || sold || kept) sfx.vil();   // 音は1回だけ
   for(const m of (L.up||[])) toast(m,"good",5200,true);
   S.vLog={}; checkUnlocks(); save();
 }
