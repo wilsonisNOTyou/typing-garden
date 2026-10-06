@@ -1782,12 +1782,13 @@ html.mobile #screen-garden .tlist{grid-template-columns:1fr}
       <div class="phead">
         <h2>実績</h2>
         <div class="money" id="g-goalRate"></div>
+        <button class="sbtn main" id="g-goalAll" hidden>まとめて受け取る</button>
         <button class="sbtn xbtn" data-close>閉じる ✕</button>
       </div>
       <div class="tabs sptabs"></div>
       <p class="tnote">実績を解除すると、ごほうびのキーを受け取れます。次に何をするか迷ったら、ここを見てください。</p>
       <div id="g-goalBody" class="plist"></div>
-      <div class="keyhint"><b>↑ ↓</b> 選ぶ ・ <b>Enter</b> ごほうびを受け取る ・ <b>Tab</b> 図鑑・料理図鑑へ ・ <b>Space</b> / <b>Esc</b> 閉じる</div>
+      <div class="keyhint"><b>↑ ↓</b> 選ぶ ・ <b>Enter</b> ごほうびを受け取る ・ <b>A</b> まとめて受け取る ・ <b>Tab</b> 図鑑・料理図鑑へ ・ <b>Space</b> / <b>Esc</b> 閉じる</div>
     </div>
   </div>
 
@@ -8127,6 +8128,8 @@ function renderGoalBadge(){ const n=goalsReady(); $("g-goalBadge").textContent =
 function renderGoals(){
   const vis=GOALS.filter(goalVisible), rows=goalRows();
   $("g-goalRate").textContent=`解除 ${vis.filter(goalClaimed).length} / ${vis.length}`;
+  const ready=goalReady().length;   // 受け取れるものがあるときだけ「まとめて受け取る」を出す
+  $("g-goalAll").hidden=!ready; $("g-goalAll").textContent=`まとめて受け取る(${ready})`;
   goalCur=Math.max(0,Math.min(goalCur,rows.length-1));
   const body=$("g-goalBody"), top=body.scrollTop;   // 書き直しても、見ていた位置のままにする
   body.innerHTML=rows.map((r,ri)=>{
@@ -8158,12 +8161,35 @@ function claimGoal(i){   // i: GOALS の番号
   save(); renderAll();
   if(modal==="goal") renderGoals();
 }
+/* 受け取れる実績(解除していて、まだ受け取っていないもの) */
+const goalReady = () => GOALS.map((g,i)=>i).filter(i=>{ const g=GOALS[i]; return goalVisible(g) && !goalClaimed(g) && goalDone(g); });
+/* 受け取れる実績をまとめて受け取る(同じ種類の次の段も、解除していれば続けて受け取る) */
+function claimAllGoals(){
+  let n=0, sum=0, bonus=0;
+  for(let guard=0; guard<50; guard++){
+    const ids=goalReady(); if(!ids.length) break;
+    for(const i of ids){
+      const g=GOALS[i]; if(goalClaimed(g)) continue;
+      S.goals=S.goals||{}; S.goals[g.id]=Date.now();
+      const rw=Math.round(g.rw*ev("Y",1.5,2,1)), b=rw-g.rw;   // 料理: ごほうび 1.5倍・2倍
+      S.money+=rw; if(b) S.goalBonus=(S.goalBonus||0)+b;
+      n++; sum+=rw; bonus+=b;
+    }
+  }
+  if(!n){ sfx.nope(); toast("受け取れる実績がありません","warn"); return; }
+  sfx.buy();
+  toast(`実績を ${fmtNum(n)}個 受け取りました! ごほうび +${fmtNum(sum)}キー${bonus?`(料理で +${fmtNum(bonus)})`:""}`,"good",4200,true);
+  save(); renderAll();
+  if(modal==="goal") renderGoals();
+}
+$("g-goalAll").addEventListener("click",claimAllGoals);
 function goalKey(e){
   const k=e.key;
   if(k==="Escape"||k===" "){ e.preventDefault(); closeModal(); return; }
   if(k==="Tab"){ e.preventDefault(); spaceTab(e.shiftKey?-1:1); return; }
   if(k==="ArrowUp"||k==="ArrowDown"){ e.preventDefault(); const n=goalRows().length; goalCur=(goalCur+(k==="ArrowDown"?1:-1)+n)%n; sfx.cursor(); renderSoon(renderGoals); return; }
   if(k==="Enter"){ e.preventDefault(); const r=goalRows()[goalCur]; if(r) claimGoal(r.gi); }
+  if(k==="a"||k==="A"){ e.preventDefault(); claimAllGoals(); }
 }
 $("g-goalBody").addEventListener("click",e=>{
   const b=e.target.closest("[data-claim]"); if(b){ claimGoal(+b.dataset.claim); return; }
