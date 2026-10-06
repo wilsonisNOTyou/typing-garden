@@ -3216,32 +3216,28 @@ const myId = () => { try{ return Garden.ownerId(); }catch(e){ return ""; } };
 const nameKey = name => encodeURIComponent(name).replace(/\./g,"%2E");   // 番付の保存場所(庭の rankKey と同じ)
 const nameError = n => !n ? "名前を入れてください" : ([...n].length>10 ? "名前は10文字までです" : "");
 /* ほかの人が使っている名前か(自分の印が付いていない記録があるか) */
-async function nameTaken(name){
+async function nameTaken(name){   // 番付とランキングをまとめて(同時に)調べる
   const me=myId();
-  const g=(await db.ref(`typinggarden/garden/money/${nameKey(name)}`).once("value")).val();
-  if(g && g.o && g.o!==me) return true;
-  for(const d of SCORE_DIFFS){
-    const snap=await db.ref("typinggarden/scores/"+d).orderByChild("n").equalTo(name).once("value");
-    let other=false; snap.forEach(c=>{ const v=c.val(); if(v.o && v.o!==me) other=true; });
-    if(other) return true;
-  }
-  return false;
+  const checks=[
+    db.ref(`typinggarden/garden/money/${nameKey(name)}`).once("value").then(s=>{ const g=s.val(); return !!(g && g.o && g.o!==me); }),
+    ...SCORE_DIFFS.map(d=>db.ref("typinggarden/scores/"+d).orderByChild("n").equalTo(name).once("value").then(snap=>{
+      let other=false; snap.forEach(c=>{ const v=c.val(); if(v.o && v.o!==me) other=true; }); return other; })),
+  ];
+  return (await Promise.all(checks)).some(Boolean);
 }
 /* ランキングの記録を新しい名前に移す(同じ名前の記録が両方にあれば良いほうを残す) */
 async function moveScores(from,to){
   const me=myId();
-  for(const d of SCORE_DIFFS){
+  await Promise.all(SCORE_DIFFS.map(async d=>{   // モードごとに同時に移す
     const ref=db.ref("typinggarden/scores/"+d), rows=[];
-    for(const n of [from,to]){
-      const snap=await ref.orderByChild("n").equalTo(n).once("value");
-      snap.forEach(c=>{ const v=c.val(); if(!v.o || v.o===me) rows.push({key:c.key, v}); });
-    }
-    if(!rows.length) continue;
+    const snaps=await Promise.all([from,to].map(n=>ref.orderByChild("n").equalTo(n).once("value")));
+    for(const snap of snaps) snap.forEach(c=>{ const v=c.val(); if(!v.o || v.o===me) rows.push({key:c.key, v}); });
+    if(!rows.length) return;
     rows.sort((a,b)=>betterRecord(b.v,a.v,d));
     const best=Object.assign({}, rows[0].v, { n:to, o:me });
     await ref.push(best);
-    for(const r of rows) await ref.child(r.key).remove();
-  }
+    await Promise.all(rows.map(r=>ref.child(r.key).remove()));
+  }));
 }
 let nameBusy=false;
 async function setPlayerName(name){
@@ -8107,12 +8103,14 @@ async function pushRank(name){
   const old=(await refM.once("value")).val();
   if(old && old.o && old.o!==S.owner) return {ok:false, msg:"その名前は別の庭が使っています。別の名前にしてください"};
   const t=(old&&old.t)||Date.now();
-  await refM.set({ n:name, s:Math.floor(S.money), o:S.owner, t });
-  await refH.set({ n:name, s:S.totalHarvest,      o:S.owner, t });
-  // 図鑑はルールが古いと書けないので、失敗しても続ける(番付の画面で知らせる)
-  try{ await refE.set({ n:name, s:Math.floor(earnedTotal()), o:S.owner, t }); }catch(e){ console.warn("[typinggarden rank] 累計獲得キーの番付に書き込めませんでした",e); }
-  try{ await refB.set({ n:name, s:bookProgress().got, o:S.owner, t }); rankBookErr=""; }
-  catch(e){ rankBookErr=String(e&&(e.code||e.message)||e); console.warn("[typinggarden rank] 図鑑の番付に書き込めませんでした",e); }
+  // 4つの番付を同時に書く(図鑑と累計獲得は書けなくても続ける。図鑑は番付の画面で知らせる)
+  await Promise.all([
+    refM.set({ n:name, s:Math.floor(S.money), o:S.owner, t }),
+    refH.set({ n:name, s:S.totalHarvest,      o:S.owner, t }),
+    refE.set({ n:name, s:Math.floor(earnedTotal()), o:S.owner, t }).catch(e=>console.warn("[typinggarden rank] 累計獲得キーの番付に書き込めませんでした",e)),
+    refB.set({ n:name, s:bookProgress().got, o:S.owner, t }).then(()=>{ rankBookErr=""; })
+      .catch(e=>{ rankBookErr=String(e&&(e.code||e.message)||e); console.warn("[typinggarden rank] 図鑑の番付に書き込めませんでした",e); }),
+  ]);
   await dropOtherNames(key);
   return {ok:true};
 }
@@ -8120,13 +8118,13 @@ async function pushRank(name){
    名前を変えたあと、同期した別の端末が古い名前で載せ直してしまったときの掃除 */
 const RANK_METRICS=["money","harvest","book","earn"];
 async function dropOtherNames(key){
-  for(const m of RANK_METRICS){
+  await Promise.all(RANK_METRICS.map(async m=>{
     try{
       const snap=await db.ref(`${RANK_PATH}/${m}`).orderByChild("o").equalTo(S.owner).once("value");
       const olds=[]; snap.forEach(c=>{ if(c.key!==key) olds.push(c.key); });
-      for(const k of olds) await db.ref(`${RANK_PATH}/${m}/${k}`).remove();
+      await Promise.all(olds.map(k=>db.ref(`${RANK_PATH}/${m}/${k}`).remove()));
     }catch(e){ console.warn("[typinggarden rank] 古い名前の番付を消せませんでした",m,e); }
-  }
+  }));
 }
 const hasDb = () => { try{ return !!db; }catch(e){ return false; } };
 let rankBookErr="";
@@ -8198,12 +8196,12 @@ async function useName(name, old){
   if(!hasDb() || isDebugSave()) return;
   if(old && old!==name){
     const k=rankKey(old);
-    for(const m of ["money","harvest","book","earn"]){
+    await Promise.all(["money","harvest","book","earn"].map(async m=>{
       try{
         const ref=db.ref(`${RANK_PATH}/${m}/${k}`), v=(await ref.once("value")).val();
         if(v && v.o===S.owner) await ref.remove();
       }catch(e){ if(m==="money"||m==="harvest") throw e; }   // 図鑑はルールが古いと消せないので、失敗しても続ける
-    }
+    }));
   }
   const r=await pushRank(name);
   if(!r.ok) throw new Error(r.msg);
