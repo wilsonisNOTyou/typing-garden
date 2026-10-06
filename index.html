@@ -2579,6 +2579,10 @@ function sendToGarden(keys,screws){
     cur.keys=toInt(cur.keys)+keys;
     cur.screws=toInt(cur.screws)+screws;
     localStorage.setItem(K,JSON.stringify(cur));
+    // 同期: まだクラウドに送っていない届け物。ほかの端末の記録を取り込むときに足し戻す
+    const U="typinggarden:sync:unsent", u=JSON.parse(localStorage.getItem(U)||"{}")||{};
+    u.keys=toInt(u.keys)+keys; u.screws=toInt(u.screws)+screws;
+    localStorage.setItem(U,JSON.stringify(u));
   }catch(e){}
 }
 
@@ -4679,7 +4683,7 @@ function withReal(fn){
   S.fields=realFields; S.cur=realCur;
   try{ return fn(); } finally{ realFields=S.fields; realCur=S.cur; S.fields=sf; S.cur=sc; }
 }
-function save(){ if(window.tgReplacing) return; S.aliveAt=Date.now(); try{ localStorage.setItem(SAVE_KEY, JSON.stringify(realFields ? Object.assign({},S,{fields:realFields,cur:realCur}) : S)); }catch(e){} }
+function save(){ if(window.tgReplacing || (window.tabElsewhere && window.tabElsewhere())) return; S.aliveAt=Date.now(); try{ localStorage.setItem(SAVE_KEY, JSON.stringify(realFields ? Object.assign({},S,{fields:realFields,cur:realCur}) : S)); }catch(e){} }
 function isValidState(o){
   return o && typeof o==="object" && typeof o.money==="number" && Array.isArray(o.fields) && o.fields.length>0;
 }
@@ -8514,6 +8518,7 @@ function backupImport(){
 ===================================================== */
 const SYNC_PATH="typinggarden/saves", SYNC_KEEP=5, SYNC_ALIVE=45000;
 const SYNC_BACKUP_EVERY=10*60*1000;   // バックアップは10分に1回まで(細かく送っても古い記録が残るように)
+const SYNC_HANDOFF_WAIT=2000;        // 持ち主を引き継ぐときに、前の持ち主の送信を待つ時間
 const SYNC_DEBOUNCE=2500;             // 操作が止まってから送るまで
 let syncPushing=false, syncPushAgain=false, syncBackupAt=null, syncDirtyTimer=null;
 /* 送っていない操作があるか。記録の中身は時間だけでも変わる(作物が育つ)ので、
@@ -8549,8 +8554,18 @@ function syncInit(){
   // 開いたブラウザで遊ぶ(記録を取り込むための読み直しのときは、持ち主を取らない)
   let reloaded=false;
   try{ reloaded=sessionStorage.getItem("typinggarden:synced")==="1"; sessionStorage.removeItem("typinggarden:synced"); }catch(e){}
-  if(syncCode && hasDB()){ syncConnect(); if(!reloaded) syncActivate(); }
+  if(syncCode && hasDB() && !tabInactive){
+    syncConnect(); if(!reloaded) syncActivate();
+    // 送っていない届け物が残っていれば、落ち着いてから送る
+    if(unsentNow().keys||unsentNow().screws) setTimeout(()=>{ syncDirty=true; syncPush(false); },5000);
+  }
   renderSyncState();
+}
+/* まだクラウドに送っていない届け物(タイピングから農園へ) */
+const unsentNow = () => { try{ const u=JSON.parse(lsGet("sync:unsent")||"{}")||{}; return { keys:Math.max(0,+u.keys||0), screws:Math.max(0,+u.screws||0) }; }catch(e){ return { keys:0, screws:0 }; } };
+function unsentSub(sent){   // 送れた分を差し引く(送っている間に増えた分は残す)
+  const u=unsentNow();
+  lsSet("sync:unsent", JSON.stringify({ keys:Math.max(0,u.keys-sent.keys), screws:Math.max(0,u.screws-sent.screws) }));
 }
 const syncAlive = dev => dev && Date.now()-(+syncLive[dev]||0) < SYNC_ALIVE;
 /* 持ち主を見直す。持ち主がいない・閉じられていれば自分が持ち主になる */
@@ -8646,8 +8661,17 @@ async function syncActivate(){
   try{
     const base=syncBase();
     const [oS,mS]=await Promise.all([ base.child("owner").once("value"), base.child("meta").once("value") ]);
-    const o=oS.val(), m=mS.val();
-    if(!o || o.device!==syncDevice){ syncOwner=o; syncReadOnly=true; await syncClaim(); }
+    const o=oS.val();
+    let m=mS.val();
+    if(!o || o.device!==syncDevice){
+      syncOwner=o; syncReadOnly=true; await syncClaim();
+      // 前の持ち主が開いているなら、持ち主が変わったのに気づいて最後の操作を送るまで待つ(その間はさわれない)
+      const lv = o && o.device ? (await base.child("live/"+o.device).once("value")).val() : 0;
+      if(o && o.device && (Date.now()-(+lv||0) < SYNC_ALIVE || Date.now()-(+o.t||0) < SYNC_ALIVE)){
+        await new Promise(r=>setTimeout(r,SYNC_HANDOFF_WAIT));
+        m=(await base.child("meta").once("value")).val();
+      }
+    }
     if(m && m.t>syncLastT && m.by!==syncDevice){ syncPending=true; renderSyncState(); }
     syncMaybePull();
   }catch(e){ console.warn("[typinggarden sync]",e); }
@@ -8681,12 +8705,18 @@ async function syncPush(force,urgent,handoff){
   syncPushing=true; syncPushAt=Date.now();
   const base=syncBase(), t=Date.now();
   const wasDirty=syncDirty; syncDirty=false;
+  const sent=unsentNow();
   const bundle=bundleNow();
   try{
+    const [oS,mS]=await Promise.all([ base.child("owner").once("value"), base.child("meta").once("value") ]);
+    const o=oS.val(), m=mS.val();
     // 知らないうちに別のブラウザが持ち主になっていたら送らない(古い記録で上書きしないように)
-    if(!handoff){
-      const o=(await base.child("owner").once("value")).val();
-      if(o && o.device!==syncDevice){ syncOwner=o; syncDirty=false; setReadOnly(true); return true; }
+    if(!handoff && o && o.device!==syncDevice){ syncOwner=o; syncDirty=false; setReadOnly(true); return true; }
+    // ほかのブラウザの新しい記録がまだ取り込まれていない: 送らずに先に取り込む(ほかのブラウザで進めた分を消さないように)
+    if(m && m.t>syncLastT && m.by!==syncDevice){
+      syncDirty=syncDirty||wasDirty;
+      if(!handoff){ syncPending=true; renderSyncState(); setTimeout(syncMaybePull,0); }
+      return true;
     }
     // 前の記録は10分に1回だけバックアップに残す
     if(syncBackupAt==null){
@@ -8700,6 +8730,7 @@ async function syncPush(force,urgent,handoff){
     await base.child("data").set(b64enc(bundle));
     await base.child("meta").set({ t, by:syncDevice });
     syncLastT=t; lsSet("sync:t",String(t));
+    unsentSub(sent);
     renderSyncState();
     return true;
   }catch(e){
@@ -8732,12 +8763,8 @@ async function syncPull(joining){
       return;
     }
     if(syncBusyScene()) return;                         // 遊んでいる最中なら、終わってから
-    // こちらが持ち主で、送っていない操作がある: こちらを優先して送り直す(確認は出さない)
-    if(!joining && !syncReadOnly && syncDirty){
-      syncLastT=m.t; syncPending=false; renderSyncState();
-      await syncPush(true,true);
-      return;
-    }
+    // 新しい記録が届いていれば、こちらに送っていない操作があっても取り込む(古い記録で上書きしないように)。
+    // タイピングの自己ベスト・辞典・まだ送っていない農園への届け物は、取り込む記録に足し戻す
     const mine=bundleNow();
     // 参加するときは、このブラウザの記録もバックアップに残しておく
     if(joining){
@@ -8745,7 +8772,7 @@ async function syncPull(joining){
       try{ await base.child("backups/"+t).set({ data:b64enc(mine), t, from:syncDevLabel()+"(取り込み前)" }); await syncTrimBackups(base); }catch(e){}
     }
     saveLocalPrev(mine);
-    if(!applyBundleString(data)){ const n=$("bkSyncNote"); if(n) n.textContent="※届いた記録を読めませんでした(形式が違います)"; return; }
+    if(!applyBundleString(data,!joining)){ const n=$("bkSyncNote"); if(n) n.textContent="※届いた記録を読めませんでした(形式が違います)"; return; }
     {
       lsSet("sync:t",String(m.t));
       try{ sessionStorage.setItem("typinggarden:return", scene==="garden"?"garden":""); sessionStorage.setItem("typinggarden:synced","1"); }catch(e){}
@@ -8759,10 +8786,31 @@ async function syncPull(joining){
       : "※記録を取り込めませんでした: "+String(e&&(e.code||e.message)||e).slice(0,80);
   }
 }
-function applyBundleString(s){
+/* 取り込む記録に、この端末だけにある記録を足し戻す
+   ・タイピングの自己ベスト(良いほう)・辞典(覚えた言葉を合わせる)・まだ送っていない農園への届け物 */
+function mergeLocalInto(o){
+  try{
+    for(let i=0;i<localStorage.length;i++){
+      const k=localStorage.key(i); if(!k || !k.startsWith(LS_PREFIX+"best-")) continue;
+      const key=k.slice(LS_PREFIX.length), d=key.slice(5);
+      const mine=parseFloat(localStorage.getItem(k)), theirs=parseFloat(o[key]);
+      if(!isNaN(mine) && (isNaN(theirs) || isBetterValue(mine,theirs,d))) o[key]=String(mine);
+    }
+    const dm=JSON.parse(lsGet("dict")||"[]"), dt=JSON.parse(o.dict||"[]");
+    if(Array.isArray(dm) && Array.isArray(dt) && dm.length) o.dict=JSON.stringify([...new Set([...dt,...dm])]);
+    const u=unsentNow();
+    if(u.keys||u.screws){
+      const b=JSON.parse(o["garden:inbox"]||"{}")||{};
+      o["garden:inbox"]=JSON.stringify({ keys:(+b.keys||0)+u.keys, screws:(+b.screws||0)+u.screws });
+    }
+  }catch(e){ console.warn("[typinggarden sync] この端末の記録を足し戻せませんでした",e); }
+  return o;
+}
+function applyBundleString(s,merge){
   let o;
   try{ o=JSON.parse(b64dec(s)); }catch(e){ return false; }
   if(!o||typeof o!=="object") return false;
+  if(merge) mergeLocalInto(o);
   window.tgReplacing=true;
   try{
     const old=[];
@@ -8822,7 +8870,7 @@ async function syncRestore(i){
     await base.child("data").set(b.data);
     await base.child("meta").set({ t:t+1, by:syncDevice });
     await syncTrimBackups(base);
-    if(applyBundleString(b.data)){ lsSet("sync:t",String(t+1)); location.reload(); }
+    if(applyBundleString(b.data)){ lsDel("sync:unsent"); lsSet("sync:t",String(t+1)); location.reload(); }
   }catch(e){ $("bkSyncNote").textContent=syncErrText(e); }
 }
 let syncPreparing=false;   // 最初の保存が終わるまでは、コードを見せない(途中で参加されないように)
@@ -8865,6 +8913,7 @@ async function syncJoin(inp, noteEl){
       syncCode=code; lsSet("sync:code",code); syncReadOnly=false; syncDirty=false;
       await syncClaim();                         // 取り込めるとわかってから、参加したブラウザが持ち主になる
       applyBundleString(data);
+      lsDel("sync:unsent");
       lsSet("sync:t", String((m && +m.t) || t));
       try{ sessionStorage.setItem("typinggarden:return",""); sessionStorage.setItem("typinggarden:synced","1"); }catch(e){}
       location.reload();
@@ -8964,7 +9013,7 @@ document.addEventListener("keyup",syncMarkDirty,true);
 /* 見るだけのブラウザをさわったら、まずこちらに切り替える(その1回の操作は切り替えに使う)。
    記録の引き継ぎ画面の中は、同期を止めたりできるようにそのまま通す */
 function syncGuardInput(e){
-  if(!syncCode||!syncReadOnly||window.tgReplacing) return;
+  if(!syncCode||!(syncReadOnly||syncActivating)||window.tgReplacing) return;
   if(e.target && e.target.closest && e.target.closest("#backup, #fb, #news")) return;
   if(e.type==="keydown" && (e.ctrlKey||e.metaKey||e.altKey||e.key==="Shift")) return;
   e.preventDefault(); e.stopPropagation();
@@ -9256,6 +9305,85 @@ function tutBoot(){
     clearInterval(tutTimer); tutTimer=setInterval(tutTick,300); tutRender();
   }
 }
+
+/* ---------- 同じブラウザで2つ以上開いたとき ----------
+   記録はブラウザの中で1つを共有しているので、2つのタブ(ウィンドウ)で同時に遊ぶと、古いほうの状態で上書きしてしまう。
+   最後にさわったタブだけが遊べて保存する。ほかのタブは何も保存せず「別のタブで開いています」と出し、
+   さわると、遊んでいたタブに保存してもらってから、最新の記録を読み直してこちらで遊べるようにする */
+const TAB_KEY=LS_PREFIX+"sync:tab", TAB_ACK=LS_PREFIX+"sync:tabAck", TAB_ALIVE=90000;
+let tabId=""; try{ tabId=sessionStorage.getItem("typinggarden:tabId")||""; }catch(e){}
+if(!tabId){ tabId=Math.random().toString(36).slice(2)+Date.now().toString(36); try{ sessionStorage.setItem("typinggarden:tabId",tabId); }catch(e){} }
+let tabInactive=false, tabBeatId=null, tabClaiming=false;
+const tabRead = () => { try{ return JSON.parse(localStorage.getItem(TAB_KEY)||"null"); }catch(e){ return null; } };
+const tabWrite = v => { try{ v==null ? localStorage.removeItem(TAB_KEY) : localStorage.setItem(TAB_KEY,JSON.stringify(v)); }catch(e){} };
+const tabOther = v => v && v.id && v.id!==tabId && Date.now()-(+v.t||0) < TAB_ALIVE;   // ほかのタブが遊んでいる
+function tabBeat(){
+  if(tabInactive) return;
+  const v=tabRead();
+  if(v && v.id!==tabId){ tabSleep(); return; }   // ほかのタブがさわられて、そちらで遊び始めた
+  tabWrite({ id:tabId, t:Date.now() });
+}
+/* 今まさに、ほかのタブがこちらの保存を待っている(さわられた直後)か */
+const tabClaimFresh = v => !!(v && v.c && Date.now()-v.c < 5000);
+let tabFlushing=false;
+/* 農園の保存の前に見る: ほかのタブで遊んでいるなら保存しない(止まっていたタブが動き出したときに、古い状態で上書きしないように) */
+window.tabElsewhere = () => {
+  if(tabFlushing) return false;
+  if(tabInactive) return true;
+  const v=tabRead();
+  if(v && v.id && v.id!==tabId){ setTimeout(tabSleep,0); return true; }
+  return false;
+};
+function tabSleep(){
+  if(tabInactive) return;
+  // さわられた直後なら、今の状態を保存して(この端末が持ち主ならクラウドにも送って)から、保存を止める。
+  // 止まっていたあいだに ほかのタブで遊ばれていたときは、古い状態なので保存しない
+  if(tabClaimFresh(tabRead())){
+    tabFlushing=true;
+    try{ Garden.summary(); }catch(e){}
+    try{ if(syncCode){ clearTimeout(syncDirtyTimer); syncPush(false,true); } }catch(e){}
+    tabFlushing=false;
+  }
+  tabInactive=true; window.tgReplacing=true;
+  clearInterval(tabBeatId); tabBeatId=null;
+  try{ syncDisconnect(); }catch(e){}
+  try{ localStorage.setItem(TAB_ACK, (tabRead()||{}).id||""); }catch(e){}
+  tabBanner(true);
+}
+function tabBanner(on){
+  let b=document.getElementById("tabBanner");
+  if(!b && on){
+    b=document.createElement("div"); b.id="tabBanner";
+    b.style.cssText="position:fixed;left:50%;top:12px;transform:translateX(-50%);z-index:100000;max-width:92vw;padding:12px 18px;border-radius:12px;background:#2b2d42;color:#fff;font:600 15px/1.6 system-ui,sans-serif;text-align:center;box-shadow:0 6px 24px rgba(0,0,0,.35);cursor:pointer";
+    b.textContent="このゲームは別のタブ(ウィンドウ)でも開いています。こちらでは保存しません。ここをさわると、最新の記録を読み直してこちらで遊べます";
+    document.body.appendChild(b);
+  }
+  if(b) b.style.display=on?"":"none";
+}
+function tabReload(){ try{ sessionStorage.setItem("typinggarden:return",""); }catch(e){} location.reload(); }
+function tabClaim(){
+  if(tabClaiming) return; tabClaiming=true;
+  const cur=tabRead();
+  try{ localStorage.removeItem(TAB_ACK); }catch(e){}
+  tabWrite({ id:tabId, t:Date.now(), c:Date.now() });
+  // 遊んでいたタブがあれば、保存し終えた合図(TAB_ACK)を待ってから読み直す(来なくても少しで読み直す)
+  if(tabOther(cur)) setTimeout(tabReload,2000); else tabReload();
+}
+window.addEventListener("storage",e=>{
+  if(e.key===TAB_KEY && !tabInactive){ const v=tabRead(); if(v && v.id!==tabId) tabSleep(); }
+  if(e.key===TAB_ACK && tabClaiming && e.newValue===tabId) tabReload();
+});
+// ほかのタブで遊んでいる間は、さわったらこちらに切り替える(その操作は切り替えに使う)
+function tabGuard(e){
+  if(!tabInactive) return;
+  e.preventDefault(); e.stopImmediatePropagation();
+  if(e.type==="keydown" && (e.ctrlKey||e.metaKey||e.altKey||e.key==="Shift")) return;
+  tabClaim();
+}
+for(const ev of ["keydown","pointerdown","click","touchstart"]) window.addEventListener(ev,tabGuard,{capture:true,passive:false});
+window.addEventListener("pagehide",()=>{ if(!tabInactive){ const v=tabRead(); if(v && v.id===tabId) tabWrite(null); } });
+if(tabOther(tabRead())){ tabInactive=true; window.tgReplacing=true; tabBanner(true); }   // ほかのタブで遊んでいる
+else{ tabWrite({ id:tabId, t:Date.now() }); tabBeatId=setInterval(tabBeat,5000); }
 
 refreshBestLine();
 refreshStatsLine();
