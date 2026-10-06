@@ -3544,7 +3544,7 @@ function endBookGame(){
 /* ---------- 更新情報 ----------
    新しいものを上に足していく。d は YYYY-MM-DD */
 const NEWS=[
-  { d:"2026-10-07", t:"料理の効果を調整しました", items:[
+  { d:"2026-10-06", t:"料理の効果を調整しました", items:[
     "時間を進める料理: ふつうの料理は6時間から3時間に、変異・超変異の料理は3日から1日にしました",
     "肥料が減らない料理: ふつうの料理は30%から50%に、変異・超変異の料理は60%から「かならず減らない」にしました",
     "タイピングで肥料が届く料理: ふつうの料理は100打ごとから20打ごとに、変異・超変異の料理は30打ごとから5打ごとにしました",
@@ -3558,6 +3558,7 @@ const NEWS=[
   ]},
   { d:"2026-10-06", t:"そのほかの変更", items:[
     "肥料は、村人の区画にはまけなくなりました。自分で育てる畑には、これまでどおりまけます",
+    "同じブラウザで2つ以上のタブ(ウィンドウ)で開いたときは、最後にさわったタブだけで遊べるようにしました。ほかのタブは保存しないので、記録が古い状態に戻らなくなります",
   ]},
   { d:"2026-10-05", t:"料理とわくわくガチャが登場しました", items:[
     "料理(0)で作った料理を食べると、10分のあいだ農園やタイピングに効果がかかります。料理は47品あり、レシピはお店の「レシピ」で買えます",
@@ -3610,16 +3611,19 @@ const NEWS=[
 ];
 const NEWS_SEEN_KEY="typinggarden:newsSeen";
 let newsOpen=false;
+/* 見たお知らせの印: 新しい日付と、その日のお知らせの数(同じ日に増えたときも NEW を出す)。
+   前の印(日付だけ)より、同じ日付でも数のついた印のほうが大きくなる */
+const newsKey = () => NEWS.length ? NEWS[0].d+"#"+String(NEWS.filter(n=>n.d===NEWS[0].d).length).padStart(2,"0") : "";
 function refreshNewsBadge(){
   let seen=""; try{ seen=localStorage.getItem(NEWS_SEEN_KEY)||""; }catch(e){}
-  $("newsNew").textContent = NEWS.length && NEWS[0].d>seen ? "NEW" : "";
+  $("newsNew").textContent = NEWS.length && newsKey()>seen ? "NEW" : "";
 }
 function openNews(){
   newsOpen=true;
   $("newsList").innerHTML=NEWS.map(n=>`<div class="news-item"><div class="d">${n.d.replace(/-/g,"/")}</div><h3>${escH(n.t)}</h3><ul>${n.items.map(x=>`<li>${escH(x)}</li>`).join("")}</ul></div>`).join("");
   $("news").classList.add("open");
   $("newsList").scrollTop=0;
-  try{ if(NEWS.length) localStorage.setItem(NEWS_SEEN_KEY, NEWS[0].d); }catch(e){}
+  try{ if(NEWS.length) localStorage.setItem(NEWS_SEEN_KEY, newsKey()); }catch(e){}
   refreshNewsBadge();
 }
 function closeNews(){ newsOpen=false; $("news").classList.remove("open"); }
