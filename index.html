@@ -1255,6 +1255,20 @@ html.mobile #g-cookShow .csnm{font-size:1.3rem}
 #screen-garden #g-treasBody .ghead:first-child{margin-top:.1rem}
 #screen-garden #g-treasBody .ghead span{font-size:.85rem; color:var(--ink-l)}
 #screen-garden .titem.kitem.cur{outline:3px solid #f4c542; outline-offset:1px}
+/* 一覧から選ぶ(種・シゴデキ村人の作物) */
+#screen-garden .pickpanel{width:min(860px,96vw)}
+#screen-garden .pickgrp{margin:0 0 .8rem}
+#screen-garden .pickgrp h3{font-size:.85rem; font-weight:800; color:var(--ink-l); margin:0 0 .35rem; letter-spacing:.05em}
+#screen-garden .pickgrid{display:grid; grid-template-columns:repeat(auto-fill,minmax(9rem,1fr)); gap:.4rem}
+#screen-garden .pitem{display:flex; align-items:center; gap:.45rem; min-width:0; font:inherit; font-size:.9rem; text-align:left; color:inherit;
+  cursor:pointer; background:#fffaf0; border:2px solid #d9ccb0; border-radius:10px; padding:.35rem .5rem}
+#screen-garden .pitem .pic{flex:0 0 1.7rem; width:1.7rem; height:1.7rem; display:grid; place-items:center; font-size:1.3rem}
+#screen-garden .pitem .pic svg{width:100%; height:100%}
+#screen-garden .pitem .pnm{flex:1; min-width:0; font-weight:700; font-size:.88rem; line-height:1.2; overflow-wrap:anywhere}
+#screen-garden .pitem .pct{flex:none; font-size:.8rem; color:var(--ink-l); font-variant-numeric:tabular-nums}
+#screen-garden .pitem.sel{border-color:var(--wood); background:#fff3cf}
+#screen-garden .pitem.cur{outline:3px solid #f4c542; outline-offset:1px}
+#screen-garden .slot[data-tool="4"]{-webkit-touch-callout:none; user-select:none}
 #screen-garden #g-treasTabs{margin:-.2rem 0 .5rem}
 #screen-garden #g-treasTabs[hidden]{display:none}
 html.mobile #screen-garden .sphint{display:none}   /* スマホでは Tab キーが無いので出さない */
@@ -1635,7 +1649,7 @@ html.mobile #screen-garden .tlist{grid-template-columns:1fr}
       作物は水が効いている間だけ育ちます。パソコンのタイピングで正しく打った1打ごとに、水の効いている作物の時間が進みます。
     </p>
     <p class="help pc-only">
-      <b>1〜6</b> 道具の持ち替え ・ <b>← →</b> 種や設置物を選ぶ ・ <b>↑ ↓</b> 畑を移る ・ <b>英字と , .</b> その区画で作業(<b>P</b> は案山子置き場)<br>
+      <b>1〜6</b> 道具の持ち替え ・ <b>← →</b> 種や設置物を選ぶ(<b>4</b> の長押しか2回押しで種の一覧) ・ <b>↑ ↓</b> 畑を移る ・ <b>英字と , .</b> その区画で作業(<b>P</b> は案山子置き場)<br>
       <b>Tab</b> お店 ・ <b>7</b> ガチャ ・ <b>8</b> 貴重品 ・ <b>9</b> 番付 ・ <b>0</b> 料理 ・ <b>Space</b> 図鑑・実績 ・ <b>Esc</b> タイトルへ(別端末との同期はタイトルの <b>K</b>)<br>
       作物は水が効いている間だけ育ちます。タイピングで正しく打った1打ごとに、水の効いている作物の時間が進みます。
     </p>
@@ -1676,6 +1690,16 @@ html.mobile #screen-garden .tlist{grid-template-columns:1fr}
   </div>
 
   <!-- 貴重品 -->
+  <div class="modal" id="g-pick">
+    <div class="panel pickpanel">
+      <div class="phead">
+        <h2 id="g-pickTitle">種を選ぶ</h2>
+        <button class="sbtn xbtn" data-close>閉じる ✕</button>
+      </div>
+      <p class="tnote" id="g-pickNote"></p>
+      <div id="g-pickBody"></div>
+    </div>
+  </div>
   <div class="modal" id="g-treas">
     <div class="panel gachapanel">
       <div class="phead">
@@ -3540,6 +3564,10 @@ function endBookGame(){
 /* ---------- 更新情報 ----------
    新しいものを上に足していく。d は YYYY-MM-DD */
 const NEWS=[
+  { d:"2026-10-08", t:"種を一覧から選べるようになりました", items:[
+    "4を長押しするか、すばやく2回押すと、持っている種の一覧が出ます。矢印キーで選んで Enter で決めます(スマホは道具の「種」の欄を長押し)",
+    "種はレア度ごとに並び、曜日限定の種は別にまとめています。← → で1つずつ選ぶこともこれまでどおりできます",
+  ]},
   { d:"2026-10-08", t:"料理の効果を調整しました", items:[
     "農園の時計の料理: 農園を開いている間に1秒ごとに作物が育つ時間を、ふつうの料理は10秒から30秒に、変異・超変異の料理は30秒から3分にしました",
   ]},
@@ -5719,6 +5747,7 @@ function openModal(name){
   if(name==="goal") renderGoals();
   if(name==="dbook") renderDbook();
   if(name==="cook") renderCook();
+  if(name==="pick") renderPick();
   if(SPACE_ALL.some(([m])=>m===name)) renderSpaceTabs();
 }
 function closeModal(silent){
@@ -6601,7 +6630,7 @@ function kitSub(id){   // 台所の宝物の「今の状態」
   if(id==="cookvil") return n>0?`任せている料理 <b>${(S.autoCook||[]).length} / ${n}</b>(${kb("料理の「作る」で A","料理の「作る」の「料理番に任せる」")})`:"";
   const sw = `<span class="kswap"><button class="sbtn" data-kd="-1">${kb("◀ Q","◀")}</button><button class="sbtn" data-kd="1">${kb("E ▶","▶")}</button></span>`;   // ボタンは名前より前(名前の長さで位置が動かないように)
   if(id==="kamado") return n>0?`画面の色 ${sw}<br><b>${S.kamado&&DISH[S.kamado]?`${esc(M_COLOR[S.kamado]||"")}(${esc(DISH[S.kamado].name)})`:"なし"}</b>`:"";
-  if(id==="sgvil") return n>0?`育てる作物 ${sw}<br><b>${ico(CROP[sgCropId()])} ${esc(CROP[sgCropId()].name)}</b> ・ 使っている区画 <b>${vilUsed("sg")} / ${(S.sgVil||0)*SG_SLOTS}</b>`:"";
+  if(id==="sgvil") return n>0?`育てる作物 ${sw}<br><b>${ico(CROP[sgCropId()])} ${esc(CROP[sgCropId()].name)}</b>(${kb("Enter","もう一度タップ")}で一覧から選ぶ) ・ 使っている区画 <b>${vilUsed("sg")} / ${(S.sgVil||0)*SG_SLOTS}</b>`:"";
   if(id==="sgk") return n>0?`${OBJ_HOW}畑の P に置くと、1打の時短 +2分・カラスよけ・自動の水やり`:"";
   if(id==="deed") return (S.got.deed||0)>0?`持っている ${n}枚 ・ 畑 ${FS().length} / ${FIELD_MAX}枚`:"";
   if(id==="sfert"||id==="mfert") return n>0?kb("肥料(5)で持って、← → で選んでまく","道具の「肥料」を持って、◀ ▶ で選んでまく"):"";
@@ -6657,6 +6686,8 @@ function kitAct(dir){   // Enter(dir=0)・Shift+Enter(dir=-1)・◀▶ のボタ
     const ids=["",...kamadoDishes()];
     if(ids.length<2){ sfx.nope(); toast("画面の色の料理を食べると、その色を選べるようになります","warn",3600); return; }
     S.kamado=ids[(ids.indexOf(S.kamado||"")+dir+ids.length)%ids.length]; sfx.tab(); applyTheme();
+  }else if(id==="sgvil" && !dir){
+    openPick("sg"); return;
   }else if(id==="sgvil" && dir){
     const ok=sgCrops().map(c=>c.id); if(!ok.length){ sfx.nope(); return; }
     S.sgCrop=ok[(ok.indexOf(sgCropId())+dir+ok.length)%ok.length]; sfx.tab();
@@ -6683,6 +6714,76 @@ function renderTreas(){
         ${n>0?`<div class="tsum">今の合計 <b>${v}${c.eff.unit}</b>${capped?" (上限)":""}</div>`:""}
       </div></div>`;
   }).join("")+`</div>`;
+}
+/* ---------- 一覧から選ぶ ----------
+   種(4 の長押し・スマホは種の欄の長押し)と、シゴデキ村人が育てる作物(台所の宝物でシゴデキ村人を選んで Enter)。
+   レア度ごとに並べ、矢印キーで選んで Enter で決める */
+const PICK_RANKS=["N","R","SR","HR","UR","GSR","GHR","曜日限定"];
+const pickGroup = id => CROP[id].day!=null ? "曜日限定" : (CROP[id].r||"N");   // 曜日限定の作物はレア度と分けて並べる
+let pickKind="seed", pickCur=0, pickIds=[], lastFour=0;
+function openPick(kind){
+  pickKind=kind;
+  pickIds = kind==="sg" ? sgCrops().map(c=>c.id) : ownedSeeds();
+  if(!pickIds.length){ sfx.nope(); toast(kind==="sg" ? "まだ選べる作物がありません(一度収穫した作物から選べます)" : kb("種がありません。Tab でお店へ","種がありません。お店で買えます"),"warn"); return; }
+  // レア度の順(同じレア度の中は今の並びのまま)
+  pickIds = PICK_RANKS.flatMap(r=>pickIds.filter(id=>pickGroup(id)===r)).concat(pickIds.filter(id=>!PICK_RANKS.includes(pickGroup(id))));
+  const now = kind==="sg" ? sgCropId() : S.seedId;
+  pickCur=Math.max(0, pickIds.indexOf(now));
+  openModal("pick");
+}
+function renderPick(){
+  const sg=pickKind==="sg", now = sg ? sgCropId() : S.seedId;
+  $("g-pickTitle").textContent = sg ? "シゴデキ村人が育てる作物" : "種を選ぶ";
+  $("g-pickNote").innerHTML = (sg ? "図鑑に載っている作物から選べます。" : "持っている種です。")+kb("<b>矢印キー</b> で選んで <b>Enter</b> で決定 ・ <b>Esc</b> 閉じる","タップして選びます");
+  let i=0;
+  $("g-pickBody").innerHTML = PICK_RANKS.concat("").map(r=>{
+    const ids=pickIds.filter(id=>r ? pickGroup(id)===r : !PICK_RANKS.includes(pickGroup(id)));
+    if(!ids.length) return "";
+    return `<div class="pickgrp"><h3>${r||"そのほか"}</h3><div class="pickgrid">${ids.map(id=>{ const c=CROP[id], j=i++;
+      return `<button class="pitem${j===pickCur?" cur":""}${id===now?" sel":""}" data-i="${j}" tabindex="-1"><span class="pic">${ico(c)}</span><span class="pnm">${esc(c.name)}</span>${sg?"":`<span class="pct">×${fmtNum(S.seeds[id]||0)}</span>`}</button>`; }).join("")}</div></div>`;
+  }).join("");
+  const cur=$("g-pickBody").querySelector(".pitem.cur"); if(cur && cur.scrollIntoView) cur.scrollIntoView({block:"nearest"});
+}
+function pickChoose(i){
+  const id=pickIds[i]; if(!id) return;
+  if(pickKind==="sg"){
+    S.sgCrop=id; sfx.tab(); save(); renderAll();
+    openModal("treas");   // 台所の宝物に戻る
+  }else{
+    S.seedId=id; S.tool=4; sfx.tool(); save(); renderAll();
+    closeModal(true);
+  }
+}
+/* 上下: 見た目で上・下の段にある、いちばん近い位置の項目へ */
+function pickMove(dir){
+  const els=[...$("g-pickBody").querySelectorAll(".pitem")], me=els[pickCur]; if(!me) return;
+  const r=me.getBoundingClientRect(), cx=r.left+r.width/2;
+  const rows=els.map((el,j)=>({ j, b:el.getBoundingClientRect() })).filter(o=> dir>0 ? o.b.top>r.top+4 : o.b.top<r.top-4);
+  if(!rows.length) return;
+  const rowTop = dir>0 ? Math.min(...rows.map(o=>o.b.top)) : Math.max(...rows.map(o=>o.b.top));
+  const inRow=rows.filter(o=>Math.abs(o.b.top-rowTop)<4);
+  inRow.sort((a,b)=>Math.abs(a.b.left+a.b.width/2-cx)-Math.abs(b.b.left+b.b.width/2-cx));
+  pickCur=inRow[0].j;
+}
+function pickKey(e){
+  const k=e.key;
+  if(e.repeat && k==="4") return;   // 4 を長押しして開いたときの続き
+  if(k==="Escape"||k==="4"){ e.preventDefault(); if(pickKind==="sg") openModal("treas"); else closeModal(); return; }
+  const n=pickIds.length;
+  if(k==="ArrowLeft"||k==="ArrowRight"){ e.preventDefault(); pickCur=(pickCur+(k==="ArrowRight"?1:-1)+n)%n; sfx.cursor(); renderSoon(renderPick); return; }
+  if(k==="ArrowUp"||k==="ArrowDown"){ e.preventDefault(); pickMove(k==="ArrowDown"?1:-1); sfx.cursor(); renderSoon(renderPick); return; }
+  if(k==="Enter"){ e.preventDefault(); pickChoose(pickCur); }
+}
+$("g-pickBody").addEventListener("click",e=>{ const it=e.target.closest && e.target.closest(".pitem"); if(it) pickChoose(+it.dataset.i); });
+// スマホ・マウス: 種の欄を長押しすると一覧
+{
+  const slot=root.querySelector('.slot[data-tool="4"]'); let t=null, fired=false;
+  const stop=()=>{ clearTimeout(t); t=null; };
+  slot.addEventListener("pointerdown",e=>{ if(e.target.closest(".arr")) return; fired=false; stop(); t=setTimeout(()=>{ fired=true; openPick("seed"); },450); });
+  for(const ev of ["pointerup","pointerleave","pointercancel"]) slot.addEventListener(ev,stop);
+  slot.addEventListener("contextmenu",e=>e.preventDefault());
+  slot.addEventListener("dblclick",e=>{ if(!e.target.closest(".arr")) openPick("seed"); });
+  slot.addEventListener("click",e=>{ if(fired){ fired=false; e.stopImmediatePropagation(); } },true);
 }
 function treasKey(e){
   const k=e.key;
@@ -8222,6 +8323,7 @@ function onKeyMain(e){
     else if(e.key==="Escape"){ e.preventDefault(); e.target.blur(); }
     return;
   }
+  if(modal==="pick"){ pickKey(e); return; }
   if(modal==="shop"){ shopKey(e); return; }
   if(modal==="gacha"){ gachaKey(e); return; }
   if(modal==="treas"){ treasKey(e); return; }
@@ -8248,6 +8350,8 @@ function onKeyMain(e){
   if(k==="9"){ e.preventDefault(); openModal("rank"); return; }
   if(k==="0"){ e.preventDefault(); if(!cookOpen()){ sfx.nope(); toast(COOK_LOCK_MSG(),"warn",4200); return; } openModal("cook"); return; }
   if(k==="Escape"){ backToTitle(); return; }
+  if(k==="4" && e.repeat){ openPick("seed"); return; }   // 4 を長押し: 種の一覧
+  if(k==="4"){ const now=Date.now(); if(now-lastFour<350){ lastFour=0; openPick("seed"); return; } lastFour=now; }   // 4 をすばやく2回: 種の一覧
   if(/^[1-6]$/.test(k)){ setTool(+k); return; }
   if(k==="ArrowLeft"){ e.preventDefault(); cycleSel(-1); return; }
   if(k==="ArrowRight"){ e.preventDefault(); cycleSel(1); return; }
