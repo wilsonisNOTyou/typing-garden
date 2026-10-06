@@ -3544,6 +3544,9 @@ function endBookGame(){
 /* ---------- 更新情報 ----------
    新しいものを上に足していく。d は YYYY-MM-DD */
 const NEWS=[
+  { d:"2026-10-08", t:"料理の効果を調整しました", items:[
+    "農園の時計の料理: 農園を開いている間に1秒ごとに作物が育つ時間を、ふつうの料理は10秒から30秒に、変異・超変異の料理は30秒から3分にしました",
+  ]},
   { d:"2026-10-06", t:"料理の効果を調整しました", items:[
     "時間を進める料理: ふつうの料理は6時間から3時間に、変異・超変異の料理は3日から1日にしました",
     "肥料が減らない料理: ふつうの料理は30%から50%に、変異・超変異の料理は60%から「かならず減らない」にしました",
@@ -7095,7 +7098,7 @@ const EFFS = {
   P8:{ nm:"効果を延ばす",        n:"食べた瞬間、今かかっている料理の効果が10分延びる", s:"食べた瞬間、今かかっている料理の効果が1時間延びる" },
   Q1:{ nm:"種おかわり",          n:"ガチャで出た作物の種が20%で2つ",       s:"ガチャで出た作物の種が50%で2つ" },
   Q2:{ nm:"変わり種の売値",      n:"変異・超変異の作物の売値 1.5倍",       s:"変異・超変異の作物の売値 3倍" },
-  Q3:{ nm:"農園の時計",            n:"農園を開いている間、1秒ごとに水の効いている作物が10秒育つ", s:"農園を開いている間、1秒ごとに水の効いている作物が30秒育つ" },
+  Q3:{ nm:"農園の時計",            n:"農園を開いている間、1秒ごとに水の効いている作物が30秒育つ", s:"農園を開いている間、1秒ごとに水の効いている作物が3分育つ" },
 };
 const instantEff = e => e==="β" || e==="P8";   // 食べた瞬間に効く(今の効果は消えない)
 /* 料理の段階(作物の品質の番号をそのまま使う): 0 ふつう / 1 ☆ / 2 ☆☆ / 4 ☆☆☆ / 3 変異 / 5 超変異 */
@@ -8321,7 +8324,7 @@ function enter(){
   reportVillagers();
   crowVisit();
   clearInterval(loopId); clearInterval(saveId);
-  loopId=setInterval(()=>{ const q3=ev("Q3",10/60,30/60,0); /* 料理: 農園の時計(分) */ if(q3) applySkip(q3); showCookNotice(); autoCookTick(); tick(); reportVillagers(); renderBar(); renderField(); renderInfo(); renderCounter(); renderBuff(); if(modal==="cook") $("g-cookNow").innerHTML=cookNowText(); },1000);
+  loopId=setInterval(()=>{ const q3=ev("Q3",30/60,3,0); /* 料理: 農園の時計(分) */ if(q3) applySkip(q3); showCookNotice(); autoCookTick(); tick(); reportVillagers(); renderBar(); renderField(); renderInfo(); renderCounter(); renderBuff(); if(modal==="cook") $("g-cookNow").innerHTML=cookNowText(); },1000);
   saveId=setInterval(save,15000);
 }
 function leave(){
