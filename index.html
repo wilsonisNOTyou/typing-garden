@@ -2579,6 +2579,10 @@ function sendToGarden(keys,screws){
     cur.keys=toInt(cur.keys)+keys;
     cur.screws=toInt(cur.screws)+screws;
     localStorage.setItem(K,JSON.stringify(cur));
+    // 同期: まだクラウドに送っていない届け物。ほかの端末の記録を取り込むときに足し戻す
+    const U="typinggarden:sync:unsent", u=JSON.parse(localStorage.getItem(U)||"{}")||{};
+    u.keys=toInt(u.keys)+keys; u.screws=toInt(u.screws)+screws;
+    localStorage.setItem(U,JSON.stringify(u));
   }catch(e){}
 }
 
@@ -2870,7 +2874,7 @@ function gardenScrews(d,n){
   if(d==="book") return n;
   return n*(SCREW_MULT[d]||1);
 }
-const showGardenScrews = (el,n) => { const m=gardenScrewMul(); $(el).textContent = n>0 ? `農園に ${Math.floor(n*m).toLocaleString("ja-JP")}キー 届きます${m>1?`(料理で×${m})`:""}` : ""; };
+const showGardenScrews = (el,n) => { const m=gardenScrewMul(); $(el).textContent = n>0 ? `農園に ${Math.floor(n*m).toLocaleString("ja-JP")}キー 届きます${m>1?`(料理で1本 ${m.toLocaleString("ja-JP")}キー)`:""}` : ""; };
 
 /* ---------- 入力 ---------- */
 const START_KEYS={"1":"easy","2":"normal","3":"hard","4":"ta-easy","5":"ta-normal","6":"ta-hard","7":"oneshot"};
@@ -3540,6 +3544,12 @@ function endBookGame(){
 /* ---------- 更新情報 ----------
    新しいものを上に足していく。d は YYYY-MM-DD */
 const NEWS=[
+  { d:"2026-10-06", t:"料理の効果を調整しました", items:[
+    "時間を進める料理: ふつうの料理は6時間から3時間に、変異・超変異の料理は3日から1日にしました",
+    "肥料が減らない料理: ふつうの料理は30%から50%に、変異・超変異の料理は60%から「かならず減らない」にしました",
+    "タイピングで肥料が届く料理: ふつうの料理は100打ごとから20打ごとに、変異・超変異の料理は30打ごとから5打ごとにしました",
+    "1語のキーの料理: タイピングから届くキー1本が、これまでに収穫した作物でいちばん高い売値(今の☆の値段)の1個分になります。変異・超変異の料理は2個分です(これまでは2倍・4倍)",
+  ]},
   { d:"2026-10-06", t:"お店の効率化に「仕分け帳」「貴重品の種の自動売却」「村人の指示書2」が登場しました", items:[
     "仕分け帳(100,000キー): お店の「売る」で、作物・食材・種を選んだ1種類ずつ、100個・1000個残して、残りをまとめて売れるようになります(オンオフできます)",
     "貴重品の種の自動売却(500,000キー): 効果の上限まで届く分がそろった貴重品の種を、ガチャから出たときに1つ10,000キーで売ります(オンオフできます)。上限のない貴重品は売りません",
@@ -3548,6 +3558,7 @@ const NEWS=[
   ]},
   { d:"2026-10-06", t:"そのほかの変更", items:[
     "肥料は、村人の区画にはまけなくなりました。自分で育てる畑には、これまでどおりまけます",
+    "同じブラウザで2つ以上のタブ(ウィンドウ)で開いたときは、最後にさわったタブだけで遊べるようにしました。ほかのタブは保存しないので、記録が古い状態に戻らなくなります",
   ]},
   { d:"2026-10-05", t:"料理とわくわくガチャが登場しました", items:[
     "料理(0)で作った料理を食べると、10分のあいだ農園やタイピングに効果がかかります。料理は47品あり、レシピはお店の「レシピ」で買えます",
@@ -3600,16 +3611,19 @@ const NEWS=[
 ];
 const NEWS_SEEN_KEY="typinggarden:newsSeen";
 let newsOpen=false;
+/* 見たお知らせの印: 新しい日付と、その日のお知らせの数(同じ日に増えたときも NEW を出す)。
+   前の印(日付だけ)より、同じ日付でも数のついた印のほうが大きくなる */
+const newsKey = () => NEWS.length ? NEWS[0].d+"#"+String(NEWS.filter(n=>n.d===NEWS[0].d).length).padStart(2,"0") : "";
 function refreshNewsBadge(){
   let seen=""; try{ seen=localStorage.getItem(NEWS_SEEN_KEY)||""; }catch(e){}
-  $("newsNew").textContent = NEWS.length && NEWS[0].d>seen ? "NEW" : "";
+  $("newsNew").textContent = NEWS.length && newsKey()>seen ? "NEW" : "";
 }
 function openNews(){
   newsOpen=true;
   $("newsList").innerHTML=NEWS.map(n=>`<div class="news-item"><div class="d">${n.d.replace(/-/g,"/")}</div><h3>${escH(n.t)}</h3><ul>${n.items.map(x=>`<li>${escH(x)}</li>`).join("")}</ul></div>`).join("");
   $("news").classList.add("open");
   $("newsList").scrollTop=0;
-  try{ if(NEWS.length) localStorage.setItem(NEWS_SEEN_KEY, NEWS[0].d); }catch(e){}
+  try{ if(NEWS.length) localStorage.setItem(NEWS_SEEN_KEY, newsKey()); }catch(e){}
   refreshNewsBadge();
 }
 function closeNews(){ newsOpen=false; $("news").classList.remove("open"); }
@@ -4673,7 +4687,7 @@ function withReal(fn){
   S.fields=realFields; S.cur=realCur;
   try{ return fn(); } finally{ realFields=S.fields; realCur=S.cur; S.fields=sf; S.cur=sc; }
 }
-function save(){ if(window.tgReplacing) return; S.aliveAt=Date.now(); try{ localStorage.setItem(SAVE_KEY, JSON.stringify(realFields ? Object.assign({},S,{fields:realFields,cur:realCur}) : S)); }catch(e){} }
+function save(){ if(window.tgReplacing || (window.tabElsewhere && window.tabElsewhere())) return; S.aliveAt=Date.now(); try{ localStorage.setItem(SAVE_KEY, JSON.stringify(realFields ? Object.assign({},S,{fields:realFields,cur:realCur}) : S)); }catch(e){} }
 function isValidState(o){
   return o && typeof o==="object" && typeof o.money==="number" && Array.isArray(o.fields) && o.fields.length>0;
 }
@@ -5068,7 +5082,7 @@ function consumeInbox(){
   S.money+=screws;
   S.fromTypingMin+=minutes; S.fromTypingScrews+=screws;
   const m=S.inMsg||{min:0,screws:0,plots:0};
-  const per=ev("P5",100,30,0);   // 料理: 何打ごとに肥料が届くか
+  const per=ev("P5",20,5,0);   // 料理: 何打ごとに肥料が届くか
   if(per){ S.p5Keys=(S.p5Keys||0)+keys; const f=Math.floor(S.p5Keys/per); if(f>0){ S.p5Keys-=f*per; S.fert+=f; m.fert=(m.fert||0)+f; } }
   m.min+=minutes; m.screws+=screws; m.plots=Math.max(m.plots,n);
   S.inMsg=m;
@@ -5599,7 +5613,7 @@ function act(k){
       const fmax=ev("K",3,Infinity,2);
       if((p.crop.fert||0)>=fmax){ nope(k,`この作物に肥料はもう${fmax}回使っています`); break; }
       p.crop.fert=(p.crop.fert||0)+1;
-      if(Math.random()<ev("η",.3,.6,0)) floatAt(k,"🍂 減らなかった!"); else S.fert--;
+      if(Math.random()<ev("η",.5,1,0)) floatAt(k,"🍂 減らなかった!"); else S.fert--;
       grow(p, need(p.crop)*effFert(), Date.now());
       if(isRipe(p)) p.crop.ripeAt=Date.now();
       hit(k); floatAt(k,`🍂 ${p.crop.fert}/${fmax===Infinity?"∞":fmax}`); sfx.fert();
@@ -5659,7 +5673,7 @@ function magicFert(k,p,id){
     p.crop.mut=true; p.crop.mutN=3;
   }
   p.crop.rolled=true;
-  if(Math.random()<ev("η",.3,.6,0)) toast("料理の効果で、肥料が減りませんでした","good",2600); else S[id]--;
+  if(Math.random()<ev("η",.5,1,0)) toast("料理の効果で、肥料が減りませんでした","good",2600); else S[id]--;
   if(!(S[id]>0)) S.fertSel="fert";
   hit(k); floatAt(k, id==="mfert"?"✧×3":"✦×3"); sfx.vil();
   toast(`${ico(g)} ${esc(c.name)}にまきました。${id==="mfert"?"超変異で3個穫れます":"変異で3個穫れます"}`,"good mut"+(id==="mfert"?" sup":""),4200,true);
@@ -6812,9 +6826,9 @@ const DISHES = [
          `<svg viewBox="0 0 32 32"><path d="M9 6h14l-2 22c-.1 1.2-1 2-2.2 2h-5.6c-1.2 0-2.1-.8-2.2-2z" fill="#fff0e8" fill-opacity=".7" stroke="#b8d4e4" stroke-width=".7"/><path d="M9.7 12h12.6l-1.5 16c-.1 1-.9 1.6-1.9 1.6h-5.8c-1 0-1.8-.6-1.9-1.6z" fill="#ff5a2a"/><ellipse cx="16" cy="12" rx="6.3" ry="1.2" fill="#ff9a3a"/><path d="M16 20c-3-1-5 0-7 2 3 0 5 1 7 3 2-2 4-3 7-3-2-2-4-3-7-2z" fill="#ffd06a" opacity=".8"/><path d="M22 8c3-2 6-1 7 1-2 0-3 1-4 2" fill="#ff6a2a"/><path d="M22 8c1-3 4-4 6-4" stroke="#ff9a2a" stroke-width="1.2" fill="none"/><path d="M19 13l4-10" stroke="#ffcf3a" stroke-width="1.6" stroke-linecap="round"/></svg>`,
          `<svg viewBox="0 0 32 32"><circle cx="16" cy="16" r="14" fill="#ffd8a0" opacity="0.45"/><path d="M9 6h14l-2 22c-.1 1.2-1 2-2.2 2h-5.6c-1.2 0-2.1-.8-2.2-2z" fill="#fff8e8" fill-opacity=".7" stroke="#b8d4e4" stroke-width=".7"/><path d="M9.7 12h12.6l-1.5 16c-.1 1-.9 1.6-1.9 1.6h-5.8c-1 0-1.8-.6-1.9-1.6z" fill="#ffcf3a"/><ellipse cx="16" cy="12" rx="6.3" ry="1.2" fill="#fff0a0"/><path d="M12 22l4-6 4 6-4-2z" fill="#ff8a2a"/><path d="M6 4c-1 3 0 5 2 6" stroke="#ff5a7a" stroke-width="1.6" fill="none" stroke-linecap="round"/><path d="M8 4c-1 3 0 5 2 6" stroke="#ffcf3a" stroke-width="1.6" fill="none" stroke-linecap="round"/><path d="M24 4c-1 3 0 5 2 6" stroke="#5fd08a" stroke-width="1.6" fill="none" stroke-linecap="round"/><path d="M26 4c-1 3 0 5 2 6" stroke="#4fb3ff" stroke-width="1.6" fill="none" stroke-linecap="round"/><path d="M19 13l4-10" stroke="#ff5a7a" stroke-width="1.6" stroke-linecap="round"/></svg>`] },
   { id:"annin", name:"月光ライチの杏仁豆腐", n3:"日輪の杏仁豆腐", n5:"かぐや姫の杏仁豆腐", icon:"🍮", ing:[["lychee", 1], ["sugarcane", 1], ["milk", 1]], eff:"β",
-    l0:"月の光のようにぷるんと白い。ひと口食べると、畑の時間が一気に六時間進む。",
-    l3:"日輪ライチの杏仁豆腐。食べた瞬間、畑に何度も朝が来る。",
-    l5:"かぐや姫ライチの杏仁豆腐。月へ帰る前のひとときのように、畑の時間が三日ぶん駆け抜ける。",
+    l0:"月の光のようにぷるんと白い。ひと口食べると、畑の時間が一気に三時間進む。",
+    l3:"日輪ライチの杏仁豆腐。食べた瞬間、畑にひと晩が過ぎて朝が来る。",
+    l5:"かぐや姫ライチの杏仁豆腐。月へ帰る前のひとときのように、畑の時間が一日ぶん駆け抜ける。",
     art:[`<svg viewBox="0 0 32 32"><path d="M3 18h26c0 6.4-5.8 11.6-13 11.6S3 24.4 3 18z" fill="#e8f0f8"/><ellipse cx="16" cy="18" rx="13" ry="3" fill="#fffdf6"/><path d="M9 16.6l2-1.4 2 1.4-2 1.4z" fill="#ffffff" stroke="#e8e0d0" stroke-width=".4"/><path d="M14 15.6l2-1.4 2 1.4-2 1.4z" fill="#ffffff" stroke="#e8e0d0" stroke-width=".4"/><path d="M19 16.6l2-1.4 2 1.4-2 1.4z" fill="#ffffff" stroke="#e8e0d0" stroke-width=".4"/><circle cx="13.6" cy="18" r="1.6" fill="#f4f0e8" stroke="#e0d8c8" stroke-width=".4"/><path d="M24 5a3 3 0 1 0 2.4 4.6 2.4 2.4 0 1 1-2.4-4.6z" fill="#e8e0ff"/></svg>`,
          `<svg viewBox="0 0 32 32"><circle cx="16" cy="16" r="14" fill="#ffe08a" opacity="0.4"/><path d="M22.0 9.0L26.0 9.0M20.9 12.5L24.1 14.9M17.9 14.7L19.1 18.5M14.1 14.7L12.9 18.5M11.1 12.5L7.9 14.9M10.0 9.0L6.0 9.0M11.1 5.5L7.9 3.1M14.1 3.3L12.9 -0.5M17.9 3.3L19.1 -0.5M20.9 5.5L24.1 3.1" stroke="#ffcf40" stroke-width="1.2" stroke-linecap="round" opacity="0.8"/><circle cx="16" cy="9" r="4.6" fill="#ffd23a"/><path d="M5 20h22c0 6.4-5.8 11.6-11 11.6S5 26.4 5 20z" fill="#f4efe6"/><ellipse cx="16" cy="20" rx="11" ry="3" fill="#fff8e0"/><path d="M9 18.8l2-1.4 2 1.4-2 1.4z" fill="#fff6d8" stroke="#e8c45a" stroke-width=".4"/><path d="M14 18l2-1.4 2 1.4-2 1.4z" fill="#fff6d8" stroke="#e8c45a" stroke-width=".4"/><path d="M19 18.8l2-1.4 2 1.4-2 1.4z" fill="#fff6d8" stroke="#e8c45a" stroke-width=".4"/></svg>`,
          `<svg viewBox="0 0 32 32"><rect width="32" height="32" rx="6" fill="#141a3a"/><circle cx="16" cy="10" r="7" fill="#fff8d8"/><circle cx="13.6" cy="8.4" r="1.2" fill="#ece4c0"/><circle cx="18.4" cy="11.4" r="1" fill="#ece4c0"/><path d="M3 32V10M6 32V6M28 32V8" stroke="#4f9a4a" stroke-width="2"/><path d="M3 16h1.6M6 12h1.6M28 14h-1.6M3 24h1.6M6 22h1.6M28 22h-1.6" stroke="#2f6a2a" stroke-width=".8"/><path d="M2 12c2-1 3-.6 4 .6M27 10c-2-1-3-.6-4 .6" stroke="#7fc46a" stroke-width="1" fill="none"/><path d="M7 22h18c0 6.4-5.8 11.6-9 11.6S7 28.4 7 22z" fill="#f4efe6"/><ellipse cx="16" cy="22" rx="9" ry="3" fill="#ffffff"/><path d="M10.6 21l2-1.2 2 1.2-2 1.2z" fill="#ffffff" stroke="#e8e0d0" stroke-width=".4"/><path d="M14 20.4l2-1.2 2 1.2-2 1.2z" fill="#ffffff" stroke="#e8e0d0" stroke-width=".4"/><path d="M17.4 21l2-1.2 2 1.2-2 1.2z" fill="#ffffff" stroke="#e8e0d0" stroke-width=".4"/><path d="M16 1.6l0.39 1.01 1.01 0.39-1.01 0.39-0.39 1.01-0.39-1.01-1.01-0.39 1.01-0.39z" fill="#ffffff" opacity="1"/></svg>`] },
@@ -6833,9 +6847,9 @@ const DISHES = [
          `<svg viewBox="0 0 32 32"><path d="M9 6h14l-2 22c-.1 1.2-1 2-2.2 2h-5.6c-1.2 0-2.1-.8-2.2-2z" fill="#fff0e8" fill-opacity=".7" stroke="#b8d4e4" stroke-width=".7"/><path d="M9.7 12h12.6l-1.5 16c-.1 1-.9 1.6-1.9 1.6h-5.8c-1 0-1.8-.6-1.9-1.6z" fill="#ff4a2a"/><ellipse cx="16" cy="12" rx="6.3" ry="1.2" fill="#ffb03a"/><path d="M12 26c0-4 2-6 4-6s4 2 4 6" fill="#ffcf3a" opacity=".8"/><path d="M16 6c-3-3-8-3-10 0 3 0 5 1 6 3 1-2 2-3 4-3zM16 6c3-3 8-3 10 0-3 0-5 1-6 3-1-2-2-3-4-3z" fill="#ff8a2a"/></svg>`,
          `<svg viewBox="0 0 32 32"><rect width="32" height="32" rx="6" fill="#1e2448"/><path d="M24 3a3 3 0 1 0 2.6 4.6 2.4 2.4 0 1 1-2.6-4.6z" fill="#f4e7a4"/><circle cx="5" cy="6" r="0.5" fill="#ffffff"/><circle cx="9" cy="3" r="0.4" fill="#ffffff"/><circle cx="28" cy="16" r="0.4" fill="#ffffff"/><path d="M9 6h14l-2 22c-.1 1.2-1 2-2.2 2h-5.6c-1.2 0-2.1-.8-2.2-2z" fill="#e8ecf8" fill-opacity=".7" stroke="#b8d4e4" stroke-width=".7"/><path d="M9.7 12h12.6l-1.5 16c-.1 1-.9 1.6-1.9 1.6h-5.8c-1 0-1.8-.6-1.9-1.6z" fill="#f8f0ff"/><ellipse cx="16" cy="12" rx="6.3" ry="1.2" fill="#ffffff"/><g fill="#3a1a1a"><circle cx="13" cy="17" r=".35"/><circle cx="17" cy="19" r=".35"/><circle cx="19" cy="23" r=".35"/><circle cx="14" cy="24" r=".35"/><circle cx="16" cy="21" r=".35"/></g><ellipse cx="9" cy="6.4" rx="1.4" ry="3" fill="#ffffff" transform="rotate(0 9 8.4)"/><ellipse cx="9" cy="6.4" rx="1.4" ry="3" fill="#ffffff" transform="rotate(45 9 8.4)"/><ellipse cx="9" cy="6.4" rx="1.4" ry="3" fill="#ffffff" transform="rotate(90 9 8.4)"/><ellipse cx="9" cy="6.4" rx="1.4" ry="3" fill="#ffffff" transform="rotate(135 9 8.4)"/><ellipse cx="9" cy="6.4" rx="1.4" ry="3" fill="#ffffff" transform="rotate(180 9 8.4)"/><ellipse cx="9" cy="6.4" rx="1.4" ry="3" fill="#ffffff" transform="rotate(225 9 8.4)"/><ellipse cx="9" cy="6.4" rx="1.4" ry="3" fill="#ffffff" transform="rotate(270 9 8.4)"/><ellipse cx="9" cy="6.4" rx="1.4" ry="3" fill="#ffffff" transform="rotate(315 9 8.4)"/><circle cx="9" cy="8.4" r="1.2" fill="#fff2a0"/></svg>`] },
   { id:"pancake", name:"キーの木シロップのパンケーキ", n3:"千年パンケーキ", n5:"世界樹パンケーキ", icon:"🥞", ing:[["keytree", 1], ["wheat", 1], ["egg", 1], ["milk", 1], ["butter", 1]], eff:"N",
-    l0:"キーの木の樹液から作ったシロップをたっぷり。一語打つごとのキーが二倍になる。",
-    l3:"千年キーの木のシロップ。打った言葉が、倍の重さのキーになって庭に届く。",
-    l5:"世界樹キーのシロップ。一語打つごとに、キーが四倍になって降ってくる。",
+    l0:"キーの木の樹液から作ったシロップをたっぷり。一語打つごとのキーが、農園でいちばん高い作物ひとつぶんの値打ちになる。",
+    l3:"千年キーの木のシロップ。打った言葉が、倍の重さのキーになって農園に届く。",
+    l5:"世界樹キーのシロップ。一語打つごとに、農園でいちばん高い作物ふたつぶんのキーが降ってくる。",
     art:[`<svg viewBox="0 0 32 32"><ellipse cx="16" cy="26" rx="14" ry="4.6" fill="#d9cfbd"/><ellipse cx="16" cy="25.2" rx="12.2" ry="3.4" fill="#f6f2ea"/><ellipse cx="16" cy="22.0" rx="10" ry="3" fill="#e8b45a"/><path d="M6 22.0c0 1.4 4.4 2.6 10 2.6s10-1.2 10-2.6" stroke="#b8803a" stroke-width=".7" fill="none"/><ellipse cx="16" cy="18.6" rx="10" ry="3" fill="#e8b45a"/><path d="M6 18.6c0 1.4 4.4 2.6 10 2.6s10-1.2 10-2.6" stroke="#b8803a" stroke-width=".7" fill="none"/><ellipse cx="16" cy="15.2" rx="10" ry="3" fill="#e8b45a"/><path d="M6 15.2c0 1.4 4.4 2.6 10 2.6s10-1.2 10-2.6" stroke="#b8803a" stroke-width=".7" fill="none"/><ellipse cx="16" cy="14.6" rx="8.6" ry="2.4" fill="#c8803a"/><rect x="14" y="12" width="4" height="2.4" rx=".4" fill="#ffe08a"/><path d="M20 13c1 2 1 4 0 7" stroke="#c8803a" stroke-width="1.4" fill="none"/><path d="M15 9v-3M17 9v-3" stroke="#a0a8b0" stroke-width="1"/></svg>`,
          `<svg viewBox="0 0 32 32"><ellipse cx="16" cy="26" rx="14" ry="4.6" fill="#d9cfbd"/><ellipse cx="16" cy="25.2" rx="12.2" ry="3.4" fill="#f6f2ea"/><ellipse cx="16" cy="22.0" rx="10" ry="3" fill="#c89a5a"/><ellipse cx="16" cy="18.6" rx="10" ry="3" fill="#c89a5a"/><ellipse cx="16" cy="15.2" rx="10" ry="3" fill="#c89a5a"/><ellipse cx="16" cy="22.0" rx="9.0" ry="2.4" fill="none" stroke="#8a5a2a" stroke-width=".5"/><ellipse cx="16" cy="22.0" rx="6.0" ry="1.6" fill="none" stroke="#8a5a2a" stroke-width=".5"/><ellipse cx="16" cy="18.6" rx="8.6" ry="2.4" fill="none" stroke="#8a5a2a" stroke-width=".5"/><ellipse cx="16" cy="18.6" rx="5.6" ry="1.6" fill="none" stroke="#8a5a2a" stroke-width=".5"/><ellipse cx="16" cy="15.2" rx="8.2" ry="2.4" fill="none" stroke="#8a5a2a" stroke-width=".5"/><ellipse cx="16" cy="15.2" rx="5.2" ry="1.6" fill="none" stroke="#8a5a2a" stroke-width=".5"/><path d="M13 15l3-2.6 3 2.6" stroke="#c3ccd8" stroke-width="1.6" fill="none"/><rect x="14.4" y="13" width="3.2" height="2" fill="#c3ccd8"/></svg>`,
          `<svg viewBox="0 0 32 32"><circle cx="16" cy="16" r="14" fill="#d0f0c0" opacity="0.4"/><ellipse cx="16" cy="28" rx="14" ry="4.6" fill="#e8c45a"/><ellipse cx="16" cy="27.2" rx="12.2" ry="3.4" fill="#fff8e0"/><ellipse cx="16" cy="22.0" rx="10" ry="3" fill="#e8b45a"/><path d="M6 22.0c0 1.4 4.4 2.6 10 2.6s10-1.2 10-2.6" stroke="#b8803a" stroke-width=".7" fill="none"/><ellipse cx="16" cy="18.6" rx="10" ry="3" fill="#e8b45a"/><path d="M6 18.6c0 1.4 4.4 2.6 10 2.6s10-1.2 10-2.6" stroke="#b8803a" stroke-width=".7" fill="none"/><ellipse cx="16" cy="15.2" rx="10" ry="3" fill="#e8b45a"/><path d="M6 15.2c0 1.4 4.4 2.6 10 2.6s10-1.2 10-2.6" stroke="#b8803a" stroke-width=".7" fill="none"/><ellipse cx="16" cy="11.8" rx="10" ry="3" fill="#e8b45a"/><path d="M6 11.8c0 1.4 4.4 2.6 10 2.6s10-1.2 10-2.6" stroke="#b8803a" stroke-width=".7" fill="none"/><ellipse cx="16" cy="11.200000000000001" rx="8.6" ry="2.4" fill="#f4c542"/><path d="M16 9V3" stroke="#7a5230" stroke-width="1.4"/><circle cx="16" cy="3.6" r="3.6" fill="#4f8a3a"/><circle cx="13" cy="5" r="2.4" fill="#63a349"/><circle cx="19" cy="5" r="2.4" fill="#3f7530"/><path d="M8 18c-1 2-1 4 0 6M24 18c1 2 1 4 0 6" stroke="#f4c542" stroke-width="1.4" fill="none"/></svg>`] },
@@ -7055,7 +7069,7 @@ const EFFS = {
   K:{ nm:"肥料の回数",           n:"1つの作物に肥料を3回まで",            s:"1つの作物に肥料を何回でも" },
   L:{ nm:"一括植え",             n:"種を植えると、その畑の空いた土ぜんぶに植わる", s:"種を植えると、すべての畑の空いた土に植わる" },
   M:{ nm:"画面の色",             n:"ホーム画面とタイピングが料理の色に染まる", s:"ホーム画面とタイピングが料理の色に鮮やかに染まり、作物が舞い、キーが料理に変わる。農園では収穫のたびに花火があがる" },
-  N:{ nm:"1語のキー",            n:"タイピングから農園に届くキー 2倍",         s:"タイピングから農園に届くキー 4倍" },
+  N:{ nm:"1語のキー",            n:"タイピングから農園に届くキー1本が、いちばん高い作物1個分の売値になる", s:"タイピングから農園に届くキー1本が、いちばん高い作物2個分の売値になる" },
   O:{ nm:"村人がガチャの作物",   n:"村人がガチャの作物(N・R)を育てる",  s:"村人がガチャの作物(SR〜UR)を育てる" },
   P:{ nm:"一括水やり",           n:"じょうろ1回で、その畑ぜんぶに水やり",  s:"じょうろ1回で、すべての畑に水やり" },
   Q:{ nm:"一括収穫",             n:"収穫すると、その畑の実りをぜんぶ収穫", s:"収穫すると、すべての畑の実りをぜんぶ収穫" },
@@ -7063,13 +7077,13 @@ const EFFS = {
   S:{ nm:"ガチャのレア度",       n:"ガチャの SR 以上が出る確率 1.2倍",     s:"ガチャの SR 以上が出る確率 1.5倍" },
   V:{ nm:"ノーミス勝負のお守り", n:"ノーミス勝負でミスしても1回まで続く(効果中はランキングに載りません)", s:"ノーミス勝負でミスしても3回まで続く(効果中はランキングに載りません)" },
   "α":{ nm:"種が戻る",           n:"収穫すると20%で同じ種が1つ戻る(貴重品は除く)", s:"収穫すると、かならず同じ種が1つ戻る(貴重品は除く)" },
-  "β":{ nm:"時間を進める",       n:"食べた瞬間、すべての畑が6時間進む",    s:"食べた瞬間、すべての畑が3日進む" },
+  "β":{ nm:"時間を進める",       n:"食べた瞬間、すべての畑が3時間進む",    s:"食べた瞬間、すべての畑が1日進む" },
   "γ":{ nm:"ガチャおかわり",     n:"ガチャ1回ごとに10%でもう1回",         s:"ガチャ1回ごとに50%でもう1回" },
   "ε":{ nm:"GUR が出やすい",     n:"わくわくガチャの GUR の確率 1.5倍",    s:"わくわくガチャの GUR の確率 3倍" },
   "μ":{ nm:"GHR が出やすい",     n:"ガチャの GHR の確率 1.5倍",            s:"ガチャの GHR の確率 3倍" },
   "ν":{ nm:"GSR が出やすい",     n:"ガチャの GSR の確率 1.5倍",            s:"ガチャの GSR の確率 3倍" },
   "ζ":{ nm:"食材おかわり",       n:"わくわくガチャの食材が20%で2つ",       s:"わくわくガチャの食材がかならず2つ" },
-  "η":{ nm:"肥料が減らない",     n:"肥料を使っても30%で減らない",          s:"肥料を使っても60%で減らない" },
+  "η":{ nm:"肥料が減らない",     n:"肥料を使っても50%で減らない",          s:"肥料を使っても減らない" },
   "λ":{ nm:"確定枠アップ",       n:"ガチャで SR 以上が8回ごとに1つ確定",   s:"ガチャで SR 以上が5回ごとに1つ確定" },
   Z:{ nm:"村人の種代",           n:"村人の種代が半分",                     s:"村人の種代が無料" },
   P1:{ nm:"料理おかわり",        n:"料理を作ると20%でもう1つできる",       s:"料理を作ると、かならずもう1つできる" },
@@ -7077,7 +7091,7 @@ const EFFS = {
   X:{ nm:"仕込みおかわり",       n:"仕込むと20%でもう1つできる",           s:"仕込むと、かならずもう1つできる" },
   Y:{ nm:"実績のごほうび",       n:"実績のごほうび 1.5倍",                 s:"実績のごほうび 2倍" },
   P3:{ nm:"食材が上位種に化ける", n:"わくわくガチャの食材が5%で上位種に化ける", s:"わくわくガチャの食材が20%で上位種に化ける" },
-  P5:{ nm:"タイピングで肥料",      n:"タイピング100打ごとに肥料が1つ届く",     s:"タイピング30打ごとに肥料が1つ届く" },
+  P5:{ nm:"タイピングで肥料",      n:"タイピング20打ごとに肥料が1つ届く",      s:"タイピング5打ごとに肥料が1つ届く" },
   P8:{ nm:"効果を延ばす",        n:"食べた瞬間、今かかっている料理の効果が10分延びる", s:"食べた瞬間、今かかっている料理の効果が1時間延びる" },
   Q1:{ nm:"種おかわり",          n:"ガチャで出た作物の種が20%で2つ",       s:"ガチャで出た作物の種が50%で2つ" },
   Q2:{ nm:"変わり種の売値",      n:"変異・超変異の作物の売値 1.5倍",       s:"変異・超変異の作物の売値 3倍" },
@@ -7352,7 +7366,7 @@ function cookEat(id,g){
   const bk=bookKeyOf(g); S.dishEaten[id]=S.dishEaten[id]||{}; S.dishEaten[id][bk]=true;
   let what="";   // 演出に出す、食べて起きたこと
   if(d.eff==="β"){   // 時間を進める: その場で効く(今の効果は消えない)
-    const hours = isMutT(g) ? 72 : 6;
+    const hours = isMutT(g) ? 24 : 3;
     tick(); advanceAll(hours*HOUR);
     what=`すべての畑が ${hours>=24?hours/24+"日":hours+"時間"} 進みました`;
     toast(`${dishIco(d,g)} ${esc(dishName(d,g))}を食べました。すべての畑が ${hours>=24?hours/24+"日":hours+"時間"} 進みました`,"good",4200,true);
@@ -7657,7 +7671,10 @@ function dishFirework(k){
   }
 }
 /* タイピング本編から使う: 届くキーの倍率・ノーミス勝負のお守りの数 */
-const screwMul = () => ev("N",2,4,1);
+/* 料理「1語のキー」: タイピングから届くキー1本が、収穫したことのある作物で いちばん高い売値(今の☆の値段)の 1個分・2個分になる。
+   売値アップの料理・貴重品と変異の売値は入れない(重ねると大きくなりすぎるため) */
+const bestCropPrice = () => CROPS.reduce((m,c)=>c.treasure||!(S.harvestBy[c.id]>0) ? m : Math.max(m, Math.round(c.price*QUALITY[tierOf(c.id)].mult)), 0);
+const screwMul = () => { const x=eff("N"); return x ? Math.max(1, bestCropPrice())*(x===2?2:1) : 1; };
 const charmLives = () => ev("V",1,3,0);
 
 /* ---------- 図鑑 ----------
@@ -8505,6 +8522,7 @@ function backupImport(){
 ===================================================== */
 const SYNC_PATH="typinggarden/saves", SYNC_KEEP=5, SYNC_ALIVE=45000;
 const SYNC_BACKUP_EVERY=10*60*1000;   // バックアップは10分に1回まで(細かく送っても古い記録が残るように)
+const SYNC_HANDOFF_WAIT=2000;        // 持ち主を引き継ぐときに、前の持ち主の送信を待つ時間
 const SYNC_DEBOUNCE=2500;             // 操作が止まってから送るまで
 let syncPushing=false, syncPushAgain=false, syncBackupAt=null, syncDirtyTimer=null;
 /* 送っていない操作があるか。記録の中身は時間だけでも変わる(作物が育つ)ので、
@@ -8540,8 +8558,18 @@ function syncInit(){
   // 開いたブラウザで遊ぶ(記録を取り込むための読み直しのときは、持ち主を取らない)
   let reloaded=false;
   try{ reloaded=sessionStorage.getItem("typinggarden:synced")==="1"; sessionStorage.removeItem("typinggarden:synced"); }catch(e){}
-  if(syncCode && hasDB()){ syncConnect(); if(!reloaded) syncActivate(); }
+  if(syncCode && hasDB() && !tabInactive){
+    syncConnect(); if(!reloaded) syncActivate();
+    // 送っていない届け物が残っていれば、落ち着いてから送る
+    if(unsentNow().keys||unsentNow().screws) setTimeout(()=>{ syncDirty=true; syncPush(false); },5000);
+  }
   renderSyncState();
+}
+/* まだクラウドに送っていない届け物(タイピングから農園へ) */
+const unsentNow = () => { try{ const u=JSON.parse(lsGet("sync:unsent")||"{}")||{}; return { keys:Math.max(0,+u.keys||0), screws:Math.max(0,+u.screws||0) }; }catch(e){ return { keys:0, screws:0 }; } };
+function unsentSub(sent){   // 送れた分を差し引く(送っている間に増えた分は残す)
+  const u=unsentNow();
+  lsSet("sync:unsent", JSON.stringify({ keys:Math.max(0,u.keys-sent.keys), screws:Math.max(0,u.screws-sent.screws) }));
 }
 const syncAlive = dev => dev && Date.now()-(+syncLive[dev]||0) < SYNC_ALIVE;
 /* 持ち主を見直す。持ち主がいない・閉じられていれば自分が持ち主になる */
@@ -8637,8 +8665,17 @@ async function syncActivate(){
   try{
     const base=syncBase();
     const [oS,mS]=await Promise.all([ base.child("owner").once("value"), base.child("meta").once("value") ]);
-    const o=oS.val(), m=mS.val();
-    if(!o || o.device!==syncDevice){ syncOwner=o; syncReadOnly=true; await syncClaim(); }
+    const o=oS.val();
+    let m=mS.val();
+    if(!o || o.device!==syncDevice){
+      syncOwner=o; syncReadOnly=true; await syncClaim();
+      // 前の持ち主が開いているなら、持ち主が変わったのに気づいて最後の操作を送るまで待つ(その間はさわれない)
+      const lv = o && o.device ? (await base.child("live/"+o.device).once("value")).val() : 0;
+      if(o && o.device && (Date.now()-(+lv||0) < SYNC_ALIVE || Date.now()-(+o.t||0) < SYNC_ALIVE)){
+        await new Promise(r=>setTimeout(r,SYNC_HANDOFF_WAIT));
+        m=(await base.child("meta").once("value")).val();
+      }
+    }
     if(m && m.t>syncLastT && m.by!==syncDevice){ syncPending=true; renderSyncState(); }
     syncMaybePull();
   }catch(e){ console.warn("[typinggarden sync]",e); }
@@ -8672,12 +8709,18 @@ async function syncPush(force,urgent,handoff){
   syncPushing=true; syncPushAt=Date.now();
   const base=syncBase(), t=Date.now();
   const wasDirty=syncDirty; syncDirty=false;
+  const sent=unsentNow();
   const bundle=bundleNow();
   try{
+    const [oS,mS]=await Promise.all([ base.child("owner").once("value"), base.child("meta").once("value") ]);
+    const o=oS.val(), m=mS.val();
     // 知らないうちに別のブラウザが持ち主になっていたら送らない(古い記録で上書きしないように)
-    if(!handoff){
-      const o=(await base.child("owner").once("value")).val();
-      if(o && o.device!==syncDevice){ syncOwner=o; syncDirty=false; setReadOnly(true); return true; }
+    if(!handoff && o && o.device!==syncDevice){ syncOwner=o; syncDirty=false; setReadOnly(true); return true; }
+    // ほかのブラウザの新しい記録がまだ取り込まれていない: 送らずに先に取り込む(ほかのブラウザで進めた分を消さないように)
+    if(m && m.t>syncLastT && m.by!==syncDevice){
+      syncDirty=syncDirty||wasDirty;
+      if(!handoff){ syncPending=true; renderSyncState(); setTimeout(syncMaybePull,0); }
+      return true;
     }
     // 前の記録は10分に1回だけバックアップに残す
     if(syncBackupAt==null){
@@ -8691,6 +8734,7 @@ async function syncPush(force,urgent,handoff){
     await base.child("data").set(b64enc(bundle));
     await base.child("meta").set({ t, by:syncDevice });
     syncLastT=t; lsSet("sync:t",String(t));
+    unsentSub(sent);
     renderSyncState();
     return true;
   }catch(e){
@@ -8723,12 +8767,8 @@ async function syncPull(joining){
       return;
     }
     if(syncBusyScene()) return;                         // 遊んでいる最中なら、終わってから
-    // こちらが持ち主で、送っていない操作がある: こちらを優先して送り直す(確認は出さない)
-    if(!joining && !syncReadOnly && syncDirty){
-      syncLastT=m.t; syncPending=false; renderSyncState();
-      await syncPush(true,true);
-      return;
-    }
+    // 新しい記録が届いていれば、こちらに送っていない操作があっても取り込む(古い記録で上書きしないように)。
+    // タイピングの自己ベスト・辞典・まだ送っていない農園への届け物は、取り込む記録に足し戻す
     const mine=bundleNow();
     // 参加するときは、このブラウザの記録もバックアップに残しておく
     if(joining){
@@ -8736,7 +8776,7 @@ async function syncPull(joining){
       try{ await base.child("backups/"+t).set({ data:b64enc(mine), t, from:syncDevLabel()+"(取り込み前)" }); await syncTrimBackups(base); }catch(e){}
     }
     saveLocalPrev(mine);
-    if(!applyBundleString(data)){ const n=$("bkSyncNote"); if(n) n.textContent="※届いた記録を読めませんでした(形式が違います)"; return; }
+    if(!applyBundleString(data,!joining)){ const n=$("bkSyncNote"); if(n) n.textContent="※届いた記録を読めませんでした(形式が違います)"; return; }
     {
       lsSet("sync:t",String(m.t));
       try{ sessionStorage.setItem("typinggarden:return", scene==="garden"?"garden":""); sessionStorage.setItem("typinggarden:synced","1"); }catch(e){}
@@ -8750,10 +8790,31 @@ async function syncPull(joining){
       : "※記録を取り込めませんでした: "+String(e&&(e.code||e.message)||e).slice(0,80);
   }
 }
-function applyBundleString(s){
+/* 取り込む記録に、この端末だけにある記録を足し戻す
+   ・タイピングの自己ベスト(良いほう)・辞典(覚えた言葉を合わせる)・まだ送っていない農園への届け物 */
+function mergeLocalInto(o){
+  try{
+    for(let i=0;i<localStorage.length;i++){
+      const k=localStorage.key(i); if(!k || !k.startsWith(LS_PREFIX+"best-")) continue;
+      const key=k.slice(LS_PREFIX.length), d=key.slice(5);
+      const mine=parseFloat(localStorage.getItem(k)), theirs=parseFloat(o[key]);
+      if(!isNaN(mine) && (isNaN(theirs) || isBetterValue(mine,theirs,d))) o[key]=String(mine);
+    }
+    const dm=JSON.parse(lsGet("dict")||"[]"), dt=JSON.parse(o.dict||"[]");
+    if(Array.isArray(dm) && Array.isArray(dt) && dm.length) o.dict=JSON.stringify([...new Set([...dt,...dm])]);
+    const u=unsentNow();
+    if(u.keys||u.screws){
+      const b=JSON.parse(o["garden:inbox"]||"{}")||{};
+      o["garden:inbox"]=JSON.stringify({ keys:(+b.keys||0)+u.keys, screws:(+b.screws||0)+u.screws });
+    }
+  }catch(e){ console.warn("[typinggarden sync] この端末の記録を足し戻せませんでした",e); }
+  return o;
+}
+function applyBundleString(s,merge){
   let o;
   try{ o=JSON.parse(b64dec(s)); }catch(e){ return false; }
   if(!o||typeof o!=="object") return false;
+  if(merge) mergeLocalInto(o);
   window.tgReplacing=true;
   try{
     const old=[];
@@ -8813,7 +8874,7 @@ async function syncRestore(i){
     await base.child("data").set(b.data);
     await base.child("meta").set({ t:t+1, by:syncDevice });
     await syncTrimBackups(base);
-    if(applyBundleString(b.data)){ lsSet("sync:t",String(t+1)); location.reload(); }
+    if(applyBundleString(b.data)){ lsDel("sync:unsent"); lsSet("sync:t",String(t+1)); location.reload(); }
   }catch(e){ $("bkSyncNote").textContent=syncErrText(e); }
 }
 let syncPreparing=false;   // 最初の保存が終わるまでは、コードを見せない(途中で参加されないように)
@@ -8856,6 +8917,7 @@ async function syncJoin(inp, noteEl){
       syncCode=code; lsSet("sync:code",code); syncReadOnly=false; syncDirty=false;
       await syncClaim();                         // 取り込めるとわかってから、参加したブラウザが持ち主になる
       applyBundleString(data);
+      lsDel("sync:unsent");
       lsSet("sync:t", String((m && +m.t) || t));
       try{ sessionStorage.setItem("typinggarden:return",""); sessionStorage.setItem("typinggarden:synced","1"); }catch(e){}
       location.reload();
@@ -8955,7 +9017,7 @@ document.addEventListener("keyup",syncMarkDirty,true);
 /* 見るだけのブラウザをさわったら、まずこちらに切り替える(その1回の操作は切り替えに使う)。
    記録の引き継ぎ画面の中は、同期を止めたりできるようにそのまま通す */
 function syncGuardInput(e){
-  if(!syncCode||!syncReadOnly||window.tgReplacing) return;
+  if(!syncCode||!(syncReadOnly||syncActivating)||window.tgReplacing) return;
   if(e.target && e.target.closest && e.target.closest("#backup, #fb, #news")) return;
   if(e.type==="keydown" && (e.ctrlKey||e.metaKey||e.altKey||e.key==="Shift")) return;
   e.preventDefault(); e.stopPropagation();
@@ -9247,6 +9309,85 @@ function tutBoot(){
     clearInterval(tutTimer); tutTimer=setInterval(tutTick,300); tutRender();
   }
 }
+
+/* ---------- 同じブラウザで2つ以上開いたとき ----------
+   記録はブラウザの中で1つを共有しているので、2つのタブ(ウィンドウ)で同時に遊ぶと、古いほうの状態で上書きしてしまう。
+   最後にさわったタブだけが遊べて保存する。ほかのタブは何も保存せず「別のタブで開いています」と出し、
+   さわると、遊んでいたタブに保存してもらってから、最新の記録を読み直してこちらで遊べるようにする */
+const TAB_KEY=LS_PREFIX+"sync:tab", TAB_ACK=LS_PREFIX+"sync:tabAck", TAB_ALIVE=90000;
+let tabId=""; try{ tabId=sessionStorage.getItem("typinggarden:tabId")||""; }catch(e){}
+if(!tabId){ tabId=Math.random().toString(36).slice(2)+Date.now().toString(36); try{ sessionStorage.setItem("typinggarden:tabId",tabId); }catch(e){} }
+let tabInactive=false, tabBeatId=null, tabClaiming=false;
+const tabRead = () => { try{ return JSON.parse(localStorage.getItem(TAB_KEY)||"null"); }catch(e){ return null; } };
+const tabWrite = v => { try{ v==null ? localStorage.removeItem(TAB_KEY) : localStorage.setItem(TAB_KEY,JSON.stringify(v)); }catch(e){} };
+const tabOther = v => v && v.id && v.id!==tabId && Date.now()-(+v.t||0) < TAB_ALIVE;   // ほかのタブが遊んでいる
+function tabBeat(){
+  if(tabInactive) return;
+  const v=tabRead();
+  if(v && v.id!==tabId){ tabSleep(); return; }   // ほかのタブがさわられて、そちらで遊び始めた
+  tabWrite({ id:tabId, t:Date.now() });
+}
+/* 今まさに、ほかのタブがこちらの保存を待っている(さわられた直後)か */
+const tabClaimFresh = v => !!(v && v.c && Date.now()-v.c < 5000);
+let tabFlushing=false;
+/* 農園の保存の前に見る: ほかのタブで遊んでいるなら保存しない(止まっていたタブが動き出したときに、古い状態で上書きしないように) */
+window.tabElsewhere = () => {
+  if(tabFlushing) return false;
+  if(tabInactive) return true;
+  const v=tabRead();
+  if(v && v.id && v.id!==tabId){ setTimeout(tabSleep,0); return true; }
+  return false;
+};
+function tabSleep(){
+  if(tabInactive) return;
+  // さわられた直後なら、今の状態を保存して(この端末が持ち主ならクラウドにも送って)から、保存を止める。
+  // 止まっていたあいだに ほかのタブで遊ばれていたときは、古い状態なので保存しない
+  if(tabClaimFresh(tabRead())){
+    tabFlushing=true;
+    try{ Garden.summary(); }catch(e){}
+    try{ if(syncCode){ clearTimeout(syncDirtyTimer); syncPush(false,true); } }catch(e){}
+    tabFlushing=false;
+  }
+  tabInactive=true; window.tgReplacing=true;
+  clearInterval(tabBeatId); tabBeatId=null;
+  try{ syncDisconnect(); }catch(e){}
+  try{ localStorage.setItem(TAB_ACK, (tabRead()||{}).id||""); }catch(e){}
+  tabBanner(true);
+}
+function tabBanner(on){
+  let b=document.getElementById("tabBanner");
+  if(!b && on){
+    b=document.createElement("div"); b.id="tabBanner";
+    b.style.cssText="position:fixed;left:50%;top:12px;transform:translateX(-50%);z-index:100000;max-width:92vw;padding:12px 18px;border-radius:12px;background:#2b2d42;color:#fff;font:600 15px/1.6 system-ui,sans-serif;text-align:center;box-shadow:0 6px 24px rgba(0,0,0,.35);cursor:pointer";
+    b.textContent="このゲームは別のタブ(ウィンドウ)でも開いています。こちらでは保存しません。ここをさわると、最新の記録を読み直してこちらで遊べます";
+    document.body.appendChild(b);
+  }
+  if(b) b.style.display=on?"":"none";
+}
+function tabReload(){ try{ sessionStorage.setItem("typinggarden:return",""); }catch(e){} location.reload(); }
+function tabClaim(){
+  if(tabClaiming) return; tabClaiming=true;
+  const cur=tabRead();
+  try{ localStorage.removeItem(TAB_ACK); }catch(e){}
+  tabWrite({ id:tabId, t:Date.now(), c:Date.now() });
+  // 遊んでいたタブがあれば、保存し終えた合図(TAB_ACK)を待ってから読み直す(来なくても少しで読み直す)
+  if(tabOther(cur)) setTimeout(tabReload,2000); else tabReload();
+}
+window.addEventListener("storage",e=>{
+  if(e.key===TAB_KEY && !tabInactive){ const v=tabRead(); if(v && v.id!==tabId) tabSleep(); }
+  if(e.key===TAB_ACK && tabClaiming && e.newValue===tabId) tabReload();
+});
+// ほかのタブで遊んでいる間は、さわったらこちらに切り替える(その操作は切り替えに使う)
+function tabGuard(e){
+  if(!tabInactive) return;
+  e.preventDefault(); e.stopImmediatePropagation();
+  if(e.type==="keydown" && (e.ctrlKey||e.metaKey||e.altKey||e.key==="Shift")) return;
+  tabClaim();
+}
+for(const ev of ["keydown","pointerdown","click","touchstart"]) window.addEventListener(ev,tabGuard,{capture:true,passive:false});
+window.addEventListener("pagehide",()=>{ if(!tabInactive){ const v=tabRead(); if(v && v.id===tabId) tabWrite(null); } });
+if(tabOther(tabRead())){ tabInactive=true; window.tgReplacing=true; tabBanner(true); }   // ほかのタブで遊んでいる
+else{ tabWrite({ id:tabId, t:Date.now() }); tabBeatId=setInterval(tabBeat,5000); }
 
 refreshBestLine();
 refreshStatsLine();
