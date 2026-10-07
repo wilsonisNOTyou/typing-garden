@@ -81,6 +81,16 @@ body.dishtheme:not(.garden):not(.washi){
     repeating-linear-gradient(45deg, transparent 0 34px, rgba(255,255,255,.05) 34px 36px),
     radial-gradient(ellipse at 50% 0%, color-mix(in srgb, var(--dish) 82%, #fff) 0%, color-mix(in srgb, var(--dish) 68%, #000) 55%, var(--bg) 100%);
 }
+/* 料理の色を2つ(お弁当箱): 背景の光を左右に半分ずつ。左が先に食べた料理、右があとに食べた料理 */
+body.dishtheme.dishsplit:not(.garden):not(.washi){
+  background-image:
+    repeating-linear-gradient(45deg, transparent 0 34px, rgba(255,255,255,.05) 34px 36px),
+    radial-gradient(ellipse at 50% 0%, color-mix(in srgb, var(--dishL) 85%, #fff) 0%, color-mix(in srgb, var(--dishL) 70%, #000) 55%, color-mix(in srgb, var(--dishL) 45%, #0c0c10) 100%),
+    radial-gradient(ellipse at 50% 0%, color-mix(in srgb, var(--dishR) 85%, #fff) 0%, color-mix(in srgb, var(--dishR) 70%, #000) 55%, color-mix(in srgb, var(--dishR) 45%, #0c0c10) 100%);
+  background-size:auto, 50% 100%, 50% 100%;
+  background-position:0 0, left top, right top;
+  background-repeat:repeat, no-repeat, no-repeat;
+}
 .screen{display:none; text-align:center}
 .screen.active{display:block; animation:fadein .25s ease}
 @keyframes fadein{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
@@ -718,7 +728,7 @@ body.garden #app{width:min(960px,96vw); padding:1.2rem 0 2rem}
 #screen-garden .empty{color:var(--ink-l); font-size:.9rem}
 #screen-garden .help{margin-top:1rem; color:var(--ink-l); font-size:.82rem; line-height:1.8; text-align:center}
 #screen-garden .help b{color:var(--ink); background:rgba(255,255,255,.7); border-radius:4px; padding:0 .3em; font-weight:700}
-#screen-garden #g-toasts{position:fixed; top:14px; left:50%; transform:translateX(-50%); z-index:40; display:flex; flex-direction:column; gap:.4rem; align-items:center; pointer-events:none}
+#screen-garden #g-toasts{position:fixed; top:14px; left:50%; transform:translateX(-50%); width:90vw; z-index:40; display:flex; flex-direction:column; gap:.4rem; align-items:center; pointer-events:none}
 #screen-garden .toast{
   background:var(--paper); border:2px solid var(--wood-d); border-radius:10px; padding:.5rem 1rem;
   font-weight:700; box-shadow:0 4px 0 var(--wood-d); max-width:90vw; text-align:center; line-height:1.55;
@@ -1255,11 +1265,23 @@ html.mobile #g-cookShow .csnm{font-size:1.3rem}
 #screen-garden #g-treasBody .ghead:first-child{margin-top:.1rem}
 #screen-garden #g-treasBody .ghead span{font-size:.85rem; color:var(--ink-l)}
 #screen-garden .titem.kitem.cur{outline:3px solid #f4c542; outline-offset:1px}
+/* お気に入りの星 */
+#screen-garden .fstar{display:inline-block; cursor:pointer; color:#c9b88f; font-size:1.05em; line-height:1; padding:.1rem .2rem; margin-right:.15rem; vertical-align:-.05em}
+#screen-garden .fstar.on{color:#f0a500; text-shadow:0 0 6px rgba(255,190,40,.55)}
+#screen-garden .pitem .fstar{flex:none; margin:0 -.1rem 0 0}
+/* 図鑑の検索 */
+#screen-garden .bookq{display:flex; align-items:center; gap:.6rem; margin:0 0 .6rem}
+#screen-garden .bookq input{flex:1; min-width:0; font:inherit; font-size:.95rem; padding:.4rem .7rem; border:2px solid #d9ccb0; border-radius:8px; background:#fffaf0; color:inherit}
+#screen-garden .bookq input:focus{outline:none; border-color:var(--wood)}
+#screen-garden .bookq span{flex:none; font-size:.85rem; color:var(--ink-l)}
+#screen-garden .booklist .rowi.qhide{display:none}
+#screen-garden .booklist .qalt{display:block; font-size:.75rem; font-weight:700; color:#8a4fc8; line-height:1.2}
+html.mobile #screen-garden .bookq input{font-size:16px}   /* スマホで入力欄を押したときに拡大されないように */
 /* 一覧から選ぶ(種・シゴデキ村人の作物) */
 #screen-garden .pickpanel{width:min(860px,96vw)}
 #screen-garden .pickgrp{margin:0 0 .8rem}
 #screen-garden .pickgrp h3{font-size:.85rem; font-weight:800; color:var(--ink-l); margin:0 0 .35rem; letter-spacing:.05em}
-#screen-garden .pickgrid{display:grid; grid-template-columns:repeat(auto-fill,minmax(9rem,1fr)); gap:.4rem}
+#screen-garden .pickgrid{display:grid; grid-template-columns:repeat(auto-fill,minmax(10.5rem,1fr)); gap:.4rem}
 #screen-garden .pitem{display:flex; align-items:center; gap:.45rem; min-width:0; font:inherit; font-size:.9rem; text-align:left; color:inherit;
   cursor:pointer; background:#fffaf0; border:2px solid #d9ccb0; border-radius:10px; padding:.35rem .5rem}
 #screen-garden .pitem .pic{flex:0 0 1.7rem; width:1.7rem; height:1.7rem; display:grid; place-items:center; font-size:1.3rem}
@@ -1581,6 +1603,8 @@ html.mobile #screen-garden .tlist{grid-template-columns:1fr}
       <button class="btn gtab" id="tab-g-earn">累計獲得キー</button>
       <button class="btn gtab" id="tab-g-harvest">累計収穫</button>
       <button class="btn gtab" id="tab-g-book">図鑑</button>
+      <button class="btn gtab" id="tab-g-dbook">料理図鑑</button>
+      <button class="btn gtab" id="tab-g-goal">実績</button>
     </div>
     <ol class="rank-list" id="rankList"></ol>
     <p class="reg-status" id="rankStatus"></p>
@@ -1700,6 +1724,18 @@ html.mobile #screen-garden .tlist{grid-template-columns:1fr}
       <div id="g-pickBody"></div>
     </div>
   </div>
+  <div class="modal" id="g-cvpick">
+    <div class="panel">
+      <div class="phead">
+        <h2>料理番の村人に任せる料理</h2>
+        <div class="money" id="g-cvRate"></div>
+        <button class="sbtn xbtn" data-close>閉じる ✕</button>
+      </div>
+      <p class="tnote" id="g-cvNote"></p>
+      <div id="g-cvBody" class="plist"></div>
+      <div class="keyhint" id="g-cvHint"></div>
+    </div>
+  </div>
   <div class="modal" id="g-treas">
     <div class="panel gachapanel">
       <div class="phead">
@@ -1723,11 +1759,12 @@ html.mobile #screen-garden .tlist{grid-template-columns:1fr}
         <button class="sbtn xbtn" data-close>閉じる ✕</button>
       </div>
       <div class="tabs sptabs"></div>
+      <div class="bookq"><input id="g-bookQ" type="search" placeholder="名前で探す(F)" autocomplete="off" enterkeyhint="search"><span id="g-bookQn"></span></div>
       <div class="book">
         <div id="g-bookList" class="plist booklist"></div>
         <div id="g-bookDetail" class="bookdetail"></div>
       </div>
-      <div class="keyhint"><b>↑ ↓</b> 作物を選ぶ ・ <b>← →</b> 品質(ふつう / ☆ / ☆☆ / ☆☆☆ / 変異 / 超変異)を切り替え ・ <b>Tab</b> 料理図鑑・実績へ ・ <b>Space</b> / <b>Esc</b> 閉じる</div>
+      <div class="keyhint"><b>↑ ↓</b> 作物を選ぶ ・ <b>← →</b> 品質(ふつう / ☆ / ☆☆ / ☆☆☆ / 変異 / 超変異)を切り替え ・ <b>F</b> 名前で探す ・ <b>Tab</b> 料理図鑑・実績へ ・ <b>Space</b> / <b>Esc</b> 閉じる</div>
     </div>
   </div>
 
@@ -1740,11 +1777,12 @@ html.mobile #screen-garden .tlist{grid-template-columns:1fr}
         <button class="sbtn xbtn" data-close>閉じる ✕</button>
       </div>
       <div class="tabs sptabs"></div>
+      <div class="bookq"><input id="g-dbookQ" type="search" placeholder="名前で探す(F)" autocomplete="off" enterkeyhint="search"><span id="g-dbookQn"></span></div>
       <div class="book">
         <div id="g-dbookList" class="plist booklist"></div>
         <div id="g-dbookDetail" class="bookdetail"></div>
       </div>
-      <div class="keyhint"><b>↑ ↓</b> 料理を選ぶ ・ <b>← →</b> ふつう / 変異 / 超変異を切り替え ・ <b>Tab</b> 実績・図鑑へ ・ <b>Space</b> / <b>Esc</b> 閉じる</div>
+      <div class="keyhint"><b>↑ ↓</b> 料理を選ぶ ・ <b>← →</b> ふつう / 変異 / 超変異を切り替え ・ <b>F</b> 名前で探す ・ <b>Tab</b> 実績・図鑑へ ・ <b>Space</b> / <b>Esc</b> 閉じる</div>
     </div>
   </div>
 
@@ -1782,12 +1820,13 @@ html.mobile #screen-garden .tlist{grid-template-columns:1fr}
       <div class="phead">
         <h2>実績</h2>
         <div class="money" id="g-goalRate"></div>
+        <button class="sbtn main" id="g-goalAll" hidden>まとめて受け取る</button>
         <button class="sbtn xbtn" data-close>閉じる ✕</button>
       </div>
       <div class="tabs sptabs"></div>
       <p class="tnote">実績を解除すると、ごほうびのキーを受け取れます。次に何をするか迷ったら、ここを見てください。</p>
       <div id="g-goalBody" class="plist"></div>
-      <div class="keyhint"><b>↑ ↓</b> 選ぶ ・ <b>Enter</b> ごほうびを受け取る ・ <b>Tab</b> 図鑑・料理図鑑へ ・ <b>Space</b> / <b>Esc</b> 閉じる</div>
+      <div class="keyhint"><b>↑ ↓</b> 選ぶ ・ <b>Enter</b> ごほうびを受け取る ・ <b>A</b> まとめて受け取る ・ <b>Tab</b> 図鑑・料理図鑑へ ・ <b>Space</b> / <b>Esc</b> 閉じる</div>
     </div>
   </div>
 
@@ -1796,7 +1835,7 @@ html.mobile #screen-garden .tlist{grid-template-columns:1fr}
     <div class="panel savebox">
       <div class="phead"><h2>番付</h2><button class="sbtn xbtn" data-close style="margin-left:auto">閉じる ✕</button></div>
       <p id="g-rankNow"></p>
-      <p>所持キー・累計獲得キー・累計収穫数・図鑑の番付(ランキング)です。プレイヤー名で自動で載り、庭を出るたびに更新されます。名前を書きかえて Enter で、ランキングと番付の名前をまとめて変えられます。</p>
+      <p>所持キー・累計獲得キー・累計収穫数・図鑑・料理図鑑・実績の番付(ランキング)です。プレイヤー名で自動で載り、庭を出るたびに更新されます。名前を書きかえて Enter で、ランキングと番付の名前をまとめて変えられます。</p>
       <input id="g-rankName" class="rk-input" maxlength="10" placeholder="庭主の名前" autocomplete="off">
       <div class="pfoot"><span class="note" id="g-rankNote"></span><button class="sbtn main" id="g-rankBtn">決める(Enter)</button></div>
       <div class="tabs grk-tabs" id="g-rankTabs">
@@ -1804,10 +1843,12 @@ html.mobile #screen-garden .tlist{grid-template-columns:1fr}
         <button class="tab" data-rk="g-earn">累計獲得</button>
         <button class="tab" data-rk="g-harvest">累計収穫</button>
         <button class="tab" data-rk="g-book">図鑑</button>
+        <button class="tab" data-rk="g-dbook">料理図鑑</button>
+        <button class="tab" data-rk="g-goal">実績</button>
       </div>
       <ol class="grk-list" id="g-rankList"></ol>
       <p class="grk-note" id="g-rankListNote"></p>
-      <div class="keyhint"><b>N</b> 名前を書きかえる → <b>Enter</b> ・ 入力欄の <b>Esc</b> で入力をやめる ・ <b>← →</b> 所持キー / 累計獲得 / 累計収穫 / 図鑑 ・ <b>9</b> / <b>Esc</b> 閉じる</div>
+      <div class="keyhint"><b>N</b> 名前を書きかえる → <b>Enter</b> ・ 入力欄の <b>Esc</b> で入力をやめる ・ <b>← →</b> 所持キー / 累計獲得 / 累計収穫 / 図鑑 / 料理図鑑 / 実績 ・ <b>9</b> / <b>Esc</b> 閉じる</div>
     </div>
   </div>
 
@@ -2317,10 +2358,10 @@ const DIFF_LABEL = {
 const MISS_PENALTY = { easy: 10, normal: 7, hard: 5 }; // このミス数ごとにキー-1本
 const DICT_TABS = ["easy","normal","hard"];            // 辞典に並べる難易度
 /* ランキングのタブ: スコアアタック → タイムアタック → ノーミス勝負 の順 */
-const RANK_TABS = ["easy","normal","hard","ta-easy","ta-normal","ta-hard","oneshot", "g-money","g-earn","g-harvest","g-book"];
-const isGardenRank = d => d==="g-money" || d==="g-harvest" || d==="g-book" || d==="g-earn";
-const gRankUnit = d => (d==="g-money"||d==="g-earn") ? "キー" : (d==="g-book" ? "項目" : "個");
-DIFF_LABEL["g-money"]="キーボード農園 所持キー"; DIFF_LABEL["g-harvest"]="キーボード農園 累計収穫"; DIFF_LABEL["g-book"]="キーボード農園 図鑑"; DIFF_LABEL["g-earn"]="キーボード農園 累計獲得キー";
+const RANK_TABS = ["easy","normal","hard","ta-easy","ta-normal","ta-hard","oneshot", "g-money","g-earn","g-harvest","g-book","g-dbook","g-goal"];
+const isGardenRank = d => d==="g-money" || d==="g-harvest" || d==="g-book" || d==="g-earn" || d==="g-dbook" || d==="g-goal";
+const gRankUnit = d => (d==="g-money"||d==="g-earn") ? "キー" : (d==="g-book"||d==="g-dbook" ? "項目" : "個");
+DIFF_LABEL["g-money"]="キーボード農園 所持キー"; DIFF_LABEL["g-harvest"]="キーボード農園 累計収穫"; DIFF_LABEL["g-book"]="キーボード農園 図鑑"; DIFF_LABEL["g-dbook"]="キーボード農園 料理図鑑"; DIFF_LABEL["g-goal"]="キーボード農園 実績"; DIFF_LABEL["g-earn"]="キーボード農園 累計獲得キー";
 
 /* タイムアタック: モードごとの出題元と規定本数 */
 const TA_MODES = {
@@ -3564,6 +3605,17 @@ function endBookGame(){
 /* ---------- 更新情報 ----------
    新しいものを上に足していく。d は YYYY-MM-DD */
 const NEWS=[
+  { d:"2026-10-08", t:"番付に「料理図鑑」と「実績」が登場しました", items:[
+    "料理図鑑の埋まった数と、受け取った実績の数で競う番付です",
+    "農園の番付(9)と、タイトルのランキングの両方で見られます。これまでの分もさかのぼって数えます",
+  ]},
+  { d:"2026-10-08", t:"便利な機能を追加しました", items:[
+    "実績をまとめて受け取れるようになりました(実績の画面の「まとめて受け取る」、または A)",
+    "図鑑と料理図鑑で、名前で探せるようになりました(F)。変異・超変異・上位種の名前でも探せます(見つけたものだけ)",
+    "料理(作る・食べる)と種をお気に入りにできるようになりました(S、または☆)。お気に入りは一覧の一番上に並び、種は ← → で選ぶときも先に来ます",
+    "村人の収穫のお知らせが何重にも重ならず、種類ごとに1つにまとまって数が増えていくようになりました",
+    "画面の色の料理の効果が2つかかっているときは、ホーム画面とタイピングの背景が左右に2つの色で分かれるようになりました",
+  ]},
   { d:"2026-10-07", t:"種を一覧から選べるようになりました", items:[
     "4を長押しするか、すばやく2回押すと、持っている種の一覧が出ます。矢印キーで選んで Enter で決めます(スマホは道具の「種」の欄を長押し)",
     "種はレア度ごとに並び、曜日限定の種は別にまとめています。← → で1つずつ選ぶこともこれまでどおりできます",
@@ -4195,7 +4247,7 @@ const GURS = [
     art:`<svg viewBox="0 0 32 32"><circle cx="16" cy="16" r="14" fill="#7fd8e8" opacity="0.35"/><rect x="5" y="18" width="22" height="9" rx="1.4" fill="#2a1a1a"/><rect x="5" y="10" width="22" height="9" rx="1.4" fill="#c8202a"/><path d="M5 18.6h22M5 26h22" stroke="#f4c542" stroke-width="1"/><path d="M7 14h18M7 22.4h18" stroke="#f4c54288" stroke-width=".6"/><path d="M16 10c-2-3-6-4-7-2 2 0 4 1 7 2zm0 0c2-3 6-4 7-2-2 0-4 1-7 2z" fill="#4a9ad8"/><circle cx="16" cy="10" r="1.4" fill="#2a6aa8"/><path d="M14 10.6l-2.4 4.6M18 10.6l2.4 4.6" stroke="#4a9ad8" stroke-width="1.4" stroke-linecap="round"/><g fill="#f4c542"><circle cx="9" cy="14.4" r=".8"/><circle cx="23" cy="14.4" r=".8"/></g><path d="M27 2.8l0.6 1.6 1.6 0.6-1.6 0.6-0.6 1.6-0.6-1.6-1.6-0.6 1.6-0.6z" fill="#ffffff"/><path d="M5 4.2l0.5 1.3 1.3 0.5-1.3 0.5-0.5 1.3-0.5-1.3-1.3-0.5 1.3-0.5z" fill="#ffffff"/></svg>` },
   { id:"fridge", r:"GUR", gur:true, name:"魔法の冷蔵庫", icon:"✨", desc:"ゲームを閉じている間、料理の効果時間が減らなくなります", lore:"星を閉じこめた冷蔵庫。中に入れたものの時間は、扉を閉めているあいだ止まっている。",
     art:`<svg viewBox="0 0 32 32"><circle cx="16" cy="16" r="14" fill="#7fd8e8" opacity="0.35"/><rect x="8" y="3.6" width="16" height="25.4" rx="2.4" fill="#eaf6ff" stroke="#8ab8d8" stroke-width="1"/><path d="M8 12.4h16" stroke="#8ab8d8" stroke-width="1"/><rect x="20.4" y="6.4" width="1.6" height="4" rx=".6" fill="#8ab8d8"/><rect x="20.4" y="15" width="1.6" height="6" rx=".6" fill="#8ab8d8"/><path d="M8 6c2 1 3 0 4 1.4s2 .4 3 1.2" stroke="#ffffff" stroke-width="1.2" fill="none"/><path d="M10.6 17h2.8M12 15.6v2.8M11 16l2 2M11 18l2-2" stroke="#9fd0f0" stroke-width=".6"/><path d="M13.6 23h2.8M15 21.6v2.8M14 22l2 2M14 24l2-2" stroke="#9fd0f0" stroke-width=".6"/><path d="M11.0 8.6h2.8M12.4 7.199999999999999v2.8M11.4 7.6l2 2M11.4 9.6l2-2" stroke="#9fd0f0" stroke-width=".6"/><path d="M26 18c0-2 1-3 2.4-3.4" stroke="#b49cf0" stroke-width="1" fill="none"/><path d="M27 6.6l0.7 1.8 1.8 0.7-1.8 0.7-0.7 1.8-0.7-1.8-1.8-0.7 1.8-0.7z" fill="#c8b0ff"/><path d="M5 20.0l0.5 1.4 1.4 0.5-1.4 0.5-0.5 1.4-0.5-1.4-1.4-0.5 1.4-0.5z" fill="#c8b0ff"/><path d="M28 24.5l0.4 1.1 1.1 0.4-1.1 0.4-0.4 1.1-0.4-1.1-1.1-0.4 1.1-0.4z" fill="#ffffff"/></svg>` },
-  { id:"cookvil", r:"GUR", gur:true, name:"料理番の村人", icon:"✨", desc:"決めた料理を、材料があるかぎり自動で作り置きします(1人で1種類。料理の「作る」で A)", lore:"おたまを手にした村人。作り置きが10個に満たないと、黙って台所に立つ。",
+  { id:"cookvil", r:"GUR", gur:true, name:"料理番の村人", icon:"✨", desc:"決めた料理を、材料があるかぎり自動で作り置きします(1人で1種類。台所の宝物で、任せる料理と作り置きの数を選べます)", lore:"おたまを手にした村人。作り置きが決めた数に満たないと、黙って台所に立つ。",
     art:`<svg viewBox="0 0 32 32"><circle cx="16" cy="16" r="14" fill="#7fd8e8" opacity="0.35"/><path d="M8 29c0-6 3.6-9.6 8-9.6s8 3.6 8 9.6z" fill="#ffffff" stroke="#c8c8c8" stroke-width=".6"/><path d="M14 20l2 3 2-3" fill="#e05a5a"/><circle cx="16" cy="14.6" r="5" fill="#f4d2b0"/><circle cx="14.2" cy="14.4" r=".7" fill="#3a2a1a"/><circle cx="17.8" cy="14.4" r=".7" fill="#3a2a1a"/><path d="M14.6 16.8c.9.6 1.9.6 2.8 0" stroke="#a0603a" stroke-width=".8" fill="none"/><path d="M11 10.6c-2.4 0-3.4-2.4-2-4 .4-2.6 3.4-3.4 4.6-1.8 1-2.2 4-2.2 4.8 0 1.4-1.6 4.4-.6 4.4 1.8 1.4 1.6.4 4-2 4z" fill="#ffffff" stroke="#c8c8c8" stroke-width=".6"/><rect x="11" y="9.4" width="10" height="2" fill="#ffffff" stroke="#c8c8c8" stroke-width=".5"/><path d="M25 11v11" stroke="#9aa6b4" stroke-width="1.4" stroke-linecap="round"/><path d="M22.4 22.6c0 2 1.2 3 2.6 3s2.6-1 2.6-3z" fill="#9aa6b4"/><path d="M5 22c-1-1.2 1-1.8 0-3" stroke="#ffffff" stroke-width=".9" fill="none" opacity=".9"/></svg>` },
   { id:"kamado", r:"GUR", gur:true, name:"永遠のかまど", icon:"✨", desc:"画面の色を、好きな料理の色にずっと固定できます。選べるのは食べたことのある料理の色です", lore:"決して消えない火が燃えるかまど。火の色は、最後に作った料理の色に変わる。",
     art:`<svg viewBox="0 0 32 32"><circle cx="16" cy="16" r="14" fill="#7fd8e8" opacity="0.35"/><path d="M4 29V16c0-5 5-9 12-9s12 4 12 9v13z" fill="#9a8a7a"/><path d="M5 19h22" stroke="#7a6a5a" stroke-width=".8"/><path d="M5 24h22" stroke="#7a6a5a" stroke-width=".8"/><path d="M7 13h18" stroke="#7a6a5a" stroke-width=".8"/><path d="M10 29v-6c0-3.4 2.6-6 6-6s6 2.6 6 6v6z" fill="#2a1a12"/><path d="M12 29c-1-3 1-5 2-7 0 2 1 2 1.4 1 .4-2 1.2-4 2.6-5 0 3 2 4 2 7 0 2-1 3-1.6 4z" fill="#ff5a3a"/><path d="M13.6 29c-.4-2 .8-3.4 1.6-4.4.2 1.4 1 1.4 1.4.4.6 1 1.4 2.4 1 4z" fill="#ffd84a"/><path d="M14.6 29c0-1.2.6-2 1.2-2.6.4.8 1 1.6.8 2.6z" fill="#9fe0ff"/><path d="M13 5c-1.2-1.4 1.2-2.2 0-3.6M19 5c-1.2-1.4 1.2-2.2 0-3.6" stroke="#c8b0ff" stroke-width="1" fill="none" stroke-linecap="round"/><path d="M26 3.8l0.6 1.6 1.6 0.6-1.6 0.6-0.6 1.6-0.6-1.6-1.6-0.6 1.6-0.6z" fill="#ffb0e0"/><path d="M6 4.2l0.5 1.3 1.3 0.5-1.3 0.5-0.5 1.3-0.5-1.3-1.3-0.5 1.3-0.5z" fill="#b0ffcf"/></svg>` },
@@ -4684,7 +4736,7 @@ function newState(){
     fields:[makeField()], cur:0,
     tool:1, seedId:"carrot", objSel:"spr",
     seeds:{ carrot:4 }, inv:{}, canLv:1, hoeLv:1, sickLv:1, fert:0, objs:{}, auto:{},
-    food:{}, mfert:0, sfert:0, fertSel:"fert", sgVil:0, kit:{}, hourglass:0, bento:0, bentoUntil:0, buff2:null, autoCook:[], kamado:"", sgCrop:"carrot",
+    food:{}, mfert:0, sfert:0, fertSel:"fert", sgVil:0, kit:{}, hourglass:0, bento:0, bentoUntil:0, buff2:null, autoCook:[], cookKeep:10, fav:{s:{},d:{}}, kamado:"", sgCrop:"carrot",
     recipes:{}, dishes:{}, dishMade:{}, dishEaten:{}, buff:null,
     harvestBy:{}, harvestQ:{}, got:{}, gachaCount:0, treas:{}, known:["carrot","potato"], lastCrow:[],
     lastTick:Date.now(), created:Date.now(),
@@ -4737,7 +4789,7 @@ function normalize(o){
   if(s.cookCount==null) s.cookCount=Object.values(s.dishes).reduce((a,st)=>a+Object.values(st||{}).reduce((x,n)=>x+(n||0),0),0);
   s.ateCount=s.ateCount||0; s.prepCount=s.prepCount||0;
   if(s.buff && !(s.buff.d && s.buff.until)) s.buff=null;
-  s.food=s.food||{}; s.mfert=s.mfert||0; s.sfert=s.sfert||0; s.sgVil=s.sgVil||0; s.kit=s.kit||{}; s.hourglass=s.hourglass||0; s.bento=s.bento||0; s.autoCook=s.autoCook||[]; s.kamado=s.kamado||""; s.sgCrop=s.sgCrop||"carrot";
+  s.food=s.food||{}; s.mfert=s.mfert||0; s.sfert=s.sfert||0; s.sgVil=s.sgVil||0; s.kit=s.kit||{}; s.hourglass=s.hourglass||0; s.bento=s.bento||0; s.autoCook=s.autoCook||[]; if(![0,1,10].includes(s.cookKeep)) s.cookKeep=10; s.fav=s.fav||{}; s.fav.s=s.fav.s||{}; s.fav.d=s.fav.d||{}; s.kamado=s.kamado||""; s.sgCrop=s.sgCrop||"carrot";
   if(!["fert","sfert","mfert"].includes(s.fertSel)) s.fertSel="fert";
   s.villagers=s.villagers||0; s.vLog=s.vLog||{}; s.vilLv=s.vilLv||0;
   if(!s.owner) s.owner=Math.random().toString(36).slice(2)+Date.now().toString(36);
@@ -5458,7 +5510,18 @@ function renderBasket(){
 /* 手持ちの種・設置物(1つ以上あるもの) */
 /* 種の並びは売値の安い順(貴重品の種は最後)。◀ ▶ もこの順に動く */
 const seedRank = id => { const c=CROP[id]; return !c ? 0 : (c.treasure ? Infinity : c.price); };
-const ownedSeeds=()=>CROPS.filter(c=>(S.seeds[c.id]||0)>0).map(c=>c.id).sort((a,b)=>seedRank(a)-seedRank(b));
+/* お気に入り(種・料理): 一覧や ← → の順番で一番上に来る */
+const isFavS = id => !!(S.fav && S.fav.s && S.fav.s[id]);
+const isFavD = id => !!(S.fav && S.fav.d && S.fav.d[id]);
+function toggleFav(kind,id){
+  S.fav=S.fav||{s:{},d:{}}; const m=S.fav[kind]=S.fav[kind]||{};
+  if(m[id]) delete m[id]; else m[id]=true;
+  sfx.tab(); save();
+  const nm = kind==="s" ? CROP[id].name+"の種" : DISH[id].name;
+  toast(m[id] ? `★ ${esc(nm)}をお気に入りにしました(一番上に並びます)` : `${esc(nm)}をお気に入りから外しました`,"",2200,true);
+}
+const starHtml = (kind,id) => { const on = kind==="s" ? isFavS(id) : isFavD(id); return `<span class="fstar${on?" on":""}" data-star="${kind}:${id}" title="お気に入り(S)">${on?"★":"☆"}</span>`; };
+const ownedSeeds=()=>CROPS.filter(c=>(S.seeds[c.id]||0)>0).map(c=>c.id).sort((a,b)=>(isFavS(b)-isFavS(a)) || seedRank(a)-seedRank(b));
 /* 手持ちがなくなった種の次に持つ種: それより高い種のうち一番安いもの。無ければ手持ちで一番高い種 */
 function nextSeed(fromId){
   const o=ownedSeeds(); if(!o.length) return fromId;
@@ -5763,12 +5826,13 @@ function openModal(name){
   if(name==="shop") renderShop();
   if(name==="gacha") renderGacha();
   if(name==="treas") renderTreas();
-  if(name==="book") renderBook();
+  if(name==="book"){ bookQ=""; $("g-bookQ").value=""; renderBook(); }
   if(name==="rank") prepareRank();
   if(name==="goal") renderGoals();
-  if(name==="dbook") renderDbook();
+  if(name==="dbook"){ dbookQ=""; $("g-dbookQ").value=""; renderDbook(); }
   if(name==="cook") renderCook();
   if(name==="pick") renderPick();
+  if(name==="cvpick") renderCvPick();
   if(SPACE_ALL.some(([m])=>m===name)) renderSpaceTabs();
 }
 function closeModal(silent){
@@ -6294,10 +6358,15 @@ function gainGur(id){   // 返す文は、その宝物をはじめて手に入�
   if(id==="bento"){ S.bento=(S.bento||0)+1;
     return `${I} 二段重ねのお弁当箱を手に入れました! 使うと1時間、料理の効果を2つまで同時にかけられます(同じ効果は重ならず、強い方だけが効きます)。${KT}で${kb("選んで Enter で使えます","タップして選び、もう一度タップで使えます")}`; }
   if(g.kit || ["fridge","cookvil","kamado"].includes(id)){
+    // 上限まで重ねた宝物と、1つで足りる宝物(冷蔵庫・かまど)の2つ目からは、かわりにネジを受け取る
+    if((g.kit && kitVal(id)>=g.kit.cap) || ((id==="fridge"||id==="kamado") && ((S.kit&&S.kit[id])||0)>0)){
+      S.money+=1000000; S.totalSales+=1000000;
+      return `${I} ${g.name}! ${g.kit?"もう効果の上限まで重ねている":"もう持っている"}ので、かわりに 1,000,000キー を受け取りました`;
+    }
     S.kit=S.kit||{}; S.kit[id]=(S.kit[id]||0)+1;
     const k=g.kit, more = k ? `重ねるほど強くなり、最大 +${k.cap}${k.unit}です` : "";
     if(id==="fridge")  return `${I} 魔法の冷蔵庫を手に入れました! これからは、ゲームを閉じている間も料理の効果時間が減りません(持っているだけで効きます)`;
-    if(id==="cookvil") return `${I} 料理番の村人が来てくれました! 決めた料理を、材料があるかぎり自動で作り置きしてくれます。${kb("料理(0)の「作る」で任せたい料理を選んで A を押してください","料理の「作る」で、任せたい料理の「料理番に任せる」を押してください")}(1人で1種類)`;
+    if(id==="cookvil") return `${I} 料理番の村人が来てくれました! 決めた料理を、材料があるかぎり自動で作り置きしてくれます。${kb("台所の宝物(8 → Tab)で料理番の村人を選んで Enter を押すと、任せる料理を選べます","台所の宝物で料理番の村人をタップすると、任せる料理を選べます")}(1人で1種類)`;
     if(id==="kamado")  return `${I} 永遠のかまどを手に入れました! 画面の色を、食べたことのある料理の色にずっと固定できます。${KT}で${kb(" Q / E を押して"," ◀ ▶ を押して")}色を選んでください`;
     if(id==="pan")     return `${I} 鉄のフライパンを手に入れました! 料理の効果時間が +${k.per}${k.unit} 延びます(${more})`;
     if(id==="pot")     return `${I} 鉄の両手鍋を手に入れました! 料理を作ると、+${k.per}${k.unit}の確率でもう1つできます(${more})`;
@@ -6641,15 +6710,15 @@ function gachaHTML(){
 const TREASURES = CROPS.filter(c=>c.treasure);
 let treasTab=0, kitCur=0;
 const kitAny = () => KIT_ORDER.some(id=>(S.got[id]||0)>0);   // 台所の宝物はシークレット: 1つ手に入れるまでタブを出さない
-const KIT_NOTE="わくわくガチャの GHR・GUR から出る台所の宝物です。重ねるほど強くなるものもあります(上限あり)。"+kb("使うものは、選んで Enter で使います。","使うものは、タップして選び、もう一度タップで使います。");   // ほかの宝物の名前は書かない(ネタバレになるため)
+const KIT_NOTE="わくわくガチャの GHR・GUR から出る台所の宝物です。重ねるほど強くなるものもあります(上限あり。上限をこえた分や、1つで足りるものの2つ目からは、かわりに 1,000,000キー を受け取ります)。"+kb("使うものは、選んで Enter で使います。","使うものは、タップして選び、もう一度タップで使います。");   // ほかの宝物の名前は書かない(ネタバレになるため)
 const TREAS_NOTE="ガチャの GHR から出る種を育てると手に入ります。売ることはできませんが、持っているだけで農園にずっと効きます(同じものを重ねるほど強くなります)。";
 function kitSub(id){   // 台所の宝物の「今の状態」
   const g=GUR[id], n=kitN(id);
   if(g.kit) return `今の合計 <b>+${kitVal(id)}${g.kit.unit}</b>${kitVal(id)>=g.kit.cap?" (上限)":""}`;
   if(id==="hourglass"||id==="bento") return n>0?`${kb("<b>Enter</b> で使う","もう一度タップで使う")}${id==="bento"&&bentoOn()?` ・ 使っています(残り ${fmtLeft(S.bentoUntil-Date.now())})`:""}`:"";
   if(id==="fridge") return "";
-  if(id==="cookvil") return n>0?`任せている料理 <b>${(S.autoCook||[]).length} / ${n}</b>(${kb("料理の「作る」で A","料理の「作る」の「料理番に任せる」")})`:"";
   const sw = `<span class="kswap"><button class="sbtn" data-kd="-1">${kb("◀ Q","◀")}</button><button class="sbtn" data-kd="1">${kb("E ▶","▶")}</button></span>`;   // ボタンは名前より前(名前の長さで位置が動かないように)
+  if(id==="cookvil") return n>0?`作り置き ${sw}<br><b>${cookKeepTxt()}</b> ・ 任せている料理 <b>${(S.autoCook||[]).length} / ${n}</b>(${kb("Enter","もう一度タップ")}で任せる料理を選ぶ)`:"";
   if(id==="kamado") return n>0?`画面の色 ${sw}<br><b>${S.kamado&&DISH[S.kamado]?`${esc(M_COLOR[S.kamado]||"")}(${esc(DISH[S.kamado].name)})`:"なし"}</b>`:"";
   if(id==="sgvil") return n>0?`育てる作物 ${sw}<br><b>${ico(CROP[sgCropId()])} ${esc(CROP[sgCropId()].name)}</b>(${kb("Enter","もう一度タップ")}で一覧から選ぶ) ・ 使っている区画 <b>${vilUsed("sg")} / ${(S.sgVil||0)*SG_SLOTS}</b>`:"";
   if(id==="sgk") return n>0?`${OBJ_HOW}畑の P に置くと、1打の時短 +2分・カラスよけ・自動の水やり`:"";
@@ -6707,6 +6776,11 @@ function kitAct(dir){   // Enter(dir=0)・Shift+Enter(dir=-1)・◀▶ のボタ
     const ids=["",...kamadoDishes()];
     if(ids.length<2){ sfx.nope(); toast("画面の色の料理を食べると、その色を選べるようになります","warn",3600); return; }
     S.kamado=ids[(ids.indexOf(S.kamado||"")+dir+ids.length)%ids.length]; sfx.tab(); applyTheme();
+  }else if(id==="cookvil" && dir){
+    S.cookKeep=COOK_KEEPS[(COOK_KEEPS.indexOf(S.cookKeep)+dir+COOK_KEEPS.length)%COOK_KEEPS.length]; sfx.tab();
+    autoCookAt=0;   // すぐに作り置きを見直す
+  }else if(id==="cookvil" && !dir){
+    openModal("cvpick"); return;
   }else if(id==="sgvil" && !dir){
     openPick("sg"); return;
   }else if(id==="sgvil" && dir){
@@ -6739,29 +6813,35 @@ function renderTreas(){
 /* ---------- 一覧から選ぶ ----------
    種(4 の長押し・スマホは種の欄の長押し)と、シゴデキ村人が育てる作物(台所の宝物でシゴデキ村人を選んで Enter)。
    レア度ごとに並べ、矢印キーで選んで Enter で決める */
-const PICK_RANKS=["N","R","SR","HR","UR","GSR","GHR","曜日限定"];
-const pickGroup = id => CROP[id].day!=null ? "曜日限定" : (CROP[id].r||"N");   // 曜日限定の作物はレア度と分けて並べる
+const PICK_RANKS=["お気に入り","N","R","SR","HR","UR","GSR","GHR","曜日限定"];
+const pickGroup = id => pickKind==="seed" && isFavS(id) ? "お気に入り" : CROP[id].day!=null ? "曜日限定" : (CROP[id].r||"N");   // お気に入りは一番上、曜日限定の作物はレア度と分けて並べる
 let pickKind="seed", pickCur=0, pickIds=[], lastFour=0;
 function openPick(kind){
   pickKind=kind;
   pickIds = kind==="sg" ? sgCrops().map(c=>c.id) : ownedSeeds();
   if(!pickIds.length){ sfx.nope(); toast(kind==="sg" ? "まだ選べる作物がありません(一度収穫した作物から選べます)" : kb("種がありません。Tab でお店へ","種がありません。お店で買えます"),"warn"); return; }
   // レア度の順(同じレア度の中は今の並びのまま)
-  pickIds = PICK_RANKS.flatMap(r=>pickIds.filter(id=>pickGroup(id)===r)).concat(pickIds.filter(id=>!PICK_RANKS.includes(pickGroup(id))));
+  pickSort();
   const now = kind==="sg" ? sgCropId() : S.seedId;
   pickCur=Math.max(0, pickIds.indexOf(now));
   openModal("pick");
 }
+function pickSort(){ pickIds = PICK_RANKS.flatMap(r=>pickIds.filter(id=>pickGroup(id)===r)).concat(pickIds.filter(id=>!PICK_RANKS.includes(pickGroup(id)))); }
+/* 種の一覧でお気に入りを付け外しする(選んでいる種は、並びが変わっても選んだまま) */
+function pickFav(i){
+  const id=pickIds[i]; if(!id || pickKind!=="seed") return;
+  toggleFav("s",id); pickSort(); pickCur=pickIds.indexOf(id); renderPick(); renderAll();
+}
 function renderPick(){
   const sg=pickKind==="sg", now = sg ? sgCropId() : S.seedId;
   $("g-pickTitle").textContent = sg ? "シゴデキ村人が育てる作物" : "種を選ぶ";
-  $("g-pickNote").innerHTML = (sg ? "図鑑に載っている作物から選べます。" : "持っている種です。")+kb("<b>矢印キー</b> で選んで <b>Enter</b> で決定 ・ <b>Esc</b> 閉じる","タップして選びます");
+  $("g-pickNote").innerHTML = (sg ? "図鑑に載っている作物から選べます。" : "持っている種です。☆でお気に入り(一番上に並びます)。")+kb("<b>矢印キー</b> で選んで <b>Enter</b> で決定"+(sg?"":" ・ <b>S</b> お気に入り")+" ・ <b>Esc</b> 閉じる","タップして選びます");
   let i=0;
   $("g-pickBody").innerHTML = PICK_RANKS.concat("").map(r=>{
     const ids=pickIds.filter(id=>r ? pickGroup(id)===r : !PICK_RANKS.includes(pickGroup(id)));
     if(!ids.length) return "";
     return `<div class="pickgrp"><h3>${r||"そのほか"}</h3><div class="pickgrid">${ids.map(id=>{ const c=CROP[id], j=i++;
-      return `<button class="pitem${j===pickCur?" cur":""}${id===now?" sel":""}" data-i="${j}" tabindex="-1"><span class="pic">${ico(c)}</span><span class="pnm">${esc(c.name)}</span>${sg?"":`<span class="pct">×${fmtNum(S.seeds[id]||0)}</span>`}</button>`; }).join("")}</div></div>`;
+      return `<button class="pitem${j===pickCur?" cur":""}${id===now?" sel":""}" data-i="${j}" tabindex="-1">${sg?"":starHtml("s",id)}<span class="pic">${ico(c)}</span><span class="pnm">${esc(c.name)}</span>${sg?"":`<span class="pct">×${fmtNum(S.seeds[id]||0)}</span>`}</button>`; }).join("")}</div></div>`;
   }).join("");
   const cur=$("g-pickBody").querySelector(".pitem.cur"); if(cur && cur.scrollIntoView) cur.scrollIntoView({block:"nearest"});
 }
@@ -6794,8 +6874,9 @@ function pickKey(e){
   if(k==="ArrowLeft"||k==="ArrowRight"){ e.preventDefault(); pickCur=(pickCur+(k==="ArrowRight"?1:-1)+n)%n; sfx.cursor(); renderSoon(renderPick); return; }
   if(k==="ArrowUp"||k==="ArrowDown"){ e.preventDefault(); pickMove(k==="ArrowDown"?1:-1); sfx.cursor(); renderSoon(renderPick); return; }
   if(k==="Enter"){ e.preventDefault(); pickChoose(pickCur); }
+  if(k==="s"||k==="S"){ e.preventDefault(); pickFav(pickCur); }
 }
-$("g-pickBody").addEventListener("click",e=>{ const it=e.target.closest && e.target.closest(".pitem"); if(it) pickChoose(+it.dataset.i); });
+$("g-pickBody").addEventListener("click",e=>{ const it=e.target.closest && e.target.closest(".pitem"); if(!it) return; if(e.target.closest("[data-star]")){ pickFav(+it.dataset.i); return; } pickChoose(+it.dataset.i); });
 // スマホ・マウス: 種の欄を長押しすると一覧
 {
   const slot=root.querySelector('.slot[data-tool="4"]'); let t=null, fired=false;
@@ -6806,6 +6887,58 @@ $("g-pickBody").addEventListener("click",e=>{ const it=e.target.closest && e.tar
   slot.addEventListener("dblclick",e=>{ if(!e.target.closest(".arr")) openPick("seed"); });
   slot.addEventListener("click",e=>{ if(fired){ fired=false; e.stopImmediatePropagation(); } },true);
 }
+/* 料理番の村人に任せる料理: レシピを持っている料理を並べ、段階を選んで任せる / やめる */
+let cvCur=0, cvRows=[];
+const cvGrade={};
+function cvRowsOf(){
+  const ac=S.autoCook||[];
+  return DISHES.filter(d=>S.recipes[d.id]).sort((a,b)=>isFavD(b.id)-isFavD(a.id)).map(d=>{
+    const g = cvGrade[d.id] ?? ((ac.find(a=>a.id===d.id)||{}).g ?? 0);
+    const on=ac.some(a=>a.id===d.id && a.g===g), others=ac.filter(a=>a.id===d.id && a.g!==g).map(a=>gradeName(a.g));
+    const made=!!(S.dishMade[d.id]||{})[bookKeyOf(g)], seen=!isMutT(g)||made;
+    return { d, g, on, ic:`<span class="dic${g===5?" sup":g===3?" mut":""}">${made?dishIco(d,g):"❔"}</span>`,
+      nm:`${seen?esc(dishName(d,g)):`？？？(${esc(d.name)}の${gradeName(g)})`} <span class="dgrade${g===3?" mut":g===5?" sup":""}">◀ ${gradeName(g)} ▶</span>${on?' <small class="dauto">🧑‍🍳 任せている</small>':""}`,
+      ds:`作り置き ×${(S.dishes[d.id]||{})[g]||0}${others.length?` ・ ${others.join("・")}も任せています`:""}`,
+      keys:`<b>Enter</b> ${on?"任せるのをやめる":"任せる"}` };
+  });
+}
+function renderCvPick(){
+  const n=kitN("cookvil"), used=(S.autoCook||[]).length;
+  cvRows=cvRowsOf(); cvCur=Math.max(0,Math.min(cvCur,cvRows.length-1));
+  $("g-cvRate").textContent=`あと ${Math.max(0,n-used)} 個任せられます`;
+  $("g-cvNote").textContent=`料理番の村人 ${n}人(1人で1種類)・作り置き ${cookKeepTxt()}。レシピを持っている料理から選べます。`;
+  const body=$("g-cvBody");
+  body.innerHTML = cvRows.length ? cvRows.map((r,i)=>`<div class="rowi ${i===cvCur?"cur":""}" data-i="${i}">
+      <div class="ic">${r.ic}</div>
+      <div><div class="nm">${r.nm}</div><div class="ds">${r.ds}</div></div>
+      <div class="keyk">${window.IS_MOBILE ? shopActBtns(r.keys) : (i===cvCur?r.keys:"")}</div></div>`).join("")
+    : `<p class="empty" style="padding:1rem .4rem">レシピがありません。お店の「レシピ」で買うと、ここで選べます。</p>`;
+  $("g-cvHint").innerHTML = window.IS_MOBILE ? "" : "<b>↑ ↓</b> 選ぶ ・ <b>← →</b> 段階(ふつう / 変異 / 超変異) ・ <b>Enter</b> 任せる / やめる ・ <b>Esc</b> 台所の宝物に戻る";
+  keepVisible(body);
+}
+function cvToggle(){
+  const r=cvRows[cvCur]; if(!r) return;
+  cvGrade[r.d.id]=r.g; toggleAutoCook(r.d.id,r.g); renderCvPick();
+}
+function cvStep(dir){
+  const r=cvRows[cvCur]; if(!r) return;
+  cvGrade[r.d.id]=DISH_GRADES[(DISH_GRADES.indexOf(r.g)+dir+DISH_GRADES.length)%DISH_GRADES.length]; sfx.tab(); renderCvPick();
+}
+function cvKey(e){
+  const k=e.key;
+  if(k==="Escape"){ e.preventDefault(); openModal("treas"); return; }
+  const n=cvRows.length;
+  if((k==="ArrowUp"||k==="ArrowDown") && n){ e.preventDefault(); cvCur=(cvCur+(k==="ArrowDown"?1:-1)+n)%n; sfx.cursor(); renderSoon(renderCvPick); return; }
+  if(k==="ArrowLeft"||k==="ArrowRight"){ e.preventDefault(); cvStep(k==="ArrowRight"?1:-1); return; }
+  if(k==="Enter"){ e.preventDefault(); cvToggle(); }
+}
+$("g-cvBody").addEventListener("click",e=>{
+  const row=e.target.closest && e.target.closest(".rowi"); if(!row) return;
+  cvCur=+row.dataset.i;
+  if(e.target.closest(".dgrade")){ cvStep(1); return; }
+  if(e.target.closest("[data-act]")){ cvToggle(); return; }
+  renderCvPick();
+});
 function treasKey(e){
   const k=e.key;
   if(k==="Escape"||k==="8"){ e.preventDefault(); closeModal(); return; }
@@ -6814,7 +6947,7 @@ function treasKey(e){
     if(k==="ArrowLeft"||k==="ArrowRight"){ e.preventDefault(); kitCur=(kitCur+(k==="ArrowRight"?1:-1)+KIT_ORDER.length)%KIT_ORDER.length; sfx.cursor(); renderKit(); return; }
     if(k==="ArrowUp"||k==="ArrowDown"){ e.preventDefault(); kitCur=kitBelow(kitCur,k==="ArrowDown"?1:-1); sfx.cursor(); renderKit(); return; }
     if(k==="Enter"){ e.preventDefault(); kitAct(0); return; }
-    if(k==="q"||k==="Q"||k==="e"||k==="E"){ e.preventDefault(); if(["kamado","sgvil"].includes(KIT_ORDER[kitCur])) kitAct(k==="e"||k==="E"?1:-1); return; }
+    if(k==="q"||k==="Q"||k==="e"||k==="E"){ e.preventDefault(); if(["kamado","sgvil","cookvil"].includes(KIT_ORDER[kitCur])) kitAct(k==="e"||k==="E"?1:-1); return; }
     return;
   }
   if(k==="ArrowUp"||k==="ArrowDown"){ e.preventDefault(); $("g-treasBody").scrollBy(0, k==="ArrowDown"?90:-90); }
@@ -7198,7 +7331,7 @@ const EFFS = {
   S:{ nm:"ガチャのレア度",       n:"ガチャの SR 以上が出る確率 1.2倍",     s:"ガチャの SR 以上が出る確率 1.5倍" },
   V:{ nm:"ノーミス勝負のお守り", n:"ノーミス勝負でミスしても1回まで続く(効果中はランキングに載りません)", s:"ノーミス勝負でミスしても3回まで続く(効果中はランキングに載りません)" },
   "α":{ nm:"種が戻る",           n:"収穫すると20%で同じ種が1つ戻る(貴重品は除く)", s:"収穫すると、かならず同じ種が1つ戻る(貴重品は除く)" },
-  "β":{ nm:"時間を進める",       n:"食べた瞬間、すべての畑が3時間進む",    s:"食べた瞬間、すべての畑が1日進む" },
+  "β":{ nm:"時間を進める",       n:"食べた瞬間、すべての畑が3時間進む",    m:"食べた瞬間、すべての畑が12時間進む", s:"食べた瞬間、すべての畑が1日進む" },
   "γ":{ nm:"ガチャおかわり",     n:"ガチャ1回ごとに10%でもう1回",         s:"ガチャ1回ごとに50%でもう1回" },
   "ε":{ nm:"GUR が出やすい",     n:"わくわくガチャの GUR の確率 1.5倍",    s:"わくわくガチャの GUR の確率 3倍" },
   "μ":{ nm:"GHR が出やすい",     n:"ガチャの GHR の確率 1.5倍",            s:"ガチャの GHR の確率 3倍" },
@@ -7213,7 +7346,7 @@ const EFFS = {
   Y:{ nm:"実績のごほうび",       n:"実績のごほうび 1.5倍",                 s:"実績のごほうび 2倍" },
   P3:{ nm:"食材が上位種に化ける", n:"わくわくガチャの食材が5%で上位種に化ける", s:"わくわくガチャの食材が20%で上位種に化ける" },
   P5:{ nm:"タイピングで肥料",      n:"タイピング20打ごとに肥料が1つ届く",      s:"タイピング5打ごとに肥料が1つ届く" },
-  P8:{ nm:"効果を延ばす",        n:"食べた瞬間、今かかっている料理の効果が10分延びる", s:"食べた瞬間、今かかっている料理の効果が1時間延びる" },
+  P8:{ nm:"効果を延ばす",        n:"食べた瞬間、今かかっている料理の効果が10分延びる", m:"食べた瞬間、今かかっている料理の効果が30分延びる", s:"食べた瞬間、今かかっている料理の効果が1時間延びる" },
   Q1:{ nm:"種おかわり",          n:"ガチャで出た作物の種が20%で2つ",       s:"ガチャで出た作物の種が50%で2つ" },
   Q2:{ nm:"変わり種の売値",      n:"変異・超変異の作物の売値 1.5倍",       s:"変異・超変異の作物の売値 3倍" },
   Q3:{ nm:"農園の時計",            n:"農園を開いている間、1秒ごとに水の効いている作物が30秒育つ", s:"農園を開いている間、1秒ごとに水の効いている作物が3分育つ" },
@@ -7350,8 +7483,9 @@ const cookGradeOf = d => cookGrade[d.id] ?? (DISH_GRADES.find(g=>cookPlan(d.ing,
 const eatGrade={};    // 食べる画面で、料理ごとに選んでいる段階
 function cookRowsOf(){
   const rows=[];
+  const favFirst = list => list.filter(d=>isFavD(d.id)).concat(list.filter(d=>!isFavD(d.id)));
   if(cookTab===0){
-    for(const d of DISHES){
+    for(const d of favFirst(DISHES)){
       if(!S.recipes[d.id]) continue;
       const g=cookGradeOf(d);
       const plan=cookPlan(d.ing,g);
@@ -7361,20 +7495,20 @@ function cookRowsOf(){
       const made=!!(S.dishMade[d.id]||{})[bookKeyOf(g)];   // 絵は、その段階を一度作るまで伏せる
       const seen=!isMutT(g) || made;                        // 変異・超変異の料理は、名前も伏せる
       rows.push({ d, ic:`<span class="dic${g===5?" sup":g===3?" mut":""}">${made?dishIco(d,g):"❔"}</span>`,
-        nm:`${seen?esc(dishName(d,g)):`？？？(${esc(d.name)}の${gradeName(g)})`} <span class="dgrade${g===3?" mut":g===5?" sup":""}">◀ ${gl}(${fmtMin(min)}) ▶</span>${ac?' <small class="dauto">🧑‍🍳 料理番</small>':""}`,
+        nm:`${starHtml("d",d.id)}${seen?esc(dishName(d,g)):`？？？(${esc(d.name)}の${gradeName(g)})`} <span class="dgrade${g===3?" mut":g===5?" sup":""}">◀ ${gl}(${fmtMin(min)}) ▶</span>${ac?' <small class="dauto">🧑‍🍳 料理番</small>':""}`,
         ds:`効果: ${effLine(d,plan?plan.grade:g)} ・ 作り置き ×${(S.dishes[d.id]||{})[plan?plan.grade:g]||0}<br>材料(持っている/要る): ${ingHaveText(d.ing,g)}${plan?"":` <b class="dlack">(材料が足りません)</b>`}`,
         keys: [plan?"<b>Enter</b> 1つ作る<br><b>Shift+Enter</b> 作れるだけ":"", kitN("cookvil")>0?`<b>A</b> ${ac?"料理番をやめる":"料理番に任せる"}`:""].filter(Boolean).join("<br>"),
         locked:!plan, enter:()=>cookMake(d.id,1), shift:()=>cookMake(d.id,99), left:()=>cookStep(d.id,-1), right:()=>cookStep(d.id,1), auto:()=>toggleAutoCook(d.id,g) });
     }
   }else if(cookTab===1){
-    for(const d of DISHES){
+    for(const d of favFirst(DISHES)){
       const st=S.dishes[d.id]; if(!st) continue;
       const gs=DISH_GRADES.filter(g=>(st[g]||0)>0); if(!gs.length) continue;
       if(!gs.includes(eatGrade[d.id])) eatGrade[d.id]=gs[0];
       const g=eatGrade[d.id], n=st[g];
       const step=dir=>{ eatGrade[d.id]=gs[(gs.indexOf(g)+dir+gs.length)%gs.length]; sfx.tab(); renderCook(); };
       rows.push({ d, ic:`<span class="dic${g===5?" sup":g===3?" mut":""}">${dishIco(d,g)}</span>`,
-        nm:`${esc(dishName(d,g))} <span class="dgrade${g===3?" mut":g===5?" sup":""}">◀ ${gradeName(g)} ×${n} ▶</span>${gs.length>1?` <small class="dhave">ほかに ${gs.filter(x=>x!==g).map(x=>`${gradeName(x)}×${st[x]}`).join("・")}</small>`:""}`,
+        nm:`${starHtml("d",d.id)}${esc(dishName(d,g))} <span class="dgrade${g===3?" mut":g===5?" sup":""}">◀ ${gradeName(g)} ×${n} ▶</span>${gs.length>1?` <small class="dhave">ほかに ${gs.filter(x=>x!==g).map(x=>`${gradeName(x)}×${st[x]}`).join("・")}</small>`:""}`,
         ds: `${effLine(d,g)}${instantEff(d.eff)?"":`(${fmtMin(dishMin(g))})`}`,
         keys:"<b>Enter</b> 食べる", enter:()=>cookEat(d.id,g), shift:()=>cookEat(d.id,g), left:()=>step(-1), right:()=>step(1) });
     }
@@ -7397,7 +7531,8 @@ function cookRowsOf(){
 }
 /* 画面の色の料理は、何色になるかを具体的に書く(変異・超変異でも色は同じ) */
 const M_COLOR = { strawmilk:"ピンク", sherbet:"赤", lemonade:"黄色", melonsoda:"緑", bluetart:"青", grapejuice:"紫", chips:"濃い紫", vanillaice:"クリーム色" };
-const effText = (d,g) => { const t=isMutT(g) ? EFFS[d.eff].s : EFFS[d.eff].n; return d.eff==="M" && M_COLOR[d.id] ? t.replace("料理の色",M_COLOR[d.id]) : t; };
+const effText = (d,g) => { const e=EFFS[d.eff], t = g===3 && e.m ? e.m : isMutT(g) ? e.s : e.n;   // m: 変異だけ強さが違う効果(食べた瞬間に効くもの)
+  return d.eff==="M" && M_COLOR[d.id] ? t.replace("料理の色",M_COLOR[d.id]) : t; };
 function cookStep(id,dir){
   const i=DISH_GRADES.indexOf(cookGradeOf(DISH[id]));
   cookGrade[id]=DISH_GRADES[(i+dir+DISH_GRADES.length)%DISH_GRADES.length];
@@ -7487,13 +7622,13 @@ function cookEat(id,g){
   const bk=bookKeyOf(g); S.dishEaten[id]=S.dishEaten[id]||{}; S.dishEaten[id][bk]=true;
   let what="";   // 演出に出す、食べて起きたこと
   if(d.eff==="β"){   // 時間を進める: その場で効く(今の効果は消えない)
-    const hours = isMutT(g) ? 24 : 3;
+    const hours = g===5 ? 24 : g===3 ? 12 : 3;
     tick(); advanceAll(hours*HOUR);
     what=`すべての畑が ${hours>=24?hours/24+"日":hours+"時間"} 進みました`;
     toast(`${dishIco(d,g)} ${esc(dishName(d,g))}を食べました。すべての畑が ${hours>=24?hours/24+"日":hours+"時間"} 進みました`,"good",4200,true);
   }else if(d.eff==="P8"){   // 効果を延ばす: 今の効果に時間を足す
     const bs=buffList(), b=bs[0];
-    const add = isMutT(g) ? 60 : 10;
+    const add = g===5 ? 60 : g===3 ? 30 : 10;
     for(const x of bs) x.until+=add*60000;   // かかっている効果を全部延ばす
     what=`${esc(dishName(DISH[b.d],b.t))}の効果が ${fmtMin(add)} 延びました`;
     toast(`${dishIco(d,g)} ${esc(dishName(d,g))}を食べました。${esc(dishName(DISH[b.d],b.t))}の効果が ${fmtMin(add)} 延びました(残り ${fmtLeft(b.until-Date.now())})`,"good",5200,true);
@@ -7516,10 +7651,13 @@ function toggleAutoCook(id,g){
   if(i>=0){ S.autoCook.splice(i,1); toast(`${esc(dishName(DISH[id],g))}(${gradeName(g)})を料理番の村人に任せるのをやめました`,"good"); }
   else{
     if(S.autoCook.length>=n){ sfx.nope(); toast(`料理番の村人の手が空いていません(1人で1種類・今 ${n}人)`,"warn",3600); return; }
-    S.autoCook.push({id,g}); toast(`🧑‍🍳 ${esc(dishName(DISH[id],g))}(${gradeName(g)})を料理番の村人に任せました。作り置きが10個になるまで、材料があるかぎり作ります`,"good",4200);
+    S.autoCook.push({id,g}); toast(`🧑‍🍳 ${esc(dishName(DISH[id],g))}(${gradeName(g)})を料理番の村人に任せました。${S.cookKeep===0?"材料があるかぎり作り続けます":`作り置きが${S.cookKeep||10}個になるまで、材料があるかぎり作ります`}`,"good",4200);
   }
   sfx.tab(); save(); renderCook();
 }
+/* 料理番の村人の作り置きの数(台所の宝物で選ぶ): 1個 / 10個 / 作れるだけ(0) */
+const COOK_KEEPS=[1,10,0];
+const cookKeepTxt = () => S.cookKeep===0 ? "作れるだけ" : `${S.cookKeep}個まで`;
 let autoCookAt=0;
 function autoCookTick(){
   if(Date.now()-autoCookAt<60000 || !(S.autoCook||[]).length) return;
@@ -7528,9 +7666,10 @@ function autoCookTick(){
   for(const a of S.autoCook.slice(0,n)){
     const d=DISH[a.id]; if(!d || !S.recipes[a.id]) continue;
     let k=0;
-    for(let i=0;i<99;i++){
+    const cap = S.cookKeep===0 ? Infinity : (S.cookKeep||10);   // 作れるだけ: 材料があるかぎり
+    for(let i=0;i<(cap===Infinity?100000:99);i++){
       const plan=cookPlan(d.ing,a.g); if(!plan) break;
-      if(((S.dishes[a.id]||{})[plan.grade]||0)>=10) break;
+      if(((S.dishes[a.id]||{})[plan.grade]||0)>=cap) break;
       if(Math.random()<ev("P2",.2,.5,0)); else consume(plan.take);
       S.dishes[a.id]=S.dishes[a.id]||{}; S.dishes[a.id][plan.grade]=(S.dishes[a.id][plan.grade]||0)+1; k++;
       if(Math.random()<ev("P1",.2,1,0)+kitVal("pot")/100){ S.dishes[a.id][plan.grade]++; k++; }
@@ -7596,7 +7735,7 @@ function renderCook(){
       <div class="keyk">${window.IS_MOBILE ? shopActBtns(r.keys) : (i===cur?r.keys:"")}</div></div>`).join("");
   }
   $("g-cookHint").innerHTML = window.IS_MOBILE ? "" :
-    `<b>Tab</b> ${COOK_TABS.map((t,i)=>i===cookTab?`「${t}」`:t).join(" / ")} ・ <b>↑ ↓</b> 選ぶ`+(cookTab===0?" ・ <b>← →</b> 段階(ふつう / 変異 / 超変異)"+(kitN("cookvil")>0?` ・ <b>A</b> 料理番に任せる(${(S.autoCook||[]).length} / ${kitN("cookvil")})`:""):cookTab===1?" ・ <b>← →</b> 段階(作り置きのあるもの)":"")+` ・ <b>Enter</b> 決定 ・ <b>0</b> / <b>Esc</b> 閉じる`;
+    `<b>Tab</b> ${COOK_TABS.map((t,i)=>i===cookTab?`「${t}」`:t).join(" / ")} ・ <b>↑ ↓</b> 選ぶ`+(cookTab===0?" ・ <b>← →</b> 段階(ふつう / 変異 / 超変異)"+(kitN("cookvil")>0?` ・ <b>A</b> 料理番に任せる(${(S.autoCook||[]).length} / ${kitN("cookvil")})`:""):cookTab===1?" ・ <b>← →</b> 段階(作り置きのあるもの)":"")+(cookTab<2?" ・ <b>S</b> お気に入り":"")+` ・ <b>Enter</b> 決定 ・ <b>0</b> / <b>Esc</b> 閉じる`;
   keepVisible(body);
 }
 function cookNowText(){
@@ -7613,12 +7752,20 @@ function cookKey(e){
   if(k==="ArrowUp"||k==="ArrowDown"){ e.preventDefault(); const n=cookRows.length; if(!n) return; cookCur[cookTab]=(cookCur[cookTab]+(k==="ArrowDown"?1:-1)+n)%n; sfx.cursor(); renderSoon(renderCook); return; }
   if((k==="ArrowLeft"||k==="ArrowRight") && r && r.left){ e.preventDefault(); (k==="ArrowLeft"?r.left:r.right)(); return; }
   if((k==="a"||k==="A") && r && r.auto){ e.preventDefault(); r.auto(); return; }
+  if((k==="s"||k==="S") && r && r.d){ e.preventDefault(); cookFav(r.d.id); return; }
   if(k==="Enter" && r){ e.preventDefault(); if(r.locked){ sfx.nope(); toast("材料が足りません","warn"); return; } (e.shiftKey?r.shift:r.enter)(); }
+}
+/* 料理のお気に入り: 付け外しして並びが変わっても、その料理を選んだままにする */
+function cookFav(id){
+  toggleFav("d",id);
+  const rows=cookRowsOf(); const i=rows.findIndex(r=>r.d && r.d.id===id); if(i>=0) cookCur[cookTab]=i;
+  renderCook();
 }
 $("g-cookBody").addEventListener("click",e=>{
   const row=e.target.closest && e.target.closest(".rowi"); if(!row) return;
   cookCur[cookTab]=+row.dataset.i;
   const r=cookRows[cookCur[cookTab]];
+  const st=e.target.closest("[data-star]"); if(st && r && r.d){ cookFav(r.d.id); return; }
   const g=e.target.closest(".dgrade"); if(g && r && r.left){ r.right(); return; }
   const b=e.target.closest("[data-act]");
   if(b && r && b.dataset.act==="auto" && r.auto){ r.auto(); return; }   // 材料が足りなくても任せられる
@@ -7650,14 +7797,53 @@ function buyRecipe(id){
 let dbookCur=0, dbookTier=0;
 const dishBookGot = () => DISHES.reduce((a,d)=>a+[0,3,5].filter(t=>(S.dishMade[d.id]||{})[t]).length,0);
 const dishMadeAny = d => !!S.dishMade[d.id] && Object.keys(S.dishMade[d.id]).length>0;
+/* ---- 図鑑の検索: 名前の一部で絞り込む ----
+   ひらがな・カタカナ、全角・半角、大文字・小文字は区別しない。まだ見つけていない名前(変異・超変異・上位種も)では見つからない */
+const normQ = v => String(v||"").normalize("NFKC").toLowerCase().replace(/[\u30a1-\u30f6]/g,ch=>String.fromCharCode(ch.charCodeAt(0)-0x60)).replace(/\s+/g,"");
+const qHit = (names,q) => !q || names.some(n=>normQ(n).includes(q));
+/* [段階, 名前]: 作物は 0 / 3 変異 / 5 超変異、食材は 0 / 1 上位種、料理は 0 / 3 / 5 */
+function cropBookEntries(c){
+  if(c.food){ const up=upOf(c.id); return [bookSeen(c)&&[0,c.name], up&&bookSeen(up)&&[1,up.name]].filter(Boolean); }
+  if(!bookSeen(c)) return [];
+  const out=[[0,c.name]];
+  if(!c.treasure){ if(qCount(c.id,3)>0) out.push([3,qName(c.id,3)]); if(qCount(c.id,5)>0) out.push([5,qName(c.id,5)]); }
+  return out;
+}
+const dishBookEntries = d => { const m=S.dishMade[d.id]||{}; return [0,3,5].filter(t=>m[t]).map(t=>[t,dishName(d,t)]); };
+const cropBookNames = c => cropBookEntries(c).map(e=>e[1]);
+const dishBookNames = d => dishBookEntries(d).map(e=>e[1]);
+/* 検索に合った名前(ふつうの名前を先に見る) */
+const qMatch = (entries,q) => q ? entries.find(([,n])=>normQ(n).includes(q))||null : null;
+/* 変異・超変異・上位種の名前で見つかったときは、一覧にその名前を添える */
+const qAlt = m => m && m[0] ? `<small class="qalt">${esc(m[1])}</small>` : "";
+/* 見つかった名前の段階を、図鑑の右側に出す */
+function bookQTier(){
+  const m=qMatch(cropBookEntries(BOOK_CROPS[bookCur]), normQ(bookQ)); if(!m) return;
+  const c=BOOK_CROPS[bookCur];
+  if(c.food) foodUp = m[0]===1; else bookTier = m[0]===0 ? (qOk(c.id,bookTier) && !isMutT(bookTier) ? bookTier : 0) : m[0];
+}
+function dbookQTier(){ const m=qMatch(dishBookEntries(DISHES[dbookCur]), normQ(dbookQ)); if(m) dbookTier=m[0]; }
+let bookQ="", dbookQ="";
+/* 検索に合うものの番号。今の番号が外れていたら、合う最初のものにする */
+function bookHits(list, names, q, cur){
+  const hits=list.map((x,i)=>i).filter(i=>qHit(names(list[i]),q));
+  return { hits, cur: !q || hits.includes(cur) ? cur : (hits.length ? hits[0] : cur) };
+}
+/* 上下: 検索で隠れているものは飛ばす */
+const stepHit = (hits,cur,dir,n) => { if(!hits.length) return cur; const i=hits.indexOf(cur); return i<0 ? hits[0] : hits[(i+dir+hits.length)%hits.length]; };
+for(const [id,set] of [["g-bookQ",v=>{ bookQ=v; bookCur=bookHits(BOOK_CROPS,cropBookNames,normQ(v),bookCur).cur; bookQTier(); renderBook(); }],["g-dbookQ",v=>{ dbookQ=v; dbookCur=bookHits(DISHES,dishBookNames,normQ(v),dbookCur).cur; dbookQTier(); renderDbook(); }]]){
+  $(id).addEventListener("input",e=>set(e.target.value));
+}
 function renderDbook(){
+  const q=normQ(dbookQ), dh=bookHits(DISHES, dishBookNames, q, dbookCur); dbookCur=dh.cur;
+  $("g-dbookQn").textContent = q ? `${dh.hits.length}件` : "";
   const got=dishBookGot();
   $("g-dbookRate").textContent=`料理図鑑 ${got} / ${DISHES.length*3}`;
   $("g-dbookList").innerHTML=DISHES.map((d,i)=>{
     const m=S.dishMade[d.id]||{}, known=dishMadeAny(d);
     const marks=`<span class="qm d0${m[0]?" on":""}">●</span><span class="qm mut${m[3]?" on":""}">✦</span><span class="qm sup${m[5]?" on":""}">✦</span>`;
-    return `<div class="rowi ${known?"":"locked"} ${i===dbookCur?"cur":""}" data-i="${i}">
-      <div class="ic">${known?`<span class="dic">${dishIco(d,[0,3,5].find(t=>m[t]))}</span>`:"❔"}</div><div class="nm">${known?esc(d.name):"？？？"}</div><div class="qmarks">${marks}</div></div>`;
+    return `<div class="rowi ${known?"":"locked"} ${i===dbookCur?"cur":""}${q && !dh.hits.includes(i)?" qhide":""}" data-i="${i}">
+      <div class="ic">${known?`<span class="dic">${dishIco(d,[0,3,5].find(t=>m[t]))}</span>`:"❔"}</div><div class="nm">${known?esc(d.name):"？？？"}${qAlt(q && qMatch(dishBookEntries(d),q))}</div><div class="qmarks">${marks}</div></div>`;
   }).join("");
   const d=DISHES[dbookCur], t=dbookTier, made=(S.dishMade[d.id]||{})[t];
   const lore = t===5 ? d.l5 : t===3 ? d.l3 : d.l0;
@@ -7679,11 +7865,13 @@ function dbookKey(e){
   const k=e.key;
   if(k==="Escape"||k===" "){ e.preventDefault(); closeModal(); return; }
   if(k==="Tab"){ e.preventDefault(); spaceTab(e.shiftKey?-1:1); return; }
-  if(k==="ArrowUp"||k==="ArrowDown"){ e.preventDefault(); dbookCur=(dbookCur+(k==="ArrowDown"?1:-1)+DISHES.length)%DISHES.length; sfx.cursor(); renderSoon(renderDbook); }
+  if(k==="f"||k==="F"||k==="/"){ e.preventDefault(); const i=$("g-dbookQ"); i.focus(); i.select(); return; }
+  if(k==="ArrowUp"||k==="ArrowDown"){ e.preventDefault(); const q=normQ(dbookQ);
+    dbookCur = q ? stepHit(bookHits(DISHES,dishBookNames,q,dbookCur).hits, dbookCur, k==="ArrowDown"?1:-1) : (dbookCur+(k==="ArrowDown"?1:-1)+DISHES.length)%DISHES.length; if(q) dbookQTier(); sfx.cursor(); renderSoon(renderDbook); }
   else if(k==="ArrowLeft"||k==="ArrowRight"){ e.preventDefault(); const qs=[0,3,5]; dbookTier=qs[(qs.indexOf(dbookTier)+(k==="ArrowRight"?1:-1)+3)%3]; sfx.tab(); renderDbook(); }
 }
 $("g-dbookDetail").addEventListener("click",e=>{ const b=e.target.closest && e.target.closest("[data-t]"); if(!b) return; dbookTier=+b.dataset.t; sfx.tab(); renderDbook(); });
-$("g-dbookList").addEventListener("click",e=>{ const r=e.target.closest && e.target.closest(".rowi"); if(!r) return; dbookCur=+r.dataset.i; renderDbook(); });
+$("g-dbookList").addEventListener("click",e=>{ const r=e.target.closest && e.target.closest(".rowi"); if(!r) return; dbookCur=+r.dataset.i; if(dbookQ) dbookQTier(); renderDbook(); });
 
 /* ---- Space の画面: 図鑑 → 料理図鑑 → 実績(Tab で切り替え) ---- */
 const SPACE_ALL=[["book","図鑑"],["dbook","料理図鑑"],["goal","実績"]];
@@ -7715,12 +7903,14 @@ function renderBuff(){
   el.title=`${dishName(d,b.t)}: ${effText(d,b.t)}`+(d2?` / ${dishName(d2,b2.t)}: ${effText(d2,b2.t)}`:"");
 }
 /* 料理の色: ホーム画面とタイピングの色を、料理の色に染める(農園はそのまま) */
-const THEME_VARS=["--dish","--bg","--panel","--panel-hi","--line","--amber","--amber-dim","--steel"];
+const THEME_VARS=["--dish","--bg","--panel","--panel-hi","--line","--amber","--amber-dim","--steel","--dishL","--dishR"];
 let themeKey="";   // いまの色(同じなら作り直さない)
 /* タイピングで使う: 変異・超変異の画面の色のとき、キーの代わりに出す料理の絵 */
 function themeScrewArt(){
-  const b=mBuff(), d=b && DISH[b.d];
-  return d && d.eff==="M" && isMutT(b.t) ? d.art[b.t===5?2:1] : null;
+  // お弁当箱で画面の色の料理が2つ効いているときは、1つずつどちらかを選んで混ぜる(ふつうの料理が選ばれたらそのまま)
+  const bs=buffList().filter(x=>DISH[x.d] && DISH[x.d].eff==="M");
+  const b=bs[Math.floor(Math.random()*bs.length)], d=b && DISH[b.d];
+  return d && isMutT(b.t) ? d.art[b.t===5?2:1] : null;
 }
 /* 背景に舞う作物: 料理の材料(変異・超変異の絵)と、農園の作物いろいろ */
 function themeFloatArts(d,t){
@@ -7735,26 +7925,36 @@ function themeFloatArts(d,t){
   for(let i=0;i<18;i++) out.push(i%2===0 && own.length ? own[i/2%own.length|0] : others[Math.floor(Math.random()*others.length)]);
   return out.filter(Boolean);
 }
-function themeFloat(on,d,t){
+function themeFloat(on,d,t,two){
   let el=document.getElementById("dishFloat");
   if(!on){ if(el) el.remove(); return; }
   if(!el){ el=document.createElement("div"); el.id="dishFloat"; el.setAttribute("aria-hidden","true"); document.body.prepend(el); }
-  el.innerHTML=themeFloatArts(d,t).map((a,i)=>{
+  const arts=themeFloatArts(d,isMutT(t)?t:3);
+  if(two){ const b=themeFloatArts(two.d,isMutT(two.t)?two.t:3); for(let i=0;i<b.length;i++) arts.splice(i*2+1,0,b[i]); arts.length=Math.min(arts.length,26); }   // 2つの料理の作物を交互に
+  el.innerHTML=arts.map((a,i)=>{
     const size=28+Math.random()*34, left=Math.random()*96, dur=16+Math.random()*16, delay=-Math.random()*dur, spin=(Math.random()<.5?-1:1)*(90+Math.random()*270);
     return `<span style="--top:${(Math.random()*90).toFixed(1)}%;left:${left.toFixed(1)}%;width:${size|0}px;height:${size|0}px;font-size:${(size*.85)|0}px;line-height:1;text-align:center;animation-duration:${dur.toFixed(1)}s;animation-delay:${delay.toFixed(1)}s;--spin:${spin|0}deg">${a}</span>`;
   }).join("");
 }
 function applyTheme(){
   let b=mBuff();
+  // お弁当箱で色の料理を2つ食べているときは、もう1つ(先に食べたほう)の色も使う
+  const b2=buffList().find(x=>x!==b && DISH[x.d] && DISH[x.d].eff==="M" && b && x.d!==b.d) || null, d2=b2 && DISH[b2.d];
   if(!(b && DISH[b.d].eff==="M") && S.kamado && kitN("kamado")>0 && DISH[S.kamado] && kamadoDishes().includes(S.kamado)) b={ d:S.kamado, t:0 };   // 永遠のかまど(食べたことのある料理の色)
   const d=b && DISH[b.d], de=document.documentElement;
-  if(!d || d.eff!=="M"){ themeKey=""; document.body.classList.remove("dishtheme","dishfun"); for(const v of THEME_VARS) de.style.removeProperty(v); themeFloat(false); return; }
-  const key=d.id+":"+b.t; if(key===themeKey) return; themeKey=key;
+  if(!d || d.eff!=="M"){ themeKey=""; document.body.classList.remove("dishtheme","dishfun","dishsplit"); for(const v of THEME_VARS) de.style.removeProperty(v); themeFloat(false); return; }
+  const key=d.id+":"+b.t+(d2?"|"+d2.id+":"+b2.t:""); if(key===themeKey) return; themeKey=key;
+  // 2つのとき: 左に先に食べた料理、右にあとから食べた料理の色。板などは2つの色を混ぜる
+  const colOf = x => x.accent||x.tint||x.color;
+  document.body.classList.toggle("dishsplit", !!d2);
+  if(d2){ de.style.setProperty("--dishL",colOf(d2)); de.style.setProperty("--dishR",colOf(d)); }
+  else{ de.style.removeProperty("--dishL"); de.style.removeProperty("--dishR"); }
+  const both = v => d2 ? `color-mix(in srgb, ${v} 50%, ${colOf(d2)})` : v;
   const c=d.tint||d.color, a=d.accent||d.color, mix=(p,base)=>`color-mix(in srgb, ${c} ${p}%, ${base})`;
   document.body.classList.add("dishtheme");
-  if(isMutT(b.t)){   // 変異・超変異: 背景をはっきり料理の色に。作物が舞い、キーが料理に変わる
+  if(isMutT(b.t) || (b2 && isMutT(b2.t))){   // 変異・超変異: 背景をはっきり料理の色に。作物が舞い、キーが料理に変わる
     document.body.classList.add("dishfun");
-    const cf=d.accent||c, mix=(p,base)=>`color-mix(in srgb, ${cf} ${p}%, ${base})`;   // 紫いもチップスのような暗い色は、明るい紫で
+    const cf=both(d.accent||c), mix=(p,base)=>`color-mix(in srgb, ${cf} ${p}%, ${base})`;   // 紫いもチップスのような暗い色は、明るい紫で
     de.style.setProperty("--dish",cf);
     de.style.setProperty("--bg",mix(62,"#0c0c10"));
     de.style.setProperty("--panel",mix(42,"#14161c"));
@@ -7763,12 +7963,12 @@ function applyTheme(){
     de.style.setProperty("--amber",`color-mix(in srgb, ${a} 35%, #ffffff)`);
     de.style.setProperty("--amber-dim",`color-mix(in srgb, ${a} 60%, #000)`);
     de.style.setProperty("--steel",`color-mix(in srgb, ${a} 20%, #f0f2f6)`);
-    themeFloat(true,d,b.t);
+    themeFloat(true,d,b.t,d2 && { d:d2, t:b2.t });
     return;
   }
   // ふつう: 演出はなし。背景と板の色だけ、はっきり料理の色に(変異・超変異より少し落ち着いた色)
   document.body.classList.remove("dishfun"); themeFloat(false);
-  const cf=d.accent||c, mixf=(p,base)=>`color-mix(in srgb, ${cf} ${p}%, ${base})`;
+  const cf=both(d.accent||c), mixf=(p,base)=>`color-mix(in srgb, ${cf} ${p}%, ${base})`;
   de.style.setProperty("--dish",cf);
   de.style.setProperty("--bg",mixf(52,"#0c0c10"));
   de.style.setProperty("--panel",mixf(36,"#14161c"));
@@ -7782,7 +7982,8 @@ function applyTheme(){
 function dishFirework(k){
   const b=mBuff(); if(!b || !isMutT(b.t)) return;
   const el=plotEls[k]; if(!el) return;
-  const r=el.getBoundingClientRect(), c=DISH[b.d].color;
+  const ms=buffList().filter(x=>DISH[x.d] && DISH[x.d].eff==="M" && isMutT(x.t));   // 2つなら、どちらかの色で
+  const r=el.getBoundingClientRect(), c=DISH[(ms[Math.floor(Math.random()*ms.length)]||b).d].color;
   for(let i=0;i<14;i++){
     const s=document.createElement("div"); s.className="fw";
     const a=Math.PI*2*i/14, dist=34+Math.random()*20;
@@ -7884,6 +8085,8 @@ function bookProgress(){
   return { got, all };
 }
 function renderBook(){
+  const q=normQ(bookQ), bh=bookHits(BOOK_CROPS, cropBookNames, q, bookCur); bookCur=bh.cur;
+  $("g-bookQn").textContent = q ? `${bh.hits.length}件` : "";
   const { got:gotAll, all:allEntries }=bookProgress();
   $("g-bookRate").textContent=`図鑑 ${gotAll} / ${allEntries} ・ 累計収穫 ${fmtNum(S.totalHarvest)}個`;
   $("g-bookList").innerHTML=BOOK_CROPS.map((c,i)=>{
@@ -7897,9 +8100,9 @@ function renderBook(){
         + [1,2,4].map(t=>`<span class="qm st${qCount(c.id,t)>0?" on":""}">☆</span>`).join("")   // ☆・☆☆・☆☆☆ を穫るたびに1つずつ光る
         + (hasMut(c.id)?`<span class="qm mut${qCount(c.id,3)>0?" on":""}">✦</span>`:"")
         + (hasSup(c.id)?`<span class="qm sup${qCount(c.id,5)>0?" on":""}">✦</span>`:"");
-    return `<div class="rowi ${known?"":"locked"} ${i===bookCur?"cur":""}" data-i="${i}">
+    return `<div class="rowi ${known?"":"locked"} ${i===bookCur?"cur":""}${q && !bh.hits.includes(i)?" qhide":""}" data-i="${i}">
       <div class="ic">${known?ico(c):"❔"}</div>
-      <div class="nm">${known?c.name:"？？？"}</div>
+      <div class="nm">${known?c.name:"？？？"}${qAlt(q && qMatch(cropBookEntries(c),q))}</div>
       <div class="qmarks">${marks}</div></div>`;
   }).join("");
   const c=BOOK_CROPS[bookCur], t=c.treasure?0:(qOk(c.id,bookTier)?bookTier:4);
@@ -7969,9 +8172,12 @@ function bookKey(e){
   if(k==="Escape"||k===" "){ e.preventDefault(); closeModal(); return; }
   if(k==="Tab"){ e.preventDefault(); spaceTab(e.shiftKey?-1:1); return; }
   const N=BOOK_CROPS.length;
+  if(k==="f"||k==="F"||k==="/"){ e.preventDefault(); const i=$("g-bookQ"); i.focus(); i.select(); return; }
   if(k==="ArrowUp"||k==="ArrowDown"){
     e.preventDefault();
-    bookCur=(bookCur+(k==="ArrowDown"?1:-1)+N)%N;
+    const q=normQ(bookQ);
+    bookCur = q ? stepHit(bookHits(BOOK_CROPS,cropBookNames,q,bookCur).hits, bookCur, k==="ArrowDown"?1:-1) : (bookCur+(k==="ArrowDown"?1:-1)+N)%N;
+    if(q) bookQTier();
     sfx.cursor(); renderSoon(renderBook);
   }else if(k==="ArrowLeft"||k==="ArrowRight"){   // 同じ作物の品質を切り替える
     e.preventDefault();
@@ -7990,7 +8196,7 @@ $("g-bookDetail").addEventListener("click",e=>{
 });
 $("g-bookList").addEventListener("click",e=>{
   const row=e.target.closest && e.target.closest(".rowi"); if(!row) return;
-  bookCur=+row.dataset.i; renderBook();
+  bookCur=+row.dataset.i; if(bookQ) bookQTier(); renderBook();
 });
 
 /* ---------- 目標 ----------
@@ -8127,6 +8333,8 @@ function renderGoalBadge(){ const n=goalsReady(); $("g-goalBadge").textContent =
 function renderGoals(){
   const vis=GOALS.filter(goalVisible), rows=goalRows();
   $("g-goalRate").textContent=`解除 ${vis.filter(goalClaimed).length} / ${vis.length}`;
+  const ready=goalReady().length;   // 受け取れるものがあるときだけ「まとめて受け取る」を出す
+  $("g-goalAll").hidden=!ready; $("g-goalAll").textContent=`まとめて受け取る(${ready})`;
   goalCur=Math.max(0,Math.min(goalCur,rows.length-1));
   const body=$("g-goalBody"), top=body.scrollTop;   // 書き直しても、見ていた位置のままにする
   body.innerHTML=rows.map((r,ri)=>{
@@ -8158,12 +8366,35 @@ function claimGoal(i){   // i: GOALS の番号
   save(); renderAll();
   if(modal==="goal") renderGoals();
 }
+/* 受け取れる実績(解除していて、まだ受け取っていないもの) */
+const goalReady = () => GOALS.map((g,i)=>i).filter(i=>{ const g=GOALS[i]; return goalVisible(g) && !goalClaimed(g) && goalDone(g); });
+/* 受け取れる実績をまとめて受け取る(同じ種類の次の段も、解除していれば続けて受け取る) */
+function claimAllGoals(){
+  let n=0, sum=0, bonus=0;
+  for(let guard=0; guard<50; guard++){
+    const ids=goalReady(); if(!ids.length) break;
+    for(const i of ids){
+      const g=GOALS[i]; if(goalClaimed(g)) continue;
+      S.goals=S.goals||{}; S.goals[g.id]=Date.now();
+      const rw=Math.round(g.rw*ev("Y",1.5,2,1)), b=rw-g.rw;   // 料理: ごほうび 1.5倍・2倍
+      S.money+=rw; if(b) S.goalBonus=(S.goalBonus||0)+b;
+      n++; sum+=rw; bonus+=b;
+    }
+  }
+  if(!n){ sfx.nope(); toast("受け取れる実績がありません","warn"); return; }
+  sfx.buy();
+  toast(`実績を ${fmtNum(n)}個 受け取りました! ごほうび +${fmtNum(sum)}キー${bonus?`(料理で +${fmtNum(bonus)})`:""}`,"good",4200,true);
+  save(); renderAll();
+  if(modal==="goal") renderGoals();
+}
+$("g-goalAll").addEventListener("click",claimAllGoals);
 function goalKey(e){
   const k=e.key;
   if(k==="Escape"||k===" "){ e.preventDefault(); closeModal(); return; }
   if(k==="Tab"){ e.preventDefault(); spaceTab(e.shiftKey?-1:1); return; }
   if(k==="ArrowUp"||k==="ArrowDown"){ e.preventDefault(); const n=goalRows().length; goalCur=(goalCur+(k==="ArrowDown"?1:-1)+n)%n; sfx.cursor(); renderSoon(renderGoals); return; }
   if(k==="Enter"){ e.preventDefault(); const r=goalRows()[goalCur]; if(r) claimGoal(r.gi); }
+  if(k==="a"||k==="A"){ e.preventDefault(); claimAllGoals(); }
 }
 $("g-goalBody").addEventListener("click",e=>{
   const b=e.target.closest("[data-claim]"); if(b){ claimGoal(+b.dataset.claim); return; }
@@ -8221,15 +8452,18 @@ const rankKey = name => encodeURIComponent(name).replace(/\./g,"%2E");
 async function pushRank(name){
   if(isDebugSave()) return {ok:false, msg:"デバッグ用の記録は番付に載せられません"};
   const key=rankKey(name);
-  const refM=db.ref(`${RANK_PATH}/money/${key}`), refH=db.ref(`${RANK_PATH}/harvest/${key}`), refB=db.ref(`${RANK_PATH}/book/${key}`), refE=db.ref(`${RANK_PATH}/earn/${key}`);
+  const refM=db.ref(`${RANK_PATH}/money/${key}`), refH=db.ref(`${RANK_PATH}/harvest/${key}`), refB=db.ref(`${RANK_PATH}/book/${key}`), refE=db.ref(`${RANK_PATH}/earn/${key}`),
+        refD=db.ref(`${RANK_PATH}/dbook/${key}`), refG=db.ref(`${RANK_PATH}/goal/${key}`);
   const old=(await refM.once("value")).val();
   if(old && old.o && old.o!==S.owner) return {ok:false, msg:"その名前は別の庭が使っています。別の名前にしてください"};
   const t=(old&&old.t)||Date.now();
-  // 4つの番付を同時に書く(図鑑と累計獲得は書けなくても続ける。図鑑は番付の画面で知らせる)
+  // 6つの番付を同時に書く(所持と累計収穫のほかは書けなくても続ける。図鑑は番付の画面で知らせる)
   await Promise.all([
     refM.set({ n:name, s:Math.floor(S.money), o:S.owner, t }),
     refH.set({ n:name, s:S.totalHarvest,      o:S.owner, t }),
     refE.set({ n:name, s:Math.floor(earnedTotal()), o:S.owner, t }).catch(e=>console.warn("[typinggarden rank] 累計獲得キーの番付に書き込めませんでした",e)),
+    refD.set({ n:name, s:dishBookGot(), o:S.owner, t }).catch(e=>console.warn("[typinggarden rank] 料理図鑑の番付に書き込めませんでした",e)),
+    refG.set({ n:name, s:GOALS.filter(goalClaimed).length, o:S.owner, t }).catch(e=>console.warn("[typinggarden rank] 実績の番付に書き込めませんでした",e)),
     refB.set({ n:name, s:bookProgress().got, o:S.owner, t }).then(()=>{ rankBookErr=""; })
       .catch(e=>{ rankBookErr=String(e&&(e.code||e.message)||e); console.warn("[typinggarden rank] 図鑑の番付に書き込めませんでした",e); }),
   ]);
@@ -8238,7 +8472,7 @@ async function pushRank(name){
 }
 /* 同じ庭(同じ持ち主の印)が別の名前でも載っていたら消す。1つの庭は番付に1つの名前だけ。
    名前を変えたあと、同期した別の端末が古い名前で載せ直してしまったときの掃除 */
-const RANK_METRICS=["money","harvest","book","earn"];
+const RANK_METRICS=["money","harvest","book","earn","dbook","goal"];
 async function dropOtherNames(key){
   await Promise.all(RANK_METRICS.map(async m=>{
     try{
@@ -8258,7 +8492,7 @@ function refreshRank(){
   return pushRank(S.rankName).catch(e=>console.warn("[typinggarden rank]",e));
 }
 function prepareRankNow(){
-  $("g-rankNow").innerHTML=`所持キー <b>${fmtNum(S.money)}</b> ・ 累計獲得 <b>${fmtNum(earnedTotal())}</b>キー ・ 累計収穫 <b>${fmtNum(S.totalHarvest)}</b>個 ・ 図鑑 <b>${bookProgress().got}</b>項目`+
+  $("g-rankNow").innerHTML=`所持キー <b>${fmtNum(S.money)}</b> ・ 累計獲得 <b>${fmtNum(earnedTotal())}</b>キー ・ 累計収穫 <b>${fmtNum(S.totalHarvest)}</b>個 ・ 図鑑 <b>${bookProgress().got}</b>項目 ・ 料理図鑑 <b>${dishBookGot()}</b>項目 ・ 実績 <b>${GOALS.filter(goalClaimed).length}</b>個`+
     (S.rankName?`<br>「${esc(S.rankName)}」として載っています。ページを開いたときと、庭に出入りするたびに自動で更新されます`:"")+
     (rankBookErr?`<br><span style="color:#c0392b">※図鑑の番付に書き込めませんでした。Firebase のルールを最新の database.rules.json で公開してください(${esc(rankBookErr.slice(0,40))})</span>`:"");
 }
@@ -8291,7 +8525,7 @@ async function renderGardenRank(){
     }).join("");
   }catch(e){ if(req===gRankReq) note.textContent="読み込めませんでした。通信環境を確認してください"; }
 }
-const G_RANK_TABS=["g-money","g-earn","g-harvest","g-book"];
+const G_RANK_TABS=["g-money","g-earn","g-harvest","g-book","g-dbook","g-goal"];
 function switchGardenRank(dir){
   const i=G_RANK_TABS.indexOf(gRankTab), n=G_RANK_TABS.length;
   gRankTab = G_RANK_TABS[(i+(dir<0?-1:1)+n)%n];
@@ -8318,7 +8552,7 @@ async function useName(name, old){
   if(!hasDb() || isDebugSave()) return;
   if(old && old!==name){
     const k=rankKey(old);
-    await Promise.all(["money","harvest","book","earn"].map(async m=>{
+    await Promise.all(RANK_METRICS.map(async m=>{
       try{
         const ref=db.ref(`${RANK_PATH}/${m}/${k}`), v=(await ref.once("value")).val();
         if(v && v.o===S.owner) await ref.remove();
@@ -8341,10 +8575,12 @@ function onKeyMain(e){
   // 貼り付け欄の中: Enter で読み込み、Esc で欄から抜ける
   if(tag==="TEXTAREA"||tag==="INPUT"){
     if(e.key==="Enter" && e.target.id==="g-rankName"){ e.preventDefault(); submitRank(); }
+    else if(e.key==="Enter" && !e.isComposing && (e.target.id==="g-bookQ"||e.target.id==="g-dbookQ")){ e.preventDefault(); e.target.blur(); }
     else if(e.key==="Escape"){ e.preventDefault(); e.target.blur(); }
     return;
   }
   if(modal==="pick"){ pickKey(e); return; }
+  if(modal==="cvpick"){ cvKey(e); return; }
   if(modal==="shop"){ shopKey(e); return; }
   if(modal==="gacha"){ gachaKey(e); return; }
   if(modal==="treas"){ treasKey(e); return; }
