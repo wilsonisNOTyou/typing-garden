@@ -1603,6 +1603,8 @@ html.mobile #screen-garden .tlist{grid-template-columns:1fr}
       <button class="btn gtab" id="tab-g-earn">累計獲得キー</button>
       <button class="btn gtab" id="tab-g-harvest">累計収穫</button>
       <button class="btn gtab" id="tab-g-book">図鑑</button>
+      <button class="btn gtab" id="tab-g-dbook">料理図鑑</button>
+      <button class="btn gtab" id="tab-g-goal">実績</button>
     </div>
     <ol class="rank-list" id="rankList"></ol>
     <p class="reg-status" id="rankStatus"></p>
@@ -1833,7 +1835,7 @@ html.mobile #screen-garden .tlist{grid-template-columns:1fr}
     <div class="panel savebox">
       <div class="phead"><h2>番付</h2><button class="sbtn xbtn" data-close style="margin-left:auto">閉じる ✕</button></div>
       <p id="g-rankNow"></p>
-      <p>所持キー・累計獲得キー・累計収穫数・図鑑の番付(ランキング)です。プレイヤー名で自動で載り、庭を出るたびに更新されます。名前を書きかえて Enter で、ランキングと番付の名前をまとめて変えられます。</p>
+      <p>所持キー・累計獲得キー・累計収穫数・図鑑・料理図鑑・実績の番付(ランキング)です。プレイヤー名で自動で載り、庭を出るたびに更新されます。名前を書きかえて Enter で、ランキングと番付の名前をまとめて変えられます。</p>
       <input id="g-rankName" class="rk-input" maxlength="10" placeholder="庭主の名前" autocomplete="off">
       <div class="pfoot"><span class="note" id="g-rankNote"></span><button class="sbtn main" id="g-rankBtn">決める(Enter)</button></div>
       <div class="tabs grk-tabs" id="g-rankTabs">
@@ -1841,10 +1843,12 @@ html.mobile #screen-garden .tlist{grid-template-columns:1fr}
         <button class="tab" data-rk="g-earn">累計獲得</button>
         <button class="tab" data-rk="g-harvest">累計収穫</button>
         <button class="tab" data-rk="g-book">図鑑</button>
+        <button class="tab" data-rk="g-dbook">料理図鑑</button>
+        <button class="tab" data-rk="g-goal">実績</button>
       </div>
       <ol class="grk-list" id="g-rankList"></ol>
       <p class="grk-note" id="g-rankListNote"></p>
-      <div class="keyhint"><b>N</b> 名前を書きかえる → <b>Enter</b> ・ 入力欄の <b>Esc</b> で入力をやめる ・ <b>← →</b> 所持キー / 累計獲得 / 累計収穫 / 図鑑 ・ <b>9</b> / <b>Esc</b> 閉じる</div>
+      <div class="keyhint"><b>N</b> 名前を書きかえる → <b>Enter</b> ・ 入力欄の <b>Esc</b> で入力をやめる ・ <b>← →</b> 所持キー / 累計獲得 / 累計収穫 / 図鑑 / 料理図鑑 / 実績 ・ <b>9</b> / <b>Esc</b> 閉じる</div>
     </div>
   </div>
 
@@ -2354,10 +2358,10 @@ const DIFF_LABEL = {
 const MISS_PENALTY = { easy: 10, normal: 7, hard: 5 }; // このミス数ごとにキー-1本
 const DICT_TABS = ["easy","normal","hard"];            // 辞典に並べる難易度
 /* ランキングのタブ: スコアアタック → タイムアタック → ノーミス勝負 の順 */
-const RANK_TABS = ["easy","normal","hard","ta-easy","ta-normal","ta-hard","oneshot", "g-money","g-earn","g-harvest","g-book"];
-const isGardenRank = d => d==="g-money" || d==="g-harvest" || d==="g-book" || d==="g-earn";
-const gRankUnit = d => (d==="g-money"||d==="g-earn") ? "キー" : (d==="g-book" ? "項目" : "個");
-DIFF_LABEL["g-money"]="キーボード農園 所持キー"; DIFF_LABEL["g-harvest"]="キーボード農園 累計収穫"; DIFF_LABEL["g-book"]="キーボード農園 図鑑"; DIFF_LABEL["g-earn"]="キーボード農園 累計獲得キー";
+const RANK_TABS = ["easy","normal","hard","ta-easy","ta-normal","ta-hard","oneshot", "g-money","g-earn","g-harvest","g-book","g-dbook","g-goal"];
+const isGardenRank = d => d==="g-money" || d==="g-harvest" || d==="g-book" || d==="g-earn" || d==="g-dbook" || d==="g-goal";
+const gRankUnit = d => (d==="g-money"||d==="g-earn") ? "キー" : (d==="g-book"||d==="g-dbook" ? "項目" : "個");
+DIFF_LABEL["g-money"]="キーボード農園 所持キー"; DIFF_LABEL["g-harvest"]="キーボード農園 累計収穫"; DIFF_LABEL["g-book"]="キーボード農園 図鑑"; DIFF_LABEL["g-dbook"]="キーボード農園 料理図鑑"; DIFF_LABEL["g-goal"]="キーボード農園 実績"; DIFF_LABEL["g-earn"]="キーボード農園 累計獲得キー";
 
 /* タイムアタック: モードごとの出題元と規定本数 */
 const TA_MODES = {
@@ -3601,6 +3605,10 @@ function endBookGame(){
 /* ---------- 更新情報 ----------
    新しいものを上に足していく。d は YYYY-MM-DD */
 const NEWS=[
+  { d:"2026-10-08", t:"番付に「料理図鑑」と「実績」が登場しました", items:[
+    "料理図鑑の埋まった数と、受け取った実績の数で競う番付です",
+    "農園の番付(9)と、タイトルのランキングの両方で見られます。これまでの分もさかのぼって数えます",
+  ]},
   { d:"2026-10-08", t:"便利な機能を追加しました", items:[
     "実績をまとめて受け取れるようになりました(実績の画面の「まとめて受け取る」、または A)",
     "図鑑と料理図鑑で、名前で探せるようになりました(F)。変異・超変異・上位種の名前でも探せます(見つけたものだけ)",
@@ -8436,15 +8444,18 @@ const rankKey = name => encodeURIComponent(name).replace(/\./g,"%2E");
 async function pushRank(name){
   if(isDebugSave()) return {ok:false, msg:"デバッグ用の記録は番付に載せられません"};
   const key=rankKey(name);
-  const refM=db.ref(`${RANK_PATH}/money/${key}`), refH=db.ref(`${RANK_PATH}/harvest/${key}`), refB=db.ref(`${RANK_PATH}/book/${key}`), refE=db.ref(`${RANK_PATH}/earn/${key}`);
+  const refM=db.ref(`${RANK_PATH}/money/${key}`), refH=db.ref(`${RANK_PATH}/harvest/${key}`), refB=db.ref(`${RANK_PATH}/book/${key}`), refE=db.ref(`${RANK_PATH}/earn/${key}`),
+        refD=db.ref(`${RANK_PATH}/dbook/${key}`), refG=db.ref(`${RANK_PATH}/goal/${key}`);
   const old=(await refM.once("value")).val();
   if(old && old.o && old.o!==S.owner) return {ok:false, msg:"その名前は別の庭が使っています。別の名前にしてください"};
   const t=(old&&old.t)||Date.now();
-  // 4つの番付を同時に書く(図鑑と累計獲得は書けなくても続ける。図鑑は番付の画面で知らせる)
+  // 6つの番付を同時に書く(所持と累計収穫のほかは書けなくても続ける。図鑑は番付の画面で知らせる)
   await Promise.all([
     refM.set({ n:name, s:Math.floor(S.money), o:S.owner, t }),
     refH.set({ n:name, s:S.totalHarvest,      o:S.owner, t }),
     refE.set({ n:name, s:Math.floor(earnedTotal()), o:S.owner, t }).catch(e=>console.warn("[typinggarden rank] 累計獲得キーの番付に書き込めませんでした",e)),
+    refD.set({ n:name, s:dishBookGot(), o:S.owner, t }).catch(e=>console.warn("[typinggarden rank] 料理図鑑の番付に書き込めませんでした",e)),
+    refG.set({ n:name, s:GOALS.filter(goalClaimed).length, o:S.owner, t }).catch(e=>console.warn("[typinggarden rank] 実績の番付に書き込めませんでした",e)),
     refB.set({ n:name, s:bookProgress().got, o:S.owner, t }).then(()=>{ rankBookErr=""; })
       .catch(e=>{ rankBookErr=String(e&&(e.code||e.message)||e); console.warn("[typinggarden rank] 図鑑の番付に書き込めませんでした",e); }),
   ]);
@@ -8453,7 +8464,7 @@ async function pushRank(name){
 }
 /* 同じ庭(同じ持ち主の印)が別の名前でも載っていたら消す。1つの庭は番付に1つの名前だけ。
    名前を変えたあと、同期した別の端末が古い名前で載せ直してしまったときの掃除 */
-const RANK_METRICS=["money","harvest","book","earn"];
+const RANK_METRICS=["money","harvest","book","earn","dbook","goal"];
 async function dropOtherNames(key){
   await Promise.all(RANK_METRICS.map(async m=>{
     try{
@@ -8473,7 +8484,7 @@ function refreshRank(){
   return pushRank(S.rankName).catch(e=>console.warn("[typinggarden rank]",e));
 }
 function prepareRankNow(){
-  $("g-rankNow").innerHTML=`所持キー <b>${fmtNum(S.money)}</b> ・ 累計獲得 <b>${fmtNum(earnedTotal())}</b>キー ・ 累計収穫 <b>${fmtNum(S.totalHarvest)}</b>個 ・ 図鑑 <b>${bookProgress().got}</b>項目`+
+  $("g-rankNow").innerHTML=`所持キー <b>${fmtNum(S.money)}</b> ・ 累計獲得 <b>${fmtNum(earnedTotal())}</b>キー ・ 累計収穫 <b>${fmtNum(S.totalHarvest)}</b>個 ・ 図鑑 <b>${bookProgress().got}</b>項目 ・ 料理図鑑 <b>${dishBookGot()}</b>項目 ・ 実績 <b>${GOALS.filter(goalClaimed).length}</b>個`+
     (S.rankName?`<br>「${esc(S.rankName)}」として載っています。ページを開いたときと、庭に出入りするたびに自動で更新されます`:"")+
     (rankBookErr?`<br><span style="color:#c0392b">※図鑑の番付に書き込めませんでした。Firebase のルールを最新の database.rules.json で公開してください(${esc(rankBookErr.slice(0,40))})</span>`:"");
 }
@@ -8506,7 +8517,7 @@ async function renderGardenRank(){
     }).join("");
   }catch(e){ if(req===gRankReq) note.textContent="読み込めませんでした。通信環境を確認してください"; }
 }
-const G_RANK_TABS=["g-money","g-earn","g-harvest","g-book"];
+const G_RANK_TABS=["g-money","g-earn","g-harvest","g-book","g-dbook","g-goal"];
 function switchGardenRank(dir){
   const i=G_RANK_TABS.indexOf(gRankTab), n=G_RANK_TABS.length;
   gRankTab = G_RANK_TABS[(i+(dir<0?-1:1)+n)%n];
@@ -8533,7 +8544,7 @@ async function useName(name, old){
   if(!hasDb() || isDebugSave()) return;
   if(old && old!==name){
     const k=rankKey(old);
-    await Promise.all(["money","harvest","book","earn"].map(async m=>{
+    await Promise.all(RANK_METRICS.map(async m=>{
       try{
         const ref=db.ref(`${RANK_PATH}/${m}/${k}`), v=(await ref.once("value")).val();
         if(v && v.o===S.owner) await ref.remove();
