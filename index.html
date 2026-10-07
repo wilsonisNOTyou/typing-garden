@@ -7907,8 +7907,10 @@ const THEME_VARS=["--dish","--bg","--panel","--panel-hi","--line","--amber","--a
 let themeKey="";   // いまの色(同じなら作り直さない)
 /* タイピングで使う: 変異・超変異の画面の色のとき、キーの代わりに出す料理の絵 */
 function themeScrewArt(){
-  const b=mBuff(), d=b && DISH[b.d];
-  return d && d.eff==="M" && isMutT(b.t) ? d.art[b.t===5?2:1] : null;
+  // お弁当箱で画面の色の料理が2つ効いているときは、1つずつどちらかを選んで混ぜる(ふつうの料理が選ばれたらそのまま)
+  const bs=buffList().filter(x=>DISH[x.d] && DISH[x.d].eff==="M");
+  const b=bs[Math.floor(Math.random()*bs.length)], d=b && DISH[b.d];
+  return d && isMutT(b.t) ? d.art[b.t===5?2:1] : null;
 }
 /* 背景に舞う作物: 料理の材料(変異・超変異の絵)と、農園の作物いろいろ */
 function themeFloatArts(d,t){
