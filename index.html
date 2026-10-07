@@ -6358,6 +6358,11 @@ function gainGur(id){   // 返す文は、その宝物をはじめて手に入�
   if(id==="bento"){ S.bento=(S.bento||0)+1;
     return `${I} 二段重ねのお弁当箱を手に入れました! 使うと1時間、料理の効果を2つまで同時にかけられます(同じ効果は重ならず、強い方だけが効きます)。${KT}で${kb("選んで Enter で使えます","タップして選び、もう一度タップで使えます")}`; }
   if(g.kit || ["fridge","cookvil","kamado"].includes(id)){
+    // 上限まで重ねた宝物と、1つで足りる宝物(冷蔵庫・かまど)の2つ目からは、かわりにネジを受け取る
+    if((g.kit && kitVal(id)>=g.kit.cap) || ((id==="fridge"||id==="kamado") && ((S.kit&&S.kit[id])||0)>0)){
+      S.money+=1000000; S.totalSales+=1000000;
+      return `${I} ${g.name}! ${g.kit?"もう効果の上限まで重ねている":"もう持っている"}ので、かわりに 1,000,000キー を受け取りました`;
+    }
     S.kit=S.kit||{}; S.kit[id]=(S.kit[id]||0)+1;
     const k=g.kit, more = k ? `重ねるほど強くなり、最大 +${k.cap}${k.unit}です` : "";
     if(id==="fridge")  return `${I} 魔法の冷蔵庫を手に入れました! これからは、ゲームを閉じている間も料理の効果時間が減りません(持っているだけで効きます)`;
@@ -6705,7 +6710,7 @@ function gachaHTML(){
 const TREASURES = CROPS.filter(c=>c.treasure);
 let treasTab=0, kitCur=0;
 const kitAny = () => KIT_ORDER.some(id=>(S.got[id]||0)>0);   // 台所の宝物はシークレット: 1つ手に入れるまでタブを出さない
-const KIT_NOTE="わくわくガチャの GHR・GUR から出る台所の宝物です。重ねるほど強くなるものもあります(上限あり)。"+kb("使うものは、選んで Enter で使います。","使うものは、タップして選び、もう一度タップで使います。");   // ほかの宝物の名前は書かない(ネタバレになるため)
+const KIT_NOTE="わくわくガチャの GHR・GUR から出る台所の宝物です。重ねるほど強くなるものもあります(上限あり。上限をこえた分や、1つで足りるものの2つ目からは、かわりに 1,000,000キー を受け取ります)。"+kb("使うものは、選んで Enter で使います。","使うものは、タップして選び、もう一度タップで使います。");   // ほかの宝物の名前は書かない(ネタバレになるため)
 const TREAS_NOTE="ガチャの GHR から出る種を育てると手に入ります。売ることはできませんが、持っているだけで農園にずっと効きます(同じものを重ねるほど強くなります)。";
 function kitSub(id){   // 台所の宝物の「今の状態」
   const g=GUR[id], n=kitN(id);
@@ -7326,7 +7331,7 @@ const EFFS = {
   S:{ nm:"ガチャのレア度",       n:"ガチャの SR 以上が出る確率 1.2倍",     s:"ガチャの SR 以上が出る確率 1.5倍" },
   V:{ nm:"ノーミス勝負のお守り", n:"ノーミス勝負でミスしても1回まで続く(効果中はランキングに載りません)", s:"ノーミス勝負でミスしても3回まで続く(効果中はランキングに載りません)" },
   "α":{ nm:"種が戻る",           n:"収穫すると20%で同じ種が1つ戻る(貴重品は除く)", s:"収穫すると、かならず同じ種が1つ戻る(貴重品は除く)" },
-  "β":{ nm:"時間を進める",       n:"食べた瞬間、すべての畑が3時間進む",    s:"食べた瞬間、すべての畑が1日進む" },
+  "β":{ nm:"時間を進める",       n:"食べた瞬間、すべての畑が3時間進む",    m:"食べた瞬間、すべての畑が12時間進む", s:"食べた瞬間、すべての畑が1日進む" },
   "γ":{ nm:"ガチャおかわり",     n:"ガチャ1回ごとに10%でもう1回",         s:"ガチャ1回ごとに50%でもう1回" },
   "ε":{ nm:"GUR が出やすい",     n:"わくわくガチャの GUR の確率 1.5倍",    s:"わくわくガチャの GUR の確率 3倍" },
   "μ":{ nm:"GHR が出やすい",     n:"ガチャの GHR の確率 1.5倍",            s:"ガチャの GHR の確率 3倍" },
@@ -7341,7 +7346,7 @@ const EFFS = {
   Y:{ nm:"実績のごほうび",       n:"実績のごほうび 1.5倍",                 s:"実績のごほうび 2倍" },
   P3:{ nm:"食材が上位種に化ける", n:"わくわくガチャの食材が5%で上位種に化ける", s:"わくわくガチャの食材が20%で上位種に化ける" },
   P5:{ nm:"タイピングで肥料",      n:"タイピング20打ごとに肥料が1つ届く",      s:"タイピング5打ごとに肥料が1つ届く" },
-  P8:{ nm:"効果を延ばす",        n:"食べた瞬間、今かかっている料理の効果が10分延びる", s:"食べた瞬間、今かかっている料理の効果が1時間延びる" },
+  P8:{ nm:"効果を延ばす",        n:"食べた瞬間、今かかっている料理の効果が10分延びる", m:"食べた瞬間、今かかっている料理の効果が30分延びる", s:"食べた瞬間、今かかっている料理の効果が1時間延びる" },
   Q1:{ nm:"種おかわり",          n:"ガチャで出た作物の種が20%で2つ",       s:"ガチャで出た作物の種が50%で2つ" },
   Q2:{ nm:"変わり種の売値",      n:"変異・超変異の作物の売値 1.5倍",       s:"変異・超変異の作物の売値 3倍" },
   Q3:{ nm:"農園の時計",            n:"農園を開いている間、1秒ごとに水の効いている作物が30秒育つ", s:"農園を開いている間、1秒ごとに水の効いている作物が3分育つ" },
@@ -7526,7 +7531,8 @@ function cookRowsOf(){
 }
 /* 画面の色の料理は、何色になるかを具体的に書く(変異・超変異でも色は同じ) */
 const M_COLOR = { strawmilk:"ピンク", sherbet:"赤", lemonade:"黄色", melonsoda:"緑", bluetart:"青", grapejuice:"紫", chips:"濃い紫", vanillaice:"クリーム色" };
-const effText = (d,g) => { const t=isMutT(g) ? EFFS[d.eff].s : EFFS[d.eff].n; return d.eff==="M" && M_COLOR[d.id] ? t.replace("料理の色",M_COLOR[d.id]) : t; };
+const effText = (d,g) => { const e=EFFS[d.eff], t = g===3 && e.m ? e.m : isMutT(g) ? e.s : e.n;   // m: 変異だけ強さが違う効果(食べた瞬間に効くもの)
+  return d.eff==="M" && M_COLOR[d.id] ? t.replace("料理の色",M_COLOR[d.id]) : t; };
 function cookStep(id,dir){
   const i=DISH_GRADES.indexOf(cookGradeOf(DISH[id]));
   cookGrade[id]=DISH_GRADES[(i+dir+DISH_GRADES.length)%DISH_GRADES.length];
@@ -7616,13 +7622,13 @@ function cookEat(id,g){
   const bk=bookKeyOf(g); S.dishEaten[id]=S.dishEaten[id]||{}; S.dishEaten[id][bk]=true;
   let what="";   // 演出に出す、食べて起きたこと
   if(d.eff==="β"){   // 時間を進める: その場で効く(今の効果は消えない)
-    const hours = isMutT(g) ? 24 : 3;
+    const hours = g===5 ? 24 : g===3 ? 12 : 3;
     tick(); advanceAll(hours*HOUR);
     what=`すべての畑が ${hours>=24?hours/24+"日":hours+"時間"} 進みました`;
     toast(`${dishIco(d,g)} ${esc(dishName(d,g))}を食べました。すべての畑が ${hours>=24?hours/24+"日":hours+"時間"} 進みました`,"good",4200,true);
   }else if(d.eff==="P8"){   // 効果を延ばす: 今の効果に時間を足す
     const bs=buffList(), b=bs[0];
-    const add = isMutT(g) ? 60 : 10;
+    const add = g===5 ? 60 : g===3 ? 30 : 10;
     for(const x of bs) x.until+=add*60000;   // かかっている効果を全部延ばす
     what=`${esc(dishName(DISH[b.d],b.t))}の効果が ${fmtMin(add)} 延びました`;
     toast(`${dishIco(d,g)} ${esc(dishName(d,g))}を食べました。${esc(dishName(DISH[b.d],b.t))}の効果が ${fmtMin(add)} 延びました(残り ${fmtLeft(b.until-Date.now())})`,"good",5200,true);
