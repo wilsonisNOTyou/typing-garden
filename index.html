@@ -1164,8 +1164,10 @@ html.mobile #g-cookShow .csnm{font-size:1.3rem}
 #screen-garden .qm.on{color:#e0a800}
 #screen-garden .qm.st{font-size:.85rem; margin-left:-.05em}
 #screen-garden .qm.st.on{color:#f0b400; text-shadow:0 0 5px rgba(255,190,0,.9)}
-#screen-garden .btabs{display:flex; justify-content:center; gap:.3rem; margin-bottom:.4rem}
+#screen-garden .btabs{display:flex; flex-wrap:wrap; justify-content:center; gap:.3rem; margin-bottom:.4rem}
+#screen-garden .bback{display:none}   /* スマホの縦持ちで、詳しく見る画面のときだけ出す */
 #screen-garden .btab{
+  white-space:nowrap;
   font-size:.75rem; font-weight:700; color:var(--ink-l);
   background:#f1e8d4; border-radius:999px; padding:.1rem .6rem;
 }
@@ -1412,6 +1414,18 @@ html.mobile #screen-garden .bookdetail{overflow:auto; min-height:0; padding:.8re
 html.mobile #screen-garden .btab{padding:.3rem .8rem; font-size:.85rem; cursor:pointer}
 html.mobile #screen-garden .tlist{grid-template-columns:1fr}
 
+/* 番付: 説明を省いて、ランキングの表を広く */
+html.mobile #screen-garden .rk-desc{display:none}
+html.mobile #g-rankNow{font-size:.85rem; line-height:1.6; margin:.1rem 0 .5rem}
+html.mobile #g-rankNow b{font-size:.95rem}
+html.mobile #screen-garden .rk-row{display:flex; flex-wrap:wrap; align-items:center; gap:.4rem}
+html.mobile #screen-garden .rk-row .rk-input{flex:1 1 0; min-width:0; width:auto; padding:.45rem .7rem}
+html.mobile #screen-garden .rk-row .pfoot{display:contents}
+html.mobile #screen-garden .rk-row .note{order:3; flex-basis:100%}
+html.mobile #screen-garden .rk-row .note:empty{display:none}
+html.mobile #screen-garden .grk-tabs{margin-top:.6rem}
+html.mobile #screen-garden .grk-list{max-height:none; flex:1 1 auto; min-height:12rem}
+/* 図鑑: 品質の切り替えは横に並べる(縦書きにならないように) */
 /* 縦持ち: 並びはパソコンと同じ(スプリンクラーの範囲がわかるように)。画面の幅いっぱいに収める */
 @media (orientation:portrait){
   html.mobile #screen-garden{--k:calc((100vw - 60px) / 10); --g:3px}
@@ -1432,6 +1446,14 @@ html.mobile #screen-garden .tlist{grid-template-columns:1fr}
   html.mobile #screen-garden .rowi .acts{justify-content:flex-start}
   html.mobile #screen-garden .book{grid-template-columns:1fr; grid-template-rows:minmax(8rem,34%) 1fr}
   html.mobile #screen-garden .booklist .rowi{grid-template-columns:2rem 1fr auto}
+  /* 図鑑は、一覧と詳しく見る画面を切り替える(どちらも画面いっぱいに使う) */
+  html.mobile #screen-garden .book{display:flex; flex-direction:column; gap:.5rem}
+  html.mobile #screen-garden .book .booklist{flex:1; min-height:0}
+  html.mobile #screen-garden .book .bookdetail{display:none}
+  html.mobile #screen-garden .book.showd .booklist{display:none}
+  html.mobile #screen-garden .book.showd .bookdetail{display:block; flex:1; min-height:0}
+  html.mobile #screen-garden .book.showd .bback{display:block; align-self:flex-start}
+  html.mobile #screen-garden .panel:has(.book.showd) .bookq{display:none}
   html.mobile #screen-garden .gacha{grid-template-columns:1fr; gap:.6rem}
   html.mobile #screen-garden .gleft{width:auto; display:flex; align-items:center; justify-content:center; gap:1rem}
   html.mobile #screen-garden .gmachine{transform:scale(.8); margin:0}
@@ -1761,6 +1783,7 @@ html.mobile #screen-garden .tlist{grid-template-columns:1fr}
       <div class="tabs sptabs"></div>
       <div class="bookq"><input id="g-bookQ" type="search" placeholder="名前で探す(F)" autocomplete="off" enterkeyhint="search"><span id="g-bookQn"></span></div>
       <div class="book">
+        <button class="sbtn bback" type="button">◀ 一覧にもどる</button>
         <div id="g-bookList" class="plist booklist"></div>
         <div id="g-bookDetail" class="bookdetail"></div>
       </div>
@@ -1779,6 +1802,7 @@ html.mobile #screen-garden .tlist{grid-template-columns:1fr}
       <div class="tabs sptabs"></div>
       <div class="bookq"><input id="g-dbookQ" type="search" placeholder="名前で探す(F)" autocomplete="off" enterkeyhint="search"><span id="g-dbookQn"></span></div>
       <div class="book">
+        <button class="sbtn bback" type="button">◀ 一覧にもどる</button>
         <div id="g-dbookList" class="plist booklist"></div>
         <div id="g-dbookDetail" class="bookdetail"></div>
       </div>
@@ -1835,9 +1859,11 @@ html.mobile #screen-garden .tlist{grid-template-columns:1fr}
     <div class="panel savebox">
       <div class="phead"><h2>番付</h2><button class="sbtn xbtn" data-close style="margin-left:auto">閉じる ✕</button></div>
       <p id="g-rankNow"></p>
-      <p>所持キー・累計獲得キー・累計収穫数・図鑑・料理図鑑・実績の番付(ランキング)です。プレイヤー名で自動で載り、庭を出るたびに更新されます。名前を書きかえて Enter で、ランキングと番付の名前をまとめて変えられます。</p>
-      <input id="g-rankName" class="rk-input" maxlength="10" placeholder="庭主の名前" autocomplete="off">
-      <div class="pfoot"><span class="note" id="g-rankNote"></span><button class="sbtn main" id="g-rankBtn">決める(Enter)</button></div>
+      <p class="rk-desc">所持キー・累計獲得キー・累計収穫数・図鑑・料理図鑑・実績の番付(ランキング)です。プレイヤー名で自動で載り、庭を出るたびに更新されます。名前を書きかえて Enter で、ランキングと番付の名前をまとめて変えられます。</p>
+      <div class="rk-row">
+        <input id="g-rankName" class="rk-input" maxlength="10" placeholder="庭主の名前" autocomplete="off">
+        <div class="pfoot"><span class="note" id="g-rankNote"></span><button class="sbtn main" id="g-rankBtn">決める(Enter)</button></div>
+      </div>
       <div class="tabs grk-tabs" id="g-rankTabs">
         <button class="tab" data-rk="g-money">所持キー</button>
         <button class="tab" data-rk="g-earn">累計獲得</button>
@@ -5826,10 +5852,10 @@ function openModal(name){
   if(name==="shop") renderShop();
   if(name==="gacha") renderGacha();
   if(name==="treas") renderTreas();
-  if(name==="book"){ bookQ=""; $("g-bookQ").value=""; renderBook(); }
+  if(name==="book"){ bookQ=""; $("g-bookQ").value=""; bookShowDetail("g-book",false); renderBook(); }
   if(name==="rank") prepareRank();
   if(name==="goal") renderGoals();
-  if(name==="dbook"){ dbookQ=""; $("g-dbookQ").value=""; renderDbook(); }
+  if(name==="dbook"){ dbookQ=""; $("g-dbookQ").value=""; bookShowDetail("g-dbook",false); renderDbook(); }
   if(name==="cook") renderCook();
   if(name==="pick") renderPick();
   if(name==="cvpick") renderCvPick();
@@ -7871,7 +7897,17 @@ function dbookKey(e){
   else if(k==="ArrowLeft"||k==="ArrowRight"){ e.preventDefault(); const qs=[0,3,5]; dbookTier=qs[(qs.indexOf(dbookTier)+(k==="ArrowRight"?1:-1)+3)%3]; sfx.tab(); renderDbook(); }
 }
 $("g-dbookDetail").addEventListener("click",e=>{ const b=e.target.closest && e.target.closest("[data-t]"); if(!b) return; dbookTier=+b.dataset.t; sfx.tab(); renderDbook(); });
-$("g-dbookList").addEventListener("click",e=>{ const r=e.target.closest && e.target.closest(".rowi"); if(!r) return; dbookCur=+r.dataset.i; if(dbookQ) dbookQTier(); renderDbook(); });
+$("g-dbookList").addEventListener("click",e=>{ const r=e.target.closest && e.target.closest(".rowi"); if(!r) return; dbookCur=+r.dataset.i; if(dbookQ) dbookQTier(); renderDbook(); bookShowDetail("g-dbook",true); });
+/* スマホの縦持ち: 一覧で選ぶと、詳しく見る画面に切り替える(戻るボタンで一覧へ) */
+function bookShowDetail(id,on){
+  const bk=$(id).querySelector(".book"); if(!bk) return;
+  bk.classList.toggle("showd", !!on && !!window.IS_MOBILE);
+  const d=bk.querySelector(".bookdetail"); if(on && d) d.scrollTop=0;
+}
+for(const id of ["g-book","g-dbook"]){
+  $(id).querySelector(".bback").addEventListener("click",()=>{ sfx.tab(); bookShowDetail(id,false); });
+  $(id).querySelector(".bookq input").addEventListener("input",()=>bookShowDetail(id,false));   // 探すときは一覧を見せる
+}
 
 /* ---- Space の画面: 図鑑 → 料理図鑑 → 実績(Tab で切り替え) ---- */
 const SPACE_ALL=[["book","図鑑"],["dbook","料理図鑑"],["goal","実績"]];
@@ -8196,7 +8232,7 @@ $("g-bookDetail").addEventListener("click",e=>{
 });
 $("g-bookList").addEventListener("click",e=>{
   const row=e.target.closest && e.target.closest(".rowi"); if(!row) return;
-  bookCur=+row.dataset.i; if(bookQ) bookQTier(); renderBook();
+  bookCur=+row.dataset.i; if(bookQ) bookQTier(); renderBook(); bookShowDetail("g-book",true);
 });
 
 /* ---------- 目標 ----------
