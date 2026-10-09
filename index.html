@@ -10011,6 +10011,21 @@ const tqGift = () => { const x = tqKind==="one" ? 2**Math.floor(tqOk/10) : 1; re
 const tqNum = n => Math.round(n).toLocaleString("ja-JP");
 const tqHours = min => tqNum(min/60)+"時間";   // 1セットの語数・訳が出るまでの秒数(設定できる範囲)
 const TQ_KEY="typinggarden:toeic";   // 同期・記録の引き継ぎに入る(パソコンとスマホで学習の記録を共有)
+/* レベルの解放: 最初は基本1と熟語1・2だけ。10語セットで8問以上正解するか、ノーミス勝負で10問以上正解すると次のレベルが開く */
+const TQ_CHAIN=["b1","b2","b3","470","630","730","860","990"];
+const TQ_OPEN0=["b1","i1","i2","weak"];
+const TQ_UNLOCK_SET=8, TQ_UNLOCK_ONE=10;
+const TQ_OPEN_KEY="typinggarden:toeic-open";    // 解放したレベル(同期・引き継ぎに入る)
+let tqOpenLv=[];
+const tqIsOpen = lv => TQ_OPEN0.includes(lv) || tqOpenLv.includes(lv);
+const tqPrevLv = lv => { const i=TQ_CHAIN.indexOf(lv); return i>0 ? TQ_CHAIN[i-1] : null; };
+/* そのレベルで条件を満たしたら次のレベルを開く。開いたレベルを返す */
+function tqUnlockNext(lv){
+  const i=TQ_CHAIN.indexOf(lv), nx=TQ_CHAIN[i+1];
+  if(i<0 || !nx || tqIsOpen(nx)) return null;
+  tqOpenLv.push(nx); try{ localStorage.setItem(TQ_OPEN_KEY,JSON.stringify(tqOpenLv)); }catch(e){}
+  return nx;
+}
 const TQ_BEST_KEY="typinggarden:toeic-best";   // ノーミス勝負の自己ベスト(出題形式ごと)
 const TQ_OPT_KEY="typinggarden:toeic-opt";     // 設定(入力で訳が出るまでの秒数)
 const TQ_RANK = (f,lv) => "toeic-"+f+"-"+lv;   // ランキングの保存場所(出題形式・始めたレベルごと)
@@ -10020,6 +10035,7 @@ const tqRevealMs = () => tqSec*1000;
 const tqLoad = () => {
   try{ tqStat=JSON.parse(localStorage.getItem(TQ_KEY)||"{}")||{}; }catch(e){ tqStat=tqStat||{}; }
   try{ tqBest=JSON.parse(localStorage.getItem(TQ_BEST_KEY)||"{}")||{}; }catch(e){ tqBest=tqBest||{}; }
+  try{ const o=JSON.parse(localStorage.getItem(TQ_OPEN_KEY)||"[]"); tqOpenLv=Array.isArray(o)?o:[]; }catch(e){}
   try{ const o=JSON.parse(localStorage.getItem(TQ_OPT_KEY)||"{}")||{}; if(o.sec>=TQ_SEC_MIN && o.sec<=TQ_SEC_MAX) tqSec=o.sec|0; }catch(e){}
 };
 const tqSaveOpt = () => { try{ localStorage.setItem(TQ_OPT_KEY,JSON.stringify({sec:tqSec})); }catch(e){} };
@@ -10043,12 +10059,12 @@ let tqLadder=[], tqUnl=1, tqUsed=new Set(), tqOk=0, tqOver=false;   // ノーミ
 function tqView(id){ for(const v of ["tqMenu","tqPlay","tqResult","tqList"]) $(v).classList.toggle("on",v===id); }
 function openToeic(){ tqLoad(); window.tqFromRank=false; show("toeic"); tqMenu(); }
 /* そのレベルを選べるか(ノーミス勝負は苦手を選べない・入力はスマホで遊べない) */
-const tqCan = lv => !(tqKind==="one" && lv==="weak") && tqPool(lv).length>0;
+const tqCan = lv => tqIsOpen(lv) && !(tqKind==="one" && lv==="weak") && tqPool(lv).length>0;
 /* メニュー: 出題形式 → モード → レベル */
-/* 農園のようす(実った作物など)と、農園へ行くボタン */
+/* 農園のようす(収穫できる作物など)と、農園へ行くボタン */
 function tqFarm(){
   let st=null; try{ st=Garden.peek(); }catch(e){}
-  const html = st ? `🌾 実った作物 <b>${tqNum(st.ripe)}</b> ・ 育っている作物 <b>${tqNum(st.crops-st.ripe)}</b> ・ 所持キー <b>${tqNum(st.money)}</b>` : "";
+  const html = st ? `🌾 収穫できる作物 <b>${tqNum(st.ripe)}</b> ・ 育っている作物 <b>${tqNum(st.crops-st.ripe)}</b> ・ 所持キー <b>${tqNum(st.money)}</b>` : "";
   document.querySelectorAll(".tq-farm").forEach(e=>e.innerHTML=html);
 }
 function tqToGarden(){ clearTimeout(tqTimer); openGarden(); }
@@ -10059,7 +10075,8 @@ function tqMenu(){
   $("tqLevels").innerHTML=TQ_LEVELS.map(([k,nm],i)=>{
     const pool=tqPool(k), ok=tqCan(k);
     let sub;
-    if(tqKind==="one" && k==="weak") sub="ノーミス勝負では選べません";
+    if(!tqIsOpen(k)) sub=`🔒 ${tqLvName(tqPrevLv(k))}で合格すると解放`;
+    else if(tqKind==="one" && k==="weak") sub="ノーミス勝負では選べません";
     else if(!pool.length) sub = k==="weak" ? "まだありません" : "穴埋めはありません";
     else if(k==="weak") sub=`${pool.length}語`;
     else if(tqKind==="one") sub=`${pool.length}語 ・ 自己ベスト ${tqBest[tqBestKey(tqFmt,k)]||0}問`;
@@ -10072,6 +10089,8 @@ function tqMenu(){
     tqFmt==="type" && window.IS_MOBILE ? "入力はパソコンで遊べます。スマホでは4択か穴埋め4択を選んでください"
     : tqKind==="one" ? `選んだレベルの単語を全部正解でクリア(1問でも間違えたら終わり)。正解ごとにキーと農園の時間が届き、${TQ_UP_N}問ごとに倍になります`
     : "";
+  // まだ閉じているレベルがあれば、解放のしかたを添える
+  if(TQ_CHAIN.some(k=>!tqIsOpen(k))) $("tqNote").textContent += ($("tqNote").textContent?" ・ ":"")+`合格: 10語セットで${TQ_UNLOCK_SET}問以上、ノーミス勝負で${TQ_UNLOCK_ONE}問以上正解すると次のレベルが開きます`;
 }
 /* 10語を選ぶ: 苦手・まだ出ていない単語ほど出やすく、覚えた単語は出にくい */
 const tqWt = w => tqWeak(w.en) ? 4 : !tqStat[w.en] ? 3 : tqGood(w.en) ? .5 : 2;
@@ -10281,15 +10300,19 @@ function tqFinish(){
   sendToGarden(0, tqPts, tqMin);   // 正解ぶんのキーと農園の時間を届ける
   const sent = tqPts ? `<br>農園に キー ${tqNum(tqPts)} を届け、農園の時間を ${tqHours(tqMin)} 進めます` : "";
   $("tqReg").innerHTML="";
+  // 次のレベルの解放
+  const lvNow = tqKind==="one" ? tqLadder[0] : tqLv;
+  const opened = (tqKind==="one" ? tqOk>=TQ_UNLOCK_ONE : (tqLog.length>=TQ_SET && ok>=TQ_UNLOCK_SET)) ? tqUnlockNext(lvNow) : null;
+  const openMsg = opened ? `<br><b class="tq-new">🔓 ${tqLvName(opened)}が解放されました!</b>` : "";
   if(tqKind==="one"){
     const bk=tqBestKey(tqFmt,tqLadder[0]), old=tqBest[bk]||0, isBest=tqOk>old;
     if(isBest){ tqBest[bk]=tqOk; tqSaveBest(); }
     $("tqResSum").innerHTML=`ノーミス勝負 ・ ${tqFmtName(tqFmt)}${tqFmt==="type"?`(${tqSec}秒)`:""} ・ ${tqLvName(tqLadder[0])}<br><span class="tq-big">${tqOk}<small>問 正解</small></span>`
       +(tqClear ? `<br><b class="tq-new">${tqLvName(tqLadder[0])}を全部正解! クリア!</b>` : "")
-      +(isBest&&old ? `<br><b class="tq-new">自己ベスト更新!</b>(これまで ${old}問)` : `<br>自己ベスト ${Math.max(old,tqOk)}問`)+sent;
+      +(isBest&&old ? `<br><b class="tq-new">自己ベスト更新!</b>(これまで ${old}問)` : `<br>自己ベスト ${Math.max(old,tqOk)}問`)+openMsg+sent;
     tqRegister();
   }else{
-    $("tqResSum").innerHTML=`${tqLvName(tqLv)} ・ ${tqFmtName(tqFmt)} ・ 正解 <b>${ok}</b> / ${tqLog.length}語`+sent;
+    $("tqResSum").innerHTML=`${tqLvName(tqLv)} ・ ${tqFmtName(tqFmt)} ・ 正解 <b>${ok}</b> / ${tqLog.length}語`+openMsg+sent;
   }
   $("tqAgain").innerHTML=(tqKind==="one"?"もう一回":"もう1セット")+' <span class="kbdh">Enter</span>';
   $("tqResList").innerHTML=tqLog.map(x=>`<li><span class="mk">${x.ok?"○":x.half?"△":"✕"}</span><span class="w">${tqEsc(x.w.en)}</span><span class="m">${tqEsc(x.w.means.map(m=>m.j).join("、"))}</span></li>`).join("");
