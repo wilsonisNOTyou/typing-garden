@@ -6109,7 +6109,7 @@ function shopRows(){
           const has3=S.vilOrder3;
           rows.push({ ic:"📜",
             nm: `村人の指示書3 <span style="color:var(--ink-l)">${has3?"購入済み":fmtNum(VIL_ORDER3_COST)+"キー"}</span>`,
-            ds: has3?`持っている種を使う ${onoff(S.vilUseSeed)}<br>村人が種を植えるとき、同じ種を持っていれば、買わずにそれを使います。なければ今までどおり買います(貴重品の種は使いません)`
+            ds: has3?`持っている種を使う ${onoff(S.vilUseSeed)}<br>村人が種を植えるとき、同じ種を持っていれば、買わずにそれを使います。なければ今までどおり買います`
                     :`村人が種を植えるとき、同じ種を持っていれば、買わずにそれを使うようになります(オンオフできます)`,
             keys: has3?`<b>Enter</b> ${S.vilUseSeed?"オフにする":"オンにする"}`:"<b>Enter</b> 買う",
             enter: ()=>has3?toggleVilUseSeed():buyVilOrder3(), shift: ()=>has3?toggleVilUseSeed():buyVilOrder3() });
