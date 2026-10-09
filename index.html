@@ -91,6 +91,17 @@ body.dishtheme.dishsplit:not(.garden):not(.washi){
   background-position:0 0, left top, right top;
   background-repeat:repeat, no-repeat, no-repeat;
 }
+/* 料理の色を3つ(永遠のかまど + お弁当箱): 背景を時計の12時・4時・8時の向きに3つに分ける */
+body.dishtheme.dishsplit3:not(.garden):not(.washi){
+  background-image:
+    repeating-linear-gradient(45deg, transparent 0 34px, rgba(255,255,255,.05) 34px 36px),
+    radial-gradient(circle at 50% 50%, rgba(255,255,255,.16) 0%, transparent 42%, rgba(0,0,0,.42) 100%),
+    conic-gradient(from -60deg at 50% 50%,
+      color-mix(in srgb, var(--dishA) 72%, #0c0c10) 0deg 120deg,
+      color-mix(in srgb, var(--dishB) 72%, #0c0c10) 120deg 240deg,
+      color-mix(in srgb, var(--dishC) 72%, #0c0c10) 240deg 360deg);
+  background-attachment:scroll, fixed, fixed;
+}
 /* ---- TOEIC 英単語 ---- */
 .diff-btn.toeic{border-color:#3b5f8f}
 .diff-btn.toeic .name{color:#8fc2ff}
@@ -355,6 +366,30 @@ h1.logo .gd::after{content:'🌱'; position:absolute; right:-.55em; top:-.55em; 
   border-radius:4px; background:rgba(255,255,255,.12); color:var(--steel); font-size:.8em;
 }
 .keynav{color:#6b7484; font-size:.78rem; margin-top:.8rem; line-height:1.7}
+/* ---- タイマー(遊ぶ時間) ---- */
+.pt-line{color:var(--steel); font-size:.9rem; margin:.7rem 0 .2rem}
+.pt-line .btn{padding:.35rem .8rem; font-size:.85rem; margin-left:.4rem}
+#pt{z-index:10001}
+.pt-today{color:var(--ink); font-size:.95rem; margin:.4rem 0}
+.pt-today b{color:var(--amber); font-size:1.1rem}
+.pt-h{display:flex; align-items:center; gap:.7rem}
+/* オンオフのスイッチ(押すたびに切り替わる) */
+.pt-sw{position:relative; display:inline-flex; align-items:center; flex:none; width:6.4rem; height:2rem; padding:0 .8rem; border-radius:999px; border:2px solid var(--line); background:#14171c; color:var(--steel); font:inherit; font-size:.85rem; letter-spacing:.1em; cursor:pointer; justify-content:flex-end}
+.pt-sw::before{content:""; position:absolute; left:.2rem; top:50%; width:1.5rem; height:1.5rem; margin-top:-.75rem; border-radius:50%; background:#6b7484; transition:left .15s}
+.pt-sw.on{background:var(--amber); border-color:var(--amber); color:#1b1405; font-weight:700; justify-content:flex-start}
+.pt-sw.on::before{left:calc(100% - 1.7rem); background:#fff}
+.pt-row{display:flex; align-items:center; flex-wrap:wrap; gap:.5rem; color:var(--steel); font-size:.9rem; margin-left:1.7rem}
+.pt-row .bk-codein{width:auto; text-transform:none; letter-spacing:0; font-family:inherit}
+.pt-row.off{opacity:.45}
+#ptLock{position:fixed; inset:0; z-index:10000; display:none; align-items:center; justify-content:center; padding:16px; background:rgba(8,10,14,.94)}
+#ptLock.open{display:flex}
+#ptLock .pt-box{max-width:460px; text-align:center; color:var(--ink); line-height:1.8}
+#ptLock .pt-big{font-size:3rem; line-height:1.2}
+#ptLock h2{color:var(--amber); letter-spacing:.15em; font-weight:400; margin:.4rem 0 .6rem}
+#ptLock p{color:var(--steel)}
+#ptLock .btn{margin-top:1rem}
+#ptWarn{position:fixed; left:50%; top:14px; transform:translateX(-50%); z-index:9999; display:none; max-width:90vw; padding:.6rem 1.1rem; border-radius:10px; background:#2e343e; border:2px solid var(--amber); color:var(--ink); font-size:.95rem; box-shadow:0 8px 24px rgba(0,0,0,.5)}
+#ptWarn.show{display:block}
 .keynav b{color:var(--steel); background:rgba(255,255,255,.08); border-radius:4px; padding:0 .35em; font-weight:400}
 /* ---- 記録の引き継ぎ ---- */
 .bk-modal{position:fixed; inset:0; z-index:20; display:none; align-items:center; justify-content:center; background:rgba(8,10,14,.7); cursor:pointer}
@@ -1641,6 +1676,7 @@ html.mobile #screen-garden .grk-list{max-height:none; flex:1 1 auto; min-height:
       <button class="btn" id="tutBtn">遊び方ガイド <span class="kbdh">H</span></button>
       <button class="btn" id="newsBtn">更新情報 <span class="news-new" id="newsNew"></span><span class="kbdh">U</span></button>
     </div>
+    <p class="pt-line"><span id="ptLineText"></span><button class="btn" id="ptBtn">タイマー <span class="kbdh">L</span></button></p>
     <p class="hint">キー 1〜9 でモードを選んで開始 ・ G 庭 ・ R ランキング ・ D 図鑑 ・ K 別端末と同期 / ローマ字入力(shi・si どちらもOK)<br>8 単語帳 ・ N 名前 ・ F 要望・バグ報告 ・ H 遊び方ガイド ・ U 更新情報 ・ Esc でいつでもタイトルに戻る</p>
     <div class="hazard" aria-hidden="true"><span class="k">Q</span><span class="s">🌱</span><span class="k">W</span><span class="k">E</span><span class="s">🥕</span><span class="k">R</span><span class="k">T</span><span class="s">🌿</span><span class="k">Y</span><span class="k">U</span><span class="s">🍅</span><span class="k">I</span><span class="k">O</span><span class="s">🌽</span><span class="k">P</span><span class="s">🍓</span></div>
   </section>
@@ -2116,6 +2152,21 @@ html.mobile #screen-garden .grk-list{max-height:none; flex:1 1 auto; min-height:
 <div id="imeWarn">日本語入力がオンになっています。<b>半角英数</b>(「英数」キーや「半角/全角」キー)に切り替えてください</div>
 
 <!-- 要望・バグ報告 -->
+<div id="pt" class="bk-modal">
+  <div class="bk-panel pt-panel">
+    <div class="bk-head"><h2>タイマー</h2><button class="btn bk-x" id="ptClose">閉じる ✕</button></div>
+    <p class="bk-p">遊ぶ時間を決められます。この端末(ブラウザ)だけの設定で、同期はしません。ページを開いて表に出している時間を数えます(ほかのタブやアプリを見ている間は数えません)。時間になっても、遊んでいるタイピングの1回は最後まで遊べます。</p>
+    <p class="pt-today" id="ptToday"></p>
+    <h3 class="pt-h">遊べない時間帯 <button class="pt-sw" type="button" data-box="ptBan"></button><input type="checkbox" id="ptBan" hidden></h3>
+    <div class="pt-row" id="ptBanRow"><input type="time" id="ptFrom" class="bk-codein"> 〜 <input type="time" id="ptTo" class="bk-codein"> は遊べません</div>
+    <h3 class="pt-h">1日に遊べる時間 <button class="pt-sw" type="button" data-box="ptCap"></button><input type="checkbox" id="ptCap" hidden></h3>
+    <div class="pt-row" id="ptCapRow"><select id="ptLimit" class="bk-codein"></select> まで(毎日0時に0分に戻ります)</div>
+    <p class="bk-p" style="margin-top:.8rem">「オフ」を押すと「オン」になり、決めた時間で止まるようになります。もう一度押すと「オフ」に戻ります。</p>
+    <div class="bk-foot"><span class="bk-note" id="ptNote">変えるとすぐに保存されます</span><button class="btn primary" id="ptSave">保存する</button></div>
+  </div>
+</div>
+<div id="ptLock"><div class="pt-box"><div class="pt-big">⏰</div><h2>今は遊べません</h2><p id="ptLockMsg"></p><button class="btn" id="ptLockSet">タイマーの設定 (L)</button></div></div>
+<div id="ptWarn"></div>
 <div id="fb" class="bk-modal">
   <div class="bk-panel">
     <div class="bk-head"><h2>要望・バグ報告</h2><button class="btn bk-x" id="fbClose">閉じる ✕</button></div>
@@ -3183,6 +3234,7 @@ document.addEventListener("keydown",e=>{
     if(e.key==="f"||e.key==="F") openFeedback();
     if(e.key==="u"||e.key==="U") openNews();
     if(e.key==="e"||e.key==="E") openToeic();
+    if(e.key==="l"||e.key==="L") ptOpenWin();
     if(e.key==="h"||e.key==="H") tutAsk(false);
     if(e.key==="n"||e.key==="N"){ e.preventDefault(); openNameWin(); }
     if((e.key==="t"||e.key==="T") && syncReadOnly) syncTakeOver();
@@ -3795,6 +3847,18 @@ function endBookGame(){
 /* ---------- 更新情報 ----------
    新しいものを上に足していく。d は YYYY-MM-DD */
 const NEWS=[
+  { d:"2026-10-09", t:"お店の効率化に「村人の指示書3」が登場しました", items:[
+    "村人の指示書3(300,000キー): 村人が種を植えるとき、同じ種を持っていれば、買わずにそれを使います。なければ今までどおり買います",
+    "お店の効率化でオンオフできます。村人の指示書2を持っているとお店に並びます",
+  ]},
+  { d:"2026-10-09", t:"トップ画面に「タイマー」を追加しました", items:[
+    "「遊べない時間帯」と「1日に遊べる時間」を決められます(トップ画面のタイマー、または L)。はじめはどちらもオフです",
+    "決めた時間になるとゲーム全体が止まります。遊んでいるタイピングの1回は最後まで続けられます",
+    "この端末(ブラウザ)だけの設定で、同期はしません。ページを表に出している時間を数えます",
+  ]},
+  { d:"2026-10-09", t:"画面の色が3色まで分かれるようになりました", items:[
+    "画面の色の効果が3つ重なったときは、ホーム画面とタイピングの背景が3つの色に分かれます",
+  ]},
   { d:"2026-10-08", t:"番付に「料理図鑑」と「実績」が登場しました", items:[
     "料理図鑑の埋まった数と、受け取った実績の数で競う番付です",
     "農園の番付(9)と、タイトルのランキングの両方で見られます。これまでの分もさかのぼって数えます",
@@ -4934,6 +4998,7 @@ function newState(){
     villagers:0, vLog:{}, vilLv:0,
     vilOrder:false, vilAutoH:true, vilAutoM:false,   // 村人の指示書(自動収穫・変異の自動収穫)
     vilOrder2:false, vilSellN:true, vilSellM:false,  // 村人の指示書2(収穫したあと売るか: ふつうの作物・変異の作物)
+    vilOrder3:false, vilUseSeed:true,                 // 村人の指示書3(持っている種があれば、買わずにそれを植える)
     seedSort:false,                                  // 仕分け帳(作物・食材・種を100個・1000個残して売る)
     sortOn:true,                                     // 仕分け帳を使うか(オフなら 1つ・10個ずつ売る)
     treasSell:0,                                     // 貴重品の種の自動売却: 0 なし・1 買った(オフ)・2 オン
@@ -5110,10 +5175,16 @@ function villagerAdvance(p,dt){
     if(!S.vilAutoH && p.crop && p.crop.rolled && p.crop.grown>=need(p.crop)) break;   // 実ったまま待っている(自動収穫オフ)
     if(!p.crop){
       const c=CROP[p.vil==="sg" ? sgCropId() : (eff("O") ? vilGachaCrop() : vilCropId())];   // シゴデキ村人は選んだ作物
-      const cost=Math.round(vilSeedCost(c)*ev("Z",.5,0,1));   // 料理で半分・無料
-      if(S.money<cost){ p.vWait=true; break; }   // 種代が足りなければ待つ
-      S.money-=cost;
-      S.vLog.spent=(S.vLog.spent||0)+cost;
+      if(S.vilOrder3 && S.vilUseSeed && !c.treasure && (S.seeds[c.id]||0)>0){   // 指示書3: 持っている種を使う(買わない)
+        S.seeds[c.id]--;
+        S.vLog.used=(S.vLog.used||0)+1;
+        if(c.id===S.seedId && !(S.seeds[c.id]>0)) S.seedId=nextSeed(S.seedId);
+      }else{
+        const cost=Math.round(vilSeedCost(c)*ev("Z",.5,0,1));   // 料理で半分・無料
+        if(S.money<cost){ p.vWait=true; break; }   // 種代が足りなければ待つ
+        S.money-=cost;
+        S.vLog.spent=(S.vLog.spent||0)+cost;
+      }
       p.crop={ id:c.id, grown:0 }; p.vWait=false;
     }
     const n=need(p.crop), rem=n-p.crop.grown;
@@ -5184,6 +5255,21 @@ function buyVilOrder2(){
   if(!spend(VIL_ORDER2_COST)) return;
   S.vilOrder2=true; sfx.buy();
   toast("村人の指示書2を手に入れました。お店の効率化で、村人が収穫した作物を売るかどうかを、ふつうの作物と変異の作物それぞれで決められます","good",5600);
+  save(); renderAll();
+}
+const VIL_ORDER3_COST=300000;
+function buyVilOrder3(){
+  if(!S.vilOrder2 || S.vilOrder3) return;
+  if(!spend(VIL_ORDER3_COST)) return;
+  S.vilOrder3=true; S.vilUseSeed=true; sfx.buy();
+  toast("村人の指示書3を手に入れました。村人が種を植えるとき、同じ種を持っていれば、買わずにそれを使います(お店の効率化でオンオフできます)","good",5600);
+  save(); renderAll();
+}
+function toggleVilUseSeed(){
+  if(!S.vilOrder3) return;
+  tick();   // ここまでの分は、今の設定で進めてから切り替える
+  S.vilUseSeed=!S.vilUseSeed; sfx.tool();
+  toast(S.vilUseSeed ? "村人は、持っている種があれば買わずにそれを植えます" : "村人は、いつも種を買って植えます(持っている種は使いません)","",3200);
   save(); renderAll();
 }
 function toggleVilSell(w){
@@ -5322,8 +5408,9 @@ function reportVillagers(){
   if(msold.length) vilToast("msold", a=>{ addMut(msold)(a); a.earn+=L.mutEarn||0; }, a=>`${head(mutArr(a))} 村人が ${mutList(mutArr(a))} を収穫して売りました(+${fmtNum(a.earn)}キー)`, a=>cls(mutArr(a)), 9000);
   if(wait.length) vilToast("wait", addMut(wait), a=>`${head(mutArr(a))} 村人の畑で ${mutList(mutArr(a))} が実りました。村人は収穫せずに残しています(素手で収穫できます)`, a=>cls(mutArr(a)), 9000);
   const sold=Object.keys(L.h||{}).length>0, kept=Object.keys(L.k||{}).length>0;
-  if(sold) vilToast("sold", a=>{ addH(L.h)(a); a.earn+=L.earn||0; a.spent+=L.spent||0; }, a=>`村人が ${hList(a)} を収穫して売りました(売上 ${fmtNum(a.earn)} ・ 種代 ${fmtNum(a.spent)} キー)`, ()=>"good", 6000);
-  if(kept) vilToast("kept", addH(L.k), a=>`村人が ${hList(a)} を収穫して、持ち物に入れました`, ()=>"good", 6000);
+  const usedTxt = a => a.used ? ` ・ 手持ちの種 ${fmtNum(a.used)}つ` : "";   // 指示書3で使った種
+  if(sold) vilToast("sold", a=>{ addH(L.h)(a); a.earn+=L.earn||0; a.spent+=L.spent||0; a.used=(a.used||0)+(L.used||0); }, a=>`村人が ${hList(a)} を収穫して売りました(売上 ${fmtNum(a.earn)} ・ 種代 ${fmtNum(a.spent)} キー${usedTxt(a)})`, ()=>"good", 6000);
+  if(kept) vilToast("kept", a=>{ addH(L.k)(a); if(!sold) a.used=(a.used||0)+(L.used||0); }, a=>`村人が ${hList(a)} を収穫して、持ち物に入れました${a.used?`(手持ちの種 ${fmtNum(a.used)}つを使いました)`:""}`, ()=>"good", 6000);
   if(got.length || wait.length || msold.length || sold || kept) sfx.vil();   // 音は1回だけ
   for(const m of (L.up||[])) toast(m,"good",5200,true);
   S.vLog={}; checkUnlocks(); save();
@@ -6182,6 +6269,16 @@ function shopRows(){
                   :`村人が収穫した作物を売るかどうかを、ふつうの作物と変異の作物それぞれで決められるようになります`,
           keys: has2?"<b>Enter</b> ふつうの作物を売る / 売らない<br><b>Shift+Enter</b> 変異の作物を売る / 売らない":"<b>Enter</b> 買う",
           enter: ()=>has2?toggleVilSell("N"):buyVilOrder2(), shift: ()=>has2?toggleVilSell("M"):buyVilOrder2() });
+        // 村人の指示書3(持っている種を使う)。指示書2を持っていると並ぶ
+        if(has2){
+          const has3=S.vilOrder3;
+          rows.push({ ic:"📜",
+            nm: `村人の指示書3 <span style="color:var(--ink-l)">${has3?"購入済み":fmtNum(VIL_ORDER3_COST)+"キー"}</span>`,
+            ds: has3?`持っている種を使う ${onoff(S.vilUseSeed)}<br>村人が種を植えるとき、同じ種を持っていれば、買わずにそれを使います。なければ今までどおり買います`
+                    :`村人が種を植えるとき、同じ種を持っていれば、買わずにそれを使うようになります(オンオフできます)`,
+            keys: has3?`<b>Enter</b> ${S.vilUseSeed?"オフにする":"オンにする"}`:"<b>Enter</b> 買う",
+            enter: ()=>has3?toggleVilUseSeed():buyVilOrder3(), shift: ()=>has3?toggleVilUseSeed():buyVilOrder3() });
+        }
       }
       rows.push({ ic:"🧮",
         nm: `畑のカウンタ <span style="color:var(--ink-l)">${S.counter?"購入済み":fmtNum(COUNTER_COST)+"キー"}</span>`,
@@ -8104,7 +8201,7 @@ function renderBuff(){
   el.title=`${dishName(d,b.t)}: ${effText(d,b.t)}`+(d2?` / ${dishName(d2,b2.t)}: ${effText(d2,b2.t)}`:"");
 }
 /* 料理の色: ホーム画面とタイピングの色を、料理の色に染める(農園はそのまま) */
-const THEME_VARS=["--dish","--bg","--panel","--panel-hi","--line","--amber","--amber-dim","--steel","--dishL","--dishR"];
+const THEME_VARS=["--dish","--bg","--panel","--panel-hi","--line","--amber","--amber-dim","--steel","--dishL","--dishR","--dishA","--dishB","--dishC"];
 let themeKey="";   // いまの色(同じなら作り直さない)
 /* タイピングで使う: 変異・超変異の画面の色のとき、キーの代わりに出す料理の絵 */
 function themeScrewArt(){
@@ -8138,24 +8235,30 @@ function themeFloat(on,d,t,two){
   }).join("");
 }
 function applyTheme(){
-  let b=mBuff();
-  // お弁当箱で色の料理を2つ食べているときは、もう1つ(先に食べたほう)の色も使う
-  const b2=buffList().find(x=>x!==b && DISH[x.d] && DISH[x.d].eff==="M" && b && x.d!==b.d) || null, d2=b2 && DISH[b2.d];
-  if(!(b && DISH[b.d].eff==="M") && S.kamado && kitN("kamado")>0 && DISH[S.kamado] && kamadoDishes().includes(S.kamado)) b={ d:S.kamado, t:0 };   // 永遠のかまど(食べたことのある料理の色)
-  const d=b && DISH[b.d], de=document.documentElement;
-  if(!d || d.eff!=="M"){ themeKey=""; document.body.classList.remove("dishtheme","dishfun","dishsplit"); for(const v of THEME_VARS) de.style.removeProperty(v); themeFloat(false); return; }
-  const key=d.id+":"+b.t+(d2?"|"+d2.id+":"+b2.t:""); if(key===themeKey) return; themeKey=key;
-  // 2つのとき: 左に先に食べた料理、右にあとから食べた料理の色。板などは2つの色を混ぜる
+  // 画面の色: 食べている色の料理(お弁当箱なら2つ)と、永遠のかまどの色。同じ料理は1つに数えて、最大3色
+  const ms=buffList().filter(x=>DISH[x.d] && DISH[x.d].eff==="M");   // [あとに食べた, 先に食べた]
+  const nb=ms[0]||null, ob=(ms[1] && nb && ms[1].d!==nb.d) ? ms[1] : null;
+  const kd=(S.kamado && kitN("kamado")>0 && DISH[S.kamado] && kamadoDishes().includes(S.kamado) && ![nb,ob].some(x=>x && x.d===S.kamado)) ? { d:S.kamado, t:0 } : null;   // 永遠のかまど(食べたことのある料理の色)
+  const order=[kd, ob, nb].filter(Boolean);   // かまど → 先に食べた料理 → あとに食べた料理
+  const de=document.documentElement;
+  if(!order.length){ themeKey=""; document.body.classList.remove("dishtheme","dishfun","dishsplit","dishsplit3"); for(const v of THEME_VARS) de.style.removeProperty(v); themeFloat(false); return; }
+  const b=nb||kd, d=DISH[b.d];   // 板などの色の基準: いちばんあとに食べた料理(なければかまど)
+  const key=order.map(x=>x.d+":"+x.t).join("|"); if(key===themeKey) return; themeKey=key;
   const colOf = x => x.accent||x.tint||x.color;
-  document.body.classList.toggle("dishsplit", !!d2);
-  if(d2){ de.style.setProperty("--dishL",colOf(d2)); de.style.setProperty("--dishR",colOf(d)); }
-  else{ de.style.removeProperty("--dishL"); de.style.removeProperty("--dishR"); }
-  const both = v => d2 ? `color-mix(in srgb, ${v} 50%, ${colOf(d2)})` : v;
-  const c=d.tint||d.color, a=d.accent||d.color, mix=(p,base)=>`color-mix(in srgb, ${c} ${p}%, ${base})`;
+  const cols=order.map(x=>colOf(DISH[x.d]));
+  // 2色: 左右に半分ずつ(左が かまど・先に食べた料理)。3色: 時計の12時に かまど、4時に あとに食べた料理、8時に 先に食べた料理
+  document.body.classList.toggle("dishsplit", cols.length===2);
+  document.body.classList.toggle("dishsplit3", cols.length===3);
+  for(const v of ["--dishL","--dishR","--dishA","--dishB","--dishC"]) de.style.removeProperty(v);
+  if(cols.length===2){ de.style.setProperty("--dishL",cols[0]); de.style.setProperty("--dishR",cols[1]); }
+  if(cols.length===3){ de.style.setProperty("--dishA",cols[0]); de.style.setProperty("--dishB",cols[2]); de.style.setProperty("--dishC",cols[1]); }
+  // 板などは、すべての色を同じ割合で混ぜる
+  const cf = cols.length===1 ? cols[0] : cols.length===2 ? `color-mix(in srgb, ${cols[0]} 50%, ${cols[1]})` : `color-mix(in srgb, color-mix(in srgb, ${cols[0]} 50%, ${cols[1]}) 67%, ${cols[2]})`;
+  const a=d.accent||d.color;
   document.body.classList.add("dishtheme");
-  if(isMutT(b.t) || (b2 && isMutT(b2.t))){   // 変異・超変異: 背景をはっきり料理の色に。作物が舞い、キーが料理に変わる
+  if(ms.some(x=>isMutT(x.t))){   // 変異・超変異: 背景をはっきり料理の色に。作物が舞い、キーが料理に変わる
     document.body.classList.add("dishfun");
-    const cf=both(d.accent||c), mix=(p,base)=>`color-mix(in srgb, ${cf} ${p}%, ${base})`;   // 紫いもチップスのような暗い色は、明るい紫で
+    const mix=(p,base)=>`color-mix(in srgb, ${cf} ${p}%, ${base})`;   // 紫いもチップスのような暗い色は、明るい紫で
     de.style.setProperty("--dish",cf);
     de.style.setProperty("--bg",mix(62,"#0c0c10"));
     de.style.setProperty("--panel",mix(42,"#14161c"));
@@ -8164,12 +8267,12 @@ function applyTheme(){
     de.style.setProperty("--amber",`color-mix(in srgb, ${a} 35%, #ffffff)`);
     de.style.setProperty("--amber-dim",`color-mix(in srgb, ${a} 60%, #000)`);
     de.style.setProperty("--steel",`color-mix(in srgb, ${a} 20%, #f0f2f6)`);
-    themeFloat(true,d,b.t,d2 && { d:d2, t:b2.t });
+    themeFloat(true,DISH[nb.d],nb.t,ob && { d:DISH[ob.d], t:ob.t });
     return;
   }
   // ふつう: 演出はなし。背景と板の色だけ、はっきり料理の色に(変異・超変異より少し落ち着いた色)
   document.body.classList.remove("dishfun"); themeFloat(false);
-  const cf=both(d.accent||c), mixf=(p,base)=>`color-mix(in srgb, ${cf} ${p}%, ${base})`;
+  const mixf=(p,base)=>`color-mix(in srgb, ${cf} ${p}%, ${base})`;
   de.style.setProperty("--dish",cf);
   de.style.setProperty("--bg",mixf(52,"#0c0c10"));
   de.style.setProperty("--panel",mixf(36,"#14161c"));
@@ -9978,6 +10081,108 @@ document.addEventListener("visibilitychange",()=>{
 setInterval(()=>{ if(scene==="garden" && syncCode) syncPush(false); }, 60000);
 setInterval(()=>{ if(scene==="title") refreshGardenStat(); }, 30000);
 setInterval(()=>{ try{ Garden.alive(); Garden.applyTheme(); }catch(e){} }, 5000);   // 料理の色が切れたら戻す・魔法の冷蔵庫の時刻
+
+/* ---------- タイマー(遊ぶ時間) ----------
+   遊べない時間帯と、1日に遊べる時間。この端末だけの設定(同期・記録の引き継ぎには入れない)。
+   ページを開いて表に出している時間を数え、時間になったらゲーム全体を止める(遊んでいるタイピングの1回は最後まで) */
+const PT_KEY=LS_PREFIX.replace(/:$/,"")+"-timer";
+const PT_DEF = { ban:false, from:"21:00", to:"07:00", cap:false, limit:60, day:"", used:0 };   // はじめはどちらもオフ
+let PT=null, ptOpen=false, ptLocked=false, ptWarned="";
+const ptLoad = () => {   // 読めないとき(保存できないブラウザなど)は、今の設定のまま
+  let raw=null; try{ raw=localStorage.getItem(PT_KEY); }catch(e){}
+  if(raw==null) return Object.assign({}, PT_DEF, PT||{});
+  let o={}; try{ o=JSON.parse(raw)||{}; }catch(e){}
+  return Object.assign({}, PT_DEF, o);
+};
+PT=ptLoad();
+const ptSave = () => { try{ localStorage.setItem(PT_KEY, JSON.stringify(PT)); }catch(e){} };
+const ptToday = () => { const d=new Date(); return d.getFullYear()+"-"+(d.getMonth()+1)+"-"+d.getDate(); };
+const ptMin = s => { const [h,m]=String(s||"0:0").split(":").map(Number); return (h||0)*60+(m||0); };
+const ptEsc = v => String(v).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+const ptHM = m => m>=60 ? `${Math.floor(m/60)}時間${m%60?(m%60)+"分":""}` : `${m}分`;
+const ptNowMin = () => { const d=new Date(); return d.getHours()*60+d.getMinutes(); };
+function ptInBan(){   // 遊べない時間帯の中か(0時をまたいでもよい)
+  if(!PT.ban) return false;
+  const t=ptNowMin(), a=ptMin(PT.from), b=ptMin(PT.to);
+  if(a===b) return false;
+  return a<b ? (t>=a && t<b) : (t>=a || t<b);
+}
+const ptOver = () => PT.cap && PT.used >= PT.limit*60;
+const ptPlaying = () => scene==="game" || (scene==="poem" && typeof poemState!=="undefined" && (poemState==="countdown" || poemState==="play"));
+function ptLineRender(){
+  const used=Math.floor(PT.used/60);
+  $("ptLineText").textContent = !PT.ban && !PT.cap ? "⏱ タイマー オフ"
+    : `⏱ 今日遊んだ時間 ${ptHM(used)}`+(PT.cap?` / ${ptHM(PT.limit)}まで`:"")+(PT.ban?` ・ ${PT.from}〜${PT.to} は遊べません`:"");
+  if(ptOpen) $("ptToday").innerHTML = `今日遊んだ時間 <b>${ptHM(used)}</b>`+(PT.cap?`(あと ${ptHM(Math.max(0,Math.ceil((PT.limit*60-PT.used)/60)))})`:"");
+}
+function ptWarn(msg){
+  const el=$("ptWarn"); el.textContent=msg; el.classList.add("show");
+  clearTimeout(ptWarn.t); ptWarn.t=setTimeout(()=>el.classList.remove("show"), 8000);
+}
+function ptCheck(){
+  const ban=ptInBan(), over=ptOver();
+  if((ban||over) && !ptPlaying()){
+    $("ptLockMsg").innerHTML = ban ? `${ptEsc(PT.from)}〜${ptEsc(PT.to)} は遊べない時間です。<br><b>${ptEsc(PT.to)}</b> から、また遊べます`
+                                   : `今日遊べる時間(${ptHM(PT.limit)})を遊びました。<br>明日(0時)から、また遊べます`;
+    if(!ptLocked){ ptLocked=true; $("ptLock").classList.add("open"); try{ document.activeElement && document.activeElement.blur(); }catch(e){} }
+  }else if(!(ban||over) && ptLocked){ ptLocked=false; $("ptLock").classList.remove("open"); }
+  // もうすぐ時間のお知らせ(5分前に1回)
+  if(!ban && !over){
+    const left = PT.cap ? PT.limit*60-PT.used : Infinity;
+    if(left<=300 && ptWarned!==PT.day+"cap"){ ptWarned=PT.day+"cap"; ptWarn(`今日遊べるのは、あと ${Math.max(1,Math.ceil(left/60))}分 です`); }
+    if(PT.ban){ const until=(ptMin(PT.from)-ptNowMin()+1440)%1440; if(until>0 && until<=5 && ptWarned!==PT.day+"ban"+PT.from){ ptWarned=PT.day+"ban"+PT.from; ptWarn(`あと ${until}分 で、遊べない時間(${PT.from}〜${PT.to})になります`); } }
+  }
+}
+setInterval(()=>{
+  PT=ptLoad();   // ほかのタブで変えた設定・数えた時間も読む
+  if(PT.day!==ptToday()){ PT.day=ptToday(); PT.used=0; }
+  if(document.visibilityState==="visible" && !ptLocked && !tabInactive) PT.used++;   // 表に出していて、遊べる間だけ数える
+  ptSave(); ptCheck(); ptLineRender();
+}, 1000);
+/* 設定の窓 */
+function ptRowState(){
+  $("ptBanRow").classList.toggle("off",!$("ptBan").checked); $("ptCapRow").classList.toggle("off",!$("ptCap").checked);
+  document.querySelectorAll(".pt-sw").forEach(b=>{ const on=$(b.dataset.box).checked; b.classList.toggle("on",on); b.textContent=on?"オン":"オフ"; b.setAttribute("aria-pressed",on); });
+}
+document.querySelectorAll(".pt-sw").forEach(b=>b.addEventListener("click",()=>{ const c=$(b.dataset.box); c.checked=!c.checked; ptRowState(); ptSaveWin(); }));
+function ptOpenWin(){
+  ptOpen=true;
+  $("ptBan").checked=!!PT.ban; $("ptFrom").value=PT.from; $("ptTo").value=PT.to;
+  $("ptCap").checked=!!PT.cap; $("ptLimit").value=String(PT.limit);
+  $("ptNote").textContent="変えるとすぐに保存されます"; ptRowState(); ptLineRender();
+  $("pt").classList.add("open");
+}
+function ptCloseWin(){ ptOpen=false; $("pt").classList.remove("open"); try{ document.activeElement && document.activeElement.blur(); }catch(e){} }
+function ptSaveWin(){
+  const from=$("ptFrom").value||"21:00", to=$("ptTo").value||"07:00";
+  if($("ptBan").checked && from===to){ $("ptNote").textContent="始まりと終わりを別の時刻にしてください"; return; }
+  PT=ptLoad();
+  Object.assign(PT, { ban:$("ptBan").checked, from, to, cap:$("ptCap").checked, limit:+$("ptLimit").value||60 });
+  ptSave(); ptCheck(); ptLineRender();
+  $("ptNote").textContent = (PT.ban||PT.cap) ? "保存しました" : "保存しました(タイマーはオフです)";
+}
+$("ptLimit").innerHTML=[15,30,45,60,90,120,150,180,240,300,360,480].map(m=>`<option value="${m}">${ptHM(m)}</option>`).join("");
+$("ptBtn").addEventListener("click",ptOpenWin);
+$("ptLockSet").addEventListener("click",ptOpenWin);
+$("ptClose").addEventListener("click",ptCloseWin);
+$("ptSave").addEventListener("click",ptSaveWin);
+for(const id of ["ptBan","ptCap"]) $(id).addEventListener("change",()=>{ ptRowState(); ptSaveWin(); });
+for(const [id,box] of [["ptFrom","ptBan"],["ptTo","ptBan"],["ptLimit","ptCap"]]) $(id).addEventListener("change",()=>{ $(box).checked=true; ptRowState(); ptSaveWin(); });
+$("pt").addEventListener("click",e=>{ if(e.target===$("pt")) ptCloseWin(); });
+/* 設定の窓・遊べない画面が出ている間は、ゲームのキー操作を止める */
+window.addEventListener("keydown",e=>{
+  if(ptOpen){
+    if(e.key==="Escape"){ e.preventDefault(); ptCloseWin(); }
+    else if(e.key==="Enter" && e.target && e.target.tagName!=="BUTTON"){ e.preventDefault(); ptSaveWin(); }
+    e.stopImmediatePropagation(); return;
+  }
+  if(ptLocked){
+    if(e.key==="l"||e.key==="L"){ e.preventDefault(); ptOpenWin(); }
+    e.stopImmediatePropagation(); e.preventDefault();
+  }
+}, true);
+if(PT.day!==ptToday()){ PT.day=ptToday(); PT.used=0; ptSave(); }
+ptCheck(); ptLineRender();
 /* ---------- TOEIC 英単語 ----------
    基本単語: New General Service List(一般的な英語の頻度順)の501位〜2,800位を、基本1(〜1,300位)・基本2(〜2,050位)・基本3(〜2,800位)に分けたもの(上位500語と学習に向かない語は除く)。
    TOEIC: TOEIC Service List(TOEIC の教材で数えた頻度順の単語 1,250語)を、頻度の高い順に 470/630/730/860/990点 の5レベルに250語ずつ分けたもの。
