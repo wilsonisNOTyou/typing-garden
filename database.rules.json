@@ -34,7 +34,7 @@
             "o"
           ],
           "$name": {
-            ".write": "$metric === 'money' || $metric === 'harvest' || $metric === 'book' || $metric === 'earn' || $metric === 'dbook' || $metric === 'goal'",
+            ".write": "$metric === 'money' || $metric === 'harvest' || $metric === 'book' || $metric === 'earn' || $metric === 'dbook' || $metric === 'goal' || $metric === 'rose'",
             ".validate": "newData.hasChildren(['n', 's', 'o', 't']) && newData.child('n').isString() && newData.child('n').val().length >= 1 && newData.child('n').val().length <= 10 && newData.child('s').isNumber() && newData.child('s').val() >= 0 && newData.child('o').isString() && newData.child('t').isNumber() && (!data.exists() || data.child('o').val() === newData.child('o').val())"
           }
         }
