@@ -189,13 +189,6 @@ html.mobile .tq-res li{grid-template-columns:1.6rem 7rem 1fr}
 html.mobile .tq-lrow{grid-template-columns:7rem 1fr 3.8rem}
 /* ローズティー: 白黒の薔薇は画面をモノトーンに、透明な薔薇はすりガラスのように */
 body.dishmono:not(.garden):not(.washi) #app{filter:grayscale(1)}
-body.dishmono:not(.garden):not(.washi){background-image:repeating-linear-gradient(45deg, transparent 0 34px, rgba(255,255,255,.06) 34px 36px), radial-gradient(ellipse at 50% 0%, #e8e8e8 0%, #6a6a6a 55%, #101010 100%)}
-body.dishglass:not(.garden):not(.washi){background-image:radial-gradient(ellipse at 50% 0%, rgba(235,244,250,.5) 0%, rgba(150,170,186,.35) 55%, transparent 100%); background-color:#2a323a}
-body.dishglass:not(.garden):not(.washi)::before{content:""; position:fixed; inset:-50%; pointer-events:none; z-index:0;
-  background:repeating-linear-gradient(115deg, transparent 0 140px, rgba(255,255,255,.07) 140px 190px, transparent 190px 260px, rgba(255,255,255,.04) 260px 280px, transparent 280px 420px);
-  animation:glassflow 40s linear infinite}
-@keyframes glassflow{from{transform:translateX(0)} to{transform:translateX(420px)}}
-@media (prefers-reduced-motion:reduce){ body.dishglass::before{animation:none} }
 body.dishglass:not(.garden):not(.washi) #app{position:relative; z-index:1}
 body.dishglass:not(.garden):not(.washi) :is(.btn,.diff-btn:not(.poem),.word-panel,.plate,.tq-card,.gstat){background:rgba(255,255,255,.1); border-color:rgba(255,255,255,.4); -webkit-backdrop-filter:blur(8px); backdrop-filter:blur(8px)}
 .rgrid{display:grid; grid-template-columns:repeat(6,1fr); gap:4px; margin:.5rem 0 .7rem}
@@ -214,6 +207,14 @@ body.dishglass:not(.garden):not(.washi) :is(.btn,.diff-btn:not(.poem),.word-pane
 /* シークレットのローズティーの演出 */
 #roseFx{position:fixed; inset:0; pointer-events:none; overflow:hidden; z-index:0}
 #roseFx i, #roseFx b{position:absolute; display:block}
+#roseFx .fxl{inset:0; overflow:hidden; background-color:#141418}   /* 1色ぶんの演出(色が2つ・3つのときは、その色の場所だけ) */
+#roseFx .fxl-mono{background-image:repeating-linear-gradient(45deg, transparent 0 34px, rgba(255,255,255,.06) 34px 36px), radial-gradient(ellipse at 50% 0%, #e8e8e8 0%, #6a6a6a 55%, #101010 100%)}
+#roseFx .fxl-glass{background-image:radial-gradient(ellipse at 50% 0%, rgba(235,244,250,.5) 0%, rgba(150,170,186,.35) 55%, transparent 100%); background-color:#2a323a}
+#roseFx .fx-streak{inset:-50%; background:repeating-linear-gradient(115deg, transparent 0 140px, rgba(255,255,255,.07) 140px 190px, transparent 190px 260px, rgba(255,255,255,.04) 260px 280px, transparent 280px 420px); animation:glassflow 40s linear infinite}
+@keyframes glassflow{from{transform:translateX(0)} to{transform:translateX(420px)}}
+/* 虹色だけのときは、画面ぜんたいの色がゆっくりめぐる */
+body.dishfx-rainbow.dishsolo:not(.garden):not(.washi) #app{animation:fxHueApp 16s linear infinite}
+@keyframes fxHueApp{to{filter:hue-rotate(360deg)}}
 body.garden #roseFx, body.washi #roseFx{display:none}
 body[class*="dishfx-"]:not(.garden):not(.washi) #app{position:relative; z-index:1}
 @keyframes fxFall{from{transform:translateY(-12vh) rotate(0)} to{transform:translateY(112vh) rotate(var(--r))}}
@@ -223,12 +224,12 @@ body[class*="dishfx-"]:not(.garden):not(.washi) #app{position:relative; z-index:
 @keyframes fxGlint{0%,70%,100%{opacity:0; transform:scale(0) rotate(0)} 80%{opacity:1; transform:scale(1) rotate(45deg)}}
 @keyframes fxDrift{from{transform:translate(-4%,-3%) scale(1)} to{transform:translate(4%,3%) scale(1.08)}}
 /* 金 */
-body.dishfx-gold:not(.garden):not(.washi){background-image:radial-gradient(ellipse at 50% 0%, #fff6c4 0%, #e8b52c 38%, #8a5a0e 75%, #3a2404 100%)}
+#roseFx .fxl-gold{background-image:radial-gradient(ellipse at 50% 0%, #fff6c4 0%, #e8b52c 38%, #8a5a0e 75%, #3a2404 100%)}
 #roseFx .fx-sheen{inset:-60%; background:linear-gradient(115deg, transparent 44%, rgba(255,255,255,.08) 47%, rgba(255,250,220,.45) 50%, rgba(255,255,255,.08) 53%, transparent 56%); animation:fxSheen 7s ease-in-out infinite}
 @keyframes fxSheen{0%{transform:translateX(-45%)} 60%,100%{transform:translateX(45%)}}
 #roseFx .fx-glit{top:0; width:var(--s); height:var(--s); background:#fff4b8; border-radius:1px; box-shadow:0 0 6px 1px #ffd84a; animation:fxFall linear infinite}
 /* ダイヤ */
-body.dishfx-dia:not(.garden):not(.washi){background-image:radial-gradient(ellipse at 50% 20%, #ffffff 0%, #d6f6ff 30%, #6aaed0 70%, #1c3c58 100%)}
+#roseFx .fxl-dia{background-image:radial-gradient(ellipse at 50% 20%, #ffffff 0%, #d6f6ff 30%, #6aaed0 70%, #1c3c58 100%)}
 #roseFx .fx-facet{inset:-50%; background:repeating-conic-gradient(from 0deg at 50% 50%, rgba(255,255,255,.16) 0 7deg, rgba(150,215,255,.05) 7deg 15deg, rgba(255,255,255,.1) 15deg 22deg); animation:fxSpin 120s linear infinite}
 #roseFx .fx-prism{inset:0; background:linear-gradient(120deg, rgba(255,90,120,.10), rgba(255,220,90,.10), rgba(90,230,140,.10), rgba(90,160,255,.12), rgba(200,110,255,.10)); mix-blend-mode:screen}
 #roseFx .fx-glint{width:var(--s); height:var(--s); margin:calc(var(--s)/-2); background:hsl(var(--h) 100% 88%); clip-path:polygon(50% 0,60% 40%,100% 50%,60% 60%,50% 100%,40% 60%,0 50%,40% 40%); filter:drop-shadow(0 0 4px #fff); animation:fxGlint ease-in-out infinite}
@@ -243,12 +244,12 @@ body.dishfx-dia:not(.garden):not(.washi){background-image:radial-gradient(ellips
 #roseFx .fx-blur{inset:0; background:radial-gradient(circle at 20% 30%, rgba(255,255,255,.12), transparent 30%), radial-gradient(circle at 75% 65%, rgba(200,225,240,.12), transparent 35%)}
 #roseFx .fx-drop{top:0; width:var(--s); height:calc(var(--s)*1.25); border-radius:50% 50% 50% 50%/60% 60% 40% 40%; background:radial-gradient(circle at 35% 30%, rgba(255,255,255,.9) 0 12%, rgba(255,255,255,.12) 30%, rgba(255,255,255,.04) 70%); border:1px solid rgba(255,255,255,.35); animation:fxFall linear infinite; --r:0deg}
 /* 虹 */
-body.dishfx-rainbow:not(.garden):not(.washi){background-image:radial-gradient(ellipse at 50% 0%, #3a2a5a 0%, #141428 100%)}
-#roseFx .fx-hue{inset:-50%; background:conic-gradient(#ff5a5a,#ffb03a,#ffe84a,#5ad86a,#4ab0ff,#8a6aff,#ff5ab8,#ff5a5a); opacity:.5; filter:blur(60px); animation:fxSpin 30s linear infinite}
+#roseFx .fxl-rainbow{background-image:linear-gradient(180deg, #ff6a8a 0%, #ffb04a 20%, #ffe85a 38%, #6ad87a 56%, #5ab4ff 74%, #9a72ff 100%)}
+#roseFx .fx-hue{inset:-50%; background:conic-gradient(#ff5a5a,#ffb03a,#ffe84a,#5ad86a,#4ab0ff,#8a6aff,#ff5ab8,#ff5a5a); opacity:.75; filter:blur(50px) saturate(1.3); animation:fxSpin 24s linear infinite}
 #roseFx .fx-arc{left:-10%; right:-10%; bottom:-70vh; height:120vh; border-radius:50%; background:radial-gradient(closest-side, transparent 74%, rgba(255,90,90,.45) 76%, rgba(255,176,58,.45) 79%, rgba(255,232,74,.45) 82%, rgba(90,216,106,.45) 85%, rgba(74,176,255,.45) 88%, rgba(138,106,255,.45) 91%, transparent 94%)}
 #roseFx .fx-bub{bottom:-60px; top:auto!important; width:var(--s); height:var(--s); border-radius:50%; border:1.5px solid hsla(var(--h),100%,75%,.8); background:radial-gradient(circle at 30% 30%, rgba(255,255,255,.7) 0 8%, hsla(var(--h),100%,70%,.15) 40%, transparent 70%); animation:fxRise linear infinite}
 /* 月光 */
-body.dishfx-moon:not(.garden):not(.washi){background-image:linear-gradient(180deg, #040818 0%, #0c1840 55%, #1a2a5c 100%)}
+#roseFx .fxl-moon{background-image:linear-gradient(180deg, #040818 0%, #0c1840 55%, #1a2a5c 100%)}
 #roseFx .fx-moonglow{right:4%; top:2%; width:340px; height:340px; border-radius:50%; background:radial-gradient(circle, rgba(200,215,255,.35), transparent 65%)}
 #roseFx .fx-moon{right:calc(4% + 110px); top:calc(2% + 110px); width:120px; height:120px; border-radius:50%; background:radial-gradient(circle at 40% 38%, #fffdf0 0%, #ece8d0 55%, #c8c4b0 100%); box-shadow:0 0 50px 10px rgba(230,236,255,.45); animation:fxMoon 8s ease-in-out infinite alternate}
 @keyframes fxMoon{to{box-shadow:0 0 80px 22px rgba(230,236,255,.6)}}
@@ -256,22 +257,22 @@ body.dishfx-moon:not(.garden):not(.washi){background-image:linear-gradient(180de
 #roseFx .fx-shoot{top:12%; left:-20%; width:160px; height:2px; background:linear-gradient(90deg, transparent, #fff); transform:rotate(18deg); animation:fxShoot 9s ease-in infinite}
 @keyframes fxShoot{0%,85%{left:-20%; top:8%; opacity:0} 88%{opacity:1} 100%{left:110%; top:40%; opacity:0}}
 /* 朝焼け */
-body.dishfx-dawn:not(.garden):not(.washi){background-image:linear-gradient(180deg, #24184a 0%, #6a2e72 28%, #d8546a 55%, #ff9a5a 78%, #ffd890 100%)}
+#roseFx .fxl-dawn{background-image:linear-gradient(180deg, #24184a 0%, #6a2e72 28%, #d8546a 55%, #ff9a5a 78%, #ffd890 100%)}
 #roseFx .fx-sun{left:50%; width:260px; height:260px; margin-left:-130px; bottom:-150px; border-radius:50%; background:radial-gradient(circle, #fff6d0 0%, #ffd070 40%, rgba(255,150,70,.6) 62%, transparent 72%); animation:fxSunrise 24s ease-in-out infinite alternate}
 @keyframes fxSunrise{to{bottom:-40px}}
 #roseFx .fx-cloud{left:-40%; width:var(--s); height:calc(var(--s)*.28); border-radius:999px; background:radial-gradient(ellipse at 50% 60%, rgba(255,200,215,.55), rgba(255,170,190,.15) 70%, transparent 72%); filter:blur(2px); animation:fxCloud linear infinite}
 @keyframes fxCloud{to{transform:translateX(180vw)}}
 /* 陽光 */
-body.dishfx-noon:not(.garden):not(.washi){background-image:radial-gradient(ellipse at 50% 0%, #fffff2 0%, #fff0a0 25%, #f0c040 60%, #8a6410 100%)}
+#roseFx .fxl-noon{background-image:radial-gradient(ellipse at 50% 0%, #fffff2 0%, #fff0a0 25%, #f0c040 60%, #8a6410 100%)}
 #roseFx .fx-rays{left:50%; top:-60vmax; width:240vmax; height:240vmax; margin-left:-120vmax; margin-top:-60vmax; background:repeating-conic-gradient(rgba(255,255,255,.22) 0 5deg, transparent 5deg 15deg); animation:fxSpin 90s linear infinite}
 #roseFx .fx-flare{left:50%; top:0; width:70vmin; height:70vmin; margin-left:-35vmin; margin-top:-35vmin; border-radius:50%; background:radial-gradient(circle, rgba(255,255,255,.95), rgba(255,250,210,.4) 30%, transparent 65%)}
 #roseFx .fx-mote{width:var(--s); height:var(--s); border-radius:50%; background:#fffbe0; box-shadow:0 0 6px #ffe680; animation:fxTwinkle ease-in-out infinite}
 /* 錆 */
-body.dishfx-rust:not(.garden):not(.washi){background-image:radial-gradient(ellipse at 50% 0%, #c8784a 0%, #8a4424 45%, #3a1a0c 100%)}
+#roseFx .fxl-rust{background-image:radial-gradient(ellipse at 50% 0%, #c8784a 0%, #8a4424 45%, #3a1a0c 100%)}
 #roseFx .fx-rustex{inset:0; opacity:.55; background-image:radial-gradient(circle at 30% 40%, rgba(230,140,70,.5) 0 2px, transparent 3px), radial-gradient(circle at 70% 60%, rgba(60,25,10,.6) 0 3px, transparent 4px), radial-gradient(circle at 50% 50%, rgba(180,90,40,.4) 0 5px, transparent 7px), radial-gradient(circle at 20% 80%, rgba(110,52,24,.5) 0 1.5px, transparent 2px); background-size:23px 29px, 41px 37px, 67px 59px, 13px 17px}
 #roseFx .fx-flake{top:0; width:var(--s); height:calc(var(--s)*.7); background:#b8683c; clip-path:polygon(10% 0,90% 20%,100% 80%,30% 100%,0 60%); box-shadow:inset 0 0 0 1px #6e3418; animation:fxFall linear infinite}
 /* 翡翠 */
-body.dishfx-jade:not(.garden):not(.washi){background-image:radial-gradient(ellipse at 50% 0%, #d8fff0 0%, #6ad0a4 35%, #1e7a56 70%, #0a3222 100%)}
+#roseFx .fxl-jade{background-image:radial-gradient(ellipse at 50% 0%, #d8fff0 0%, #6ad0a4 35%, #1e7a56 70%, #0a3222 100%)}
 #roseFx .fx-marble{inset:-30%; background:radial-gradient(ellipse at 30% 30%, rgba(230,255,245,.35), transparent 30%), radial-gradient(ellipse at 70% 40%, rgba(10,80,55,.35), transparent 32%), radial-gradient(ellipse at 40% 75%, rgba(180,250,220,.3), transparent 28%), radial-gradient(ellipse at 80% 80%, rgba(20,100,70,.35), transparent 30%); filter:blur(28px); animation:fxDrift 26s ease-in-out infinite alternate}
 #roseFx .fx-marble.b{animation-duration:38s; animation-direction:alternate-reverse; transform:rotate(60deg)}
 #roseFx .fx-orb{width:var(--s); height:var(--s); border-radius:50%; background:radial-gradient(circle, rgba(240,255,250,.75), rgba(160,240,210,.2) 55%, transparent 70%); animation:fxTwinkle ease-in-out infinite}
@@ -7939,7 +7940,7 @@ const dishesAll = () => DISHES.concat(ROSE_TEAS.filter(roseTeaSeen));
 /* 料理図鑑: ローズティーは料理のあとに1行にまとめ、色のマスを ← → で選ぶ(シークレットは作ってから載る) */
 const TEA_BOOK = { id:"teabook", teabook:true, name:"ローズティー", icon:"🌹", eff:"M", ing:[], art:ROSE_TEAS[4].art };
 const DBK = () => DISHES.concat([TEA_BOOK]);
-const teaCells = () => ROSE_TEAS.filter(d=>!d.one).flatMap(d=>[[d,0],[d,3],[d,5]]).concat(ROSE_TEAS.filter(d=>d.one && (S.dishMade[d.id]||{})[0]).map(d=>[d,0]));
+const teaCells = () => ROSE_TEAS.filter(d=>!d.one).flatMap(d=>[[d,0],[d,3],[d,5]]).concat(ROSE_TEAS.filter(d=>d.one).map(d=>[d,0]));
 const teaMadeQ = () => ({0:teaCells().some(([d,t])=>t===0&&(S.dishMade[d.id]||{})[0]), 3:teaCells().some(([d,t])=>t===3&&(S.dishMade[d.id]||{})[3]), 5:teaCells().some(([d,t])=>t===5&&(S.dishMade[d.id]||{})[5])});
 let teaCur=0;
 function teaBookDetail(){
@@ -7975,24 +7976,30 @@ function kamadoNow(nb,ob){
 const roseTeaN = () => ROSE_TEAS.reduce((a,d)=>a+gradesOf(d).filter(g=>(S.dishMade[d.id]||{})[g]).length,0);   // 作ったローズティーの色の数
 /* シークレットのローズティーだけが効いているときの、画面の演出(庭と詩の画面では出さない)
    look: gold / dia / mono / glass / rainbow / moon / dawn / noon / rust / jade */
-function roseFx(look){
+function roseFx(list){   // list: [{look, clip}] 色ごとの演出と、画面のどこに出すか(clip-path)
+  if(typeof list==="string") list = list ? [{look:list, clip:""}] : [];
   let el=document.getElementById("roseFx");
   const b=document.body;
   for(const c of [...b.classList]) if(c.startsWith("dishfx-")) b.classList.remove(c);
-  if(!look){ if(el) el.remove(); return; }
-  b.classList.add("dishfx-"+look);
-  if(el && el.dataset.k===look) return;
+  b.classList.toggle("dishsolo", list.length===1 && !list[0].clip);
+  if(!list.length){ if(el) el.remove(); return; }
+  for(const x of list) b.classList.add("dishfx-"+x.look);
+  const key=JSON.stringify(list);
+  if(el && el.dataset.k===key) return;
   if(!el){ el=document.createElement("div"); el.id="roseFx"; el.setAttribute("aria-hidden","true"); b.prepend(el); }
-  el.dataset.k=look;
+  el.dataset.k=key;
+  el.innerHTML=list.map(x=>`<i class="fxl fxl-${x.look}"${x.clip?` style="clip-path:${x.clip}"`:""}>${roseFxInner(x.look)}</i>`).join("");
+}
+function roseFxInner(look){
   const R=Math.random, f=n=>n.toFixed(1);
   const many=(n,fn)=>Array.from({length:n},(_,i)=>fn(i)).join("");
   const fall=(cls,n,dur,size)=>many(n,()=>`<b class="${cls}" style="left:${f(R()*100)}%;--s:${f(size[0]+R()*(size[1]-size[0]))}px;animation-duration:${f(dur[0]+R()*(dur[1]-dur[0]))}s;animation-delay:${f(-R()*dur[1])}s;--r:${(R()*720-360)|0}deg"></b>`);
   const dots=(cls,n,size,dur)=>many(n,()=>`<b class="${cls}" style="left:${f(R()*100)}%;top:${f(R()*100)}%;--s:${f(size[0]+R()*(size[1]-size[0]))}px;--h:${(R()*360)|0};animation-duration:${f(dur[0]+R()*(dur[1]-dur[0]))}s;animation-delay:${f(-R()*dur[1])}s"></b>`);
-  el.innerHTML = {
+  return {
     gold:   `<i class="fx-sheen"></i>`+fall("fx-glit",46,[7,15],[2,5]),
     dia:    `<i class="fx-facet"></i><i class="fx-prism"></i>`+dots("fx-glint",34,[8,22],[2.4,5]),
     mono:   `<i class="fx-grain"></i><i class="fx-vig"></i>`+many(5,()=>`<b class="fx-scratch" style="left:${f(R()*100)}%;animation-delay:${f(-R()*4)}s;animation-duration:${f(2+R()*3)}s"></b>`),
-    glass:  `<i class="fx-blur"></i>`+fall("fx-drop",22,[18,36],[6,16]),
+    glass:  `<i class="fx-streak"></i><i class="fx-blur"></i>`+fall("fx-drop",22,[18,36],[6,16]),
     rainbow:`<i class="fx-hue"></i><i class="fx-arc"></i>`+dots("fx-bub",22,[10,34],[9,18]),
     moon:   `<i class="fx-moonglow"></i><i class="fx-moon"></i><i class="fx-shoot"></i>`+dots("fx-star",90,[1,3],[2,6]),
     dawn:   `<i class="fx-sun"></i>`+many(6,i=>`<b class="fx-cloud" style="top:${f(8+i*11+R()*6)}%;--s:${f(140+R()*160)}px;animation-duration:${f(50+R()*50)}s;animation-delay:${f(-R()*100)}s"></b>`),
@@ -8672,7 +8679,11 @@ function applyTheme(){
   const solo = order.length===1 ? (DISH[order[0].d].look||"") : "";   // シークレットのローズティーだけのとき
   document.body.classList.toggle("dishmono", solo==="mono");
   document.body.classList.toggle("dishglass", solo==="glass");
-  roseFx(solo);   // 画面の演出
+  // シークレットのローズティーの演出: 色が2つ・3つのときは、その色の場所(左右・3つに分けた扇形)にだけ出す
+  const W=innerWidth, H=innerHeight, RR=W+H, Pt=a=>{ const r=a*Math.PI/180; return `${(W/2+RR*Math.sin(r)).toFixed(0)}px ${(H/2-RR*Math.cos(r)).toFixed(0)}px`; };
+  const sec=(a,b)=>`polygon(${W/2}px ${H/2}px, ${Pt(a)}, ${Pt((a+b)/2)}, ${Pt(b)})`;
+  const regs = order.length===1 ? [""] : order.length===2 ? ["inset(0 50% 0 0)","inset(0 0 0 50%)"] : [sec(-60,60), sec(180,300), sec(60,180)];
+  roseFx(order.map((x,i)=>({ look:DISH[x.d].look||"", clip:regs[i] })).filter(x=>x.look));
   // 2色: 左右に半分ずつ(左が かまど・先に食べた料理)。3色: 時計の12時に かまど、4時に あとに食べた料理、8時に 先に食べた料理
   document.body.classList.toggle("dishsplit", cols.length===2);
   document.body.classList.toggle("dishsplit3", cols.length===3);
@@ -8740,7 +8751,7 @@ const charmLives = () => ev("V",1,3,0);
 /* ---- 図鑑: 薔薇は1ページにまとめる(ふつう・変異・超変異の30色 + 咲かせたシークレット) ----
    ← → で色を選ぶ。マスを押しても選べる */
 const ROSE_BOOK = { id:"rosebook", rosebook:true, name:"薔薇", icon:"🌹", art:ROSES[4].art, price:0 };
-const roseCells = () => ROSES.flatMap(r=>[[r.id,0],[r.id,3],[r.id,5]]).concat(ROSE_SECRET.filter(r=>qCount(r.id,0)>0).map(r=>[r.id,0]));   // 色ごとに ふつう・変異・超変異
+const roseCells = () => ROSES.flatMap(r=>[[r.id,0],[r.id,3],[r.id,5]]).concat(ROSE_SECRET.map(r=>[r.id,0]));   // 色ごとに ふつう・変異・超変異。最後にシークレット(咲かせるまで ？)
 const roseGot = () => roseCells().filter(([id,t])=>qCount(id,t)>0).length;
 let roseCur=0;
 function roseBookDetail(){
@@ -8839,7 +8850,7 @@ const loreOf = (c,t) => t===0 ? c.lore : t===5 ? SUPER[c.id].lore : (t===3 ? MUT
 function bookProgress(){
   let got=0, all=0;
   for(const c of BOOK_CROPS){
-    if(c.rosebook){ for(const [id,t] of roseCells()){ all++; if(qCount(id,t)>0) got++; } continue; }
+    if(c.rosebook){ for(const [id,t] of roseCells()){ const k=qCount(id,t)>0; if(CROP[id].secret && !k) continue; all++; if(k) got++; }   /* シークレットは咲かせたら数える */ continue; }
     if(c.food){ for(const f of [c, upOf(c.id)]){ if(!f) continue; all++; if(bookSeen(f)) got++; } continue; }
     if(c.treasure){ all++; if(tre(c.id)>0) got++; continue; }
     for(const t of QORDER){ if(!qOk(c.id,t)) continue; all++; if(qCount(c.id,t)>0) got++; }
