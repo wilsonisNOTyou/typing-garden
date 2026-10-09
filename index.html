@@ -119,6 +119,9 @@ body.dishtheme.dishsplit:not(.garden):not(.washi){
 .tq-sec .btn{min-width:2.4rem; padding:.25rem .5rem; font-size:1.1rem; line-height:1}
 .tq-sec b{color:var(--amber); font-size:1.3rem; min-width:1.6em; text-align:center; font-variant-numeric:tabular-nums}
 .tq-nextb{margin-top:.6rem}
+.tq-ranklv{margin-top:.35rem}
+.tq-ranklv .btn{font-size:.8rem; padding:.25rem .55rem}
+.tq-ranklv[hidden]{display:none}
 .tq-sec[hidden],.tq-nextb[hidden]{display:none}
 .tq-mode.on{border-color:#8fc2ff; box-shadow:0 0 0 2px #8fc2ff inset; color:#cfe4ff}
 .tq-levels{display:grid; grid-template-columns:repeat(6,1fr); gap:.6rem; margin:0 auto 1rem; max-width:860px}
@@ -1764,6 +1767,7 @@ html.mobile #screen-garden .grk-list{max-height:none; flex:1 1 auto; min-height:
       <button class="btn" id="tab-toeic-choice">4択</button>
       <button class="btn" id="tab-toeic-fill">穴埋め4択</button>
     </div>
+    <div class="rank-tabs tq-ranklv" id="tqRankLvs" hidden></div>
     <p class="tab-group-label">キーボード農園</p>
     <div class="rank-tabs">
       <button class="btn gtab" id="tab-g-money">所持キー</button>
@@ -3348,7 +3352,7 @@ async function submitScore(name,d,extra){
 
 async function fetchRanking(d){
   // タイム系は昇順に並べたいので、取得は全件から上位を選ぶ
-  const ref = isGardenRank(d) ? db.ref("typinggarden/garden/"+d.slice(2)) : db.ref("typinggarden/scores/"+d);
+  const ref = isGardenRank(d) ? db.ref("typinggarden/garden/"+d.slice(2)) : db.ref("typinggarden/scores/"+(window.tqRankKey?tqRankKey(d):d));
   const snap = isTimeRanked(d)
     ? await ref.orderByChild("e").limitToFirst(RANKING_SIZE).once("value")
     : await ref.orderByChild("s").limitToLast(RANKING_SIZE).once("value");
@@ -3366,6 +3370,7 @@ async function openRanking(d,highlight){
   rankCur=d;
   const myReq=++rankReq;   // 素早く切り替えたとき、古い読み込み結果を捨てる
   for(const t of RANK_TABS) $("tab-"+t).classList.toggle("active",d===t);
+  if(window.tqRankSync) tqRankSync(d);   // TOEIC: 始めたレベルを選ぶボタン
   show("ranking");
   const list=$("rankList");
   list.innerHTML="";
@@ -3391,7 +3396,7 @@ async function openRanking(d,highlight){
       }else if(d==="oneshot" && r.e!=null){
         scoreText = `${r.s}個 <span style="color:var(--steel);font-size:.85em">${Number(r.e).toFixed(1)}秒</span>`;
       }else{
-        scoreText = d.startsWith("toeic-") ? `${r.s}問`+(r.l?` <span style="color:var(--steel);font-size:.85em">${typeof tqLvName==="function"?tqLvName(r.l):r.l}から${r.w?"・"+r.w+"秒":""}</span>`:"") : `${r.s}個`;
+        scoreText = d.startsWith("toeic-") ? `${r.s}問`+(r.w?` <span style="color:var(--steel);font-size:.85em">訳まで${r.w}秒</span>`:"") : `${r.s}個`;
       }
       li.innerHTML=`<span class="pos">${i+1}位</span><span class="pname"></span><span class="pscore">${scoreText}</span>`;
       li.querySelector(".pname").textContent=r.n; // XSS対策でtextContent
@@ -3453,7 +3458,7 @@ function showRegName(){
 
 /* ---------- プレイヤー名(ランキングと番付で共通) ----------
    一度決めた名前は固定。変えるときは、今までのランキングと番付の記録もまとめて新しい名前に移す */
-const SCORE_DIFFS=["easy","normal","hard","ta-easy","ta-normal","ta-hard","oneshot","toeic-type","toeic-choice","toeic-fill"];
+const SCORE_DIFFS=["easy","normal","hard","ta-easy","ta-normal","ta-hard","oneshot","toeic-type-b1","toeic-type-b2","toeic-type-b3","toeic-type-470","toeic-type-630","toeic-type-730","toeic-type-860","toeic-type-990","toeic-type-i1","toeic-type-i2","toeic-choice-b1","toeic-choice-b2","toeic-choice-b3","toeic-choice-470","toeic-choice-630","toeic-choice-730","toeic-choice-860","toeic-choice-990","toeic-choice-i1","toeic-choice-i2","toeic-fill-b1","toeic-fill-b2","toeic-fill-b3","toeic-fill-470","toeic-fill-630","toeic-fill-730","toeic-fill-860","toeic-fill-990","toeic-fill-i1","toeic-fill-i2"];
 const myId = () => { try{ return Garden.ownerId(); }catch(e){ return ""; } };
 const nameKey = name => encodeURIComponent(name).replace(/\./g,"%2E");   // 番付の保存場所(庭の rankKey と同じ)
 const nameError = n => !n ? "名前を入れてください" : ([...n].length>10 ? "名前は10文字までです" : "");
@@ -9989,11 +9994,12 @@ const TQ_KINDS=[["set","10語セット","10語で1セット・苦手な単語が
 const TQ_POS={名:"名詞",動:"動詞",形:"形容詞",副:"副詞",代:"代名詞",間:"間投詞",前:"前置詞",接:"接続詞",句:"熟語"};
 const TQ=TQ_RAW.map(r=>{ const [lv,en,pos,ms,cf]=r.split("|"); return { lv, en, pos, means:ms.split(",").map(x=>{ const [j,k]=x.split(":"); return {j,k}; }), conf:cf?cf.split("/"):[] }; });
 const TQ_BY=Object.fromEntries(TQ.map(w=>[w.en,w]));
-const TQ_SET=10, TQ_UP=10, TQ_SEC_MIN=2, TQ_SEC_MAX=15;   // 1セットの語数・ノーミス勝負で上のレベルが混ざる間隔・訳が出るまでの秒数(設定できる範囲)
+const TQ_SET=10, TQ_SEC_MIN=2, TQ_SEC_MAX=15;   // 1セットの語数・訳が出るまでの秒数(設定できる範囲)
 const TQ_KEY="typinggarden:toeic";   // 同期・記録の引き継ぎに入る(パソコンとスマホで学習の記録を共有)
 const TQ_BEST_KEY="typinggarden:toeic-best";   // ノーミス勝負の自己ベスト(出題形式ごと)
 const TQ_OPT_KEY="typinggarden:toeic-opt";     // 設定(入力で訳が出るまでの秒数)
-const TQ_RANK = f => "toeic-"+f;   // ランキングの保存場所
+const TQ_RANK = (f,lv) => "toeic-"+f+"-"+lv;   // ランキングの保存場所(出題形式・始めたレベルごと)
+const tqBestKey = (f,lv) => f+"-"+lv;          // 自己ベストも出題形式・始めたレベルごと
 let tqStat={}, tqBest={}, tqSec=5;
 const tqRevealMs = () => tqSec*1000;
 const tqLoad = () => {
@@ -10018,7 +10024,7 @@ const tqEsc = v => String(v).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"
 const tqShuffle = a => { for(let i=a.length-1;i>0;i--){ const j=Math.random()*(i+1)|0; [a[i],a[j]]=[a[j],a[i]]; } return a; };
 let tqFmt=window.IS_MOBILE?"choice":"type", tqKind="set", tqLv="470", tqListLv="470", tqWords=[], tqI=0, tqPts=0, tqMiss=0, tqLog=[];
 let tqPhase="menu", tqTimer=null, tqRevealed=false, tqCands=[], tqChoices=[];
-let tqLadder=[], tqUnl=1, tqUsed=new Set(), tqOk=0, tqOver=false;   // ノーミス勝負: 上がっていくレベル・混ざっているレベルの数・出た単語・正解数・終わったか
+let tqLadder=[], tqUnl=1, tqUsed=new Set(), tqOk=0, tqOver=false;   // ノーミス勝負: 上がっていくレベル・いま何番目のレベルか(1から)・出た単語・正解数・終わったか
 function tqView(id){ for(const v of ["tqMenu","tqPlay","tqResult","tqList"]) $(v).classList.toggle("on",v===id); }
 function openToeic(){ tqLoad(); window.tqFromRank=false; show("toeic"); tqMenu(); }
 /* そのレベルを選べるか(ノーミス勝負は苦手を選べない・入力はスマホで遊べない) */
@@ -10034,15 +10040,15 @@ function tqMenu(){
     if(tqKind==="one" && k==="weak") sub="ノーミス勝負では選べません";
     else if(!pool.length) sub = k==="weak" ? "まだありません" : "穴埋めはありません";
     else if(k==="weak") sub=`${pool.length}語`;
+    else if(tqKind==="one") sub=`${pool.length}語 ・ 自己ベスト ${tqBest[tqBestKey(tqFmt,k)]||0}問`;
     else sub=`覚えた ${pool.filter(w=>tqGood(w.en)).length} / ${pool.length}語`;
     return `<button class="btn tq-lv" data-lv="${k}" ${ok?"":"disabled"}><b>${nm}</b><small>${sub}</small><span class="kbdh">${TQ_LVKEYS[i]}</span></button>`;
   }).join("");
   $("tqSecRow").hidden = tqFmt!=="type";
   $("tqSecV").textContent=tqSec;
-  const best=tqBest[tqFmt]||0;
   $("tqNote").textContent =
     tqFmt==="type" && window.IS_MOBILE ? "入力はパソコンで遊べます。スマホでは4択か穴埋め4択を選んでください"
-    : tqKind==="one" ? `ノーミス勝負(${tqFmtName(tqFmt)})の自己ベスト: ${best}問 ・ ${TQ_UP}問正解するごとに1つ上のレベルが混ざります`
+    : tqKind==="one" ? "選んだレベルの単語を全部正解すると、次のレベルに進みます(1問でも間違えたら終わり)"
     : "";
 }
 /* 10語を選ぶ: 苦手・まだ出ていない単語ほど出やすく、覚えた単語は出にくい */
@@ -10068,17 +10074,12 @@ function tqStart(lv){
   }
   tqPhase="play"; tqView("tqPlay"); tqNext();
 }
-/* ノーミス勝負の次の単語: いちばん新しく混ざったレベルから半分、それまでのレベルから半分 */
-function tqPickOne(){
-  const lvs=tqLadder.slice(0,tqUnl), newest=lvs[lvs.length-1];
-  const from = ks => TQ.filter(w=>ks.includes(w.lv) && !tqUsed.has(w.en) && (tqFmt!=="fill"||tqHasSent(w)));
-  let rest = (lvs.length>1 && Math.random()<.5) ? from(lvs.slice(0,-1)) : from([newest]);
-  if(!rest.length) rest=from(lvs);
-  if(!rest.length){ tqUsed=new Set(); rest=from(lvs); }   // 全部出たら最初から
-  const w=tqDraw(rest); tqUsed.add(w.en); return w;
-}
+/* ノーミス勝負の次の単語: いまのレベルのまだ出ていない単語から(全部正解したら次のレベルへ) */
+const tqLeft = () => tqPool(tqLadder[tqUnl-1]).filter(w=>!tqUsed.has(w.en));
+function tqPickOne(){ const w=tqDraw(tqLeft()); tqUsed.add(w.en); return w; }
 const tqMeanHtml = w => w.means.map(m=>tqEsc(m.j)+(m.j===m.k?"":`<span class="rd">(${tqEsc(m.k)})</span>`)).join(" ・ ");   // 読みは、訳と同じなら出さない
 const tqLvRange = () => tqUnl>1 ? `${tqLvName(tqLadder[0])}〜${tqLvName(tqLadder[tqUnl-1])}` : tqLvName(tqLadder[0]);
+const tqOneProg = () => `ノーミス勝負 ・ ${tqLvName(tqLadder[tqUnl-1])} 残り${tqLeft().length}語`;
 function tqNext(){
   clearTimeout(tqTimer);
   if(tqKind==="set" && tqI>=tqWords.length) return tqFinish();
@@ -10087,7 +10088,7 @@ function tqNext(){
   const w=tqWords[tqI];
   tqPhase="play"; tqRevealed=false;
   if(tqKind==="set"){ $("tqProg").textContent=`${tqI+1} / ${tqWords.length}語`; $("tqScore").textContent=tqPts; $("tqScoreL").textContent="得点"; }
-  else{ $("tqProg").textContent=`ノーミス勝負 ・ ${tqLvRange()}`; $("tqScore").textContent=tqOk; $("tqScoreL").textContent="正解"; }
+  else{ $("tqProg").textContent=tqOneProg(); $("tqScore").textContent=tqOk; $("tqScoreL").textContent="正解"; }
   $("tqMissW").textContent = tqFmt==="type" ? `ミス ${tqMiss}` : "";
   $("tqPos").textContent=TQ_POS[w.pos]||w.pos;
   $("tqFb").className="tq-fb"; $("tqFb").textContent="";
@@ -10243,14 +10244,14 @@ function tqChoose(i){
   if(tqFmt==="fill"){ $("tqNextBtn").hidden=false; $("tqHint").textContent="例文と訳を確かめたら Enter・スペース・タップで次へ"; }   // 穴埋めは文が長いので、自分で次へ進む
   else tqTimer=setTimeout(tqNext, c.ok?900:2400);
 }
-/* ノーミス勝負で1問正解: 10問ごとに上のレベルが混ざる */
+/* ノーミス勝負で1問正解: いまのレベルを全部正解したら次のレベルへ(最後のレベルなら全部制覇で終わり) */
 function tqOneOk(){
   tqOk++; $("tqScore").textContent=tqOk;
-  if(tqOk%TQ_UP===0 && tqUnl<tqLadder.length){
-    tqUnl++;
-    $("tqFb").className="tq-fb ok"; $("tqFb").textContent=`${tqOk}問正解! ここから ${tqLvName(tqLadder[tqUnl-1])} が混ざります`;
-    $("tqProg").textContent=`ノーミス勝負 ・ ${tqLvRange()}`;
-  }
+  if(tqLeft().length){ $("tqProg").textContent=tqOneProg(); return; }
+  const done=tqLvName(tqLadder[tqUnl-1]);
+  $("tqFb").className="tq-fb ok";
+  if(tqUnl<tqLadder.length){ tqUnl++; $("tqFb").textContent=`${done}を全部正解! ここから ${tqLvName(tqLadder[tqUnl-1])} です`; $("tqProg").textContent=tqOneProg(); }
+  else{ tqOver=true; $("tqFb").textContent=`${done}まで全部正解! 全レベル制覇です`; }
 }
 /* ---- 結果 ---- */
 function tqFinish(){
@@ -10260,8 +10261,8 @@ function tqFinish(){
   const sent = tqPts ? `<br>農園に キー ${tqPts} を届けました` : "";
   $("tqReg").innerHTML="";
   if(tqKind==="one"){
-    const old=tqBest[tqFmt]||0, isBest=tqOk>old;
-    if(isBest){ tqBest[tqFmt]=tqOk; tqSaveBest(); }
+    const bk=tqBestKey(tqFmt,tqLadder[0]), old=tqBest[bk]||0, isBest=tqOk>old;
+    if(isBest){ tqBest[bk]=tqOk; tqSaveBest(); }
     $("tqResSum").innerHTML=`ノーミス勝負 ・ ${tqFmtName(tqFmt)}${tqFmt==="type"?`(${tqSec}秒)`:""} ・ ${tqLvName(tqLadder[0])}から<br><span class="tq-big">${tqOk}<small>問 正解</small></span>`
       +(isBest&&old ? `<br><b class="tq-new">自己ベスト更新!</b>(これまで ${old}問)` : `<br>自己ベスト ${Math.max(old,tqOk)}問`)+` ・ ${tqLvRange()}まで進みました`+sent;
     tqRegister();
@@ -10274,7 +10275,7 @@ function tqFinish(){
 }
 /* ノーミス勝負の記録をみんなのランキングに載せる(名前が決まっていれば自動) */
 async function tqRegister(){
-  const box=$("tqReg"), d=TQ_RANK(tqFmt), n=tqOk;
+  const box=$("tqReg"), d=TQ_RANK(tqFmt,tqLadder[0]), n=tqOk;
   const viewBtn=`<button class="btn" id="tqRankView">ランキングを見る <span class="kbdh">R</span></button>`;
   if(!n){ box.innerHTML=viewBtn; return; }
   if(isDebugSave()){ box.innerHTML="デバッグ用の記録はランキングに登録できません "+viewBtn; return; }
@@ -10289,7 +10290,17 @@ async function tqRegister(){
 }
 let tqRegWait=false;   // 名前を決めたあとに登録する
 function tqRegName(){ if(!playerName){ tqRegWait=true; openNameWin(); } else tqRegister(); }
-function tqRankView(){ window.tqFromRank=true; openRanking(TQ_RANK(tqFmt), playerName); }
+function tqRankView(){ window.tqFromRank=true; tqRankLv=tqLadder[0]; openRanking("toeic-"+tqFmt, playerName); }
+/* みんなのランキング: 出題形式のタブ(toeic-type など)は、下のレベルのボタンで選んだレベルの記録を出す */
+let tqRankLv="470";
+const TQ_RANK_LVS=TQ_LEVELS.filter(([k])=>k!=="weak");
+window.tqRankKey = d => /^toeic-(type|choice|fill)$/.test(d) ? d+"-"+tqRankLv : d;
+window.tqRankSync = d => {
+  const box=$("tqRankLvs"), on=/^toeic-/.test(d);
+  box.hidden=!on; if(!on) return;
+  box.innerHTML=TQ_RANK_LVS.map(([k,nm])=>`<button class="btn${k===tqRankLv?" active":""}" data-lv="${k}">${nm}から</button>`).join("");
+};
+$("tqRankLvs").addEventListener("click",e=>{ const b=e.target.closest("[data-lv]"); if(!b) return; tqRankLv=b.dataset.lv; openRanking(rankCur, playerName); });
 setInterval(()=>{ if(tqRegWait && !nmOpen){ tqRegWait=false; if(playerName && tqPhase==="result" && scene==="toeic") tqRegister(); } },400);
 /* ---- 単語リスト ---- */
 function tqList(lv){
