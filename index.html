@@ -198,6 +198,16 @@ body.dishglass:not(.garden):not(.washi)::before{content:""; position:fixed; inse
 @media (prefers-reduced-motion:reduce){ body.dishglass::before{animation:none} }
 body.dishglass:not(.garden):not(.washi) #app{position:relative; z-index:1}
 body.dishglass:not(.garden):not(.washi) :is(.btn,.diff-btn:not(.poem),.word-panel,.plate,.tq-card,.gstat){background:rgba(255,255,255,.1); border-color:rgba(255,255,255,.4); -webkit-backdrop-filter:blur(8px); backdrop-filter:blur(8px)}
+.rgrid{display:grid; grid-template-columns:repeat(10,1fr); gap:3px; margin:.5rem 0 .7rem}
+.rcell{aspect-ratio:1; display:grid; place-items:center; border-radius:6px; background:rgba(0,0,0,.05); cursor:pointer; font-size:.75rem; overflow:hidden}
+.rcell .cart, .rcell svg{width:100%; height:100%; display:block}
+.rcell.mut{background:rgba(160,110,255,.14)}
+.rcell.sup{background:rgba(255,190,60,.2)}
+.rcell.sec{background:rgba(255,255,255,.55); box-shadow:inset 0 0 0 1px rgba(200,160,60,.6)}
+.rcell.on{outline:2px solid #e0a020; outline-offset:1px}
+.rq{font-size:.75rem; padding:0 .4rem; border-radius:999px; color:#fff; background:#9a70e0}
+.rq.sup{background:linear-gradient(90deg,#ff8ac8,#ffc94a,#7ad8ff)}
+.rcount{font-size:.75rem; color:#8a6a3a; font-variant-numeric:tabular-nums}
 .screen{display:none; text-align:center}
 .screen.active{display:block; animation:fadein .25s ease}
 @keyframes fadein{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
@@ -1851,7 +1861,7 @@ html.mobile #screen-garden .grk-list{max-height:none; flex:1 1 auto; min-height:
       <button class="tbtn rank" id="g-rankOpenBtn">番付<span class="kb">9</span></button>
       <button class="tbtn cook" id="g-cookBtn">料理<span class="kb">0</span></button>
       <button class="tbtn goal" id="g-bookBtn">図鑑・実績<span class="gbadge" id="g-goalBadge"></span><span class="kb">Space</span></button>
-      <button class="tbtn toeic" id="g-toeicBtn">TOEIC</button>
+      <button class="tbtn toeic" id="g-toeicBtn">TOEIC<span class="kb">-</span></button>
       <button class="tbtn" id="g-backBtn">タイトルへ<span class="kb">Esc</span></button>
     </div>
 
@@ -1897,7 +1907,7 @@ html.mobile #screen-garden .grk-list{max-height:none; flex:1 1 auto; min-height:
     </p>
     <p class="help pc-only">
       <b>1〜6</b> 道具の持ち替え ・ <b>← →</b> 種や設置物を選ぶ(<b>4</b> の長押しか2回押しで種の一覧) ・ <b>↑ ↓</b> 畑を移る ・ <b>英字と , .</b> その区画で作業(<b>P</b> は案山子置き場)<br>
-      <b>Tab</b> お店 ・ <b>7</b> ガチャ ・ <b>8</b> 貴重品 ・ <b>9</b> 番付 ・ <b>0</b> 料理 ・ <b>Space</b> 図鑑・実績 ・ <b>Esc</b> タイトルへ(別端末との同期はタイトルの <b>K</b>)<br>
+      <b>Tab</b> お店 ・ <b>7</b> ガチャ ・ <b>8</b> 貴重品 ・ <b>9</b> 番付 ・ <b>0</b> 料理 ・ <b>Space</b> 図鑑・実績 ・ <b>-</b> TOEIC ・ <b>Esc</b> タイトルへ(別端末との同期はタイトルの <b>K</b>)<br>
       作物は水が効いている間だけ育ちます。タイピングで正しく打った1打ごとに、水の効いている作物の時間が進みます。
     </p>
   </div>
@@ -4454,98 +4464,53 @@ const ROSE_ALL = ROSES.concat(ROSE_SECRET);
 /* 種(畑に植えるまで色は分からない)。持ち物では「薔薇の種」1行にまとめ、中身の色は S.roseBag {レベル:数} に持つ */
 const ROSE_SEED = { id:"rose", name:"薔薇", icon:"🌹", seedOnly:true, gacha:true, cost:0, hours:6, price:1e9,
   art:`<svg viewBox="0 0 32 32"><path d="M16 30V17" stroke="#3f7a3a" stroke-width="1.6" stroke-linecap="round"/><path d="M15.8 24c-3-.4-5.4-2-6.2-4.2 3 .2 5.2 1.6 6.2 4.2z" fill="#4f8a3a"/><path d="M16 18c-3.4-1.4-4.4-5.6-2.6-9.4L16 4l2.6 4.6c1.8 3.8.8 8-2.6 9.4z" fill="#8a7a6a"/><path d="M16 18c-1.6-2-1.8-6.4 0-11.4 1.8 5 1.6 9.4 0 11.4z" fill="#b4a490"/><path d="M13.6 15.4c-1.6-.4-2.6-2-2.6-3.6 1.6.4 2.6 1.8 2.6 3.6zM18.4 15.4c1.6-.4 2.6-2 2.6-3.6-1.6.4-2.6 1.8-2.6 3.6z" fill="#4f8a3a"/><text x="16" y="13.6" font-size="7" text-anchor="middle" fill="#fff" font-family="sans-serif" font-weight="700">?</text></svg>` };
-const ROSE_MUT={}, ROSE_SUP={}, ROSE_LQ={}, ROSE_LQ3={};
+const ROSE_MUT={}, ROSE_SUP={};
 for(const r of ROSES){
   ROSE_MUT[r.id]={ name:r.m.name, art:roseSvg(r.m.c1,r.m.c2,{bg:r.m.c1,ln:r.ln}) };
   ROSE_SUP[r.id]={ name:r.s.name, art:roseSvg(r.s.c1,r.s.c2,{bg:r.s.c1,sp:r.lv==="990"?"#c8c8d0":"#fff6c8",ln:r.ln}) };
 }
-/* 説明文: [ふつう, ☆, ☆☆, ☆☆☆, 変異, 超変異](シークレットは変異がない) */
+/* 説明文: [ふつう, 変異, 超変異](シークレットは変異がない)。薔薇には品質の ☆ がない */
 const ROSE_LORE = {
   b1:["英単語を覚えた数だけ届く種から咲いた、最初の薔薇。何も書かれていない便箋のように白い。",
-      "花びらの縁まで、混じりけのない白になってきた。",
-      "朝露をのせると、花びらが光を集めて少しまぶしい。百輪目で、白にも深さがあると知った。",
-      "三百輪目。暗い部屋に置くと、そこだけ明かりがついたように見える。",
       "花びらがほんのり黄みを帯びて、焼きたてのお菓子のように柔らかい色になった。",
       "光の当たる角度で、花びらが桃色にも青にも揺らめく。海の底から拾い上げたような艶がある。"],
   b2:["陽だまりの色をした薔薇。そばに置くと、机の上が少し明るくなる。",
-      "黄色がむらなく行き渡り、花の形が揃ってきた。",
-      "香りに柑橘のような爽やかさが混じる。百輪目で、蜂がこの花の場所を覚えたらしい。",
-      "三百輪目。曇りの日でも、この花の周りだけ晴れている気がする。",
       "酸っぱい香りがしそうなほど鮮やかな黄色。実際にかいでみると、ちゃんと薔薇の香りがする。",
       "花びらの奥に、閉じこめられた光がとろりと揺れている。何千年も前の夕日のようだ。"],
   b3:["やさしい桃色の薔薇。贈り物にすると、たいてい笑顔が返ってくる。",
-      "花びらの重なりが、ふっくらとしてきた。",
-      "ひらくたびに甘い香りが部屋に満ちる。百輪目で、つぼみの数を数えるのが楽しみになった。",
-      "三百輪目。一輪挿しにするだけで、部屋の空気がやわらかくなる。",
       "春の一日だけを切り取ったような、淡い桜の色。散りぎわまで美しい。",
       "南の海をそのまま映したような、あたたかな珊瑚色。耳を寄せると波の音がする、と言う者がいる。"],
   "470":["元気な橙色の薔薇。見ているだけで、次の一問に向かう気力がわいてくる。",
-      "色が濃くなり、花びらの先までしっかり張っている。",
-      "香りに果物のような甘酸っぱさがある。百輪目で、橙色が少し誇らしげになった。",
-      "三百輪目。花の前に立つと、頬が夕方のように照らされる。",
       "熟れた杏のような、やわらかな橙色。思わず手に取って香りを確かめたくなる。",
       "花びらの付け根から先へ、橙から紅へと色が移ろう。一輪の中に、一日の終わりがある。"],
   "630":["誰もが思い浮かべる、まっすぐな赤の薔薇。花言葉を知らなくても、気持ちは伝わる。",
-      "赤が深まり、花びらにビロードのような手ざわりが出てきた。",
-      "一輪で部屋の主役になる。百輪目で、赤にもいろいろな赤があると分かった。",
-      "三百輪目。見つめていると、胸の奥が少し熱くなる。",
       "どこまでも深い紅。暗がりで見ると、黒に近いほど濃い。",
       "長い年月を寝かせたような、落ち着いた紅紫。香りまで少し大人びている。"],
   "730":["気品のある紫の薔薇。昔から、めったに見られない色として大切にされてきた。",
-      "紫の色合いが落ち着き、花の形が整ってきた。",
-      "夕暮れに見ると、花びらが少し青みを帯びる。百輪目で、その時刻を待つようになった。",
-      "三百輪目。一輪あるだけで、背筋がすっと伸びる。",
       "藤の花のような、薄く澄んだ紫。香りをかぐと、なぜか眠くなる。",
       "熟した葡萄のように、深くて甘い紫。房のように寄り添って咲くことがある。"],
   "860":["かつては「ありえないもの」のたとえだった青い薔薇。ここでは、覚えた単語の数だけ咲く。",
-      "青がはっきりしてきて、紫に見えることが少なくなった。",
-      "月の光の下で、花びらが静かに光る。百輪目で、不可能という言葉を少し信じなくなった。",
-      "三百輪目。空の色を一輪に集めたように、どこまでも青い。",
       "晴れた朝の空のような、透きとおる水色。触れると、ひんやりする気がする。",
       "宝石の瑠璃を砕いて溶かしたような、深い青。じっと見ていると、星が浮かんで見える。"],
   "990":["いちばん難しい単語の向こうに咲く、黒に近い深紅の薔薇。光にかざすと、奥にかすかな赤が見える。",
-      "黒みが増し、花びらの縁まで色が沈んできた。",
-      "近づくと、甘く重たい香りがする。百輪目で、この花の前では声をひそめるようになった。",
-      "三百輪目。夜になると、そこにあると分かるのは香りだけ。",
       "色が抜け落ちたような、静かな灰色。古い写真の中で咲いている花のようだ。",
       "光をすべて吸いこむ、混じりけのない黒。見ていると、花ではなく夜そのものに思えてくる。"],
   i1:["花びらが葉のような緑色をした、ふしぎな薔薇。熟語のように、組み合わせの妙で生まれた色。",
-      "緑が澄んで、葉と花の見分けがつくようになってきた。",
-      "青りんごのような香りがする。百輪目で、緑の花も悪くないと皆が言い出した。",
-      "三百輪目。花瓶に挿すと、そこだけ初夏の森になる。",
       "芽吹いたばかりの若葉の色。見ているだけで、何かを始めたくなる。",
       "宝石のように深く澄んだ緑。光を受けると、花びらの奥で緑の炎が揺れる。"],
   i2:["紅茶を思わせる、渋い茶色の薔薇。派手さはないが、見るほどに味わいが出る。",
-      "茶色に赤みが差し、花びらにつやが出てきた。",
-      "焼き菓子のような甘い香りがする。百輪目で、この色のよさが分かる人が増えた。",
-      "三百輪目。古い本の隣に置くと、一枚の絵のように収まる。",
       "色あせた写真のような、懐かしい茶色。昔のことを思い出しそうになる。",
       "磨いた銅のように、赤く輝く茶色。指で弾くと、澄んだ音がしそうだ。"],
-  gold:["金色に実ったものの隣で、その輝きを映すように咲いた薔薇。花びらが金箔のように光る。",
-      "金色にむらがなくなり、花びらがずしりと重く感じる。",
-      "日が沈んでも、しばらく花びらが光っている。",
-      "三百輪目。触れた指先まで、金色に染まりそうだ。"],
-  dia:["まばゆく実ったものの光を浴びて咲いた薔薇。花びらは硬く透きとおり、光を七色に散らす。",
-      "花びらの角がきらりと立ち、光を集めるようになった。",
-      "朝日に向けると、壁に小さな虹がいくつも映る。",
-      "三百輪目。触れると、かすかに鈴のような音がする。"],
-  bw:["ほかに何もない畑で、ひとりきりで咲いた薔薇。花びらの半分が白く、半分が黒い。",
-      "白と黒の境目が、くっきりとしてきた。",
-      "見る向きによって、白い花にも黒い花にも見える。",
-      "三百輪目。白と黒のあいだに、灰色がひとつもない。"],
-  clear:["水を一滴も知らずに咲いた薔薇。花びらがガラスのように透きとおっている。",
-      "花びらの透明さが増し、向こう側の景色がゆがまずに見える。",
-      "そこにあるのは分かるのに、目を離すとどこにあるか分からなくなる。",
-      "三百輪目。輪郭だけが、光の中にうっすら浮かんでいる。"],
-  rainbow:["急がず、近道もせず、ただ時の流れだけで咲いた薔薇。花びら一枚一枚が違う色をしている。",
-      "花びらの色の並びが、虹と同じ順番にそろってきた。",
-      "雨上がりになると、花の上に小さな虹がかかる。",
-      "三百輪目。待つことそのものが、この花の色なのかもしれない。"],
+  gold:["金色に実ったものの隣で、その輝きを映すように咲いた薔薇。花びらが金箔のように光る。"],
+  dia:["まばゆく実ったものの光を浴びて咲いた薔薇。花びらは硬く透きとおり、光を七色に散らす。"],
+  bw:["ほかに何もない畑で、ひとりきりで咲いた薔薇。花びらの半分が白く、半分が黒い。"],
+  clear:["水を一滴も知らずに咲いた薔薇。花びらがガラスのように透きとおっている。"],
+  rainbow:["急がず、近道もせず、ただ時の流れだけで咲いた薔薇。花びら一枚一枚が違う色をしている。"],
 };
 for(const r of ROSE_ALL){
   const L=ROSE_LORE[r.id.slice(5)];
-  r.lore=L[0]; ROSE_LQ[r.id]=[L[1],L[2]]; ROSE_LQ3[r.id]=L[3];
-  if(ROSE_MUT[r.id]){ ROSE_MUT[r.id].lore=L[4]; ROSE_SUP[r.id].lore=L[5]; }
+  r.lore=L[0];
+  if(ROSE_MUT[r.id]){ ROSE_MUT[r.id].lore=L[1]; ROSE_SUP[r.id].lore=L[2]; }
   r.desc="薔薇の種から咲く";
 }
 const CROP = Object.fromEntries(CROPS.concat(ROSE_ALL,[ROSE_SEED]).map(c=>[c.id,c]));
@@ -4959,7 +4924,7 @@ const QUALITY = [
 const TIERS = [0,1,2,4];
 const QORDER = [0,1,2,4,3,5];
 const isMutT = t => t===3 || t===5;          // 変異・超変異(自動売却しない・「すべて売る」で売らない)
-const qOk = (id,t) => t===3 ? hasMut(id) : (t===5 ? hasSup(id) : true);
+const qOk = (id,t) => t===3 ? hasMut(id) : (t===5 ? hasSup(id) : !(t && CROP[id] && CROP[id].rose));   // 薔薇は ☆ がない
 const nextTier = t => t===0?1 : t===1?2 : t===2?4 : null;
 const qualUp = t => { const x=eff("R"); return x===2 ? 4 : x===1 ? (nextTier(t) ?? t) : t; };   // 料理: 品質アップ
 /* 貴重品(GHR)の持っている数と、そこから決まる庭全体の効果 */
@@ -4981,7 +4946,7 @@ const effSeed    = () => 1 - effVal("greennecklace")/100;   // 種の値段の�
 const effGacha   = () => (1 - effVal("silverstar")/100) * ev("I",.9,.5,1);      // ガチャの値段の倍率
 const effFert    = () => FERT_BOOST + effVal("blueamaryllis")/100 + ev("J",.1,.2,0);  // 肥料の効き(1つで最大45%、2つで最大90%)
 
-const tierOf  = id => { const n=S.harvestBy[id]||0; return n>=QUALITY[4].need?4:(n>=QUALITY[2].need?2:(n>=QUALITY[1].need?1:0)); };
+const tierOf  = id => { if(CROP[id] && CROP[id].rose) return 0; const n=S.harvestBy[id]||0; return n>=QUALITY[4].need?4:(n>=QUALITY[2].need?2:(n>=QUALITY[1].need?1:0)); };
 const priceOf = (id,t) => Math.round(CROP[id].price*QUALITY[t].mult*effSell()*(t===3||t===5 ? ev("Q2",1.5,3,1) : 1));
 const qName   = (id,t) => t===5 ? (SUPER[id] ? SUPER[id].name : CROP[id].name+QUALITY[5].mark) : t===3 ? (MUTANT[id] ? MUTANT[id].name : CROP[id].name+QUALITY[3].mark) : CROP[id].name+QUALITY[t].mark;
 /* 品質ごとの図鑑の説明文(ふつうの品質は CROPS の lore) */
@@ -5277,6 +5242,7 @@ function isWet(fi,k,now,cov){
 function grow(p,add,base,src){
   const before=p.crop.grown, n=need(p.crop);
   if(src && add>0 && !(p.crop.src||"").includes(src)) p.crop.src=(p.crop.src||"")+src;   // 薔薇: 何で育ったか
+  if(src==="t" && add>0) p.crop.tg=(p.crop.tg||0)+add/effGrowth();   // 薔薇: 時間で自然に育った長さ
   p.crop.grown=Math.min(n, before+add);
   if(p.crop.grown>=n && !p.crop.ripeAt){
     p.crop.ripeAt=base+(n-before);
@@ -5310,7 +5276,7 @@ function rosePick(){
 }
 const plantId = id => id==="rose" ? rosePick() : id;
 /* 実った瞬間に、育ち方を見てシークレットの色に変わることがある。
-   src: 育った手段(t 時間 / s 時間の短縮 / f 肥料 / c 料理の時計 / x そのほか) */
+   src: 育った手段(t 時間 / s 時間の短縮 / f 肥料 / c 料理の時計 / x そのほか)。tg: 時間で自然に育った長さ */
 function roseSecret(p){
   const fi=S.fields.findIndex(f=>KEYS.some(k=>f[k]===p)); if(fi<0) return;
   const f=S.fields[fi], src=p.crop.src||"";
@@ -5320,7 +5286,7 @@ function roseSecret(p){
   if(carrot(true)) id="rose_dia";
   else if(carrot(false)) id="rose_gold";
   else if(!S.fields.some(fx=>other(fx,q=>!q.vil))) id="rose_bw";
-  else if(src==="f") id="rose_clear";
+  else if(src.includes("f") && !/[scx]/.test(src) && (p.crop.tg||0)<=60000) id="rose_clear";   // 肥料だけ(自然に育つのは1分まで)
   else if(src==="t") id="rose_rainbow";
   if(!id) return;
   p.crop.id=id; p.crop.mut=false; p.crop.sup=false; p.crop.mutN=0;
@@ -5955,7 +5921,7 @@ function renderInfo(){
       const t=p.crop.mut?cropQ(p):tierOf(c.id);
       big=`${selKey} ・ ${icoQ(c,t)} ${esc(qName(c.id,t))} 収穫できます${t===5?"(超変異)":(t===3?"(変異)":"")}`;
       sub.push(`${kb("素手(1)","素手")}で収穫 ・ 売値 ${fmtNum(priceOf(c.id,t))}キー${isMutT(t)?` ・ ${t===5?"超変異":"変異"}は自動売却されません`:""}`);
-      const nt=isMutT(t)?null:nextTier(t);
+      const nt=isMutT(t)||c.rose?null:nextTier(t);
       if(nt!=null){ const left=QUALITY[nt].need-(S.harvestBy[c.id]||0); sub.push(`あと ${left}個 収穫すると「${qName(c.id,nt)}」が穫れるようになります`); }
     }else{
       const pct=Math.floor(p.crop.grown/need(p.crop)*100);
@@ -6095,7 +6061,7 @@ function harvestOne(k){
     toast(`${ico(c)} ${esc(c.name)} を手に入れました。${esc(c.eff.text)}(合計 ${effVal(c.id)}${c.eff.unit})`,"good",6000,true);
     return;
   }
-  let t=qualUp(tierOf(c.id));
+  let t=c.rose?0:qualUp(tierOf(c.id));
   const mq = cropMut ? (cropSup?5:3) : (rolled ? 0 : rollMut(c.id));   // 5=超変異 3=変異
   const mut = mq>0;
   if(mut) t=mq;
@@ -8383,6 +8349,7 @@ const normQ = v => String(v||"").normalize("NFKC").toLowerCase().replace(/[\u30a
 const qHit = (names,q) => !q || names.some(n=>normQ(n).includes(q));
 /* [段階, 名前]: 作物は 0 / 3 変異 / 5 超変異、食材は 0 / 1 上位種、料理は 0 / 3 / 5 */
 function cropBookEntries(c){
+  if(c.rosebook) return bookSeen(c) ? [[0,"薔薇"]].concat(roseCells().map(([id,t],i)=>qCount(id,t)>0?["r"+i,qName(id,t)]:null).filter(Boolean)) : [];
   if(c.food){ const up=upOf(c.id); return [bookSeen(c)&&[0,c.name], up&&bookSeen(up)&&[1,up.name]].filter(Boolean); }
   if(!bookSeen(c)) return [];
   const out=[[0,c.name]];
@@ -8400,6 +8367,7 @@ const qAlt = m => m && m[0] ? `<small class="qalt">${esc(m[1])}</small>` : "";
 function bookQTier(){
   const m=qMatch(cropBookEntries(BOOK_CROPS[bookCur]), normQ(bookQ)); if(!m) return;
   const c=BOOK_CROPS[bookCur];
+  if(c.rosebook){ if(typeof m[0]==="string") roseCur=+m[0].slice(1); return; }
   if(c.food) foodUp = m[0]===1; else bookTier = m[0]===0 ? (qOk(c.id,bookTier) && !isMutT(bookTier) ? bookTier : 0) : m[0];
 }
 function dbookQTier(){ const m=qMatch(dishBookEntries(DBK()[dbookCur]), normQ(dbookQ)); if(m) dbookTier=m[0]; }
@@ -8605,11 +8573,38 @@ const charmLives = () => ev("V",1,3,0);
 /* 図鑑: 売値の安い順。貴重品(GHR)は品質が無いので、最後にまとめて並べる */
 /* 食材は作物のあと・貴重品の前に、ふつうの食材のすぐ後ろにその上位種を並べる */
 /* 食材はふつうの食材だけを並べ、上位種は ← → で切り替える */
+/* ---- 図鑑: 薔薇は1ページにまとめる(ふつう・変異・超変異の30色 + 咲かせたシークレット) ----
+   ← → で色を選ぶ。マスを押しても選べる */
+const ROSE_BOOK = { id:"rosebook", rosebook:true, name:"薔薇", icon:"🌹", art:ROSES[4].art, price:0 };
+const roseCells = () => [0,3,5].flatMap(t=>ROSES.map(r=>[r.id,t])).concat(ROSE_SECRET.filter(r=>qCount(r.id,0)>0).map(r=>[r.id,0]));
+const roseGot = () => roseCells().filter(([id,t])=>qCount(id,t)>0).length;
+let roseCur=0;
+function roseBookDetail(){
+  const cells=roseCells(); roseCur=Math.max(0,Math.min(roseCur,cells.length-1));
+  const [id,t]=cells[roseCur], r=CROP[id], n=qCount(id,t), got=n>0;
+  const grid=cells.map(([cid,ct],i)=>{ const k=qCount(cid,ct)>0;
+    return `<span class="rcell${i===roseCur?" on":""}${ct===3?" mut":ct===5?" sup":""}${CROP[cid].secret?" sec":""}" data-rc="${i}">${k?icoQ(CROP[cid],ct):"❔"}</span>`; }).join("");
+  const cond = r.secret ? "特別な育て方をした薔薇の種から、まれに咲きます"
+    : t===0 ? `TOEIC 英単語の${ROSE_LVNAME[r.lv]}でもらえる薔薇の種から咲きます`
+    : `${ROSE_LVNAME[r.lv]}の薔薇の種が咲くとき、${t===5?+(effSup()*100).toFixed(2):+(effMut()*100).toFixed(1)}% の確率で${t===5?"超変異":"変異"}します`;
+  return `<div class="btabs"><span class="btab on">薔薇 ${roseGot()} / ${cells.length}色</span></div>
+    <div class="rgrid">${grid}</div>
+    <div class="bnm">${got?esc(qName(id,t)):"？？？"}${t===5?' <small class="rq sup">超変異</small>':t===3?' <small class="rq mut">変異</small>':""}</div>
+    <dl>
+      <dt>収穫</dt><dd>${fmtNum(n)}輪</dd>
+      <dt>売値</dt><dd>${fmtNum(priceOf(id,t))}キー</dd>
+      <dt>育つまで</dt><dd>${fmtDur(r.hours*HOUR)}</dd>
+      <dt>咲く条件</dt><dd>${cond}</dd>
+    </dl>
+    <div class="lore ${got?"":"unknown"}">${got?esc(loreOf(r,t)):"まだ咲かせたことがありません。咲かせると、名前と説明がわかります。"}</div>`;
+}
+/* 実績で数えるもの */
+const roseHarv = () => ROSE_ALL.reduce((a,r)=>a+(S.harvestBy[r.id]||0),0);
+const roseQGot = t => ROSES.some(r=>qCount(r.id,t)>0) ? 1 : 0;
+const roseSecGot = () => ROSE_SECRET.some(r=>qCount(r.id,0)>0) ? 1 : 0;
 const FOOD_BOOK = FOODS.filter(f=>!f.up).sort((a,b)=>a.price-b.price);
-let BOOK_CROPS = [];
-const bookCropsNow = () => (BOOK_CROPS = CROPS.filter(c=>!c.treasure).sort((a,b)=>a.price-b.price).concat(ROSES, ROSE_SECRET.filter(c=>S.harvestBy && (S.harvestBy[c.id]||0)>0), FOOD_BOOK, CROPS.filter(c=>c.treasure)));
-bookCropsNow();
-const bookSeen = c => c.rose ? (S.harvestBy[c.id]||0)>0 : c.food ? (S.got[c.id]||0)>0 : c.treasure ? tre(c.id)>0 : (isUnlocked(c)||S.harvestBy[c.id]>0);
+const BOOK_CROPS = CROPS.filter(c=>!c.treasure).sort((a,b)=>a.price-b.price).concat([ROSE_BOOK], FOOD_BOOK, CROPS.filter(c=>c.treasure));
+const bookSeen = c => c.rosebook ? ROSE_ALL.some(r=>(S.harvestBy[r.id]||0)>0) : c.food ? (S.got[c.id]||0)>0 : c.treasure ? tre(c.id)>0 : (isUnlocked(c)||S.harvestBy[c.id]>0);
 let bookCur=0, bookTier=0, foodUp=false;   // foodUp: 食材の図鑑で上位種を見ているか
 const qCount = (id,t) => (S.harvestQ[id]&&S.harvestQ[id][t])||0;
 /* ☆☆☆(300個目)の説明文 */
@@ -8674,13 +8669,12 @@ const LORE_Q3 = {
   shadowqueen: "三百個目。光を吸い込むような黒紫。掘り出すたびに、畑が一瞬だけ夜になる。",
   keytree: "三百本目。どのキーも同じ深さで沈み、同じ音で戻ってくる。外す瞬間の音を聞きに、見物人が集まるようになった。"
 };
-Object.assign(LORE_Q,ROSE_LQ); Object.assign(LORE_Q3,ROSE_LQ3);   // 薔薇の ☆・☆☆・☆☆☆ の説明文
 const loreOf = (c,t) => t===0 ? c.lore : t===5 ? SUPER[c.id].lore : (t===3 ? MUTANT[c.id].lore : (t===4 ? LORE_Q3[c.id] : LORE_Q[c.id][t-1]));
 /* 図鑑の埋まり具合: got 埋まった項目 / all 全項目(作物×品質・変異・貴重品) */
 function bookProgress(){
-  bookCropsNow();
   let got=0, all=0;
   for(const c of BOOK_CROPS){
+    if(c.rosebook){ for(const [id,t] of roseCells()){ all++; if(qCount(id,t)>0) got++; } continue; }
     if(c.food){ for(const f of [c, upOf(c.id)]){ if(!f) continue; all++; if(bookSeen(f)) got++; } continue; }
     if(c.treasure){ all++; if(tre(c.id)>0) got++; continue; }
     for(const t of QORDER){ if(!qOk(c.id,t)) continue; all++; if(qCount(c.id,t)>0) got++; }
@@ -8688,7 +8682,6 @@ function bookProgress(){
   return { got, all };
 }
 function renderBook(){
-  bookCropsNow();
   const q=normQ(bookQ), bh=bookHits(BOOK_CROPS, cropBookNames, q, bookCur); bookCur=bh.cur;
   $("g-bookQn").textContent = q ? `${bh.hits.length}件` : "";
   const { got:gotAll, all:allEntries }=bookProgress();
@@ -8696,7 +8689,7 @@ function renderBook(){
   $("g-bookList").innerHTML=BOOK_CROPS.map((c,i)=>{
     const up=c.food?upOf(c.id):null;
     const known=bookSeen(c) || (up && bookSeen(up));
-    const marks=c.food
+    const marks=c.rosebook ? `<small class="rcount">${roseGot()} / ${roseCells().length}</small>` : c.food
       ? `<span class="qm${bookSeen(c)?" on":""}">・</span>`+(up?`<span class="qm upm${bookSeen(up)?" on":""}">✦</span>`:"")
       : c.treasure
       ? `<span class="qm${known?" on":""}">✨</span>`
@@ -8729,6 +8722,12 @@ function renderBook(){
     keepVisible($("g-bookList"));
     return;
   }
+  if(c.rosebook){
+    $("g-bookDetail").innerHTML = known ? roseBookDetail() : `<div class="bic">❔</div><div class="bnm">？？？</div>
+       <div class="lore unknown">TOEIC 英単語でもらえる薔薇の種から咲きます。咲かせると、名前がわかります。</div>`;
+    keepVisible($("g-bookList"));
+    return;
+  }
   if(c.treasure){
     // 貴重品: 品質は無く、永続効果と説明文を載せる
     $("g-bookDetail").innerHTML = known ? `
@@ -8749,9 +8748,9 @@ function renderBook(){
   }
   if(!known){
     $("g-bookDetail").innerHTML=`<div class="bic">❔</div><div class="bnm">？？？</div>
-      <div class="lore unknown">${c.rose?"TOEIC 英単語でもらえる薔薇の種から咲きます。咲かせると、名前がわかります。":c.gacha?`${gachaText(c)}(レア度 ${c.r})。引き当てると、名前がわかります。`:(c.day!=null?`${dayText(c)}。`:`${unlockText(c.unlock)}。お店に並ぶと、名前がわかります。`)}</div>`;
+      <div class="lore unknown">${c.gacha?`${gachaText(c)}(レア度 ${c.r})。引き当てると、名前がわかります。`:(c.day!=null?`${dayText(c)}。`:`${unlockText(c.unlock)}。お店に並ぶと、名前がわかります。`)}</div>`;
   }else{
-    const cond = t===0 ? (c.rose?(c.secret?"特別な育て方をした薔薇の種から、まれに咲きます":`TOEIC 英単語の${ROSE_LVNAME[c.lv]}でもらえる薔薇の種から咲きます`):c.gacha?`${gachaText(c)}(レア度 ${c.r})`:(c.day!=null?dayText(c):"種を植えて育てれば穫れます"))
+    const cond = t===0 ? (c.gacha?`${gachaText(c)}(レア度 ${c.r})`:(c.day!=null?dayText(c):"種を植えて育てれば穫れます"))
       : t===5 ? `${c.name}が実るたびに ${+(effSup()*100).toFixed(2)}% の確率で超変異します${c.rose?"":"(村人の畑では収穫されずに残ります)"}`
       : t===3 ? `${c.name}を収穫するたびに ${+(effMut()*100).toFixed(1)}% の確率で変異します${c.rose?"":"(村人の畑では収穫されずに残ります)"}`
       : (total>=QUALITY[t].need ? `${c.name}を ${QUALITY[t].need}個 収穫して穫れるようになりました`
@@ -8772,7 +8771,6 @@ function renderBook(){
   keepVisible($("g-bookList"));
 }
 function bookKey(e){
-  bookCropsNow();
   const k=e.key;
   if(k==="Escape"||k===" "){ e.preventDefault(); closeModal(); return; }
   if(k==="Tab"){ e.preventDefault(); spaceTab(e.shiftKey?-1:1); return; }
@@ -8786,6 +8784,7 @@ function bookKey(e){
     sfx.cursor(); renderSoon(renderBook);
   }else if(k==="ArrowLeft"||k==="ArrowRight"){   // 同じ作物の品質を切り替える
     e.preventDefault();
+    if(BOOK_CROPS[bookCur].rosebook){ const N=roseCells().length; roseCur=(roseCur+(k==="ArrowRight"?1:-1)+N)%N; sfx.tab(); renderBook(); return; }
     if(BOOK_CROPS[bookCur].treasure) return;
     if(BOOK_CROPS[bookCur].food){ if(upOf(BOOK_CROPS[bookCur].id)){ foodUp=!foodUp; sfx.tab(); renderBook(); } return; }
     const qs=QORDER.filter(q=>qOk(BOOK_CROPS[bookCur].id,q));   // ふつう → ☆ → ☆☆ → ☆☆☆ → 変異 → 超変異
@@ -8795,6 +8794,7 @@ function bookKey(e){
   }
 }
 $("g-bookDetail").addEventListener("click",e=>{
+  const rc=e.target.closest && e.target.closest("[data-rc]"); if(rc){ roseCur=+rc.dataset.rc; sfx.tab(); renderBook(); return; }   // 薔薇の色のマス
   const b=e.target.closest && e.target.closest("[data-t]"); if(!b) return;
   if(BOOK_CROPS[bookCur].food) foodUp=b.dataset.t==="1"; else bookTier=+b.dataset.t;
   sfx.tab(); renderBook();
@@ -8909,6 +8909,19 @@ const GOALS = [
   { cat:"貴重品", id:"t1",  ic:"✨", nm:"たからもの",       ds:"貴重品を手に入れる",           need:1, now:treasKinds, rw:10000 },
   { cat:"貴重品", id:"t3",  ic:"✨", nm:"宝物庫",           ds:"貴重品を3種類手に入れる",      need:3, now:treasKinds, rw:50000 },
   { cat:"貴重品", id:"tAll",ic:"🏆", nm:"すべての宝",       ds:"貴重品をすべて手に入れる",     need:()=>TREAS_ALL, now:treasKinds, rw:300000 },
+  { cat:"薔薇", ser:"rh", id:"rh1",   ic:"🌹", nm:"はじめての薔薇",   ds:"薔薇を1輪収穫する",              need:1,    now:roseHarv, rw:1000 },
+  { cat:"薔薇", ser:"rh", id:"rh100", ic:"🌹", nm:"薔薇園",           ds:"薔薇を100輪収穫する",            need:100,  now:roseHarv, rw:30000 },
+  { cat:"薔薇", ser:"rh", id:"rh1000",ic:"🌹", nm:"薔薇の楽園",       ds:"薔薇を1,000輪収穫する",          need:1000, now:roseHarv, rw:300000 },
+  { cat:"薔薇", ser:"rk", id:"rk5",   ic:"💐", nm:"色とりどり",       ds:"薔薇を5色集める(変異・超変異も1色に数える)", need:5, now:roseGot, rw:5000 },
+  { cat:"薔薇", ser:"rk", id:"rk10",  ic:"💐", nm:"花束",             ds:"薔薇を10色集める",               need:10,   now:roseGot, rw:30000 },
+  { cat:"薔薇", ser:"rk", id:"rk20",  ic:"💐", nm:"薔薇の目録",       ds:"薔薇を20色集める",               need:20,   now:roseGot, rw:200000 },
+  { cat:"薔薇", ser:"rk", id:"rk30",  ic:"💐", nm:"三十色の薔薇",     ds:"薔薇を30色集める",               need:30,   now:roseGot, rw:2000000 },
+  { cat:"薔薇", ser:"rm", id:"rm",    ic:"✦",  nm:"ふしぎな薔薇",     ds:"変異の薔薇を咲かせる",           need:1,    now:()=>roseQGot(3), rw:30000 },
+  { cat:"薔薇", ser:"rs", id:"rs",    ic:"✧",  nm:"奇跡の薔薇",       ds:"超変異の薔薇を咲かせる",         need:1,    now:()=>roseQGot(5), rw:200000 },
+  { cat:"薔薇", ser:"rx", id:"rx",    ic:"🔮", nm:"幻の薔薇",         ds:"まだ誰も知らない色の薔薇を咲かせる", need:1, now:roseSecGot, rw:1000000 },
+  { cat:"薔薇", ser:"rt", id:"rt1",   ic:"🫖", nm:"良いお茶ですね",   ds:"ローズティーを作る",             need:1,    now:roseTeaN, rw:5000 },
+  { cat:"薔薇", ser:"rt", id:"rt10",  ic:"🫖", nm:"お茶会",           ds:"ローズティーを10色作る",         need:10,   now:roseTeaN, rw:100000 },
+  { cat:"薔薇", ser:"rt", id:"rt30",  ic:"🫖", nm:"ティーパーティー", ds:"ローズティーを30色作る",         need:30,   now:roseTeaN, rw:1000000 },
   { cat:"台所の宝物", ser:"kt", id:"kt1",  ic:"🍳", nm:"台所の宝物",     ds:"台所の宝物を手に入れる",          need:1,  now:()=>kitKinds(), rw:100000 },
   { cat:"台所の宝物", ser:"kt", id:"ktAll",ic:"🏆", nm:"台所の主",       ds:"台所の宝物をすべて手に入れる",    need:()=>KIT_ORDER.length, now:()=>kitKinds(), rw:10000000 },
   { cat:"台所の宝物", id:"ktGHR",ic:"🧰", nm:"台所の道具箱",       ds:"GHR の台所の宝物を6種類すべて手に入れる", need:()=>KIT_ORDER.filter(id=>GUR[id].r==="GHR").length, now:()=>kitKinds("GHR"), rw:1000000 },
@@ -9212,6 +9225,7 @@ function onKeyMain(e){
   if(k==="9"){ e.preventDefault(); openModal("rank"); return; }
   if(k==="0"){ e.preventDefault(); if(!cookOpen()){ sfx.nope(); toast(COOK_LOCK_MSG(),"warn",4200); return; } openModal("cook"); return; }
   if(k==="Escape"){ backToTitle(); return; }
+  if(k==="-"){ e.preventDefault(); leave(); openToeic(); return; }   // TOEIC 英単語へ
   if(k==="4" && e.repeat){ openPick("seed"); return; }   // 4 を長押し: 種の一覧
   if(k==="4"){ const now=Date.now(); if(now-lastFour<350){ lastFour=0; openPick("seed"); return; } lastFour=now; }   // 4 をすばやく2回: 種の一覧
   if(/^[1-6]$/.test(k)){ setTool(+k); return; }
@@ -9335,6 +9349,10 @@ function debugUnlock(){
   for(const g of GURS) S.got[g.id]=1;
   S.gachaPass={1111:true,11111:true,111111:true,w1111:true,w11111:true,w111111:true}; S.mfert=3; S.sfert=3; S.sgVil=1; S.objs.sgk=2; S.hourglass=3; S.bento=2; S.deeds=45; S.kit={pan:20,pot:20,board:20,loupe:20,fridge:1,cookvil:2,kamado:1};
   for(const d of DISHES){ S.recipes[d.id]=true; S.dishes[d.id]={0:1,3:1,5:1}; S.dishMade[d.id]={0:true,3:true,5:true}; S.dishEaten[d.id]={0:true,3:true,5:true}; }
+  for(const r of ROSE_ALL){ S.harvestBy[r.id]=50; S.harvestQ[r.id]=r.secret?[5]:[20,0,0,3,0,1]; S.inv[r.id]=r.secret?[2]:[3,0,0,2,0,1]; }   // 薔薇
+  S.roseBag={}; for(const r of ROSES) S.roseBag[r.lv]=10; S.seeds.rose=100;
+  for(const d of ROSE_TEAS){ const G=gradesOf(d); S.dishes[d.id]=Object.fromEntries(G.map(g=>[g,1])); S.dishMade[d.id]=Object.fromEntries(G.map(g=>[g,true])); S.dishEaten[d.id]=Object.fromEntries(G.map(g=>[g,true])); }
+  try{ if(typeof tqOpenAll==="function") tqOpenAll(); }catch(e){}   // TOEIC のレベルもすべて開く
   S.known=CROPS.map(c=>c.id).concat(["fert","obj:spr","obj:crow"]);
   S.lastTick=Date.now();
   save();
@@ -10935,6 +10953,8 @@ document.querySelectorAll(".tq-gardenBtn, #tqGstatM, #tqGstatR").forEach(b=>b.ad
 $("g-toeicBtn").addEventListener("click",()=>{ try{ Garden.leave(); }catch(e){} openToeic(); });   // 農園からTOEICへ
 $("tqSecDn").addEventListener("click",()=>tqSetSec(-1));
 $("tqSecUp").addEventListener("click",()=>tqSetSec(1));
+/* デバッグ(すべて解放): TOEIC のレベルもすべて開く */
+function tqOpenAll(){ tqOpenLv=TQ_CHAIN.slice(); try{ localStorage.setItem(TQ_OPEN_KEY,JSON.stringify(tqOpenLv)); }catch(e){} }
 
 </script>
 </body>
