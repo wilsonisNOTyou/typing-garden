@@ -3953,6 +3953,22 @@ function endBookGame(){
 /* ---------- 更新情報 ----------
    新しいものを上に足していく。d は YYYY-MM-DD */
 const NEWS=[
+  { d:"2026-10-10", t:"トップ画面に「TOEIC 英単語」を追加しました", items:[
+    "英単語(基本単語 2,288語・TOEIC 1,250語)と熟語 約250を、4択・穴埋め4択で覚えられます(トップ画面の TOEIC 英単語、または E)",
+    "10語セット: 10語で1セット。苦手な単語・まだ出ていない単語ほど出やすくなります",
+    "ノーミス勝負: 1問間違えたら終わり。選んだレベルの単語を全部正解したらクリアです。正解した数は、出題形式・レベルごとにランキングに載ります",
+    "最初に遊べるのは基本1と熟語1・熟語2です。10語セットで8問以上、ノーミス勝負で10問以上正解すると、次のレベルが開きます",
+    "正解するたびに、農園へキー10と農園の時間3時間が届きます(ノーミス勝負は10問ごとにどちらも倍)",
+    "農園の「TOEIC」ボタン(または -)から、農園と TOEIC を行き来できます",
+  ]},
+  { d:"2026-10-10", t:"農園に「薔薇」が咲くようになりました", items:[
+    "TOEIC 英単語で遊ぶと「薔薇の種」が届きます(10語セットは終えたときに 1個・3個・10個、ノーミス勝負は10問正解ごとに 10個から倍々)",
+    "何色が咲くかは、育ててのお楽しみ。単語のレベルによって咲く色が変わり、変異・超変異もあります",
+    "薔薇はお店とガチャには並ばず、村人にも任せられません",
+    "図鑑に薔薇のページを追加しました。咲かせた色が並びます",
+    "薔薇を使う新しい料理のレシピが、お店に並びます(50,000キー)",
+    "実績に「薔薇」の項目を追加しました",
+  ]},
   { d:"2026-10-09", t:"お店の効率化に「村人の指示書3」が登場しました", items:[
     "村人の指示書3(300,000キー): 村人が種を植えるとき、同じ種を持っていれば、買わずにそれを使います。なければ今までどおり買います",
     "お店の効率化でオンオフできます。村人の指示書2を持っているとお店に並びます",
@@ -6372,7 +6388,7 @@ function magicFert(k,p,id){
   if(Math.random()<ev("η",.5,1,0)) toast("料理の効果で、肥料が減りませんでした","good",2600); else S[id]--;
   if(!(S[id]>0)) S.fertSel="fert";
   hit(k); floatAt(k, id==="mfert"?"✧×3":"✦×3"); sfx.vil();
-  toast(`${ico(g)} ${esc(c.name)}にまきました。${id==="mfert"?"超変異で3個穫れます":"変異で3個穫れます"}`,"good mut"+(id==="mfert"?" sup":""),4200,true);
+  toast(`${ico(g)} ${esc(c.rose?"薔薇":c.name)}にまきました。${id==="mfert"?"超変異で3個穫れます":"変異で3個穫れます"}`,"good mut"+(id==="mfert"?" sup":""),4200,true);
 }
 function setTool(t){ S.tool=t; sfx.tool(); save(); renderBar(); }
 /* ← →: 設置を持っているときは設置物、それ以外は種を切り替える */
@@ -8540,7 +8556,7 @@ function buyRecipe(id){
 
 /* ---- 料理図鑑(Space の2番目) ---- */
 let dbookCur=0, dbookTier=0;
-const dishBookGot = () => DISHES.reduce((a,d)=>a+[0,3,5].filter(t=>(S.dishMade[d.id]||{})[t]).length,0);
+const dishBookGot = () => DISHES.reduce((a,d)=>a+[0,3,5].filter(t=>(S.dishMade[d.id]||{})[t]).length,0) + Object.values(teaMadeQ()).filter(Boolean).length;   // ローズティーは3項目
 const dishMadeAny = d => !!S.dishMade[d.id] && Object.keys(S.dishMade[d.id]).length>0;
 /* ---- 図鑑の検索: 名前の一部で絞り込む ----
    ひらがな・カタカナ、全角・半角、大文字・小文字は区別しない。まだ見つけていない名前(変異・超変異・上位種も)では見つからない */
@@ -8585,7 +8601,7 @@ function renderDbook(){
   const DL=DBK(), q=normQ(dbookQ), dh=bookHits(DL, dishBookNames, q, dbookCur); dbookCur=dh.cur;
   $("g-dbookQn").textContent = q ? `${dh.hits.length}件` : "";
   const got=dishBookGot();
-  $("g-dbookRate").textContent=`料理図鑑 ${got} / ${DISHES.length*3}${roseTeaN()?` ・ ローズティー ${roseTeaN()}色`:""}`;
+  $("g-dbookRate").textContent=`料理図鑑 ${got} / ${DISHES.length*3+3}`;
   $("g-dbookList").innerHTML=DL.map((d,i)=>{
     const m=d.teabook?teaMadeQ():(S.dishMade[d.id]||{}), known=d.teabook?roseTeaN()>0:dishMadeAny(d);
     const marks=`<span class="qm d0${m[0]?" on":""}">●</span><span class="qm mut${m[3]?" on":""}">✦</span><span class="qm sup${m[5]?" on":""}">✦</span>`;
@@ -8880,7 +8896,7 @@ const loreOf = (c,t) => t===0 ? c.lore : t===5 ? SUPER[c.id].lore : (t===3 ? MUT
 function bookProgress(){
   let got=0, all=0;
   for(const c of BOOK_CROPS){
-    if(c.rosebook){ for(const [id,t] of roseCells()){ const k=qCount(id,t)>0; if(CROP[id].secret && !k) continue; all++; if(k) got++; }   /* シークレットは咲かせたら数える */ continue; }
+    if(c.rosebook){ for(const t of [0,3,5]){ all++; if(ROSE_ALL.some(r=>qCount(r.id,t)>0)) got++; }   /* 薔薇は ふつう・変異・超変異 の3項目(どの色でもよい) */ continue; }
     if(c.food){ for(const f of [c, upOf(c.id)]){ if(!f) continue; all++; if(bookSeen(f)) got++; } continue; }
     if(c.treasure){ all++; if(tre(c.id)>0) got++; continue; }
     for(const t of QORDER){ if(!qOk(c.id,t)) continue; all++; if(qCount(c.id,t)>0) got++; }
@@ -9089,19 +9105,19 @@ const GOALS = [
   { cat:"図鑑", id:"b300", ic:"📚", nm:"図鑑の守り人",     ds:"図鑑を300項目うめる",          need:300, now:()=>bookProgress().got, rw:2000000 },
   { cat:"図鑑", id:"bAll", ic:"🏆", nm:"図鑑コンプリート", ds:"図鑑をすべてうめる",           need:()=>bookProgress().all, now:()=>bookProgress().got, rw:5000000 },
   { cat:"図鑑", id:"cb35", ic:"📖", nm:"料理図鑑づくり",     ds:"料理図鑑を35項目うめる",       need:35,   now:()=>dishBookGot(), rw:50000 },
-  { cat:"図鑑", id:"cbAll",ic:"🏆", nm:"料理図鑑コンプリート", ds:"料理図鑑をすべてうめる",     need:()=>DISHES.length*3, now:()=>dishBookGot(), rw:3000000 },
+  { cat:"図鑑", id:"cbAll",ic:"🏆", nm:"料理図鑑コンプリート", ds:"料理図鑑をすべてうめる",     need:()=>DISHES.length*3+3, now:()=>dishBookGot(), rw:3000000 },
   { cat:"料理", id:"ce1",  ic:"🍽️", nm:"いただきます",       ds:"料理を食べる",                 need:1,    now:()=>S.ateCount||0,  rw:500 },
   { cat:"料理", id:"ce1000",ic:"🍽️", nm:"食いしん坊",        ds:"料理を合計1,000回食べる",      need:1000, now:()=>S.ateCount||0,  rw:500000 },
   { cat:"料理", id:"cm1",  ic:"🍳", nm:"はじめての料理",     ds:"料理を作る",                   need:1,    now:()=>S.cookCount||0, rw:1000 },
   { cat:"料理", id:"cp1",  ic:"🫙", nm:"仕込み上手",         ds:"仕込みをする",                 need:1,    now:()=>S.prepCount||0, rw:1000 },
   { cat:"料理", id:"cm10", ic:"🍳", nm:"料理好き",           ds:"料理を合計10回作る",           need:10,   now:()=>S.cookCount||0, rw:5000 },
-  { cat:"料理", id:"cr10", ic:"📜", nm:"レシピ集め",         ds:"10種類のレシピを買う",         need:10,   now:()=>Object.keys(S.recipes||{}).length, rw:10000 },
+  { cat:"料理", id:"cr10", ic:"📜", nm:"レシピ集め",         ds:"10種類のレシピを買う",         need:10,   now:()=>Object.keys(S.recipes||{}).length+(S.roseTeaRecipe?1:0), rw:10000 },
   { cat:"料理", id:"cm100",ic:"🍳", nm:"料理人",             ds:"料理を合計100回作る",          need:100,  now:()=>S.cookCount||0, rw:30000 },
   { cat:"料理", ser:"cmx", id:"cmm",  ic:"✦",  nm:"ふしぎな味",         ds:"変異の料理を作る",             need:1,    now:()=>DISHES.some(d=>(S.dishMade[d.id]||{})[3])?1:0, rw:30000 },
-  { cat:"料理", id:"crAll",ic:"📜", nm:"レシピ全集",         ds:"すべてのレシピを買う",         need:()=>DISHES.length, now:()=>Object.keys(S.recipes||{}).length, rw:100000 },
+  { cat:"料理", id:"crAll",ic:"📜", nm:"レシピ全集",         ds:"すべてのレシピを買う",         need:()=>DISHES.length+1, now:()=>Object.keys(S.recipes||{}).length+(S.roseTeaRecipe?1:0), rw:100000 },
   { cat:"料理", id:"cm1000",ic:"👨‍🍳", nm:"料理長",           ds:"料理を合計1,000回作る",        need:1000, now:()=>S.cookCount||0, rw:100000 },
   { cat:"料理", id:"cm10k",ic:"👨‍🍳", nm:"料理の鉄人",         ds:"料理を合計10,000回作る",       need:1e4,  now:()=>S.cookCount||0, rw:1000000 },
-  { cat:"料理", id:"cdAll",ic:"🏆", nm:"全メニュー制覇",     ds:"すべての料理を作る(段階はどれでも)", need:()=>DISHES.length, now:()=>DISHES.filter(dishMadeAny).length, rw:1000000 },
+  { cat:"料理", id:"cdAll",ic:"🏆", nm:"全メニュー制覇",     ds:"すべての料理を作る(段階はどれでも)", need:()=>DISHES.length+1, now:()=>DISHES.filter(dishMadeAny).length+(roseTeaN()?1:0), rw:1000000 },
   { cat:"料理", ser:"cmx", id:"cms",  ic:"🌈", nm:"奇跡の味",           ds:"超変異の料理を作る",           need:1,    now:()=>DISHES.some(d=>(S.dishMade[d.id]||{})[5])?1:0, rw:200000 },
   { cat:"農園づくり", id:"o1", ic:"💦", nm:"畑の道具",     ds:"スプリンクラーか案山子を置く", need:1, now:()=>FS().some(f=>KEYS.some(k=>f[k].obj))?1:0, rw:500 },
   { cat:"農園づくり", id:"f2", ic:"🎫", nm:"畑を広げる",   ds:"畑を2枚にする",                need:2, now:()=>FS().length, rw:1000 },
