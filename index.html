@@ -123,14 +123,13 @@ body.dishtheme.dishsplit:not(.garden):not(.washi){
 .tq-ranklv .btn{font-size:.8rem; padding:.25rem .55rem}
 .tq-ranklv[hidden]{display:none}
 .tq-sec[hidden],.tq-nextb[hidden]{display:none}
-.tq-farm{color:var(--steel); font-size:.85rem; min-height:1.2em; margin:.5rem 0}
-.tq-farm b{color:#9be37c}
+.gstat.tq-gstat{margin:.4rem auto .7rem}
 .tq-mode.on{border-color:#8fc2ff; box-shadow:0 0 0 2px #8fc2ff inset; color:#cfe4ff}
 .tq-levels{display:grid; grid-template-columns:repeat(6,1fr); gap:.6rem; margin:0 auto 1rem; max-width:860px}
 html.mobile .tq-levels{grid-template-columns:repeat(3,1fr); gap:.45rem}
 html.mobile .tq-lv{padding:.6rem .3rem}
 html.mobile .tq-lv small{font-size:.68rem}
-.tq-lv{display:flex; flex-direction:column; align-items:center; gap:.25rem; padding:.8rem .5rem}
+.tq-lv{display:flex; flex-direction:column; align-items:center; gap:.25rem; padding:.8rem .25rem}
 .tq-lv b{font-size:1.15rem; color:var(--amber); font-weight:700}
 .tq-lv small{font-size:.75rem; color:var(--steel); font-variant-numeric:tabular-nums}
 .tq-lv .kbdh{margin:0}
@@ -1659,7 +1658,7 @@ html.mobile #screen-garden .grk-list{max-height:none; flex:1 1 auto; min-height:
       <p class="tq-rowl">レベル</p>
       <div class="tq-levels" id="tqLevels"></div>
       <p class="tq-note" id="tqNote"></p>
-      <p class="tq-farm"></p>
+      <div class="gstat tq-gstat" id="tqGstatM"></div>
       <div class="btn-row">
         <button class="btn" id="tqListBtn">単語リスト <span class="kbdh">L</span></button>
         <button class="btn tq-gardenBtn">農園へ <span class="kbdh">G</span></button>
@@ -1692,7 +1691,7 @@ html.mobile #screen-garden .grk-list{max-height:none; flex:1 1 auto; min-height:
         <button class="btn" id="tqToMenu">メニューへ <span class="kbdh">Esc</span></button>
         <button class="btn tq-gardenBtn">農園へ <span class="kbdh">G</span></button>
       </div>
-      <p class="tq-farm"></p>
+      <div class="gstat tq-gstat" id="tqGstatR"></div>
       <ol class="tq-res" id="tqResList"></ol>
     </div>
     <div class="tq-view" id="tqList">
@@ -9589,8 +9588,8 @@ function syncGuardInput(e){
 }
 document.addEventListener("click",syncGuardInput,true);
 document.addEventListener("keydown",syncGuardInput,true);
-function refreshGardenStat(){
-  const el=$("gardenStat"); if(!el) return;
+function refreshGardenStat(id="gardenStat"){
+  const el=$(id); if(!el) return;
   let s; try{ s=Garden.summary(); }catch(e){ return; }
   const fmt=n=>Math.floor(n).toLocaleString("ja-JP");
   let t=`<span class="kicon"></span>所持キー<b>${fmt(s.money)}</b>`;
@@ -10061,11 +10060,10 @@ function openToeic(){ tqLoad(); window.tqFromRank=false; show("toeic"); tqMenu()
 /* そのレベルを選べるか(ノーミス勝負は苦手を選べない・入力はスマホで遊べない) */
 const tqCan = lv => tqIsOpen(lv) && !(tqKind==="one" && lv==="weak") && tqPool(lv).length>0;
 /* メニュー: 出題形式 → モード → レベル */
-/* 農園のようす(収穫できる作物など)と、農園へ行くボタン */
+/* 農園のようす(タイトルと同じ表示: 所持キー・収穫できる作物・水が切れた作物)。押すと農園へ */
 function tqFarm(){
-  let st=null; try{ st=Garden.peek(); }catch(e){}
-  const html = st ? `🌾 収穫できる作物 <b>${tqNum(st.ripe)}</b> ・ 育っている作物 <b>${tqNum(st.crops-st.ripe)}</b> ・ 所持キー <b>${tqNum(st.money)}</b>` : "";
-  document.querySelectorAll(".tq-farm").forEach(e=>e.innerHTML=html);
+  try{ Garden.peek(); }catch(e){}   // 届け物を先に受け取って最新にする
+  refreshGardenStat("tqGstatM"); refreshGardenStat("tqGstatR");
 }
 function tqToGarden(){ clearTimeout(tqTimer); openGarden(); }
 function tqMenu(){
@@ -10337,7 +10335,7 @@ let tqRegWait=false;   // 名前を決めたあとに登録する
 function tqRegName(){ if(!playerName){ tqRegWait=true; openNameWin(); } else tqRegister(); }
 function tqRankView(){ window.tqFromRank=true; tqRankLv=tqLadder[0]; openRanking("toeic-"+tqFmt, playerName); }
 /* みんなのランキング: 出題形式のタブ(toeic-type など)は、下のレベルのボタンで選んだレベルの記録を出す */
-let tqRankLv="470";
+let tqRankLv="b1";
 const TQ_RANK_LVS=TQ_LEVELS.filter(([k])=>k!=="weak");
 window.tqRankKey = d => /^toeic-(type|choice|fill)$/.test(d) ? d+"-"+tqRankLv : d;
 window.tqRankSync = d => {
@@ -10411,7 +10409,7 @@ $("tqToMenu").addEventListener("click",tqMenu);
 $("tqReg").addEventListener("click",e=>{ if(e.target.closest("#tqRegBtn")) tqRegName(); else if(e.target.closest("#tqRankView")) tqRankView(); });
 $("tqLTabs").addEventListener("click",e=>{ const b=e.target.closest("[data-lv]"); if(b) tqList(b.dataset.lv); });
 $("tqListBack").addEventListener("click",tqMenu);
-document.querySelectorAll(".tq-gardenBtn").forEach(b=>b.addEventListener("click",tqToGarden));
+document.querySelectorAll(".tq-gardenBtn, #tqGstatM, #tqGstatR").forEach(b=>b.addEventListener("click",tqToGarden));
 $("g-toeicBtn").addEventListener("click",()=>{ try{ Garden.leave(); }catch(e){} openToeic(); });   // 農園からTOEICへ
 $("tqSecDn").addEventListener("click",()=>tqSetSec(-1));
 $("tqSecUp").addEventListener("click",()=>tqSetSec(1));
