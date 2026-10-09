@@ -91,6 +91,17 @@ body.dishtheme.dishsplit:not(.garden):not(.washi){
   background-position:0 0, left top, right top;
   background-repeat:repeat, no-repeat, no-repeat;
 }
+/* 料理の色を3つ(永遠のかまど + お弁当箱): 背景を時計の12時・4時・8時の向きに3つに分ける */
+body.dishtheme.dishsplit3:not(.garden):not(.washi){
+  background-image:
+    repeating-linear-gradient(45deg, transparent 0 34px, rgba(255,255,255,.05) 34px 36px),
+    radial-gradient(circle at 50% 50%, rgba(255,255,255,.16) 0%, transparent 42%, rgba(0,0,0,.42) 100%),
+    conic-gradient(from -60deg at 50% 50%,
+      color-mix(in srgb, var(--dishA) 72%, #0c0c10) 0deg 120deg,
+      color-mix(in srgb, var(--dishB) 72%, #0c0c10) 120deg 240deg,
+      color-mix(in srgb, var(--dishC) 72%, #0c0c10) 240deg 360deg);
+  background-attachment:scroll, fixed, fixed;
+}
 .screen{display:none; text-align:center}
 .screen.active{display:block; animation:fadein .25s ease}
 @keyframes fadein{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
@@ -4770,6 +4781,7 @@ function newState(){
     villagers:0, vLog:{}, vilLv:0,
     vilOrder:false, vilAutoH:true, vilAutoM:false,   // 村人の指示書(自動収穫・変異の自動収穫)
     vilOrder2:false, vilSellN:true, vilSellM:false,  // 村人の指示書2(収穫したあと売るか: ふつうの作物・変異の作物)
+    vilOrder3:false, vilUseSeed:true,                 // 村人の指示書3(持っている種があれば、買わずにそれを植える)
     seedSort:false,                                  // 仕分け帳(作物・食材・種を100個・1000個残して売る)
     sortOn:true,                                     // 仕分け帳を使うか(オフなら 1つ・10個ずつ売る)
     treasSell:0,                                     // 貴重品の種の自動売却: 0 なし・1 買った(オフ)・2 オン
@@ -4946,10 +4958,16 @@ function villagerAdvance(p,dt){
     if(!S.vilAutoH && p.crop && p.crop.rolled && p.crop.grown>=need(p.crop)) break;   // 実ったまま待っている(自動収穫オフ)
     if(!p.crop){
       const c=CROP[p.vil==="sg" ? sgCropId() : (eff("O") ? vilGachaCrop() : vilCropId())];   // シゴデキ村人は選んだ作物
-      const cost=Math.round(vilSeedCost(c)*ev("Z",.5,0,1));   // 料理で半分・無料
-      if(S.money<cost){ p.vWait=true; break; }   // 種代が足りなければ待つ
-      S.money-=cost;
-      S.vLog.spent=(S.vLog.spent||0)+cost;
+      if(S.vilOrder3 && S.vilUseSeed && !c.treasure && (S.seeds[c.id]||0)>0){   // 指示書3: 持っている種を使う(買わない)
+        S.seeds[c.id]--;
+        S.vLog.used=(S.vLog.used||0)+1;
+        if(c.id===S.seedId && !(S.seeds[c.id]>0)) S.seedId=nextSeed(S.seedId);
+      }else{
+        const cost=Math.round(vilSeedCost(c)*ev("Z",.5,0,1));   // 料理で半分・無料
+        if(S.money<cost){ p.vWait=true; break; }   // 種代が足りなければ待つ
+        S.money-=cost;
+        S.vLog.spent=(S.vLog.spent||0)+cost;
+      }
       p.crop={ id:c.id, grown:0 }; p.vWait=false;
     }
     const n=need(p.crop), rem=n-p.crop.grown;
@@ -5020,6 +5038,21 @@ function buyVilOrder2(){
   if(!spend(VIL_ORDER2_COST)) return;
   S.vilOrder2=true; sfx.buy();
   toast("村人の指示書2を手に入れました。お店の効率化で、村人が収穫した作物を売るかどうかを、ふつうの作物と変異の作物それぞれで決められます","good",5600);
+  save(); renderAll();
+}
+const VIL_ORDER3_COST=300000;
+function buyVilOrder3(){
+  if(!S.vilOrder2 || S.vilOrder3) return;
+  if(!spend(VIL_ORDER3_COST)) return;
+  S.vilOrder3=true; S.vilUseSeed=true; sfx.buy();
+  toast("村人の指示書3を手に入れました。村人が種を植えるとき、同じ種を持っていれば、買わずにそれを使います(お店の効率化でオンオフできます)","good",5600);
+  save(); renderAll();
+}
+function toggleVilUseSeed(){
+  if(!S.vilOrder3) return;
+  tick();   // ここまでの分は、今の設定で進めてから切り替える
+  S.vilUseSeed=!S.vilUseSeed; sfx.tool();
+  toast(S.vilUseSeed ? "村人は、持っている種があれば買わずにそれを植えます" : "村人は、いつも種を買って植えます(持っている種は使いません)","",3200);
   save(); renderAll();
 }
 function toggleVilSell(w){
@@ -5158,8 +5191,9 @@ function reportVillagers(){
   if(msold.length) vilToast("msold", a=>{ addMut(msold)(a); a.earn+=L.mutEarn||0; }, a=>`${head(mutArr(a))} 村人が ${mutList(mutArr(a))} を収穫して売りました(+${fmtNum(a.earn)}キー)`, a=>cls(mutArr(a)), 9000);
   if(wait.length) vilToast("wait", addMut(wait), a=>`${head(mutArr(a))} 村人の畑で ${mutList(mutArr(a))} が実りました。村人は収穫せずに残しています(素手で収穫できます)`, a=>cls(mutArr(a)), 9000);
   const sold=Object.keys(L.h||{}).length>0, kept=Object.keys(L.k||{}).length>0;
-  if(sold) vilToast("sold", a=>{ addH(L.h)(a); a.earn+=L.earn||0; a.spent+=L.spent||0; }, a=>`村人が ${hList(a)} を収穫して売りました(売上 ${fmtNum(a.earn)} ・ 種代 ${fmtNum(a.spent)} キー)`, ()=>"good", 6000);
-  if(kept) vilToast("kept", addH(L.k), a=>`村人が ${hList(a)} を収穫して、持ち物に入れました`, ()=>"good", 6000);
+  const usedTxt = a => a.used ? ` ・ 手持ちの種 ${fmtNum(a.used)}つ` : "";   // 指示書3で使った種
+  if(sold) vilToast("sold", a=>{ addH(L.h)(a); a.earn+=L.earn||0; a.spent+=L.spent||0; a.used=(a.used||0)+(L.used||0); }, a=>`村人が ${hList(a)} を収穫して売りました(売上 ${fmtNum(a.earn)} ・ 種代 ${fmtNum(a.spent)} キー${usedTxt(a)})`, ()=>"good", 6000);
+  if(kept) vilToast("kept", a=>{ addH(L.k)(a); if(!sold) a.used=(a.used||0)+(L.used||0); }, a=>`村人が ${hList(a)} を収穫して、持ち物に入れました${a.used?`(手持ちの種 ${fmtNum(a.used)}つを使いました)`:""}`, ()=>"good", 6000);
   if(got.length || wait.length || msold.length || sold || kept) sfx.vil();   // 音は1回だけ
   for(const m of (L.up||[])) toast(m,"good",5200,true);
   S.vLog={}; checkUnlocks(); save();
@@ -6017,6 +6051,16 @@ function shopRows(){
                   :`村人が収穫した作物を売るかどうかを、ふつうの作物と変異の作物それぞれで決められるようになります`,
           keys: has2?"<b>Enter</b> ふつうの作物を売る / 売らない<br><b>Shift+Enter</b> 変異の作物を売る / 売らない":"<b>Enter</b> 買う",
           enter: ()=>has2?toggleVilSell("N"):buyVilOrder2(), shift: ()=>has2?toggleVilSell("M"):buyVilOrder2() });
+        // 村人の指示書3(持っている種を使う)。指示書2を持っていると並ぶ
+        if(has2){
+          const has3=S.vilOrder3;
+          rows.push({ ic:"📜",
+            nm: `村人の指示書3 <span style="color:var(--ink-l)">${has3?"購入済み":fmtNum(VIL_ORDER3_COST)+"キー"}</span>`,
+            ds: has3?`持っている種を使う ${onoff(S.vilUseSeed)}<br>村人が種を植えるとき、同じ種を持っていれば、買わずにそれを使います。なければ今までどおり買います(貴重品の種は使いません)`
+                    :`村人が種を植えるとき、同じ種を持っていれば、買わずにそれを使うようになります(オンオフできます)`,
+            keys: has3?`<b>Enter</b> ${S.vilUseSeed?"オフにする":"オンにする"}`:"<b>Enter</b> 買う",
+            enter: ()=>has3?toggleVilUseSeed():buyVilOrder3(), shift: ()=>has3?toggleVilUseSeed():buyVilOrder3() });
+        }
       }
       rows.push({ ic:"🧮",
         nm: `畑のカウンタ <span style="color:var(--ink-l)">${S.counter?"購入済み":fmtNum(COUNTER_COST)+"キー"}</span>`,
@@ -7939,7 +7983,7 @@ function renderBuff(){
   el.title=`${dishName(d,b.t)}: ${effText(d,b.t)}`+(d2?` / ${dishName(d2,b2.t)}: ${effText(d2,b2.t)}`:"");
 }
 /* 料理の色: ホーム画面とタイピングの色を、料理の色に染める(農園はそのまま) */
-const THEME_VARS=["--dish","--bg","--panel","--panel-hi","--line","--amber","--amber-dim","--steel","--dishL","--dishR"];
+const THEME_VARS=["--dish","--bg","--panel","--panel-hi","--line","--amber","--amber-dim","--steel","--dishL","--dishR","--dishA","--dishB","--dishC"];
 let themeKey="";   // いまの色(同じなら作り直さない)
 /* タイピングで使う: 変異・超変異の画面の色のとき、キーの代わりに出す料理の絵 */
 function themeScrewArt(){
@@ -7973,24 +8017,30 @@ function themeFloat(on,d,t,two){
   }).join("");
 }
 function applyTheme(){
-  let b=mBuff();
-  // お弁当箱で色の料理を2つ食べているときは、もう1つ(先に食べたほう)の色も使う
-  const b2=buffList().find(x=>x!==b && DISH[x.d] && DISH[x.d].eff==="M" && b && x.d!==b.d) || null, d2=b2 && DISH[b2.d];
-  if(!(b && DISH[b.d].eff==="M") && S.kamado && kitN("kamado")>0 && DISH[S.kamado] && kamadoDishes().includes(S.kamado)) b={ d:S.kamado, t:0 };   // 永遠のかまど(食べたことのある料理の色)
-  const d=b && DISH[b.d], de=document.documentElement;
-  if(!d || d.eff!=="M"){ themeKey=""; document.body.classList.remove("dishtheme","dishfun","dishsplit"); for(const v of THEME_VARS) de.style.removeProperty(v); themeFloat(false); return; }
-  const key=d.id+":"+b.t+(d2?"|"+d2.id+":"+b2.t:""); if(key===themeKey) return; themeKey=key;
-  // 2つのとき: 左に先に食べた料理、右にあとから食べた料理の色。板などは2つの色を混ぜる
+  // 画面の色: 食べている色の料理(お弁当箱なら2つ)と、永遠のかまどの色。同じ料理は1つに数えて、最大3色
+  const ms=buffList().filter(x=>DISH[x.d] && DISH[x.d].eff==="M");   // [あとに食べた, 先に食べた]
+  const nb=ms[0]||null, ob=(ms[1] && nb && ms[1].d!==nb.d) ? ms[1] : null;
+  const kd=(S.kamado && kitN("kamado")>0 && DISH[S.kamado] && kamadoDishes().includes(S.kamado) && ![nb,ob].some(x=>x && x.d===S.kamado)) ? { d:S.kamado, t:0 } : null;   // 永遠のかまど(食べたことのある料理の色)
+  const order=[kd, ob, nb].filter(Boolean);   // かまど → 先に食べた料理 → あとに食べた料理
+  const de=document.documentElement;
+  if(!order.length){ themeKey=""; document.body.classList.remove("dishtheme","dishfun","dishsplit","dishsplit3"); for(const v of THEME_VARS) de.style.removeProperty(v); themeFloat(false); return; }
+  const b=nb||kd, d=DISH[b.d];   // 板などの色の基準: いちばんあとに食べた料理(なければかまど)
+  const key=order.map(x=>x.d+":"+x.t).join("|"); if(key===themeKey) return; themeKey=key;
   const colOf = x => x.accent||x.tint||x.color;
-  document.body.classList.toggle("dishsplit", !!d2);
-  if(d2){ de.style.setProperty("--dishL",colOf(d2)); de.style.setProperty("--dishR",colOf(d)); }
-  else{ de.style.removeProperty("--dishL"); de.style.removeProperty("--dishR"); }
-  const both = v => d2 ? `color-mix(in srgb, ${v} 50%, ${colOf(d2)})` : v;
-  const c=d.tint||d.color, a=d.accent||d.color, mix=(p,base)=>`color-mix(in srgb, ${c} ${p}%, ${base})`;
+  const cols=order.map(x=>colOf(DISH[x.d]));
+  // 2色: 左右に半分ずつ(左が かまど・先に食べた料理)。3色: 時計の12時に かまど、4時に あとに食べた料理、8時に 先に食べた料理
+  document.body.classList.toggle("dishsplit", cols.length===2);
+  document.body.classList.toggle("dishsplit3", cols.length===3);
+  for(const v of ["--dishL","--dishR","--dishA","--dishB","--dishC"]) de.style.removeProperty(v);
+  if(cols.length===2){ de.style.setProperty("--dishL",cols[0]); de.style.setProperty("--dishR",cols[1]); }
+  if(cols.length===3){ de.style.setProperty("--dishA",cols[0]); de.style.setProperty("--dishB",cols[2]); de.style.setProperty("--dishC",cols[1]); }
+  // 板などは、すべての色を同じ割合で混ぜる
+  const cf = cols.length===1 ? cols[0] : cols.length===2 ? `color-mix(in srgb, ${cols[0]} 50%, ${cols[1]})` : `color-mix(in srgb, color-mix(in srgb, ${cols[0]} 50%, ${cols[1]}) 67%, ${cols[2]})`;
+  const a=d.accent||d.color;
   document.body.classList.add("dishtheme");
-  if(isMutT(b.t) || (b2 && isMutT(b2.t))){   // 変異・超変異: 背景をはっきり料理の色に。作物が舞い、キーが料理に変わる
+  if(ms.some(x=>isMutT(x.t))){   // 変異・超変異: 背景をはっきり料理の色に。作物が舞い、キーが料理に変わる
     document.body.classList.add("dishfun");
-    const cf=both(d.accent||c), mix=(p,base)=>`color-mix(in srgb, ${cf} ${p}%, ${base})`;   // 紫いもチップスのような暗い色は、明るい紫で
+    const mix=(p,base)=>`color-mix(in srgb, ${cf} ${p}%, ${base})`;   // 紫いもチップスのような暗い色は、明るい紫で
     de.style.setProperty("--dish",cf);
     de.style.setProperty("--bg",mix(62,"#0c0c10"));
     de.style.setProperty("--panel",mix(42,"#14161c"));
@@ -7999,12 +8049,12 @@ function applyTheme(){
     de.style.setProperty("--amber",`color-mix(in srgb, ${a} 35%, #ffffff)`);
     de.style.setProperty("--amber-dim",`color-mix(in srgb, ${a} 60%, #000)`);
     de.style.setProperty("--steel",`color-mix(in srgb, ${a} 20%, #f0f2f6)`);
-    themeFloat(true,d,b.t,d2 && { d:d2, t:b2.t });
+    themeFloat(true,DISH[nb.d],nb.t,ob && { d:DISH[ob.d], t:ob.t });
     return;
   }
   // ふつう: 演出はなし。背景と板の色だけ、はっきり料理の色に(変異・超変異より少し落ち着いた色)
   document.body.classList.remove("dishfun"); themeFloat(false);
-  const cf=both(d.accent||c), mixf=(p,base)=>`color-mix(in srgb, ${cf} ${p}%, ${base})`;
+  const mixf=(p,base)=>`color-mix(in srgb, ${cf} ${p}%, ${base})`;
   de.style.setProperty("--dish",cf);
   de.style.setProperty("--bg",mixf(52,"#0c0c10"));
   de.style.setProperty("--panel",mixf(36,"#14161c"));
