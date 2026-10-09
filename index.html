@@ -281,6 +281,26 @@ h1.logo .gd::after{content:'🌱'; position:absolute; right:-.55em; top:-.55em; 
   border-radius:4px; background:rgba(255,255,255,.12); color:var(--steel); font-size:.8em;
 }
 .keynav{color:#6b7484; font-size:.78rem; margin-top:.8rem; line-height:1.7}
+/* ---- タイマー(遊ぶ時間) ---- */
+.pt-line{color:var(--steel); font-size:.9rem; margin:.7rem 0 .2rem}
+.pt-line .btn{padding:.35rem .8rem; font-size:.85rem; margin-left:.4rem}
+#pt{z-index:10001}
+.pt-today{color:var(--ink); font-size:.95rem; margin:.4rem 0}
+.pt-today b{color:var(--amber); font-size:1.1rem}
+.pt-panel h3 label{display:flex; align-items:center; gap:.5rem; cursor:pointer}
+.pt-panel input[type=checkbox]{width:1.15rem; height:1.15rem; accent-color:var(--amber)}
+.pt-row{display:flex; align-items:center; flex-wrap:wrap; gap:.5rem; color:var(--steel); font-size:.9rem; margin-left:1.7rem}
+.pt-row .bk-codein{width:auto; text-transform:none; letter-spacing:0; font-family:inherit}
+.pt-row.off{opacity:.45}
+#ptLock{position:fixed; inset:0; z-index:10000; display:none; align-items:center; justify-content:center; padding:16px; background:rgba(8,10,14,.94)}
+#ptLock.open{display:flex}
+#ptLock .pt-box{max-width:460px; text-align:center; color:var(--ink); line-height:1.8}
+#ptLock .pt-big{font-size:3rem; line-height:1.2}
+#ptLock h2{color:var(--amber); letter-spacing:.15em; font-weight:400; margin:.4rem 0 .6rem}
+#ptLock p{color:var(--steel)}
+#ptLock .btn{margin-top:1rem}
+#ptWarn{position:fixed; left:50%; top:14px; transform:translateX(-50%); z-index:9999; display:none; max-width:90vw; padding:.6rem 1.1rem; border-radius:10px; background:#2e343e; border:2px solid var(--amber); color:var(--ink); font-size:.95rem; box-shadow:0 8px 24px rgba(0,0,0,.5)}
+#ptWarn.show{display:block}
 .keynav b{color:var(--steel); background:rgba(255,255,255,.08); border-radius:4px; padding:0 .35em; font-weight:400}
 /* ---- 記録の引き継ぎ ---- */
 .bk-modal{position:fixed; inset:0; z-index:20; display:none; align-items:center; justify-content:center; background:rgba(8,10,14,.7); cursor:pointer}
@@ -1563,6 +1583,7 @@ html.mobile #screen-garden .grk-list{max-height:none; flex:1 1 auto; min-height:
       <button class="btn" id="tutBtn">遊び方ガイド <span class="kbdh">H</span></button>
       <button class="btn" id="newsBtn">更新情報 <span class="news-new" id="newsNew"></span><span class="kbdh">U</span></button>
     </div>
+    <p class="pt-line"><span id="ptLineText"></span><button class="btn" id="ptBtn">タイマー <span class="kbdh">L</span></button></p>
     <p class="hint">キー 1〜9 でモードを選んで開始 ・ G 庭 ・ R ランキング ・ D 図鑑 ・ K 別端末と同期 / ローマ字入力(shi・si どちらもOK)<br>8 単語帳 ・ N 名前 ・ F 要望・バグ報告 ・ H 遊び方ガイド ・ U 更新情報 ・ Esc でいつでもタイトルに戻る</p>
     <div class="hazard" aria-hidden="true"><span class="k">Q</span><span class="s">🌱</span><span class="k">W</span><span class="k">E</span><span class="s">🥕</span><span class="k">R</span><span class="k">T</span><span class="s">🌿</span><span class="k">Y</span><span class="k">U</span><span class="s">🍅</span><span class="k">I</span><span class="k">O</span><span class="s">🌽</span><span class="k">P</span><span class="s">🍓</span></div>
   </section>
@@ -1973,6 +1994,20 @@ html.mobile #screen-garden .grk-list{max-height:none; flex:1 1 auto; min-height:
 <div id="imeWarn">日本語入力がオンになっています。<b>半角英数</b>(「英数」キーや「半角/全角」キー)に切り替えてください</div>
 
 <!-- 要望・バグ報告 -->
+<div id="pt" class="bk-modal">
+  <div class="bk-panel pt-panel">
+    <div class="bk-head"><h2>タイマー</h2><button class="btn bk-x" id="ptClose">閉じる ✕</button></div>
+    <p class="bk-p">遊ぶ時間を決められます。この端末(ブラウザ)だけの設定で、同期はしません。ページを開いて表に出している時間を数えます(ほかのタブやアプリを見ている間は数えません)。時間になっても、遊んでいるタイピングの1回は最後まで遊べます。</p>
+    <p class="pt-today" id="ptToday"></p>
+    <h3><label><input type="checkbox" id="ptBan"> 遊べない時間帯</label></h3>
+    <div class="pt-row" id="ptBanRow"><input type="time" id="ptFrom" class="bk-codein"> 〜 <input type="time" id="ptTo" class="bk-codein"> は遊べません</div>
+    <h3><label><input type="checkbox" id="ptCap"> 1日に遊べる時間</label></h3>
+    <div class="pt-row" id="ptCapRow"><select id="ptLimit" class="bk-codein"></select> まで(毎日0時に0分に戻ります)</div>
+    <div class="bk-foot"><span class="bk-note" id="ptNote"></span><button class="btn primary" id="ptSave">保存する</button></div>
+  </div>
+</div>
+<div id="ptLock"><div class="pt-box"><div class="pt-big">⏰</div><h2>今は遊べません</h2><p id="ptLockMsg"></p><button class="btn" id="ptLockSet">タイマーの設定 (L)</button></div></div>
+<div id="ptWarn"></div>
 <div id="fb" class="bk-modal">
   <div class="bk-panel">
     <div class="bk-head"><h2>要望・バグ報告</h2><button class="btn bk-x" id="fbClose">閉じる ✕</button></div>
@@ -3037,6 +3072,7 @@ document.addEventListener("keydown",e=>{
     if(e.key==="8") openBooks();
     if(e.key==="f"||e.key==="F") openFeedback();
     if(e.key==="u"||e.key==="U") openNews();
+    if(e.key==="l"||e.key==="L") ptOpenWin();
     if(e.key==="h"||e.key==="H") tutAsk(false);
     if(e.key==="n"||e.key==="N"){ e.preventDefault(); openNameWin(); }
     if((e.key==="t"||e.key==="T") && syncReadOnly) syncTakeOver();
@@ -9863,6 +9899,96 @@ document.addEventListener("visibilitychange",()=>{
 setInterval(()=>{ if(scene==="garden" && syncCode) syncPush(false); }, 60000);
 setInterval(()=>{ if(scene==="title") refreshGardenStat(); }, 30000);
 setInterval(()=>{ try{ Garden.alive(); Garden.applyTheme(); }catch(e){} }, 5000);   // 料理の色が切れたら戻す・魔法の冷蔵庫の時刻
+
+/* ---------- タイマー(遊ぶ時間) ----------
+   遊べない時間帯と、1日に遊べる時間。この端末だけの設定(同期・記録の引き継ぎには入れない)。
+   ページを開いて表に出している時間を数え、時間になったらゲーム全体を止める(遊んでいるタイピングの1回は最後まで) */
+const PT_KEY=LS_PREFIX.replace(/:$/,"")+"-timer";
+const ptLoad = () => { let o={}; try{ o=JSON.parse(localStorage.getItem(PT_KEY)||"{}")||{}; }catch(e){} return Object.assign({ ban:false, from:"21:00", to:"07:00", cap:false, limit:60, day:"", used:0 }, o); };
+let PT=ptLoad(), ptOpen=false, ptLocked=false, ptWarned="";
+const ptSave = () => { try{ localStorage.setItem(PT_KEY, JSON.stringify(PT)); }catch(e){} };
+const ptToday = () => { const d=new Date(); return d.getFullYear()+"-"+(d.getMonth()+1)+"-"+d.getDate(); };
+const ptMin = s => { const [h,m]=String(s||"0:0").split(":").map(Number); return (h||0)*60+(m||0); };
+const ptEsc = v => String(v).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+const ptHM = m => m>=60 ? `${Math.floor(m/60)}時間${m%60?(m%60)+"分":""}` : `${m}分`;
+const ptNowMin = () => { const d=new Date(); return d.getHours()*60+d.getMinutes(); };
+function ptInBan(){   // 遊べない時間帯の中か(0時をまたいでもよい)
+  if(!PT.ban) return false;
+  const t=ptNowMin(), a=ptMin(PT.from), b=ptMin(PT.to);
+  if(a===b) return false;
+  return a<b ? (t>=a && t<b) : (t>=a || t<b);
+}
+const ptOver = () => PT.cap && PT.used >= PT.limit*60;
+const ptPlaying = () => scene==="game" || (scene==="poem" && typeof poemState!=="undefined" && (poemState==="countdown" || poemState==="play"));
+function ptLineRender(){
+  const used=Math.floor(PT.used/60);
+  $("ptLineText").textContent = `⏱ 今日遊んだ時間 ${ptHM(used)}`+(PT.cap?` / ${ptHM(PT.limit)}まで`:"")+(PT.ban?` ・ ${PT.from}〜${PT.to} は遊べません`:"");
+  if(ptOpen) $("ptToday").innerHTML = `今日遊んだ時間 <b>${ptHM(used)}</b>`+(PT.cap?`(あと ${ptHM(Math.max(0,Math.ceil((PT.limit*60-PT.used)/60)))})`:"");
+}
+function ptWarn(msg){
+  const el=$("ptWarn"); el.textContent=msg; el.classList.add("show");
+  clearTimeout(ptWarn.t); ptWarn.t=setTimeout(()=>el.classList.remove("show"), 8000);
+}
+function ptCheck(){
+  const ban=ptInBan(), over=ptOver();
+  if((ban||over) && !ptPlaying()){
+    $("ptLockMsg").innerHTML = ban ? `${ptEsc(PT.from)}〜${ptEsc(PT.to)} は遊べない時間です。<br><b>${ptEsc(PT.to)}</b> から、また遊べます`
+                                   : `今日遊べる時間(${ptHM(PT.limit)})を遊びました。<br>明日(0時)から、また遊べます`;
+    if(!ptLocked){ ptLocked=true; $("ptLock").classList.add("open"); try{ document.activeElement && document.activeElement.blur(); }catch(e){} }
+  }else if(!(ban||over) && ptLocked){ ptLocked=false; $("ptLock").classList.remove("open"); }
+  // もうすぐ時間のお知らせ(5分前に1回)
+  if(!ban && !over){
+    const left = PT.cap ? PT.limit*60-PT.used : Infinity;
+    if(left<=300 && ptWarned!==PT.day+"cap"){ ptWarned=PT.day+"cap"; ptWarn(`今日遊べるのは、あと ${Math.max(1,Math.ceil(left/60))}分 です`); }
+    if(PT.ban){ const until=(ptMin(PT.from)-ptNowMin()+1440)%1440; if(until>0 && until<=5 && ptWarned!==PT.day+"ban"+PT.from){ ptWarned=PT.day+"ban"+PT.from; ptWarn(`あと ${until}分 で、遊べない時間(${PT.from}〜${PT.to})になります`); } }
+  }
+}
+setInterval(()=>{
+  PT=ptLoad();   // ほかのタブで変えた設定・数えた時間も読む
+  if(PT.day!==ptToday()){ PT.day=ptToday(); PT.used=0; }
+  if(document.visibilityState==="visible" && !ptLocked && !tabInactive) PT.used++;   // 表に出していて、遊べる間だけ数える
+  ptSave(); ptCheck(); ptLineRender();
+}, 1000);
+/* 設定の窓 */
+function ptRowState(){ $("ptBanRow").classList.toggle("off",!$("ptBan").checked); $("ptCapRow").classList.toggle("off",!$("ptCap").checked); }
+function ptOpenWin(){
+  ptOpen=true;
+  $("ptBan").checked=!!PT.ban; $("ptFrom").value=PT.from; $("ptTo").value=PT.to;
+  $("ptCap").checked=!!PT.cap; $("ptLimit").value=String(PT.limit);
+  $("ptNote").textContent=""; ptRowState(); ptLineRender();
+  $("pt").classList.add("open");
+}
+function ptCloseWin(){ ptOpen=false; $("pt").classList.remove("open"); try{ document.activeElement && document.activeElement.blur(); }catch(e){} }
+function ptSaveWin(){
+  const from=$("ptFrom").value||"21:00", to=$("ptTo").value||"07:00";
+  if($("ptBan").checked && from===to){ $("ptNote").textContent="始まりと終わりを別の時刻にしてください"; return; }
+  PT=ptLoad();
+  Object.assign(PT, { ban:$("ptBan").checked, from, to, cap:$("ptCap").checked, limit:+$("ptLimit").value||60 });
+  ptSave(); ptCheck(); ptLineRender();
+  $("ptNote").textContent="保存しました";
+}
+$("ptLimit").innerHTML=[15,30,45,60,90,120,150,180,240,300,360,480].map(m=>`<option value="${m}">${ptHM(m)}</option>`).join("");
+$("ptBtn").addEventListener("click",ptOpenWin);
+$("ptLockSet").addEventListener("click",ptOpenWin);
+$("ptClose").addEventListener("click",ptCloseWin);
+$("ptSave").addEventListener("click",ptSaveWin);
+$("ptBan").addEventListener("change",ptRowState);
+$("ptCap").addEventListener("change",ptRowState);
+$("pt").addEventListener("click",e=>{ if(e.target===$("pt")) ptCloseWin(); });
+/* 設定の窓・遊べない画面が出ている間は、ゲームのキー操作を止める */
+window.addEventListener("keydown",e=>{
+  if(ptOpen){
+    if(e.key==="Escape"){ e.preventDefault(); ptCloseWin(); }
+    else if(e.key==="Enter" && e.target && e.target.tagName!=="BUTTON"){ e.preventDefault(); ptSaveWin(); }
+    e.stopImmediatePropagation(); return;
+  }
+  if(ptLocked){
+    if(e.key==="l"||e.key==="L"){ e.preventDefault(); ptOpenWin(); }
+    e.stopImmediatePropagation(); e.preventDefault();
+  }
+}, true);
+if(PT.day!==ptToday()){ PT.day=ptToday(); PT.used=0; ptSave(); }
+ptCheck(); ptLineRender();
 </script>
 </body>
 </html>
