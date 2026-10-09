@@ -287,8 +287,12 @@ h1.logo .gd::after{content:'🌱'; position:absolute; right:-.55em; top:-.55em; 
 #pt{z-index:10001}
 .pt-today{color:var(--ink); font-size:.95rem; margin:.4rem 0}
 .pt-today b{color:var(--amber); font-size:1.1rem}
-.pt-panel h3 label{display:flex; align-items:center; gap:.5rem; cursor:pointer}
-.pt-panel input[type=checkbox]{width:1.15rem; height:1.15rem; accent-color:var(--amber)}
+.pt-h{display:flex; align-items:center; gap:.7rem}
+/* オンオフのスイッチ(押すたびに切り替わる) */
+.pt-sw{position:relative; display:inline-flex; align-items:center; flex:none; width:6.4rem; height:2rem; padding:0 .8rem; border-radius:999px; border:2px solid var(--line); background:#14171c; color:var(--steel); font:inherit; font-size:.85rem; letter-spacing:.1em; cursor:pointer; justify-content:flex-end}
+.pt-sw::before{content:""; position:absolute; left:.2rem; top:50%; width:1.5rem; height:1.5rem; margin-top:-.75rem; border-radius:50%; background:#6b7484; transition:left .15s}
+.pt-sw.on{background:var(--amber); border-color:var(--amber); color:#1b1405; font-weight:700; justify-content:flex-start}
+.pt-sw.on::before{left:calc(100% - 1.7rem); background:#fff}
 .pt-row{display:flex; align-items:center; flex-wrap:wrap; gap:.5rem; color:var(--steel); font-size:.9rem; margin-left:1.7rem}
 .pt-row .bk-codein{width:auto; text-transform:none; letter-spacing:0; font-family:inherit}
 .pt-row.off{opacity:.45}
@@ -1999,10 +2003,11 @@ html.mobile #screen-garden .grk-list{max-height:none; flex:1 1 auto; min-height:
     <div class="bk-head"><h2>タイマー</h2><button class="btn bk-x" id="ptClose">閉じる ✕</button></div>
     <p class="bk-p">遊ぶ時間を決められます。この端末(ブラウザ)だけの設定で、同期はしません。ページを開いて表に出している時間を数えます(ほかのタブやアプリを見ている間は数えません)。時間になっても、遊んでいるタイピングの1回は最後まで遊べます。</p>
     <p class="pt-today" id="ptToday"></p>
-    <h3><label><input type="checkbox" id="ptBan"> 遊べない時間帯</label></h3>
+    <h3 class="pt-h">遊べない時間帯 <button class="pt-sw" type="button" data-box="ptBan"></button><input type="checkbox" id="ptBan" hidden></h3>
     <div class="pt-row" id="ptBanRow"><input type="time" id="ptFrom" class="bk-codein"> 〜 <input type="time" id="ptTo" class="bk-codein"> は遊べません</div>
-    <h3><label><input type="checkbox" id="ptCap"> 1日に遊べる時間</label></h3>
+    <h3 class="pt-h">1日に遊べる時間 <button class="pt-sw" type="button" data-box="ptCap"></button><input type="checkbox" id="ptCap" hidden></h3>
     <div class="pt-row" id="ptCapRow"><select id="ptLimit" class="bk-codein"></select> まで(毎日0時に0分に戻ります)</div>
+    <p class="bk-p" style="margin-top:.8rem">「オフ」を押すと「オン」になり、決めた時間で止まるようになります。もう一度押すと「オフ」に戻ります。</p>
     <div class="bk-foot"><span class="bk-note" id="ptNote">変えるとすぐに保存されます</span><button class="btn primary" id="ptSave">保存する</button></div>
   </div>
 </div>
@@ -9958,7 +9963,11 @@ setInterval(()=>{
   ptSave(); ptCheck(); ptLineRender();
 }, 1000);
 /* 設定の窓 */
-function ptRowState(){ $("ptBanRow").classList.toggle("off",!$("ptBan").checked); $("ptCapRow").classList.toggle("off",!$("ptCap").checked); }
+function ptRowState(){
+  $("ptBanRow").classList.toggle("off",!$("ptBan").checked); $("ptCapRow").classList.toggle("off",!$("ptCap").checked);
+  document.querySelectorAll(".pt-sw").forEach(b=>{ const on=$(b.dataset.box).checked; b.classList.toggle("on",on); b.textContent=on?"オン":"オフ"; b.setAttribute("aria-pressed",on); });
+}
+document.querySelectorAll(".pt-sw").forEach(b=>b.addEventListener("click",()=>{ const c=$(b.dataset.box); c.checked=!c.checked; ptRowState(); ptSaveWin(); }));
 function ptOpenWin(){
   ptOpen=true;
   $("ptBan").checked=!!PT.ban; $("ptFrom").value=PT.from; $("ptTo").value=PT.to;
