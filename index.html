@@ -91,6 +91,65 @@ body.dishtheme.dishsplit:not(.garden):not(.washi){
   background-position:0 0, left top, right top;
   background-repeat:repeat, no-repeat, no-repeat;
 }
+/* ---- TOEIC 英単語 ---- */
+.diff-btn.toeic{border-color:#3b5f8f}
+.diff-btn.toeic .name{color:#8fc2ff}
+.diff-btn.toeic:hover,.diff-btn.toeic:focus-visible{border-color:#8fc2ff}
+#screen-toeic{max-width:760px; margin:0 auto}
+.tq-view{display:none}
+.tq-view.on{display:block}
+.tq-title{color:#8fc2ff; letter-spacing:.2em; font-weight:400; margin:.4rem 0 .2rem}
+.tq-sub{color:var(--steel); font-size:.9rem; margin-bottom:1rem}
+.tq-modes{display:flex; gap:.6rem; justify-content:center; flex-wrap:wrap; margin-bottom:1rem}
+.tq-mode{display:flex; flex-direction:column; align-items:center; gap:.2rem; min-width:13rem; padding:.7rem 1rem}
+.tq-mode small{font-size:.75rem; color:var(--steel)}
+.tq-mode.on{border-color:#8fc2ff; box-shadow:0 0 0 2px #8fc2ff inset; color:#cfe4ff}
+.tq-levels{display:grid; grid-template-columns:repeat(auto-fit,minmax(8.5rem,1fr)); gap:.6rem; margin:0 auto 1rem; max-width:720px}
+.tq-lv{display:flex; flex-direction:column; align-items:center; gap:.25rem; padding:.8rem .5rem}
+.tq-lv b{font-size:1.15rem; color:var(--amber); font-weight:700}
+.tq-lv small{font-size:.75rem; color:var(--steel); font-variant-numeric:tabular-nums}
+.tq-lv .kbdh{margin:0}
+.tq-lv:disabled{opacity:.45; cursor:default}
+.tq-note{color:#ffb38a; font-size:.85rem; min-height:1.2em}
+.tq-hud{display:flex; justify-content:center; gap:1.4rem; color:var(--steel); font-variant-numeric:tabular-nums; margin-bottom:.6rem}
+.tq-hud b{color:var(--amber)}
+.tq-card{background:linear-gradient(180deg,var(--panel-hi,#3a414d),var(--panel,#2a2f38)); border:2px solid var(--line); border-radius:12px; padding:1.4rem 1rem 1.2rem; min-height:16rem}
+.tq-pos{display:inline-block; font-size:.8rem; color:#cfe4ff; background:rgba(143,194,255,.15); border-radius:999px; padding:.05rem .7rem}
+.tq-word{font-size:clamp(2rem,7vw,3.2rem); font-family:Georgia,'Times New Roman',serif; color:#fff; letter-spacing:.03em; margin:.3rem 0 .6rem; overflow-wrap:anywhere}
+.tq-bar{height:6px; border-radius:3px; background:rgba(255,255,255,.1); overflow:hidden; max-width:420px; margin:0 auto .7rem}
+.tq-bar i{display:block; height:100%; width:100%; background:#8fc2ff; transform-origin:left}
+.tq-mean{min-height:2.2em; color:var(--ink); font-size:1.05rem; line-height:1.7}
+.tq-mean .rd{color:var(--steel); font-size:.85em}
+.tq-mean.wait{color:var(--steel); font-size:.9rem}
+.tq-typed{font-family:ui-monospace,Menlo,Consolas,monospace; font-size:1.4rem; letter-spacing:.06em; min-height:1.6em; margin-top:.4rem}
+.tq-typed .done{color:var(--amber)}
+.tq-typed .rest{color:#6b7484}
+.tq-opts{display:grid; grid-template-columns:1fr 1fr; gap:.6rem; margin-top:.6rem}
+.tq-opt{display:flex; align-items:center; gap:.6rem; text-align:left; padding:.8rem .9rem; font-size:1rem; min-height:3.4rem}
+.tq-opt .no{flex:none; width:1.6rem; height:1.6rem; border-radius:50%; display:grid; place-items:center; background:rgba(255,255,255,.1); font-size:.85rem}
+.tq-opt.ok{border-color:#5fbf6a; background:rgba(95,191,106,.22)}
+.tq-opt.ng{border-color:#e05a4a; background:rgba(224,90,74,.22)}
+.tq-fb{min-height:1.6em; margin-top:.7rem; font-size:1.05rem}
+.tq-fb.ok{color:#7fdc8a}
+.tq-fb.ng{color:#ff8a7a}
+.tq-res{list-style:none; padding:0; margin:1rem auto; max-width:620px; text-align:left}
+.tq-res li{display:grid; grid-template-columns:1.8rem 9rem 1fr; gap:.5rem; padding:.45rem .3rem; border-bottom:1px dashed var(--line); align-items:baseline}
+.tq-res .w{font-family:Georgia,'Times New Roman',serif; color:#fff}
+.tq-res .m{color:var(--steel); font-size:.9rem}
+.tq-res .mk{text-align:center}
+.tq-ltabs{display:flex; gap:.4rem; justify-content:center; flex-wrap:wrap; margin-bottom:.6rem}
+.tq-ltabs .btn.on{border-color:#8fc2ff; color:#cfe4ff}
+.tq-lbody{max-height:60vh; overflow:auto; text-align:left; border:1px solid var(--line); border-radius:8px; padding:.3rem .6rem}
+.tq-lrow{display:grid; grid-template-columns:8.5rem 1fr 4.5rem; gap:.5rem; padding:.35rem 0; border-bottom:1px dashed var(--line); font-size:.9rem; align-items:baseline}
+.tq-lrow .w{font-family:Georgia,'Times New Roman',serif; color:#fff}
+.tq-lrow .m{color:var(--steel)}
+.tq-lrow .st{text-align:right; font-size:.8rem; white-space:nowrap}
+.tq-lrow .st.good{color:#7fdc8a}
+.tq-lrow .st.weak{color:#ff8a7a}
+html.mobile #screen-toeic .hint{display:none}
+html.mobile .tq-opts{grid-template-columns:1fr}
+html.mobile .tq-res li{grid-template-columns:1.6rem 7rem 1fr}
+html.mobile .tq-lrow{grid-template-columns:7rem 1fr 3.8rem}
 .screen{display:none; text-align:center}
 .screen.active{display:block; animation:fadein .25s ease}
 @keyframes fadein{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
@@ -1345,8 +1404,8 @@ html.mobile body{align-items:flex-start}
 
 /* タイトル: 庭と、ランキング・辞典・引き継ぎだけ */
 html.mobile #screen-title .mode-group:not(:has(.garden)){display:none}
-html.mobile #screen-title .mode-group .diff-btn:not(.garden):not(.books){display:none}
-html.mobile #screen-title .diff-btn.garden, html.mobile #screen-title .diff-btn.books{width:min(360px,100%); padding:1rem 1.2rem}
+html.mobile #screen-title .mode-group .diff-btn:not(.garden):not(.books):not(.toeic){display:none}
+html.mobile #screen-title .diff-btn.garden, html.mobile #screen-title .diff-btn.books, html.mobile #screen-title .diff-btn.toeic{width:min(360px,100%); padding:1rem 1.2rem}
 html.mobile #screen-title .diff-btn.garden .name{font-size:1.5rem}
 html.mobile #screen-title .diff-btn.garden .desc{font-size:.85rem}
 html.mobile .mnote{color:var(--steel); font-size:.8rem; line-height:1.6; margin:.2rem auto .8rem; max-width:360px}
@@ -1532,6 +1591,10 @@ html.mobile #screen-garden .grk-list{max-height:none; flex:1 1 auto; min-height:
           <div class="name">タイピング単語帳<span class="kbd">8</span></div>
           <div class="desc">自分で言葉とよみがなを登録して<br>その単語帳で練習する</div>
         </button>
+        <button class="diff-btn toeic" data-diff="toeic">
+          <div class="name">TOEIC 英単語<span class="kbd">E</span></div>
+          <div class="desc">英単語の意味を打つ・4択で答える<br>10語で1セット(スマホは4択)</div>
+        </button>
         <button class="diff-btn garden" data-diff="garden">
           <div class="name">キーボード農園<span class="kbd">9</span></div>
           <div class="desc">作物を育ててキーを増やす<br>ここで打つほど庭の時間が進む</div>
@@ -1554,6 +1617,54 @@ html.mobile #screen-garden .grk-list{max-height:none; flex:1 1 auto; min-height:
     </div>
     <p class="hint">キー 1〜9 でモードを選んで開始 ・ G 庭 ・ R ランキング ・ D 図鑑 ・ K 別端末と同期 / ローマ字入力(shi・si どちらもOK)<br>8 単語帳 ・ N 名前 ・ F 要望・バグ報告 ・ H 遊び方ガイド ・ U 更新情報 ・ Esc でいつでもタイトルに戻る</p>
     <div class="hazard" aria-hidden="true"><span class="k">Q</span><span class="s">🌱</span><span class="k">W</span><span class="k">E</span><span class="s">🥕</span><span class="k">R</span><span class="k">T</span><span class="s">🌿</span><span class="k">Y</span><span class="k">U</span><span class="s">🍅</span><span class="k">I</span><span class="k">O</span><span class="s">🌽</span><span class="k">P</span><span class="s">🍓</span></div>
+  </section>
+
+  <!-- TOEIC 英単語 -->
+  <section id="screen-toeic" class="screen">
+    <div class="tq-view on" id="tqMenu">
+      <h2 class="tq-title">TOEIC 英単語</h2>
+      <p class="tq-sub">10語で1セット。正解すると農園にキーが届きます</p>
+      <div class="tq-modes">
+        <button class="btn tq-mode" data-m="type">入力モード<small>意味をローマ字で打つ・5秒で訳が出る</small></button>
+        <button class="btn tq-mode" data-m="choice">4択モード<small>本番のように4つから選ぶ</small></button>
+      </div>
+      <div class="tq-levels" id="tqLevels"></div>
+      <p class="tq-note" id="tqNote"></p>
+      <div class="btn-row">
+        <button class="btn" id="tqListBtn">単語リスト <span class="kbdh">L</span></button>
+        <button class="btn" id="tqBack">タイトルへ <span class="kbdh">Esc</span></button>
+      </div>
+      <p class="hint">Tab モードの切り替え ・ 1〜5 レベルを選んで始める ・ L 単語リスト ・ Esc タイトルへ</p>
+    </div>
+    <div class="tq-view" id="tqPlay">
+      <div class="tq-hud"><span id="tqProg"></span><span>得点 <b id="tqScore">0</b></span><span id="tqMissW"></span></div>
+      <div class="tq-card">
+        <span class="tq-pos" id="tqPos"></span>
+        <div class="tq-word" id="tqWord"></div>
+        <div class="tq-bar" id="tqBarW"><i id="tqBar"></i></div>
+        <div class="tq-mean" id="tqMean"></div>
+        <div class="tq-typed" id="tqTyped"></div>
+        <div class="tq-opts" id="tqOpts"></div>
+        <div class="tq-fb" id="tqFb"></div>
+      </div>
+      <p class="hint" id="tqHint"></p>
+    </div>
+    <div class="tq-view" id="tqResult">
+      <h2 class="tq-title">結果</h2>
+      <p class="tq-sub" id="tqResSum"></p>
+      <ol class="tq-res" id="tqResList"></ol>
+      <div class="btn-row">
+        <button class="btn primary" id="tqAgain">もう1セット <span class="kbdh">Enter</span></button>
+        <button class="btn" id="tqToMenu">メニューへ <span class="kbdh">Esc</span></button>
+      </div>
+    </div>
+    <div class="tq-view" id="tqList">
+      <h2 class="tq-title">単語リスト</h2>
+      <p class="tq-sub">✓ 覚えた(3回続けて正解) ・ ✕ 苦手(間違えたまま)</p>
+      <div class="tq-ltabs" id="tqLTabs"></div>
+      <div class="tq-lbody" id="tqLBody"></div>
+      <div class="btn-row" style="margin-top:.8rem"><button class="btn" id="tqListBack">戻る <span class="kbdh">Esc</span></button></div>
+    </div>
   </section>
 
   <!-- ゲーム画面 -->
@@ -2638,7 +2749,7 @@ const fmtTime = s => Number(s).toFixed(2)+"秒";
 
 /* ---------- 画面制御 ---------- */
 const $=id=>document.getElementById(id);
-const screens={title:$("screen-title"),game:$("screen-game"),result:$("screen-result"),ranking:$("screen-ranking"),dict:$("screen-dict"),books:$("screen-books"),garden:$("screen-garden")};
+const screens={title:$("screen-title"),toeic:$("screen-toeic"),game:$("screen-game"),result:$("screen-result"),ranking:$("screen-ranking"),dict:$("screen-dict"),books:$("screen-books"),garden:$("screen-garden")};
 let scene="title";
 function show(name){
   scene=name;
@@ -3026,12 +3137,14 @@ document.addEventListener("keydown",e=>{
     if(e.key==="8") openBooks();
     if(e.key==="f"||e.key==="F") openFeedback();
     if(e.key==="u"||e.key==="U") openNews();
+    if(e.key==="e"||e.key==="E") openToeic();
     if(e.key==="h"||e.key==="H") tutAsk(false);
     if(e.key==="n"||e.key==="N"){ e.preventDefault(); openNameWin(); }
     if((e.key==="t"||e.key==="T") && syncReadOnly) syncTakeOver();
     if(e.key==="9"||e.key==="g"||e.key==="G") openGarden();
     return;
   }
+  if(scene==="toeic"){ tqKey(e); return; }
   if(scene==="books"){ booksKey(e); return; }
   if(scene==="ranking"){
     if(e.key==="Escape") show("title");
@@ -3131,6 +3244,7 @@ document.querySelectorAll(".diff-btn").forEach(b=>{
   b.addEventListener("click",()=>{
     if(b.dataset.diff==="garden") openGarden();
     else if(b.dataset.diff==="books") openBooks();
+    else if(b.dataset.diff==="toeic") openToeic();
     else startGame(b.dataset.diff);
   });
 });
@@ -9813,6 +9927,226 @@ document.addEventListener("visibilitychange",()=>{
 setInterval(()=>{ if(scene==="garden" && syncCode) syncPush(false); }, 60000);
 setInterval(()=>{ if(scene==="title") refreshGardenStat(); }, 30000);
 setInterval(()=>{ try{ Garden.alive(); Garden.applyTheme(); }catch(e){} }, 5000);   // 料理の色が切れたら戻す・魔法の冷蔵庫の時刻
+/* ---------- TOEIC 英単語 ----------
+   レベル別(600/730/860/990点)の英単語。10語で1セット。
+   入力モード: 英単語を見て、意味をローマ字で打つ(5秒で訳が出る。出る前に打てたら「覚えてた」で3点、出たあとは1点)
+   4択モード: 意味を4つから選ぶ(見た目の似た単語の意味を、まぎらわしい選択肢に混ぜる)。スマホでも遊べる
+   単語ごとに正解・間違いを記録して、苦手な単語ほど出やすく、覚えた単語は出にくくする。得点ぶん農園にキーを届ける */
+const TQ_RAW=["600|available|形|利用できる:りようできる,手が空いている:てがあいている|valuable/affordable", "600|schedule|名|予定:よてい,予定表:よていひょう", "600|appointment|名|予約:よやく,約束:やくそく", "600|deliver|動|配達する:はいたつする,届ける:とどける", "600|order|動|注文する:ちゅうもんする,命令する:めいれいする", "600|receipt|名|領収書:りょうしゅうしょ,レシート:れしーと|recipe", "600|invoice|名|請求書:せいきゅうしょ", "600|purchase|動|購入する:こうにゅうする,買う:かう", "600|customer|名|顧客:こきゃく,客:きゃく", "600|employee|名|従業員:じゅうぎょういん,社員:しゃいん|employer", "600|employer|名|雇用主:こようぬし,雇い主:やといぬし|employee", "600|department|名|部署:ぶしょ,部門:ぶもん", "600|meeting|名|会議:かいぎ,打ち合わせ:うちあわせ", "600|reserve|動|予約する:よやくする,取っておく:とっておく|preserve", "600|cancel|動|取り消す:とりけす,キャンセルする:きゃんせるする", "600|confirm|動|確認する:かくにんする|conform", "600|product|名|製品:せいひん,商品:しょうひん|produce", "600|price|名|価格:かかく,値段:ねだん|prize", "600|discount|名|割引:わりびき", "600|refund|名|返金:へんきん,払い戻し:はらいもどし", "600|apply|動|申し込む:もうしこむ,応募する:おうぼする", "600|application|名|申込書:もうしこみしょ,応募:おうぼ,申請:しんせい", "600|position|名|職:しょく,地位:ちい,位置:いち", "600|hire|動|雇う:やとう|fire", "600|repair|動|修理する:しゅうりする|prepare", "600|replace|動|取り替える:とりかえる,交換する:こうかんする", "600|ship|動|発送する:はっそうする,出荷する:しゅっかする", "600|package|名|小包:こづつみ,荷物:にもつ", "600|fee|名|料金:りょうきん,手数料:てすうりょう|free", "600|report|名|報告書:ほうこくしょ,報告:ほうこく", "600|attend|動|出席する:しゅっせきする,参加する:さんかする|attempt", "600|contact|動|連絡する:れんらくする|contract", "600|colleague|名|同僚:どうりょう|college", "600|client|名|顧客:こきゃく,依頼人:いらいにん", "600|document|名|書類:しょるい,文書:ぶんしょ", "600|sign|動|署名する:しょめいする", "600|floor|名|階:かい,床:ゆか|flour", "600|headquarters|名|本社:ほんしゃ,本部:ほんぶ", "600|branch|名|支店:してん,支社:ししゃ", "600|rent|動|借りる:かりる,賃借する:ちんしゃくする|lend", "600|equipment|名|設備:せつび,機器:きき", "600|supply|名|供給:きょうきゅう,備品:びひん", "600|delay|名|遅れ:おくれ,遅延:ちえん", "600|announce|動|発表する:はっぴょうする,知らせる:しらせる|pronounce", "600|direct|動|案内する:あんないする,指示する:しじする", "600|local|形|地元の:じもとの,地域の:ちいきの", "600|recently|副|最近:さいきん", "600|immediately|副|すぐに:すぐに,直ちに:ただちに", "600|probably|副|おそらく:おそらく,たぶん:たぶん", "600|already|副|すでに:すでに,もう:もう|ready", "730|estimate|名|見積もり:みつもり,見積もる:みつもる", "730|budget|名|予算:よさん", "730|revenue|名|収益:しゅうえき,歳入:さいにゅう|avenue", "730|expense|名|費用:ひよう,経費:けいひ|expanse", "730|negotiate|動|交渉する:こうしょうする", "730|contract|名|契約:けいやく,契約書:けいやくしょ|contact", "730|submit|動|提出する:ていしゅつする|summit", "730|approve|動|承認する:しょうにんする,賛成する:さんせいする|improve", "730|promote|動|昇進させる:しょうしんさせる,促進する:そくしんする,宣伝する:せんでんする", "730|candidate|名|候補者:こうほしゃ", "730|qualification|名|資格:しかく,能力:のうりょく", "730|requirement|名|必要条件:ひつようじょうけん,要件:ようけん", "730|merchandise|名|商品:しょうひん", "730|inventory|名|在庫:ざいこ,在庫目録:ざいこもくろく|invention", "730|warehouse|名|倉庫:そうこ", "730|vendor|名|販売業者:はんばいぎょうしゃ,売り手:うりて", "730|supplier|名|供給業者:きょうきゅうぎょうしゃ,仕入れ先:しいれさき", "730|itinerary|名|旅程:りょてい,旅行日程:りょこうにってい", "730|agenda|名|議題:ぎだい,協議事項:きょうぎじこう", "730|deadline|名|締め切り:しめきり,期限:きげん", "730|postpone|動|延期する:えんきする", "730|extend|動|延長する:えんちょうする,伸ばす:のばす|extent", "730|renovate|動|改装する:かいそうする,修理する:しゅうりする", "730|facility|名|施設:しせつ,設備:せつび", "730|maintenance|名|保守:ほしゅ,整備:せいび,維持:いじ", "730|recruit|動|採用する:さいようする,募集する:ぼしゅうする", "730|personnel|名|人事:じんじ,職員:しょくいん|personal", "730|survey|名|調査:ちょうさ,アンケート:あんけーと", "730|respond|動|返答する:へんとうする,応じる:おうじる", "730|inquiry|名|問い合わせ:といあわせ,調査:ちょうさ", "730|complimentary|形|無料の:むりょうの,称賛の:しょうさんの|complementary", "730|refreshments|名|軽食:けいしょく,飲み物:のみもの", "730|reimburse|動|払い戻す:はらいもどす,返済する:へんさいする", "730|accommodate|動|収容する:しゅうようする,便宜を図る:べんぎをはかる", "730|temporary|形|一時的な:いちじてきな,臨時の:りんじの|contemporary", "730|permanent|形|永久の:えいきゅうの,常勤の:じょうきんの", "730|regulation|名|規則:きそく,規制:きせい", "730|comply|動|従う:したがう,順守する:じゅんしゅする|complain", "730|implement|動|実行する:じっこうする,実施する:じっしする|compliment", "730|efficient|形|効率的な:こうりつてきな|effective", "730|effective|形|効果的な:こうかてきな,有効な:ゆうこうな|efficient", "730|expand|動|拡大する:かくだいする,広げる:ひろげる|expend", "730|launch|動|開始する:かいしする,発売する:はつばいする|lunch", "730|feature|名|特徴:とくちょう,機能:きのう|future", "730|install|動|設置する:せっちする,取り付ける:とりつける", "730|assign|動|割り当てる:わりあてる,任命する:にんめいする|resign", "730|audit|名|会計監査:かいけいかんさ,監査:かんさ", "730|commute|動|通勤する:つうきんする|compute", "730|attach|動|添付する:てんぷする,取り付ける:とりつける|attack", "730|quote|名|見積もり:みつもり,引用:いんよう", "860|adjacent|形|隣接した:りんせつした,隣の:となりの", "860|subsequent|形|その後の:そのごの,次の:つぎの|consequent", "860|tentative|形|仮の:かりの,暫定的な:ざんていてきな", "860|prerequisite|名|前提条件:ぜんていじょうけん,必須条件:ひっすじょうけん", "860|collaborate|動|協力する:きょうりょくする,共同で行う:きょうどうでおこなう", "860|consolidate|動|統合する:とうごうする,強化する:きょうかする", "860|deteriorate|動|悪化する:あっかする", "860|expedite|動|促進する:そくしんする,早める:はやめる", "860|incentive|名|奨励金:しょうれいきん,動機:どうき", "860|lucrative|形|もうかる:もうかる,有利な:ゆうりな", "860|mandatory|形|義務的な:ぎむてきな,必須の:ひっすの", "860|obsolete|形|時代遅れの:じだいおくれの,廃れた:すたれた|absolute", "860|patron|名|常連客:じょうれんきゃく,後援者:こうえんしゃ|pattern", "860|proficient|形|熟達した:じゅくたつした,堪能な:たんのうな|sufficient", "860|reconcile|動|和解させる:わかいさせる,一致させる:いっちさせる", "860|stipulate|動|規定する:きていする,明記する:めいきする|stimulate", "860|surplus|名|余剰:よじょう,黒字:くろじ", "860|tenant|名|賃借人:ちんしゃくにん,テナント:てなんと", "860|unanimous|形|満場一致の:まんじょういっちの|anonymous", "860|vacancy|名|空き:あき,欠員:けついん,空室:くうしつ|vacation", "860|warranty|名|保証:ほしょう,保証書:ほしょうしょ", "860|allocate|動|割り当てる:わりあてる,配分する:はいぶんする|locate", "860|amenity|名|快適な設備:かいてきなせつび,アメニティ:あめにてぃ", "860|attire|名|服装:ふくそう|attic", "860|commence|動|開始する:かいしする,始まる:はじまる|commerce", "860|compensate|動|補償する:ほしょうする,埋め合わせる:うめあわせる", "860|discrepancy|名|食い違い:くいちがい,不一致:ふいっち", "860|endorse|動|支持する:しじする,推薦する:すいせんする", "860|fluctuate|動|変動する:へんどうする", "860|forfeit|動|失う:うしなう,没収される:ぼっしゅうされる", "860|inaugurate|動|就任させる:しゅうにんさせる,開始する:かいしする", "860|liability|名|責任:せきにん,負債:ふさい|reliability", "860|meticulous|形|細心の:さいしんの,几帳面な:きちょうめんな", "860|oversee|動|監督する:かんとくする|overseas", "860|premises|名|敷地:しきち,構内:こうない|promises", "860|procurement|名|調達:ちょうたつ", "860|quarterly|形|四半期の:しはんきの,年4回の:ねんよんかいの", "860|remit|動|送金する:そうきんする", "860|solicit|動|求める:もとめる,懇願する:こんがんする", "860|tariff|名|関税:かんぜい,料金表:りょうきんひょう", "860|renewal|名|更新:こうしん,再開:さいかい", "860|exempt|形|免除された:めんじょされた|except", "860|feasible|形|実現可能な:じつげんかのうな", "860|streamline|動|合理化する:ごうりかする,効率化する:こうりつかする", "860|turnover|名|離職率:りしょくりつ,売上高:うりあげだか", "860|delegate|動|委任する:いにんする,任せる:まかせる", "860|disclose|動|公開する:こうかいする,開示する:かいじする|enclose", "860|diversify|動|多様化する:たようかする", "860|intermittent|形|断続的な:だんぞくてきな", "860|pertinent|形|関連のある:かんれんのある,適切な:てきせつな", "990|amortize|動|償却する:しょうきゃくする,分割返済する:ぶんかつへんさいする", "990|arbitration|名|仲裁:ちゅうさい", "990|austerity|名|緊縮:きんしゅく,厳しさ:きびしさ", "990|benchmark|名|基準:きじゅん,水準点:すいじゅんてん", "990|circumvent|動|回避する:かいひする,出し抜く:だしぬく", "990|contingency|名|不測の事態:ふそくのじたい,偶発事件:ぐうはつじけん", "990|culminate|動|最高潮に達する:さいこうちょうにたっする,終わる:おわる", "990|defer|動|延期する:えんきする,従う:したがう|differ", "990|depreciation|名|減価償却:げんかしょうきゃく,価値の下落:かちのげらく|appreciation", "990|disburse|動|支払う:しはらう,支出する:ししゅつする", "990|encumbrance|名|負担:ふたん,妨げ:さまたげ", "990|escalate|動|段階的に拡大する:だんかいてきにかくだいする,上昇する:じょうしょうする", "990|exorbitant|形|法外な:ほうがいな,途方もない:とほうもない", "990|fiscal|形|財政の:ざいせいの,会計の:かいけいの|physical", "990|garner|動|獲得する:かくとくする,集める:あつめる", "990|indemnify|動|補償する:ほしょうする,損害を償う:そんがいをつぐなう", "990|jeopardize|動|危うくする:あやうくする,危険にさらす:きけんにさらす", "990|leverage|動|活用する:かつようする,てこ入れする:てこいれする", "990|lenient|形|寛大な:かんだいな,甘い:あまい", "990|nominal|形|名目上の:めいもくじょうの,ごくわずかな:ごくわずかな", "990|onerous|形|面倒な:めんどうな,負担の重い:ふたんのおもい", "990|preclude|動|妨げる:さまたげる,不可能にする:ふかのうにする|include", "990|proprietor|名|経営者:けいえいしゃ,所有者:しょゆうしゃ", "990|provisional|形|暫定的な:ざんていてきな,仮の:かりの", "990|rebate|名|割り戻し:わりもどし,払い戻し:はらいもどし|debate", "990|remuneration|名|報酬:ほうしゅう,給料:きゅうりょう", "990|rescind|動|取り消す:とりけす,無効にする:むこうにする", "990|scrutinize|動|精査する:せいさする,詳しく調べる:くわしくしらべる", "990|stagnant|形|停滞した:ていたいした,不振の:ふしんの", "990|subsidiary|名|子会社:こがいしゃ|subsidy", "990|subsidy|名|補助金:ほじょきん,助成金:じょせいきん|subsidiary", "990|tenure|名|在職期間:ざいしょくきかん,保有期間:ほゆうきかん", "990|viable|形|実行可能な:じっこうかのうな,存続可能な:そんぞくかのうな|variable", "990|waive|動|放棄する:ほうきする,免除する:めんじょする|wave", "990|adhere|動|守る:まもる,固執する:こしつする,くっつく:くっつく", "990|attrition|名|自然減:しぜんげん,消耗:しょうもう|nutrition", "990|collateral|名|担保:たんぽ", "990|consortium|名|共同事業体:きょうどうじぎょうたい,連合:れんごう", "990|discretion|名|裁量:さいりょう,慎重さ:しんちょうさ", "990|dissipate|動|消散させる:しょうさんさせる,浪費する:ろうひする|anticipate", "990|impending|形|差し迫った:さしせまった", "990|ingenious|形|独創的な:どくそうてきな,巧妙な:こうみょうな|ingenuous", "990|mediate|動|仲裁する:ちゅうさいする,調停する:ちょうていする|meditate", "990|negligible|形|ごくわずかな:ごくわずかな,取るに足らない:とるにたらない|negligent", "990|precarious|形|不安定な:ふあんていな,危険な:きけんな", "990|replenish|動|補充する:ほじゅうする,補給する:ほきゅうする", "990|retain|動|保持する:ほじする,雇っておく:やとっておく|obtain", "990|slump|名|不振:ふしん,暴落:ぼうらく", "990|underwrite|動|引き受ける:ひきうける,保証する:ほしょうする", "990|unprecedented|形|前例のない:ぜんれいのない"];
+const TQ_CONF={"valuable": "価値のある", "affordable": "手頃な価格の", "recipe": "調理法", "preserve": "保存する", "conform": "従う", "produce": "生産する", "prize": "賞", "fire": "解雇する", "prepare": "準備する", "free": "無料の", "attempt": "試みる", "college": "大学", "flour": "小麦粉", "lend": "貸す", "pronounce": "発音する", "ready": "準備ができた", "avenue": "大通り", "expanse": "広がり", "summit": "頂上", "improve": "改善する", "invention": "発明", "personal": "個人的な", "complementary": "補完的な", "contemporary": "現代の", "complain": "不満を言う", "compliment": "褒め言葉", "expend": "費やす", "lunch": "昼食", "future": "未来", "extent": "程度", "resign": "辞職する", "compute": "計算する", "attack": "攻撃する", "consequent": "結果として起こる", "absolute": "絶対的な", "pattern": "模様", "sufficient": "十分な", "stimulate": "刺激する", "anonymous": "匿名の", "vacation": "休暇", "locate": "位置を突き止める", "attic": "屋根裏", "commerce": "商業", "reliability": "信頼性", "overseas": "海外の", "promises": "約束", "except": "〜を除いて", "enclose": "同封する", "differ": "異なる", "appreciation": "感謝", "physical": "身体の", "include": "含む", "debate": "討論", "variable": "変わりやすい", "wave": "手を振る", "nutrition": "栄養", "anticipate": "予期する", "ingenuous": "純真な", "meditate": "瞑想する", "negligent": "怠慢な", "obtain": "得る", "contract": "契約", "contact": "連絡する", "employer": "雇用主", "employee": "従業員", "efficient": "効率的な", "effective": "効果的な", "subsidy": "補助金", "subsidiary": "子会社"};
+const TQ_LEVELS=[["600","600点"],["730","730点"],["860","860点"],["990","990点"],["weak","苦手"]];
+const TQ_POS={名:"名詞",動:"動詞",形:"形容詞",副:"副詞"};
+const TQ=TQ_RAW.map(r=>{ const [lv,en,pos,ms,cf]=r.split("|"); return { lv, en, pos, means:ms.split(",").map(x=>{ const [j,k]=x.split(":"); return {j,k}; }), conf:cf?cf.split("/"):[] }; });
+const TQ_BY=Object.fromEntries(TQ.map(w=>[w.en,w]));
+const TQ_SET=10, TQ_REVEAL=5000;
+const TQ_KEY="typinggarden:toeic";   // 同期・記録の引き継ぎに入る(パソコンとスマホで学習の記録を共有)
+let tqStat={};
+const tqLoad = () => { try{ tqStat=JSON.parse(localStorage.getItem(TQ_KEY)||"{}")||{}; }catch(e){ tqStat=tqStat||{}; } };
+const tqSaveStat = () => { try{ localStorage.setItem(TQ_KEY,JSON.stringify(tqStat)); }catch(e){} };
+const tqSt = en => tqStat[en] || {c:0,w:0,s:0};
+const tqGood = en => tqSt(en).s>=3;                                   // 覚えた: 3回続けて正解
+const tqWeak = en => { const t=tqSt(en); return t.w>0 && t.s<2; };     // 苦手: 間違えたあと、まだ2回続けて正解していない
+function tqMark(en,ok){ const t=Object.assign({c:0,w:0,s:0},tqStat[en]); if(ok){ t.c++; t.s++; }else{ t.w++; t.s=0; } t.t=Date.now(); tqStat[en]=t; tqSaveStat(); }
+const tqPool = lv => lv==="weak" ? TQ.filter(w=>tqWeak(w.en)) : TQ.filter(w=>w.lv===lv);
+const tqLvName = lv => (TQ_LEVELS.find(([k])=>k===lv)||[0,lv])[1];
+const tqEsc = v => String(v).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+const tqShuffle = a => { for(let i=a.length-1;i>0;i--){ const j=Math.random()*(i+1)|0; [a[i],a[j]]=[a[j],a[i]]; } return a; };
+let tqMode=window.IS_MOBILE?"choice":"type", tqLv="600", tqListLv="600", tqWords=[], tqI=0, tqPts=0, tqMiss=0, tqLog=[];
+let tqPhase="menu", tqTimer=null, tqRevealed=false, tqCands=[], tqChoices=[];
+function tqView(id){ for(const v of ["tqMenu","tqPlay","tqResult","tqList"]) $(v).classList.toggle("on",v===id); }
+function openToeic(){ tqLoad(); show("toeic"); tqMenu(); }
+/* メニュー */
+function tqMenu(){
+  clearTimeout(tqTimer); tqPhase="menu"; tqView("tqMenu");
+  document.querySelectorAll(".tq-mode").forEach(b=>b.classList.toggle("on",b.dataset.m===tqMode));
+  $("tqLevels").innerHTML=TQ_LEVELS.map(([k,nm],i)=>{
+    const pool=tqPool(k);
+    const sub = k==="weak" ? (pool.length?`${pool.length}語`:"まだありません") : `覚えた ${pool.filter(w=>tqGood(w.en)).length} / ${pool.length}語`;
+    return `<button class="btn tq-lv" data-lv="${k}" ${pool.length?"":"disabled"}><b>${nm}</b><small>${sub}</small><span class="kbdh">${i+1}</span></button>`;
+  }).join("");
+  $("tqNote").textContent = tqMode==="type" && window.IS_MOBILE ? "入力モードはパソコンで遊べます。スマホでは4択モードを選んでください" : "";
+}
+/* 10語を選ぶ: 苦手・まだ出ていない単語ほど出やすく、覚えた単語は出にくい */
+function tqPick(lv){
+  const rest=tqPool(lv).slice(), out=[];
+  const wt = w => tqWeak(w.en) ? 4 : !tqStat[w.en] ? 3 : tqGood(w.en) ? .5 : 2;
+  while(out.length<TQ_SET && rest.length){
+    let r=Math.random()*rest.reduce((a,w)=>a+wt(w),0), i=0;
+    for(; i<rest.length-1; i++){ r-=wt(rest[i]); if(r<0) break; }
+    out.push(rest.splice(i,1)[0]);
+  }
+  return out;
+}
+function tqStart(lv){
+  if(tqMode==="type" && window.IS_MOBILE){ sndMiss(); return; }
+  const ws=tqPick(lv); if(!ws.length){ sndMiss(); return; }
+  tqLv=lv; tqWords=ws; tqI=0; tqPts=0; tqMiss=0; tqLog=[]; gardenKeys=0;
+  tqPhase="play"; tqView("tqPlay"); tqNext();
+}
+const tqMeanHtml = w => w.means.map(m=>tqEsc(m.j)+(m.j===m.k?"":`<span class="rd">(${tqEsc(m.k)})</span>`)).join(" ・ ");   // 読みは、訳と同じなら出さない
+function tqNext(){
+  clearTimeout(tqTimer);
+  if(tqI>=tqWords.length) return tqFinish();
+  const w=tqWords[tqI];
+  tqPhase="play"; tqRevealed=false;
+  $("tqProg").textContent=`${tqI+1} / ${tqWords.length}語`; $("tqScore").textContent=tqPts;
+  $("tqMissW").textContent = tqMode==="type" ? `ミス ${tqMiss}` : "";
+  $("tqPos").textContent=TQ_POS[w.pos]||w.pos; $("tqWord").textContent=w.en;
+  $("tqFb").className="tq-fb"; $("tqFb").textContent="";
+  if(tqMode==="type"){
+    $("tqOpts").innerHTML=""; $("tqBarW").style.display="";
+    $("tqMean").className="tq-mean wait"; $("tqMean").textContent="意味を打ってください(5秒で訳が出ます)";
+    tqCands=tqCandsOf(w).map(k=>({ k, st:tkNew(k) }));
+    const bar=$("tqBar"); bar.style.transition="none"; bar.style.transform="scaleX(1)"; void bar.offsetWidth;
+    bar.style.transition=`transform ${TQ_REVEAL}ms linear`; bar.style.transform="scaleX(0)";
+    tqTimer=setTimeout(tqReveal,TQ_REVEAL);
+    tqRenderTyped();
+    $("tqHint").textContent="意味をローマ字で打つ(どの訳を打っても正解) ・ 訳が出る前に打てたら3点、出たあとは1点 ・ Esc やめる";
+  }else{
+    $("tqBarW").style.display="none"; $("tqTyped").innerHTML="";
+    $("tqMean").className="tq-mean"; $("tqMean").textContent="";
+    tqChoices=tqMakeChoices(w);
+    $("tqOpts").innerHTML=tqChoices.map((c,i)=>`<button class="btn tq-opt" data-i="${i}"><span class="no">${i+1}</span><span>${tqEsc(c.txt)}</span></button>`).join("");
+    $("tqHint").textContent="1〜4 で選ぶ(正解で2点) ・ Esc やめる";
+  }
+}
+/* ---- 入力モード ---- */
+/* 正解にする読み: 訳ごとの読みと、「〜する」「〜な」「〜の」などを省いた形 */
+function tqCandsOf(w){
+  const out=new Set();
+  for(const {k} of w.means){
+    out.add(k);
+    for(const suf of ["させる","された","される","する","した","な","の"]) if(k.endsWith(suf) && k.length-suf.length>=2) out.add(k.slice(0,-suf.length));
+  }
+  return [...out];
+}
+/* ローマ字の判定(ネジ打ちと同じしくみ)を、訳の候補ごとに持つ */
+const tkSave = () => ({ chunks, chunkIdx, buf, typedRomaji, nAmbig });
+function tkLoad(t){ chunks=t.chunks; chunkIdx=t.chunkIdx; buf=t.buf; typedRomaji=t.typedRomaji; nAmbig=t.nAmbig; }
+function tkNew(k){ setWord(k); return tkSave(); }
+function tqType(key){
+  const alive=[]; let done=null;
+  for(const c of tqCands){
+    tkLoad(c.st);
+    const r=handleKey(key);
+    if(r==="miss") continue;
+    c.st=tkSave(); alive.push(c);
+    if(r==="done" && !done) done=c;
+  }
+  if(!alive.length){ tqMiss++; sndMiss(); $("tqMissW").textContent=`ミス ${tqMiss}`; return; }
+  tqCands=alive; gardenKeys++; sndType();
+  if(done) return tqTypeDone(done);
+  tqRenderTyped();
+}
+function tqRenderTyped(){
+  const c=tqCands[0]; if(!c){ $("tqTyped").innerHTML="&nbsp;"; return; }
+  tkLoad(c.st);
+  const done=typedRomaji+buf, rest=tqRevealed ? remainingRomaji() : "";
+  $("tqTyped").innerHTML = (done||rest) ? `<span class="done">${tqEsc(done)}</span><span class="rest">${tqEsc(rest)}</span>` : "&nbsp;";
+}
+function tqReveal(){
+  if(tqPhase!=="play" || tqMode!=="type") return;
+  tqRevealed=true;
+  $("tqMean").className="tq-mean"; $("tqMean").innerHTML=tqMeanHtml(tqWords[tqI]);
+  tqRenderTyped();
+}
+function tqTypeDone(c){
+  clearTimeout(tqTimer);
+  const w=tqWords[tqI], mem=!tqRevealed, p=mem?3:1;
+  tqPts+=p; tqMark(w.en,mem); tqLog.push({ w, ok:mem, half:!mem });
+  tkLoad(c.st);
+  $("tqTyped").innerHTML=`<span class="done">${tqEsc(typedRomaji)}</span>`;
+  $("tqMean").className="tq-mean"; $("tqMean").innerHTML=tqMeanHtml(w);
+  $("tqFb").className="tq-fb ok"; $("tqFb").textContent = mem ? "覚えてた! +3点" : "+1点(訳を見て打てました)";
+  $("tqScore").textContent=tqPts; $("tqBar").style.transition="none";
+  mem ? sndClear() : sndDone();
+  tqI++; tqPhase="wait"; tqTimer=setTimeout(tqNext, mem?800:1300);
+}
+/* ---- 4択モード ---- */
+/* はずれ: 見た目の似た単語の意味 → 同じ品詞・同じレベル → 同じ品詞。正解と同じ訳を持つ単語は使わない */
+function tqMakeChoices(w){
+  const txt = x => x.means.slice(0,2).map(m=>m.j).join("、");
+  const used=new Set(w.means.map(m=>m.j));
+  const overlap = x => x.means.some(m=>used.has(m.j));
+  const out=[{ txt:txt(w), ok:true }];
+  const add = t => { if(out.length<4 && !out.some(o=>o.txt===t)) out.push({ txt:t, ok:false }); };
+  for(const c of w.conf){ const x=TQ_BY[c]; if(x){ if(!overlap(x)) add(txt(x)); } else if(TQ_CONF[c] && !used.has(TQ_CONF[c])) add(TQ_CONF[c]); }
+  for(const pool of [TQ.filter(x=>x.pos===w.pos && x.lv===w.lv), TQ.filter(x=>x.pos===w.pos), TQ])
+    for(const x of tqShuffle(pool.slice())){ if(out.length>=4) break; if(x!==w && !overlap(x)) add(txt(x)); }
+  return tqShuffle(out);
+}
+function tqChoose(i){
+  if(tqPhase!=="play" || tqMode!=="choice") return;
+  const w=tqWords[tqI], c=tqChoices[i]; if(!c) return;
+  document.querySelectorAll("#tqOpts .tq-opt").forEach((b,j)=>{ if(tqChoices[j].ok) b.classList.add("ok"); else if(j===i) b.classList.add("ng"); });
+  if(c.ok) tqPts+=2;
+  tqMark(w.en,c.ok); tqLog.push({ w, ok:c.ok });
+  $("tqMean").innerHTML=tqMeanHtml(w);
+  $("tqFb").className="tq-fb "+(c.ok?"ok":"ng"); $("tqFb").textContent = c.ok ? "正解! +2点" : "ざんねん…(緑が正解)";
+  $("tqScore").textContent=tqPts;
+  c.ok ? sndClear() : sndMiss();
+  tqI++; tqPhase="wait"; tqTimer=setTimeout(tqNext, c.ok?900:2400);
+}
+/* ---- 結果 ---- */
+function tqFinish(){
+  clearTimeout(tqTimer); tqPhase="result";
+  const ok=tqLog.filter(x=>x.ok).length;
+  recordStats(0, tqPts);   // 得点ぶん農園にキーを届ける(正しく打ったキーの数で農園の時間も進む)
+  $("tqResSum").innerHTML=`${tqLvName(tqLv)} ・ ${tqMode==="type"?"入力":"4択"}モード ・ 正解 <b>${ok}</b> / ${tqLog.length}語 ・ 得点 <b>${tqPts}</b>`+(tqPts?`<br>農園に キー ${tqPts} を届けました`:"");
+  $("tqResList").innerHTML=tqLog.map(x=>`<li><span class="mk">${x.ok?"○":x.half?"△":"✕"}</span><span class="w">${tqEsc(x.w.en)}</span><span class="m">${tqEsc(x.w.means.map(m=>m.j).join("、"))}</span></li>`).join("");
+  tqView("tqResult");
+}
+/* ---- 単語リスト ---- */
+function tqList(lv){
+  tqListLv=lv||tqListLv; tqPhase="list"; tqView("tqList");
+  $("tqLTabs").innerHTML=TQ_LEVELS.map(([k,nm],i)=>`<button class="btn${k===tqListLv?" on":""}" data-lv="${k}">${nm} <span class="kbdh">${i+1}</span></button>`).join("");
+  const pool=tqPool(tqListLv);
+  $("tqLBody").innerHTML = pool.length ? pool.map(w=>{
+    const t=tqSt(w.en);
+    const st = tqGood(w.en) ? `<span class="st good">✓ 覚えた</span>` : tqWeak(w.en) ? `<span class="st weak">✕ 苦手</span>` : tqStat[w.en] ? `<span class="st">${t.c} / ${t.c+t.w}回</span>` : `<span class="st">未</span>`;
+    return `<div class="tq-lrow"><span class="w">${tqEsc(w.en)}</span><span class="m">${tqEsc(w.means.map(m=>m.j).join("、"))}</span>${st}</div>`;
+  }).join("") : `<p class="tq-sub" style="padding:1rem">苦手な単語はまだありません</p>`;
+}
+/* ---- キー操作 ---- */
+function tqKey(e){
+  const k=e.key, n=+k;
+  if(tqPhase==="menu"){
+    if(k==="Escape"){ e.preventDefault(); show("title"); }
+    else if(k==="Tab"){ e.preventDefault(); tqMode = tqMode==="type" ? "choice" : "type"; tqMenu(); }
+    else if(k==="l"||k==="L") tqList(tqLv);
+    else if(n>=1 && n<=5){ e.preventDefault(); const lv=TQ_LEVELS[n-1][0]; if(tqPool(lv).length) tqStart(lv); }
+    return;
+  }
+  if(tqPhase==="list"){
+    if(k==="Escape"){ e.preventDefault(); tqMenu(); }
+    else if(n>=1 && n<=5) tqList(TQ_LEVELS[n-1][0]);
+    return;
+  }
+  if(tqPhase==="result"){
+    if(k==="Enter"){ e.preventDefault(); if(tqPool(tqLv).length) tqStart(tqLv); else tqMenu(); }
+    else if(k==="Escape"){ e.preventDefault(); tqMenu(); }
+    return;
+  }
+  if(k==="Escape"){ e.preventDefault(); gardenKeys=0; tqMenu(); return; }   // 途中でやめる(キーは届かない)
+  if(tqPhase==="wait"){ if(tqMode==="choice" && (k==="Enter"||k===" ")){ e.preventDefault(); tqNext(); } return; }
+  if(tqPhase!=="play") return;
+  if(tqMode==="choice"){ if(n>=1 && n<=4){ e.preventDefault(); tqChoose(n-1); } return; }
+  if(e.ctrlKey || e.metaKey || e.altKey) return;
+  if(k==="Process" || e.isComposing){ $("tqFb").className="tq-fb ng"; $("tqFb").textContent="日本語入力をオフ(半角英数)にして打ってください"; return; }
+  if(k.length===1){ e.preventDefault(); tqType(k); }
+}
+/* ---- クリック・タップ ---- */
+document.querySelectorAll(".tq-mode").forEach(b=>b.addEventListener("click",()=>{ tqMode=b.dataset.m; tqMenu(); }));
+$("tqLevels").addEventListener("click",e=>{ const b=e.target.closest(".tq-lv"); if(b && !b.disabled) tqStart(b.dataset.lv); });
+$("tqOpts").addEventListener("click",e=>{ const b=e.target.closest(".tq-opt"); if(!b) return; if(tqPhase==="wait"){ tqNext(); return; } tqChoose(+b.dataset.i); });
+$("screen-toeic").querySelector(".tq-card").addEventListener("click",e=>{ if(tqPhase==="wait" && tqMode==="choice" && !e.target.closest(".tq-opt")) tqNext(); });
+$("tqListBtn").addEventListener("click",()=>tqList(tqLv));
+$("tqBack").addEventListener("click",()=>show("title"));
+$("tqAgain").addEventListener("click",()=>{ if(tqPool(tqLv).length) tqStart(tqLv); else tqMenu(); });
+$("tqToMenu").addEventListener("click",tqMenu);
+$("tqLTabs").addEventListener("click",e=>{ const b=e.target.closest("[data-lv]"); if(b) tqList(b.dataset.lv); });
+$("tqListBack").addEventListener("click",tqMenu);
+
 </script>
 </body>
 </html>
