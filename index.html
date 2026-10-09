@@ -280,6 +280,19 @@ body[class*="dishfx-"]:not(.garden):not(.washi) #app{position:relative; z-index:
 /* 明るい演出では、文字に影をつけて読みやすく */
 body:is(.dishfx-gold,.dishfx-dia,.dishfx-noon,.dishfx-jade):not(.garden):not(.washi) #app{text-shadow:0 1px 3px rgba(0,0,0,.6)}
 body:is(.dishfx-gold,.dishfx-dia,.dishfx-noon,.dishfx-jade):not(.garden):not(.washi) .gstat{background:rgba(20,24,30,.55)}
+/* 幸運 */
+#roseFx .fxl-lucky{background-image:radial-gradient(ellipse at 50% 0%, #fff8e0 0%, #ffd6e8 40%, #e890b8 75%, #6a2a4a 100%)}
+#roseFx .fx-halo{left:50%; top:-30vmin; width:90vmin; height:90vmin; margin-left:-45vmin; border-radius:50%; background:radial-gradient(circle, rgba(255,240,170,.75), rgba(255,215,120,.25) 45%, transparent 70%); animation:fxMoon 6s ease-in-out infinite alternate}
+#roseFx .fx-clover{top:0; width:var(--s); height:var(--s); background:radial-gradient(circle at 50% 25%, #5ac85a 0 24%, transparent 25%), radial-gradient(circle at 25% 50%, #5ac85a 0 24%, transparent 25%), radial-gradient(circle at 75% 50%, #5ac85a 0 24%, transparent 25%), radial-gradient(circle at 50% 75%, #5ac85a 0 24%, transparent 25%); filter:drop-shadow(0 0 3px rgba(255,255,255,.8)); animation:fxFall linear infinite}
+#roseFx .fx-lstar{top:0; width:var(--s); height:var(--s); background:#ffe27a; clip-path:polygon(50% 0,61% 35%,98% 35%,68% 57%,79% 91%,50% 70%,21% 91%,32% 57%,2% 35%,39% 35%); filter:drop-shadow(0 0 4px #fff3b0); animation:fxFall linear infinite}
+/* 三原色 */
+#roseFx .fxl-tri{background-image:radial-gradient(ellipse at 50% 50%, #26262e 0%, #0a0a0e 100%)}
+#roseFx .fx-rgb{left:50%; top:50%; width:70vmin; height:70vmin; margin:-35vmin; border-radius:50%; mix-blend-mode:screen; filter:blur(18px); animation:fxOrbit 14s linear infinite}
+#roseFx .fx-rgb.r{background:radial-gradient(circle, rgba(255,40,60,.95), rgba(255,40,60,.35) 55%, transparent 70%); --a:0deg}
+#roseFx .fx-rgb.g{background:radial-gradient(circle, rgba(40,230,90,.95), rgba(40,230,90,.35) 55%, transparent 70%); --a:120deg; animation-delay:-4.67s}
+#roseFx .fx-rgb.b{background:radial-gradient(circle, rgba(50,90,255,.95), rgba(50,90,255,.35) 55%, transparent 70%); --a:240deg; animation-delay:-9.33s}
+@keyframes fxOrbit{from{transform:rotate(0deg) translateX(16vmin) rotate(0deg)} to{transform:rotate(360deg) translateX(16vmin) rotate(-360deg)}}
+body.dishfx-lucky:not(.garden):not(.washi) #app{text-shadow:0 1px 3px rgba(0,0,0,.6)}
 .screen{display:none; text-align:center}
 .screen.active{display:block; animation:fadein .25s ease}
 @keyframes fadein{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
@@ -4540,6 +4553,11 @@ const ROSE_SECRET = [
     art:roseSvg("#c4743e","#7a3a1a",{sw:"#4e2410",sp:"#d89a6a"}) },
   { id:"rose_jade", name:"翡翠の薔薇", c1:"#8ee0bc", c2:"#2a9a70", cn:"翡翠色", fx:"jade", how:"磨いた翡翠のような緑の模様がゆらめき、やわらかな光の玉が浮かぶ",
     art:roseSvg("#a8ecd0","#2e9a70",{bg:"#bff5dc",sp:"#eafff4",sw:"#1e7a56"}) },
+  { id:"rose_lucky", name:"幸運の薔薇", c1:"#ffd6e8", c2:"#f0a8c8", cn:"幸運の色", fx:"lucky", how:"やわらかな桜色と金の光に包まれ、四つ葉のクローバーと星が降ってくる",
+    art:roseSvg("#ffe4f0","#f4a8c8",{bg:"#fff0b0",sp:"#ffd84a",sw:"#d87aa8",petal:["#f4a8c8","#ffd27a","#f4a8c8"]}) },
+  { id:"rose_tri", name:"三原色の薔薇", c1:"#e8e8ff", c2:"#7a7ad8", cn:"三原色", fx:"tri", how:"赤・緑・青の光が重なり合いながら回り、重なったところが白く光る",
+    art:roseSvg("#fff","#fff",{petal:["#ff3a4a","#3a6aff","#3ad86a"], sw:"rgba(255,255,255,.85)", sp:"#ffffff",
+      center:rosePie(["#ff3a4a","#ffe23a","#3ad86a","#3ae0ff","#3a6aff","#ff3ad8"])}) },
 ].map(x=>Object.assign(x,{ rose:true, secret:true, gacha:true, icon:"🌹", cost:0, hours:6, price:100000 }));
 for(const r of ROSES) r.art=roseSvg(r.c1,r.c2,{ln:r.ln});
 const ROSE_ALL = ROSES.concat(ROSE_SECRET);
@@ -4592,6 +4610,8 @@ const ROSE_LORE = {
   noon:["太陽がいちばん高い時刻に咲いた薔薇。触れると、日なたのようにあたたかい。"],
   rust:["摘まれるのを待ちくたびれた薔薇。花びらが古い鉄のような色に変わり、それでも散らずに残っている。"],
   jade:["色とりどりの薔薇に囲まれて咲いた薔薇。まわりの色をすべて混ぜ合わせたような、深い緑の石の色。"],
+  lucky:["千輪に一輪だけ、何の前ぶれもなく咲くという薔薇。見つけた日は、なぜか一日じゅういいことが続く。"],
+  tri:["三つの色に染まった画面の光を浴びて咲いた薔薇。赤・緑・青の花びらが重なるところだけ、白く光って見える。"],
   rainbow:["急がず、近道もせず、ただ時の流れだけで咲いた薔薇。花びら一枚一枚が違う色をしている。"],
 };
 for(const r of ROSE_ALL){
@@ -5373,10 +5393,12 @@ function roseSecret(p,by,when){
   const kinds = new Set(KEYS.map(k=>f[k]).filter(q=>q!==p && q.crop && CROP[q.crop.id].rose && isRipe(q)).map(q=>q.crop.id+":"+(q.crop.sup?5:q.crop.mut?3:0))).size;
   const hour = by==="t" ? new Date(when).getHours() : -1;   // 自然に実ったときだけ(短縮で途中まで進めるのはよい)
   let id=null;
-  if(carrot(true)) id="rose_dia";
+  if(Math.random()<0.001) id="rose_lucky";                // 1/1000
+  else if(carrot(true)) id="rose_dia";
   else if(carrot(false)) id="rose_gold";
   else if(!S.fields.some(fx=>other(fx,q=>!q.vil))) id="rose_bw";
   else if(kinds>=10) id="rose_jade";                       // 同じ畑に10色以上の薔薇が実っている
+  else if(roseThemeN()===3) id="rose_tri";                 // 画面の色が3色のとき
   else if(hour===0) id="rose_moon";                        // 0時台
   else if(hour===5) id="rose_dawn";                        // 5時台
   else if(hour===12) id="rose_noon";                       // 12時台
@@ -5384,6 +5406,12 @@ function roseSecret(p,by,when){
   else if(src==="t") id="rose_rainbow";
   if(!id) return;
   p.crop.id=id; p.crop.mut=false; p.crop.sup=false; p.crop.mutN=0;
+}
+/* いま画面の色が何色に分かれているか(applyTheme と同じ数え方) */
+function roseThemeN(){
+  const ms=buffList().filter(x=>DISH[x.d] && DISH[x.d].eff==="M");
+  const nb=ms[0]||null, ob=(ms[1] && nb && ms[1].d!==nb.d) ? ms[1] : null;
+  return [kamadoNow(nb,ob), ob, nb].filter(Boolean).length;
 }
 /* 実ったまま24時間置いておくと、錆色に変わる(変異・超変異とシークレットは変わらない) */
 function roseRust(p,now){
@@ -8005,6 +8033,8 @@ function roseFxInner(look){
     dawn:   `<i class="fx-sun"></i>`+many(6,i=>`<b class="fx-cloud" style="top:${f(8+i*11+R()*6)}%;--s:${f(140+R()*160)}px;animation-duration:${f(50+R()*50)}s;animation-delay:${f(-R()*100)}s"></b>`),
     noon:   `<i class="fx-rays"></i><i class="fx-flare"></i>`+dots("fx-mote",30,[2,5],[8,16]),
     rust:   `<i class="fx-rustex"></i>`+fall("fx-flake",30,[10,20],[3,8]),
+    lucky:  `<i class="fx-halo"></i>`+fall("fx-clover",22,[9,18],[14,26])+fall("fx-lstar",26,[7,14],[6,12]),
+    tri:    `<i class="fx-rgb r"></i><i class="fx-rgb g"></i><i class="fx-rgb b"></i>`,
     jade:   `<i class="fx-marble"></i><i class="fx-marble b"></i>`+dots("fx-orb",16,[20,70],[6,12]),
   }[look] || "";
 }
