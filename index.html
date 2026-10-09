@@ -2003,7 +2003,7 @@ html.mobile #screen-garden .grk-list{max-height:none; flex:1 1 auto; min-height:
     <div class="pt-row" id="ptBanRow"><input type="time" id="ptFrom" class="bk-codein"> 〜 <input type="time" id="ptTo" class="bk-codein"> は遊べません</div>
     <h3><label><input type="checkbox" id="ptCap"> 1日に遊べる時間</label></h3>
     <div class="pt-row" id="ptCapRow"><select id="ptLimit" class="bk-codein"></select> まで(毎日0時に0分に戻ります)</div>
-    <div class="bk-foot"><span class="bk-note" id="ptNote"></span><button class="btn primary" id="ptSave">保存する</button></div>
+    <div class="bk-foot"><span class="bk-note" id="ptNote">変えるとすぐに保存されます</span><button class="btn primary" id="ptSave">保存する</button></div>
   </div>
 </div>
 <div id="ptLock"><div class="pt-box"><div class="pt-big">⏰</div><h2>今は遊べません</h2><p id="ptLockMsg"></p><button class="btn" id="ptLockSet">タイマーの設定 (L)</button></div></div>
@@ -9904,8 +9904,15 @@ setInterval(()=>{ try{ Garden.alive(); Garden.applyTheme(); }catch(e){} }, 5000)
    遊べない時間帯と、1日に遊べる時間。この端末だけの設定(同期・記録の引き継ぎには入れない)。
    ページを開いて表に出している時間を数え、時間になったらゲーム全体を止める(遊んでいるタイピングの1回は最後まで) */
 const PT_KEY=LS_PREFIX.replace(/:$/,"")+"-timer";
-const ptLoad = () => { let o={}; try{ o=JSON.parse(localStorage.getItem(PT_KEY)||"{}")||{}; }catch(e){} return Object.assign({ ban:false, from:"21:00", to:"07:00", cap:false, limit:60, day:"", used:0 }, o); };
-let PT=ptLoad(), ptOpen=false, ptLocked=false, ptWarned="";
+const PT_DEF = { ban:false, from:"21:00", to:"07:00", cap:false, limit:60, day:"", used:0 };   // はじめはどちらもオフ
+let PT=null, ptOpen=false, ptLocked=false, ptWarned="";
+const ptLoad = () => {   // 読めないとき(保存できないブラウザなど)は、今の設定のまま
+  let raw=null; try{ raw=localStorage.getItem(PT_KEY); }catch(e){}
+  if(raw==null) return Object.assign({}, PT_DEF, PT||{});
+  let o={}; try{ o=JSON.parse(raw)||{}; }catch(e){}
+  return Object.assign({}, PT_DEF, o);
+};
+PT=ptLoad();
 const ptSave = () => { try{ localStorage.setItem(PT_KEY, JSON.stringify(PT)); }catch(e){} };
 const ptToday = () => { const d=new Date(); return d.getFullYear()+"-"+(d.getMonth()+1)+"-"+d.getDate(); };
 const ptMin = s => { const [h,m]=String(s||"0:0").split(":").map(Number); return (h||0)*60+(m||0); };
@@ -9922,7 +9929,8 @@ const ptOver = () => PT.cap && PT.used >= PT.limit*60;
 const ptPlaying = () => scene==="game" || (scene==="poem" && typeof poemState!=="undefined" && (poemState==="countdown" || poemState==="play"));
 function ptLineRender(){
   const used=Math.floor(PT.used/60);
-  $("ptLineText").textContent = `⏱ 今日遊んだ時間 ${ptHM(used)}`+(PT.cap?` / ${ptHM(PT.limit)}まで`:"")+(PT.ban?` ・ ${PT.from}〜${PT.to} は遊べません`:"");
+  $("ptLineText").textContent = !PT.ban && !PT.cap ? "⏱ タイマー オフ"
+    : `⏱ 今日遊んだ時間 ${ptHM(used)}`+(PT.cap?` / ${ptHM(PT.limit)}まで`:"")+(PT.ban?` ・ ${PT.from}〜${PT.to} は遊べません`:"");
   if(ptOpen) $("ptToday").innerHTML = `今日遊んだ時間 <b>${ptHM(used)}</b>`+(PT.cap?`(あと ${ptHM(Math.max(0,Math.ceil((PT.limit*60-PT.used)/60)))})`:"");
 }
 function ptWarn(msg){
@@ -9955,7 +9963,7 @@ function ptOpenWin(){
   ptOpen=true;
   $("ptBan").checked=!!PT.ban; $("ptFrom").value=PT.from; $("ptTo").value=PT.to;
   $("ptCap").checked=!!PT.cap; $("ptLimit").value=String(PT.limit);
-  $("ptNote").textContent=""; ptRowState(); ptLineRender();
+  $("ptNote").textContent="変えるとすぐに保存されます"; ptRowState(); ptLineRender();
   $("pt").classList.add("open");
 }
 function ptCloseWin(){ ptOpen=false; $("pt").classList.remove("open"); try{ document.activeElement && document.activeElement.blur(); }catch(e){} }
@@ -9965,15 +9973,15 @@ function ptSaveWin(){
   PT=ptLoad();
   Object.assign(PT, { ban:$("ptBan").checked, from, to, cap:$("ptCap").checked, limit:+$("ptLimit").value||60 });
   ptSave(); ptCheck(); ptLineRender();
-  $("ptNote").textContent="保存しました";
+  $("ptNote").textContent = (PT.ban||PT.cap) ? "保存しました" : "保存しました(タイマーはオフです)";
 }
 $("ptLimit").innerHTML=[15,30,45,60,90,120,150,180,240,300,360,480].map(m=>`<option value="${m}">${ptHM(m)}</option>`).join("");
 $("ptBtn").addEventListener("click",ptOpenWin);
 $("ptLockSet").addEventListener("click",ptOpenWin);
 $("ptClose").addEventListener("click",ptCloseWin);
 $("ptSave").addEventListener("click",ptSaveWin);
-$("ptBan").addEventListener("change",ptRowState);
-$("ptCap").addEventListener("change",ptRowState);
+for(const id of ["ptBan","ptCap"]) $(id).addEventListener("change",()=>{ ptRowState(); ptSaveWin(); });
+for(const [id,box] of [["ptFrom","ptBan"],["ptTo","ptBan"],["ptLimit","ptCap"]]) $(id).addEventListener("change",()=>{ $(box).checked=true; ptRowState(); ptSaveWin(); });
 $("pt").addEventListener("click",e=>{ if(e.target===$("pt")) ptCloseWin(); });
 /* 設定の窓・遊べない画面が出ている間は、ゲームのキー操作を止める */
 window.addEventListener("keydown",e=>{
