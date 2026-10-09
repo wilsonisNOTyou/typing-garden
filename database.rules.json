@@ -11,7 +11,7 @@
           ],
           "$id": {
             ".write": true,
-            ".validate": "$diff.matches(/^(easy|normal|hard|ta-easy|ta-normal|ta-hard|oneshot|toeic-type|toeic-choice|toeic-fill)$/) && newData.hasChildren(['n', 's', 't']) && newData.child('n').isString() && newData.child('n').val().length >= 1 && newData.child('n').val().length <= 10 && newData.child('s').isNumber() && newData.child('s').val() >= 0 && newData.child('s').val() <= 20000 && (!$diff.matches(/^(easy|normal|hard)$/) || newData.child('s').val() <= 1500) && newData.child('t').isNumber() && (!newData.child('e').exists() || (newData.child('e').isNumber() && newData.child('e').val() >= 3)) && (!newData.child('m').exists() || newData.child('m').isNumber())"
+            ".validate": "$diff.matches(/^(easy|normal|hard|ta-easy|ta-normal|ta-hard|oneshot|toeic-type|toeic-choice|toeic-fill)$/) && newData.hasChildren(['n', 's', 't']) && newData.child('n').isString() && newData.child('n').val().length >= 1 && newData.child('n').val().length <= 10 && newData.child('s').isNumber() && newData.child('s').val() >= 0 && newData.child('s').val() <= 20000 && (!$diff.matches(/^(easy|normal|hard)$/) || newData.child('s').val() <= 1500) && newData.child('t').isNumber() && (!newData.child('e').exists() || (newData.child('e').isNumber() && newData.child('e').val() >= 3)) && (!newData.child('m').exists() || newData.child('m').isNumber()) && (!newData.child('l').exists() || (newData.child('l').isString() && newData.child('l').val().length <= 4)) && (!newData.child('w').exists() || (newData.child('w').isNumber() && newData.child('w').val() >= 2 && newData.child('w').val() <= 15))"
           }
         }
       },
