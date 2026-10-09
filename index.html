@@ -6667,8 +6667,26 @@ function gainGur(id){   // 返す文は、その宝物をはじめて手に入�
   return "";
 }
 const guardEvery = () => ev("λ",8,5,11);   // SR以上が1つ確定する間隔
-let gachaNote=[];   // 演出が終わってから出す台所の宝物の知らせ(はじめての1回だけ)
-function flushGachaNote(){ for(const m of gachaNote) toast(m,"good mut sup",15000,true); gachaNote=[]; }
+let gachaNote=[];   // 演出が終わってから出す宝物の知らせ { id, m(はじめての知らせ) / swap(上限で換えた) }
+/* 演出のあとに知らせを出す。はじめての宝物はひとつずつ(長めに)、上限まで来ていてキーに換えた分と2枚目からの土地の権利書は、まとめて1つの短い知らせにする */
+function flushGachaNote(){
+  const swap={}, firsts=[]; let deeds=0;
+  for(const n of gachaNote){
+    if(n.swap) swap[n.id]=(swap[n.id]||0)+1;
+    else if(n.m) firsts.push(n.m);
+    else if(n.id==="deed") deeds++;
+  }
+  for(const m of firsts) toast(m,"good mut sup",15000,true);
+  const parts=[];
+  if(deeds) parts.push(`${ico(GUR.deed)} 土地の権利書を ${fmtNum(deeds)}枚 手に入れました(持っている権利書 ${fmtNum(S.deeds||0)}枚)`);
+  const ids=Object.keys(swap);
+  if(ids.length){
+    const n=ids.reduce((a,k)=>a+swap[k],0);
+    parts.push(`上限まで来ている宝物 ${ids.map(k=>`${ico(GUR[k])}${esc(GUR[k].name)}×${fmtNum(swap[k])}`).join("・")} のかわりに、${fmtNum(n*1000000)}キー を受け取りました`);
+  }
+  if(parts.length) toast(parts.join("<br>"),"good",5000,true);
+  gachaNote=[];
+}
 function buyGachaPass(n,m="n"){
   if(gachaPass(n,m)) return;
   if(!spend(passPrice(n,m))) return;
@@ -6712,7 +6730,13 @@ function drawGacha(n){
       if(Math.random()<ev("ζ",.2,1,0)){ S.food[x.id]++; x.dbl=true; }
       continue;
     }
-    if(GUR[x.id]){ const m=gainGur(x.id); if(S.got[x.id]===1 || x.id==="deed" || m.includes("かわりに")) gachaNote.push(m); continue; }   // 知らせは、その宝物をはじめて手に入れたときだけ(土地の権利書は毎回)
+    if(GUR[x.id]){   // 知らせは、その宝物をはじめて手に入れたときだけ。上限で換えた分と2枚目からの土地の権利書は、あとでまとめて知らせる
+      const m=gainGur(x.id);
+      if(m.includes("かわりに")) gachaNote.push({ id:x.id, swap:true });
+      else if(S.got[x.id]===1) gachaNote.push({ id:x.id, m });
+      else if(x.id==="deed") gachaNote.push({ id:"deed" });
+      continue;
+    }
     if(S.treasSell===2 && CROP[x.id] && CROP[x.id].treasure && treasFull(CROP[x.id])){   // 貴重品の種の自動売却(上限まで届いた種)
       x.sold=TREAS_SEED_PRICE;
       S.money+=x.sold; S.totalSales+=x.sold;
