@@ -293,6 +293,12 @@ body:is(.dishfx-gold,.dishfx-dia,.dishfx-noon,.dishfx-jade):not(.garden):not(.wa
 #roseFx .fx-rgb.b{background:radial-gradient(circle, rgba(50,90,255,.95), rgba(50,90,255,.35) 55%, transparent 70%); --a:240deg; animation-delay:-9.33s}
 @keyframes fxOrbit{from{transform:rotate(0deg) translateX(16vmin) rotate(0deg)} to{transform:rotate(360deg) translateX(16vmin) rotate(-360deg)}}
 body.dishfx-lucky:not(.garden):not(.washi) #app{text-shadow:0 1px 3px rgba(0,0,0,.6)}
+/* 画面の色の料理: 背景が明るい色でも読めるよう、文字に濃いふちどりをつけ、薄い文字は明るくする */
+body.dishtheme:not(.garden):not(.washi) #app{text-shadow:0 0 2px rgba(0,0,0,.9), 0 0 6px rgba(0,0,0,.55), 0 1px 2px rgba(0,0,0,.8)}
+body.dishtheme:not(.garden):not(.washi) #app :is(.hint,.tq-credit,.best-line,.subtitle,.tq-sub,.tq-rowl,.mode-head){color:#eef1f6; opacity:1}
+body.dishtheme:not(.garden):not(.washi) #app :is(.kbd,.kbdh):not(.poem *){color:#eef1f6}
+body.dishlight:not(.garden):not(.washi)::after{content:""; position:fixed; inset:0; background:rgba(0,0,0,.3); pointer-events:none; z-index:0}
+body.dishlight:not(.garden):not(.washi) #app{position:relative; z-index:1}
 .screen{display:none; text-align:center}
 .screen.active{display:block; animation:fadein .25s ease}
 @keyframes fadein{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
@@ -8720,7 +8726,7 @@ function applyTheme(){
   const kd=kamadoNow(nb,ob);   // 永遠のかまど(食べたことのある料理の色)
   const order=[kd, ob, nb].filter(Boolean);   // かまど → 先に食べた料理 → あとに食べた料理
   const de=document.documentElement;
-  if(!order.length){ themeKey=""; document.body.classList.remove("dishtheme","dishfun","dishsplit","dishsplit3","dishmono","dishglass"); roseFx(""); for(const v of THEME_VARS) de.style.removeProperty(v); themeFloat(false); return; }
+  if(!order.length){ themeKey=""; document.body.classList.remove("dishtheme","dishfun","dishsplit","dishsplit3","dishmono","dishglass","dishlight"); roseFx(""); for(const v of THEME_VARS) de.style.removeProperty(v); themeFloat(false); return; }
   const b=nb||kd, d=DISH[b.d];   // 板などの色の基準: いちばんあとに食べた料理(なければかまど)
   const key=order.map(x=>x.d+":"+x.t).join("|"); if(key===themeKey) return; themeKey=key;
   const colOf = x => { const d=DISH[x.d]; return (d.colors && d.colors[x.t]) || d.accent||d.tint||d.color; };   // ローズティーは段階ごとの色
@@ -8733,6 +8739,8 @@ function applyTheme(){
   const sec=(a,b)=>`polygon(${W/2}px ${H/2}px, ${Pt(a)}, ${Pt((a+b)/2)}, ${Pt(b)})`;
   const regs = order.length===1 ? [""] : order.length===2 ? ["inset(0 50% 0 0)","inset(0 0 0 50%)"] : [sec(-60,60), sec(180,300), sec(60,180)];
   roseFx(order.map((x,i)=>({ look:DISH[x.d].look||"", clip:regs[i] })).filter(x=>x.look));
+  const lumOf = h => { const m=/^#([0-9a-f]{6})$/i.exec(h||""); if(!m) return .3; const n=parseInt(m[1],16), f=v=>{ v/=255; return v<=.03928?v/12.92:Math.pow((v+.055)/1.055,2.4); }; return .2126*f(n>>16)+.7152*f((n>>8)&255)+.0722*f(n&255); };
+  document.body.classList.toggle("dishlight", cols.reduce((s,c)=>s+lumOf(c),0)/cols.length > .4);   // 淡い色: 背景を少し暗く
   // 2色: 左右に半分ずつ(左が かまど・先に食べた料理)。3色: 時計の12時に かまど、4時に あとに食べた料理、8時に 先に食べた料理
   document.body.classList.toggle("dishsplit", cols.length===2);
   document.body.classList.toggle("dishsplit3", cols.length===3);
