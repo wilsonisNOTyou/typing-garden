@@ -4516,7 +4516,7 @@ const CROPS = [
    お店・ガチャ・村人とは関係しない(CROPS には入れず、CROP にだけ載せる) */
 /* [レベル, 名前, 花びらの明るい色・濃い色, 売値, 変異の名前・色, 超変異の名前・色, 画面の色の名前(ふつう・変異・超変異)] */
 const ROSE_DEF = [
-  ["b1","白い薔薇","#fbfaf5","#d6d0c0",500, "クリーム色の薔薇","#fff3c8","#e3c97e", "真珠色の薔薇","#f6eef6","#c4b6d8", ["白","クリーム色","真珠色"]],
+  ["b1","白薔薇","#fbfaf5","#d6d0c0",500, "クリーム色の薔薇","#fff3c8","#e3c97e", "真珠色の薔薇","#f6eef6","#c4b6d8", ["白","クリーム色","真珠色"]],
   ["b2","黄色い薔薇","#ffd84a","#dca416",600, "レモン色の薔薇","#fff35a","#d4c210", "琥珀色の薔薇","#f2a832","#b0640c", ["黄色","レモン色","琥珀色"]],
   ["b3","ピンクの薔薇","#ff9ec4","#de5e98",700, "桜色の薔薇","#ffd8e6","#eea2be", "珊瑚色の薔薇","#ff8a7a","#d4564c", ["ピンク","桜色","珊瑚色"]],
   ["470","オレンジの薔薇","#ff9a3a","#d4640c",800, "杏色の薔薇","#ffc184","#dc8a40", "夕焼け色の薔薇","#ff6a3a","#c03428", ["オレンジ","杏色","夕焼け色"]],
@@ -4626,18 +4626,18 @@ const ROSE_LORE = {
   i2:["紅茶を思わせる、渋い茶色の薔薇。派手さはないが、見るほどに味わいが出る。",
       "色あせた写真のような、懐かしい茶色。昔のことを思い出しそうになる。",
       "磨いた銅のように、赤く輝く茶色。指で弾くと、澄んだ音がしそうだ。"],
-  gold:["金色に実ったものの隣で、その輝きを映すように咲いた薔薇。花びらが金箔のように光る。"],
-  dia:["まばゆく実ったものの光を浴びて咲いた薔薇。花びらは硬く透きとおり、光を七色に散らす。"],
-  bw:["ほかに何もない畑で、ひとりきりで咲いた薔薇。花びらの半分が白く、半分が黒い。"],
-  clear:["水を一滴も知らずに咲いた薔薇。花びらがガラスのように透きとおっている。"],
-  moon:["真夜中、誰も見ていない時刻にひとりでに咲いた薔薇。月の光を吸って、ほのかに青白く光る。"],
-  dawn:["夜明けとともに開いた薔薇。花びらに、空が朝に変わる瞬間の色が残っている。"],
-  noon:["太陽がいちばん高い時刻に咲いた薔薇。触れると、日なたのようにあたたかい。"],
-  rust:["摘まれるのを待ちくたびれた薔薇。花びらが古い鉄のような色に変わり、それでも散らずに残っている。"],
-  jade:["色とりどりの薔薇に囲まれて咲いた薔薇。まわりの色をすべて混ぜ合わせたような、深い緑の石の色。"],
-  lucky:["千輪に一輪だけ、何の前ぶれもなく咲くという薔薇。見つけた日は、なぜか一日じゅういいことが続く。"],
-  tri:["三つの色に染まった画面の光を浴びて咲いた薔薇。赤・緑・青の花びらが重なるところだけ、白く光って見える。"],
-  rainbow:["急がず、近道もせず、ただ時の流れだけで咲いた薔薇。花びら一枚一枚が違う色をしている。"],
+  gold:["金色に実ったものの隣で、その光を少しずつ分けてもらいながら咲いた薔薇。花びらは薄く打ち延ばした金箔のようで、指で触れるのがためらわれる。"],
+  dia:["まばゆく実ったものの光を、ひと晩じゅう浴び続けて咲いた薔薇。花びらは硬く透きとおり、朝日を受けると部屋じゅうに小さな虹を散らす。"],
+  bw:["白薔薇と黒薔薇に挟まれて、どちらの色にも決められないまま咲いた薔薇。花びらの半分が白く、半分が黒い。その境目には、灰色がひとつもない。"],
+  clear:["ほかに何もない畑で、ひとりきりで咲いた薔薇。比べる相手がいなかったせいか、自分の色を持たないまま、ガラスのように透きとおっている。"],
+  moon:["真夜中、誰も見ていない時刻にひっそりと開いた薔薇。月の光をためこんで、暗い部屋でもほのかに青白く光る。"],
+  dawn:["夜が明ける、ちょうどその時刻に開いた薔薇。花びらには、紫の空が橙に変わっていく一瞬の色が閉じこめられている。"],
+  noon:["太陽がいちばん高い時刻に開いた薔薇。花びらに日だまりのぬくもりが残っていて、触れると手のひらがあたたかい。"],
+  rust:["摘まれるのを一日じゅう待ちくたびれた薔薇。花びらは古い鉄のような色に変わってしまったけれど、それでも散らずに咲いている。"],
+  jade:["急かすものも、手を貸すものもない時間のなかで、ただ静かに咲いた薔薇。長いあいだ誰にも気づかれずにこぼれた涙が、ひと粒の翡翠になったような深い緑。"],
+  lucky:["千輪に一輪、何の前ぶれもなく咲くという薔薇。見つけた日は、なぜか一日じゅういいことが続く。その理由は、誰も知らない。"],
+  tri:["赤・緑・青の三つの光に照らされて咲いた薔薇。三色の花びらが重なるところだけ、白く光って見える。"],
+  rainbow:["色とりどりの薔薇に囲まれて咲いた薔薇。まわりの薔薇の色を一枚ずつ映して、花びらの一枚一枚が違う色をしている。"],
 };
 for(const r of ROSE_ALL){
   const L=ROSE_LORE[r.id.slice(5)];
@@ -5374,7 +5374,6 @@ function isWet(fi,k,now,cov){
 function grow(p,add,base,src){
   const before=p.crop.grown, n=need(p.crop);
   if(src && add>0 && !(p.crop.src||"").includes(src)) p.crop.src=(p.crop.src||"")+src;   // 薔薇: 何で育ったか
-  if(src==="t" && add>0) p.crop.tg=(p.crop.tg||0)+add/effGrowth();   // 薔薇: 時間で自然に育った長さ
   p.crop.grown=Math.min(n, before+add);
   if(p.crop.grown>=n && !p.crop.ripeAt){
     p.crop.ripeAt=base+(n-before);
@@ -5408,7 +5407,7 @@ function rosePick(){
 }
 const plantId = id => id==="rose" ? rosePick() : id;
 /* 実った瞬間に、育ち方を見てシークレットの色に変わることがある。
-   src: これまでに育った手段(t 時間 / s 時間の短縮 / f 肥料 / c 料理の時計 / x そのほか)。tg: 時間で自然に育った長さ
+   src: これまでに育った手段(t 時間 / s 時間の短縮 / f 肥料 / c 料理の時計 / x そのほか)
    by: 実らせた手段 / when: 実った時刻 */
 function roseSecret(p,by,when){
   const fi=S.fields.findIndex(f=>KEYS.some(k=>f[k]===p)); if(fi<0) return;
@@ -5416,19 +5415,20 @@ function roseSecret(p,by,when){
   const other = (fx,fn) => KEYS.some(k=>{ const q=fx[k]; return q!==p && q.crop && fn(q); });
   const carrot = sup => other(f,q=>q.crop.id==="carrot" && isRipe(q) && q.crop.mut && !!q.crop.sup===sup);
   const kinds = new Set(KEYS.map(k=>f[k]).filter(q=>q!==p && q.crop && CROP[q.crop.id].rose && isRipe(q)).map(q=>q.crop.id+":"+(q.crop.sup?5:q.crop.mut?3:0))).size;
+  const ripeRose = rid => other(f,q=>q.crop.id===rid && isRipe(q) && !q.crop.mut);
   const hour = by==="t" ? new Date(when).getHours() : -1;   // 自然に実ったときだけ(短縮で途中まで進めるのはよい)
   let id=null;
   if(Math.random()<0.001) id="rose_lucky";                // 1/1000
   else if(carrot(true)) id="rose_dia";
   else if(carrot(false)) id="rose_gold";
-  else if(!S.fields.some(fx=>other(fx,q=>!q.vil))) id="rose_bw";
-  else if(kinds>=10) id="rose_jade";                       // 同じ畑に10色以上の薔薇が実っている
+  else if(!S.fields.some(fx=>other(fx,q=>!q.vil))) id="rose_clear";   // ほかの畑にも何もない(村人の区画は数えない)
+  else if(kinds>=10) id="rose_rainbow";                    // 同じ畑に10色以上の薔薇が実っている
+  else if(ripeRose("rose_b1") && ripeRose("rose_990")) id="rose_bw";   // 同じ畑に白薔薇と黒薔薇(ふつう)が実っている
   else if(roseThemeN()===3) id="rose_tri";                 // 画面の色が3色のとき
   else if(hour===0) id="rose_moon";                        // 0時台
   else if(hour===5) id="rose_dawn";                        // 5時台
   else if(hour===12) id="rose_noon";                       // 12時台
-  else if(src.includes("f") && !/[scx]/.test(src) && (p.crop.tg||0)<=60000) id="rose_clear";   // 肥料だけ(自然に育つのは1分まで)
-  else if(src==="t") id="rose_rainbow";
+  else if(src==="t") id="rose_jade";                       // 時間だけで育った(短縮・肥料なし)
   if(!id) return;
   p.crop.id=id; p.crop.mut=false; p.crop.sup=false; p.crop.mutN=0;
 }
@@ -7955,7 +7955,7 @@ function teaSvg(tea,petal,o={}){
     +`<path d="M11.6 10.6c-1.2-1.6 1-2.6 0-4.6M16 10c-1.2-1.6 1-2.6 0-4.6M20.2 10.6c-1.2-1.6 1-2.6 0-4.6" stroke="#ffffff" stroke-width=".9" fill="none" opacity=".55" stroke-linecap="round"/>`
     +(o.sp?roseSpark(o.sp):"")+`</svg>`;
 }
-const teaName = nm => nm==="黒薔薇" ? "黒いローズティー" : nm.replace("薔薇","ローズティー");
+const teaName = nm => nm==="黒薔薇" ? "黒いローズティー" : nm==="白薔薇" ? "白いローズティー" : nm.replace("薔薇","ローズティー");
 const ROSE_TEAS = ROSE_ALL.map(r=>{
   const id="rt_"+r.id.slice(5);
   if(r.secret){
