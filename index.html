@@ -165,6 +165,7 @@ html.mobile .tq-lv small{font-size:.68rem}
 .tq-opt .no{flex:none; width:1.6rem; height:1.6rem; border-radius:50%; display:grid; place-items:center; background:rgba(255,255,255,.1); font-size:.85rem}
 .tq-opt.ok{border-color:#5fbf6a; background:rgba(95,191,106,.22)}
 .tq-opt.ng{border-color:#e05a4a; background:rgba(224,90,74,.22)}
+.tq-opt.tq-idk{grid-column:1/-1; justify-content:center; min-height:2.6rem; padding:.5rem .9rem; color:var(--steel); font-size:.92rem}   /* 分からない */
 .tq-fb{min-height:1.6em; margin-top:.7rem; font-size:1.05rem}
 .tq-fb.ok{color:#7fdc8a}
 .tq-fb.ng{color:#ff8a7a}
@@ -10930,8 +10931,9 @@ function tqNext(){
       $("tqWord").innerHTML=tqEsc(s).replace(/\[[^\]]*\]/,'<span class="tq-blank">　　　　</span>');
     }else $("tqWord").textContent=w.en;
     tqChoices = tqFmt==="fill" ? tqFillChoices(w) : tqMakeChoices(w);
-    $("tqOpts").innerHTML=tqChoices.map((c,i)=>`<button class="btn tq-opt${tqFmt==="fill"?" en":""}" data-i="${i}"><span class="no">${i+1}</span><span>${tqEsc(c.txt)}</span></button>`).join("");
-    $("tqHint").textContent = tqKind==="one" ? "1〜4 で選ぶ ・ 間違えたら終わり ・ Esc やめる(そこまでの記録が残ります)" : "1〜4 で選ぶ(正解で2点) ・ Esc やめる";
+    $("tqOpts").innerHTML=tqChoices.map((c,i)=>`<button class="btn tq-opt${tqFmt==="fill"?" en":""}" data-i="${i}"><span class="no">${i+1}</span><span>${tqEsc(c.txt)}</span></button>`).join("")
+      +`<button class="btn tq-opt tq-idk" data-i="-1"><span class="no">5</span><span>分からない</span></button>`;   // 当てずっぽうで正解にしたくないとき
+    $("tqHint").textContent = tqKind==="one" ? "1〜4 で選ぶ ・ 5 分からない ・ 間違えたら終わり ・ Esc やめる(そこまでの記録が残ります)" : "1〜4 で選ぶ ・ 5 分からない ・ Esc やめる";
   }
 }
 /* ---- 入力 ---- */
@@ -11037,9 +11039,10 @@ function tqFillChoices(w){
 }
 function tqChoose(i){
   if(tqPhase!=="play" || tqFmt==="type") return;
-  const w=tqWords[tqI], c=tqChoices[i]; if(!c) return;
-  document.querySelectorAll("#tqOpts .tq-opt").forEach((b,j)=>{ if(tqChoices[j].ok) b.classList.add("ok"); else if(j===i) b.classList.add("ng"); });
-  tqMark(w.en,c.ok); tqLog.push({ w, ok:c.ok });
+  const w=tqWords[tqI], c = i<0 ? { ok:false, idk:true } : tqChoices[i]; if(!c) return;   // i<0: 分からない(不正解と同じに数える)
+  document.querySelectorAll("#tqOpts .tq-opt:not(.tq-idk)").forEach((b,j)=>{ if(tqChoices[j].ok) b.classList.add("ok"); else if(j===i) b.classList.add("ng"); });
+  if(c.idk) $("tqOpts").querySelector(".tq-idk").classList.add("ng");
+  tqMark(w.en,c.ok); tqLog.push({ w, ok:c.ok, idk:!!c.idk });
   if(tqFmt==="fill"){
     const [s,,ja]=TQ_SENT[w.en];
     $("tqWord").innerHTML=tqEsc(s).replace(/\[([^\]]*)\]/,'<span class="tq-fillin">$1</span>');
@@ -11053,7 +11056,7 @@ function tqChoose(i){
     $("tqFb").className="tq-fb ok"; $("tqFb").textContent=`正解! キー +${tqNum(g.sc)} ・ 農園の時間 +${tqHours(g.min)}`+(g.rose?` ・ 🌹 薔薇の種 +${tqNum(g.rose)}`:"");
     if(tqKind==="one") tqOneOk(); else{ $("tqScore").textContent=tqNum(tqPts); }
   }else{
-    $("tqFb").className="tq-fb ng"; $("tqFb").textContent = tqKind==="one" ? "ざんねん…ここで終わり(緑が正解)" : "ざんねん…(緑が正解)";
+    $("tqFb").className="tq-fb ng"; $("tqFb").textContent = c.idk ? (tqKind==="one" ? "分からない…ここで終わり(緑が正解)" : "答えは緑のものです") : tqKind==="one" ? "ざんねん…ここで終わり(緑が正解)" : "ざんねん…(緑が正解)";
     if(tqKind==="one") tqOver=true;
   }
   c.ok ? sndClear() : sndMiss();
@@ -11093,7 +11096,7 @@ function tqFinish(){
     $("tqResSum").innerHTML=`${tqLvName(tqLv)} ・ ${tqFmtName(tqFmt)} ・ 正解 <b>${ok}</b> / ${tqLog.length}語`+openMsg+sent+roseMsg;
   }
   $("tqAgain").innerHTML=(tqKind==="one"?"もう一回":"もう1セット")+' <span class="kbdh">Enter</span>';
-  $("tqResList").innerHTML=tqLog.map(x=>`<li><span class="mk">${x.ok?"○":x.half?"△":"✕"}</span><span class="w">${tqEsc(x.w.en)}</span><span class="m">${tqEsc(x.w.means.map(m=>m.j).join("、"))}</span></li>`).join("");
+  $("tqResList").innerHTML=tqLog.map(x=>`<li><span class="mk">${x.ok?"○":x.half?"△":x.idk?"？":"✕"}</span><span class="w">${tqEsc(x.w.en)}</span><span class="m">${tqEsc(x.w.means.map(m=>m.j).join("、"))}</span></li>`).join("");
   tqFarm(); tqView("tqResult");
 }
 /* ノーミス勝負の記録をみんなのランキングに載せる(名前が決まっていれば自動) */
@@ -11171,7 +11174,7 @@ function tqKey(e){
   }
   if(tqPhase==="wait"){ if(tqFmt!=="type" && (k==="Enter"||k===" ")){ e.preventDefault(); tqNext(); } return; }
   if(tqPhase!=="play") return;
-  if(tqFmt!=="type"){ if(n>=1 && n<=4){ e.preventDefault(); tqChoose(n-1); } return; }
+  if(tqFmt!=="type"){ if(n>=1 && n<=4){ e.preventDefault(); tqChoose(n-1); } else if(n===5){ e.preventDefault(); tqChoose(-1); } return; }   // 5: 分からない
   if(e.ctrlKey || e.metaKey || e.altKey) return;
   if(k==="Process" || e.isComposing){ $("tqFb").className="tq-fb ng"; $("tqFb").textContent="日本語入力をオフ(半角英数)にして打ってください"; return; }
   if(k.length===1 || (k==="Enter" && tqPend)){ e.preventDefault(); tqType(k); }
