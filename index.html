@@ -165,6 +165,7 @@ html.mobile .tq-lv small{font-size:.68rem}
 .tq-opt .no{flex:none; width:1.6rem; height:1.6rem; border-radius:50%; display:grid; place-items:center; background:rgba(255,255,255,.1); font-size:.85rem}
 .tq-opt.ok{border-color:#5fbf6a; background:rgba(95,191,106,.22)}
 .tq-opt.ng{border-color:#e05a4a; background:rgba(224,90,74,.22)}
+.tq-opt.tq-idk{grid-column:1/-1; justify-content:center; min-height:2.6rem; padding:.5rem .9rem; color:var(--steel); font-size:.92rem}   /* 分からない */
 .tq-fb{min-height:1.6em; margin-top:.7rem; font-size:1.05rem}
 .tq-fb.ok{color:#7fdc8a}
 .tq-fb.ng{color:#ff8a7a}
@@ -10769,6 +10770,13 @@ const TQ_SET=10, TQ_SEC_MIN=2, TQ_SEC_MAX=15;
 const TQ_GIFT_SC=10, TQ_GIFT_MIN=180;   // 1問正解で農園に届くキーと、進む農園の時間(分)。ノーミス勝負は10問ごとに倍
 /* この1問の正解で届くもの(ノーミス勝負は、それまでの正解数10問ごとに倍) */
 const TQ_UP_N=10;
+const TQ_LIMIT = { choice:10, fill:20 };   // 一本勝負の1問の秒数(4択・穴埋め4択)
+function tqClock(sec){   // 残り時間のバー。0 になったら時間切れ
+  $("tqBarW").style.display="";
+  const bar=$("tqBar"); bar.style.transition="none"; bar.style.transform="scaleX(1)"; void bar.offsetWidth;
+  bar.style.transition=`transform ${sec}s linear`; bar.style.transform="scaleX(0)";
+  tqTimer=setTimeout(()=>tqChoose(-2), sec*1000);
+}
 const tqFillX = () => tqFmt==="fill" ? 2 : 1;   // 穴埋め4択は倍
 const tqGift = () => { const x = (tqKind==="one" ? 2**Math.floor(tqOk/10) : 1) * tqFillX(); return { sc:TQ_GIFT_SC*x, min:TQ_GIFT_MIN*x, rose: tqKind==="one" ? x : 0 }; };
 /* 薔薇の種: 10語セットは終わったときに(7問以下 1個・8問以上 3個・全問正解 10個)、ノーミス勝負は1問正解ごとに(1〜10問目は1個、11〜20問目は2個…と倍々)。
@@ -10861,7 +10869,7 @@ function tqMenu(){
   $("tqSecV").textContent=tqSec;
   $("tqNote").textContent =
     tqFmt==="type" && window.IS_MOBILE ? "入力はパソコンで遊べます。スマホでは4択か穴埋め4択を選んでください"
-    : tqKind==="one" ? `選んだレベルの単語を全部正解でクリア(1問でも間違えたら終わり)。正解ごとにキーと農園の時間と薔薇の種が届き、${TQ_UP_N}問ごとにどれも倍になります`+(tqFmt==="fill"?"(穴埋め4択はさらに倍)":"")
+    : tqKind==="one" ? `選んだレベルの単語を全部正解でクリア(1問でも間違えたら終わり${tqFmt!=="type"?`・1問${TQ_LIMIT[tqFmt]}秒まで`:""})。正解ごとにキーと農園の時間と薔薇の種が届き、${TQ_UP_N}問ごとにどれも倍になります`+(tqFmt==="fill"?"(穴埋め4択はさらに倍)":"")
     : `1セット終えると薔薇の種が届きます(${TQ_UNLOCK_SET-1}問以下 1個・${TQ_UNLOCK_SET}問以上 3個・全問正解 10個)`+(tqFmt==="fill"?"。穴埋め4択はキー・時間・薔薇の種がどれも倍":"");
   // まだ閉じているレベルがあれば、解放のしかたを添える
   if(TQ_CHAIN.some(k=>!tqIsOpen(k))) $("tqNote").textContent += ($("tqNote").textContent?" ・ ":"")+`合格: 10語セットで${TQ_UNLOCK_SET}問以上、ノーミス勝負で${TQ_UNLOCK_ONE}問以上正解すると次のレベルが開きます`;
@@ -10923,15 +10931,17 @@ function tqNext(){
       ? `意味をローマ字で打つ(どの訳を打っても正解) ・ ${tqSec}秒以内に打てないと終わり ・ Esc やめる(そこまでの記録が残ります)`
       : "意味をローマ字で打つ(どの訳を打っても正解) ・ 訳が出る前に打てたら3点、出たあとは1点 ・ Esc やめる";
   }else{
-    $("tqBarW").style.display="none"; $("tqTyped").innerHTML="";
+    $("tqTyped").innerHTML="";
     $("tqMean").className="tq-mean"; $("tqMean").textContent="";
     if(tqFmt==="fill"){
       const [s]=TQ_SENT[w.en];
       $("tqWord").innerHTML=tqEsc(s).replace(/\[[^\]]*\]/,'<span class="tq-blank">　　　　</span>');
     }else $("tqWord").textContent=w.en;
     tqChoices = tqFmt==="fill" ? tqFillChoices(w) : tqMakeChoices(w);
-    $("tqOpts").innerHTML=tqChoices.map((c,i)=>`<button class="btn tq-opt${tqFmt==="fill"?" en":""}" data-i="${i}"><span class="no">${i+1}</span><span>${tqEsc(c.txt)}</span></button>`).join("");
-    $("tqHint").textContent = tqKind==="one" ? "1〜4 で選ぶ ・ 間違えたら終わり ・ Esc やめる(そこまでの記録が残ります)" : "1〜4 で選ぶ(正解で2点) ・ Esc やめる";
+    $("tqOpts").innerHTML=tqChoices.map((c,i)=>`<button class="btn tq-opt${tqFmt==="fill"?" en":""}" data-i="${i}"><span class="no">${i+1}</span><span>${tqEsc(c.txt)}</span></button>`).join("")
+      +`<button class="btn tq-opt tq-idk" data-i="-1"><span class="no">5</span><span>分からない</span></button>`;   // 当てずっぽうで正解にしたくないとき
+    $("tqHint").textContent = tqKind==="one" ? `1〜4 で選ぶ ・ 5 分からない ・ 間違えたら終わり ・ ${TQ_LIMIT[tqFmt]}秒で時間切れ ・ Esc やめる(そこまでの記録が残ります)` : "1〜4 で選ぶ ・ 5 分からない ・ Esc やめる";
+    if(tqKind==="one") tqClock(TQ_LIMIT[tqFmt]); else $("tqBarW").style.display="none";
   }
 }
 /* ---- 入力 ---- */
@@ -11037,9 +11047,12 @@ function tqFillChoices(w){
 }
 function tqChoose(i){
   if(tqPhase!=="play" || tqFmt==="type") return;
-  const w=tqWords[tqI], c=tqChoices[i]; if(!c) return;
-  document.querySelectorAll("#tqOpts .tq-opt").forEach((b,j)=>{ if(tqChoices[j].ok) b.classList.add("ok"); else if(j===i) b.classList.add("ng"); });
-  tqMark(w.en,c.ok); tqLog.push({ w, ok:c.ok });
+  const w=tqWords[tqI], c = i<0 ? { ok:false, idk:true, late:i===-2 } : tqChoices[i]; if(!c) return;   // i<0: 分からない(不正解と同じに数える)・-2: 時間切れ
+  clearTimeout(tqTimer);
+  { const bar=$("tqBar"); bar.style.transform=getComputedStyle(bar).transform; bar.style.transition="none"; }   // 残り時間のバーを止める
+  document.querySelectorAll("#tqOpts .tq-opt:not(.tq-idk)").forEach((b,j)=>{ if(tqChoices[j].ok) b.classList.add("ok"); else if(j===i) b.classList.add("ng"); });
+  if(c.idk && !c.late) $("tqOpts").querySelector(".tq-idk").classList.add("ng");
+  tqMark(w.en,c.ok); tqLog.push({ w, ok:c.ok, idk:!!c.idk, late:!!c.late });
   if(tqFmt==="fill"){
     const [s,,ja]=TQ_SENT[w.en];
     $("tqWord").innerHTML=tqEsc(s).replace(/\[([^\]]*)\]/,'<span class="tq-fillin">$1</span>');
@@ -11053,7 +11066,7 @@ function tqChoose(i){
     $("tqFb").className="tq-fb ok"; $("tqFb").textContent=`正解! キー +${tqNum(g.sc)} ・ 農園の時間 +${tqHours(g.min)}`+(g.rose?` ・ 🌹 薔薇の種 +${tqNum(g.rose)}`:"");
     if(tqKind==="one") tqOneOk(); else{ $("tqScore").textContent=tqNum(tqPts); }
   }else{
-    $("tqFb").className="tq-fb ng"; $("tqFb").textContent = tqKind==="one" ? "ざんねん…ここで終わり(緑が正解)" : "ざんねん…(緑が正解)";
+    $("tqFb").className="tq-fb ng"; $("tqFb").textContent = c.late ? "時間切れ…ここで終わり(緑が正解)" : c.idk ? (tqKind==="one" ? "分からない…ここで終わり(緑が正解)" : "答えは緑のものです") : tqKind==="one" ? "ざんねん…ここで終わり(緑が正解)" : "ざんねん…(緑が正解)";
     if(tqKind==="one") tqOver=true;
   }
   c.ok ? sndClear() : sndMiss();
@@ -11093,7 +11106,7 @@ function tqFinish(){
     $("tqResSum").innerHTML=`${tqLvName(tqLv)} ・ ${tqFmtName(tqFmt)} ・ 正解 <b>${ok}</b> / ${tqLog.length}語`+openMsg+sent+roseMsg;
   }
   $("tqAgain").innerHTML=(tqKind==="one"?"もう一回":"もう1セット")+' <span class="kbdh">Enter</span>';
-  $("tqResList").innerHTML=tqLog.map(x=>`<li><span class="mk">${x.ok?"○":x.half?"△":"✕"}</span><span class="w">${tqEsc(x.w.en)}</span><span class="m">${tqEsc(x.w.means.map(m=>m.j).join("、"))}</span></li>`).join("");
+  $("tqResList").innerHTML=tqLog.map(x=>`<li><span class="mk">${x.ok?"○":x.half?"△":x.late?"⏱":x.idk?"？":"✕"}</span><span class="w">${tqEsc(x.w.en)}</span><span class="m">${tqEsc(x.w.means.map(m=>m.j).join("、"))}</span></li>`).join("");
   tqFarm(); tqView("tqResult");
 }
 /* ノーミス勝負の記録をみんなのランキングに載せる(名前が決まっていれば自動) */
@@ -11171,7 +11184,7 @@ function tqKey(e){
   }
   if(tqPhase==="wait"){ if(tqFmt!=="type" && (k==="Enter"||k===" ")){ e.preventDefault(); tqNext(); } return; }
   if(tqPhase!=="play") return;
-  if(tqFmt!=="type"){ if(n>=1 && n<=4){ e.preventDefault(); tqChoose(n-1); } return; }
+  if(tqFmt!=="type"){ if(n>=1 && n<=4){ e.preventDefault(); tqChoose(n-1); } else if(n===5){ e.preventDefault(); tqChoose(-1); } return; }   // 5: 分からない
   if(e.ctrlKey || e.metaKey || e.altKey) return;
   if(k==="Process" || e.isComposing){ $("tqFb").className="tq-fb ng"; $("tqFb").textContent="日本語入力をオフ(半角英数)にして打ってください"; return; }
   if(k.length===1 || (k==="Enter" && tqPend)){ e.preventDefault(); tqType(k); }
