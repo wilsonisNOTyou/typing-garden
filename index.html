@@ -133,6 +133,9 @@ body.dishtheme.dishsplit3:not(.garden):not(.washi){
 .tq-ranklv{margin-top:.35rem}
 .tq-ranklv .btn{font-size:.8rem; padding:.25rem .55rem}
 .tq-ranklv[hidden]{display:none}
+.tq-ranklv{align-items:center}
+.tq-rktab{color:var(--steel); font-size:.72rem; margin-left:.3rem; white-space:nowrap}
+html.mobile .tq-rktab{display:none}
 .tq-sec[hidden],.tq-nextb[hidden],.tq-pos[hidden]{display:none}
 .gstat.tq-gstat{margin:.4rem auto .7rem}
 .tq-mode.on{border-color:#8fc2ff; box-shadow:0 0 0 2px #8fc2ff inset; color:#cfe4ff}
@@ -3381,6 +3384,7 @@ document.addEventListener("keydown",e=>{
   if(scene==="books"){ booksKey(e); return; }
   if(scene==="ranking"){
     if(e.key==="Escape") rankBack();
+    else if(e.key==="Tab" && !$("tqRankLvs").hidden){ e.preventDefault(); tqRankGroupStep(e.shiftKey?-1:1); }   // TOEIC: 基本・470〜990点・熟語 を切り替える
     else if(e.key==="ArrowLeft"||e.key==="ArrowRight"){
       e.preventDefault();
       const i=RANK_TABS.indexOf(rankCur), n=RANK_TABS.length;
@@ -11560,8 +11564,9 @@ window.tqRankMulti = d => { if(!/^toeic-(type|choice|fill)$/.test(d)) return nul
 window.tqRankSync = d => {
   const box=$("tqRankLvs"), on=/^toeic-/.test(d) && d!=="toeic-listen";   // リスニングはレベルがない
   box.hidden=!on; if(!on) return;
-  box.innerHTML=TQ_RANK_GROUPS.map(([k,nm])=>`<button class="btn${k===tqRankLv?" active":""}" data-lv="${k}">${nm}</button>`).join("");
+  box.innerHTML=TQ_RANK_GROUPS.map(([k,nm])=>`<button class="btn${k===tqRankLv?" active":""}" data-lv="${k}">${nm}</button>`).join("")+`<small class="tq-rktab"><span class="kbdh">Tab</span> で切り替え</small>`;
 };
+function tqRankGroupStep(dir){ const n=TQ_RANK_GROUPS.length, i=TQ_RANK_GROUPS.findIndex(g=>g[0]===tqRankLv); tqRankLv=TQ_RANK_GROUPS[(i+dir+n)%n][0]; openRanking(rankCur, playerName); }
 $("tqRankLvs").addEventListener("click",e=>{ const b=e.target.closest("[data-lv]"); if(!b) return; tqRankLv=b.dataset.lv; openRanking(rankCur, playerName); });
 setInterval(()=>{ if(tqRegWait && !nmOpen){ tqRegWait=false; if(playerName && tqPhase==="result" && scene==="toeic") tqRegister(); } },400);
 /* ---- 単語リスト ---- */
