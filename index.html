@@ -8036,14 +8036,14 @@ function teaBookDetail(){
   return `<div class="btabs"><span class="btab on">ローズティー ${roseTeaN()} / ${cells.length}色</span></div>
     <div class="bic"><span class="dbig${made?"":" unknown"}${t===5?" sup":t===3?" mut":""}">${made?dishIco(d,t):"？"}</span></div>
     <div class="bnm">${made?esc(dishName(d,t)):"？？？"}${t===5?' <small class="rq sup">超変異</small>':t===3?' <small class="rq mut">変異</small>':""}</div>
-    <div class="rgrid">${grid}</div>
     <dl>
       <dt>材料</dt><dd>${ingText(d.ing,t)}</dd>
       <dt>効果</dt><dd>${made?effLine(d,t):"？？？"}</dd>
       <dt>効く時間</dt><dd>${fmtMin(dishMin(t))}</dd>
       <dt>レシピ</dt><dd>${S.roseTeaRecipe?"持っている":`お店で買えます(${fmtNum(ROSE_TEA_COST)}キー)`}</dd>
     </dl>
-    <div class="lore ${made?"":"unknown"}">${made?esc(lore):"その色の薔薇でローズティーを作ると、ここに載ります。"}</div>`;
+    <div class="lore ${made?"":"unknown"}">${made?esc(lore):"その色の薔薇でローズティーを作ると、ここに載ります。"}</div>
+    <div class="rgrid">${grid}</div>`;
 }
 /* 永遠のかまど: ローズティーは段階ごとに色が違うので「id@段階」で持つ(ふつうは id だけ) */
 const kamaSplit = s => { const [d,g]=String(s||"").split("@"); return { d, t:+g||0 }; };
@@ -8848,19 +8848,19 @@ function roseBookDetail(){
   const grid=cells.map(([cid,ct],i)=>{ const k=qCount(cid,ct)>0;
     return `<span class="rcell${i===roseCur?" on":""}${ct===3?" mut":ct===5?" sup":""}${CROP[cid].secret?" sec":""}" data-rc="${i}">${k?icoQ(CROP[cid],ct):"❔"}</span>`; }).join("");
   const cond = r.secret ? "特別な育て方をした薔薇の種から、まれに咲きます"
-    : t===0 ? (r.lv==="ls"||r.lv==="lt" ? "TOEIC リスニングでもらえる薔薇の種から咲きます(銀の薔薇か青緑の薔薇のどちらかが届きます)" : `TOEIC 英単語の${ROSE_LVNAME[r.lv]}でもらえる薔薇の種から咲きます`)
+    : t===0 ? (r.lv==="ls"||r.lv==="lt" ? "TOEIC リスニングでもらえる薔薇の種から咲きます" : `TOEIC 英単語の${ROSE_LVNAME[r.lv]}でもらえる薔薇の種から咲きます`)
     : `${ROSE_LVNAME[r.lv]}の薔薇の種が咲くとき、${t===5?+(effSup()*100).toFixed(2):+(effMut()*100).toFixed(1)}% の確率で${t===5?"超変異":"変異"}します`;
   return `<div class="btabs"><span class="btab on">薔薇 ${roseGot()} / ${cells.length}色</span></div>
     <div class="bic q${t}">${got?icoQ(r,t):"❔"}</div>
     <div class="bnm">${got?esc(qName(id,t)):"？？？"}${t===5?' <small class="rq sup">超変異</small>':t===3?' <small class="rq mut">変異</small>':""}</div>
-    <div class="rgrid">${grid}</div>
     <dl>
       <dt>収穫</dt><dd>${fmtNum(n)}輪</dd>
       <dt>売値</dt><dd>${fmtNum(priceOf(id,t))}キー</dd>
       <dt>育つまで</dt><dd>${fmtDur(r.hours*HOUR)}</dd>
       <dt>咲く条件</dt><dd>${cond}</dd>
     </dl>
-    <div class="lore ${got?"":"unknown"}">${got?esc(loreOf(r,t)):"まだ咲かせたことがありません。咲かせると、名前と説明がわかります。"}</div>`;
+    <div class="lore ${got?"":"unknown"}">${got?esc(loreOf(r,t)):"まだ咲かせたことがありません。咲かせると、名前と説明がわかります。"}</div>
+    <div class="rgrid">${grid}</div>`;
 }
 /* 実績で数えるもの */
 const roseHarv = () => ROSE_ALL.reduce((a,r)=>a+(S.harvestBy[r.id]||0),0);
@@ -11098,7 +11098,7 @@ const TQ_FMTS=[
   // ["type","入力","意味をローマ字で打つ・決めた秒数で訳が出る"],   // 入力は一旦休止(戻すときはこの行を生かす)
   ["choice","4択","英単語の意味を4つから選ぶ"],["fill","穴埋め4択","例文の空所に入る語句を選ぶ"],["listen","リスニング","質問を聞いて、3つの応答から選ぶ"]];
 /* リスニング(応答問題): レベルは1つ(と苦手)。問題は単語と同じ形に合わせ、en に質問文を入れて正解・間違いを記録する */
-const TQ_LEVELS_L=[["ls","応答問題"],["weak","苦手"]];
+const TQ_LEVELS_L=[["ls","会話"],["weak","苦手"]];
 const TQL=LQ_RAW.map(([q,ja,a])=>({ lv:"ls", en:q, ja, a, listen:true, pos:"", means:[{j:ja,k:ja}], conf:[] }));
 const tqLevels = () => tqFmt==="listen" ? TQ_LEVELS_L : TQ_LEVELS;
 const tqUnit = () => tqFmt==="listen" ? "問" : "語";
@@ -11428,6 +11428,8 @@ function tqListenPlay(){
   const mine = f => () => { if(tok===tqSayTok) f(); };
   const hl = j => document.querySelectorAll("#tqOpts .tq-lo").forEach((b,k)=>b.classList.toggle("hl",k===j));
   const utt = (text,voice,onstart) => { const u=new SpeechSynthesisUtterance(text); if(voice) u.voice=voice; u.lang=(voice&&voice.lang)||"en-US"; u.rate = !one && tqSlow ? .75 : .95; u.onstart=onstart; return u; };
+  const num = tqKind==="one" ? tqOk+(tqPhase==="play"?1:0) : (tqPhase==="wait"?tqI:tqI+1);
+  const lead=utt(`Question ${num}.`,tqVQ,mine(()=>{ if(tqPhase==="play") $("tqMean").textContent=`Question ${num}`; }));
   const list=[utt(w.en,tqVQ,mine(()=>{ hl(-1); if(tqPhase==="play") $("tqMean").textContent="質問"; }))];
   tqChoices.forEach((c,j)=>list.push(utt(`${"ABC"[j]}. ${c.txt}`,tqVA,mine(()=>{ hl(j); if(tqPhase==="play") $("tqMean").textContent=`(${"ABC"[j]})`; }))));
   const last=list[list.length-1];
@@ -11437,8 +11439,10 @@ function tqListenPlay(){
     $("tqMean").textContent="どれが一番よい応答ですか?";
     if(one) tqClock(TQ_LIMIT.listen); else if(btn) btn.disabled=false;
   });
-  if(tqPhase==="play") $("tqMean").textContent="…";
-  try{ list.forEach(u=>tqSynth.speak(u)); }catch(e){}
+  if(tqPhase==="play") $("tqMean").textContent="まもなく流れます…";
+  // 「Question 3.」のあと、少し間をおいて本文をまとめて予約する(読み上げが温まっているので、出だしの待ちがそろう)
+  lead.onend=lead.onerror=mine(()=>setTimeout(mine(()=>{ try{ list.forEach(u=>tqSynth.speak(u)); }catch(e){} }),500));
+  try{ tqSynth.speak(lead); }catch(e){}
 }
 function tqSetSlow(v){ tqSlow=v; $("tqSlow").checked=v; }
 function tqChoose(i){
