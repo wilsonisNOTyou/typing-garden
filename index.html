@@ -1935,7 +1935,7 @@ html.mobile #screen-garden .grk-list{max-height:none; flex:1 1 auto; min-height:
     <div class="rank-tabs" style="margin-top:.6rem">
       <button class="btn" id="tab-oneshot">ノーミス勝負</button>
     </div>
-    <p class="tab-group-label">TOEIC 英単語 ノーミス勝負(正解数・レベルごと)</p>
+    <p class="tab-group-label">TOEIC ノーミス勝負(正解数)</p>
     <div class="rank-tabs">
       <button class="btn" id="tab-toeic-choice">4択</button>
       <button class="btn" id="tab-toeic-fill">穴埋め4択</button>
@@ -3545,6 +3545,14 @@ async function submitScore(name,d,extra){
 }
 
 async function fetchRanking(d){
+  const multi = window.tqRankMulti ? tqRankMulti(d) : null;   // TOEIC: 基本・470〜990点・熟語のまとまり
+  if(multi){
+    const parts=await Promise.all(multi.map(([key,lv])=>db.ref("nejiuchi/scores/"+key).orderByChild("s").limitToLast(RANKING_SIZE).once("value").then(snap=>{ const a=[]; snap.forEach(c=>{ a.push(Object.assign(c.val(),{_lv:lv})); }); return a; })));
+    const rows=[].concat(...parts);
+    rows.sort((a,b)=> (b.s-a.s) || (tqLvHard(b._lv)-tqLvHard(a._lv)) || (a.t-b.t));   // 問題数 → 難しいレベル → 先着
+    const seen=new Set();                 // 1つの名前につき1件(いちばん良い記録だけ)
+    return rows.filter(r=>{ if(seen.has(r.n)) return false; seen.add(r.n); return true; }).slice(0,RANKING_SIZE);
+  }
   // タイム系は昇順に並べたいので、取得は全件から上位を選ぶ
   const ref = isGardenRank(d) ? db.ref("typinggarden/garden/"+d.slice(2)) : db.ref("typinggarden/scores/"+(window.tqRankKey?tqRankKey(d):d));
   const snap = isTimeRanked(d)
@@ -3590,7 +3598,7 @@ async function openRanking(d,highlight){
       }else if(d==="oneshot" && r.e!=null){
         scoreText = `${r.s}個 <span style="color:var(--steel);font-size:.85em">${Number(r.e).toFixed(1)}秒</span>`;
       }else{
-        scoreText = d.startsWith("toeic-") ? `${r.s}問`+(r.w?` <span style="color:var(--steel);font-size:.85em">訳まで${r.w}秒</span>`:"") : `${r.s}個`;
+        scoreText = d.startsWith("toeic-") ? `${r.s}問`+(r._lv?` <span style="color:var(--steel);font-size:.85em">${tqLvName(r._lv)}</span>`:"")+(r.w?` <span style="color:var(--steel);font-size:.85em">訳まで${r.w}秒</span>`:"") : `${r.s}個`;
       }
       li.innerHTML=`<span class="pos">${i+1}位</span><span class="pname"></span><span class="pscore">${scoreText}</span>`;
       li.querySelector(".pname").textContent=r.n; // XSS対策でtextContent
@@ -11540,16 +11548,19 @@ async function tqRegister(){
 }
 let tqRegWait=false;   // 名前を決めたあとに登録する
 function tqRegName(){ if(!playerName){ tqRegWait=true; openNameWin(); } else tqRegister(); }
-function tqRankView(){ window.tqFromRank=true; tqRankLv=tqLadder[0]; openRanking("toeic-"+tqFmt, playerName); }
+function tqRankView(){ window.tqFromRank=true; tqRankLv=tqRankGroupOf(tqLadder[0]); openRanking("toeic-"+tqFmt, playerName); }
 /* みんなのランキング: 出題形式のタブ(toeic-type など)は、下のレベルのボタンで選んだレベルの記録を出す */
-let tqRankLv="b1";
-const TQ_RANK_LVS=TQ_LEVELS.filter(([k])=>k!=="weak");
-window.tqRankKey = d => d==="toeic-listen" ? "toeic-listen-ls" : /^toeic-(type|choice|fill)$/.test(d) ? d+"-"+(tqRankLv==="ls"?"b1":tqRankLv) : d;
+/* レベルは3つのまとまりで1つのランキングにする(記録はこれまでどおりレベルごとに保存し、見るときに集める) */
+const TQ_RANK_GROUPS=[["base","基本",["b1","b2","b3"]],["score","470〜990点",["470","630","730","860","990"]],["idiom","熟語",["i1","i2"]]];
+const tqRankGroupOf = lv => (TQ_RANK_GROUPS.find(g=>g[2].includes(lv))||TQ_RANK_GROUPS[0])[0];
+const tqLvHard = lv => TQ_LEVELS.findIndex(([k])=>k===lv);   // 同じ問題数なら、難しい(後ろの)レベルが上
+let tqRankLv="base";
+window.tqRankKey = d => d==="toeic-listen" ? "toeic-listen-ls" : d;
+window.tqRankMulti = d => { if(!/^toeic-(type|choice|fill)$/.test(d)) return null; const g=TQ_RANK_GROUPS.find(x=>x[0]===tqRankLv)||TQ_RANK_GROUPS[0]; return g[2].map(lv=>[d+"-"+lv,lv]); };
 window.tqRankSync = d => {
   const box=$("tqRankLvs"), on=/^toeic-/.test(d) && d!=="toeic-listen";   // リスニングはレベルがない
-  if(tqRankLv==="ls" && on) tqRankLv="b1";
   box.hidden=!on; if(!on) return;
-  box.innerHTML=TQ_RANK_LVS.map(([k,nm])=>`<button class="btn${k===tqRankLv?" active":""}" data-lv="${k}">${nm}</button>`).join("");
+  box.innerHTML=TQ_RANK_GROUPS.map(([k,nm])=>`<button class="btn${k===tqRankLv?" active":""}" data-lv="${k}">${nm}</button>`).join("");
 };
 $("tqRankLvs").addEventListener("click",e=>{ const b=e.target.closest("[data-lv]"); if(!b) return; tqRankLv=b.dataset.lv; openRanking(rankCur, playerName); });
 setInterval(()=>{ if(tqRegWait && !nmOpen){ tqRegWait=false; if(playerName && tqPhase==="result" && scene==="toeic") tqRegister(); } },400);
