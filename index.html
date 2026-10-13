@@ -3551,7 +3551,7 @@ async function submitScore(name,d,extra){
 async function fetchRanking(d){
   const multi = window.tqRankMulti ? tqRankMulti(d) : null;   // TOEIC: 基本・470〜990点・熟語のまとまり
   if(multi){
-    const parts=await Promise.all(multi.map(([key,lv])=>db.ref("nejiuchi/scores/"+key).orderByChild("s").limitToLast(RANKING_SIZE).once("value").then(snap=>{ const a=[]; snap.forEach(c=>{ a.push(Object.assign(c.val(),{_lv:lv})); }); return a; })));
+    const parts=await Promise.all(multi.map(([key,lv])=>db.ref("typinggarden/scores/"+key).orderByChild("s").limitToLast(RANKING_SIZE).once("value").then(snap=>{ const a=[]; snap.forEach(c=>{ a.push(Object.assign(c.val(),{_lv:lv})); }); return a; })));
     const rows=[].concat(...parts);
     rows.sort((a,b)=> (b.s-a.s) || (tqLvHard(b._lv)-tqLvHard(a._lv)) || (a.t-b.t));   // 問題数 → 難しいレベル → 先着
     const seen=new Set();                 // 1つの名前につき1件(いちばん良い記録だけ)
