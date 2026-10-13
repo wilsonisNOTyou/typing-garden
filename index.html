@@ -720,7 +720,6 @@ html.mobile.gated body{overflow:hidden}
 #mGate ol{padding-left:1.4rem; margin:.6rem 0 1rem}
 #mGate .bk-codein{width:100%; box-sizing:border-box; font-size:1.1rem; margin-bottom:.6rem}
 #mGate .btn{width:100%}
-html.mobile .bk-pconly{display:none}
 /* ---- プレイヤー名 ---- */
 .name-line{margin:.3rem 0 0; font-size:.9rem; color:var(--steel)}
 .name-line .btn{padding:.25rem .8rem; font-size:.82rem; margin-left:.4rem}
@@ -1585,6 +1584,7 @@ html.mobile #screen-garden .sphint{display:none}   /* スマホでは Tab キー
    タイピングのモードは隠し、庭・ランキング・辞典・記録の引き継ぎだけにする。
    縦持ち・横持ちそれぞれで並びを変える
 ===================================================== */
+.bk-warn{color:#ffb38a}
 .m-only{display:none}
 html.mobile .m-only{display:block}
 html.mobile .pc-only{display:none}
@@ -1798,7 +1798,7 @@ html.mobile #screen-garden .grk-list{max-height:none; flex:1 1 auto; min-height:
       </div>
     </div>
 
-    <p class="mnote m-only">スマホでは、パソコンと同期した記録で <b>キーボード農園</b> と <b>タイピング単語帳</b>(単語帳づくり)が遊べます。タイピングはパソコンで遊んでください</p>
+    <p class="mnote m-only">スマホでは <b>キーボード農園</b>・<b>TOEIC 英単語</b>・<b>タイピング単語帳</b>(単語帳づくり)が遊べます。タイピングはパソコンで。「別端末と同期」でパソコンとつなぐと、同じ記録で遊べます</p>
     <p class="best-line" id="bestLine"></p>
     <p class="best-line" id="bestLineTa"></p>
     <p class="best-line" id="statsLine"></p>
@@ -2362,6 +2362,7 @@ html.mobile #screen-garden .grk-list{max-height:none; flex:1 1 auto; min-height:
       <button class="btn" id="bkRestore" style="display:none">クラウドのバックアップ (R)</button>
       <span class="bk-note" id="bkSyncNote"></span>
     </div>
+    <p class="bk-p bk-warn">ご注意: コードを入れて参加すると、この端末の記録はコードの記録に置き換わります(参加前の記録はクラウドのバックアップに残り、R から戻せます)。スマホで始めた記録をパソコンへ移すときは、スマホで「同期を始める」を押して、出たコードをパソコンで入れてください。</p>
     <div id="bkBackups" class="bk-backups"></div>
 
     <div class="bk-pconly">
@@ -2374,7 +2375,6 @@ html.mobile #screen-garden .grk-list{max-height:none; flex:1 1 auto; min-height:
     <textarea class="bk-code" id="bkImport" placeholder="I を押してから Ctrl+V で貼り付け、Enter で読み込み"></textarea>
     <div class="bk-foot"><span class="bk-note" id="bkImportNote"></span><button class="btn" id="bkLoad">読み込む (Enter)</button></div>
     </div>
-    <p class="bk-p m-only">記録文字列での引き継ぎは、パソコンだけで使えます。スマホは同期で記録を受け取ります。</p>
     <p class="keynav"><b>C</b> コピー ・ <b>I</b> 貼り付け欄へ ・ <b>Enter</b> 読み込む ・ <b>S</b> 同期の開始/停止 ・ <b>J</b> コード入力 ・ <b>T</b> こちらで遊ぶ ・ <b>R</b>→<b>1〜5</b> バックアップから戻す ・ <b>K</b> / <b>Esc</b> 閉じる</p>
   </div>
 </div>
@@ -9723,7 +9723,6 @@ async function backupCopy(){
   catch(e){ ta.focus(); ta.select(); try{ document.execCommand("copy"); $("bkCopyNote").textContent="コピーしました"; }catch(_){ $("bkCopyNote").textContent="選択しました。Ctrl+C でコピーしてください"; } }
 }
 function backupImport(){
-  if(window.IS_MOBILE) return;   // 記録文字列での引き継ぎはパソコンだけ
   const note=$("bkImportNote"), str=$("bkImport").value;
   if(!str.trim()){ note.textContent="記録文字列を貼り付けてください(I で貼り付け欄へ)"; return; }
   // デバッグ用の合言葉2: 料理とわくわくガチャが解放された直後くらいの記録にする
@@ -10191,6 +10190,7 @@ async function syncJoin(inp, noteEl){
       // 先に取り込めるか確かめる。だめなら、このブラウザは何も変えない(持ち主にもならない)
       let ok=false; try{ const o=JSON.parse(b64dec(data)); ok=!!o && typeof o==="object"; }catch(e){}
       if(!ok){ note.textContent="※このコードの記録を読めませんでした(形式が違います)。今の記録はそのままです"; return; }
+      if(!confirm("この端末の記録は、コードの記録に置き換わります(今の記録はクラウドのバックアップに残り、あとから戻せます)。参加しますか?")){ note.textContent="やめました。この端末の記録はそのままです"; return; }
       note.textContent="記録を取り込みます…";
       const mine=bundleNow(), t=Date.now();
       saveLocalPrev(mine);                       // 参加前の記録を手元にも残す
@@ -10205,8 +10205,7 @@ async function syncJoin(inp, noteEl){
       location.reload();
       return;
     }
-    // このコードにまだ記録がない: このブラウザの記録を置く(スマホは同期される側だけなので置かない)
-    if(window.IS_MOBILE){ note.textContent="このコードの記録が見つかりません。パソコンで「同期を始める」を押して出たコードを入れてください"; return; }
+    // このコードにまだ記録がない: このブラウザの記録を置く
     if(syncCode) syncStop();
     syncCode=code; lsSet("sync:code",code); syncReadOnly=false;
     syncLastT=0; lsSet("sync:t","0");
@@ -10258,7 +10257,7 @@ function renderSyncState(){
 $("bkSyncStart").addEventListener("click",()=>{ syncCode?syncStop():syncBegin(); });
 $("bkJoin").addEventListener("click",()=>syncJoin());
 /* スマホは同期される側だけ。同期していないときは同期の画面だけを出す */
-const mGated = () => !!window.IS_MOBILE && !syncCode;
+const mGated = () => false;   // スマホも1台目にできる(同期していなくても遊べる。以前は同期の画面だけだった)
 function renderMGate(){
   document.documentElement.classList.toggle("gated", mGated());
   if(!mGated()) return;
@@ -10331,7 +10330,7 @@ $("toGardenBtn").addEventListener("click",openGarden);
    進み具合は保存するので、途中でやめても続きから。タイトルの H でいつでも見直せる
 ===================================================== */
 const TUT_KEY="typinggarden:tut";
-const TUT_STEPS=["type","plate","name","toGarden","till","plant","water","grow","harvest","sell","gacha","done"];
+const TUT_STEPS=["type","plate","name","toeic","toGarden","till","plant","water","grow","harvest","sell","gacha","done"];
 let tut=null, tutTimer=null;
 function tutLoad(){ try{ tut=JSON.parse(localStorage.getItem(TUT_KEY)||"null"); }catch(e){ tut=null; } }
 function tutSave(){ try{ localStorage.setItem(TUT_KEY, JSON.stringify(tut)); }catch(e){} }
@@ -10339,7 +10338,7 @@ const tutStep = () => tut && !tut.done ? TUT_STEPS[tut.step] : null;
 const TUT_FIELD_STEPS=["till","plant","water","grow","harvest"];   // 練習用の畑で行う手順
 function tutGo(i, skipped){
   Garden.tutSandbox(TUT_FIELD_STEPS.includes(TUT_STEPS[i]));        // 先に畑を切り替えてから、今の状態を覚える
-  tut.step=i; tut.base=Garden.tutState(); tut.skipped=!!skipped;   // skipped: 前の手順を自動でとばした
+  tut.step=i; tut.base=Garden.tutState(); tut.skipped=!!skipped; tut.tq0=window.tqOkN||0;   // tq0: その手順を始めたときの TOEIC の正解数   // skipped: 前の手順を自動でとばした
   if(TUT_STEPS[i]==="gacha" && !tut.gave){ tut.gave=true; tut.gift=true; Garden.tutGive(100); }   // ガイドのたびに100キー
   tutSave(); tutRender();
 }
@@ -10369,6 +10368,8 @@ function tutTick(){
     case "type":     if(scene==="game") return tutNext(); break;
     case "plate":    if(scene==="result") return tutNext(); if(scene==="title") return tutGo(0); break;
     case "name":     if(playerName || !db) return tutNext(); break;   // 名前が決まったら次へ(ランキングが使えないときはとばす)
+    case "toeic":    if(!window.IS_MOBILE) return tutNext();          // スマホだけ: TOEIC で3問正解する(パソコンはタイピングで済んでいる)
+                     if(tutTqN()>=TUT_TQ) return tutNext(); break;
     case "toGarden": if(scene==="garden") return tutNext(); break;
     // 2回目以降のガイドでは、畑のようすによってできない手順があるので、そのときはとばす
     case "till":     if(st.soil>b.soil) return tutNext();
@@ -10381,6 +10382,7 @@ function tutTick(){
     case "water":    if(st.wet>b.wet) return tutNext();
                      if(st.ripe>0 || st.dry===0) return tutPass(); break;
     case "grow":     if(st.ripe>0) return tutNext();
+                     if(window.IS_MOBILE && tutTqN()>=1) return tutNext();   // スマホ: TOEIC で1問正解すると庭の時間が進む(収穫で庭へ戻る)
                      if(st.crops===0) return tutTo("sell");              // 育てる作物がない
                      break;
     case "harvest":  if(st.harvest>b.harvest) return tutNext();
@@ -10395,11 +10397,28 @@ function tutTick(){
   }
   tutRender();
 }
+const TUT_TQ=3;   // スマホのガイドで解く TOEIC の問題数
+const tutTqN = () => (window.tqOkN||0)-(tut&&tut.tq0||0);   // この手順を始めてからの TOEIC の正解数
+/* スマホ: TOEIC の画面で、4択・10語セット・基本1 を選ぶ案内(できたら play) */
+function tutTqView(play){
+  if(scene==="title") return { sel:".diff-btn.toeic", text:play.title };
+  if(scene!=="toeic") return { sel:null, text:"タイトルに戻って、TOEIC 英単語を開こう" };
+  if(tqPhase==="menu"){
+    if(tqFmt!=="choice") return { sel:'#tqFmts [data-f="choice"]', text:"「4択」を選ぼう" };
+    if(tqKind!=="set") return { sel:'#tqKinds [data-k="set"]', text:"「10語セット」を選ぼう" };
+    return { sel:'#tqLevels [data-lv="b1"]', text:"「基本1」を押して始めよう" };
+  }
+  if(tqPhase==="result") return { sel:"#tqAgain", text:play.again };
+  return { sel:null, text:play.text };
+}
 /* いま見せる案内: { sel: 光らせる場所, text, acts: [[ボタン名, 処理]] } */
 function tutView(){
   const id=tutStep(), st=Garden.tutState(), g=scene==="garden";
-  const toFarm = { sel: scene==="result" ? "#toGardenBtn" : (scene==="title" ? ".diff-btn.garden" : null),
-                   text:"キーボード農園へ行こう(タイトルでは 9、結果画面では G)" };
+  const tqBack = text => ({ sel:null, text, acts:[["農園へ戻る", ()=>tqToGarden(), "G"]] });   // TOEIC を解いている途中: ボタンで農園へ
+  if(scene==="toeic" && (tqPhase==="play"||tqPhase==="wait") && ["toGarden","till","plant","water","harvest","sell","gacha"].includes(id))
+    return tqBack(id==="toGarden" ? "正解したぶんのキーと時間が、農園に届いています。農園へ戻ろう" : "農園に戻って続けよう");
+  const toFarm = { sel: scene==="result" ? "#toGardenBtn" : scene==="title" ? ".diff-btn.garden" : scene==="toeic" ? ".tq-view.on .tq-gardenBtn" : null,
+                   text: window.IS_MOBILE ? "キーボード農園へ行こう" : "キーボード農園へ行こう(タイトルでは 9、結果画面では G)" };
   const M=!!window.IS_MOBILE;
   // 道具を持ちかえる案内(lead: その手順でやること)
   const hold = (tool,name,lead) => st.tool!==tool ? { sel:`.slot[data-tool="${tool}"]`,
@@ -10421,7 +10440,13 @@ function tutView(){
         text: M ? "ようこそ、タイピングガーデンへ! 最初に、ランキングと農園の番付に使う名前を決めよう。「名前を決める」を押してね"
                 : "ランキングと農園の番付に使う名前を決めよう。「名前を決める」を押すか、キー N" };
       return { sel:null, text:"タイトルで名前を決めよう" };
+    case "toeic": {
+      const n=Math.max(1,TUT_TQ-tutTqN());
+      return tutTqView({ title:'TOEIC 英単語で遊ぶと、問題に正解するたびに農園へキーと農園の時間が届きます。TOEIC 英単語を開こう',
+        text:`英単語の意味を4つから選ぼう。あと${n}問正解で次へ`, again:`もう1セットやってみよう(あと${n}問正解)` });
+    }
     case "toGarden":
+      if(scene==="toeic") return { sel:".tq-view.on .tq-gardenBtn", text:'正解したぶんのキーと時間が、農園に届いています。農園へ行ってみよう' };
       return scene==="result" ? { sel:"#toGardenBtn", text:"外したキーは農園に届いています。庭へ行ってみよう(G)" }
            : scene==="title" ? { sel:".diff-btn.garden", text: window.IS_MOBILE ? "キーボード農園を開こう" : "キーボード農園を開こう(キー 9)" }
            : { sel:null, text:"キーボード農園へ行こう" };
@@ -10436,10 +10461,9 @@ function tutView(){
       if(!g) return toFarm;
       return hold(3,"じょうろ", tut.skipped ? "植えた作物に水をあげよう" : "植えられた! 次は水やり") || { sel:"#g-planter .plot.growing:not(.wet)", text:"植えた区画に水をあげよう。作物は水が効いている間だけ育ちます" };
     case "grow":
-      if(window.IS_MOBILE){
-        return { sel: g ? "#g-planter .plot.growing" : null,
-                 text:"作物は、パソコンでタイピングするほど早く育ちます(1打で数分ぶん)。スマホでは打てないので、今回は特別に時間を進めましょう",
-                 acts:[["時間を進める", ()=>{ Garden.tutGrow(); }, "Enter"]] };
+      if(window.IS_MOBILE){   // スマホ: TOEIC で正解して育てる
+        if(g) return { sel:"#g-toeicBtn", text:'作物は、TOEIC で正解するほど早く育ちます(1問正解で農園の時間が3時間進む)。TOEIC を開いて、1問正解しよう' };
+        return tutTqView({ title:"TOEIC 英単語で1問正解して、作物を育てよう", text:'1問正解すると、農園の時間が進んで作物が育ちます', again:"もう1セットで、1問正解しよう" });
       }
       if(g) return { sel:"#g-backBtn", text:"水が効いている作物は、タイピングするほど早く育ちます(1打で数分ぶん)。タイトルに戻って(Esc)、もう1回打ってみよう" };
       if(scene==="title") return { sel:'.diff-btn[data-diff="easy"]', text:"もう1回タイピングして、作物の時間を進めよう(ガイドで植えたにんじんは12打ほどで実ります)" };
@@ -10473,7 +10497,7 @@ function tutView(){
 }
 /* 始める前に「はじめますか?」と聞く(auto: 初めて開いたときに自動で聞いた) */
 let tutAsking=null;
-const tutMin = () => window.IS_MOBILE ? 2 : 4;
+const tutMin = () => 4;
 function tutAsk(auto){
   if(tutStep()) tutEnd();
   tutAsking={ auto:!!auto };
@@ -10482,7 +10506,7 @@ function tutAsk(auto){
   $("tutRing").style.display="none";
   $("tutStep").textContent="はじめてガイド";
   $("tutText").textContent = `はじめてガイド(約${tutMin()}分)を始めますか?\n` +
-    (M ? "農園での畑づくりから収穫・ガチャまで、実際に遊びながら覚えられます。"
+    (M ? "TOEIC 英単語で問題を解くところから、農園での畑づくり・収穫・ガチャまで、実際に遊びながら覚えられます。"
        : "タイピングから農園での畑づくり・収穫・ガチャまで、実際に遊びながら覚えられます。");
   const acts=$("tutActs"); acts.innerHTML="";
   const yes=document.createElement("button"); yes.className="btn primary"; yes.innerHTML="はじめる"+(M?"":' <span class="kbdh">Enter</span>'); yes.onclick=tutStart;
@@ -10531,7 +10555,8 @@ function tutRender(){
   const id=tutStep(); if(!id) return;
   const v=tutView(), ring=$("tutRing"), bub=$("tutBubble");
   const el = v.sel ? [...document.querySelectorAll(v.sel)].find(x=>x.offsetParent!==null && x.getBoundingClientRect().width>0) : null;
-  const i=TUT_STEPS.indexOf(id)+1, total=TUT_STEPS.length;
+  const shown=TUT_STEPS.filter(x=> window.IS_MOBILE ? x!=="type" && x!=="plate" : x!=="toeic");   // 番号は、その端末で通る手順だけで数える
+  const i=shown.indexOf(id)+1, total=shown.length;
   const key=id+"|"+v.text+"|"+(v.acts||[]).map(a=>a[0]).join();
   if(bub.dataset.key!==key){
     bub.dataset.key=key;
@@ -11494,6 +11519,7 @@ function tqChoose(i){
       +tqChoices.map((o,j)=>`<li class="${o.ok?"c":""}">(${"ABC"[j]}) ${tqEsc(o.txt)} — ${tqEsc(o.ja)}</li>`).join("")+"</ul>";
   }else $("tqMean").innerHTML=tqMeanHtml(w);
   if(c.ok){
+    window.tqOkN=(window.tqOkN||0)+1;   // はじめてガイド(スマホ)で数える
     const g=tqGift(); tqPts+=g.sc; tqMin+=g.min;
     sendToGarden(0, g.sc, g.min);   // 1問ごとにすぐ届ける(途中でやめても正解ぶんは届く)
     if(g.rose) tqRose(tqRoseLv(tqLadder[0]), g.rose);   // ノーミス勝負: 薔薇の種も1問ごと
@@ -11557,7 +11583,7 @@ async function tqRegister(){
     const extra={s:n, l:tqLadder[0]}; if(tqFmt==="type") extra.w=tqSec;   // 始めたレベル・訳が出るまでの秒数も載せる
     const res=await submitScore(playerName,d,extra);
     box.innerHTML=(res.saved ? "ランキングを更新しました! " : "ランキングの記録(自己ベスト)を超えられなかったので、ランキングはそのままです ")+viewBtn;
-  }catch(e){ box.textContent="登録に失敗しました。通信環境を確認してください。"; }
+  }catch(e){ box.textContent = /permission/i.test(String(e&&(e.code||e.message)||"")) ? "登録できませんでした(ランキングの保存先の設定が、まだこの記録に対応していません)" : "登録に失敗しました。通信環境を確認してください。"; }
 }
 let tqRegWait=false;   // 名前を決めたあとに登録する
 function tqRegName(){ if(!playerName){ tqRegWait=true; openNameWin(); } else tqRegister(); }
