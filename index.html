@@ -7343,7 +7343,7 @@ const MACHINES={
   r:{ name:"薔薇ガチャ", mult:.1, order:RARITY_ORDER.slice(0,7), coin:true },   // 1回 10コイン(薔薇ガチャコインで引く)
 };
 let gachaM="n";
-const ROSE_RATES = { N:50, R:28, SR:17.1, HR:3, UR:1.7, GSR:0.18, GHR:0.02 };   // 貴重品上限+料理2つでも、引き続けるとコインが少しずつ減る   // 薔薇ガチャ
+const ROSE_RATES = { N:50.5, R:28.2, SR:17.19, HR:3, UR:1, GSR:0.1, GHR:0.01 };   // 貴重品上限+料理2つでも、引き続けるとコインが少しずつ減る   // 薔薇ガチャ
 const MACHINE_ORDER = ["n","w","r"];   // ← → で切り替える順
 const roseGachaOpen = () => roseGot()>=10;   // 薔薇を10色集めると解放(図鑑の色の数。変異・超変異も1色)
 const machineOpen = m => m==="w" ? cookOpen() : m==="r" ? roseGachaOpen() : true;
