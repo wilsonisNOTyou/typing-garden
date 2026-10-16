@@ -5754,6 +5754,7 @@ const plantId = id => id==="rose" ? rosePick() : id;
 /* 実った瞬間に、育ち方を見てシークレットの色に変わることがある。
    src: これまでに育った手段(t 時間 / s 時間の短縮 / k 庭の時計の料理 / f 肥料 / c 料理の時計 / x そのほか)
    by: 実らせた手段 / when: 実った時刻 */
+const ROSE_SEC_CHANCE = 0.2;   // 幸運・透明のほかのシークレットは、条件がそろっても 20% で咲く
 function roseSecret(p,by,when){
   const fi=S.fields.findIndex(f=>KEYS.some(k=>f[k]===p)); if(fi<0) return;
   const f=S.fields[fi], src=p.crop.src||"", farm=p.vil==="rf";
@@ -5762,18 +5763,19 @@ function roseSecret(p,by,when){
   const kinds = new Set(KEYS.map(k=>f[k]).filter(q=>q!==p && q.crop && CROP[q.crop.id].rose && isRipe(q)).map(q=>q.crop.id+":"+(q.crop.sup?5:q.crop.mut?3:0))).size;
   const ripeRose = rid => other(f,q=>q.crop.id===rid && isRipe(q) && !q.crop.mut);
   const hour = by==="t"||by==="k" ? new Date(when).getHours() : -1;   // 自然に実ったとき・庭の時計で実ったときだけ(短縮で途中まで進めるのはよい)
+  const sc = () => Math.random()<ROSE_SEC_CHANCE;   // 条件がそろっていても、咲くのはときどき(畑一面がシークレットにならないように)。外れたら次の条件へ
   let id=null;
   if(Math.random()<0.001) id="rose_lucky";                // 1/1000
-  else if(carrot(true)) id="rose_dia";
-  else if(carrot(false)) id="rose_gold";
+  else if(carrot(true) && sc()) id="rose_dia";
+  else if(carrot(false) && sc()) id="rose_gold";
   else if(!farm && !S.fields.some(fx=>other(fx,q=>!q.vil))) id="rose_clear";   // 薔薇農家の薔薇はならない(ひとりで咲いたわけではない)   // ほかの畑にも何もない(村人の区画は数えない)
-  else if(kinds>=10) id="rose_rainbow";                    // 同じ畑に10色以上の薔薇が実っている
-  else if(ripeRose("rose_b1") && ripeRose("rose_990")) id="rose_bw";   // 同じ畑に白薔薇と黒薔薇(ふつう)が実っている
-  else if(roseThemeN()===3) id="rose_tri";                 // 画面の色が3色のとき
-  else if(hour===0) id="rose_moon";                        // 0時台
-  else if(hour===5) id="rose_dawn";                        // 5時台
-  else if(hour===12) id="rose_noon";                       // 12時台
-  else if(src==="t" && !farm) id="rose_jade";   // 薔薇農家の薔薇はならない(農家の手が加わっている)                       // 時間だけで育った(短縮・肥料なし)
+  else if(kinds>=10 && sc()) id="rose_rainbow";                    // 同じ畑に10色以上の薔薇が実っている
+  else if(ripeRose("rose_b1") && ripeRose("rose_990") && sc()) id="rose_bw";   // 同じ畑に白薔薇と黒薔薇(ふつう)が実っている
+  else if(roseThemeN()===3 && sc()) id="rose_tri";                 // 画面の色が3色のとき
+  else if(hour===0 && sc()) id="rose_moon";                        // 0時台
+  else if(hour===5 && sc()) id="rose_dawn";                        // 5時台
+  else if(hour===12 && sc()) id="rose_noon";                       // 12時台
+  else if(src==="t" && !farm && sc()) id="rose_jade";   // 薔薇農家の薔薇はならない(農家の手が加わっている)                       // 時間だけで育った(短縮・肥料なし)
   if(!id) return;
   p.crop.id=id; p.crop.mut=false; p.crop.sup=false; p.crop.mutN=0;
 }
@@ -5807,7 +5809,9 @@ function roseThemeN(){
 /* 実ったまま24時間置いておくと、錆色に変わる(変異・超変異とシークレットは変わらない) */
 function roseRust(p,now){
   const c=CROP[p.crop.id];
-  if(c.rose && !c.secret && !p.crop.mut && p.crop.ripeAt && now-p.crop.ripeAt>=24*HOUR) p.crop.id="rose_rust";
+  if(c.rose && !c.secret && !p.crop.mut && p.crop.ripeAt && !p.crop.noRust && now-p.crop.ripeAt>=24*HOUR){   // 錆色も 20%。外れたら、その薔薇はもう錆びない
+    if(Math.random()<ROSE_SEC_CHANCE) p.crop.id="rose_rust"; else p.crop.noRust=true;
+  }
 }
 function tick(now=Date.now()){
   const last=S.lastTick;
@@ -7883,17 +7887,17 @@ function gachaHTML(){
 /* ---------- 薔薇ガチャの GSR: シークレットの薔薇のヒントが書かれた花弁(12種) ---------- */
 const PETALS=[
   { k:"lucky",   hint:"千輪に一輪、何の前ぶれもなく咲く。狙って咲かせる方法はなく、たくさん咲かせるほど出会いやすくなる。" },
-  { k:"dia",     hint:"同じ畑に、超変異のにんじんが実ったまま置いてあるときに薔薇が実ると、その硬い光を分けてもらえる。" },
-  { k:"gold",    hint:"同じ畑に、変異のにんじんが実ったまま置いてあるときに薔薇が実ると、その金色を分けてもらえる。" },
+  { k:"dia",     hint:"同じ畑に、超変異のにんじんが実ったまま置いてあるときに薔薇が実ると、その硬い光を分けてもらえることがある。" },
+  { k:"gold",    hint:"同じ畑に、変異のにんじんが実ったまま置いてあるときに薔薇が実ると、その金色を分けてもらえることがある。" },
   { k:"clear",   hint:"すべての畑に、ほかの作物がひとつもないときに実った薔薇。村人に任せている区画は数えない。" },
-  { k:"rainbow", hint:"同じ畑に、すでに実った薔薇が10色以上並んでいるときに実ると、その色を一枚ずつ映しとる。" },
-  { k:"bw",      hint:"同じ畑に、実った白薔薇と黒薔薇が並んでいるときに実ると、どちらの色にも決められなくなる。" },
-  { k:"tri",     hint:"画面の色が3つに分かれているときに実ると、三つの光が重なる。" },
-  { k:"moon",    hint:"真夜中の0時台に、時間の流れや農園の時計で実ると、月の光をためこむ。最後のひと押しが肥料や時短だと、月の光は届かない。" },
-  { k:"dawn",    hint:"夜明けの5時台に、時間の流れや農園の時計で実ると、空の色が移り変わる一瞬を閉じこめる。最後のひと押しが肥料や時短だと、夜明けを見逃してしまう。" },
-  { k:"noon",    hint:"太陽がいちばん高い12時台に、時間の流れや農園の時計で実ると、日だまりのぬくもりが残る。最後のひと押しが肥料や時短だと、ぬくもりは逃げてしまう。" },
-  { k:"jade",    hint:"肥料も、時間の短縮も、時計の料理も一度も使わず、時間の流れだけで育ちきると、静かな緑になる。" },
-  { k:"rust",    hint:"実ったふつうの薔薇を、摘まずに24時間置いておくと、古い鉄のような色に変わってしまう。" },
+  { k:"rainbow", hint:"同じ畑に、すでに実った薔薇が10色以上並んでいるときに実ると、その色を一枚ずつ映しとることがある。" },
+  { k:"bw",      hint:"同じ畑に、実った白薔薇と黒薔薇が並んでいるときに実ると、どちらの色にも決められなくなることがある。" },
+  { k:"tri",     hint:"画面の色が3つに分かれているときに実ると、三つの光が重なることがある。" },
+  { k:"moon",    hint:"真夜中の0時台に、時間の流れや農園の時計で実ると、月の光をためこむことがある。最後のひと押しが肥料や時短だと、月の光は届かない。" },
+  { k:"dawn",    hint:"夜明けの5時台に、時間の流れや農園の時計で実ると、空の色が移り変わる一瞬を閉じこめることがある。最後のひと押しが肥料や時短だと、夜明けを見逃してしまう。" },
+  { k:"noon",    hint:"太陽がいちばん高い12時台に、時間の流れや農園の時計で実ると、日だまりのぬくもりが残ることがある。最後のひと押しが肥料や時短だと、ぬくもりは逃げてしまう。" },
+  { k:"jade",    hint:"肥料も、時間の短縮も、時計の料理も一度も使わず、時間の流れだけで育ちきると、静かな緑になることがある。" },
+  { k:"rust",    hint:"実ったふつうの薔薇を、摘まずに24時間置いておくと、古い鉄のような色に変わってしまうことがある。" },
 ];
 const petalName = k => CROP["rose_"+k].name+"の花弁";
 /* 何色もある薔薇の色(花弁の絵・薔薇のかまどの花びら) */
@@ -7964,8 +7968,8 @@ function rosePetals(){
   const R=Math.random, f=n=>n.toFixed(1), pal=ROSE_PAL[r.id.slice(5)] || [r.c1,r.c1,r.c2];   // 虹色・三原色などは、いろいろな色が舞う
   el.innerHTML=Array.from({length:24},()=>`<b style="left:${f(R()*100)}%;--s:${f(8+R()*9)}px;--c:${pal[Math.floor(R()*pal.length)]};animation-duration:${f(10+R()*10)}s;animation-delay:${f(-R()*20)}s;--r:${(R()*720-360)|0}deg;--x:${f(R()*16-4)}vw"></b>`).join("");
 }
-/* コインに変換: 種 1・ふつうの薔薇 5・変異 20・超変異 100・シークレット 500 */
-const RG_COIN={ seed:1, 0:5, 3:20, 5:100, sec:500 };
+/* コインに変換: 種 1・ふつうの薔薇 5・変異 20・超変異 100・シークレット 100 */
+const RG_COIN={ seed:1, 0:5, 3:20, 5:100, sec:100 };
 let rgView="gacha", rgSel=0;
 function rgConvRows(){
   const rows=[];
@@ -8006,7 +8010,7 @@ function rgConvHTML(){
     : `<div class="gempty">変換できる薔薇や薔薇の種がありません</div>`;
   return `<div class="rgconv">
     <div class="rghead"><b>🌹 薔薇ガチャコインに変換</b><span>持っているコイン <b>${fmtNum(S.roseCoin||0)}</b>枚</span><button class="sbtn" data-rgv="gacha">ガチャへ${MOB?"":' <span class="kb">Tab</span>'}</button></div>
-    <p class="rgnote">薔薇の種 1枚 ・ ふつうの薔薇 5枚 ・ 変異 20枚 ・ 超変異 100枚 ・ シークレットの薔薇 500枚。変換した薔薇は戻せません</p>
+    <p class="rgnote">薔薇の種 1枚 ・ ふつうの薔薇 5枚 ・ 変異 20枚 ・ 超変異 100枚 ・ シークレットの薔薇 100枚。変換した薔薇は戻せません</p>
     <div class="rglist">${tbl}</div></div>`;
 }
 function rgConvKey(e){
