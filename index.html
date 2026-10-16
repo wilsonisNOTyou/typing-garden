@@ -4232,6 +4232,7 @@ const NEWS=[
     "実績に「薔薇ガチャ」の項目を追加しました",
   ]},
   { d:"2026-10-16", t:"そのほかの変更", items:[
+    "薔薇ガチャで出る新しい薔薇の種は、ほかの薔薇の種と混ぜず、色ごとに選んで植えられるようにしました。種の一覧に「薔薇」の段を追加しました",
     "ガチャが安くなる効果は、キーで引くガチャにだけ効きます。薔薇ガチャのコインは安くなりません",
     "わくわくガチャで、上限まで持っている台所の宝物・時渡りの砂時計・土地の権利書が出たときにもらえるキーを、1,000,000キー から 100,000キー にしました",
     "ガチャをまとめて引いたとき、引くのが遅くなっていたのを直しました",
@@ -5648,6 +5649,11 @@ function normalize(o){
   s.rankName=s.rankName||"";
   // 収穫かごを品質別に([ふつう, ☆, ☆☆])
   for(const id of Object.keys(s.inv)){ if(typeof s.inv[id]==="number") s.inv[id]=[s.inv[id],0,0]; }
+  if(s.roseBag && s.seeds) for(const lv of Object.keys(s.roseBag)){   // 前の版で薔薇の種の袋に入った UR の種を、色ごとの種に移す
+    if(!/^u/.test(lv) || !(s.roseBag[lv]>0)) continue;
+    const k=Math.min(s.roseBag[lv], s.seeds.rose||0);
+    s.seeds["rose_"+lv]=(s.seeds["rose_"+lv]||0)+k; s.seeds.rose=(s.seeds.rose||0)-k; delete s.roseBag[lv];
+  }
   s.harvestQ=s.harvestQ||{}; s.got=s.got||{}; s.gachaCount=s.gachaCount||0; s.treas=s.treas||{};
   for(const id of Object.keys(s.harvestBy)){ if(!s.harvestQ[id]) s.harvestQ[id]=[s.harvestBy[id],0,0]; }
   // P を案山子置き場に。P にあったものは手持ちに戻し、ほかの区画の案山子は P へ移す
@@ -5718,9 +5724,13 @@ function grow(p,add,base,src,rate){   // rate: 1ms で進む量(薔薇の案山�
 }
 /* ---- 薔薇の種: 届く・植える ---- */
 const ROSE_LVNAME = { b1:"基本1", b2:"基本2", b3:"基本3", "470":"470点", "630":"630点", "730":"730点", "860":"860点", "990":"990点", i1:"熟語1", i2:"熟語2", ls:"リスニング", lt:"リスニング", u1:"薔薇ガチャ", u2:"薔薇ガチャ", u3:"薔薇ガチャ", u4:"薔薇ガチャ" };
+/* 薔薇ガチャの UR の種(u1〜u4)は袋に混ぜず、色ごとの種として持つ(狙って育てられるように) */
+const roseOwnSeed = lv => /^u/.test(lv);
+const ROSE_USEEDS = () => ROSES.filter(r=>roseOwnSeed(r.lv));
 /* TOEIC 英単語から届く(lv: そのレベルの色の種) */
 function roseGive(lv,n){
   n=Math.max(0,Math.floor(Number(n)||0)); if(!n || !ROSE_LVNAME[lv]) return;
+  if(roseOwnSeed(lv)){ const id="rose_"+lv; S.seeds[id]=(S.seeds[id]||0)+n; if(!(S.seeds[S.seedId]>0)) S.seedId=id; return; }
   S.roseBag=S.roseBag||{};
   S.roseBag[lv]=(S.roseBag[lv]||0)+n;
   S.seeds.rose=(S.seeds.rose||0)+n;
@@ -6525,7 +6535,7 @@ function toggleFav(kind,id){
   toast(m[id] ? `★ ${esc(nm)}をお気に入りにしました(一番上に並びます)` : `${esc(nm)}をお気に入りから外しました`,"",2200,true);
 }
 const starHtml = (kind,id) => { const on = kind==="s" ? isFavS(id) : isFavD(id); return `<span class="fstar${on?" on":""}" data-star="${kind}:${id}" title="お気に入り(S)">${on?"★":"☆"}</span>`; };
-const ownedSeeds=()=>CROPS.concat(ROSE_SEED,ROSE_HALF).filter(c=>(S.seeds[c.id]||0)>0).map(c=>c.id).sort((a,b)=>(isFavS(b)-isFavS(a)) || seedRank(a)-seedRank(b));
+const ownedSeeds=()=>CROPS.concat(ROSE_SEED,ROSE_USEEDS(),ROSE_HALF).filter(c=>(S.seeds[c.id]||0)>0).map(c=>c.id).sort((a,b)=>(isFavS(b)-isFavS(a)) || seedRank(a)-seedRank(b));
 /* 手持ちがなくなった種の次に持つ種: それより高い種のうち一番安いもの。無ければ手持ちで一番高い種 */
 function nextSeed(fromId){
   const o=ownedSeeds(); if(!o.length) return fromId;
@@ -7951,6 +7961,7 @@ let rgView="gacha", rgSel=0;
 function rgConvRows(){
   const rows=[];
   if((S.seeds.rose||0)>0) rows.push({ kind:"seed", ic:ico(ROSE_SEED), nm:"薔薇の種", n:S.seeds.rose, v:RG_COIN.seed });
+  for(const r of ROSE_USEEDS()) if((S.seeds[r.id]||0)>0) rows.push({ kind:"useed", id:r.id, ic:ico(r), nm:r.name+"の種", n:S.seeds[r.id], v:RG_COIN.seed });
   for(const r of ROSE_ALL) for(const t of (r.secret?[0]:[0,3,5])){
     const n=invN(r.id,t); if(n<=0) continue;
     rows.push({ kind:"rose", id:r.id, t, ic:icoQ(r,t), nm:qName(r.id,t), n, v: r.secret ? RG_COIN.sec : RG_COIN[t] });
@@ -7970,7 +7981,7 @@ function rgTakeSeeds(k){
 function rgConvert(i,want){   // want: 変換する数(マイナスなら、その数だけ残す)
   const rows=rgConvRows(), x=rows[i]; if(!x){ sfx.nope(); return; }
   const k = want<0 ? x.n+want : Math.min(x.n, want); if(k<=0){ sfx.nope(); return; }
-  if(x.kind==="seed") rgTakeSeeds(k); else S.inv[x.id][x.t]-=k;
+  if(x.kind==="seed") rgTakeSeeds(k); else if(x.kind==="useed"){ S.seeds[x.id]-=k; if(!S.seeds[x.id] && S.seedId===x.id) S.seedId=nextSeed(x.id); } else S.inv[x.id][x.t]-=k;
   const gain=k*x.v;
   S.roseCoin=(S.roseCoin||0)+gain; S.roseCoinTotal=(S.roseCoinTotal||0)+gain;
   sfx.sell();
@@ -8133,8 +8144,8 @@ function renderTreas(){
 /* ---------- 一覧から選ぶ ----------
    種(4 の長押し・スマホは種の欄の長押し)と、シゴデキ村人が育てる作物(台所の宝物でシゴデキ村人を選んで Enter)。
    レア度ごとに並べ、矢印キーで選んで Enter で決める */
-const PICK_RANKS=["お気に入り","N","R","SR","HR","UR","GSR","GHR","曜日限定"];
-const pickGroup = id => pickKind==="seed" && isFavS(id) ? "お気に入り" : CROP[id].day!=null ? "曜日限定" : (CROP[id].r||"N");   // お気に入りは一番上、曜日限定の作物はレア度と分けて並べる
+const PICK_RANKS=["お気に入り","N","R","SR","HR","UR","GSR","GHR","曜日限定","薔薇"];
+const pickGroup = id => pickKind==="seed" && isFavS(id) ? "お気に入り" : /^rose/.test(id) ? "薔薇" : CROP[id].day!=null ? "曜日限定" : (CROP[id].r||"N");   // お気に入りは一番上、曜日限定の作物はレア度と分けて並べる
 let pickKind="seed", pickCur=0, pickIds=[], lastFour=0;
 function openPick(kind){
   pickKind=kind;
@@ -8146,7 +8157,7 @@ function openPick(kind){
   pickCur=Math.max(0, pickIds.indexOf(now));
   openModal("pick");
 }
-function pickSort(){ pickIds = PICK_RANKS.flatMap(r=>pickIds.filter(id=>pickGroup(id)===r)).concat(pickIds.filter(id=>!PICK_RANKS.includes(pickGroup(id)))); }
+function pickSort(){ pickIds = PICK_RANKS.flatMap(r=>pickIds.filter(id=>pickGroup(id)===r).sort((x,y)=> r==="薔薇" ? (y==="rose")-(x==="rose") : 0)).concat(pickIds.filter(id=>!PICK_RANKS.includes(pickGroup(id)))); }
 /* 種の一覧でお気に入りを付け外しする(選んでいる種は、並びが変わっても選んだまま) */
 function pickFav(i){
   const id=pickIds[i]; if(!id || pickKind!=="seed") return;
@@ -10323,7 +10334,8 @@ function debugUnlock(){
   for(const id in RG) S.got[id]=1;
   S.petals=Object.fromEntries(PETALS.map(x=>[x.k,3]));
   S.seeds.rose_hb=20; S.seeds.rose_hr=20; S.objs.rsk=2; S.roseVil=2; S.rkam=1; S.rkamOn=true; S.rkamCol="rose_b3";
-  S.roseBag={}; for(const r of ROSES) S.roseBag[r.lv]=10; S.seeds.rose=100;
+  S.roseBag={}; for(const r of ROSES) if(!roseOwnSeed(r.lv)) S.roseBag[r.lv]=10; S.seeds.rose=Object.values(S.roseBag).reduce((a,b)=>a+b,0);
+  for(const r of ROSE_USEEDS()) S.seeds[r.id]=10;
   for(const d of ROSE_TEAS){ const G=gradesOf(d); S.dishes[d.id]=Object.fromEntries(G.map(g=>[g,1])); S.dishMade[d.id]=Object.fromEntries(G.map(g=>[g,true])); S.dishEaten[d.id]=Object.fromEntries(G.map(g=>[g,true])); }
   try{ if(typeof tqOpenAll==="function") tqOpenAll(); }catch(e){}   // TOEIC のレベルもすべて開く
   S.known=CROPS.map(c=>c.id).concat(["fert","obj:spr","obj:crow"]);
