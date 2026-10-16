@@ -3767,9 +3767,11 @@ const baraName = n => { const a=Array.from(n); if(a.length>1 && Math.random()<.5
 const baraEsc = v => String(v==null?"":v).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
 async function fetchRanking(d){
   if(d==="barabara"){
-    const snap=await db.ref("typinggarden/scores/barabara").orderByChild("s").limitToLast(RANKING_SIZE).once("value");
+    const snap=await db.ref("typinggarden/scores/barabara").orderByChild("s").limitToLast(RANKING_SIZE*5).once("value");
     const rows=[]; snap.forEach(c=>{ rows.push(c.val()); });
-    return rows.sort((a,b)=>(b.s-a.s) || (a.t-b.t));
+    rows.sort((a,b)=>(b.s-a.s) || (a.t-b.t));
+    const per={};   // 1人(同じ名前)3つまで
+    return rows.filter(r=>(per[r.n]=(per[r.n]||0)+1)<=3).slice(0,RANKING_SIZE);
   }
   const multi = window.tqRankMulti ? tqRankMulti(d) : null;   // TOEIC: 基本・470〜990点・熟語のまとまり
   if(multi){
@@ -4233,6 +4235,7 @@ const NEWS=[
   ]},
   { d:"2026-10-16", t:"そのほかの変更", items:[
     "薔薇ガチャで出る新しい薔薇の種は、ほかの薔薇の種と混ぜず、色ごとに選んで植えられるようにしました。種の一覧に「薔薇」の段を追加しました",
+    "種を使い切ったとき、種の並びで次にある種に切り替わるように直しました。同じ値段の種やお気に入りの種を飛ばしてしまうことがありました",
     "ガチャが安くなる効果は、キーで引くガチャにだけ効きます。薔薇ガチャのコインは安くなりません",
     "わくわくガチャで、上限まで持っている台所の宝物・時渡りの砂時計・土地の権利書が出たときにもらえるキーを、1,000,000キー から 100,000キー にしました",
     "ガチャをまとめて引いたとき、引くのが遅くなっていたのを直しました",
@@ -6535,12 +6538,18 @@ function toggleFav(kind,id){
   toast(m[id] ? `★ ${esc(nm)}をお気に入りにしました(一番上に並びます)` : `${esc(nm)}をお気に入りから外しました`,"",2200,true);
 }
 const starHtml = (kind,id) => { const on = kind==="s" ? isFavS(id) : isFavD(id); return `<span class="fstar${on?" on":""}" data-star="${kind}:${id}" title="お気に入り(S)">${on?"★":"☆"}</span>`; };
-const ownedSeeds=()=>CROPS.concat(ROSE_SEED,ROSE_USEEDS(),ROSE_HALF).filter(c=>(S.seeds[c.id]||0)>0).map(c=>c.id).sort((a,b)=>(isFavS(b)-isFavS(a)) || seedRank(a)-seedRank(b));
+const seedAll = () => CROPS.concat(ROSE_SEED,ROSE_USEEDS(),ROSE_HALF);
+let seedIdx=null;
+const seedOrder = (a,b) => { if(!seedIdx){ seedIdx={}; seedAll().forEach((c,i)=>seedIdx[c.id]=i); }   // 種の並び: お気に入り → 安い順 → 同じ値段なら作物の順
+  return (isFavS(b)-isFavS(a)) || seedRank(a)-seedRank(b) || (seedIdx[a]??0)-(seedIdx[b]??0); };
+const ownedSeeds=()=>seedAll().filter(c=>(S.seeds[c.id]||0)>0).map(c=>c.id).sort(seedOrder);
 /* 手持ちがなくなった種の次に持つ種: それより高い種のうち一番安いもの。無ければ手持ちで一番高い種 */
+/* 種がなくなったとき: 並び(お気に入り → 安い順)で、その種のすぐ後ろの種へ。いちばん後ろなら、すぐ前の種へ */
 function nextSeed(fromId){
   const o=ownedSeeds(); if(!o.length) return fromId;
-  const base=seedRank(fromId);
-  return o.find(id=>seedRank(id)>base) || o[o.length-1];
+  if(o.includes(fromId)) return fromId;
+  const all=o.concat(fromId).sort(seedOrder), i=all.indexOf(fromId);
+  return all[i+1] || all[i-1];
 }
 const placedOn = id => S.fields.some(f=>f[POST].obj===id);
 const crowPlaced =()=>placedOn("crow");
