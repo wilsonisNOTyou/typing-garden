@@ -1465,6 +1465,39 @@ body.garden.barag{background:radial-gradient(ellipse at 50% 120%, rgba(200,30,62
 .gmfull .gstp.big{width:6rem; height:6rem; margin:-3rem 0 0 -3rem; border-width:4px}
 .gmfull .gstp.top{width:7.4rem; height:7.4rem; margin:-3.7rem 0 0 -3.7rem; box-shadow:inset 0 0 0 3px #fff, inset 0 0 0 6px var(--c), 0 0 24px 6px var(--c)}
 @keyframes g-stamp{0%{transform:scale(2.6) rotate(var(--rot)); opacity:0}100%{transform:scale(1) rotate(var(--rot)); opacity:1}}
+/* 画面いっぱいにした、札の滝・カプセルの山・花火大会 */
+.gmfull{contain:strict}
+#screen-garden .gmfull .gmfall{position:absolute; inset:0; height:auto; border-radius:0; background:transparent; overflow:hidden}
+#screen-garden .gmfull .gmfall .gcard.gmdrop{animation-name:g-mdropf}
+@keyframes g-mdropf{0%{transform:translateY(0) rotate(0)}100%{transform:translateY(112vh) rotate(var(--rot))}}
+#screen-garden .gmfull .gmcap{position:absolute; inset:0; height:auto; border-radius:0; padding:0; background:linear-gradient(180deg,rgba(255,240,180,.15),rgba(255,200,120,.25)); box-shadow:none}
+#screen-garden .gmfull .gcap{animation-name:g-capdropf}
+@keyframes g-capdropf{0%{transform:translateY(-105vh) rotate(-160deg)}75%{transform:translateY(3px) rotate(10deg)}100%{transform:translateY(0) rotate(0)}}
+#screen-garden .gmfull .gmsky{position:absolute; inset:0; height:auto; border-radius:0; opacity:.92}
+.gmfull.f15, .gmfull.f19{background:radial-gradient(ellipse at 50% 50%, rgba(30,30,80,.55), rgba(5,5,25,.82))}
+.gmfull.f18{background:repeating-conic-gradient(from 0deg at 50% 50%, rgba(255,216,74,.10) 0 10deg, rgba(138,208,255,.10) 10deg 20deg); animation:g-swbg 6s linear infinite}
+@keyframes g-swbg{to{background-position:0 0; filter:hue-rotate(360deg)}}
+.gmfull .gstar{position:absolute; animation:g-star linear forwards}
+.gmfull .gstar .gtail{position:absolute; right:50%; top:50%; width:9rem; height:3px; margin-top:-1.5px; background:linear-gradient(90deg,transparent,var(--c)); transform-origin:100% 50%; transform:rotate(-35deg); border-radius:99px; filter:blur(.5px)}
+.gmfull .gstar.big .gtail{width:16rem; height:5px; box-shadow:0 0 8px var(--c)}
+@keyframes g-star{0%{transform:translate(0,0); opacity:0}10%{opacity:1}100%{transform:translate(-70vw,50vw); opacity:0}}
+.gmfull .gcar{position:absolute; left:100vw; width:4.2rem; height:3rem; border-radius:6px 6px 3px 3px; background:linear-gradient(180deg,#e05a4a,#a8321f); border:2px solid #5a1a10; display:flex; align-items:center; justify-content:center; animation:g-train linear forwards}
+.gmfull .gcar.big{background:linear-gradient(180deg,#ffe36e,#d8a020); border-color:#8a6014; box-shadow:0 0 14px var(--c)}
+.gmfull .gcar .gwh{position:absolute; bottom:-.55rem; left:.4rem; width:.9rem; height:.9rem; border-radius:50%; background:#333; border:2px solid #999}
+.gmfull .gcar .gwh.r{left:auto; right:.4rem}
+.gmfull .gcar .gfl{top:-1.3rem}
+.gmfull .gloco{position:absolute; left:100vw; font-size:3rem; line-height:3rem; transform:scaleX(-1); animation:g-train 3s linear forwards}
+@keyframes g-train{to{transform:translateX(-118vw)}}
+.gmfull .gloco{animation-name:g-traino}
+@keyframes g-traino{from{transform:scaleX(-1)}to{transform:translateX(-118vw) scaleX(-1)}}
+.gmfull .gpop{position:absolute; bottom:-3rem; animation:g-popx linear forwards}
+.gmfull .gpop .gpy{display:inline-block; animation:g-popy cubic-bezier(.2,.6,.4,1) forwards}
+@keyframes g-popx{to{transform:translateX(var(--dx))}}
+@keyframes g-popy{0%{transform:translateY(0) rotate(0)}45%{transform:translateY(var(--hy)) rotate(200deg)}100%{transform:translateY(10vh) rotate(420deg)}}
+.gmfull .gswl{position:absolute; left:50%; top:50%; animation:g-swirl cubic-bezier(.3,0,.7,1) forwards}
+@keyframes g-swirl{0%{transform:rotate(var(--a0)) translateX(0) rotate(calc(-1 * var(--a0))) scale(.2); opacity:0}15%{opacity:1}100%{transform:rotate(calc(var(--a0) + 600deg)) translateX(70vmax) rotate(calc(-1 * var(--a0) - 600deg)) scale(1.4); opacity:.2}}
+.gmfull .ghyp{position:absolute; left:50%; top:50%; animation:g-hyp cubic-bezier(.6,0,1,1) forwards}
+@keyframes g-hyp{0%{transform:translate(-50%,-50%) scale(.05); opacity:0}20%{opacity:1}100%{transform:translate(calc(-50% + var(--dx)),calc(-50% + var(--dy))) scale(3); opacity:.6}}
 /* カプセルの山 */
 #screen-garden .gmega.f8{background:linear-gradient(180deg,#ffe36e,#ffb84a); box-shadow:inset 0 0 0 4px #e0503a, 0 6px 18px rgba(0,0,0,.25)}
 #screen-garden .gmcap{position:relative; height:min(22rem,52vh); display:flex; flex-wrap:wrap-reverse; align-content:flex-start; justify-content:center; gap:1px; padding:.3rem; overflow:hidden; border-radius:14px; background:linear-gradient(180deg,rgba(255,255,255,.75),rgba(220,240,255,.55)); box-shadow:inset 0 0 0 3px rgba(255,255,255,.9), inset 0 -10px 20px rgba(0,0,0,.08)}
@@ -7889,9 +7922,12 @@ function drawGacha(n){
 }
 /* ---------- 1111111連: カプセルが降り注ぎ、カウンターが一気に回る。計算は少しずつ進めて、画面を止めない ---------- */
 let gachaMega=null;   // { n, i, by, cnt, extra, best, t0, C, G, og, disp, skip, fx }
-const MEGA_FX=["一気にドーン","","","加速する111連","全種類の札","札の滝","","いつもの","カプセルの山","花火大会","宝箱ラッシュ","キーの雨","シャボン玉","水族館","スタンプ連打"];
-const MEGA_FX_SET=[0,3,4,5,8,9,10,11,12,13,14];
-const MEGA_FULL=[11,12,13,14];   // ガチャの画面からはみ出して、画面いっぱいに出る演出   // 演出セットを使っているときにランダムで出る演出(いつものは出ない)
+const MEGA_FX=["一気にドーン","","","加速する111連","全種類の札","札の滝","","いつもの","カプセルの山","花火大会","宝箱ラッシュ","キーの雨","シャボン玉","水族館","スタンプ連打","流れ星","ガチャ特急","ポップコーン","うずまき","ハイパードライブ"];
+const MEGA_FX_SET=[0,3,4,5,8,9,10,11,12,13,14,15,16,17,18,19];
+const MEGA_FULL=[5,8,9,11,12,13,14,15,16,17,18,19];   // ガチャの画面からはみ出して、画面いっぱいに出る演出
+const MEGA_QN={8:170,12:110,13:110,16:80,19:160};   // 見せる札のおおよその数(ほかは140)
+const MEGA_GAP={5:26,9:42,10:28,11:22,12:45,13:45,14:36,15:30,16:70,17:26,18:26,19:18};   // 札1枚あたりの間隔(ミリ秒)
+const MEGA_CAP = n => MOB ? Math.round(n*.6) : n;   // 同時に出す数の上限(スマホは少なめにして軽くする)   // 演出セットを使っているときにランダムで出る演出(いつものは出ない)
 const MEGA_SET_PRICE=100000000;   // 大連ガチャの演出セット
 const MEGA_CARD_MS=5500;   // 札を見せる演出: 札がめくれ続ける長さ
 const MEGA_MIN_MS=4500;   // 計算が速くても、カウンターが回りきるまでこれだけ見せる
@@ -7901,7 +7937,7 @@ function megaStart(n){
   const fx = (S.megaSet && !S.megaSetOff) ? MEGA_FX_SET[Math.floor(Math.random()*MEGA_FX_SET.length)] : 7;
   gachaMega={ n, i:0, by:{}, cnt:{}, extra:0, best:-1, t0:performance.now(), C:gachaCtx(), G:guardEvery(), og:ev("γ",.1,.5,0), disp:0, skip:false, tick:0, fx, stop:0, stopAt:0 };
   { const M=gachaMega, ord=MACHINES[gachaM].order.filter(r=>poolOf(r).length);
-    Object.assign(M,{ q:[], qi:0, qp:[3,5,8,9,10,11,12,13,14].includes(M.fx)?Math.min(1,(M.fx===8?170:[12,13].includes(M.fx)?110:140)/n):0, lastC:0, firstId:{}, cardBest:-1, pauseUntil:0, cardsShown:0, snd:0, shelf:{}, phase:"", endAt:0,
+    Object.assign(M,{ q:[], qi:0, qp:M.fx>=3 && M.fx!==4 && M.fx!==7 ? Math.min(1,(MEGA_QN[M.fx]||140)/n):0, lastC:0, firstId:{}, cardBest:-1, pauseUntil:0, cardsShown:0, snd:0, shelf:{}, phase:"", endAt:0,
       top2:RARITY_ORDER.indexOf(ord[Math.max(0,ord.length-2)]), topR:RARITY_ORDER.indexOf(ord[ord.length-1]), spotSeen:{}, spotShown:{}, spotQ:[], spotAt:0 });   // 大きく見せるのは、その台の上から2段のレア度だけ
     if(M.fx!==7) M.sweep=sfxSweep(M.fx===4?7500:M.fx>=3?MEGA_CARD_MS:MEGA_MIN_MS); }
   renderGacha();
@@ -7957,7 +7993,7 @@ function megaCards(){
       const expect=M.q.length+(M.n-M.i)*M.qp;
       let target = (M.skip || (M.i>=M.n && t>=1)) ? M.q.length : Math.floor(expect*Math.pow(t,2.2));   // はじめはゆっくり、だんだん速く
       target=Math.min(target,M.q.length);
-      const gap={9:42,10:28,5:26,11:22,12:45,13:45,14:36}[M.fx]||20;   // 札1枚あたりの間隔(ミリ秒)。速くなりすぎて見えなくならないように
+      const gap=MEGA_GAP[M.fx]||20;   // 札1枚あたりの間隔(ミリ秒)。速くなりすぎて見えなくならないように
       let lim = (M.skip || t>=1) ? 40 : Math.min(6, Math.floor((now-(M.lastC||now-gap))/gap));   // 予定の長さを過ぎたら、残りは一気に
       if(lim>0) M.lastC=now;
       while(M.qi<target && lim-->0){ if(megaCardShow(M,M.q[M.qi++],now)) break; }
@@ -7982,15 +8018,20 @@ const megaCardIn = y => { const c=itemOf(y.id); return `<span class="gtag">${RAR
 function megaCardShow(M,y,now){
   const ri=RARITY_ORDER.indexOf(y.r), up = ri>=3 && ri>M.cardBest, hit = ri>=M.top2 && ri>=(M.spotMax||0) && !M.spotShown[y.id];   // 一度上のレア度を見せたら、それより下は見せない
   if(hit){ M.spotShown[y.id]=1; M.spotMax=ri; }
-  if(MEGA_FULL.includes(M.fx)){
-    const full=document.getElementById("g-megaFull"), shelf=$("g-megaShelf");
+  if(MEGA_FULL.includes(M.fx) && M.fx!==5){
+    const shelf=$("g-megaShelf");
+    if(shelf && ri>=3 && !M.shelf[y.id]){ M.shelf[y.id]=1; shelf.firstElementChild.insertAdjacentHTML("afterend",`<div class="gcard ${y.r} pop${up?" gmhit":""}">${megaCardIn(y)}</div>`); }
+  }
+  if(M.fx>=11){
+    const full=document.getElementById("g-megaFull"), shelf=null;
     if(shelf && ri>=3 && !M.shelf[y.id]){ M.shelf[y.id]=1; shelf.firstElementChild.insertAdjacentHTML("afterend",`<div class="gcard ${y.r} pop${up?" gmhit":""}">${megaCardIn(y)}</div>`); }   // ガチャの画面には、HR 以上の種類を並べる
     if(!full) return false;
     const c=itemOf(y.id), col=RARITY[y.r].color, big=ri>=3, top=ri>=M.top2;
     const lab = big && full.querySelectorAll(".gfl").length<4 ? `<span class="gfl">${c.name}</span>` : "";
     const el=document.createElement("div"); el.style.setProperty("--c",col);
     const X=(4+Math.random()*90).toFixed(1)+"vw", Y=(8+Math.random()*78).toFixed(1)+"vh";
-    if(M.fx===11){   // キーの雨: 画面じゅうに、引いたものが降ってくる
+    if(M.fx>=15){ if(!megaFullMore(M,y,el,full,c,ri,big,top,lab,X,Y,now)) return false; }
+    else if(M.fx===11){   // キーの雨: 画面じゅうに、引いたものが降ってくる
       if(!big && full.childElementCount>70) return false;
       el.className="gfr"+(big?" big":"")+(top?" top":""); el.style.left=X; el.style.animationDuration=(1.6+Math.random()*1.2).toFixed(2)+"s"; el.style.setProperty("--rot",(Math.random()*540-270|0)+"deg");
       el.innerHTML=`<span class="gfi">${ico(c)}</span>${lab}`; setTimeout(()=>el.remove(),3000);
@@ -8011,16 +8052,17 @@ function megaCardShow(M,y,now){
     full.appendChild(el);
   }else if(M.fx===8){   // カプセルの山: カプセルが降ってきて、下から積もり、箱いっぱいになる
     const box=$("g-megaCap"); if(!box) return false;
-    if(!M.capMax){ const r=box.getBoundingClientRect(), sz=parseFloat(getComputedStyle(box).fontSize)*2.3; M.capMax=Math.max(30,Math.floor(r.width/sz)*Math.floor(r.height/sz)); }
-    const cap=document.createElement("i");
-    cap.className="gcap"+(ri>=3?" hi":"")+(ri>=M.top2?" top":""); cap.style.setProperty("--c",RARITY[y.r].color); cap.title=itemOf(y.id).name;
-    if(box.childElementCount<M.capMax) box.appendChild(cap);
+    if(!M.capMax){ const r=box.getBoundingClientRect(), sz=parseFloat(getComputedStyle(box).fontSize)*2.3; M.capMax=MEGA_CAP(Math.max(30,Math.floor(r.width/sz)*Math.floor(r.height/sz)));
+      M.capK=Math.max(1,Math.ceil(M.capMax*.97/Math.max(1,M.q.length+(M.n-M.i)*M.qp))); }   // 1枚あたり何個降らせると、ちょうど埋まるか
+    const mk=()=>{ const cap=document.createElement("i"); cap.className="gcap"+(ri>=3?" hi":"")+(ri>=M.top2?" top":""); cap.style.setProperty("--c",RARITY[y.r].color); cap.style.animationDelay=(Math.random()*.25).toFixed(2)+"s"; return cap; };
+    const cap=mk();
+    if(box.childElementCount<M.capMax){ const fr=document.createDocumentFragment(); fr.appendChild(cap); for(let j=1;j<(ri>=3?1:M.capK) && box.childElementCount+j<M.capMax;j++) fr.appendChild(mk()); box.appendChild(fr); }
     else if(ri>=3){ const lows=[...box.querySelectorAll(".gcap:not(.hi)")]; const o=lows[Math.random()*lows.length|0]; if(o) o.replaceWith(cap); }   // いっぱいになったら、HR 以上だけ入れ替えて見せる
   }else if(M.fx===9){   // 花火大会: 引いたものが夜空で花火になる。レア度が高いほど大きく、名前が浮かぶ
     const sky=$("g-megaSky"); if(!sky) return false;
-    if(ri>=3 || sky.childElementCount<34){
+    if(ri>=3 || sky.childElementCount<MEGA_CAP(40)){
       const fw=document.createElement("div"); fw.className="gfw"+(ri>=3?" big":""); fw.style.left=(8+Math.random()*84).toFixed(1)+"%"; fw.style.top=(12+Math.random()*50).toFixed(1)+"%"; fw.style.setProperty("--c",RARITY[y.r].color);
-      const np = ri>=M.top2 ? 22 : ri>=3 ? 16 : 9, dist = ri>=M.top2 ? 5.5 : ri>=3 ? 4 : 2.2;
+      const np = MEGA_CAP(ri>=M.top2 ? 24 : ri>=3 ? 16 : 9), dist = ri>=M.top2 ? 9 : ri>=3 ? 6 : 3;
       fw.innerHTML=Array.from({length:np},(_,i)=>`<i style="--a:${(i*360/np+Math.random()*12).toFixed(0)}deg;--d:${(dist*(.75+Math.random()*.4)).toFixed(2)}rem"></i>`).join("")+((ri>=4 || ri>=3 && sky.querySelectorAll(".gfwl").length<2) && sky.querySelectorAll(".gfwl").length<4 ?`<span class="gfwl">${ico(itemOf(y.id))} ${itemOf(y.id).name}</span>`:"");   // 名前は重なりすぎないように、同時に4つまで
       sky.appendChild(fw); setTimeout(()=>fw.remove(), ri>=3?1500:1000);
       if(ri>=3 && now-(M.boom||0)>120){ M.boom=now; beep(90+ri*12,.18,"sine",.05); }
@@ -8035,7 +8077,7 @@ function megaCardShow(M,y,now){
     const fall=$("g-megaFall"), shelf=$("g-megaShelf"); if(!fall) return false;
     if(ri>=3 && !M.shelf[y.id]){ M.shelf[y.id]=1; shelf.firstElementChild.insertAdjacentHTML("afterend",`<div class="gcard ${y.r} pop${up?" gmhit":""}">${megaCardIn(y)}</div>`); }   // 新しいものを左に
     else{
-      if(fall.childElementCount<46){   // 落ちている途中の札は消さない(多すぎるときは、新しい札を見せないだけ)
+      if(fall.childElementCount<MEGA_CAP(60)){   // 落ちている途中の札は消さない(多すぎるときは、新しい札を見せないだけ)
         const d=document.createElement("div"); d.className=`gcard ${y.r} gmdrop`; d.innerHTML=megaCardIn(y);
         d.style.left=(Math.random()*84).toFixed(1)+"%"; d.style.setProperty("--rot",(Math.random()*70-35).toFixed(0)+"deg"); d.style.animationDuration=(1.9+Math.random()*.8).toFixed(2)+"s";
         d.addEventListener("animationend",()=>d.remove()); fall.appendChild(d); setTimeout(()=>d.remove(),3200);
@@ -8089,7 +8131,7 @@ function megaHTML(){
     const slots=Array.from({length:MOB?12:24},()=>`<div class="gcard gmslot"></div>`).join("");
     const album=MACHINES[gachaM].order.filter(r=>poolOf(r).length).flatMap(r=>poolOf(r).map(c=>`<div class="gcard ${r} gmq" data-id="${c.id}"><span class="gtag">${RARITY[r].label}</span><span class="gic">？</span></div>`)).join("");
     const chests=Array.from({length:MOB?12:24},()=>`<div class="gchest"><span class="glid"></span></div>`).join("");
-    const stage = MEGA_FULL.includes(M.fx) ? `<div class="gmshelf" id="g-megaShelf"><span class="gmshelfh">HR 以上</span></div><div class="gmfullnote">${["キーの雨","シャボン玉","水族館","スタンプ連打"][M.fx-11]}</div>` : M.fx===8 ? `<div class="gmcap" id="g-megaCap"></div>` : M.fx===9 ? `<div class="gmsky" id="g-megaSky"></div>` : M.fx===10 ? `<div class="gmchest" id="g-megaChest">${chests}</div>` : M.fx===4 ? `<div class="gcards gmkinds gmalbum" id="g-megaKinds">${album}</div>` : M.fx===5 ? `<div class="gmshelf" id="g-megaShelf"><span class="gmshelfh">HR 以上</span></div><div class="gmfall" id="g-megaFall"></div>` : `<div class="gcards gmboard" id="g-megaBoard">${slots}</div>`;
+    const stage = MEGA_FULL.includes(M.fx) && M.fx===5 ? `<div class="gmshelf" id="g-megaShelf"><span class="gmshelfh">HR 以上</span></div><div class="gmfullnote">${MEGA_FX[M.fx]}</div>` : MEGA_FULL.includes(M.fx) ? `<div class="gmshelf" id="g-megaShelf"><span class="gmshelfh">HR 以上</span></div><div class="gmfullnote">${MEGA_FX[M.fx]}</div>` : M.fx===8 ? `<div class="gmcap" id="g-megaCap"></div>` : M.fx===9 ? `<div class="gmsky" id="g-megaSky"></div>` : M.fx===10 ? `<div class="gmchest" id="g-megaChest">${chests}</div>` : M.fx===4 ? `<div class="gcards gmkinds gmalbum" id="g-megaKinds">${album}</div>` : M.fx===5 ? `<div class="gmshelf" id="g-megaShelf"><span class="gmshelfh">HR 以上</span></div><div class="gmfall" id="g-megaFall"></div>` : `<div class="gcards gmboard" id="g-megaBoard">${slots}</div>`;
     return `<div class="gmega cards f${M.fx} ${gachaM}"><div class="gmhead"><span class="gmtop">${fmtNum(M.n)}連</span><span class="gmnum" id="g-megaNum">0</span></div><div class="gmprog"><i id="g-megaProg"></i></div><div class="gmstage" id="g-megaStage">${stage}</div></div>`;
   }
   const rain=Array.from({length:42},(_,i)=>`<i style="left:${(Math.random()*96).toFixed(1)}%;--c:${cols[Math.floor(Math.random()*Math.min(cols.length,4))]};animation-delay:${(-Math.random()*1.2).toFixed(2)}s;animation-duration:${(.7+Math.random()*.7).toFixed(2)}s"></i>`).join("");
@@ -8144,10 +8186,44 @@ function sfxSweep(ms){
   }catch(e){ return null; }
 }
 function megaSkip(){ if(gachaMega) gachaMega.skip=true; }
+/* 画面いっぱいの演出(15〜19)の1枚ぶん。出さないときは false */
+function megaFullMore(M,y,el,full,c,ri,big,top,lab,X,Y,now){
+  const n=full.childElementCount;
+  if(M.fx===15){   // 流れ星: 右上から左下へ、尾を引いて流れる
+    if(!big && n>MEGA_CAP(45)) return false;
+    el.className="gstar"+(big?" big":"")+(top?" top":""); el.style.left=(20+Math.random()*95).toFixed(1)+"vw"; el.style.top=(-10+Math.random()*45).toFixed(1)+"vh"; el.style.animationDuration=(.9+Math.random()*.7).toFixed(2)+"s";
+    el.innerHTML=`<span class="gtail"></span><span class="gfi">${ico(c)}</span>${lab}`; setTimeout(()=>el.remove(),1800);
+  }else if(M.fx===16){   // ガチャ特急: 3本の線路を、引いたものを乗せた貨車が走っていく
+    if(n>MEGA_CAP(40)) return false;
+    M.lane=((M.lane||0)+1)%3;
+    el.className="gcar"+(big?" big":"")+(top?" top":""); el.style.top=(22+M.lane*24)+"vh"; el.style.animationDuration=(big?3.6:3).toFixed(1)+"s";
+    el.innerHTML=`<span class="gfi">${ico(c)}</span>${lab}<i class="gwh"></i><i class="gwh r"></i>`; setTimeout(()=>el.remove(),3800);
+    if(!M.loco){ M.loco=1; for(let i=0;i<3;i++){ const l=document.createElement("div"); l.className="gloco"; l.style.top=(22+i*24)+"vh"; l.textContent="🚂"; full.appendChild(l); setTimeout(()=>l.remove(),3200); } }
+  }else if(M.fx===17){   // ポップコーン: 下からポンッとはね上がって、落ちていく
+    if(!big && n>MEGA_CAP(50)) return false;
+    el.className="gpop"+(big?" big":"")+(top?" top":""); el.style.left=X; el.style.setProperty("--dx",(Math.random()*30-15).toFixed(1)+"vw"); el.style.setProperty("--hy",-(45+Math.random()*45).toFixed(0)+"vh"); el.style.animationDuration=(1.5+Math.random()*.7).toFixed(2)+"s";
+    el.innerHTML=`<span class="gpy" style="animation-duration:${el.style.animationDuration}"><span class="gfi">${ico(c)}</span>${lab}</span>`; setTimeout(()=>el.remove(),2400);
+    if(now-(M.boom||0)>90){ M.boom=now; beep(600+Math.random()*300,.03,"square",.012); }
+  }else if(M.fx===18){   // うずまき: 画面のまんなかから、ぐるぐる回りながら広がっていく
+    if(!big && n>MEGA_CAP(55)) return false;
+    el.className="gswl"+(big?" big":"")+(top?" top":""); el.style.setProperty("--a0",(Math.random()*360|0)+"deg"); el.style.animationDuration=(2+Math.random()*.8).toFixed(2)+"s";
+    el.innerHTML=`<span class="gfi">${ico(c)}</span>${lab}`; setTimeout(()=>el.remove(),3000);
+  }else{   // ハイパードライブ: まんなかから、こちらへ向かって飛んでくる
+    if(!big && n>MEGA_CAP(55)) return false;
+    const a=Math.random()*Math.PI*2, d=75;
+    el.className="ghyp"+(big?" big":"")+(top?" top":""); el.style.setProperty("--dx",(Math.cos(a)*d).toFixed(1)+"vmax"); el.style.setProperty("--dy",(Math.sin(a)*d).toFixed(1)+"vmax"); el.style.animationDuration=(big?1.6:(.8+Math.random()*.5)).toFixed(2)+"s";
+    el.innerHTML=`<span class="gfi">${ico(c)}</span>${lab}`; setTimeout(()=>el.remove(),1800);
+  }
+  return true;
+}
 function megaFullMake(fx){
   const old=document.getElementById("g-megaFull"); if(old) old.remove();
   if(!MEGA_FULL.includes(fx)) return;
-  const el=document.createElement("div"); el.id="g-megaFull"; el.className="gmfull f"+fx; document.body.appendChild(el);
+  const el=document.createElement("div"); el.id="g-megaFull"; el.className="gmfull f"+fx;
+  if(fx===5) el.innerHTML=`<div class="gmfall" id="g-megaFall"></div>`;   // 札の滝: 画面いっぱいに落ちる
+  if(fx===8) el.innerHTML=`<div class="gmcap" id="g-megaCap"></div>`;     // カプセルの山: 画面いっぱいに積もる
+  if(fx===9) el.innerHTML=`<div class="gmsky" id="g-megaSky"></div>`;     // 花火大会: 画面いっぱいの夜空
+  ($("screen-garden")||document.body).appendChild(el);
 }
 function megaFullEnd(){ const el=document.getElementById("g-megaFull"); if(!el) return; el.classList.add("out"); setTimeout(()=>el.remove(),700); }
 function megaEnd(keep){
