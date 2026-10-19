@@ -9561,7 +9561,7 @@ const EFFS = {
   S:{ nm:"ガチャのレア度",       n:"ガチャの SR 以上が出る確率 1.2倍",     s:"ガチャの SR 以上が出る確率 1.5倍" },
   V:{ nm:"ノーミス勝負のお守り", n:"ノーミス勝負でミスしても1回まで続く(効果中はランキングに載りません)", s:"ノーミス勝負でミスしても3回まで続く(効果中はランキングに載りません)" },
   "α":{ nm:"種が戻る",           n:"収穫すると20%で同じ種が1つ戻る(貴重品は除く)", s:"収穫すると、かならず同じ種が1つ戻る(貴重品は除く)" },
-  "β":{ nm:"時間を進める",       n:"食べた瞬間、すべての畑が3時間進む",    m:"食べた瞬間、すべての畑が12時間進む", s:"食べた瞬間、すべての畑が1日進む" },
+  "β":{ nm:"時間を進める",       n:"食べた瞬間、水が効いている畑が3時間進む",    m:"食べた瞬間、水が効いている畑が12時間進む", s:"食べた瞬間、水が効いている畑が1日進む" },
   "γ":{ nm:"ガチャおかわり",     n:"ガチャ1回ごとに10%でもう1回",         s:"ガチャ1回ごとに50%でもう1回" },
   "ε":{ nm:"GUR が出やすい",     n:"わくわくガチャの GUR の確率 1.5倍",    s:"わくわくガチャの GUR の確率 3倍" },
   "μ":{ nm:"GHR が出やすい",     n:"ガチャの GHR の確率 1.5倍",            s:"ガチャの GHR の確率 3倍" },
@@ -9856,9 +9856,9 @@ function cookEat(id,g){
   let what="";   // 演出に出す、食べて起きたこと
   if(d.eff==="β"){   // 時間を進める: その場で効く(今の効果は消えない)
     const hours = g===5 ? 24 : g===3 ? 12 : 3;
-    tick(); advanceAll(hours*HOUR);
-    what=`すべての畑が ${hours>=24?hours/24+"日":hours+"時間"} 進みました`;
-    toast(`${dishIco(d,g)} ${esc(dishName(d,g))}を食べました。すべての畑が ${hours>=24?hours/24+"日":hours+"時間"} 進みました`,"good",4200,true);
+    tick(); advanceAll(hours*HOUR,true);
+    what=`水が効いている畑が ${hours>=24?hours/24+"日":hours+"時間"} 進みました`;
+    toast(`${dishIco(d,g)} ${esc(dishName(d,g))}を食べました。水が効いている畑が ${hours>=24?hours/24+"日":hours+"時間"} 進みました`,"good",4200,true);
   }else if(d.eff==="P8"){   // 効果を延ばす: 今の効果に時間を足す
     const bs=buffList(), b=bs[0];
     const add = g===5 ? 60 : g===3 ? 30 : 10;
@@ -9915,8 +9915,9 @@ function autoCookTick(){
   if(made.length){ toast(`🧑‍🍳 料理番の村人が ${made.join(" ・ ")} を作り置きしました`,"good",4200,true); save(); if(modal==="cook") renderCook(); }
 }
 /* 時間を進める(β): 水の有無にかかわらず、すべての畑の作物と村人の区画を進める */
-function advanceAll(ms){
-  const run=()=>{ for(const f of S.fields) for(const k of KEYS){ const p=f[k]; if(p.vil==="rf"){ roseFarm(p,ms,Date.now()-ms,"c"); continue; } if(p.vil){ villagerAdvance(p,ms*effVilGrow()); continue; } if(p.crop && !isRipe(p)) grow(p,ms,Date.now()-ms,"c"); } };
+function advanceAll(ms,wetOnly){   // wetOnly: 水が効いている区画だけ進める(時間を進める料理)
+  const run=()=>{ const now=Date.now(); S.fields.forEach((f,fi)=>{ const cov=covered(fi); for(const k of KEYS){ const p=f[k]; if(p.vil==="rf"){ roseFarm(p,ms,now-ms,"c"); continue; } if(p.vil){ villagerAdvance(p,ms*effVilGrow()); continue; }
+    if(p.crop && !isRipe(p)){ const w=!wetOnly || (p.s==="soil" && cov.has(k)) ? ms : Math.max(0, Math.min(ms, (p.wet||0)-now)); if(w>0) grow(p,w,now-ms,"c"); } } }); };   // 料理のときは、水が効いている区画だけ進む(村人・薔薇農家は水もあげてくれる)
   withReal(run); if(realFields) run();
   reportVillagers();
 }
