@@ -8694,8 +8694,8 @@ const RG_GHR = [
   { k:"rfv", id:"rg:rfv", name:"薔薇農家", art:RFV.art, desc:"持ち物の薔薇の種を、1人につき3区画で植えて育て、咲いたら持ち物に入れてくれます(ふつうの畑と同じ速さ)", n:()=>S.roseVil||0,
     give:()=>{ S.roseVil=(S.roseVil||0)+1; S.objSel="rfvil"; return `${ico(RFV)} 薔薇農家が来てくれました! ${kb("設置(6)","設置")}で区画を任せると、持ち物の薔薇の種を${RF_SLOTS}区画で育ててくれます`; } },
   { k:"rkam", id:"rg:rkam", name:"薔薇のかまど", art:RKAMA.art, desc:'好きな色の薔薇の花びらを、ホーム画面・農園・タイピングに舞わせます(2つ目からは 100,000キー に替わります)', n:()=>S.rkam||0,
-    give:()=>{ if(S.rkam){ S.money+=100000; S.totalSales+=100000; return ""; } S.rkam=1; S.rkamOn=true; S.rkamCol=S.rkamCol||rkamCols()[0]||"";
-      rosePetals(); return `${ico(RKAMA)} 薔薇のかまどを手に入れました! 貴重品(8)の「薔薇」で、舞わせる花びらの色を選べます`; } },
+    give:()=>{ if(S.rkam){ S.money+=100000; S.totalSales+=100000; return ""; } S.rkam=1; S.rkamOn=false; S.rkamCol=S.rkamCol||rkamCols()[0]||"";   // 手に入れた直後はオフ(貴重品の「薔薇」でオンにする)
+      rosePetals(); return `${ico(RKAMA)} 薔薇のかまどを手に入れました! 貴重品(8)の「薔薇」でオンにすると、選んだ色の花びらが舞います`; } },
 ];
 for(const x of RG_GHR) rgAdd("GHR",{ id:x.id, name:x.name, icon:"✨", art:x.art, give:x.give });
 const rgGhrGot = () => RG_GHR.filter(x=>(S.got[x.id]||0)>0).length;
