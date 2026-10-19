@@ -1467,11 +1467,15 @@ body.garden.barag{background:radial-gradient(ellipse at 50% 120%, rgba(200,30,62
 @keyframes g-stamp{0%{transform:scale(2.6) rotate(var(--rot)); opacity:0}100%{transform:scale(1) rotate(var(--rot)); opacity:1}}
 /* 画面いっぱいにした、札の滝・カプセルの山・花火大会 */
 .gmfull{contain:strict}
+#screen-garden.gmhide > div:first-child{visibility:hidden}   /* 大連ガチャのあいだは、後ろの庭を描かない(描き直しが重い) */
+#screen-garden.gmhide #g-gacha{background:rgba(40,30,15,.82)}
+#screen-garden #g-gacha{transition:background .3s}
 #screen-garden .gmfull .gmfall{position:absolute; inset:0; height:auto; border-radius:0; background:transparent; overflow:hidden}
 #screen-garden .gmfull .gmfall .gcard.gmdrop{animation-name:g-mdropf}
 @keyframes g-mdropf{0%{transform:translateY(0) rotate(0)}100%{transform:translateY(112vh) rotate(var(--rot))}}
 #screen-garden .gmfull .gmcap{position:absolute; inset:0; height:auto; border-radius:0; padding:0; background:linear-gradient(180deg,rgba(255,240,180,.15),rgba(255,200,120,.25)); box-shadow:none}
-#screen-garden .gmfull .gcap{animation-name:g-capdropf}
+#screen-garden .gmfull .gcap{animation-name:g-capdropf; width:var(--cs,2.2rem); height:var(--cs,2.2rem)}
+#screen-garden .gmfull .gcap.top{animation:g-capdropf .5s cubic-bezier(.3,.8,.5,1.15) both; box-shadow:0 0 0 3px #fff, 0 0 12px 4px var(--c)}   /* 画面いっぱいのときは、光り続けない(重い) */
 @keyframes g-capdropf{0%{transform:translateY(-105vh) rotate(-160deg)}75%{transform:translateY(3px) rotate(10deg)}100%{transform:translateY(0) rotate(0)}}
 #screen-garden .gmfull .gmsky{position:absolute; inset:0; height:auto; border-radius:0}
 .gmfull.f15, .gmfull.f19{background:radial-gradient(ellipse at 50% 50%, rgba(30,30,80,.55), rgba(5,5,25,.82))}
@@ -7930,6 +7934,7 @@ const MEGA_SET_PRICE=100000000;   // 大連ガチャの演出セット
 const MEGA_CARD_MS=5500;   // 札を見せる演出: 札がめくれ続ける長さ
 const MEGA_MIN_MS=4500;   // 計算が速くても、カウンターが回りきるまでこれだけ見せる
 function megaStart(n){
+  { const sg=$("screen-garden"); if(sg) sg.classList.add("gmhide"); }
   drawMemoStart();
   gachaRes=[]; gachaShown=0; gachaBig=null;
   const fx = (S.megaSet && !S.megaSetOff) ? MEGA_FX_SET[Math.floor(Math.random()*MEGA_FX_SET.length)] : 7;
@@ -8054,7 +8059,10 @@ function megaCardShow(M,y,now){
     full.appendChild(el);
   }else if(M.fx===8){   // カプセルの山: カプセルが降ってきて、下から積もり、箱いっぱいになる
     const box=$("g-megaCap"); if(!box) return false;
-    if(!M.capMax){ const r=box.getBoundingClientRect(), sz=parseFloat(getComputedStyle(box).fontSize)*2.3; M.capMax=MEGA_CAP(Math.max(30,Math.floor(r.width/sz)*Math.floor(r.height/sz)));
+    if(!M.capMax){ const r=box.getBoundingClientRect(), full=!!box.closest(".gmfull");
+      let sz=parseFloat(getComputedStyle(box).fontSize)*2.3;
+      if(full){ sz=Math.max(sz, Math.sqrt(r.width*r.height/(MOB?110:200))); box.style.setProperty("--cs",(sz-1).toFixed(1)+"px"); }   // 画面いっぱいのときは、カプセルを大きくして数を減らす(軽くする)
+      M.capMax=MEGA_CAP(Math.max(30,Math.floor(r.width/sz)*Math.floor(r.height/sz))); if(full) M.capMax=Math.max(30,Math.floor(r.width/sz)*Math.floor(r.height/sz));
       M.capK=Math.max(1,Math.ceil(M.capMax*.97/Math.max(1,M.q.length+(M.n-M.i)*M.qp))); }   // 1枚あたり何個降らせると、ちょうど埋まるか
     const mk=()=>{ const cap=document.createElement("i"); cap.className="gcap"+(ri>=3?" hi":"")+(ri>=M.top2?" top":""); cap.style.setProperty("--c",RARITY[y.r].color); cap.style.animationDelay=(Math.random()*.25).toFixed(2)+"s"; return cap; };
     const cap=mk();
@@ -8180,11 +8188,11 @@ const sfxFlick = ri => beep(1700+ri*160+Math.random()*200,.018,"triangle",.012);
 function sfxSweep(ms){
   try{
     audioCtx=audioCtx||new (window.AudioContext||window.webkitAudioContext)();
-    const t=audioCtx.currentTime, d=ms/1000, g=audioCtx.createGain(), os=[];
-    g.gain.setValueAtTime(0.0001,t); g.gain.exponentialRampToValueAtTime(.03,t+.4); g.gain.setValueAtTime(.03,t+40); g.gain.exponentialRampToValueAtTime(0.0001,t+41);   // 止めるまで鳴る(長くても40秒)
-    for(const [type,mul] of [["sine",1],["triangle",1.5]]){ const o=audioCtx.createOscillator(); o.type=type; o.frequency.setValueAtTime(180*mul,t); o.frequency.exponentialRampToValueAtTime(900*mul,t+d); o.connect(g); o.start(t); o.stop(t+41.1); os.push(o); }
+    const t=audioCtx.currentTime, d=Math.min(2,ms/1000), g=audioCtx.createGain(), os=[];   // はじめに一度だけ上がって消える(鳴り続けない)
+    g.gain.setValueAtTime(0.0001,t); g.gain.exponentialRampToValueAtTime(.025,t+.25); g.gain.setValueAtTime(.025,t+d*.6); g.gain.exponentialRampToValueAtTime(0.0001,t+d);
+    for(const [type,mul] of [["sine",1],["triangle",1.5]]){ const o=audioCtx.createOscillator(); o.type=type; o.frequency.setValueAtTime(180*mul,t); o.frequency.exponentialRampToValueAtTime(900*mul,t+d); o.connect(g); o.start(t); o.stop(t+d+.05); os.push(o); }
     g.connect(audioCtx.destination);
-    return { stop(){ try{ const n=audioCtx.currentTime; g.gain.cancelScheduledValues(n); g.gain.setValueAtTime(g.gain.value||.02,n); g.gain.exponentialRampToValueAtTime(0.0001,n+.25); os.forEach(o=>o.stop(n+.3)); }catch(e){} } };
+    return { stop(){ try{ const n=audioCtx.currentTime; if(n>=t+d) return; g.gain.cancelScheduledValues(n); g.gain.setValueAtTime(Math.max(.0001,g.gain.value),n); g.gain.exponentialRampToValueAtTime(0.0001,n+.25); os.forEach(o=>o.stop(n+.3)); }catch(e){} } };
   }catch(e){ return null; }
 }
 function megaSkip(){ if(gachaMega) gachaMega.skip=true; }
@@ -8231,6 +8239,7 @@ function megaFullEnd(){ const el=document.getElementById("g-megaFull"); if(!el) 
 function megaEnd(keep){
   const M=gachaMega; if(!M) return;
   megaFullEnd();
+  { const sg=$("screen-garden"); if(sg) sg.classList.remove("gmhide"); }
   const kept = keep ? document.querySelector(".gmega") : null;
   if(kept){ const tp=kept.querySelector(".gmtop"); if(tp) tp.textContent=`${fmtNum(M.n)}連の結果`; }
   if(M.sweep) M.sweep.stop();
