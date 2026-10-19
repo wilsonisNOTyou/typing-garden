@@ -152,7 +152,7 @@ html.mobile .tq-lv small{font-size:.68rem}
 .tq-credit{color:#6b7484; font-size:.72rem; margin-top:.8rem}
 .tq-hud{display:flex; justify-content:center; gap:1.4rem; color:var(--steel); font-variant-numeric:tabular-nums; margin-bottom:.6rem}
 .tq-hud b{color:var(--amber)}
-.tq-card{background:linear-gradient(180deg,var(--panel-hi,#3a414d),var(--panel,#2a2f38)); border:2px solid var(--line); border-radius:12px; padding:1.4rem 1rem 1.2rem; min-height:16rem}
+.tq-card{position:relative; background:linear-gradient(180deg,var(--panel-hi,#3a414d),var(--panel,#2a2f38)); border:2px solid var(--line); border-radius:12px; padding:1.4rem 1rem 1.2rem; min-height:16rem}
 .tq-pos{display:inline-block; font-size:.8rem; color:#cfe4ff; background:rgba(143,194,255,.15); border-radius:999px; padding:.05rem .7rem}
 .tq-word{font-size:clamp(2rem,7vw,3.2rem); font-family:Georgia,'Times New Roman',serif; color:#fff; letter-spacing:.03em; margin:.3rem 0 .6rem; overflow-wrap:anywhere}
 .tq-bar{height:6px; border-radius:3px; background:rgba(255,255,255,.1); overflow:hidden; max-width:420px; margin:0 auto .7rem}
@@ -170,6 +170,26 @@ html.mobile .tq-lv small{font-size:.68rem}
 .tq-opt.ng{border-color:#e05a4a; background:rgba(224,90,74,.22)}
 .tq-opt.tq-idk{grid-column:1/-1; justify-content:center; min-height:2.6rem; padding:.5rem .9rem; color:var(--steel); font-size:.92rem}   /* 分からない */
 .tq-fb{min-height:1.6em; margin-top:.7rem; font-size:1.05rem}
+/* 単語の状態(出題時)と、答えたあとの知らせ */
+.tq-wst{position:absolute; top:.6rem; left:.8rem; font-size:.78rem; font-weight:600; color:var(--steel); opacity:.85}
+.tq-wst:empty{display:none}
+.tq-wst.good{color:#6ac87a}
+.tq-wst.weak{color:#e07a7a}
+.tq-wst.run{color:#d8b06a}
+.tq-wst.new{color:#8aa4e0}
+.tq-wmsg{min-height:0; font-size:.85rem; font-weight:600}   /* 単語の知らせは控えめに: 小さな文字だけ */
+.tq-wmsg:empty{display:none}
+.tq-wmsg span{display:inline-block; margin-top:.3rem; opacity:.85}
+.tq-wmsg .good{color:#6ac87a}
+.tq-wmsg .over{color:#e8a25a}
+.tq-wmsg .weak{color:#e07a7a}
+.tq-wmsg .run{color:var(--steel)}
+/* 一本勝負: 10問ごとの中断ポイント */
+.tq-ck{display:flex; flex-direction:column; align-items:center; gap:.5rem}
+.tq-ck b{font-size:2rem}
+.tq-ck span{font-size:1rem; font-family:inherit; color:var(--steel)}
+.tq-ckbtns{grid-column:1/-1; display:flex; gap:.6rem; flex-wrap:wrap; justify-content:center; margin-top:.4rem}
+.tq-ckbtns .tq-opt{justify-content:center; min-width:10rem}
 /* リスニング */
 .tq-card.listen .tq-word{font-size:1rem; margin:.4rem 0 .5rem}
 .tq-listen{font-size:1.15rem; padding:.7rem 1.8rem; border-radius:999px; border-color:#8fc2ff; color:#cfe4ff}
@@ -768,6 +788,7 @@ html.mobile.gated body{overflow:hidden}
 .news-item:last-child{border-bottom:none}
 .news-item .d{color:var(--amber); font-size:.85rem}
 .news-item h3{margin:.15rem 0 .35rem; font-size:1.02rem}
+.news-item ul+h3{margin-top:.8rem}   /* 同じ日付の中の、次の見出し */
 .news-item ul{margin:0; padding-left:1.2rem; line-height:1.7; font-size:.92rem}
 .result-garden{color:#9fd36a; font-size:.95rem; margin:.1rem 0 .4rem; min-height:1.2em}
 /* ---- タイピング単語帳 ---- */
@@ -1148,6 +1169,18 @@ body.garden.barag{background:radial-gradient(ellipse at 50% 120%, rgba(200,30,62
 #screen-garden .modal{cursor:pointer}
 #screen-garden .modal .panel{cursor:default}
 #screen-garden .noticepanel{max-width:40rem}
+#screen-garden .layoutpanel{width:min(40rem,94vw)}
+#screen-garden .lyhint{font-size:.85rem; color:#6b5233; line-height:1.55; margin-bottom:.6rem}
+#screen-garden .lylist{display:flex; flex-direction:column; gap:.45rem}
+#screen-garden .lyslot{display:flex; flex-wrap:wrap; align-items:center; gap:.4rem .6rem; padding:.5rem .7rem; border:2px solid #e2d3b4; border-radius:10px; background:#fffaf0; cursor:pointer}
+#screen-garden .lyslot.cur{border-color:#c8873a; background:#fff3dc}
+#screen-garden .lyslot .lynum{font-weight:800; color:#a07a4a; width:1.2rem}
+#screen-garden .lyslot .lyname{flex:1; min-width:8rem; font:inherit; font-weight:800; padding:.25rem .5rem; border:1px solid #e2d3b4; border-radius:6px; background:#fff}
+#screen-garden .lyslot .lyname:focus{outline:2px solid #c8873a}
+#screen-garden .lyslot .lyempty{font-size:.78rem; color:#a08a68}
+#screen-garden .lyslot .lyask{flex-basis:100%; font-size:.88rem; font-weight:700; color:#8a4a14}
+#screen-garden .lyslot .sbtn{padding:.2rem .7rem}
+#screen-garden .tbtn.lay[hidden]{display:none}
 #screen-garden .noticebody{line-height:1.8; margin:.4rem 0 1rem}
 #screen-garden .noticebody li{margin:.35rem 0}
 #screen-garden .noticebody b{color:#a0522d}
@@ -1325,6 +1358,113 @@ body.garden.barag{background:radial-gradient(ellipse at 50% 120%, rgba(200,30,62
 }
 
 /* ---- 農園: 大連ガチャ(1111連・11111連・111111連)のまとめ表示と演出 ---- */
+/* ---- 農園: 1111111連(カプセルが降り注ぎ、カウンターが一気に回る) ---- */
+#screen-garden .gmega{position:relative; overflow:hidden; border-radius:14px; padding:1rem 1rem 1.2rem; min-height:19rem; display:flex; flex-direction:column; align-items:center; gap:.5rem;
+  background:radial-gradient(circle at 50% 30%, #fff8e0, #ffe2a8 45%, #f4b860); box-shadow:inset 0 0 0 3px rgba(255,255,255,.6), 0 6px 18px rgba(120,70,10,.25)}
+#screen-garden .gmega.w{background:radial-gradient(circle at 50% 30%, #fff, #ffe3f2 45%, #c8b8ff)}
+#screen-garden .gmega.r{background:radial-gradient(circle at 50% 30%, #fff4f6, #ffc2cf 45%, #a8122e)}
+#screen-garden .gmrain{position:absolute; inset:0; pointer-events:none}
+#screen-garden .gmrain i{position:absolute; top:-2rem; width:1.3rem; height:1.3rem; border-radius:50%;
+  background:radial-gradient(circle at 35% 30%, #fff 0 18%, var(--c) 20% 52%, #fff 54% 100%); box-shadow:0 2px 3px rgba(0,0,0,.2); animation:g-mrain linear infinite}
+@keyframes g-mrain{0%{transform:translateY(0) rotate(0)}100%{transform:translateY(24rem) rotate(540deg)}}
+#screen-garden .gmtop{position:relative; font-weight:900; font-size:1.05rem; color:#fff; background:#c8742a; border-radius:999px; padding:.1rem 1rem; box-shadow:0 3px 0 #8a4a14}
+#screen-garden .gmega.w .gmtop{background:#b06ad8; box-shadow:0 3px 0 #6a3a98}
+#screen-garden .gmega.r .gmtop{background:#c81e3e; box-shadow:0 3px 0 #6e0a1e}
+#screen-garden .gmnum{position:relative; font-size:3.2rem; font-weight:900; line-height:1.05; font-variant-numeric:tabular-nums; color:#5a3a12;
+  text-shadow:0 0 6px #fff, 0 0 6px #fff, 0 3px 0 #fff; animation:g-mbeat .25s ease-in-out infinite}
+@keyframes g-mbeat{50%{transform:scale(1.05)}}
+#screen-garden .gmprog{position:relative; width:min(26rem,90%); height:.7rem; border-radius:999px; background:rgba(255,255,255,.7); overflow:hidden; box-shadow:inset 0 1px 2px rgba(0,0,0,.2)}
+#screen-garden .gmprog i{display:block; height:100%; width:0; background:linear-gradient(90deg,#ff6a8a,#ffd84a,#6ad0ff,#9aff8a,#c89aff); background-size:200% 100%; animation:g-mstripe .8s linear infinite}
+@keyframes g-mstripe{to{background-position:200% 0}}
+#screen-garden .gmrows{position:relative; width:min(26rem,94%); display:flex; flex-direction:column; gap:.22rem; background:rgba(255,255,255,.82); border-radius:10px; padding:.5rem .7rem}
+#screen-garden .gmrow{display:grid; grid-template-columns:3rem 1fr 6.5rem; align-items:center; gap:.5rem; font-variant-numeric:tabular-nums}
+#screen-garden .gmrow b{color:var(--rc); font-weight:900}
+#screen-garden .gmbar{height:.65rem; border-radius:999px; background:rgba(0,0,0,.08); overflow:hidden}
+#screen-garden .gmbar i{display:block; height:100%; width:0; background:var(--rc); border-radius:999px; box-shadow:0 0 6px var(--rc)}
+#screen-garden .gmct{text-align:right; font-weight:800}
+#screen-garden .gmpop{position:absolute; top:42%; left:50%; transform:translate(-50%,-50%); pointer-events:none}
+#screen-garden .gmpop span{display:block; font-size:3.4rem; font-weight:900; color:var(--rc); -webkit-text-stroke:2px #fff; text-shadow:0 0 12px var(--rc), 0 0 24px #fff; opacity:0}
+#screen-garden .gmpop.on span{animation:g-mpop 1.1s cubic-bezier(.2,.9,.3,1.3) forwards}
+@keyframes g-mpop{0%{opacity:0; transform:scale(.3) rotate(-15deg)}25%{opacity:1; transform:scale(1.25) rotate(4deg)}70%{opacity:1; transform:scale(1)}100%{opacity:0; transform:scale(1.6)}}
+#g-gachaBody.gmshake{animation:g-mshake .6s ease-in-out}
+@keyframes g-mshake{0%,100%{transform:none}15%{transform:translate(-8px,4px) rotate(-.6deg)}30%{transform:translate(8px,-4px) rotate(.6deg)}45%{transform:translate(-6px,3px)}60%{transform:translate(5px,-2px)}80%{transform:translate(-2px,1px)}}
+.gmbanner{position:fixed; inset:0; z-index:9997; display:flex; align-items:center; justify-content:center; pointer-events:none;
+  background:radial-gradient(circle at 50% 50%, rgba(255,255,255,.75), rgba(255,220,120,.35) 40%, transparent 70%); animation:g-mbg 2.6s ease forwards}
+.gmbanner div{display:flex; flex-direction:column; align-items:center; animation:g-mban 2.6s cubic-bezier(.2,.9,.3,1.3) forwards}
+.gmbanner small{font-weight:900; font-size:1.1rem; color:#5a3a12; background:#fff; border-radius:999px; padding:.05rem .8rem}
+.gmbanner b{font-size:4.6rem; font-weight:900; line-height:1.1; background:linear-gradient(90deg,#ff4a6a,#ffb02a,#3ab0ff,#5ad85a,#b06ad8); -webkit-background-clip:text; background-clip:text; color:transparent;
+  -webkit-text-stroke:2px #fff; filter:drop-shadow(0 4px 0 rgba(90,58,18,.35))}
+.gmbanner span{font-size:1.6rem; font-weight:900; color:#fff; -webkit-text-stroke:1px #5a3a12; text-shadow:0 3px 0 #5a3a12}
+@keyframes g-mbg{0%{opacity:0}10%{opacity:1}80%{opacity:1}100%{opacity:0}}
+@keyframes g-mban{0%{opacity:0; transform:scale(.2) rotate(-10deg)}15%{opacity:1; transform:scale(1.15) rotate(2deg)}25%{transform:scale(1)}82%{opacity:1; transform:scale(1)}100%{opacity:0; transform:scale(1.3)}}
+.gmfw{position:fixed; width:.55rem; height:.55rem; border-radius:50%; z-index:9998; pointer-events:none; box-shadow:0 0 8px currentColor; animation:g-mfw 1.3s ease-out forwards}
+@keyframes g-mfw{0%{transform:translate(-50%,-50%) scale(1); opacity:1}100%{transform:translate(calc(-50% + var(--x)), calc(-50% + var(--y) + 40px)) scale(.3); opacity:0}}
+/* 札を見せる演出 */
+#screen-garden .gmega.cards{background:linear-gradient(180deg,#fffaf0,#f6ead2); align-items:stretch}
+#screen-garden .gmega.classic{min-height:0; padding:.8rem}
+#screen-garden .gmega.classic .gmnum{font-size:1.6rem; animation:none}
+#screen-garden .gmega.cards .gmtop, #screen-garden .gmega.cards .gmnum, #screen-garden .gmega.cards .gmprog{align-self:center}
+#screen-garden .gmega.cards .gmnum{font-size:2.4rem; animation:none}
+#screen-garden .gmstage{position:relative; width:100%; min-width:0}
+#screen-garden .gmega{max-width:100%; min-width:0}
+#screen-garden .gacha .gright{min-width:0}
+#screen-garden .gmboard{justify-content:center; min-height:0}
+#screen-garden .gmboard .gmslot{visibility:hidden}
+#screen-garden .gmboard .gcard.pop, #screen-garden .gmkinds .gcard.pop, #screen-garden .gmshelf .gcard.pop{animation:g-gpop .3s cubic-bezier(.2,.9,.3,1.3)}
+#screen-garden .gcard.gmhit{z-index:2; animation:g-mhit .7s cubic-bezier(.2,.9,.3,1.3) !important; box-shadow:0 0 0 3px #fff, 0 0 18px 6px #ffd84a}
+@keyframes g-mhit{0%{transform:scale(.3) rotate(-20deg)}50%{transform:scale(1.5) rotate(4deg)}100%{transform:scale(1.1)}}
+/* 3つの演出の見た目: 加速はカードの台、全種類は図鑑のページ、滝は流れる水 */
+#screen-garden .gmega.cards .gmhead{display:flex; align-items:baseline; justify-content:center; gap:.8rem; align-self:stretch}
+#screen-garden .gmega.cards .gmhead .gmnum{font-size:1.9rem}
+#screen-garden .gmega.f3{background:radial-gradient(ellipse at 50% 40%, #2f7a4a, #1a4a2c 75%); box-shadow:inset 0 0 0 4px #8a5a2a, inset 0 0 0 7px #c8a06a, 0 6px 18px rgba(0,0,0,.35)}
+#screen-garden .gmega.f3 .gmhead .gmnum{color:#ffe9a8; text-shadow:0 2px 0 rgba(0,0,0,.4)}
+#screen-garden .gmega.f3 .gmboard .gcard.pop{animation:g-mflip .35s ease-out}
+@keyframes g-mflip{0%{transform:perspective(400px) rotateY(90deg) scale(.9)}100%{transform:none}}
+#screen-garden .gmega.f4{background:linear-gradient(180deg,#fbf3df,#f1e3c0); box-shadow:inset 0 0 0 3px #c8a06a, inset 14px 0 0 -10px #d8c090, 0 6px 18px rgba(90,60,20,.25)}
+#screen-garden .gmalbum .gcard.gmq{opacity:.45; background:repeating-linear-gradient(45deg,#efe4c8 0 6px,#e8dbb8 6px 12px); border-style:dashed}
+#screen-garden .gmalbum .gcard.gmq .gic{font-size:1.6rem; color:#b8a078}
+#screen-garden .gmega.f5{background:linear-gradient(180deg,#e6f6ff,#bfe6fb 30%,#7ccaf0); box-shadow:inset 0 0 0 3px #5aaad8, 0 6px 18px rgba(20,80,120,.25)}
+#screen-garden .gmega.f5 .gmfall{background:repeating-linear-gradient(180deg, rgba(255,255,255,.35) 0 2px, transparent 2px 22px), linear-gradient(180deg, rgba(90,180,230,.25), rgba(40,130,200,.45)); background-size:100% 44px, auto; animation:g-mwater .6s linear infinite}
+@keyframes g-mwater{to{background-position:0 44px, 0 0}}
+#screen-garden .gmega.f5 .gmfall::after{content:""; position:absolute; left:0; right:0; bottom:0; height:2.4rem; background:radial-gradient(ellipse at 50% 100%, rgba(255,255,255,.85), transparent 70%); animation:g-msplash 1.1s ease-in-out infinite alternate; pointer-events:none}
+@keyframes g-msplash{to{opacity:.55; transform:scaleX(1.06)}}
+#screen-garden .gmega.f5 .gmshelf{background:linear-gradient(180deg,#9a7a5a,#7a5a3a); border:none; box-shadow:inset 0 -4px 0 rgba(0,0,0,.25)}
+#screen-garden .gmega.f5 .gmshelfh{color:#fff2d8}
+#screen-garden .gmfall{position:relative; height:14rem; overflow:hidden; border-radius:10px; background:linear-gradient(180deg,rgba(255,255,255,.6),rgba(255,236,200,.4))}
+#screen-garden .gcard.gmdrop{position:absolute; top:-6.5rem; animation:g-mdrop linear forwards}
+@keyframes g-mdrop{0%{transform:translateY(0) rotate(0)}100%{transform:translateY(21rem) rotate(var(--rot))}}
+#screen-garden .gmshelfh{font-size:.68rem; font-weight:800; color:var(--ink-l); writing-mode:vertical-rl; align-self:center}
+#screen-garden .gmshelf{display:flex; flex-wrap:nowrap; gap:.3rem; align-items:center; overflow:hidden; height:4.6rem; padding:.25rem; border-radius:10px; background:rgba(255,216,74,.18); border:2px dashed #e8c060; margin-bottom:.35rem}
+#screen-garden .gmkhead{text-align:center; font-weight:900; color:#5a3a12; margin:.2rem 0 .4rem}
+#screen-garden .gmkinds{justify-content:center; min-height:0}
+#screen-garden .gmkinds .gcard{height:6.3rem; justify-content:flex-start; padding-top:1rem}
+#screen-garden .gmkinds .gcard.spot .gcnt{position:static; font-size:.78rem; font-weight:900; color:#5a3a12}
+#screen-garden .gmshelf .gcard{width:3.4rem; height:3.9rem; flex:none}
+#screen-garden .gmshelf .gcard .gic{font-size:1.4rem}
+#screen-garden .gmshelf .gcard .gic svg{width:1.5rem; height:1.5rem}
+#screen-garden .gmshelf .gcard .gnm{font-size:.55rem}
+#screen-garden .gmkinds .gcard.gmbig{transform:scale(1.12); box-shadow:0 0 12px 3px rgba(255,216,74,.8); margin:.2rem}
+/* 上から2段のレア度: 演出の真ん中に大きく */
+#screen-garden .gmspot{position:absolute; inset:0; z-index:5; display:flex; align-items:center; justify-content:center; pointer-events:none; background:radial-gradient(circle at 50% 50%, rgba(255,255,255,.55), transparent 45%); animation:g-mspotbg .85s ease forwards}
+#screen-garden .gmspot.top{animation-duration:1.1s; background:radial-gradient(circle at 50% 50%, rgba(255,255,255,.75), color-mix(in srgb, var(--rc) 25%, transparent) 50%, transparent 70%)}
+#screen-garden .gmspot .gmrays{position:absolute; top:50%; left:50%; width:16rem; height:16rem; margin:-8rem 0 0 -8rem; border-radius:50%;
+  background:repeating-conic-gradient(color-mix(in srgb, var(--rc) 70%, #fff) 0 9deg, transparent 9deg 18deg); -webkit-mask:radial-gradient(circle,#000 20%,transparent 66%); mask:radial-gradient(circle,#000 20%,transparent 66%); animation:g-csspin 4s linear infinite}
+#screen-garden .gmspotin{position:relative; display:flex; flex-direction:column; align-items:center; gap:.2rem; animation:g-mspot .85s cubic-bezier(.2,.9,.3,1.3) forwards}
+#screen-garden .gmspot.top .gmspotin{animation-duration:1.1s}
+#screen-garden .gmspotin b{font-size:1.6rem; font-weight:900; color:var(--rc); -webkit-text-stroke:2px #fff; text-shadow:0 0 14px var(--rc)}
+#screen-garden .gmspotin .gcard{transform:scale(1.3); margin:.9rem 0 .6rem; box-shadow:0 0 0 3px #fff, 0 0 18px 6px var(--rc)}
+@keyframes g-mspotbg{0%{opacity:0}12%{opacity:1}80%{opacity:1}100%{opacity:0}}
+@keyframes g-mspot{0%{transform:scale(.2) rotate(-18deg); opacity:0}18%{transform:scale(1.1) rotate(3deg); opacity:1}28%{transform:none}82%{opacity:1}100%{opacity:0; transform:scale(1.08)}}
+/* 1111111連の結果: 最高レア */
+#screen-garden .gmhero{border-radius:14px; padding:.6rem .6rem .9rem; margin-bottom:.6rem; background:radial-gradient(circle at 50% 0%, color-mix(in srgb, var(--rc) 30%, #fff), #fff8ec 70%); box-shadow:inset 0 0 0 3px var(--rc), 0 0 18px color-mix(in srgb, var(--rc) 50%, transparent)}
+#screen-garden .gmheroh{text-align:center; font-weight:900; font-size:1.15rem; color:color-mix(in srgb, var(--rc) 70%, #3a2a10); margin-bottom:.5rem}
+#screen-garden .gmhero .gcards{justify-content:center; min-height:0; gap:.8rem}
+#screen-garden .gmhero .gcard{transform:scale(1.12); margin:.3rem; box-shadow:0 0 12px 3px color-mix(in srgb, var(--rc) 60%, transparent)}
+#screen-garden .gmhero .gcard.spot .gcnt{position:static; font-size:.78rem; font-weight:900; color:#5a3a12}
+#screen-garden .gmkinds .gcard.gmtopc{transform:scale(1.25); margin:.5rem; box-shadow:0 0 0 2px #fff, 0 0 18px 6px rgba(255,216,74,.9)}
+html.mobile #screen-garden .gmnum{font-size:2.4rem}
+html.mobile .gmbanner b{font-size:3rem}
+@media (prefers-reduced-motion:reduce){ #screen-garden .gmrain, .gmfw{display:none} #screen-garden .gmnum, #g-gachaBody.gmshake{animation:none} }
 /* ---- 農園: 料理ができたときの演出(中央に大きく絵を出す) ---- */
 #g-cookShow{position:fixed; inset:0; z-index:38; display:none; align-items:center; justify-content:center; pointer-events:none}
 #g-cookShow.on{display:flex}
@@ -1934,6 +2074,7 @@ html.mobile #screen-garden .grk-list{max-height:none; flex:1 1 auto; min-height:
       <div class="tq-hud"><span id="tqProg"></span><span><span id="tqScoreL">得点</span> <b id="tqScore">0</b></span><span id="tqMissW"></span></div>
       <div class="tq-card">
         <span class="tq-pos" id="tqPos"></span>
+        <span class="tq-wst" id="tqWst"></span>
         <div class="tq-word" id="tqWord"></div>
         <label class="tq-slow" id="tqSlowW" hidden><input type="checkbox" id="tqSlow"> ゆっくり <span class="kbdh">S</span></label>
         <div class="tq-bar" id="tqBarW"><i id="tqBar"></i></div>
@@ -1942,6 +2083,7 @@ html.mobile #screen-garden .grk-list{max-height:none; flex:1 1 auto; min-height:
         <div class="tq-typed" id="tqTyped"></div>
         <div class="tq-opts" id="tqOpts"></div>
         <div class="tq-fb" id="tqFb"></div>
+        <div class="tq-wmsg" id="tqWmsg"></div>
         <button class="btn primary tq-nextb" id="tqNextBtn" hidden>次へ <span class="kbdh">Enter</span></button>
       </div>
       <p class="hint" id="tqHint"></p>
@@ -2073,6 +2215,7 @@ html.mobile #screen-garden .grk-list{max-height:none; flex:1 1 auto; min-height:
       <button class="tbtn cook" id="g-cookBtn">料理<span class="kb">0</span></button>
       <button class="tbtn goal" id="g-bookBtn">図鑑・実績<span class="gbadge" id="g-goalBadge"></span><span class="kb">Space</span></button>
       <button class="tbtn toeic" id="g-toeicBtn">TOEIC<span class="kb">-</span></button>
+      <button class="tbtn lay" id="g-layoutBtn" hidden>配置セット<span class="kb">/</span></button>
       <button class="tbtn" id="g-backBtn">タイトルへ<span class="kb">Esc</span></button>
     </div>
 
@@ -2229,6 +2372,16 @@ html.mobile #screen-garden .grk-list{max-height:none; flex:1 1 auto; min-height:
         <div id="g-dbookDetail" class="bookdetail"></div>
       </div>
       <div class="keyhint"><b>↑ ↓</b> 料理を選ぶ ・ <b>← →</b> ふつう / 変異 / 超変異を切り替え ・ <b>F</b> 名前で探す ・ <b>Tab</b> 実績・図鑑へ ・ <b>Space</b> / <b>Esc</b> 閉じる</div>
+    </div>
+  </div>
+
+  <!-- 配置セット: 村人と設置物の並びを3つまで保存して、読み込む -->
+  <div class="modal" id="g-layout">
+    <div class="panel layoutpanel">
+      <div class="phead"><h2>🗂️ 配置セット</h2></div>
+      <p class="lyhint">すべての畑の、村人と設置物の並びを保存します。読み込むと、まだ育っている作物はそのまま、任された村人の速さで育ってから村人の作物に切り替わります</p>
+      <div id="g-layoutList" class="lylist"></div>
+      <div class="keyhint"><b>1〜3</b> 選ぶ ・ <b>N</b> 名前を付ける ・ <b>S</b> 今の配置を保存 ・ <b>Enter</b> 読み込む ・ <b>/</b> か <b>Esc</b> 閉じる</div>
     </div>
   </div>
 
@@ -4225,6 +4378,17 @@ function endBookGame(){
 /* ---------- 更新情報 ----------
    新しいものを上に足していく。d は YYYY-MM-DD */
 const NEWS=[
+  { d:"2026-10-20", t:"1,111,111連と、大連ガチャの演出セット", items:[
+    "すべてのガチャに 1,111,111連 を追加しました。お店の「効率化」で権利を買うと、F キーやボタンで引けます",
+    "お店の「効率化」に「大連ガチャの演出セット」を追加しました。使っているあいだは、1,111連以上のガチャでいろいろな演出がランダムで出ます",
+  ]},
+  { d:"2026-10-20", t:"村人と設置物の「配置セット」", items:[
+    "お店の「効率化」で、1,000,000キーの「配置セット」を買えるようになりました。すべての畑の村人と設置物の並びを3つまで保存して、農園で / を押すか上の「配置セット」ボタンから、一度に切り替えられます",
+  ]},
+  { d:"2026-10-20", t:"TOEIC 英単語の中断と、単語のお知らせ", items:[
+    "ノーミス勝負で、10問正解するごとに中断できるようになりました。次に同じ出題形式・レベルを選ぶと、続きから始まります",
+    "出題のときと答えたあとに、覚えた単語・苦手な単語・連続で正解している回数・苦手の解消までの回数がわかるようになりました",
+  ]},
   { d:"2026-10-16", t:"3台目のガチャ「薔薇ガチャ」が登場しました", items:[
     "薔薇を10色集めると、ガチャに3台目の「薔薇ガチャ」が登場します",
     "薔薇ガチャは「薔薇ガチャコイン」で引きます。持っている薔薇や薔薇の種を、ガチャ画面の「コインに変換」でコインに替えられます",
@@ -4378,7 +4542,8 @@ function refreshNewsBadge(){
 }
 function openNews(){
   newsOpen=true;
-  $("newsList").innerHTML=NEWS.map(n=>`<div class="news-item"><div class="d">${n.d.replace(/-/g,"/")}</div><h3>${escH(n.t)}</h3><ul>${n.items.map(x=>`<li>${escH(x)}</li>`).join("")}</ul></div>`).join("");
+  const groups=[]; for(const n of NEWS){ const g=groups[groups.length-1]; if(g && g.d===n.d) g.list.push(n); else groups.push({ d:n.d, list:[n] }); }   // 同じ日付の項目は、日付を1回だけ出して1つにまとめる
+  $("newsList").innerHTML=groups.map(g=>`<div class="news-item"><div class="d">${g.d.replace(/-/g,"/")}</div>${g.list.map(n=>`<h3>${escH(n.t)}</h3><ul>${n.items.map(x=>`<li>${escH(x)}</li>`).join("")}</ul>`).join("")}</div>`).join("");
   $("news").classList.add("open");
   $("newsList").scrollTop=0;
   try{ if(NEWS.length) localStorage.setItem(NEWS_SEEN_KEY, newsKey()); }catch(e){}
@@ -5903,6 +6068,12 @@ function villagerAdvance(p,dt){
   while(guard++<100000){
     if(!S.vilAutoM && p.crop && p.crop.mut && p.crop.grown>=need(p.crop)) break;   // 変異が実っている(変異の自動収穫オフ): 手で収穫されるまで待つ
     if(!S.vilAutoH && p.crop && p.crop.rolled && p.crop.grown>=need(p.crop)) break;   // 実ったまま待っている(自動収穫オフ)
+    if(p.crop && CROP[p.crop.id].rose){   // 配置セットで任された薔薇: 村人の速さで咲かせて持ち物に入れ、そのあと村人の作物に切り替える
+      if(!isRipe(p)){ const rem=need(p.crop)-p.crop.grown; if(t<rem){ if(t>0) grow(p,t,Date.now()-t,"c"); break; } grow(p,rem,Date.now()-t,"c"); t-=rem; if(!p.crop) continue; }
+      const id=p.crop.id, q=p.crop.mut?(p.crop.sup?5:3):0;
+      p.crop=null; invAdd(id,q,1); recordHarvest(id,q,true); S.vLog.rose=(S.vLog.rose||0)+1;
+      continue;
+    }
     if(!p.crop){
       const c=CROP[p.vil==="sg" ? sgCropId() : (eff("O") ? vilGachaCrop() : vilCropId())];   // シゴデキ村人は選んだ作物
       if(S.vilOrder3 && S.vilUseSeed && !c.treasure && (S.seeds[c.id]||0)>0){   // 指示書3: 持っている種を使う(買わない)
@@ -6595,7 +6766,9 @@ function renderBar(){
 /* キーを長押ししている間(連打のキー)は、画面の描き直しを1コマに1回にまとめる。
    描き直しが重いので、押すたびに描き直すとキーがたまり、離したあともしばらく動き続けるため */
 let deferUI=false;
+function renderLayoutBtn(){ const b=$("g-layoutBtn"); if(b) b.hidden=!S.layoutOwned || !!S.layoutOff; }
 function renderAll(){
+  renderLayoutBtn();
   if(deferUI){ renderSoon(renderAllNow); return; }
   renderAllNow();
 }
@@ -6777,7 +6950,6 @@ function act(k){
         if((rf?rfFree():sg?sgFree():vilFree())<=0){ nope(k,`${who}の手が空いていません(1人につき${rf?RF_SLOTS:sg?SG_SLOTS:VIL_SLOTS}区画)`); break; }
         if(p.obj){ nope(k,"設置物があります"); break; }
         if(p.s==="post"){ nope(k,"P は案山子置き場です"); break; }
-        if(sg && p.crop && p.crop.id!==sgCropId()){ nope(k,"ほかの作物が植わっています。収穫してから任せましょう"); break; }
         if(p.crop && CROP[p.crop.id].half){ nope(k,"この種は、自分で育てましょう"); break; }
         if(rf && p.crop && !CROP[p.crop.id].rose){ nope(k,"ほかの作物が植わっています。収穫してから任せましょう"); break; }
         if(!rf && p.crop && CROP[p.crop.id].rose){ nope(k,"薔薇は村人に任せられません"); break; }
@@ -6805,6 +6977,85 @@ function act(k){
   }
   save();
   renderAll();
+}
+/* ---- 配置セット: 村人と設置物の並びを3つまで保存・読み込み(お店で買う) ----
+   S.layouts[i] = { t:保存した時刻, f:[ 畑ごとに { 区画のキー: [村人 "v"/"sg"/"rf" か 0, 設置物 か null] } ] } */
+const LAYOUT_N=3, LAYOUT_PRICE=1000000;
+const lyCode = v => v==="sg"?"sg":v==="rf"?"rf":v?"v":0, lyVil = c => c==="sg"?"sg":c==="rf"?"rf":c==="v"?true:false;
+let lyCur=0;
+let lyAsk=null;   // 確認中: { kind:"save"|"load", i }
+const lyName = i => ((S.layoutNames||[])[i]||"").trim() || `セット${i+1}`;
+function renderLayout(){
+  S.layouts=S.layouts||[];
+  const ae=document.activeElement, editing = ae && ae.classList && ae.classList.contains("lyname") ? +ae.dataset.lyn : -1;
+  if(editing>=0 && !lyAsk) return;   // 名前を入力しているあいだは描き直さない
+  $("g-layoutList").innerHTML=Array.from({length:LAYOUT_N},(_,i)=>{ const L=S.layouts[i], ask=lyAsk && lyAsk.i===i;
+    const body = ask ? `<span class="lyask">${lyAsk.kind==="save"?`「${esc(lyName(i))}」を今の配置で上書きしますか?`:`「${esc(lyName(i))}」を読み込みますか? 今の村人と設置物の並びが切り替わります`}</span><button class="sbtn main" data-lyyes="1">はい${kb("(Enter)","")}</button><button class="sbtn" data-lyno="1">やめる${kb("(Esc)","")}</button>`
+      : `<button class="sbtn" data-lysave="${i}">${L?"上書き保存":"今の配置を保存"}${kb("(S)","")}</button><button class="sbtn main" data-lyload="${i}"${L?"":" disabled"}>読み込む${kb("(Enter)","")}</button>`;
+    return `<div class="lyslot${i===lyCur?" cur":""}${L?"":" empty"}" data-ly="${i}"><span class="lynum">${i+1}</span><input class="lyname" data-lyn="${i}" maxlength="16" value="${esc((S.layoutNames||[])[i]||"")}" placeholder="セット${i+1}" autocomplete="off">${L?"":`<span class="lyempty">空き</span>`}${body}</div>`; }).join("");
+}
+function layoutSave(i,ok){
+  S.layouts=S.layouts||[];
+  if(S.layouts[i] && !ok){ lyAsk={ kind:"save", i }; lyCur=i; sfx.tab(); renderLayout(); return; }   // 上書きは確かめてから
+  lyAsk=null;
+  S.layouts[i]={ t:Date.now(), f:FS().map(f=>{ const o={}; for(const k of KEYS){ const p=f[k], v=lyCode(p.vil); if(v||p.obj) o[k]=[v,p.obj||null]; } return o; }) };
+  sfx.place(); toast(`🗂️ 今の配置を「${esc(lyName(i))}」に保存しました`,"good",2600);
+  save(); renderLayout();
+}
+function layoutLoad(i,ok){
+  const L=(S.layouts||[])[i]; if(!L){ sfx.nope(); return; }
+  if(!ok){ lyAsk={ kind:"load", i }; lyCur=i; sfx.tab(); renderLayout(); return; }   // 読み込みも確かめてから
+  lyAsk=null;
+  tick();
+  const fs=FS(), want=(fi,k)=>((L.f[fi]||{})[k])||[0,null];
+  let nVil=0, nObj=0, skipV=0, skipO=0;
+  // 1. セットと違う村人・設置物を外す(設置物は持ち物に戻る。植わっている作物はそのまま)
+  fs.forEach((f,fi)=>{ for(const k of KEYS){ const p=f[k], [wv,wo]=want(fi,k);
+    if(p.vil && lyCode(p.vil)!==wv){ p.vil=false; p.vWait=false; if(!p.crop) p.emptySince=Date.now(); }
+    if(p.obj && p.obj!==wo){ S.objs[p.obj]=(S.objs[p.obj]||0)+1; p.obj=null; if(!p.crop && !p.vil) p.emptySince=Date.now(); }
+  } });
+  // 2. 設置物を置く(作物が植わっている区画と、持っていない設置物は置けない)
+  fs.forEach((f,fi)=>{ for(const k of KEYS){ const p=f[k], [,wo]=want(fi,k);
+    if(!wo || p.obj===wo) continue;
+    if(p.vil || (p.crop && !isScare(wo)) || (isScare(wo)!==(p.s==="post")) || !(S.objs[wo]>0)){ skipO++; continue; }
+    p.obj=wo; S.objs[wo]--; p.emptySince=0; nObj++;
+  } });
+  // 3. 村人を任せる。植わっている作物は、そのまま村人の速さで育ててから切り替わる
+  const free={ v:vilFree(), sg:sgFree(), rf:rfFree() };
+  fs.forEach((f,fi)=>{ for(const k of KEYS){ const p=f[k], [wv]=want(fi,k);
+    if(!wv || lyCode(p.vil)===wv) continue;
+    if(p.obj || p.s==="post" || (p.crop && CROP[p.crop.id].half) || !(free[wv]>0)){ skipV++; continue; }
+    free[wv]--; p.vil=lyVil(wv); p.vWait=false; p.emptySince=0; if(p.s==="grass") p.s="soil";
+    if(!p.crop){ if(wv==="rf") roseFarm(p,0,Date.now(),"t"); else villagerAdvance(p,0); }
+    nVil++;
+  } });
+  sfx.vil();
+  toast(`🗂️ 「${esc(lyName(i))}」を読み込みました ・ 村人 ${nVil}区画・設置物 ${nObj}個を置きました`+(skipV?` ・ 手が足りないなどで村人を置けなかった区画 ${skipV}`:"")+(skipO?` ・ 作物がある・数が足りないなどで置けなかった設置物 ${skipO}`:""),skipV||skipO?"warn":"good",6000,true);
+  save(); renderAll(); closeModal(true);
+}
+function layoutKey(e){
+  const k=e.key;
+  if(lyAsk){   // 確認中: Enter はい / Esc やめる
+    e.preventDefault();
+    if(k==="Enter"||k==="y"||k==="Y"){ const a=lyAsk; if(a.kind==="save") layoutSave(a.i,true); else layoutLoad(a.i,true); }
+    else if(k==="Escape"||k==="n"||k==="N"){ lyAsk=null; sfx.tab(); renderLayout(); }
+    return;
+  }
+  if(k==="Escape"||k==="/"){ e.preventDefault(); closeModal(); return; }
+  if(k==="n"||k==="N"){ e.preventDefault(); const inp=$("g-layoutList").querySelector(`.lyname[data-lyn="${lyCur}"]`); if(inp){ inp.focus(); inp.select(); } return; }
+  if(/^[1-3]$/.test(k)){ e.preventDefault(); lyCur=+k-1; sfx.tab(); renderLayout(); return; }
+  if(k==="ArrowUp"||k==="ArrowDown"){ e.preventDefault(); lyCur=(lyCur+(k==="ArrowDown"?1:LAYOUT_N-1))%LAYOUT_N; sfx.tab(); renderLayout(); return; }
+  if(k==="s"||k==="S"){ e.preventDefault(); layoutSave(lyCur); return; }
+  if(k==="Enter"){ e.preventDefault(); layoutLoad(lyCur); return; }
+}
+function openLayout(){ if(S.layoutOwned && S.layoutOff) return;   // 使っていないときは開かない(保存したセットは残る)
+  if(!S.layoutOwned){ sfx.nope(); toast(`配置セットは、お店の「効率化」で買えます`,"warn",3000); return; } openModal("layout"); }
+function buyLayout(){
+  if(S.layoutOwned) return;
+  if(!spend(LAYOUT_PRICE)) return;
+  S.layoutOwned=true;
+  toast(`🗂️ 配置セットを買いました。農園で / を押すと、村人と設置物の並びを3つまで保存・読み込みできます`,"good",4600);
+  save(); renderAll();
 }
 /* 不思議な肥料(変異で3個穫れる)・摩訶不思議な肥料(必ず超変異) */
 function magicFert(k,p,id){
@@ -6869,6 +7120,7 @@ function openModal(name){
   if(name==="cook") renderCook();
   if(name==="pick") renderPick();
   if(name==="cvpick") renderCvPick();
+  if(name==="layout"){ lyAsk=null; renderLayout(); }
   if(SPACE_ALL.some(([m])=>m===name)) renderSpaceTabs();
 }
 function closeModal(silent){
@@ -7075,6 +7327,23 @@ function shopRows(){
         nm: `${MACHINES[m].name}の${fmtNum(n)}連の権利 <span style="color:var(--ink-l)">${fmtNum(passPrice(n,m))}キー</span>`,
         ds: `${MACHINES[m].name}で ${fmtNum(n)}連 が引けるようになります(1回 ${fmtNum(gachaCost(n,m))}${gachaUnit(m)}・11回ごとにSR以上1つ確定)。一度買えばずっと使えます`,
         keys: "<b>Enter</b> 買う", enter:()=>buyGachaPass(n,m), shift:()=>buyGachaPass(n,m) });
+    }
+    // 配置セット: 村人と設置物の並びを3つまで保存・読み込み
+    if(S.villagers>0 || (S.sgVil||0)>0 || (S.roseVil||0)>0){
+      if(!S.layoutOwned) rows.push({ ic:"🗂️", nm:`配置セット <span style="color:var(--ink-l)">${fmtNum(LAYOUT_PRICE)}キー</span>`,
+        ds:"すべての畑の村人と設置物の並びを、3つまで保存して一度に切り替えられます。まだ育っている作物は、任された村人の速さで育ってから切り替わります",
+        keys:"<b>Enter</b> 買う", enter:buyLayout, shift:buyLayout });
+      else rows.push({ ic:"🗂️", nm:`配置セット <span style="color:var(--ink-l)">${S.layoutOff?"使っていない":"使っている"}</span>`,
+        ds:S.layoutOff?"使わないあいだは、上のボタンと / キーが出ません。保存したセットは消えません":"農園で / を押すか、上のボタンで開きます", keys:`<b>Enter</b> ${S.layoutOff?"使う":"使わない"}`, enter:()=>{ S.layoutOff=!S.layoutOff; sfx.tab(); save(); renderAll(); }, shift:()=>{} });
+    }
+    // 大連ガチャの演出セット: 1,111連以上で、いろいろな演出がランダムで出る(1つ買えば、どのガチャでも)
+    if(["n","w","r"].some(m=>gachaPass(1111,m))){
+      if(!S.megaSet) rows.push({ ic:"🎆", nm:`大連ガチャの演出セット <span style="color:var(--ink-l)">${fmtNum(MEGA_SET_PRICE)}キー</span>`,
+        ds:"1,111連以上のガチャで、「一気にドーン」「加速する111連」「全種類の札」「札の滝」の演出がランダムで出るようになります。どのガチャでも使えます",
+        keys:"<b>Enter</b> 買う", enter:buyMegaSet, shift:buyMegaSet });
+      else rows.push({ ic:"🎆", nm:`大連ガチャの演出セット <span style="color:var(--ink-l)">${S.megaSetOff?"使っていない":"使っている"}</span>`,
+        ds:"1,111連以上のガチャで、いろいろな演出がランダムで出ます。いつもの出し方より短く終わります。使わないときは、いつもの出し方になります",
+        keys:`<b>Enter</b> ${S.megaSetOff?"使う":"使わない"}`, enter:()=>{ S.megaSetOff=!S.megaSetOff; sfx.tab(); save(); renderAll(); }, shift:()=>{} });
     }
   }else if(shopTab===4){
     if(!cookOpen()) rows.push({ ic:"🔒", nm:"レシピ", ds:COOK_LOCK_MSG(), keys:"", locked:true, enter:()=>{}, shift:()=>{} });
@@ -7403,18 +7672,19 @@ function drawOne(minIdx){
   return { r, id: pool[Math.floor(Math.random()*pool.length)].id };
 }
 /* 1111連・11111連・111111連: お店で権利を買うと引けるようになる(ガチャ代は別) */
-const GACHA_COST1111=100000, GACHA_COST11111=1000000, GACHA_COST111111=10000000;
-const GACHA_BIG=[1111,11111,111111];
-const GACHA_PASS_PRICE={ 1111:100000, 11111:1000000, 111111:10000000 };          // 種ガチャ
-const WAKU_PASS_PRICE ={ 1111:1000000, 11111:10000000, 111111:100000000 };       // わくわくガチャ(種ガチャとは別に買う)
-const ROSE_PASS_PRICE ={ 1111:1000000, 11111:10000000, 111111:100000000 };       // 薔薇ガチャ(権利はキーで買う)
+const GACHA_COST1111=100000, GACHA_COST11111=1000000, GACHA_COST111111=10000000, GACHA_COST1111111=100000000;
+const GACHA_BIG=[1111,11111,111111,1111111];
+const GACHA_MEGA=1111111;   // 1111111連: 引く計算を少しずつ進めながら、一気に見せる
+const GACHA_PASS_PRICE={ 1111:100000, 11111:1000000, 111111:10000000, 1111111:1000000000 };          // 種ガチャ
+const WAKU_PASS_PRICE ={ 1111:1000000, 11111:10000000, 111111:100000000, 1111111:10000000000 };      // わくわくガチャ(種ガチャとは別に買う)
+const ROSE_PASS_PRICE ={ 1111:1000000, 11111:10000000, 111111:100000000, 1111111:10000000000 };      // 薔薇ガチャ(権利はキーで買う)
 const passKey   = (n,m) => m==="w" ? "w"+n : m==="r" ? "r"+n : String(n);
 const passPrice = (n,m) => (m==="w" ? WAKU_PASS_PRICE : m==="r" ? ROSE_PASS_PRICE : GACHA_PASS_PRICE)[n];
 const gachaPass = (n,m=gachaM) => !!(S.gachaPass && S.gachaPass[passKey(n,m)]);
 const gachaUnit = (m=gachaM) => MACHINES[m].coin ? "コイン" : "キー";
 const gachaWallet = (m=gachaM) => MACHINES[m].coin ? (S.roseCoin||0) : S.money;
 const gachaCost = (n,m=gachaM) => Math.max(1, Math.round((
-  n===111111 ? GACHA_COST111111 : n===11111 ? GACHA_COST11111 : n===1111 ? GACHA_COST1111 : n===111 ? GACHA_COST111 : n===11 ? GACHA_COST11 : GACHA_COST1*n
+  n===1111111 ? GACHA_COST1111111 : n===111111 ? GACHA_COST111111 : n===11111 ? GACHA_COST11111 : n===1111 ? GACHA_COST1111 : n===111 ? GACHA_COST111 : n===11 ? GACHA_COST11 : GACHA_COST1*n
 )*MACHINES[m].mult*(MACHINES[m].coin ? 1 : effGacha())));   // 薔薇ガチャ(コイン)には、料理と貴重品の割引が効かない
 /* ガチャの台を切り替える(引いた結果は消える) */
 function switchMachine(m){
@@ -7484,6 +7754,13 @@ function flushGachaNote(){
   if(parts.length) toast(parts.join("<br>"),"good",5000,true);
   gachaNote=[];
 }
+function buyMegaSet(){
+  if(S.megaSet) return;
+  if(!spend(MEGA_SET_PRICE)) return;
+  S.megaSet=true; S.megaSetOff=false;
+  toast("🎆 大連ガチャの演出セットを買いました。1,111連以上のガチャで、いろいろな演出がランダムで出ます","good",4200);
+  save(); renderAll();
+}
 function buyGachaPass(n,m="n"){
   if(gachaPass(n,m)) return;
   if(!spend(passPrice(n,m))) return;
@@ -7494,7 +7771,7 @@ function buyGachaPass(n,m="n"){
 let gachaRes=[], gachaShown=0, gachaTimer=null;
 /* 大連(1111連以上)の結果: 作物ごとにまとめ、低レアから順に出す */
 let gachaBig=null;   // { n, groups:[{ r, total, items:[{id,n,isNew,sold}] }], stage, soldAll, newKinds }
-const gachaBusy = () => gachaShown<gachaRes.length || !!(gachaBig && gachaBig.stage<gachaBig.groups.length);
+const gachaBusy = () => gachaShown<gachaRes.length || !!(gachaBig && gachaBig.stage<gachaBig.groups.length) || !!gachaMega;
 /* ← → で次の台へ(まだ開いていない台は、知らせを出して止まる) */
 function stepMachine(dir){
   const i=MACHINE_ORDER.indexOf(gachaM), n=MACHINE_ORDER.length;
@@ -7508,6 +7785,7 @@ function drawGacha(n){
   const cost=gachaCost(n);
   if(gachaWallet()<cost){ sfx.nope(); toast(MACHINES[gachaM].coin ? "薔薇ガチャコインが足りません(薔薇や種をコインに変換できます)" : "キーが足りません","warn",3200); return; }
   if(MACHINES[gachaM].coin) S.roseCoin-=cost; else S.money-=cost;
+  if(n>=1111){ megaStart(n); return; }   // 大連は少しずつ計算しながら、演出(演出セットならランダム)で見せる
   const res=[];
   drawMemoStart();
   try{
@@ -7525,40 +7803,8 @@ function drawGacha(n){
   const og=ev("γ",.1,.5,0);
   if(og){ const add=[]; for(let i=0;i<n;i++) if(Math.random()<og){ const y=drawOne(0); y.extra=true; add.push(y); } for(const y of add) res.push(y); }
   }finally{ drawMemo=null; }
-  const upP=ev("P3",.05,.2,0)+kitVal("loupe")/100, dblFood=ev("ζ",.2,1,0), dblSeed=ev("Q1",.2,.5,0);   // 料理の効果は、引くあいだ変わらない
-  for(const x of res){
-    if(FOOD[x.id] && gachaM==="w"){   // 料理: 食材が上位種に化ける
-      const up=upOf(x.id);
-      if(up && Math.random()<upP){ x.id=up.id; x.r=up.r; x.upg=true; }
-    }
-    if(!(S.got[x.id]>0)) x.isNew=true;
-    S.got[x.id]=(S.got[x.id]||0)+1;
-    if(RG[x.id]){ const m=RG[x.id].give(); if(m && S.got[x.id]===1) gachaNote.push({ id:x.id, m }); continue; }   // 薔薇ガチャ: 薔薇(収穫には数えない)・種・花弁など
-    if(FOOD[x.id]){   // 食材はそのまま持ち物へ(料理で2つになることがある)
-      S.food[x.id]=(S.food[x.id]||0)+1;
-      if(Math.random()<dblFood){ S.food[x.id]++; x.dbl=true; }
-      continue;
-    }
-    if(GUR[x.id]){   // 知らせは、その宝物をはじめて手に入れたときだけ。上限で換えた分と2枚目からの土地の権利書は、あとでまとめて知らせる
-      const m=gainGur(x.id);
-      if(m.includes("かわりに")) gachaNote.push({ id:x.id, swap:true });
-      else if(S.got[x.id]===1) gachaNote.push({ id:x.id, m });
-      else if(x.id==="deed") gachaNote.push({ id:"deed" });
-      continue;
-    }
-    if(S.treasSell===2 && CROP[x.id] && CROP[x.id].treasure && treasFull(CROP[x.id])){   // 貴重品の種の自動売却(上限まで届いた種)
-      x.sold=TREAS_SEED_PRICE;
-      S.money+=x.sold; S.totalSales+=x.sold;
-    }else if(autoSeed(x.id)){                      // 種の自動売却
-      const two=Math.random()<dblSeed;   // 料理: 種おかわり
-      const gain=seedPrice(CROP[x.id])*(two?2:1);
-      S.money+=gain; S.totalSales+=gain;
-      x.sold=gain; if(two) x.dbl=true;
-    }else{
-      S.seeds[x.id]=(S.seeds[x.id]||0)+1;
-      if(Math.random()<dblSeed){ S.seeds[x.id]++; x.dbl=true; }
-    }
-  }
+  const C=gachaCtx();
+  for(const x of res) gachaApply(x,C);
   S.gachaCount=(S.gachaCount||0)+res.length;   // ガチャおかわりで増えた分も、引いた回数に数える
   if(gachaM==="r") S.roseGachaCount=(S.roseGachaCount||0)+res.length;
   if(!ownedSeeds().includes(S.seedId)){ const sd=res.find(x=>CROP[x.id] && S.seeds[x.id]>0); if(sd) S.seedId=sd.id; }
@@ -7575,24 +7821,317 @@ function drawGacha(n){
   renderGacha();
   revealNext();
 }
+/* ---------- 1111111連: カプセルが降り注ぎ、カウンターが一気に回る。計算は少しずつ進めて、画面を止めない ---------- */
+let gachaMega=null;   // { n, i, by, cnt, extra, best, t0, C, G, og, disp, skip, fx }
+const MEGA_FX=["一気にドーン","","","加速する111連","全種類の札","札の滝","","いつもの"];
+const MEGA_FX_SET=[0,3,4,5];   // 演出セットを使っているときにランダムで出る演出(いつものは出ない)
+const MEGA_SET_PRICE=100000000;   // 大連ガチャの演出セット
+const MEGA_CARD_MS=5500;   // 札を見せる演出: 札がめくれ続ける長さ
+const MEGA_MIN_MS=4500;   // 計算が速くても、カウンターが回りきるまでこれだけ見せる
+function megaStart(n){
+  drawMemoStart();
+  gachaRes=[]; gachaShown=0; gachaBig=null;
+  const fx = (S.megaSet && !S.megaSetOff) ? MEGA_FX_SET[Math.floor(Math.random()*MEGA_FX_SET.length)] : 7;
+  gachaMega={ n, i:0, by:{}, cnt:{}, extra:0, best:-1, t0:performance.now(), C:gachaCtx(), G:guardEvery(), og:ev("γ",.1,.5,0), disp:0, skip:false, tick:0, fx, stop:0, stopAt:0 };
+  { const M=gachaMega, ord=MACHINES[gachaM].order.filter(r=>poolOf(r).length);
+    Object.assign(M,{ q:[], qi:0, qp:[3,5].includes(M.fx)?Math.min(1,140/n):0, lastC:0, firstId:{}, cardBest:-1, pauseUntil:0, cardsShown:0, snd:0, shelf:{}, phase:"", endAt:0,
+      top2:RARITY_ORDER.indexOf(ord[Math.max(0,ord.length-2)]), topR:RARITY_ORDER.indexOf(ord[ord.length-1]), spotSeen:{}, spotShown:{}, spotQ:[], spotAt:0 });   // 大きく見せるのは、その台の上から2段のレア度だけ
+    if(M.fx!==7) M.sweep=sfxSweep(M.fx===4?7500:M.fx>=3?MEGA_CARD_MS:MEGA_MIN_MS); }
+  renderGacha();
+  if(gachaMega.fx!==7) seq([196,262,330,392,523],90,"sawtooth",.05,.16);
+  megaStep();
+}
+function megaStep(){
+  const M=gachaMega; if(!M) return;
+  const until=performance.now()+12;
+  while(M.i<M.n && performance.now()<until){
+    const k=Math.min(M.G, M.n-M.i), blk=[];
+    for(let j=0;j<k;j++) blk.push(drawOne(0));
+    if(k===M.G){ let ok=false; for(const y of blk) if(RARITY_ORDER.indexOf(y.r)>=2){ ok=true; break; } if(!ok) blk[k-1]=drawOne(2); }   // 11回ごとにSR以上1つ確定
+    if(M.og) for(let j=0;j<k;j++) if(Math.random()<M.og){ const y=drawOne(0); y.extra=true; blk.push(y); M.extra++; }   // 料理: ガチャおかわり
+    for(const y of blk){
+      gachaApply(y,M.C); gachaTally(M.by,y);
+      M.cnt[y.r]=(M.cnt[y.r]||0)+1;
+      const ri=RARITY_ORDER.indexOf(y.r);
+      if(ri>M.best){ M.best=ri; M.bestItem=y; }
+      if(ri>=M.top2 && !M.spotSeen[y.id]){ M.spotSeen[y.id]=1; if(M.fx===0 && M.spotQ.length<8) M.spotQ.push(y); }   // 上から2段のレア度: 種類ごとに、はじめて出たときに見せる
+      if(M.qp){   // 札を見せる演出: 引いたものから一部を選んで並べる(HR 以上は、その種類がはじめて出たときも並べる)
+        const first = ri>=3 && !M.firstId[y.id]; if(first) M.firstId[y.id]=1;
+        if(first || Math.random()<M.qp) M.q.push(y);
+      }
+    }
+    M.i+=k;
+  }
+  if(performance.now()-M.t0<1200){ const body=$("g-gachaBody"), mg=body && body.querySelector(".gmega"); if(mg) body.scrollTop += mg.getBoundingClientRect().top - body.getBoundingClientRect().top - 6; }   // はじめのうちは、演出の上端に合わせ続ける
+  if(M.fx===7){   // いつもの: 計算が終わったら、段ごとに出す
+    const el=$("g-megaNum"); if(el){ el.textContent=fmtNum(M.i); $("g-megaProg").style.width=(M.i/M.n*100).toFixed(1)+"%"; }
+    if(M.i>=M.n){ megaEnd(); return; }
+    requestAnimationFrame(megaStep); return;
+  }
+  if(M.fx>=3){ megaCards(); return; }
+  // 見せる数: 計算の進みと、最低限の時間の進みの遅いほう(早送りなら計算の進みまで)
+  const t=(performance.now()-M.t0)/MEGA_MIN_MS, ease=1-Math.pow(1-Math.min(1,t),3);
+  M.disp = M.skip ? M.i : Math.min(M.i, Math.floor(M.n*ease));
+  megaRender();
+  if(M.disp>=M.n){
+    megaEnd(); return;
+  }
+  requestAnimationFrame(megaStep);
+}
+/* ---- 札を見せる演出(加速する111連・全種類の札・札の滝) ---- */
+function megaCards(){
+  const M=gachaMega, now=performance.now();
+  if(M.phase==="kinds"){ megaKindsStep(now); return; }
+  const stream = M.fx!==4;
+  if(stream){
+    const t=Math.min(1,(now-M.t0)/MEGA_CARD_MS);
+    if(now>=M.pauseUntil){
+      const expect=M.q.length+(M.n-M.i)*M.qp;
+      let target = (M.skip || (M.i>=M.n && t>=1)) ? M.q.length : Math.floor(expect*Math.pow(t,2.2));   // はじめはゆっくり、だんだん速く
+      target=Math.min(target,M.q.length);
+      const gap=M.fx===5?26:20;   // 札1枚あたりの間隔(ミリ秒)。速くなりすぎて見えなくならないように
+      let lim = (M.skip || t>=1) ? 40 : Math.min(6, Math.floor((now-(M.lastC||now-gap))/gap));   // 予定の長さを過ぎたら、残りは一気に
+      if(lim>0) M.lastC=now;
+      while(M.qi<target && lim-->0){ if(megaCardShow(M,M.q[M.qi++],now)) break; }
+    }
+    const expect=Math.max(1,M.q.length+(M.n-M.i)*M.qp);
+    M.disp = (M.i>=M.n && M.qi>=M.q.length) ? M.n : Math.min(M.i, Math.floor(M.n*Math.min(1,M.qi/expect)));
+  }else{
+    const t=Math.min(1,(now-M.t0)/2500), ease=1-Math.pow(1-t,3);
+    M.disp = M.skip ? M.i : Math.min(M.i, Math.floor(M.n*ease));
+  }
+  const el=$("g-megaNum"); if(el){ el.textContent=fmtNum(M.disp); $("g-megaProg").style.width=(M.disp/M.n*100).toFixed(2)+"%"; }
+  const done = M.i>=M.n && M.disp>=M.n && (!stream || (M.qi>=M.q.length && now>=M.pauseUntil));
+  if(done){
+    if(M.fx===4||M.fx===6){ megaKindsStart(now); requestAnimationFrame(megaStep); return; }
+    if(!M.endAt) M.endAt=now+600;
+    if(now>=M.endAt){ megaEnd(); return; }
+  }
+  requestAnimationFrame(megaStep);
+}
+const megaCardIn = y => { const c=itemOf(y.id); return `<span class="gtag">${RARITY[y.r].label}</span><span class="gic">${ico(c)}</span><span class="gnm">${c.name}</span>`; };
+/* 札を1枚見せる。これまでで一番のレア度(HR 以上)なら、少し止めて光らせる(true を返す) */
+function megaCardShow(M,y,now){
+  const ri=RARITY_ORDER.indexOf(y.r), up = ri>=3 && ri>M.cardBest, hit = ri>=M.top2 && ri>=(M.spotMax||0) && !M.spotShown[y.id];   // 一度上のレア度を見せたら、それより下は見せない
+  if(hit){ M.spotShown[y.id]=1; M.spotMax=ri; }
+  if(M.fx===5){   // 札の滝: HR 以上は上の棚に残り、ほかは流れ落ちる
+    const fall=$("g-megaFall"), shelf=$("g-megaShelf"); if(!fall) return false;
+    if(ri>=3 && !M.shelf[y.id]){ M.shelf[y.id]=1; shelf.firstElementChild.insertAdjacentHTML("afterend",`<div class="gcard ${y.r} pop${up?" gmhit":""}">${megaCardIn(y)}</div>`); }   // 新しいものを左に
+    else{
+      if(fall.childElementCount<46){   // 落ちている途中の札は消さない(多すぎるときは、新しい札を見せないだけ)
+        const d=document.createElement("div"); d.className=`gcard ${y.r} gmdrop`; d.innerHTML=megaCardIn(y);
+        d.style.left=(Math.random()*84).toFixed(1)+"%"; d.style.setProperty("--rot",(Math.random()*70-35).toFixed(0)+"deg"); d.style.animationDuration=(1.9+Math.random()*.8).toFixed(2)+"s";
+        d.addEventListener("animationend",()=>d.remove()); fall.appendChild(d); setTimeout(()=>d.remove(),3200);
+      }
+    }
+  }else{   // 加速する111連: 札の場所を順に上書きしていく
+    const board=$("g-megaBoard"); if(!board) return false;
+    const old=board.children[M.cardsShown % board.children.length], el=document.createElement("div");
+    el.className=`gcard ${y.r} pop`+(up||hit?" gmhit":""); el.innerHTML=megaCardIn(y); old.replaceWith(el);
+  }
+  M.cardsShown++;
+  if(up) M.cardBest=ri;
+  if(hit){ megaSpot(y); if(ri>=M.topR && !M.paused){ const d=300; M.paused=1; M.pauseUntil=now+d; M.t0+=d; return true; } return false; }   // 最高レアがはじめて出たときだけ、ほんの少し止める
+  if(now-M.snd>55){ M.snd=now; sfxFlick(ri); }
+  return false;
+}
+/* 全種類の札: 出た種類を、低いレア度から1枚ずつ個数つきで並べる */
+function megaKindsStart(now){
+  const M=gachaMega; if(M.phase==="kinds") return;
+  M.phase="kinds";
+  const g=gachaGroups(M.n,M.by,M.extra);
+  M.kinds=g.groups.flatMap(gr=>gr.items.map(x=>Object.assign({},x,{ r:gr.up?x.r:gr.r })))
+    .map((x,i)=>[x,i]).sort((a,b)=>RARITY_ORDER.indexOf(a[0].r)-RARITY_ORDER.indexOf(b[0].r) || a[1]-b[1]).map(a=>a[0]);   // 低いレア度から、最後が最高レア
+  M.ki=0; M.kindAt=now+300;
+  const base=M.kinds.map(x=>{ const ri=RARITY_ORDER.indexOf(x.r); return ri>=M.top2 ? 400 : [50,60,80,130,180,220,260][ri]||100; }), sum=base.reduce((a,b)=>a+b,0);
+  M.kindGap=base.map(v=>v*Math.min(1,4800/sum));   // 種類が多くても、5秒ほどで並べ終える
+  if(!$("g-megaKinds")){ const st=$("g-megaStage"); if(st) st.innerHTML=`<div class="gcards gmkinds" id="g-megaKinds"></div>`; }
+}
+function megaKindsStep(now){
+  const M=gachaMega;
+  while(M.ki<M.kinds.length && now>=M.kindAt){
+    const x=M.kinds[M.ki++], ri=RARITY_ORDER.indexOf(x.r), c=itemOf(x.id), box=$("g-megaKinds");
+    if(box){
+      const slot=box.querySelector(`.gmq[data-id="${x.id}"]`), prev=box.querySelector(`.gmfill[data-id="${x.id}"]`);
+      const n=x.n+(prev?+prev.dataset.n:0);   // 化けた食材と同じ種類なら、同じ枠に足す
+      const html=`<div class="gcard ${x.r} spot pop gmfill${ri>=M.top2?" gmbig gmtopc":ri>=4?" gmbig":""}" data-id="${x.id}" data-n="${n}"><span class="gtag">${RARITY[x.r].label}</span><span class="gic">${ico(c)}</span><span class="gnm">${c.name}</span>${x.isNew?'<span class="gnew">NEW</span>':""}<span class="gcnt">×${fmtNum(n)}</span></div>`;
+      const at=slot||prev;
+      if(at) at.outerHTML=html; else box.insertAdjacentHTML("beforeend",html);
+      const el=box.querySelector(`.gmfill[data-id="${x.id}"]`); if(el) gachaFollow($("g-gachaBody"), el, "auto");
+    }
+    if(ri>=M.top2){ sfxGacha(x.r); if(ri>=M.topR && !M.kFlash){ M.kFlash=1; gachaFlash(x.r, true); } } else if(ri>=3) sfxGacha(x.r); else sfxFlick(ri);   // 画面を光らせるのは、最高レアの1枚目だけ(続けて光るとチカチカする)
+    M.kindAt = now + (M.skip ? 25 : M.kindGap[M.ki-1]);
+  }
+  if(M.ki>=M.kinds.length && now>=M.kindAt+600){ megaEnd(true); return; }   // 並べ終えた札は、そのまま結果として残す
+  requestAnimationFrame(megaStep);
+}
+function megaHTML(){
+  const M=gachaMega, cols=MACHINES[gachaM].order.map(r=>RARITY[r].color);
+  if(M.fx===7) return `<div class="gmega classic"><div class="gmtop">${fmtNum(M.n)}連</div><div class="gmnum" id="g-megaNum">0</div><div class="gmprog"><i id="g-megaProg"></i></div></div>`;
+  if(M.fx>=3){
+    const slots=Array.from({length:MOB?12:24},()=>`<div class="gcard gmslot"></div>`).join("");
+    const album=MACHINES[gachaM].order.filter(r=>poolOf(r).length).flatMap(r=>poolOf(r).map(c=>`<div class="gcard ${r} gmq" data-id="${c.id}"><span class="gtag">${RARITY[r].label}</span><span class="gic">？</span></div>`)).join("");
+    const stage = M.fx===4 ? `<div class="gcards gmkinds gmalbum" id="g-megaKinds">${album}</div>` : M.fx===5 ? `<div class="gmshelf" id="g-megaShelf"><span class="gmshelfh">HR 以上</span></div><div class="gmfall" id="g-megaFall"></div>` : `<div class="gcards gmboard" id="g-megaBoard">${slots}</div>`;
+    return `<div class="gmega cards f${M.fx} ${gachaM}"><div class="gmhead"><span class="gmtop">${fmtNum(M.n)}連</span><span class="gmnum" id="g-megaNum">0</span></div><div class="gmprog"><i id="g-megaProg"></i></div><div class="gmstage" id="g-megaStage">${stage}</div></div>`;
+  }
+  const rain=Array.from({length:42},(_,i)=>`<i style="left:${(Math.random()*96).toFixed(1)}%;--c:${cols[Math.floor(Math.random()*Math.min(cols.length,4))]};animation-delay:${(-Math.random()*1.2).toFixed(2)}s;animation-duration:${(.7+Math.random()*.7).toFixed(2)}s"></i>`).join("");
+  const bars=MACHINES[gachaM].order.filter(r=>poolOf(r).length).map(r=>`<div class="gmrow" data-r="${r}" style="--rc:${RARITY[r].color}"><b>${RARITY[r].label}</b><span class="gmbar"><i></i></span><span class="gmct">0</span></div>`).join("");
+  return `<div class="gmega ${gachaM}"><div class="gmrain">${rain}</div>
+    <div class="gmtop">${fmtNum(M.n)}連</div>
+    <div class="gmnum" id="g-megaNum">0</div>
+    <div class="gmprog"><i id="g-megaProg"></i></div>
+    <div class="gmrows">${bars}</div>
+    <div class="gmpop" id="g-megaPop"></div>
+  </div>`;
+}
+function megaRender(){
+  const M=gachaMega, el=$("g-megaNum"); if(!M || !el) return;
+  el.textContent=fmtNum(M.disp);
+  $("g-megaProg").style.width=(M.disp/M.n*100).toFixed(2)+"%";
+  const f=M.i ? M.disp/M.i : 0, L=Math.log10(M.n+1);
+  for(const row of document.querySelectorAll(".gmega .gmrow")){
+    const c=Math.round((M.cnt[row.dataset.r]||0)*f);
+    row.querySelector(".gmct").textContent=fmtNum(c);
+    row.querySelector(".gmbar i").style.width=(c ? Math.max(3,Math.log10(c+1)/L*100) : 0).toFixed(1)+"%";   // 少ないレア度も見えるよう、対数の長さ
+  }
+  // 上から2段のレア度の新しい種類が出たら、その札を真ん中に出す(続くときは少しずつ間をあける)
+  const now=performance.now();
+  if(M.spotQ.length && f>0 && now>=M.spotAt && M.disp<M.n){
+    const top=M.spotQ.reduce((a,y)=>RARITY_ORDER.indexOf(y.r)>RARITY_ORDER.indexOf(a.r)?y:a, M.spotQ[0]), ti=RARITY_ORDER.indexOf(top.r);
+    M.spotQ=M.spotQ.filter(y=>y!==top && RARITY_ORDER.indexOf(y.r)>=ti);   // 見せたものより下のレア度は、もう見せない
+    if(ti>=(M.spotMax||0)){ M.spotMax=ti; megaSpot(top); M.spotAt=now+750; }
+  }
+}
+/* 上から2段のレア度がはじめて出たとき: 演出の真ん中に、その札を大きく出す */
+function megaSpot(y){
+  const host=document.querySelector(".gmega"); if(!host) return;
+  const ri=RARITY_ORDER.indexOf(y.r), top=ri>=6 || ri===RARITY_ORDER.indexOf(MACHINES[gachaM].order.filter(r=>poolOf(r).length).slice(-1)[0]);
+  host.querySelectorAll(".gmspot").forEach(e=>e.remove());
+  const el=document.createElement("div"); el.className="gmspot"+(top?" top":""); el.style.setProperty("--rc",RARITY[y.r].color);
+  el.innerHTML=`<i class="gmrays"></i><div class="gmspotin"><b>${RARITY[y.r].label}!</b><div class="gcard ${y.r}">${megaCardIn(y)}</div></div>`;
+  host.appendChild(el); setTimeout(()=>el.remove(), top?1100:850);
+  sfxGacha(y.r); gachaFlash(y.r, true);
+}
+/* 札がめくれる軽い音(レア度で少しだけ高さが変わる) */
+const sfxFlick = ri => beep(1700+ri*160+Math.random()*200,.018,"triangle",.012);
+/* カウンターが回るあいだの、上がっていく音(ひとつながり) */
+function sfxSweep(ms){
+  try{
+    audioCtx=audioCtx||new (window.AudioContext||window.webkitAudioContext)();
+    const t=audioCtx.currentTime, d=ms/1000, g=audioCtx.createGain(), os=[];
+    g.gain.setValueAtTime(0.0001,t); g.gain.exponentialRampToValueAtTime(.03,t+.4); g.gain.setValueAtTime(.03,t+40); g.gain.exponentialRampToValueAtTime(0.0001,t+41);   // 止めるまで鳴る(長くても40秒)
+    for(const [type,mul] of [["sine",1],["triangle",1.5]]){ const o=audioCtx.createOscillator(); o.type=type; o.frequency.setValueAtTime(180*mul,t); o.frequency.exponentialRampToValueAtTime(900*mul,t+d); o.connect(g); o.start(t); o.stop(t+41.1); os.push(o); }
+    g.connect(audioCtx.destination);
+    return { stop(){ try{ const n=audioCtx.currentTime; g.gain.cancelScheduledValues(n); g.gain.setValueAtTime(g.gain.value||.02,n); g.gain.exponentialRampToValueAtTime(0.0001,n+.25); os.forEach(o=>o.stop(n+.3)); }catch(e){} } };
+  }catch(e){ return null; }
+}
+function megaSkip(){ if(gachaMega) gachaMega.skip=true; }
+function megaEnd(keep){
+  const M=gachaMega; if(!M) return;
+  const kept = keep ? document.querySelector(".gmega") : null;
+  if(kept){ const tp=kept.querySelector(".gmtop"); if(tp) tp.textContent=`${fmtNum(M.n)}連の結果`; }
+  if(M.sweep) M.sweep.stop();
+  drawMemo=null; gachaMega=null;
+  const total=M.n+M.extra;
+  S.gachaCount=(S.gachaCount||0)+total;
+  if(gachaM==="r") S.roseGachaCount=(S.roseGachaCount||0)+total;
+  if(!ownedSeeds().includes(S.seedId)){ const sd=Object.values(M.by).find(x=>CROP[x.id] && S.seeds[x.id]>0); if(sd) S.seedId=sd.id; }
+  checkUnlocks();
+  gachaBig=gachaGroups(M.n,M.by,M.extra);
+  if(M.fx===7){ renderBar(); save(); renderGacha(); revealBigNext(); return; }   // いつもの: 低いレア度から段ごとに
+  gachaBig.stage=gachaBig.groups.length; gachaBig.done=true; gachaBig.mega=true;
+  if(kept) gachaBig.megaHTML=kept.outerHTML.replace(/ pop(?=["\s])/g,"");   // 全種類の札: 並べた札をそのまま結果にする
+  renderGacha(); renderBar(); flushGachaNote(); save();
+  megaFinale(M);
+}
+/* 終わり: 画面が揺れて、真ん中に大きく「達成!」、花火が上がる */
+function megaFinale(M){
+  const best=RARITY_ORDER[Math.max(0,M.best)];
+  seq([523,659,784,1046,784,1046,1318,1568,2093],80,"square",.06,.22);
+  setTimeout(()=>seq([1046,1318,1568,2093,2637],60,"triangle",.05,.4),780);
+  gachaFlash(best, true);
+  const body=$("g-gachaBody"); if(body){ body.classList.remove("gmshake"); void body.offsetWidth; body.classList.add("gmshake"); setTimeout(()=>body.classList.remove("gmshake"),700); }
+  const b=document.createElement("div"); b.className="gmbanner";
+  b.innerHTML=`<div><small>${MACHINES[gachaM].name}</small><b>${fmtNum(M.n)}連</b><span>引ききりました!</span></div>`;
+  document.body.appendChild(b); setTimeout(()=>b.remove(),2600);
+  const cols=["#ffd84a","#ff6a8a","#6ad0ff","#9aff8a","#c89aff","#ffffff"];
+  for(let k=0;k<7;k++) setTimeout(()=>{
+    const x=10+Math.random()*80, y=12+Math.random()*50, c=cols[k%cols.length];
+    for(let i=0;i<26;i++){
+      const a=i/26*Math.PI*2, d=80+Math.random()*90, e=document.createElement("i"); e.className="gmfw";
+      e.style.left=x+"vw"; e.style.top=y+"vh"; e.style.background=c;
+      e.style.setProperty("--x",(Math.cos(a)*d).toFixed(0)+"px"); e.style.setProperty("--y",(Math.sin(a)*d).toFixed(0)+"px");
+      document.body.appendChild(e); setTimeout(()=>e.remove(),1500);
+    }
+    beep(70+Math.random()*25,.35,"sine",.07);   // ドン
+    setTimeout(()=>beep(2400+Math.random()*1200,.06,"sine",.015),120);   // きらっ
+  }, 150+k*260);
+  if(gachaM==="r") rosePetalStorm(70);
+  if(gachaM==="w") wakuConfetti(60);
+}
+/* 料理の効果(引くあいだ変わらない) */
+const gachaCtx = () => ({ upP:ev("P3",.05,.2,0)+kitVal("loupe")/100, dblFood:ev("ζ",.2,1,0), dblSeed:ev("Q1",.2,.5,0) });
+/* 引いたもの1つを受け取る(持ち物・種・宝物・自動売却) */
+function gachaApply(x,C){
+  const { upP, dblFood, dblSeed } = C;
+  {
+    if(FOOD[x.id] && gachaM==="w"){   // 料理: 食材が上位種に化ける
+      const up=upOf(x.id);
+      if(up && Math.random()<upP){ x.id=up.id; x.r=up.r; x.upg=true; }
+    }
+    if(!(S.got[x.id]>0)) x.isNew=true;
+    S.got[x.id]=(S.got[x.id]||0)+1;
+    if(RG[x.id]){ const m=RG[x.id].give(); if(m && S.got[x.id]===1) gachaNote.push({ id:x.id, m }); return; }   // 薔薇ガチャ: 薔薇(収穫には数えない)・種・花弁など
+    if(FOOD[x.id]){   // 食材はそのまま持ち物へ(料理で2つになることがある)
+      S.food[x.id]=(S.food[x.id]||0)+1;
+      if(Math.random()<dblFood){ S.food[x.id]++; x.dbl=true; }
+      return;
+    }
+    if(GUR[x.id]){   // 知らせは、その宝物をはじめて手に入れたときだけ。上限で換えた分と2枚目からの土地の権利書は、あとでまとめて知らせる
+      const m=gainGur(x.id);
+      if(m.includes("かわりに")) gachaNote.push({ id:x.id, swap:true });
+      else if(S.got[x.id]===1) gachaNote.push({ id:x.id, m });
+      else if(x.id==="deed") gachaNote.push({ id:"deed" });
+      return;
+    }
+    if(S.treasSell===2 && CROP[x.id] && CROP[x.id].treasure && treasFull(CROP[x.id])){   // 貴重品の種の自動売却(上限まで届いた種)
+      x.sold=TREAS_SEED_PRICE;
+      S.money+=x.sold; S.totalSales+=x.sold;
+    }else if(autoSeed(x.id)){                      // 種の自動売却
+      const two=Math.random()<dblSeed;   // 料理: 種おかわり
+      const gain=seedPrice(CROP[x.id])*(two?2:1);
+      S.money+=gain; S.totalSales+=gain;
+      x.sold=gain; if(two) x.dbl=true;
+    }else{
+      S.seeds[x.id]=(S.seeds[x.id]||0)+1;
+      if(Math.random()<dblSeed){ S.seeds[x.id]++; x.dbl=true; }
+    }
+  }
+}
+/* 大連の結果を作物ごとに数える */
+function gachaTally(by,x){
+  const key=(x.upg?"^":"")+x.id;   // 上位種に化けた食材は、そのまま出たものと分けて数える
+  const o=by[key]||(by[key]={ id:x.id, n:0, bonus:0, isNew:false, sold:0, upg:!!x.upg, r:x.r });
+  o.n++; if(x.dbl){ o.n++; o.bonus++; }   // 種おかわり・食材おかわりで2つになった分も数える
+  if(x.isNew) o.isNew=true; if(x.sold) o.sold+=x.sold;
+}
 function summarizeGacha(n,res){
   const by={};
-  for(const x of res){
-    const key=(x.upg?"^":"")+x.id;   // 上位種に化けた食材は、そのまま出たものと分けて数える
-    const o=by[key]||(by[key]={ id:x.id, n:0, bonus:0, isNew:false, sold:0, upg:!!x.upg, r:x.r });
-    o.n++; if(x.dbl){ o.n++; o.bonus++; }   // 種おかわり・食材おかわりで2つになった分も数える
-    if(x.isNew) o.isNew=true; if(x.sold) o.sold+=x.sold;
-  }
+  for(const x of res) gachaTally(by,x);
+  return gachaGroups(n,by,res.filter(x=>x.extra).length);
+}
+function gachaGroups(n,by,extra){
   const groups=[];
   for(const r of RARITY_ORDER){
     const items=poolOf(r).map(c=>by[c.id]).filter(Boolean);
     if(items.length) groups.push({ r, items, total:items.reduce((a,x)=>a+x.n,0) });
   }
-  // 化けた食材は最後に別の段で見せる(レア度の段に混ぜると、確率より多く出たように見えるため)
+  // 化けた食材は別の段で見せる(レア度の段に混ぜると、確率より多く出たように見えるため)。
+  // 段は HR より前に置き、いちばん最後はいつも最高レアの段にする(最後に下のレア度が出ると、引き直したように見えるため)
   const ups=Object.values(by).filter(o=>o.upg).sort((a,b)=>RARITY_ORDER.indexOf(b.r)-RARITY_ORDER.indexOf(a.r));
-  if(ups.length) groups.push({ r:ups[0].r, up:true, items:ups, total:ups.reduce((a,x)=>a+x.n,0) });
+  if(ups.length){ const at=groups.findIndex(g=>RARITY_ORDER.indexOf(g.r)>=3); groups.splice(at<0?groups.length:at, 0, { r:ups[0].r, up:true, items:ups, total:ups.reduce((a,x)=>a+x.n,0) }); }
   const all=Object.values(by);
-  return { n, groups, stage:0, soldAll:all.reduce((a,x)=>a+x.sold,0), extra:res.filter(x=>x.extra).length, bonus:all.reduce((a,x)=>a+x.bonus,0), newKinds:all.filter(x=>x.isNew).length };
+  return { n, groups, stage:0, soldAll:all.reduce((a,x)=>a+x.sold,0), extra, bonus:all.reduce((a,x)=>a+x.bonus,0), newKinds:all.filter(x=>x.isNew).length };
 }
 function revealNext(){
   clearTimeout(gachaTimer);
@@ -7626,6 +8165,7 @@ function bigFinale(){
   renderGacha(); renderBar(); flushGachaNote(); save();
 }
 function gachaSkip(){
+  if(gachaMega){ megaSkip(); return; }
   clearTimeout(gachaTimer);
   if(gachaBig && gachaBig.stage<gachaBig.groups.length){
     gachaBig.stage=gachaBig.groups.length;
@@ -7738,8 +8278,11 @@ function renderGacha(){
   const body=$("g-gachaBody");
   body.innerHTML=gachaHTML()+gachaListHTML();
   // 大連の演出中は、いま出した段が見えるようにする
-  const cur=body.querySelector(".gsumsec.pop, .gspot");
-  if(cur) gachaFollow(body,cur,"smooth");
+  const top=body.querySelector(".gmhero, .gmtopc"), mg=!top && gachaMega && body.querySelector(".gmega");
+  const cur=top || body.querySelector(".gsumsec.pop, .gspot");
+  if(mg) body.scrollTop += mg.getBoundingClientRect().top - body.getBoundingClientRect().top - 6;   // 1111111連: 演出の全体が見えるように
+  else if(top) body.scrollTop += top.getBoundingClientRect().top - body.getBoundingClientRect().top - (top.classList.contains("gmtopc")?60:6);   // 結果: 最高レアに合わせる
+  else if(cur) gachaFollow(body,cur,"smooth");
   // 11連・111連も、めくったカードが見えるようについていく(速くめくるときはすぐ動かす)
   else if(gachaRes.length>1){
     const card=body.querySelector(".gcard.pop");
@@ -7752,7 +8295,7 @@ function renderGacha(){
       : `<div class="acts gacts">${nextOpenMachine()!==gachaM?`<button class="sbtn" data-gm="${nextOpenMachine()}">${MACHINES[nextOpenMachine()].name}へ</button>`:""}${gachaM==="r"?`<button class="sbtn" data-rgv="${rgView==="conv"?"gacha":"conv"}">${rgView==="conv"?"ガチャへ":"コインに変換"}</button>`:""}<button class="sbtn main" data-g="1">1回</button><button class="sbtn main" data-g="11">11回</button><button class="sbtn main" data-g="111">111回</button>${bigBtns.map(n=>`<button class="sbtn main big" data-g="${n}">${fmtNum(n)}回</button>`).join("")}</div>`;
     return;
   }
-  const bigKeys={1111:"A",11111:"S",111111:"D"};
+  const bigKeys={1111:"A",11111:"S",111111:"D",1111111:"F"};
   if(gachaM==="r" && rgView==="conv"){ $("g-gachaHint").innerHTML="<b>↑ ↓</b> 選ぶ ・ <b>Enter</b> 1つ ・ <b>Shift+Enter</b> 10個 ・ <b>Ctrl+Enter</b> 全部 ・ <b>Alt+Enter</b> 10個残す ・ <b>Alt+Shift+Enter</b> 100個残す ・ <b>Tab</b> ガチャへ ・ <b>← →</b> ガチャを切り替え ・ <b>Esc</b> 閉じる"; return; }
   $("g-gachaHint").innerHTML =
     (gachaBusy() ? "<b>Enter</b> 早送り" : "<b>Enter</b> 1回 ・ <b>Shift+Enter</b> 11回 ・ <b>Ctrl+Enter</b> 111回"+bigBtns.map(n=>` ・ <b>${bigKeys[n]}</b> ${fmtNum(n)}回`).join(""))+
@@ -7825,12 +8368,20 @@ function gachaKey(e){
   if(!gachaBusy() && (k==="a"||k==="A")){ e.preventDefault(); drawGacha(1111); return; }
   if(!gachaBusy() && (k==="s"||k==="S")){ e.preventDefault(); drawGacha(11111); return; }
   if(!gachaBusy() && (k==="d"||k==="D")){ e.preventDefault(); drawGacha(111111); return; }
+  if(!gachaBusy() && (k==="f"||k==="F")){ e.preventDefault(); drawGacha(1111111); return; }
   if(k==="ArrowLeft"||k==="ArrowRight"){ e.preventDefault(); stepMachine(k==="ArrowRight"?1:-1); return; }
   if(k==="ArrowUp"||k==="ArrowDown"){ e.preventDefault(); $("g-gachaBody").scrollBy(0, k==="ArrowDown"?90:-90); }
 }
 /* 大連の結果: 低レアから段ごとに、作物と個数を並べる。最後に目玉(HR以上)とNEWを大きく出す */
+/* 1111111連の結果: いちばん上のレア度の札を、いちばん上に大きく */
+function megaHeroHTML(B){
+  const g=B.groups.filter(x=>!x.up).slice(-1)[0]; if(!g) return "";
+  return `<div class="gmhero" style="--rc:${RARITY[g.r].color}"><div class="gmheroh">最高レア ${RARITY[g.r].label} ・ ${fmtNum(g.total)}個</div><div class="gcards">`
+    +g.items.map(x=>{ const c=itemOf(x.id); return `<div class="gcard ${g.r} spot"><span class="gtag">${RARITY[g.r].label}</span><span class="gic">${ico(c)}</span><span class="gnm">${c.name}</span>${x.isNew?'<span class="gnew">NEW</span>':""}<span class="gcnt">×${fmtNum(x.n)}</span></div>`; }).join("")+`</div></div>`;
+}
 function gachaBigHTML(){
   const B=gachaBig;
+  if(B.megaHTML) return B.megaHTML;
   const shown=B.groups.slice(0,B.stage);
   const secs=shown.map((g,i)=>{
     const ri=RARITY_ORDER.indexOf(g.r), last=i===shown.length-1 && !B.done;
@@ -7852,7 +8403,7 @@ function gachaBigHTML(){
           ${x.upg?'<span class="gextra">化けた!</span>':""}${x.isNew?'<span class="gnew">NEW</span>':""}<span class="gcnt">×${fmtNum(x.n)}</span></div>`; }).join("")+`</div></div>`
       : `<div class="gspot plain">今回は HR 以上・NEW はありませんでした。また挑戦しましょう</div>`;
   }
-  return `<div class="gsum">
+  return `${B.mega?megaHeroHTML(B):""}<div class="gsum">
     <div class="gsumtop">${fmtNum(B.n)}連の結果${B.extra?` ・ ガチャおかわり +${fmtNum(B.extra)}回`:""}${B.bonus?` ・ 種・食材おかわり +${fmtNum(B.bonus)}個`:""}${B.done?` ・ NEW ${B.newKinds}種${B.soldAll?` ・ 種の自動売却 +${fmtNum(B.soldAll)}キー`:""}`:" ・ 開封中…"}</div>
     ${secs}${spot}
   </div>`;
@@ -7877,7 +8428,7 @@ function gachaHTML(){
     </div>
     <div class="gright">
       <div class="grates">${rates}</div>
-      ${gachaBig ? gachaBigHTML() : `<div class="gcards">${cards||`<div class="gempty">${gachaM==="w"?"ここに引いた種や食材が出ます":gachaM==="r"?"ここに引いた薔薇や種が出ます":"ここに引いた種が出ます"}</div>`}</div>`}
+      ${gachaMega ? megaHTML() : gachaBig ? gachaBigHTML() : `<div class="gcards">${cards||`<div class="gempty">${gachaM==="w"?"ここに引いた種や食材が出ます":gachaM==="r"?"ここに引いた薔薇や種が出ます":"ここに引いた種が出ます"}</div>`}</div>`}
     </div>
   </div>`;
 }
@@ -10168,7 +10719,7 @@ function onKeyMain(e){
   // 貼り付け欄の中: Enter で読み込み、Esc で欄から抜ける
   if(tag==="TEXTAREA"||tag==="INPUT"){
     if(e.key==="Enter" && e.target.id==="g-rankName"){ e.preventDefault(); submitRank(); }
-    else if(e.key==="Enter" && !e.isComposing && (e.target.id==="g-bookQ"||e.target.id==="g-dbookQ")){ e.preventDefault(); e.target.blur(); }
+    else if(e.key==="Enter" && !e.isComposing && (e.target.id==="g-bookQ"||e.target.id==="g-dbookQ"||e.target.classList.contains("lyname"))){ e.preventDefault(); e.target.blur(); }
     else if(e.key==="Escape"){ e.preventDefault(); e.target.blur(); }
     return;
   }
@@ -10182,6 +10733,7 @@ function onKeyMain(e){
   if(modal==="dbook"){ dbookKey(e); return; }
   if(modal==="notice"){ e.preventDefault(); if(e.key==="Enter") closeModal(); return; }   // 料理の解放のお知らせは Enter でだけ閉じる
   if(modal==="cook"){ cookKey(e); return; }
+  if(modal==="layout"){ layoutKey(e); return; }
   if(modal==="rank"){
     if(e.key==="Escape"||e.key==="9"){ e.preventDefault(); closeModal(); }
     else if(e.key==="Enter"){ e.preventDefault(); submitRank(); }
@@ -10201,6 +10753,7 @@ function onKeyMain(e){
   if(k==="0"){ e.preventDefault(); if(!cookOpen()){ sfx.nope(); toast(COOK_LOCK_MSG(),"warn",4200); return; } openModal("cook"); return; }
   if(k==="Escape"){ backToTitle(); return; }
   if(k==="-"){ e.preventDefault(); leave(); openToeic(); return; }   // TOEIC 英単語へ
+  if(k==="/"){ e.preventDefault(); openLayout(); return; }   // 配置セット
   if(k==="4" && e.repeat){ openPick("seed"); return; }   // 4 を長押し: 種の一覧
   if(k==="4"){ const now=Date.now(); if(now-lastFour<350){ lastFour=0; openPick("seed"); return; } lastFour=now; }   // 4 をすばやく2回: 種の一覧
   if(/^[1-6]$/.test(k)){ setTool(+k); return; }
@@ -10225,6 +10778,17 @@ $("g-gachaBtn").addEventListener("click",()=>openModal("gacha"));
 $("g-treasBtn").addEventListener("click",()=>openModal("treas"));
 $("g-bookBtn").addEventListener("click",()=>openModal("book"));
 $("g-backBtn").addEventListener("click",()=>backToTitle());
+$("g-layoutBtn").addEventListener("click",openLayout);
+$("g-layoutList").addEventListener("input",e=>{ const t=e.target; if(!t.classList.contains("lyname")) return; S.layoutNames=S.layoutNames||[]; S.layoutNames[+t.dataset.lyn]=t.value.slice(0,16); save(); });
+$("g-layoutList").addEventListener("focusin",e=>{ const t=e.target; if(t.classList.contains("lyname")){ lyCur=+t.dataset.lyn; $("g-layoutList").querySelectorAll(".lyslot").forEach((x,i)=>x.classList.toggle("cur",i===lyCur)); } });
+$("g-layoutList").addEventListener("click",e=>{
+  if(e.target.closest("[data-lyyes]")){ const a=lyAsk; if(a){ if(a.kind==="save") layoutSave(a.i,true); else layoutLoad(a.i,true); } return; }
+  if(e.target.closest("[data-lyno]")){ lyAsk=null; renderLayout(); return; }
+  if(e.target.closest(".lyname")) return;
+  const sv=e.target.closest("[data-lysave]"); if(sv){ lyCur=+sv.dataset.lysave; layoutSave(lyCur); return; }
+  const ld=e.target.closest("[data-lyload]"); if(ld){ if(!ld.disabled) layoutLoad(+ld.dataset.lyload); return; }
+  const sl=e.target.closest("[data-ly]"); if(sl){ lyCur=+sl.dataset.ly; renderLayout(); }
+});
 $("g-rankOpenBtn").addEventListener("click",()=>openModal("rank"));
 $("g-cookBtn").addEventListener("click",()=>{ if(!cookOpen()){ sfx.nope(); toast(COOK_LOCK_MSG(),"warn",4200); return; } openModal("cook"); });
 /* 料理のボタン: 解放前は鍵つきで薄く */
@@ -10338,12 +10902,12 @@ function debugUnlock(){
   }
   for(const f of FOODS){ S.got[f.id]=1; S.food[f.id]=999; }
   for(const g of GURS) S.got[g.id]=1;
-  S.gachaPass={1111:true,11111:true,111111:true,w1111:true,w11111:true,w111111:true}; S.mfert=3; S.sfert=3; S.sgVil=1; S.objs.sgk=2; S.hourglass=3; S.bento=2; S.deeds=45; S.kit={pan:20,pot:20,board:20,loupe:20,fridge:1,cookvil:2,kamado:1};
+  S.gachaPass={1111:true,11111:true,111111:true,1111111:true,w1111:true,w11111:true,w111111:true,w1111111:true}; S.mfert=3; S.sfert=3; S.sgVil=1; S.objs.sgk=2; S.hourglass=3; S.bento=2; S.deeds=45; S.kit={pan:20,pot:20,board:20,loupe:20,fridge:1,cookvil:2,kamado:1};
   for(const d of DISHES){ S.recipes[d.id]=true; S.dishes[d.id]={0:1,3:1,5:1}; S.dishMade[d.id]={0:true,3:true,5:true}; S.dishEaten[d.id]={0:true,3:true,5:true}; }
   for(const r of ROSE_ALL){ S.harvestBy[r.id]=50; S.harvestQ[r.id]=r.secret?[5]:[20,0,0,3,0,1]; S.inv[r.id]=r.secret?[2]:[3,0,0,2,0,1]; }   // 薔薇
   S.roseTeaRecipe=true; S.baraSeen=true; S.rgNoticed=true;
   // 薔薇ガチャ: コイン・権利・花弁・GHR をすべて
-  S.roseCoin=100000000; S.gachaPass.r1111=true; S.gachaPass.r11111=true; S.gachaPass.r111111=true;
+  S.roseCoin=100000000; S.megaSet=true; S.layoutOwned=true; S.gachaPass.r1111=true; S.gachaPass.r11111=true; S.gachaPass.r111111=true; S.gachaPass.r1111111=true;
   for(const id in RG) S.got[id]=1;
   S.petals=Object.fromEntries(PETALS.map(x=>[x.k,3]));
   S.seeds.rose_hb=20; S.seeds.rose_hr=20; S.objs.rsk=2; S.roseVil=2; S.rkam=1; S.rkamOn=true; S.rkamCol="rose_b3";
@@ -11932,6 +12496,11 @@ function tqUnlockNext(lv){
   return nx;
 }
 const TQ_BEST_KEY="typinggarden:toeic-best";   // ノーミス勝負の自己ベスト(出題形式ごと)
+const TQ_SUSP_KEY=TQ_KEY+"-susp";   // 一本勝負の中断(出題形式・レベルごと。10問ごとに中断できる)
+const TQ_CKPT=10;
+const tqSuspAll = () => { try{ return JSON.parse(localStorage.getItem(TQ_SUSP_KEY)||"{}")||{}; }catch(e){ return {}; } };
+const tqSuspGet = (f,lv) => tqSuspAll()[tqBestKey(f,lv)] || null;
+function tqSuspSet(f,lv,v){ const a=tqSuspAll(), k=tqBestKey(f,lv); if(v) a[k]=v; else delete a[k]; try{ localStorage.setItem(TQ_SUSP_KEY,JSON.stringify(a)); }catch(e){} }
 const TQ_OPT_KEY="typinggarden:toeic-opt";     // 設定(入力で訳が出るまでの秒数)
 const TQ_RANK = (f,lv) => "toeic-"+f+"-"+lv;   // ランキングの保存場所(出題形式・始めたレベルごと)
 const tqBestKey = (f,lv) => f+"-"+lv;          // 自己ベストも出題形式・始めたレベルごと
@@ -11950,6 +12519,29 @@ const tqSaveBest = () => { try{ localStorage.setItem(TQ_BEST_KEY,JSON.stringify(
 const tqSt = en => tqStat[en] || {c:0,w:0,s:0};
 const tqGood = en => tqSt(en).s>=3;                                   // 覚えた: 3回続けて正解
 const tqWeak = en => { const t=tqSt(en); return t.w>0 && t.s<2; };     // 苦手: 間違えたあと、まだ2回続けて正解していない
+/* 出題時の単語の状態 */
+function tqWstShow(w){
+  const el=$("tqWst"); if(!el) return;
+  if(!w || w.word){ el.className="tq-wst"; el.textContent=""; return; }
+  const t=tqStat[w.en];
+  const [c,txt] = !t ? ["new","はじめて"] : tqGood(w.en) ? ["good","✓ 覚えた単語"] : tqWeak(w.en) ? ["weak",`✕ 苦手な単語 ・ あと${2-t.s}回続けて正解で解消`] : t.s>0 ? ["run",`${t.s}回連続で正解中`] : ["",""];
+  el.className="tq-wst "+c; el.textContent = tqFmt==="listen" ? txt.replace("単語","問題") : txt;
+}
+/* 答えたあと: 覚えた・苦手に追加・苦手を解消 などを知らせる(苦手な単語は、苦手がどうなったかを先に) */
+function tqMarkFx(en,ok){
+  const g0=tqGood(en), w0=tqWeak(en);
+  tqMark(en,ok);
+  const t=tqSt(en), g1=tqGood(en), w1=tqWeak(en), u = tqFmt==="listen" ? "問題" : "単語";
+  let html="";
+  if(ok && !g0 && g1) html=`<span class="good">🎉 3回続けて正解! この${u}を覚えた!</span>`;
+  else if(ok && w0 && !w1) html=`<span class="over">💪 苦手を解消しました</span>`;
+  else if(ok && w0) html=`<span class="run">正解 ・ あと${2-t.s}回続けて正解すると苦手を解消できます</span>`;
+  else if(!ok && w0) html=`<span class="weak">苦手のまま ・ 2回続けて正解すると解消できます</span>`;
+  else if(!ok && !w0 && w1) html=`<span class="weak">📌 ${g0?"覚えていたけれど、":""}苦手に追加しました</span>`;
+  else if(ok && t.s>0 && !g1) html=`<span class="run">${t.s>1?`${t.s}回連続で正解`:"正解"} ・ あと${3-t.s}回続けて正解すると覚えられます</span>`;
+  const el=$("tqWmsg"); if(el) el.innerHTML=html;
+  if(html){ const w=tqWords[tqI]; if(w) tqWstShow(w); }
+}
 function tqMark(en,ok){ const t=Object.assign({c:0,w:0,s:0},tqStat[en]); if(ok){ t.c++; t.s++; }else{ t.w++; t.s=0; } t.t=Date.now(); tqStat[en]=t; tqSaveStat(); }
 const tqHasSent = w => !!TQ_SENT[w.en];
 /* レベルの単語(穴埋めは例文のある単語だけ) */
@@ -11986,7 +12578,7 @@ function tqMenu(){
     else if(tqKind==="one" && k==="weak") sub="ノーミス勝負では選べません";
     else if(!pool.length) sub = k==="weak" ? "まだありません" : "穴埋めはありません";
     else if(k==="weak") sub=`${pool.length}${tqUnit()}`;
-    else if(tqKind==="one") sub=`${pool.length}${tqUnit()} ・ 自己ベスト ${tqBest[tqBestKey(tqFmt,k)]||0}問`;
+    else if(tqKind==="one"){ const sv=tqSuspGet(tqFmt,k); sub = sv ? `⏸ 中断中 ${sv.ok}問から続き` : `${pool.length}${tqUnit()} ・ 自己ベスト ${tqBest[tqBestKey(tqFmt,k)]||0}問`; }
     else sub=`覚えた ${pool.filter(w=>tqGood(w.en)).length} / ${pool.length}${tqUnit()}`;
     return `<button class="btn tq-lv" data-lv="${k}" ${ok?"":"disabled"}><b>${nm}</b><small>${sub}</small><span class="kbdh">${TQ_LVKEYS[i]}</span></button>`;
   }).join("");
@@ -12003,6 +12595,7 @@ function tqMenu(){
   // まだ閉じているレベルがあれば、解放のしかたを添える
   if(tqFmt==="listen") $("tqNote").textContent += " ・ 英語が読み上げられます(音が出ます)"+(tqSynth?"":"。この端末・ブラウザでは読み上げが使えません");
   else if(TQ_CHAIN.some(k=>!tqIsOpen(k))) $("tqNote").textContent += ($("tqNote").textContent?" ・ ":"")+`合格: 10語セットで${TQ_UNLOCK_SET}問以上、ノーミス勝負で${TQ_UNLOCK_ONE}問以上正解すると次のレベルが開きます`;
+  if(tqKind==="one" && !baraOn()) $("tqNote").textContent += ` ・ ${TQ_CKPT}問正解するごとに、中断して続きをあとで遊べます`;
 }
 /* 10語を選ぶ: 苦手・まだ出ていない単語ほど出やすく、覚えた単語は出にくい */
 const tqWt = w => tqWeak(w.en) ? 4 : !tqStat[w.en] ? 3 : tqGood(w.en) ? .5 : 2;
@@ -12025,7 +12618,18 @@ function tqStart(lv){
   tqLv=lv; tqWords=[]; tqI=0; tqPts=0; tqMin=0; tqRoseN=0; tqMiss=0; tqLog=[]; gardenKeys=0; tqOver=false;
   if(tqKind==="set"){ tqWords=tqPick(lv); }
   else{
-    tqLadder=[lv]; tqUnl=1; tqClear=false; tqUsed=new Set(); tqOk=0;   // そのレベルだけ(全部正解でクリア)
+    tqLadder=[lv]; tqUnl=1; tqClear=false; tqUsed=new Set(); tqOk=0; tqCkptDue=false;   // そのレベルだけ(全部正解でクリア)
+    const sv=!tqBara && tqSuspGet(tqFmt,lv);
+    if(sv){   // 中断したところから続ける(届け物はもう届いている)
+      tqSuspSet(tqFmt,lv,null);
+      const pool=tqPool(lv), by=Object.fromEntries(pool.map(w=>[w.en,w]));
+      tqOk=sv.ok||0; tqUsed=new Set(sv.used||[]); tqPts=sv.pts||0; tqMin=sv.min||0; tqRoseN=sv.rose||0;
+      if(tqFmt==="type" && sv.sec){ tqSec=sv.sec; tqSaveOpt(); }
+      tqLog=(sv.log||[]).map(([en,ok])=>by[en]?{ w:by[en], ok:!!ok }:null).filter(Boolean);
+      tqPhase="play"; tqView("tqPlay"); tqNext();
+      $("tqFb").className="tq-fb ok"; $("tqFb").textContent=`中断したところ(${tqOk}問 正解)から続けます`;
+      return;
+    }
   }
   tqPhase="play"; tqView("tqPlay"); tqNext();
 }
@@ -12050,6 +12654,7 @@ function tqNext(){
   clearTimeout(tqTimer);
   if(tqKind==="set" && tqI>=tqWords.length) return tqFinish();
   if(tqKind==="one" && tqOver) return tqFinish();
+  if(tqKind==="one" && tqCkptDue) return tqCkpt();
   if(tqBara){ tqFmt=tqBaraFmt(); tqWords[tqI]=tqBaraWord(tqFmt); }
   if(tqKind==="one" && tqI>=tqWords.length) tqWords.push(tqPickOne());
   const w=tqWords[tqI];
@@ -12060,8 +12665,9 @@ function tqNext(){
   $("tqPos").textContent=TQ_POS[w.pos]||w.pos;
   $("tqPos").hidden = tqFmt==="fill" || tqFmt==="listen";
   tqHush(); $("tqSlowW").hidden = !(tqFmt==="listen" && tqKind==="set"); $("tqOpts").classList.toggle("three", tqFmt==="listen");   // 穴埋めは品詞が答えのヒントになるので出さない
-  $("tqFb").className="tq-fb"; $("tqFb").textContent="";
+  $("tqFb").className="tq-fb"; $("tqFb").textContent=""; $("tqWmsg").innerHTML="";
   $("tqJa").textContent=""; $("tqNextBtn").hidden=true;
+  tqWstShow(w);
   const card=$("screen-toeic").querySelector(".tq-card");
   card.classList.toggle("fill",tqFmt==="fill"); card.classList.toggle("bara",tqBara);
   card.classList.toggle("listen",tqFmt==="listen");
@@ -12188,7 +12794,7 @@ function tqReveal(){
   $("tqMean").className="tq-mean"; $("tqMean").innerHTML=tqMeanHtml(tqWords[tqI]);
   if(tqKind==="one"){   // ノーミス勝負: 時間切れで終わり
     const w=tqWords[tqI];
-    tqMark(w.en,false); tqLog.push({ w, ok:false }); tqOver=true;
+    tqMarkFx(w.en,false); tqLog.push({ w, ok:false }); tqOver=true;
     $("tqTyped").innerHTML=""; $("tqFb").className="tq-fb ng"; $("tqFb").textContent="時間切れ…";
     sndMiss(); tqI++; tqPhase="wait"; tqTimer=setTimeout(tqNext,2200);
     return;
@@ -12198,7 +12804,7 @@ function tqReveal(){
 function tqTypeDone(c,mem=!tqRevealed){
   clearTimeout(tqTimer); clearTimeout(tqPendTimer); tqPend=null;
   const w=tqWords[tqI], p=mem?3:1;
-  tqPts+=p; tqMark(w.en,mem); tqLog.push({ w, ok:mem, half:!mem });
+  tqPts+=p; tqMarkFx(w.en,mem); tqLog.push({ w, ok:mem, half:!mem });
   tkLoad(c.st);
   $("tqTyped").innerHTML=`<span class="done">${tqEsc(typedRomaji)}</span>`;
   $("tqMean").className="tq-mean"; $("tqMean").innerHTML=tqMeanHtml(w);
@@ -12278,7 +12884,7 @@ function tqChoose(i){
   { const bar=$("tqBar"); bar.style.transform=getComputedStyle(bar).transform; bar.style.transition="none"; }   // 残り時間のバーを止める
   document.querySelectorAll("#tqOpts .tq-opt:not(.tq-idk)").forEach((b,j)=>{ if(tqChoices[j].ok) b.classList.add("ok"); else if(j===i) b.classList.add("ng"); });
   if(c.idk && !c.late) $("tqOpts").querySelector(".tq-idk").classList.add("ng");
-  tqMark(w.en,c.ok); tqLog.push({ w, ok:c.ok, idk:!!c.idk, late:!!c.late });
+  tqMarkFx(w.en,c.ok); tqLog.push({ w, ok:c.ok, idk:!!c.idk, late:!!c.late });
   if(tqFmt==="fill"){
     const [s,,ja]=TQ_SENT[w.en];
     $("tqWord").innerHTML=tqEsc(s).replace(/\[([^\]]*)\]/,'<span class="tq-fillin">$1</span>');
@@ -12307,9 +12913,25 @@ function tqChoose(i){
   else tqTimer=setTimeout(tqNext, c.ok?900:2400);
 }
 /* ノーミス勝負で1問正解: そのレベルを全部正解したらクリアで終わり */
-let tqClear=false;
+let tqClear=false, tqCkptDue=false;
+/* 10問ごとの中断ポイント */
+function tqCkpt(){
+  clearTimeout(tqTimer); tqHush(); tqCkptDue=false; tqPhase="ckpt";
+  $("tqProg").textContent=tqOneProg(); $("tqPos").hidden=true; $("tqWst").textContent=""; $("tqWst").className="tq-wst";
+  $("tqBarW").style.display="none"; $("tqTyped").innerHTML=""; $("tqMean").className="tq-mean"; $("tqMean").textContent=""; $("tqJa").textContent="";
+  $("tqFb").className="tq-fb"; $("tqFb").textContent=""; $("tqWmsg").innerHTML=""; $("tqNextBtn").hidden=true; $("tqSlowW").hidden=true;
+  $("tqWord").innerHTML=`<div class="tq-ck"><b>${tqOk}問 連続正解!</b><span>ここで中断して、あとで続きから遊べます</span></div>`;
+  $("tqOpts").innerHTML=`<div class="tq-ckbtns"><button class="btn primary tq-opt" data-ck="go">続ける <span class="kbdh">Enter</span></button><button class="btn tq-opt" data-ck="stop">中断する <span class="kbdh">S</span></button></div>`;
+  $("tqHint").textContent="Enter 続ける ・ S 中断する(次にこの出題形式・レベルのノーミス勝負を始めると、続きから) ・ Esc やめる(ここまでの記録が残ります)";
+}
+function tqSuspend(){
+  tqSuspSet(tqFmt, tqLadder[0], { ok:tqOk, used:[...tqUsed], pts:tqPts, min:tqMin, rose:tqRoseN, sec:tqSec, log:tqLog.map(x=>[x.w.en, x.ok?1:0]), t:Date.now() });
+  sndDone(); tqMenu();
+  $("tqNote").textContent=`${tqLvName(tqLadder[0])}のノーミス勝負を ${tqOk}問 で中断しました。次にこのレベルを選ぶと、続きから始まります`;
+}
 function tqOneOk(){
   tqOk++; $("tqScore").textContent=tqOk;
+  if(!tqBara && tqOk%TQ_CKPT===0 && tqLeft().length) tqCkptDue=true;   // 次へ進む前に、続けるか中断するかを選べる
   if(tqBara || tqLeft().length){ $("tqProg").textContent=tqOneProg(); return; }   // バラバラはクリアなし
   tqOver=true; tqClear=true;   // そのレベルを全部正解したらクリア
   $("tqFb").textContent+=` ・ ${tqLvName(tqLadder[0])}を全部正解! クリアです`;
@@ -12424,6 +13046,11 @@ function tqKey(e){
     else{ gardenKeys=0; tqMenu(); }
     return;
   }
+  if(tqPhase==="ckpt"){
+    if(k==="Enter"||k===" "){ e.preventDefault(); tqPhase="play"; tqNext(); }
+    else if(k==="s"||k==="S"){ e.preventDefault(); tqSuspend(); }
+    return;
+  }
   if(tqPhase==="wait"){ if(tqFmt!=="type" && (k==="Enter"||k===" ")){ e.preventDefault(); tqNext(); } else if(tqFmt==="listen" && (k==="l"||k==="L")){ e.preventDefault(); tqListenPlay(); } return; }
   if(tqPhase!=="play") return;
   if(tqFmt==="listen"){   // A / B / C か 1 / 2 / 3 で選ぶ・5 分からない・L 聞く・S ゆっくり
@@ -12445,11 +13072,13 @@ function tqKey(e){
 $("tqFmts").addEventListener("click",e=>{ const b=e.target.closest("[data-f]"); if(b){ tqFmt=b.dataset.f; tqMenu(); } });
 $("tqKinds").addEventListener("click",e=>{ const b=e.target.closest("[data-k]"); if(b){ tqKind=b.dataset.k; tqMenu(); } });
 $("tqLevels").addEventListener("click",e=>{ const b=e.target.closest(".tq-lv"); if(b && !b.disabled) tqStart(b.dataset.lv); });
-$("tqOpts").addEventListener("click",e=>{ const b=e.target.closest(".tq-opt"); if(!b) return; if(tqPhase==="wait"){ tqNext(); return; } tqChoose(+b.dataset.i); });
+$("tqOpts").addEventListener("click",e=>{ const b=e.target.closest(".tq-opt"); if(!b) return;
+  if(tqPhase==="ckpt"){ if(b.dataset.ck==="go"){ tqPhase="play"; tqNext(); } else if(b.dataset.ck==="stop") tqSuspend(); return; }
+  if(tqPhase==="wait"){ tqNext(); return; } tqChoose(+b.dataset.i); });
 $("screen-toeic").querySelector(".tq-card").addEventListener("click",e=>{
   if(e.target.closest("#tqListen")){ tqListenPlay(); return; }
   if(e.target.closest(".tq-slow")) return;
-  if(tqPhase==="wait" && tqFmt!=="type" && !e.target.closest(".tq-opt")) tqNext();
+  if(tqPhase==="wait" && tqFmt!=="type" && !e.target.closest(".tq-opt")) tqNext();   // 中断ポイントでは、ボタンで選ぶ
 });
 $("tqSlow").addEventListener("change",e=>tqSetSlow(e.target.checked));
 $("tqListBtn").addEventListener("click",()=>tqList(tqLv));
