@@ -5828,7 +5828,7 @@ const OBJ_ORDER = ["spr","crow"];   // お店に並ぶ設置物
 OBJS.sgk = { id:"sgk", name:"シゴデキ案山子", icon:"🧑‍🌾", area:null, cost:0, unlock:{},
   what:"P(案山子置き場)に置くと、その畑にカラスが来なくなり、1打の時短が+3分、畑じゅうの水やりが自動になります" };
 OBJS.rsk = { id:"rsk", name:"薔薇でできた案山子", icon:"🌹", area:null, cost:0, unlock:{},
-  what:"P(案山子置き場)に置くと、庭を開いているあいだ、その畑の薔薇が1分で咲きます(水がなくても育ちます)。カラスも来ません" };
+  what:"P(案山子置き場)に置くと、農園を開いているあいだ、その畑の水が効いている薔薇が1分で咲きます。カラスも来ません" };
 const OBJ_ALL = ["spr","crow","sgk","rsk"];
 const RSK_RATE = 6*HOUR/60000;   // 薔薇の案山子: 6時間の薔薇が1分で咲く速さ
 const isScare = id => id==="crow" || id==="sgk" || id==="rsk";   // P に置く案山子のなかま
@@ -6093,8 +6093,9 @@ function tickFields(last,now){
         const p=f[k];
         if(p.vil==="rf"){ const r=effGrowth()*(rb||1); roseFarm(p,dt*r,last,"t",r); continue; }   // 薔薇農家: ふつうの畑と同じ速さ
         if(p.vil){ villagerAdvance(p,dt*effVilGrow()); continue; }
-        if(rb && p.crop && !isRipe(p) && (CROP[p.crop.id].rose||CROP[p.crop.id].half)){   // 薔薇の案山子: 薔薇は1分で咲く(水がなくても育つ)
-          const r=effGrowth()*rb; grow(p,dt*r,last,"t",r);
+        if(rb && p.crop && !isRipe(p) && (CROP[p.crop.id].rose||CROP[p.crop.id].half)){   // 薔薇の案山子: 水が効いているあいだだけ、薔薇は1分で咲く
+          const w=(p.s==="soil" && cov.has(k)) ? dt : Math.max(0, Math.min(now,p.wet)-last), r=effGrowth()*rb;
+          if(w>0) grow(p,w*r,last,"t",r);
         }
         else if(p.crop && !isRipe(p)){
           const add = ((p.s==="soil" && cov.has(k)) ? dt : Math.max(0, Math.min(now,p.wet)-last)) * effGrowth();
@@ -8689,7 +8690,7 @@ const RG_GHR = [
     give:()=>{ S.seeds.rose_hb=(S.seeds.rose_hb||0)+1; return `${ico(CROP.rose_hb)} 薔の種を手に入れました。どこかに、この種の片割れがいるらしい……`; } },
   { k:"hr", id:"rg:half_hr", name:"薇の種", art:CROP.rose_hr.art, desc:"ふたつに割れた種の、もう片方。ひとりでは咲けず、ひとりで実ると消えてしまう。息の合う片割れがすぐそばにいれば……", n:()=>S.seeds.rose_hr||0,
     give:()=>{ S.seeds.rose_hr=(S.seeds.rose_hr||0)+1; return `${ico(CROP.rose_hr)} 薇の種を手に入れました。どこかに、この種の片割れがいるらしい……`; } },
-  { k:"rsk", id:"rg:rsk", name:"薔薇でできた案山子", art:RSKA.art, desc:"P(案山子置き場)に置くと、庭を開いているあいだ、その畑の薔薇が1分で咲きます(水がなくても育ちます)。カラスも来ません", n:()=>(S.objs.rsk||0)+FS().filter(f=>f[POST].obj==="rsk").length,
+  { k:"rsk", id:"rg:rsk", name:"薔薇でできた案山子", art:RSKA.art, desc:"P(案山子置き場)に置くと、農園を開いているあいだ、その畑の水が効いている薔薇が1分で咲きます。カラスも来ません", n:()=>(S.objs.rsk||0)+FS().filter(f=>f[POST].obj==="rsk").length,
     give:()=>{ S.objs.rsk=(S.objs.rsk||0)+1; S.objSel="rsk"; return `${ico(RSKA)} 薔薇でできた案山子を手に入れました! ${kb("設置(6)","設置")}で畑の P に置くと、庭を開いているあいだ、その畑の薔薇が1分で咲きます`; } },
   { k:"rfv", id:"rg:rfv", name:"薔薇農家", art:RFV.art, desc:"持ち物の薔薇の種を、1人につき3区画で植えて育て、咲いたら持ち物に入れてくれます(ふつうの畑と同じ速さ)", n:()=>S.roseVil||0,
     give:()=>{ S.roseVil=(S.roseVil||0)+1; S.objSel="rfvil"; return `${ico(RFV)} 薔薇農家が来てくれました! ${kb("設置(6)","設置")}で区画を任せると、持ち物の薔薇の種を${RF_SLOTS}区画で育ててくれます`; } },
