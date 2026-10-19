@@ -1449,7 +1449,7 @@ body.garden.barag{background:radial-gradient(ellipse at 50% 120%, rgba(200,30,62
 .gmfull .gbb.big{width:5.2rem; height:5.2rem; margin-left:-2.6rem; box-shadow:inset 0 0 8px rgba(255,255,255,.9), 0 0 14px var(--c)}
 .gmfull .gbb.top{width:6.4rem; height:6.4rem; margin-left:-3.2rem; box-shadow:inset 0 0 10px #fff, 0 0 22px 6px var(--c)}
 @keyframes g-bub{0%{transform:translate(0,0) scale(.5)}15%{transform:translate(calc(var(--sw) * .3),-18vh) scale(1)}85%{transform:translate(var(--sw),-95vh) scale(1); opacity:1}100%{transform:translate(var(--sw),-105vh) scale(1.5); opacity:0}}
-.gmfull.f13{background:linear-gradient(180deg,rgba(80,170,230,.22),rgba(20,80,160,.35)); animation:g-water 4s ease-in-out infinite alternate}
+.gmfull.f13{background:linear-gradient(180deg,rgba(80,170,230,.22),rgba(20,80,160,.35))}
 @keyframes g-water{from{background-position:0 0}to{background-position:0 20px}}
 .gmfull .gfish{position:absolute; left:-12vw; animation:g-swim linear forwards}
 .gmfull .gfish.ltr{left:auto; right:-12vw; animation-name:g-swimr}
@@ -1473,9 +1473,9 @@ body.garden.barag{background:radial-gradient(ellipse at 50% 120%, rgba(200,30,62
 #screen-garden .gmfull .gmcap{position:absolute; inset:0; height:auto; border-radius:0; padding:0; background:linear-gradient(180deg,rgba(255,240,180,.15),rgba(255,200,120,.25)); box-shadow:none}
 #screen-garden .gmfull .gcap{animation-name:g-capdropf}
 @keyframes g-capdropf{0%{transform:translateY(-105vh) rotate(-160deg)}75%{transform:translateY(3px) rotate(10deg)}100%{transform:translateY(0) rotate(0)}}
-#screen-garden .gmfull .gmsky{position:absolute; inset:0; height:auto; border-radius:0; opacity:.92}
+#screen-garden .gmfull .gmsky{position:absolute; inset:0; height:auto; border-radius:0}
 .gmfull.f15, .gmfull.f19{background:radial-gradient(ellipse at 50% 50%, rgba(30,30,80,.55), rgba(5,5,25,.82))}
-.gmfull.f18{background:repeating-conic-gradient(from 0deg at 50% 50%, rgba(255,216,74,.10) 0 10deg, rgba(138,208,255,.10) 10deg 20deg); animation:g-swbg 6s linear infinite}
+.gmfull.f18{background:repeating-conic-gradient(from 0deg at 50% 50%, rgba(255,216,74,.10) 0 10deg, rgba(138,208,255,.10) 10deg 20deg)}   /* 背景は動かさない(画面全体を描き直すと重い) */
 @keyframes g-swbg{to{background-position:0 0; filter:hue-rotate(360deg)}}
 .gmfull .gstar{position:absolute; animation:g-star linear forwards}
 .gmfull .gstar .gtail{position:absolute; right:50%; top:50%; width:9rem; height:3px; margin-top:-1.5px; background:linear-gradient(90deg,transparent,var(--c)); transform-origin:100% 50%; transform:rotate(-35deg); border-radius:99px; filter:blur(.5px)}
@@ -1501,8 +1501,8 @@ body.garden.barag{background:radial-gradient(ellipse at 50% 120%, rgba(200,30,62
 /* カプセルの山 */
 #screen-garden .gmega.f8{background:linear-gradient(180deg,#ffe36e,#ffb84a); box-shadow:inset 0 0 0 4px #e0503a, 0 6px 18px rgba(0,0,0,.25)}
 #screen-garden .gmcap{position:relative; height:min(22rem,52vh); display:flex; flex-wrap:wrap-reverse; align-content:flex-start; justify-content:center; gap:1px; padding:.3rem; overflow:hidden; border-radius:14px; background:linear-gradient(180deg,rgba(255,255,255,.75),rgba(220,240,255,.55)); box-shadow:inset 0 0 0 3px rgba(255,255,255,.9), inset 0 -10px 20px rgba(0,0,0,.08)}
-#screen-garden .gcap{display:block; width:2.2rem; height:2.2rem; border-radius:50%; flex:none; background:radial-gradient(circle at 32% 28%, rgba(255,255,255,.9) 0 12%, transparent 13%), linear-gradient(180deg, var(--c) 0 50%, #fbfbfb 50%); box-shadow:inset 0 0 0 2px rgba(0,0,0,.18), 0 2px 3px rgba(0,0,0,.18); animation:g-capdrop .5s cubic-bezier(.3,.8,.5,1.15) both}
-#screen-garden .gcap.hi{box-shadow:inset 0 0 0 2px rgba(0,0,0,.18), 0 0 8px 3px var(--c)}
+#screen-garden .gcap{display:block; width:2.2rem; height:2.2rem; border-radius:50%; flex:none; background:radial-gradient(circle at 32% 28%, rgba(255,255,255,.9) 0 12%, transparent 13%), linear-gradient(180deg, var(--c) 0 50%, #fbfbfb 50%); border:2px solid rgba(0,0,0,.16); box-sizing:border-box; animation:g-capdrop .5s cubic-bezier(.3,.8,.5,1.15) both}
+#screen-garden .gcap.hi{box-shadow:0 0 8px 3px var(--c)}
 #screen-garden .gcap.top{animation:g-capdrop .5s cubic-bezier(.3,.8,.5,1.15) both, g-captop 1s ease-in-out .5s infinite alternate}
 @keyframes g-capdrop{0%{transform:translateY(-24rem) rotate(-120deg)}75%{transform:translateY(3px) rotate(10deg)}100%{transform:translateY(0) rotate(0)}}
 @keyframes g-captop{from{filter:brightness(1)}to{filter:brightness(1.5) drop-shadow(0 0 6px #fff)}}
@@ -1511,7 +1511,7 @@ body.garden.barag{background:radial-gradient(ellipse at 50% 120%, rgba(200,30,62
 #screen-garden .gmega.f9 .gmhead .gmnum, #screen-garden .gmega.f9 .gmhead .gmtop{color:#fff2c8}
 #screen-garden .gmsky{position:relative; height:min(20rem,48vh); overflow:hidden; border-radius:12px; background:radial-gradient(1px 1px at 12% 22%,#fff,transparent),radial-gradient(1px 1px at 68% 12%,#fff,transparent),radial-gradient(1.5px 1.5px at 40% 40%,#ffe,transparent),radial-gradient(1px 1px at 86% 34%,#fff,transparent),radial-gradient(1px 1px at 24% 64%,#fff,transparent),linear-gradient(180deg,#060a24,#141640 70%,#2a2050)}
 #screen-garden .gfw{position:absolute; width:0; height:0}
-#screen-garden .gfw i{position:absolute; left:0; top:0; width:.32rem; height:.32rem; margin:-.16rem; border-radius:50%; background:var(--c); box-shadow:0 0 6px var(--c); animation:g-fwp .95s cubic-bezier(.1,.7,.3,1) forwards}
+#screen-garden .gfw i{position:absolute; left:0; top:0; width:.32rem; height:.32rem; margin:-.16rem; border-radius:50%; background:var(--c); animation:g-fwp .95s cubic-bezier(.1,.7,.3,1) forwards}
 #screen-garden .gfw.big i{width:.45rem; height:.45rem; animation-duration:1.35s}
 #screen-garden .gfwl{position:absolute; left:0; top:0; white-space:nowrap; font-size:.75rem; font-weight:800; color:#fff; text-shadow:0 0 6px var(--c), 0 1px 2px #000; animation:g-fwl 1.45s ease-out forwards}
 #screen-garden .gfwl svg{width:1.1rem; height:1.1rem; vertical-align:-.25rem}
@@ -7947,7 +7947,10 @@ function megaStart(n){
 }
 function megaStep(){
   const M=gachaMega; if(!M) return;
-  const until=performance.now()+12;
+  const fnow=performance.now();
+  if(M.lastF){ M.slow=(M.slow||0)*.92+(fnow-M.lastF>60?.08:0); M.lite=M.slow>.3; }   // 描くのが追いつかない端末では、低いレア度の絵を減らす
+  M.lastF=fnow;
+  const until=fnow+(MEGA_FULL.includes(M.fx)?10:12);   // 画面いっぱいの演出は、描くほうに少し時間を残す
   while(M.i<M.n && performance.now()<until){
     const k=Math.min(M.G, M.n-M.i), blk=[];
     for(let j=0;j<k;j++) blk.push(drawOne(0));
@@ -8016,6 +8019,7 @@ function megaCards(){
 const megaCardIn = y => { const c=itemOf(y.id); return `<span class="gtag">${RARITY[y.r].label}</span><span class="gic">${ico(c)}</span><span class="gnm">${c.name}</span>`; };
 /* 札を1枚見せる。これまでで一番のレア度(HR 以上)なら、少し止めて光らせる(true を返す) */
 function megaCardShow(M,y,now){
+  if(M.lite && RARITY_ORDER.indexOf(y.r)<3 && M.fx!==8 && Math.random()<.5){ M.cardsShown++; return false; }   // 重い端末: 低いレア度は半分だけ見せる
   const ri=RARITY_ORDER.indexOf(y.r), up = ri>=3 && ri>M.cardBest, hit = ri>=M.top2 && ri>=(M.spotMax||0) && !M.spotShown[y.id];   // 一度上のレア度を見せたら、それより下は見せない
   if(hit){ M.spotShown[y.id]=1; M.spotMax=ri; }
   if(MEGA_FULL.includes(M.fx) && M.fx!==5){
@@ -8060,9 +8064,9 @@ function megaCardShow(M,y,now){
     else if(ri>=3){ const lows=[...box.querySelectorAll(".gcap:not(.hi)")]; const o=lows[Math.random()*lows.length|0]; if(o) o.replaceWith(cap); }   // いっぱいになったら、HR 以上だけ入れ替えて見せる
   }else if(M.fx===9){   // 花火大会: 引いたものが夜空で花火になる。レア度が高いほど大きく、名前が浮かぶ
     const sky=$("g-megaSky"); if(!sky) return false;
-    if(ri>=3 || sky.childElementCount<MEGA_CAP(40)){
+    if(ri>=3 || sky.childElementCount<MEGA_CAP(30)){
       const fw=document.createElement("div"); fw.className="gfw"+(ri>=3?" big":""); fw.style.left=(8+Math.random()*84).toFixed(1)+"%"; fw.style.top=(12+Math.random()*50).toFixed(1)+"%"; fw.style.setProperty("--c",RARITY[y.r].color);
-      const np = MEGA_CAP(ri>=M.top2 ? 24 : ri>=3 ? 16 : 9), dist = ri>=M.top2 ? 9 : ri>=3 ? 6 : 3;
+      const np = MEGA_CAP(ri>=M.top2 ? 18 : ri>=3 ? 12 : 7), dist = ri>=M.top2 ? 9 : ri>=3 ? 6 : 3;
       fw.innerHTML=Array.from({length:np},(_,i)=>`<i style="--a:${(i*360/np+Math.random()*12).toFixed(0)}deg;--d:${(dist*(.75+Math.random()*.4)).toFixed(2)}rem"></i>`).join("")+((ri>=4 || ri>=3 && sky.querySelectorAll(".gfwl").length<2) && sky.querySelectorAll(".gfwl").length<4 ?`<span class="gfwl">${ico(itemOf(y.id))} ${itemOf(y.id).name}</span>`:"");   // 名前は重なりすぎないように、同時に4つまで
       sky.appendChild(fw); setTimeout(()=>fw.remove(), ri>=3?1500:1000);
       if(ri>=3 && now-(M.boom||0)>120){ M.boom=now; beep(90+ri*12,.18,"sine",.05); }
@@ -8077,7 +8081,7 @@ function megaCardShow(M,y,now){
     const fall=$("g-megaFall"), shelf=$("g-megaShelf"); if(!fall) return false;
     if(ri>=3 && !M.shelf[y.id]){ M.shelf[y.id]=1; shelf.firstElementChild.insertAdjacentHTML("afterend",`<div class="gcard ${y.r} pop${up?" gmhit":""}">${megaCardIn(y)}</div>`); }   // 新しいものを左に
     else{
-      if(fall.childElementCount<MEGA_CAP(60)){   // 落ちている途中の札は消さない(多すぎるときは、新しい札を見せないだけ)
+      if(fall.childElementCount<MEGA_CAP(45)){   // 落ちている途中の札は消さない(多すぎるときは、新しい札を見せないだけ)
         const d=document.createElement("div"); d.className=`gcard ${y.r} gmdrop`; d.innerHTML=megaCardIn(y);
         d.style.left=(Math.random()*84).toFixed(1)+"%"; d.style.setProperty("--rot",(Math.random()*70-35).toFixed(0)+"deg"); d.style.animationDuration=(1.9+Math.random()*.8).toFixed(2)+"s";
         d.addEventListener("animationend",()=>d.remove()); fall.appendChild(d); setTimeout(()=>d.remove(),3200);
