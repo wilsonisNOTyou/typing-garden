@@ -3598,8 +3598,6 @@ function baraTick(){
     const ss=[...$("plate").querySelectorAll(".screw:not(.out):not(.gone)")]; if(ss.length<2) return;
     const x=ss[Math.random()*ss.length|0]; x.classList.add("out","bfall"); plateScrews--;
     setTimeout(()=>x.classList.add("gone"),900);
-  }else if(r<.37){
-    const pl=$("plate"); pl.classList.add("bflip"); setTimeout(()=>pl.classList.remove("bflip"),2600);
   }
 }
 setInterval(baraTick,2000);
@@ -6832,7 +6830,6 @@ function renderBar(){
   renderCookLock();
   root.querySelectorAll(".slot").forEach(s=>s.classList.toggle("on", +s.dataset.tool===S.tool));
   const tn=[canInfo().name, sickleInfo().name, hoeInfo().name];
-  if(baraOn() && Math.random()<.15) tn.push(tn.shift());   // バラバラ: 道具の名前が、ときどき入れ替わって見える
   $("g-canName").textContent=tn[0];
   $("g-sickName").textContent=tn[1];
   $("g-hoeName").textContent=tn[2];
