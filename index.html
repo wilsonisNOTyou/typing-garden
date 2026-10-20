@@ -3357,9 +3357,9 @@ let gardenKeys=0;       // このプレイで正しく打った打鍵数(キー�
 
 /* キーボード農園へ「正しい打鍵数」と「外したキー」を届ける(農園を開いたときに受け取られる) */
 const gardenScrewMul = () => { try{ return Garden.screwMul(); }catch(e){ return 1; } };   // 料理「1語のキー」の倍率
-function sendToGarden(keys,screws,mins=0){
+function sendToGarden(keys,screws,mins=0,noMul=false){   // noMul: TOEIC から(料理「1語のキー」は効かない)
   const toInt = v => Math.max(0, Math.floor(Number(v)||0));   // 大きな数(ノーミス勝負の倍々)でも壊れないように
-  keys=toInt(keys); screws=toInt(screws)*gardenScrewMul(); mins=toInt(mins);
+  keys=toInt(keys); screws=toInt(screws)*(noMul?1:gardenScrewMul()); mins=toInt(mins);
   if(keys<=0 && screws<=0 && mins<=0) return;
   try{
     const K="typinggarden:garden:inbox";
@@ -6144,9 +6144,43 @@ const vilUpPrice = () => VIL_UP_PRICES[Math.min(S.vilLv||0, VIL_UP_PRICES.length
    育ち方の条件がそろえば、シークレットの色にもなる */
 const RF_SLOTS = 3;
 const rfFree = () => (S.roseVil||0)*RF_SLOTS - vilUsed("rf");
+/* 薔薇農家: 何周もする長い時間は、まとめて進める(時間の短縮・料理のときだけ。自然に育つときは1本ずつ)。
+   色は袋の数から、変異・超変異と色の変わり方は1本ずつのときと同じ確率でまとめて決める。進めた時間を返す */
+function roseBulk(p,t){
+  const n=need({ id:"rose_b1" });
+  const k=Math.min(Math.floor(t/n), Math.floor(S.seeds.rose||0)); if(k<BULK_MIN) return 0;
+  const fi=S.fields.findIndex(f=>KEYS.some(x=>f[x]===p)); if(fi<0) return 0;
+  // 植える色(袋の数に比例)
+  const bag=S.roseBag=S.roseBag||{}, lvs=Object.keys(bag).filter(x=>bag[x]>0 && ROSE_LVNAME[x]), cnt={};
+  let all=lvs.reduce((a,x)=>a+bag[x],0), left=k;
+  lvs.forEach((lv,i)=>{ if(left<=0) return; const x=Math.min(bag[lv], i===lvs.length-1 ? left : binom(left, bag[lv]/all)); all-=bag[lv]; bag[lv]-=x; left-=x; if(x) cnt["rose_"+lv]=x; });
+  if(left>0) cnt.rose_b1=(cnt.rose_b1||0)+left;   // 袋が空のとき(1本ずつのときと同じ)
+  S.seeds.rose-=k;
+  if(!S.seeds.rose){ S.roseBag={}; if(S.seedId==="rose") S.seedId=nextSeed("rose"); }
+  // 実った瞬間に色が変わるもの(1本ずつのときと同じ条件・同じ順番)
+  const f=S.fields[fi];
+  const other = fn => KEYS.some(x=>{ const q=f[x]; return q!==p && q.crop && fn(q); });
+  const carrot = sup => other(q=>q.crop.id==="carrot" && isRipe(q) && q.crop.mut && !!q.crop.sup===sup);
+  const kinds = new Set(KEYS.map(x=>f[x]).filter(q=>q!==p && q.crop && CROP[q.crop.id].rose && isRipe(q)).map(q=>q.crop.id+":"+(q.crop.sup?5:q.crop.mut?3:0))).size;
+  const ripeRose = rid => other(q=>q.crop.id===rid && isRipe(q) && !q.crop.mut);
+  const odds=[["rose_lucky",0.001,true],["rose_dia",ROSE_SEC_CHANCE,carrot(true)],["rose_gold",ROSE_SEC_CHANCE,carrot(false)],
+    ["rose_rainbow",ROSE_SEC_CHANCE,kinds>=10],["rose_bw",ROSE_SEC_CHANCE,ripeRose("rose_b1")&&ripeRose("rose_990")],["rose_tri",ROSE_SEC_CHANCE,roseThemeN()===3]];
+  let rest=k; const sec={};
+  for(const [id,pr,ok] of odds){ if(!ok || rest<=0) continue; const x=binom(rest,pr); if(x){ sec[id]=x; rest-=x; } }
+  let sl=k-rest, tot=k;   // 色が変わったぶんを、植えた色から引く
+  const ids=Object.keys(cnt);
+  ids.forEach((id,i)=>{ const x=Math.min(cnt[id], i===ids.length-1 ? sl : binom(sl, cnt[id]/tot)); tot-=cnt[id]; cnt[id]-=x; sl-=x; });
+  const put=(id,q,x)=>{ if(x>0){ invAdd(id,q,x); recordHarvestN(id,q,x); } };
+  for(const [id,x] of Object.entries(cnt)){ const nS=binom(x, hasSup(id)?effSup():0), nM=binom(x-nS, hasMut(id)?effMut():0); put(id,5,nS); put(id,3,nM); put(id,0,x-nS-nM); }
+  for(const [id,x] of Object.entries(sec)) put(id,0,x);
+  S.vLog.rose=(S.vLog.rose||0)+k;
+  p.vWait=false;
+  return k*n;
+}
 function roseFarm(p,ms,base,src,rate){
   let t=ms, guard=0;
   while(guard++<10000){
+    if(!p.crop && src!=="t" && src!=="k" && (S.seeds.rose||0)>0){ const used=roseBulk(p,t); if(used>0){ t-=used; base+=used/(rate||1); if(t<=0) break; continue; } }   // 長い時間は、まとめて進める
     if(!p.crop){
       if(!((S.seeds.rose||0)>0)){ p.vWait=true; break; }
       S.seeds.rose--; p.crop={ id:rosePick(), grown:0 }; p.vWait=false;
@@ -6164,6 +6198,67 @@ function roseFarm(p,ms,base,src,rate){
     if(t<=0) break;
   }
 }
+/* 村人の知らせの記録: 変異・超変異は作物ごとの個数で持つ(1個ずつ並べると、長い時間が進んだときに記録が大きくなりすぎる) */
+function vlogAdd(name,key,n){
+  if(!(n>0)) return;
+  const o=S.vLog[name]=vlogObj(S.vLog[name]);
+  o[key]=(o[key]||0)+n;
+}
+const vlogObj = v => { if(!Array.isArray(v)) return v||{}; const m={}; for(const x of v) m[x]=(m[x]||0)+1; return m; };   // 前の形(1個ずつ並べた記録)も読む
+const vlogEntries = v => Object.entries(vlogObj(v));
+/* 二項分布(n 回のうち、確率 p で当たる回数)。回数が多いときは近似で */
+function binom(n,p){
+  n=Math.floor(n); if(n<=0 || !(p>0)) return 0; if(p>=1) return n;
+  if(n<=64){ let x=0; for(let i=0;i<n;i++) if(Math.random()<p) x++; return x; }
+  const m=n*p;
+  if(m<30){ const L=Math.exp(-m); let k=0, q=Math.random(); while(q>L && k<n){ k++; q*=Math.random(); } return k; }
+  const z=Math.sqrt(-2*Math.log(Math.random()||1e-12))*Math.cos(2*Math.PI*Math.random());
+  return Math.max(0, Math.min(n, Math.round(m+z*Math.sqrt(m*(1-p)))));
+}
+function recordHarvestN(id,t,n){   // 品質が上がりきった作物を、まとめて記録する
+  if(!(n>0)) return;
+  S.harvestBy[id]=(S.harvestBy[id]||0)+n;
+  S.harvestQ[id]=S.harvestQ[id]||[0,0,0];
+  S.harvestQ[id][t]=(S.harvestQ[id][t]||0)+n;
+  S.totalHarvest+=n;
+}
+/* 村人: 何周もする長い時間は、1周ずつ繰り返さずにまとめて進める(何十万回も繰り返すと画面が止まるため)。
+   穫れる数・変異・超変異・2個穫れるは、確率からまとめて決める。進めた時間を返す(0 なら、ふつうに1周ずつ) */
+const BULK_MIN=20;
+function vilBulk(p,t){
+  if(!S.vilAutoH || !S.vilAutoM) return 0;   // 実ったまま待つ設定は、すぐ止まるので1周ずつ
+  const O = p.vil!=="sg" && eff("O");
+  const c=CROP[p.vil==="sg" ? sgCropId() : (O ? vilGachaCrop() : vilCropId())];
+  if(!c || c.rose || c.half || tierOf(c.id)!==4) return 0;   // 品質が上がりきるまでは1周ずつ(上がったことを知らせる)
+  const n=need({ id:c.id });
+  let k=Math.floor(t/n); if(k<BULK_MIN) return 0;
+  if(O) k=Math.max(BULK_MIN, Math.ceil(k/32));   // ガチャの作物を育てる料理: いろいろな作物が混ざるように、少しずつ
+  let own=0;
+  if(S.vilOrder3 && S.vilUseSeed && !c.treasure && (S.seeds[c.id]||0)>0){   // 指示書3: 持っている種から使う
+    own=Math.min(k, S.seeds[c.id]); S.seeds[c.id]-=own;
+    S.vLog.used=(S.vLog.used||0)+own;
+    if(c.id===S.seedId && !(S.seeds[c.id]>0)) S.seedId=nextSeed(S.seedId);
+  }
+  const cost=Math.round(vilSeedCost(c)*ev("Z",.5,0,1));
+  let pay=k-own; if(cost>0 && pay>0) pay=Math.min(pay, Math.floor(S.money/cost));   // 種代が足りないぶんは、あとで1周ずつ(待つ)
+  const m=own+pay; if(m<=0) return 0;
+  if(cost>0 && pay>0){ S.money-=cost*pay; S.vLog.spent=(S.vLog.spent||0)+cost*pay; }
+  const nS=binom(m, hasSup(c.id)?effSup():0), nM=binom(m-nS, hasMut(c.id)?effMut():0), nN=m-nS-nM, d=effDouble();
+  const iN=nN+binom(nN,d), iM=nM+binom(nM,d), iS=nS+binom(nS,d), q=qualUp(tierOf(c.id));
+  recordHarvestN(c.id,q,iN); recordHarvestN(c.id,3,iM); recordHarvestN(c.id,5,iS);
+  if(S.vilOrder2 && !S.vilSellN){ if(iN){ invAdd(c.id,q,iN); S.vLog.k=S.vLog.k||{}; S.vLog.k[c.id]=(S.vLog.k[c.id]||0)+iN; } }
+  else if(iN){ const price=priceOf(c.id,q)*iN; S.money+=price; S.totalSales+=price; S.vLog.h=S.vLog.h||{}; S.vLog.h[c.id]=(S.vLog.h[c.id]||0)+iN; S.vLog.earn=(S.vLog.earn||0)+price; }
+  if(S.vilOrder2 && S.vilSellM){
+    const price=priceOf(c.id,3)*iM+priceOf(c.id,5)*iS;
+    if(price){ S.money+=price; S.totalSales+=price; S.vLog.mutEarn=(S.vLog.mutEarn||0)+price; }
+    vlogAdd("mutSold",c.id,iM); vlogAdd("mutSold",c.id+":5",iS);
+  }else{
+    if(iM) invAdd(c.id,3,iM); if(iS) invAdd(c.id,5,iS);
+    vlogAdd("mutGot",c.id,nM); vlogAdd("mutGot",c.id+":5",nS);
+  }
+  p.vWait=false;
+  return m*n;
+}
 function villagerAdvance(p,dt){
   if(p.vil==="rf"){ roseFarm(p,dt,Date.now()-dt,"c"); return; }
   let t=dt, guard=0;
@@ -6177,6 +6272,7 @@ function villagerAdvance(p,dt){
       continue;
     }
     if(!p.crop){
+      { const used=vilBulk(p,t); if(used>0){ t-=used; continue; } }   // 長い時間は、まとめて進める
       const c=CROP[p.vil==="sg" ? sgCropId() : (eff("O") ? vilGachaCrop() : vilCropId())];   // シゴデキ村人は選んだ作物
       if(S.vilOrder3 && S.vilUseSeed && !c.treasure && (S.seeds[c.id]||0)>0){   // 指示書3: 持っている種を使う(買わない)
         S.seeds[c.id]--;
@@ -6204,16 +6300,16 @@ function villagerAdvance(p,dt){
         if(S.vilOrder2 && S.vilSellM){                // 指示書2: 変異もその場で売る
           const price=priceOf(c.id,mr)*num;
           S.money+=price; S.totalSales+=price;
-          S.vLog.mutSold=S.vLog.mutSold||[]; for(let i=0;i<num;i++) S.vLog.mutSold.push(c.id+(mr===5?":5":""));
+          vlogAdd("mutSold",c.id+(mr===5?":5":""),num);
           S.vLog.mutEarn=(S.vLog.mutEarn||0)+price;
           continue;
         }
         invAdd(c.id,mr,num);
-        S.vLog.mutGot=S.vLog.mutGot||[]; S.vLog.mutGot.push(c.id+(mr===5?":5":""));
+        vlogAdd("mutGot",c.id+(mr===5?":5":""),1);
         continue;
       }
       p.crop.grown=n; p.crop.mut=true; if(mr===5) p.crop.sup=true;   // 収穫せずに畑に残し、一度だけ知らせる
-      S.vLog.mutWait=S.vLog.mutWait||[]; S.vLog.mutWait.push(c.id+(mr===5?":5":""));
+      vlogAdd("mutWait",c.id+(mr===5?":5":""),1);
       break;
     }
     if(!S.vilAutoH){                                  // 指示書: 自動収穫オフ。実ったまま、手で収穫されるのを待つ
@@ -6397,7 +6493,7 @@ function reportVillagers(){
   const L=S.vLog; if(!L || (!L.h && !L.k && !L.up && !L.mutWait && !L.mutGot && !L.mutSold)) return;
   const mutOf = x => { const [id,q]=String(x).split(":"); return [id, q==="5"?5:3]; };   // "carrot" は変異、"carrot:5" は超変異
   // 変異・超変異は作物ごとにまとめて1つの知らせにする(長い時間がまとめて進むと何百個も穫れ、音が一度に鳴りすぎるため)
-  const byCrop = arr => { const m={}; for(const x of (arr||[])){ const [id,t]=mutOf(x); if(CROP[id]){ const k=id+":"+t; m[k]=(m[k]||0)+1; } } return Object.entries(m).map(([k,n])=>{ const [id,t]=mutOf(k); return [id,t,n]; }); };
+  const byCrop = arr => { const m={}; for(const [x,n] of vlogEntries(arr)){ const [id,t]=mutOf(x); if(CROP[id]){ const k=id+":"+t; m[k]=(m[k]||0)+n; } } return Object.entries(m).map(([k,n])=>{ const [id,t]=mutOf(k); return [id,t,n]; }); };
   const mutList = arr => arr.map(([id,t,n])=>`${icoQ(CROP[id],t)} ${esc(qName(id,t))}${n>1?` ×${fmtNum(n)}`:""}`).join(" ・ ");
   const head = arr => arr.some(([,t])=>t===5) ? "✧ 超変異!" : "✦ 変異!";
   const cls  = arr => arr.some(([,t])=>t===5) ? "good mut sup" : "good mut";
@@ -9562,7 +9658,7 @@ const EFFS = {
   K:{ nm:"肥料の回数",           n:"1つの作物に肥料を3回まで",            s:"1つの作物に肥料を何回でも" },
   L:{ nm:"一括植え",             n:"種を植えると、その畑の空いた土ぜんぶに植わる", s:"種を植えると、すべての畑の空いた土に植わる" },
   M:{ nm:"画面の色",             n:"ホーム画面とタイピングが料理の色に染まる", s:"ホーム画面とタイピングが料理の色に鮮やかに染まり、作物が舞い、キーが料理に変わる。農園では収穫のたびに花火があがる" },
-  N:{ nm:"1語のキー",            n:"タイピングから農園に届くキー1本が、いちばん高い作物1個分の売値になる", s:"タイピングから農園に届くキー1本が、いちばん高い作物2個分の売値になる" },
+  N:{ nm:"1語のキー",            n:"タイピングゲームから農園に届くキー1本が、いちばん高い作物1個分の売値になる", s:"タイピングゲームから農園に届くキー1本が、いちばん高い作物2個分の売値になる" },
   O:{ nm:"村人がガチャの作物",   n:"村人がガチャの作物(N・R)を育てる",  s:"村人がガチャの作物(SR〜UR)を育てる" },
   P:{ nm:"一括水やり",           n:"じょうろ1回で、その畑ぜんぶに水やり",  s:"じょうろ1回で、すべての畑に水やり" },
   Q:{ nm:"一括収穫",             n:"収穫すると、その畑の実りをぜんぶ収穫", s:"収穫すると、すべての畑の実りをぜんぶ収穫" },
@@ -11315,7 +11411,7 @@ let syncPushing=false, syncPushAgain=false, syncBackupAt=null, syncDirtyTimer=nu
    中身を比べずに「持ち主のときにタップ・キー操作をしたか」で判断する */
 let syncDirty=false, syncActivating=false;
 /* タイピング中・結果画面では取り込まない(読み直しで遊んでいる途中が消えないように) */
-const syncBusyScene = () => scene==="game" || scene==="result";
+const syncBusyScene = () => scene==="game" || scene==="result" || (scene==="toeic" && $("tqPlay").classList.contains("on"));   // TOEIC は問題を解いているあいだ(結果・メニューに戻ったら送る)
 let syncCode=null, syncDevice=null, syncLastT=0, syncReadOnly=false;
 let syncMetaRef=null, syncOwnerRef=null, syncLiveRef=null, syncHeart=null;
 let syncPending=false, syncPushAt=0, syncOwner=null, syncLive={}, syncOwnerLoaded=false, syncLiveLoaded=false;
@@ -12667,7 +12763,7 @@ const TQ_BY=Object.fromEntries(TQ.map(w=>[w.en,w]));
 const TQ_SET=10, TQ_SEC_MIN=2, TQ_SEC_MAX=15;
 const TQ_GIFT_SC=10, TQ_GIFT_MIN=180;   // 1問正解で農園に届くキーと、進む農園の時間(分)。ノーミス勝負は10問ごとに倍
 /* この1問の正解で届くもの(ノーミス勝負は、それまでの正解数10問ごとに倍) */
-const TQ_UP_N=10, TQ_UP_MIN=50;   // ネジと薔薇の種は10問ごと、庭の時間は50問ごとに倍
+const TQ_UP_N=10, TQ_UP_MIN=50, TQ_UP_MAX=300;   // 倍になるのは300問まで(それより先は増えない)。 ネジと薔薇の種は10問ごと、庭の時間は50問ごとに倍
 const TQ_LIMIT = { choice:10, fill:20, listen:10 };   // リスニングは読み終わってから   // 一本勝負の1問の秒数(4択・穴埋め4択)
 function tqClock(sec){   // 残り時間のバー。0 になったら時間切れ
   $("tqBarW").style.display="";
@@ -12676,7 +12772,8 @@ function tqClock(sec){   // 残り時間のバー。0 になったら時間切�
   tqTimer=setTimeout(()=>tqChoose(-2), sec*1000);
 }
 const tqFillX = () => tqFmt==="fill"||tqFmt==="listen" ? 2 : 1;   // 穴埋め4択とリスニングは倍
-const tqGift = () => { const x = (tqKind==="one" ? 2**Math.floor(tqOk/10) : 1) * tqFillX(); return { sc:TQ_GIFT_SC*x, min:TQ_GIFT_MIN*tqFillX()*(tqKind==="one" ? 2**Math.floor(tqOk/TQ_UP_MIN) : 1), rose: tqKind==="one" ? x : 0 }; };   // 時間は50問ごとに倍(10問ごとだと村人や料理と重なって進みすぎるため)
+const tqUpK = () => Math.min(tqOk, TQ_UP_MAX-1);   // 301問目からは300問目と同じ
+const tqGift = () => { const x = (tqKind==="one" ? 2**Math.floor(tqUpK()/TQ_UP_N) : 1) * tqFillX(); return { sc:TQ_GIFT_SC*x, min:TQ_GIFT_MIN*tqFillX()*(tqKind==="one" ? 2**Math.floor(tqUpK()/TQ_UP_MIN) : 1), rose: tqKind==="one" ? x : 0 }; };   // 時間は50問ごとに倍(10問ごとだと村人や料理と重なって進みすぎるため)
 /* 薔薇の種: 10語セットは終わったときに(7問以下 1個・8問以上 3個・全問正解 10個)、ノーミス勝負は1問正解ごとに(1〜10問目は1個、11〜20問目は2個…と倍々)。
    穴埋め4択は倍。色は単語のレベルで決まる(苦手は、出た単語のレベルから) */
 const tqRoseLv = lv => tqFmt==="listen" ? ["ls","lt"] : [lv];   // リスニングは銀・青緑のどちらか
@@ -12767,7 +12864,9 @@ let tqBara=false, tqBaseFmt=null, tqFillPool=null;   // バラバラ: お茶が�
 let tqFmt="choice", tqKind="set", tqLv="470", tqListLv="470", tqWords=[], tqI=0, tqPts=0, tqMin=0, tqMiss=0, tqLog=[];
 let tqPhase="menu", tqTimer=null, tqRevealed=false, tqCands=[], tqChoices=[];
 let tqLadder=[], tqUnl=1, tqUsed=new Set(), tqOk=0, tqOver=false;   // ノーミス勝負: 上がっていくレベル・いま何番目のレベルか(1から)・出た単語・正解数・終わったか
-function tqView(id){ for(const v of ["tqMenu","tqPlay","tqResult","tqList"]) $(v).classList.toggle("on",v===id); }
+function tqView(id){ for(const v of ["tqMenu","tqPlay","tqResult","tqList"]) $(v).classList.toggle("on",v===id);
+  if(id!=="tqPlay"){ try{ if(syncDirty) syncPush(false); syncMaybePull(); }catch(e){} }   // 解いているあいだ待っていた同期を、ここで送る
+}
 let tqCracks=null;   // バラバラ: ひびの入ったボタン(TOEIC を開いたときに決める)
 function openToeic(){ tqLoad(); window.tqFromRank=false; tqCracks=null; show("toeic"); tqMenu(); }
 /* そのレベルを選べるか(ノーミス勝負は苦手を選べない・入力はスマホで遊べない) */
@@ -12803,7 +12902,7 @@ function tqMenu(){
   $("tqSecV").textContent=tqSec;
   $("tqNote").textContent =
     tqFmt==="type" && window.IS_MOBILE ? "入力はパソコンで遊べます。スマホでは4択か穴埋め4択を選んでください"
-    : tqKind==="one" ? `選んだレベルの単語を全部正解でクリア(1問でも間違えたら終わり${tqFmt!=="type"?`・1問${TQ_LIMIT[tqFmt]}秒まで`:""})。正解ごとにキーと農園の時間と薔薇の種が届きます。キーと薔薇の種は${TQ_UP_N}問ごとに、時間は${TQ_UP_MIN}問ごとに倍`+(tqFmt==="fill"?"(穴埋め4択はさらに倍)":tqFmt==="listen"?"(リスニングはさらに倍)":"")
+    : tqKind==="one" ? `選んだレベルの単語を全部正解でクリア(1問でも間違えたら終わり${tqFmt!=="type"?`・1問${TQ_LIMIT[tqFmt]}秒まで`:""})。正解ごとにキーと農園の時間と薔薇の種が届きます。キーと薔薇の種は${TQ_UP_N}問ごとに、時間は${TQ_UP_MIN}問ごとに倍(${TQ_UP_MAX}問まで)`+(tqFmt==="fill"?"(穴埋め4択はさらに倍)":tqFmt==="listen"?"(リスニングはさらに倍)":"")
     : `1セット終えると薔薇の種が届きます(${TQ_UNLOCK_SET-1}問以下 1個・${TQ_UNLOCK_SET}問以上 3個・全問正解 10個)`+(tqFmt==="fill"?"。穴埋め4択はキー・時間・薔薇の種がどれも倍":tqFmt==="listen"?"。リスニングはキー・時間・薔薇の種がどれも倍":"");
   // まだ閉じているレベルがあれば、解放のしかたを添える
   if(tqFmt==="listen") $("tqNote").textContent += " ・ 英語が読み上げられます(音が出ます)"+(tqSynth?"":"。この端末・ブラウザでは読み上げが使えません");
@@ -12993,7 +13092,7 @@ function tqWordKey(key){
   if(r!=="done") return;
   const w=tqWords[tqI]; tqLog.push({ w, ok:true });
   const g=tqGift(); tqPts+=g.sc; tqMin+=g.min;
-  sendToGarden(0, g.sc, g.min);
+  sendToGarden(0, g.sc, g.min, true);
   if(g.rose) tqRose(tqRoseLv(tqLadder[0]), g.rose);
   $("tqFb").className="tq-fb ok"; $("tqFb").textContent=`打てた! ネジ +${tqNum(g.sc)} ・ 庭の時間 +${tqHours(g.min)}`+(g.rose?` ・ 🌹 薔薇の種 +${tqNum(g.rose)}`:"");
   if(tqKind==="one") tqOneOk(); else $("tqScore").textContent=tqNum(tqPts);
@@ -13111,7 +13210,7 @@ function tqChoose(i){
   if(c.ok){
     window.tqOkN=(window.tqOkN||0)+1;   // はじめてガイド(スマホ)で数える
     const g=tqGift(); tqPts+=g.sc; tqMin+=g.min;
-    sendToGarden(0, g.sc, g.min);   // 1問ごとにすぐ届ける(途中でやめても正解ぶんは届く)
+    sendToGarden(0, g.sc, g.min, true);   // 1問ごとにすぐ届ける(途中でやめても正解ぶんは届く)
     if(g.rose) tqRose(tqRoseLv(tqLadder[0]), g.rose);   // ノーミス勝負: 薔薇の種も1問ごと
     $("tqFb").className="tq-fb ok"; $("tqFb").textContent=`正解! キー +${tqNum(g.sc)} ・ 農園の時間 +${tqHours(g.min)}`+(g.rose?` ・ 🌹 薔薇の種 +${tqNum(g.rose)}`:"");
     if(tqKind==="one") tqOneOk(); else{ $("tqScore").textContent=tqNum(tqPts); }
