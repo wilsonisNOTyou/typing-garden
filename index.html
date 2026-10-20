@@ -3967,6 +3967,12 @@ try{ playerName=localStorage.getItem("typinggarden:playerName")||""; }catch(e){}
    タイムアタック: タイムが短いほど上、同タイムはミスが少ないほど上
    ノーミス勝負: 本数が多いほど上、同本数はタイムが短いほど上
    スコアアタック: 本数が多いほど上 */
+/* 庭の番付の数(端数があれば足した正確な数) */
+function rankExact(r){
+  const s=Math.floor(r.s||0), c=Math.round(r.c||0);
+  if(Math.abs(s)<2**53) return (s+c).toLocaleString("ja-JP");   // 9000兆より小さければ、ふつうの数のまま
+  try{ return (BigInt(s)+BigInt(c)).toLocaleString("ja-JP"); }catch(e){ return (s+c).toLocaleString("ja-JP"); }
+}
 function betterRecord(a,b,d){
   if(isTimeRanked(d)){
     const at=(a.e==null)?Infinity:a.e, bt=(b.e==null)?Infinity:b.e;
@@ -3976,6 +3982,7 @@ function betterRecord(a,b,d){
     return 0;
   }
   if(a.s!==b.s) return a.s-b.s;
+  if((a.c||0)!==(b.c||0)) return (a.c||0)-(b.c||0);   // 庭の番付: 所持が同じ数に丸まっていたら、端数で比べる
   if(d==="oneshot"){
     const ae=(a.e==null)?Infinity:a.e, be=(b.e==null)?Infinity:b.e;
     return be-ae;
@@ -4079,7 +4086,7 @@ async function openRanking(d,highlight){
       if(d==="barabara"){
         scoreText = `${baraEsc(r.s)}${baraEsc(r.u||"")} <span style="color:var(--steel);font-size:.85em">${baraEsc(r.md||"バラバラ")}</span>`;
       }else if(isGardenRank(d)){
-        scoreText = Math.floor(r.s).toLocaleString("ja-JP") + gRankUnit(d);
+        scoreText = rankExact(r) + gRankUnit(d);
       }else if(isTimeRanked(d)){
         const missText = (r.m==null) ? "" : ` <span style="color:var(--steel);font-size:.85em">ミス${r.m}</span>`;
         scoreText = `${r.e==null?"--":fmtTime(r.e)}${missText}`;
@@ -10959,7 +10966,7 @@ async function pushRank(name){
   const t=(old&&old.t)||Date.now();
   // 6つの番付を同時に書く(所持と累計収穫のほかは書けなくても続ける。図鑑は番付の画面で知らせる)
   await Promise.all([
-    refM.set({ n:name, s:Math.floor(S.money), o:S.owner, t }),
+    refM.set(Object.assign({ n:name, s:Math.floor(S.money), o:S.owner, t }, S.xc&&S.xc.money ? { c:Math.round(S.xc.money) } : {})),   // c: 9000兆を超えたぶんの端数(所持の正確な数 = s + c)
     refH.set({ n:name, s:S.totalHarvest,      o:S.owner, t }),
     refE.set({ n:name, s:Math.floor(earnedTotal()), o:S.owner, t }).catch(e=>console.warn("[typinggarden rank] 累計獲得キーの番付に書き込めませんでした",e)),
     refD.set({ n:name, s:dishBookGot(), o:S.owner, t }).catch(e=>console.warn("[typinggarden rank] 料理図鑑の番付に書き込めませんでした",e)),
@@ -11021,7 +11028,7 @@ async function renderGardenRank(){
     note.textContent=rows.length?"":"まだ誰も載っていません。一番乗りのチャンス!";
     list.innerHTML=rows.map((r,i)=>{
       const me=r.o===S.owner;
-      const val=fmtNum(Math.floor(r.s||0))+gRankUnit(tab);
+      const val=rankExact(r)+gRankUnit(tab);
       return `<li class="${i<3?"top"+(i+1):""}${me?" me":""}"><span class="pos">${i+1}位</span><span class="pn">${esc(r.n||"")}${me?' <small>(あなた)</small>':""}</span><span class="ps">${val}</span></li>`;
     }).join("");
   }catch(e){ if(req===gRankReq) note.textContent="読み込めませんでした。通信環境を確認してください"; }
