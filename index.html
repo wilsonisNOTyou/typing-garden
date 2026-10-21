@@ -9388,6 +9388,7 @@ function treasKey(e){
 }
 root.querySelectorAll("#g-treasTabs .tab").forEach(t=>t.addEventListener("click",()=>{ const v=+t.dataset.tt; if(!treasTabs().includes(v)) return; treasTab=v; renderTreas(); }));
 $("g-treasBody").addEventListener("click",e=>{
+  if(treasTab!==1) return;   // 台所の宝物のタブだけ(薔薇のタブは、それぞれの項目で選ぶ)
   const it=e.target.closest && e.target.closest(".kitem"); if(!it) return;
   const i=+it.dataset.k, sw=e.target.closest("[data-kd]");
   if(sw){ kitCur=i; kitAct(+sw.dataset.kd); return; }   // ◀ ▶(スマホでも切り替えられるように)
