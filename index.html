@@ -13440,7 +13440,7 @@ const TQ=TQ_RAW.map(r=>{ const [lv,en,pos,ms,cf]=r.split("|"); return { lv, en, 
 const TQ_BY=Object.fromEntries(TQ.map(w=>[w.en,w]));
 const TQ_SET=10, TQ_SEC_MIN=2, TQ_SEC_MAX=15;
 const TQ_GIFT_SC=10, TQ_GIFT_MIN=180;   // 1問正解で農園に届くキーと、進む農園の時間(分)。ノーミス勝負は10問ごとに倍
-/* この1問の正解で届くもの(ノーミス勝負は、それまでの正解数10問ごとに倍) */
+/* この1問の正解で届くもの(ノーミス勝負は、出題数10問ごとに倍。お守りで見逃したミスの問題も1問に数える) */
 const TQ_UP_N=10, TQ_UP_MIN=50, TQ_UP_MAX=300;   // 倍になるのは300問まで(それより先は増えない)。 ネジと薔薇の種は10問ごと、庭の時間は50問ごとに倍
 const TQ_LIMIT = { choice:10, fill:20, listen:10 };   // リスニングは読み終わってから   // 一本勝負の1問の秒数(4択・穴埋め4択)
 function tqClock(sec){   // 残り時間のバー。0 になったら時間切れ
@@ -13450,10 +13450,10 @@ function tqClock(sec){   // 残り時間のバー。0 になったら時間切�
   tqTimer=setTimeout(()=>tqChoose(-2), sec*1000);
 }
 const tqFillX = () => tqFmt==="fill"||tqFmt==="listen" ? 2 : 1;   // 穴埋め4択とリスニングは倍
-const tqUpK = () => Math.min(tqOk, TQ_UP_MAX-1);   // 301問目からは300問目と同じ
+const tqUpK = () => Math.min(tqAns, TQ_UP_MAX-1);   // それまでに出た問題の数。301問目からは300問目と同じ
 const tqBoost = () => { try{ return Garden.tqBoost(); }catch(e){ return { rose:1, sc:1, min:1 }; } };   // 薔薇ガチャの GUR で増える
 const tqGift = () => { const b=tqBoost(), x = (tqKind==="one" ? 2**Math.floor(tqUpK()/TQ_UP_N) : 1) * tqFillX(); return { sc:Math.round(TQ_GIFT_SC*x*b.sc), min:Math.round(TQ_GIFT_MIN*tqFillX()*(tqKind==="one" ? 2**Math.floor(tqUpK()/TQ_UP_MIN) : 1)*b.min), rose: tqKind==="one" ? Math.round(x*b.rose) : 0 }; };   // 時間は50問ごとに倍(10問ごとだと村人や料理と重なって進みすぎるため)
-/* 薔薇の種: 10語セットは終わったときに(7問以下 1個・8問以上 3個・全問正解 10個)、ノーミス勝負は1問正解ごとに(1〜10問目は1個、11〜20問目は2個…と倍々)。
+/* 薔薇の種: 10語セットは終わったときに(7問以下 1個・8問以上 3個・全問正解 10個)、ノーミス勝負は1問正解ごとに(1〜10問目は1個、11〜20問目は2個…と出題数で倍々)。
    穴埋め4択は倍。色は単語のレベルで決まる(苦手は、出た単語のレベルから) */
 const tqRoseLv = lv => tqFmt==="listen" ? ["ls","lt"] : [lv];   // リスニングは銀・青緑のどちらか
 const tqRoseSet = ok => (ok>=TQ_SET ? 10 : ok>=TQ_UNLOCK_SET ? 3 : 1) * tqFillX();
@@ -13569,7 +13569,7 @@ function tqMenu(){
     else if(tqKind==="one" && k==="weak") sub="ノーミス勝負では選べません";
     else if(!pool.length) sub = k==="weak" ? "まだありません" : "穴埋めはありません";
     else if(k==="weak") sub=`${pool.length}${tqUnit()}`;
-    else if(tqKind==="one"){ const sv=tqSuspGet(tqFmt,k); sub = sv ? `⏸ 中断中 ${sv.ok}問から続き` : `${pool.length}${tqUnit()} ・ 自己ベスト ${tqBest[tqBestKey(tqFmt,k)]||0}問`; }
+    else if(tqKind==="one"){ const sv=tqSuspGet(tqFmt,k); sub = sv ? `⏸ 中断中 ${sv.q!=null?sv.q:sv.ok}問から続き` : `${pool.length}${tqUnit()} ・ 自己ベスト ${tqBest[tqBestKey(tqFmt,k)]||0}問`; }
     else sub=`覚えた ${pool.filter(w=>tqGood(w.en)).length} / ${pool.length}${tqUnit()}`;
     return `<button class="btn tq-lv" data-lv="${k}" ${ok?"":"disabled"}><b>${nm}</b><small>${sub}</small><span class="kbdh">${TQ_LVKEYS[i]}</span></button>`;
   }).join("");
@@ -13586,7 +13586,7 @@ function tqMenu(){
   // まだ閉じているレベルがあれば、解放のしかたを添える
   if(tqFmt==="listen") $("tqNote").textContent += " ・ 英語が読み上げられます(音が出ます)"+(tqSynth?"":"。この端末・ブラウザでは読み上げが使えません");
   else if(TQ_CHAIN.some(k=>!tqIsOpen(k))) $("tqNote").textContent += ($("tqNote").textContent?" ・ ":"")+`合格: 10語セットで${TQ_UNLOCK_SET}問以上、ノーミス勝負で${TQ_UNLOCK_ONE}問以上正解すると次のレベルが開きます`;
-  if(tqKind==="one" && !baraOn()) $("tqNote").textContent += ` ・ ${TQ_CKPT}問正解するごとに、中断して続きをあとで遊べます`;
+  if(tqKind==="one" && !baraOn()) $("tqNote").textContent += ` ・ ${TQ_CKPT}問ごとに、中断して続きをあとで遊べます`;
 }
 /* 10語を選ぶ: 苦手・まだ出ていない単語ほど出やすく、覚えた単語は出にくい */
 const tqWt = w => tqWeak(w.en) ? 4 : !tqStat[w.en] ? 3 : tqGood(w.en) ? .5 : 2;
@@ -13609,13 +13609,13 @@ function tqStart(lv){
   tqLv=lv; tqWords=[]; tqI=0; tqPts=0; tqMin=0; tqRoseN=0; tqMiss=0; tqLog=[]; gardenKeys=0; tqOver=false;
   if(tqKind==="set"){ tqWords=tqPick(lv); }
   else{
-    tqLadder=[lv]; tqUnl=1; tqClear=false; tqUsed=new Set(); tqOk=0; tqCkptDue=false;   // そのレベルだけ(全部正解でクリア)
+    tqLadder=[lv]; tqUnl=1; tqClear=false; tqUsed=new Set(); tqOk=0; tqAns=0; tqCkptDue=false;   // そのレベルだけ(全部正解でクリア)
     tqLives=(()=>{ try{ return Garden.charmLives(); }catch(e){ return 0; } })(); tqCharm=tqLives>0;   // 料理のお守り(タイピングと同じ)
     const sv=!tqBara && tqSuspGet(tqFmt,lv);
     if(sv){   // 中断したところから続ける(届け物はもう届いている)
       tqSuspSet(tqFmt,lv,null);
       const pool=tqPool(lv), by=Object.fromEntries(pool.map(w=>[w.en,w]));
-      tqOk=sv.ok||0; tqLives=sv.lives||0; tqCharm=!!sv.charm; tqUsed=new Set(sv.used||[]); tqPts=sv.pts||0; tqMin=sv.min||0; tqRoseN=sv.rose||0;
+      tqOk=sv.ok||0; tqAns=sv.q!=null ? sv.q : tqOk; tqLives=sv.lives||0; tqCharm=!!sv.charm; tqUsed=new Set(sv.used||[]); tqPts=sv.pts||0; tqMin=sv.min||0; tqRoseN=sv.rose||0;
       if(tqFmt==="type" && sv.sec){ tqSec=sv.sec; tqSaveOpt(); }
       tqLog=(sv.log||[]).map(([en,ok])=>by[en]?{ w:by[en], ok:!!ok }:null).filter(Boolean);
       tqPhase="play"; tqView("tqPlay"); tqNext();
@@ -13788,7 +13788,7 @@ function tqReveal(){
   $("tqMean").className="tq-mean"; $("tqMean").innerHTML=tqMeanHtml(tqWords[tqI]);
   if(tqKind==="one"){   // ノーミス勝負: 時間切れで終わり
     const w=tqWords[tqI];
-    tqMarkFx(w.en,false); tqLog.push({ w, ok:false }); tqOver=!tqCharmSave();
+    tqMarkFx(w.en,false); tqLog.push({ w, ok:false }); tqOver=!tqCharmSave(); if(!tqOver) tqAnsInc();
     $("tqTyped").innerHTML=""; $("tqFb").className="tq-fb ng"; $("tqFb").textContent="時間切れ…"+(tqOver?"":`料理のお守りでセーフ!(お守り残り${tqLives}回)`);
     sndMiss(); tqI++; tqPhase="wait"; tqTimer=setTimeout(tqNext,2200);
     return;
@@ -13852,7 +13852,7 @@ function tqListenPlay(){
   const mine = f => () => { if(tok===tqSayTok) f(); };
   const hl = j => document.querySelectorAll("#tqOpts .tq-lo").forEach((b,k)=>b.classList.toggle("hl",k===j));
   const utt = (text,voice,onstart) => { const u=new SpeechSynthesisUtterance(text); if(voice) u.voice=voice; u.lang=(voice&&voice.lang)||"en-US"; u.rate = !one && tqSlow ? .75 : .95; u.onstart=onstart; return u; };
-  const num = tqKind==="one" ? tqOk+(tqPhase==="play"?1:0) : (tqPhase==="wait"?tqI:tqI+1);
+  const num = tqKind==="one" ? tqAns+(tqPhase==="play"?1:0) : (tqPhase==="wait"?tqI:tqI+1);
   const lead=utt(`Question ${num}.`,tqVQ,mine(()=>{ if(tqPhase==="play") $("tqMean").textContent=`Question ${num}`; }));
   const list=[utt(w.en,tqVQ,mine(()=>{ hl(-1); if(tqPhase==="play") $("tqMean").textContent="質問"; }))];
   tqChoices.forEach((c,j)=>list.push(utt(`${"ABC"[j]}. ${c.txt}`,tqVA,mine(()=>{ hl(j); if(tqPhase==="play") $("tqMean").textContent=`(${"ABC"[j]})`; }))));
@@ -13898,7 +13898,7 @@ function tqChoose(i){
     if(tqKind==="one") tqOneOk(); else{ $("tqScore").textContent=tqNum(tqPts); }
   }else{
     $("tqFb").className="tq-fb ng"; $("tqFb").textContent = c.late ? "時間切れ…ここで終わり(緑が正解)" : c.idk ? (tqKind==="one" ? "分からない…ここで終わり(緑が正解)" : "答えは緑のものです") : tqKind==="one" ? "ざんねん…ここで終わり(緑が正解)" : "ざんねん…(緑が正解)";
-    if(tqKind==="one"){ tqOver=!tqCharmSave(); if(!tqOver) $("tqFb").textContent=$("tqFb").textContent.replace("ここで終わり",`料理のお守りでセーフ!(お守り残り${tqLives}回)`); }
+    if(tqKind==="one"){ tqOver=!tqCharmSave(); if(!tqOver) tqAnsInc(); if(!tqOver) $("tqFb").textContent=$("tqFb").textContent.replace("ここで終わり",`料理のお守りでセーフ!(お守り残り${tqLives}回)`); }
   }
   c.ok ? sndClear() : sndMiss();
   tqI++; tqPhase="wait";
@@ -13908,6 +13908,8 @@ function tqChoose(i){
 }
 /* ノーミス勝負で1問正解: そのレベルを全部正解したらクリアで終わり */
 let tqClear=false, tqCkptDue=false;
+let tqAns=0;   // 一本勝負: 答えた問題の数(正解 + お守りで見逃したミス)。倍になる時期と中断ポイントはこれで数える
+const tqAnsInc = () => { tqAns++; if(!tqBara && tqAns%TQ_CKPT===0 && tqLeft().length) tqCkptDue=true; };   // 次へ進む前に、続けるか中断するかを選べる
 let tqLives=0, tqCharm=false;   // 料理のお守り: ミスしても続けられる残り回数 / お守りの効果中に始めたか(ランキングに載せない)
 const tqCharmSave = () => { if(tqKind!=="one" || tqLives<=0) return false; tqLives--; return true; };   // このミスを見逃してもらえたら true
 /* 10問ごとの中断ポイント */
@@ -13916,18 +13918,17 @@ function tqCkpt(){
   $("tqProg").textContent=tqOneProg(); $("tqPos").hidden=true; $("tqWst").textContent=""; $("tqWst").className="tq-wst";
   $("tqBarW").style.display="none"; $("tqTyped").innerHTML=""; $("tqMean").className="tq-mean"; $("tqMean").textContent=""; $("tqJa").textContent="";
   $("tqFb").className="tq-fb"; $("tqFb").textContent=""; $("tqWmsg").innerHTML=""; $("tqNextBtn").hidden=true; $("tqSlowW").hidden=true;
-  $("tqWord").innerHTML=`<div class="tq-ck"><b>${tqOk}問 連続正解!</b><span>ここで中断して、あとで続きから遊べます</span></div>`;
+  $("tqWord").innerHTML=`<div class="tq-ck"><b>${tqAns===tqOk ? `${tqOk}問 連続正解!` : `${tqAns}問 到達!(正解 ${tqOk}問)`}</b><span>ここで中断して、あとで続きから遊べます</span></div>`;
   $("tqOpts").innerHTML=`<div class="tq-ckbtns"><button class="btn primary tq-opt" data-ck="go">続ける <span class="kbdh">Enter</span></button><button class="btn tq-opt" data-ck="stop">中断する <span class="kbdh">S</span></button></div>`;
   $("tqHint").textContent="Enter 続ける ・ S 中断する(次にこの出題形式・レベルのノーミス勝負を始めると、続きから) ・ Esc やめる(ここまでの記録が残ります)";
 }
 function tqSuspend(){
-  tqSuspSet(tqFmt, tqLadder[0], { ok:tqOk, lives:tqLives, charm:tqCharm?1:0, used:[...tqUsed], pts:tqPts, min:tqMin, rose:tqRoseN, sec:tqSec, log:tqLog.map(x=>[x.w.en, x.ok?1:0]), t:Date.now() });
+  tqSuspSet(tqFmt, tqLadder[0], { ok:tqOk, q:tqAns, lives:tqLives, charm:tqCharm?1:0, used:[...tqUsed], pts:tqPts, min:tqMin, rose:tqRoseN, sec:tqSec, log:tqLog.map(x=>[x.w.en, x.ok?1:0]), t:Date.now() });
   sndDone(); tqMenu();
   $("tqNote").textContent=`${tqLvName(tqLadder[0])}のノーミス勝負を ${tqOk}問 で中断しました。次にこのレベルを選ぶと、続きから始まります`;
 }
 function tqOneOk(){
-  tqOk++; $("tqScore").textContent=tqOk;
-  if(!tqBara && tqOk%TQ_CKPT===0 && tqLeft().length) tqCkptDue=true;   // 次へ進む前に、続けるか中断するかを選べる
+  tqOk++; tqAnsInc(); $("tqScore").textContent=tqOk;
   if(tqBara || tqLeft().length){ $("tqProg").textContent=tqOneProg(); return; }   // バラバラはクリアなし
   tqOver=true; tqClear=true;   // そのレベルを全部正解したらクリア
   $("tqFb").textContent+=` ・ ${tqLvName(tqLadder[0])}を全部正解! クリアです`;
