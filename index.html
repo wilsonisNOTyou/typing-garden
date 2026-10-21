@@ -9183,14 +9183,14 @@ function renderRoseTre(){
     return `<div class="titem ${seen?"":"locked"}"${seen?` data-act="gx:${x.k}"`:""}><div class="tic">${seen?`<span class="cart">${x.art}</span>`:"✨"}</div><div class="tbody">
       <div class="tnm">${seen?esc(x.name):"？？？"}</div>
       <div class="teff">${seen?esc(x.desc):"薔薇ガチャの GUR から出ます"}</div>
-      ${seen?`<div class="tsum"><button class="sbtn" data-gxo="${x.k}">${gxOn(x.k)?"オン":"オフ"}</button>${need}${x.k==="plate"?` <input id="g-plateName" class="gxname" maxlength="12" value="${esc(plateName())}" placeholder="プレートの名前"><button class="sbtn" data-gxname="1">名前を決める${kb(" (N)","")}</button>`:""}</div>`:""}</div></div>`; }).join("")+`</div>` : "");
+      ${seen?`<div class="tsum"><button class="sbtn" data-gxo="${x.k}">${gxOn(x.k)?"オン":"オフ"}</button>${need}${x.k==="plate"?` <input id="g-plateName" class="gxname" maxlength="12" value="${esc(plateName())}" placeholder="プレートの名前"><button class="sbtn" data-gxname="1">名前を決める${kb(" (N)","")}</button>`:""}</div>`:""}</div></div>`; }).join("")+`</div>` : "")
   +(true ? `<div class="ghead">GXR<span>${rgGurGot()} / ${RG_GUR.length}</span></div><div class="tlist">`+RG_GUR.map(x=>{
     const seen=(S.got[x.id]||0)>0, n=rgGurN(x.k);
     return `<div class="titem ${seen?"":"locked"}"><div class="tic">${seen?`<span class="cart">${x.art}</span>`:"✨"}</div><div class="tbody">
       <div class="tnm">${seen?esc(x.name):"？？？"}${seen?`<span class="tn">×${fmtNum(n)}</span>`:""}</div>
       <div class="teff">${seen?esc(x.desc):"薔薇ガチャの GXR から出ます"}</div>
       ${seen?`<div class="teff glore">${esc(x.lore)}</div>`:""}
-      ${seen?`<div class="tsum">いまの効果 <b>+${rgGurPct(x.k)}%</b>${n>=RG_GUR_MAX?"(上限)":""}</div>`:""}</div></div>`; }).join("")+`</div>` : "")
+      ${seen?`<div class="tsum">いまの効果 <b>+${rgGurPct(x.k)}%</b>${n>=RG_GUR_MAX?"(上限)":""}</div>`:""}</div></div>`; }).join("")+`</div>` : "");
   $("g-treasBody").querySelectorAll("[data-rkd]").forEach(b=>b.addEventListener("click",()=>rkamAct(+b.dataset.rkd)));
   $("g-treasBody").querySelectorAll("[data-gxo]").forEach(b=>b.addEventListener("click",e=>{ e.stopPropagation(); gxToggle(b.dataset.gxo); }));
   $("g-treasBody").querySelectorAll("[data-gxname]").forEach(b=>b.addEventListener("click",e=>{ e.stopPropagation(); gxSaveName(); }));
@@ -11447,6 +11447,7 @@ function debugUnlock(){
   for(const id in RG) S.got[id]=1;
   S.petals=Object.fromEntries(PETALS.map(x=>[x.k,3]));
   S.seeds.rose_hb=20; S.seeds.rose_hr=20; S.objs.rsk=2; S.roseVil=2; S.rkam=1; S.rkamOn=true; S.rkamCol="rose_b3";
+  S.gx=Object.fromEntries(RG_GXR.map(x=>[x.k,1])); S.rgGur=Object.fromEntries(RG_GUR.map(x=>[x.k,RG_GUR_MAX])); S.lastTea={ r:"rose_rainbow", g:0 };   // 薔薇ガチャの GUR(飾り)・GXR(集める宝物)
   S.roseBag={}; for(const r of ROSES) if(!roseOwnSeed(r.lv)) S.roseBag[r.lv]=10; S.seeds.rose=Object.values(S.roseBag).reduce((a,b)=>a+b,0);
   for(const r of ROSE_USEEDS()) S.seeds[r.id]=10;
   for(const d of ROSE_TEAS){ const G=gradesOf(d); S.dishes[d.id]=Object.fromEntries(G.map(g=>[g,1])); S.dishMade[d.id]=Object.fromEntries(G.map(g=>[g,true])); S.dishEaten[d.id]=Object.fromEntries(G.map(g=>[g,true])); }
