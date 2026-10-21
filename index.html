@@ -1764,12 +1764,15 @@ html.mobile #g-cookShow .csnm{font-size:1.3rem}
 .rmark{display:inline-block; width:1.15em; height:1.15em; vertical-align:-.22em; margin-left:.15em}
 .rmark svg{width:100%; height:100%; display:block}
 /* 薔薇のアーチ・薔薇の垣根・薔薇の冠の村人 */
-#screen-garden .gxarch{position:relative; z-index:3; width:min(100%,640px); height:0; margin:0 auto; pointer-events:none}   /* 高さ0: 畑を下に押さない */
-#screen-garden .gxin{position:absolute; left:0; right:0; bottom:-10px; aspect-ratio:6/1}
-html.mobile #screen-garden .gxin{aspect-ratio:13/1; bottom:-12px}
-html.mobile #screen-garden .gxplaque{top:auto; bottom:-4px; font-size:.68rem; padding:0 .4rem}   /* スマホ: 札は垣根の上に乗せて、上の行に重ならないように */
-#screen-garden .gxin > svg{position:absolute; inset:0; width:100%; height:100%}
-#screen-garden .gxplaque{position:absolute; left:50%; top:30%; transform:translateX(-50%); background:#fff8ee; border:2px solid #b0405a; border-radius:8px; padding:.05rem .6rem; font-weight:900; font-size:.86rem; color:#6a2030; white-space:nowrap; box-shadow:0 2px 0 rgba(0,0,0,.15)}
+#screen-garden .gxarch{position:relative; z-index:3; height:0; pointer-events:none}   /* 高さ0: 畑を下に押さない */
+#screen-garden .gxplate{position:absolute; left:50%; bottom:-15px; transform:translateX(-50%); display:flex; align-items:center; gap:.3rem; white-space:nowrap;
+  background:linear-gradient(180deg,#fffaf3,#f4e2cc); border:2px solid #a8324e; border-radius:10px; padding:.1rem .45rem; font-weight:900; font-size:.92rem; color:#6a2030;
+  box-shadow:inset 0 0 0 2px #fff, 0 3px 0 rgba(90,30,40,.25), 0 0 12px rgba(255,120,150,.45)}
+#screen-garden .gxpr{width:1.25em; height:1.25em; display:inline-block}
+#screen-garden .gxpr svg{width:100%; height:100%; display:block}
+html.mobile #screen-garden .gxplate{font-size:.7rem; bottom:-11px; padding:0 .35rem}
+#screen-garden .gxname{font:inherit; font-size:.85rem; width:9em; padding:.15rem .35rem; border:2px solid #d8c0a0; border-radius:6px; margin-left:.3rem}
+#screen-garden .teff.glore{font-style:italic; color:#8a6a7a}
 #screen-garden .planter.gxhedge{position:relative; box-shadow:inset 0 3px 0 rgba(255,255,255,.25), inset 0 -4px 0 rgba(0,0,0,.2), 0 0 0 4px #2a5a28, 0 16px 26px rgba(30,60,20,.35)}
 #screen-garden .planter.gxhedge::after{content:""; position:absolute; inset:-18px; border-radius:26px; padding:15px; pointer-events:none; z-index:1;
   background:
@@ -8877,43 +8880,61 @@ const RG_GHR = [
       rosePetals(); return `${ico(RKAMA)} 薔薇のかまどを手に入れました! 薔薇の花びらが舞います(貴重品(8)の「薔薇」で色を変えたり、オフにしたりできます)`; } },
 ];
 for(const x of RG_GHR) rgAdd("GHR",{ id:x.id, name:x.name, icon:"✨", art:x.art, give:x.give });
-/* GUR: TOEIC 英単語から届くものを増やす(1つ +1%・100個で +100%。上限のあとは 100,000キーに替わる) */
+/* 薔薇ガチャの GXR: 集めるほど効く宝物(1つ +1%・100個で +100%。上限のあとは 100,000キーに替わる) */
 const RG_GUR_MAX=100;
 const rgSvg = (bg,body) => `<svg viewBox="0 0 32 32"><circle cx="16" cy="16" r="14" fill="${bg}" opacity=".35"/>${body}</svg>`;
-const RG_GUR = [
-  { k:"sh", id:"rg:gur_sh", name:"薔薇色のしおり", what:"TOEIC 英単語から届く薔薇の種", art:rgSvg("#ff8aa0",`<path d="M10 4h12v24l-6-5-6 5z" fill="#e8384f" stroke="#8a1028" stroke-width="1"/><circle cx="16" cy="11" r="3.6" fill="#ffd0da"/><circle cx="16" cy="11" r="1.6" fill="#c81e3e"/>`) },
-  { k:"pen", id:"rg:gur_pen", name:"黄金のペン先", what:"TOEIC 英単語から届くキー", art:rgSvg("#ffd86a",`<path d="M16 3l7 12-7 14-7-14z" fill="#f4c542" stroke="#a8781a" stroke-width="1.2"/><path d="M16 9v12" stroke="#7a5410" stroke-width="1.4"/><circle cx="16" cy="15" r="1.8" fill="#7a5410"/>`) },
-  { k:"dial", id:"rg:gur_dial", name:"学びの日時計", what:"TOEIC 英単語で進む農園の時間", art:rgSvg("#8ad0ff",`<circle cx="16" cy="18" r="10" fill="#fff6dc" stroke="#a8743d" stroke-width="1.4"/><path d="M16 18L16 6l5 12z" fill="#a8743d"/><path d="M16 9v1M26 18h-1M7 18h-1M16 27v1M23 11l-.7.7M9 11l.7.7" stroke="#a8743d" stroke-width="1.2"/>`) },
+const spk = (x,y,r,c="#fff6c0") => `<path d="M${x} ${y-r}L${x+r*.28} ${y-r*.28}L${x+r} ${y}L${x+r*.28} ${y+r*.28}L${x} ${y+r}L${x-r*.28} ${y+r*.28}L${x-r} ${y}L${x-r*.28} ${y-r*.28}z" fill="${c}"/>`;   // きらめき
+const rgRich = body => `<svg viewBox="0 0 32 32"><defs><radialGradient id="gxbg"><stop offset="0" stop-color="#fff6fa"/><stop offset="1" stop-color="#ff9ab8"/></radialGradient></defs><circle cx="16" cy="16" r="15" fill="url(#gxbg)" stroke="#d4a020" stroke-width="1.2"/>${body}${spk(6,7,2.6)}${spk(26.5,25,2)}</svg>`;
+const RG_GUR = [   // 薔薇ガチャの GXR: 集めるほど効く宝物(1つ +1%・最大 +100%)
+  { k:"sh", id:"rg:gur_sh", name:"薔薇姫のしおり", what:"TOEIC 英単語から届く薔薇の種",
+    lore:"薔薇の国の姫が、読みかけの物語にはさんでいたしおり。はさんだページの言葉は、薔薇の種になって芽吹くという。",
+    art:rgRich(`<path d="M11 5h10v22l-5-4-5 4z" fill="#c81e3e" stroke="#7a0a1e" stroke-width=".9"/><path d="M11 8h10" stroke="#f4c542" stroke-width="1.4"/><circle cx="16" cy="14" r="3.6" fill="#ff5a7a"/><path d="M14.2 13.4c1-1.4 2.6-1.4 3.6 0M14.6 15.2c.8.8 2 .8 2.8 0" stroke="#7a0a1e" stroke-width=".7" fill="none"/><path d="M16 17.6v3.4" stroke="#5aa04a" stroke-width="1"/>`) },
+  { k:"pen", id:"rg:gur_pen", name:"薔薇水晶の羽根ペン", what:"TOEIC 英単語から届くキー",
+    lore:"薔薇水晶を削り出したペン先に、白い羽根。書いた言葉の数だけ、農園にキーが降るという。",
+    art:rgRich(`<path d="M24 4c-6 2-11 8-13 16l2 1c3-7 7-12 11-17z" fill="#fff" stroke="#c8b8d8" stroke-width=".8"/><path d="M11 20l-3 7 5-5z" fill="#ff8ab0" stroke="#c81e5a" stroke-width=".8"/><circle cx="9.4" cy="25" r="1" fill="#fff"/><circle cx="20" cy="9" r="2" fill="#ff5a7a"/>`) },
+  { k:"dial", id:"rg:gur_dial", name:"薔薇の天文時計", what:"TOEIC 英単語で進む農園の時間",
+    lore:"文字盤に十二輪の薔薇が咲く、星の巡りを映す時計。学んでいるあいだだけ、農園の時は早く巡る。",
+    art:rgRich(`<circle cx="16" cy="16" r="9" fill="#1e2a5a" stroke="#d4a020" stroke-width="1.4"/>${[0,1,2,3,4,5,6,7,8,9,10,11].map(i=>`<circle cx="${(16+7*Math.sin(i*Math.PI/6)).toFixed(1)}" cy="${(16-7*Math.cos(i*Math.PI/6)).toFixed(1)}" r="1.1" fill="${i%3?"#ff8ab0":"#ff3a5a"}"/>`).join("")}<path d="M16 16V10M16 16l4 2" stroke="#f4c542" stroke-width="1.2" stroke-linecap="round"/>${spk(13,13,1.2,"#fff")}`) },
+  { k:"perf", id:"rg:gur_perf", name:"千年薔薇の香水瓶", what:"ローズティーの効果時間",
+    lore:"千年咲き続けた薔薇から、一滴ずつ集めた香り。ひと吹きで、紅茶の香りがいつまでも消えない。",
+    art:rgRich(`<path d="M12 11h8v2c3 2 5 4 5 8a9 7 0 0 1-18 0c0-4 2-6 5-8z" fill="#ffd0e0" stroke="#c81e3e" stroke-width="1"/><rect x="13.5" y="6" width="5" height="5" rx="1" fill="#f4c542" stroke="#a8781a" stroke-width=".8"/><circle cx="16" cy="20" r="3.4" fill="#e8384f"/><path d="M14.6 19.4c.8-1 2-1 2.8 0" stroke="#7a0a1e" stroke-width=".6" fill="none"/>`) },
+  { k:"glove", id:"rg:gur_glove", name:"薔薇騎士の手甲", what:"薔薇が変異・超変異する確率", desc:"薔薇が変異・超変異する確率が、1つごとに1%ずつ上がります(最大で2倍)",
+    lore:"薔薇の騎士が、棘から花を守るためにはめていた銀の手甲。この手が触れた薔薇は、ときどき姿を変える。",
+    art:rgRich(`<path d="M10 27V15c0-2 2.6-2 2.6 0v-5c0-2 2.6-2 2.6 0V9c0-2 2.6-2 2.6 0v1c0-2 2.6-2 2.6 0v9l2-2.4c1.2-1.4 3.4-.4 2.6 1.2L21 27z" fill="#dfe6f0" stroke="#6a7a8e" stroke-width=".9"/><path d="M10 22h11" stroke="#6a7a8e" stroke-width=".8"/><circle cx="15.6" cy="18" r="2.6" fill="#e8384f"/>`) },
+  { k:"shears", id:"rg:gur_shears", name:"薔薇王の剪定鋏", what:"薔薇農家の咲く速さ",
+    lore:"薔薇の王が、みずから枝を整えた金の鋏。切った枝からは、すぐに次のつぼみがほころぶ。",
+    art:rgRich(`<circle cx="10.4" cy="23.6" r="3.6" fill="none" stroke="#c81e3e" stroke-width="2.2"/><circle cx="21.6" cy="23.6" r="3.6" fill="none" stroke="#c81e3e" stroke-width="2.2"/><path d="M12.8 21L21 6M19.2 21L11 6" stroke="#f4c542" stroke-width="2.2" stroke-linecap="round"/><circle cx="16" cy="13.6" r="1.4" fill="#a8781a"/><circle cx="16" cy="6" r="2.2" fill="#ff5a7a"/>`) },
 ];
-RG_GUR.push(
-  { k:"perf", id:"rg:gur_perf", name:"薔薇の香水瓶", what:"ローズティーの効果時間", art:rgSvg("#ff8aa0",`<path d="M12 9h8v3c4 2 6 5 6 9a10 8 0 0 1-20 0c0-4 2-7 6-9z" fill="#ffd0da" stroke="#c81e3e" stroke-width="1.2"/><rect x="13" y="4" width="6" height="5" rx="1" fill="#f4c542" stroke="#a8781a"/><circle cx="16" cy="21" r="4" fill="#e8384f"/>`) },
-  { k:"glove", id:"rg:gur_glove", name:"花守りの手袋", what:"薔薇が変異・超変異する確率", desc:"薔薇が変異・超変異する確率が、1つごとに1%ずつ上がります(最大で2倍)", art:rgSvg("#5aa04a",`<path d="M9 28V14c0-2 3-2 3 0v-6c0-2 3-2 3 0v-1c0-2 3-2 3 0v1c0-2 3-2 3 0v10l2-3c1-2 4-1 3 1l-4 8v4z" fill="#f4e8d0" stroke="#8a6a3a" stroke-width="1.1"/><circle cx="16" cy="22" r="3" fill="#e8384f"/>`) },
-  { k:"shears", id:"rg:gur_shears", name:"庭師の剪定ばさみ", what:"薔薇農家の咲く速さ", art:rgSvg("#8ad0ff",`<circle cx="10" cy="24" r="4" fill="none" stroke="#c81e3e" stroke-width="2.4"/><circle cx="22" cy="24" r="4" fill="none" stroke="#c81e3e" stroke-width="2.4"/><path d="M12.6 21L22 5M19.4 21L10 5" stroke="#7a8a9a" stroke-width="2.4" stroke-linecap="round"/><circle cx="16" cy="13.4" r="1.4" fill="#3a4a5a"/>`) },
-);
 for(const x of RG_GUR){
   x.desc=x.desc||`${x.what} +1%(1つごと。最大 +${RG_GUR_MAX}%)`;
-  rgAdd("GUR",{ id:x.id, name:x.name, icon:"✨", art:x.art, give:()=>{
+  rgAdd("GXR",{ id:x.id, name:x.name, icon:"✨", art:x.art, give:()=>{
     S.rgGur=S.rgGur||{};
     if(rgGurN(x.k)>=RG_GUR_MAX){ xAdd(S,"money",100000); S.totalSales+=100000; return ""; }   // 上限のあとはキーに替わる
     S.rgGur[x.k]=rgGurN(x.k)+1;
     return `${ico(x)} ${x.name}を手に入れました! ${x.desc}`; } });
 }
 const rgGurGot = () => RG_GUR.filter(x=>(S.got[x.id]||0)>0).length;
-/* GXR: 名前と農園の見た目の飾り(2つ目からは 100,000キーに替わる) */
+/* 薔薇ガチャの GUR: 名前と農園の見た目の飾り(2つ目からは 100,000キーに替わる) */
 const RG_GXR = [
   { k:"emb", id:"rg:gxr_emb", name:"薔薇の紋章", desc:"番付で、名前の後ろに、最後に飲んだローズティーの薔薇の印が付きます", art:rgSvg("#c040ff",`<path d="M16 3l11 4v8c0 7-5 11-11 14C10 26 5 22 5 15V7z" fill="#fff4f8" stroke="#a8122e" stroke-width="1.4"/><circle cx="16" cy="14" r="5" fill="#e8384f"/><path d="M13.4 13c1.4-2 3.8-2 5.2 0M14 15.6c1.2 1 2.8 1 4 0" stroke="#8a1028" stroke-width=".9" fill="none"/><path d="M16 19v5M13 22l3-1.6 3 1.6" stroke="#3f7a3a" stroke-width="1.2" fill="none"/>`) },
   { k:"col", id:"rg:gxr_col", name:"薔薇色の名前", desc:"番付で、名前の色が、最後に飲んだローズティーの薔薇の色になります", art:rgSvg("#ff5a8a",`<rect x="5" y="9" width="22" height="14" rx="3" fill="#fff" stroke="#c81e3e" stroke-width="1.2"/><path d="M9 19l3-7 3 7M10 17h4M18 12v7M18 12h3a2 2 0 0 1 0 4h-3" stroke="#e8384f" stroke-width="1.6" fill="none" stroke-linecap="round"/>`) },
-  { k:"arch", id:"rg:gxr_arch", name:"薔薇のアーチ", desc:"農園の上に薔薇のアーチが掛かり、あなたの名前が飾られます", art:rgSvg("#5aa04a",`<path d="M6 29V15a10 10 0 0 1 20 0v14" stroke="#3f7a3a" stroke-width="3" fill="none"/><circle cx="7" cy="17" r="2.6" fill="#e8384f"/><circle cx="10" cy="9" r="2.6" fill="#ff8a9a"/><circle cx="16" cy="5.6" r="2.8" fill="#e8384f"/><circle cx="22" cy="9" r="2.6" fill="#ff8a9a"/><circle cx="25" cy="17" r="2.6" fill="#e8384f"/>`) },
+  { k:"plate", id:"rg:gxr_plate", name:"薔薇のプレート", desc:"畑の上に、好きな名前を付けた薔薇のプレートを飾れます。薔薇の紋章・薔薇色の名前も乗ります", art:rgSvg("#ff8aa0",`<rect x="4" y="10" width="24" height="12" rx="3" fill="#fff8ee" stroke="#b0405a" stroke-width="1.4"/><path d="M9 16h14" stroke="#6a2030" stroke-width="1.6" stroke-linecap="round"/><circle cx="5" cy="16" r="3" fill="#e8384f"/><circle cx="27" cy="16" r="3" fill="#e8384f"/><circle cx="5" cy="16" r="1.2" fill="#ffd0da"/><circle cx="27" cy="16" r="1.2" fill="#ffd0da"/>`) },
   { k:"hedge", id:"rg:gxr_hedge", name:"薔薇の垣根", desc:"畑のまわりが、薔薇の咲く生け垣になります", art:rgSvg("#5aa04a",`<rect x="3" y="12" width="26" height="14" rx="5" fill="#3f7a3a"/><circle cx="8" cy="16" r="2.6" fill="#e8384f"/><circle cx="15" cy="20" r="2.6" fill="#ff8a9a"/><circle cx="22" cy="15" r="2.6" fill="#e8384f"/><circle cx="25" cy="22" r="2.2" fill="#ff8a9a"/><circle cx="10" cy="23" r="2.2" fill="#e8384f"/>`) },
   { k:"crown", id:"rg:gxr_crown", name:"薔薇の冠の村人", desc:"村人たちが、薔薇の冠をかぶって世話をします", art:rgSvg("#ffd86a",`<circle cx="16" cy="21" r="7" fill="#f4d2b0"/><circle cx="13.6" cy="21" r=".9" fill="#3a2a1a"/><circle cx="18.4" cy="21" r=".9" fill="#3a2a1a"/><path d="M8 14q8 4 16 0" stroke="#3f7a3a" stroke-width="2" fill="none"/><circle cx="10" cy="12.6" r="2.6" fill="#e8384f"/><circle cx="16" cy="11" r="3" fill="#ff5a7a"/><circle cx="22" cy="12.6" r="2.6" fill="#e8384f"/>`) },
 ];
-for(const x of RG_GXR) rgAdd("GXR",{ id:x.id, name:x.name, icon:"✨", art:x.art, give:()=>{
+for(const x of RG_GXR) rgAdd("GUR",{ id:x.id, name:x.name, icon:"✨", art:x.art, give:()=>{
   S.gx=S.gx||{};
   if(S.gx[x.k]){ xAdd(S,"money",100000); S.totalSales+=100000; return ""; }   // 2つ目からはキーに替わる
   S.gx[x.k]=1; gxApply();
   return `${ico(x)} ${x.name}を手に入れました! ${x.desc}(貴重品(8)の「薔薇」でオン・オフできます)`; } });
 const rgGxrGot = () => RG_GXR.filter(x=>(S.got[x.id]||0)>0).length;
 const gxOn = k => !!(S.gx&&S.gx[k]) && !(S.gxOff&&S.gxOff[k]);
+const plateName = () => S.plateName || (()=>{ let nm=""; try{ nm=playerName||""; }catch(e){} return nm ? nm+"の農園" : "薔薇の農園"; })();
+function gxSaveName(){
+  const ip=$("g-plateName"); if(!ip) return;
+  const v=ip.value.trim().slice(0,12); S.plateName=v; ip.blur();
+  sfx.buy(); toast(`薔薇のプレートを「${esc(plateName())}」にしました`,"good",2400); gxApply(); save(); renderTreas();
+}
 function gxToggle(k){ if(!(S.gx&&S.gx[k])){ sfx.nope(); return; } S.gxOff=S.gxOff||{}; S.gxOff[k]=!S.gxOff[k]; sfx.tab(); gxApply(); save(); renderAll(); renderTreas(); }
 /* 最後に飲んだローズティー(紋章・名前の色に使う)。"rose_b1@3" のような印で番付に送る */
 const teaCode = () => S.lastTea && CROP[S.lastTea.r] && CROP[S.lastTea.r].rose ? S.lastTea.r+"@"+(S.lastTea.g||0) : "";
@@ -8927,13 +8948,9 @@ function gxApply(){
   root.classList.toggle("gxcrown", gxOn("crown"));
   const pl=$("g-planter"); if(pl) pl.classList.toggle("gxhedge", gxOn("hedge"));
   const ar=$("g-arch"); if(!ar) return;
-  ar.hidden=!gxOn("arch"); if(ar.hidden) return;
-  let nm=""; try{ nm=playerName||""; }catch(e){}
-  const pts=[]; for(let i=0;i<=16;i++){ const t=i/16, x=(1-t)*(1-t)*6+2*(1-t)*t*150+t*t*294, y=(1-t)*(1-t)*50+2*(1-t)*t*(-20)+t*t*50; pts.push([x,y]); }   // アーチの線の上に、薔薇を並べる
-  const rs=pts.map(([x,y],i)=>`<circle cx="${(x+(i%2?-3.4:3.4)).toFixed(1)}" cy="${(y+3).toFixed(1)}" r="2" fill="#5aa04a"/><circle cx="${(x+(i%2?1.5:-1.5)).toFixed(1)}" cy="${(y+(i%2?2:-.6)).toFixed(1)}" r="${i%3?3.2:4}" fill="${["#e8384f","#ff8a9a","#c81e3e"][i%3]}"/>`).join("");
-  const deco=nameDeco();
-  ar.innerHTML=`<div class="gxin"><svg viewBox="0 0 300 50" preserveAspectRatio="none"><path d="M6 50Q150 -20 294 50" stroke="#3f7a3a" stroke-width="3.4" fill="none"/>${rs}</svg>`
-    +(nm?`<div class="gxplaque">${roseNameHTML(nm,deco)}</div>`:"")+`</div>`;
+  ar.hidden=!gxOn("plate"); if(ar.hidden) return;
+  const rose = c => `<svg viewBox="0 0 20 20"><circle cx="10" cy="10" r="8" fill="${c}"/><path d="M6.6 9c1.6-2.6 5.2-2.6 6.8 0M7.6 12c1.4 1.4 3.4 1.4 4.8 0" stroke="rgba(90,0,20,.55)" stroke-width="1.2" fill="none"/><circle cx="10" cy="9.6" r="2" fill="rgba(255,255,255,.45)"/></svg>`;
+  ar.innerHTML=`<div class="gxplate"><span class="gxpr">${rose("#e8384f")}</span><span class="gxpn">${roseNameHTML(plateName(),nameDeco())}</span><span class="gxpr">${rose("#e8384f")}</span></div>`;
 }
 /* 名前に飾りを付けた HTML(name はまだエスケープしていない名前) */
 function roseNameHTML(name,m){
@@ -9126,6 +9143,10 @@ function rtAct(dir){   // Enter(dir=0): オン・オフ / Q・E(dir=±1): かま
   const el=$("g-treasBody").querySelectorAll(".titem")[rtCur], a=el && el.dataset.act;
   if(a==="rkam") rkamAct(dir); else if(a && a.startsWith("gx:") && !dir) gxToggle(a.slice(3)); else sfx.nope();
 }
+function rtName(){   // N: 薔薇のプレートの名前を入れる
+  const el=$("g-treasBody").querySelectorAll(".titem")[rtCur], ip=$("g-plateName");
+  if(el && el.dataset.act==="gx:plate" && ip){ ip.focus(); ip.select(); } else sfx.nope();
+}
 const treasTabs = () => [0].concat(kitAny()?[1]:[], roseTreAny()?[2]:[]);   // 出ているタブ
 function renderRoseTre(){
   const got=PETALS.filter(x=>petalN(x.k)>0).length;
@@ -9150,21 +9171,24 @@ function renderRoseTre(){
         ${sub?`<div class="tsum">${sub}</div>`:""}
       </div></div>`;
   }).join("")+`</div>`
-  +(rgGurGot() ? `<div class="ghead">GUR<span>${rgGurGot()} / ${RG_GUR.length}</span></div><div class="tlist">`+RG_GUR.map(x=>{
-    const seen=(S.got[x.id]||0)>0, n=rgGurN(x.k);
-    return `<div class="titem ${seen?"":"locked"}"><div class="tic">${seen?`<span class="cart">${x.art}</span>`:"✨"}</div><div class="tbody">
-      <div class="tnm">${seen?esc(x.name):"？？？"}${seen?`<span class="tn">×${fmtNum(n)}</span>`:""}</div>
-      <div class="teff">${seen?esc(x.desc):"薔薇ガチャの GUR から出ます"}</div>
-      ${seen?`<div class="tsum">いまの効果 <b>+${rgGurPct(x.k)}%</b>${n>=RG_GUR_MAX?"(上限)":""}</div>`:""}</div></div>`; }).join("")+`</div>` : "")
-  +(rgGxrGot() ? `<div class="ghead">GXR<span>${rgGxrGot()} / ${RG_GXR.length}</span></div><div class="tlist">`+RG_GXR.map(x=>{
+  +(rgGxrGot() ? `<div class="ghead">GUR<span>${rgGxrGot()} / ${RG_GXR.length}</span></div><div class="tlist">`+RG_GXR.map(x=>{
     const seen=!!(S.gx&&S.gx[x.k]);
     const need=(x.k==="emb"||x.k==="col") && !teaCode() ? "(まだローズティーを飲んでいません)" : "";
     return `<div class="titem ${seen?"":"locked"}"${seen?` data-act="gx:${x.k}"`:""}><div class="tic">${seen?`<span class="cart">${x.art}</span>`:"✨"}</div><div class="tbody">
       <div class="tnm">${seen?esc(x.name):"？？？"}</div>
+      <div class="teff">${seen?esc(x.desc):"薔薇ガチャの GUR から出ます"}</div>
+      ${seen?`<div class="tsum"><button class="sbtn" data-gxo="${x.k}">${gxOn(x.k)?"オン":"オフ"}</button>${need}${x.k==="plate"?` <input id="g-plateName" class="gxname" maxlength="12" value="${esc(plateName())}" placeholder="プレートの名前"><button class="sbtn" data-gxname="1">名前を決める${kb(" (N)","")}</button>`:""}</div>`:""}</div></div>`; }).join("")+`</div>` : "");
+  +(rgGurGot() ? `<div class="ghead">GXR<span>${rgGurGot()} / ${RG_GUR.length}</span></div><div class="tlist">`+RG_GUR.map(x=>{
+    const seen=(S.got[x.id]||0)>0, n=rgGurN(x.k);
+    return `<div class="titem ${seen?"":"locked"}"><div class="tic">${seen?`<span class="cart">${x.art}</span>`:"✨"}</div><div class="tbody">
+      <div class="tnm">${seen?esc(x.name):"？？？"}${seen?`<span class="tn">×${fmtNum(n)}</span>`:""}</div>
       <div class="teff">${seen?esc(x.desc):"薔薇ガチャの GXR から出ます"}</div>
-      ${seen?`<div class="tsum"><button class="sbtn" data-gxo="${x.k}">${gxOn(x.k)?"オン":"オフ"}</button>${need}</div>`:""}</div></div>`; }).join("")+`</div>` : "");
+      ${seen?`<div class="teff glore">${esc(x.lore)}</div>`:""}
+      ${seen?`<div class="tsum">いまの効果 <b>+${rgGurPct(x.k)}%</b>${n>=RG_GUR_MAX?"(上限)":""}</div>`:""}</div></div>`; }).join("")+`</div>` : "")
   $("g-treasBody").querySelectorAll("[data-rkd]").forEach(b=>b.addEventListener("click",()=>rkamAct(+b.dataset.rkd)));
   $("g-treasBody").querySelectorAll("[data-gxo]").forEach(b=>b.addEventListener("click",e=>{ e.stopPropagation(); gxToggle(b.dataset.gxo); }));
+  $("g-treasBody").querySelectorAll("[data-gxname]").forEach(b=>b.addEventListener("click",e=>{ e.stopPropagation(); gxSaveName(); }));
+  { const ip=$("g-plateName"); if(ip) ip.addEventListener("click",e=>e.stopPropagation()); }
   const its=[...$("g-treasBody").querySelectorAll(".titem")]; rtCur=Math.max(0,Math.min(rtCur,its.length-1));   // キーボードで選べるように
   its.forEach((el,i)=>{ el.classList.add("kitem"); el.dataset.k=i; el.classList.toggle("cur",i===rtCur); el.addEventListener("click",()=>{ if(rtCur!==i){ rtCur=i; its.forEach((x,j)=>x.classList.toggle("cur",j===i)); } }); });
   const cur=its[rtCur]; if(cur && cur.scrollIntoView) cur.scrollIntoView({block:"nearest"});
@@ -9176,7 +9200,7 @@ function renderTreas(){
   root.querySelectorAll("#g-treasTabs .tab").forEach(t=>t.hidden=!treasTabs().includes(+t.dataset.tt));
   root.querySelectorAll("#g-treasTabs .tab").forEach(t=>t.classList.toggle("on", +t.dataset.tt===treasTab));
   $("g-treasNote").textContent = treasTab===2 ? ROSE_TRE_NOTE : treasTab ? KIT_NOTE : TREAS_NOTE;
-  if(treasTab===2){ $("g-treasHint").innerHTML="<b>Tab</b> 次のタブへ ・ <b>↑ ↓ ← →</b> 選ぶ ・ <b>Enter</b> オン・オフ"+(S.rkam?" ・ <b>Q</b> / <b>E</b> 花びらの色":"")+" ・ <b>8</b> / <b>Esc</b> 閉じる"; renderRoseTre(); return; }
+  if(treasTab===2){ $("g-treasHint").innerHTML="<b>Tab</b> 次のタブへ ・ <b>↑ ↓ ← →</b> 選ぶ ・ <b>Enter</b> オン・オフ"+(S.rkam?" ・ <b>Q</b> / <b>E</b> 花びらの色":"")+(S.gx&&S.gx.plate?" ・ <b>N</b> プレートの名前":"")+" ・ <b>8</b> / <b>Esc</b> 閉じる"; renderRoseTre(); return; }
   $("g-treasHint").innerHTML = treasTab ? "<b>Tab</b> 貴重品へ ・ <b>↑ ↓ ← →</b> 選ぶ ・ <b>Enter</b> 使う ・ <b>Q</b> / <b>E</b> かまどの色・シゴデキ村人の作物を切り替え ・ <b>8</b> / <b>Esc</b> 閉じる" : (kitAny()?"<b>Tab</b> 台所の宝物へ ・ ":"")+"<b>↑ ↓</b> 見る ・ <b>8</b> / <b>Esc</b> 閉じる";
   if(treasTab){ renderKit(); return; }
   const got=TREASURES.filter(c=>tre(c.id)>0).length;
@@ -9332,6 +9356,7 @@ function treasKey(e){
     else if(k==="ArrowUp"||k==="ArrowDown"){ e.preventDefault(); if(n){ rtCur=kitBelow(rtCur,k==="ArrowDown"?1:-1); sfx.cursor(); renderRoseTre(); } }
     else if(k==="q"||k==="Q"||k==="e"||k==="E"){ e.preventDefault(); rtAct(k==="e"||k==="E"?1:-1); }
     else if(k==="Enter"){ e.preventDefault(); rtAct(0); }
+    else if(k==="n"||k==="N"){ e.preventDefault(); rtName(); }
     return;
   }
   if(treasTab){
@@ -11224,6 +11249,7 @@ function onKeyMain(e){
   if(tag==="TEXTAREA"||tag==="INPUT"){
     if(e.key==="Enter" && e.target.id==="g-rankName"){ e.preventDefault(); submitRank(); }
     else if(e.key==="Enter" && !e.isComposing && (e.target.id==="g-bookQ"||e.target.id==="g-dbookQ"||e.target.classList.contains("lyname"))){ e.preventDefault(); e.target.blur(); }
+    else if(e.key==="Enter" && !e.isComposing && e.target.id==="g-plateName"){ e.preventDefault(); gxSaveName(); }
     else if(e.key==="Escape"){ e.preventDefault(); e.target.blur(); }
     return;
   }
