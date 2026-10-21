@@ -6715,7 +6715,7 @@ function rgGurPct(k){ return Math.min(100, rgGurN(k)); }
 function roseMutK(id){ return CROP[id] && CROP[id].rose ? 1+rgGurPct("glove")/100 : 1; }   // 花守りの手袋: 薔薇が変異・超変異する確率
 function rfMul(){ return 1+rgGurPct("shears")/100; }   // 庭師の剪定ばさみ: 薔薇農家の咲く速さ
 function xAdd(o,k,x,ck=k){
-  x=Number(x)||0; if(!x) return;
+  x=Number(x)||0; if(!x || !Number.isFinite(x)) return;   // 無限大・数でないものは足さない(数が壊れないように)
   const a=o[k]||0, s=a+x, bp=s-a, ap=s-bp, err=(a-ap)+(x-bp);   // 足した結果と、丸めで消えた分(誤差なしで出せる)
   o[k]=s;
   const C=S.xc=S.xc||{};
@@ -9044,7 +9044,7 @@ function rgConvert(i,want){   // want: 変換する数(マイナスなら、そ�
   }
   if(sid){ if(x.kind==="useed" && !(S.seeds[x.id]>0) && S.seedId===x.id) S.seedId=nextSeed(x.id); }
   else S.inv[x.id][x.t]-=k;
-  const gB=kB*BigInt(x.v), gain=Number(gB);
+  const gB=kB*BigInt(Math.round(x.v)), gain=Number(gB);
   xAddBig(S,"roseCoin",gB); S.roseCoinTotal=(S.roseCoinTotal||0)+gain;
   sfx.sell();
   toast(`${x.ic} ${esc(x.nm)}を ${kB.toLocaleString("ja-JP")}つ、薔薇ガチャコイン ${gB.toLocaleString("ja-JP")}枚に変えました`,"good",2400,true);
@@ -10235,7 +10235,7 @@ function autoCookTick(){
       if(((S.dishes[a.id]||{})[plan.grade]||0)>=cap) break;
       if(cap===Infinity){   // 作れるだけ: 同じ材料の組み合わせで作れるぶんは、まとめて作る(材料がとても多いと、1つずつでは固まるため)
         let r=Infinity; for(const [kind,id,t,n] of plan.take) r=Math.min(r, Math.floor((kind==="c" ? invN(id,t) : (S.food[id]||0))/n));
-        if(r>1){
+        if(r>1 && Number.isFinite(r)){
           const used=r-binom(r,ev("P2",.2,.5,0));   // 料理: 材料の節約
           for(const [kind,id,t,n] of plan.take){ if(kind==="c") S.inv[id][t]-=n*used; else S.food[id]-=n*used; }
           const got=r+binom(r,ev("P1",.2,1,0)+kitVal("pot")/100);
