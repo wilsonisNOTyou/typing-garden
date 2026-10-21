@@ -3300,6 +3300,9 @@ function completeChunk(romaji){
   chunkIdx++;
   return chunkIdx>=chunks.length ? "done" : "ok";
 }
+/* 「っ」「ん」の見せ方(次の文字で決まる) */
+const sokuShow = i => { const nf=(chunks[i+1].alts[0]||"x")[0]; return VOWEL_N_Y.has(nf) ? chunks[i].alts.find(a=>a.length>1) : nf; };
+const nnShow = i => { const nc=chunks[i+1]; return nc && nc.alts.some(a=>!VOWEL_N_Y.has(a[0])) ? "n" : "nn"; };
 /* 残りローマ字の表示用文字列 */
 function remainingRomaji(){
   let s="";
@@ -3307,17 +3310,16 @@ function remainingRomaji(){
     const ch=chunks[i];
     let alt;
     if(i===chunkIdx){
-      alt=ch.alts.find(a=>a.startsWith(buf))||ch.alts[0];
-      s+=alt.slice(buf.length);
+      // 今打っている文字も、先の文字と同じ書き方で見せる(打って初めて変わるように。「ん」が番になった瞬間に n→nn に変わるとちらつく)
+      const b = nAmbig && buf==="n" ? "" : buf;   // 「んな」: nn と打ったn は「ん」のものとして見せる(表示どおり nnna と打っても通る)
+      const same = ch.nn ? nnShow(i) : (ch.soku && chunks[i+1]) ? sokuShow(i) : ch.alts[0];
+      alt = same && same.startsWith(b) ? same : (ch.alts.find(a=>a.startsWith(b))||ch.alts[0]);
+      s+=alt.slice(b.length);
       continue;
     }
-    if(ch.soku && chunks[i+1]){
-      const nf=(chunks[i+1].alts[0]||"x")[0];
-      alt=VOWEL_N_Y.has(nf)?ch.alts.find(a=>a.length>1):nf;
-    } else if(ch.nn){
-      const nc=chunks[i+1];
-      alt=(nc && nc.alts.some(a=>!VOWEL_N_Y.has(a[0])))?"n":"nn";
-    } else alt=ch.alts[0];
+    if(ch.soku && chunks[i+1]) alt=sokuShow(i);
+    else if(ch.nn) alt=nnShow(i);
+    else alt=ch.alts[0];
     s+=alt;
   }
   return s;
