@@ -1437,6 +1437,10 @@ body.garden.barag{background:radial-gradient(ellipse at 50% 120%, rgba(200,30,62
 @keyframes g-fnote{from{opacity:.55}to{opacity:1}}
 .gmfull{position:fixed; inset:0; z-index:36; pointer-events:none; overflow:hidden; transition:opacity .6s}
 .gmfull.out{opacity:0}
+.gmfull .gmfcount{position:absolute; left:50%; top:calc(env(safe-area-inset-top,0px) + 12px); transform:translateX(-50%); z-index:6; background:rgba(20,10,30,.62); color:#fff; padding:.35rem 1rem .45rem; border-radius:14px; font-weight:900; font-size:1.25rem; text-align:center; font-variant-numeric:tabular-nums; box-shadow:0 0 16px rgba(255,220,120,.5)}
+.gmfull .gmfcount small{font-size:.8rem; opacity:.85}
+.gmfull .gmfbar{width:min(60vw,320px); height:6px; border-radius:99px; background:rgba(255,255,255,.25); margin-top:.3rem; overflow:hidden}
+.gmfull .gmfbar i{display:block; height:100%; width:0; background:linear-gradient(90deg,#ffd84a,#ff8a5c)}
 .gmfull .gfi{display:inline-flex; align-items:center; justify-content:center; font-size:1.6rem; line-height:1}
 .gmfull .gfi svg{width:1.8rem; height:1.8rem}
 .gmfull .big .gfi{font-size:2.6rem} .gmfull .big .gfi svg{width:2.9rem; height:2.9rem}
@@ -8183,6 +8187,7 @@ function megaCards(){
     M.disp = M.skip ? M.i : Math.min(M.i, Math.floor(M.n*ease));
   }
   const el=$("g-megaNum"); if(el){ el.textContent=fmtNum(M.disp); $("g-megaProg").style.width=(M.disp/M.n*100).toFixed(2)+"%"; }
+  { const f=document.getElementById("g-mfNum"); if(f){ f.textContent=fmtNum(M.disp); document.getElementById("g-mfBar").style.width=(M.disp/M.n*100).toFixed(2)+"%"; } }
   const done = M.i>=M.n && M.disp>=M.n && (!stream || (M.qi>=M.q.length && now>=M.pauseUntil));
   if(done){
     if(M.fx===4||M.fx===6){ megaKindsStart(now); requestAnimationFrame(megaStep); return; }
@@ -8405,6 +8410,7 @@ function megaFullMake(fx){
   if(fx===5) el.innerHTML=`<div class="gmfall" id="g-megaFall"></div>`;   // 札の滝: 画面いっぱいに落ちる
   if(fx===8) el.innerHTML=`<div class="gmcap" id="g-megaCap"></div>`;     // カプセルの山: 画面いっぱいに積もる
   if(fx===9) el.innerHTML=`<div class="gmsky" id="g-megaSky"></div>`;     // 花火大会: 画面いっぱいの夜空
+  if(gachaMega) el.insertAdjacentHTML("beforeend",`<div class="gmfcount"><b id="g-mfNum">0</b><small> / ${fmtNum(gachaMega.n)}連</small><div class="gmfbar"><i id="g-mfBar"></i></div></div>`);   // 画面いっぱいでも、どこまで引いたか分かるように
   ($("screen-garden")||document.body).appendChild(el);
 }
 function megaFullEnd(){ const el=document.getElementById("g-megaFull"); if(!el) return; el.classList.add("out"); setTimeout(()=>el.remove(),700); }
@@ -9171,14 +9177,14 @@ function renderRoseTre(){
         ${sub?`<div class="tsum">${sub}</div>`:""}
       </div></div>`;
   }).join("")+`</div>`
-  +(rgGxrGot() ? `<div class="ghead">GUR<span>${rgGxrGot()} / ${RG_GXR.length}</span></div><div class="tlist">`+RG_GXR.map(x=>{
+  +(true ? `<div class="ghead">GUR<span>${rgGxrGot()} / ${RG_GXR.length}</span></div><div class="tlist">`+RG_GXR.map(x=>{
     const seen=!!(S.gx&&S.gx[x.k]);
     const need=(x.k==="emb"||x.k==="col") && !teaCode() ? "(まだローズティーを飲んでいません)" : "";
     return `<div class="titem ${seen?"":"locked"}"${seen?` data-act="gx:${x.k}"`:""}><div class="tic">${seen?`<span class="cart">${x.art}</span>`:"✨"}</div><div class="tbody">
       <div class="tnm">${seen?esc(x.name):"？？？"}</div>
       <div class="teff">${seen?esc(x.desc):"薔薇ガチャの GUR から出ます"}</div>
       ${seen?`<div class="tsum"><button class="sbtn" data-gxo="${x.k}">${gxOn(x.k)?"オン":"オフ"}</button>${need}${x.k==="plate"?` <input id="g-plateName" class="gxname" maxlength="12" value="${esc(plateName())}" placeholder="プレートの名前"><button class="sbtn" data-gxname="1">名前を決める${kb(" (N)","")}</button>`:""}</div>`:""}</div></div>`; }).join("")+`</div>` : "");
-  +(rgGurGot() ? `<div class="ghead">GXR<span>${rgGurGot()} / ${RG_GUR.length}</span></div><div class="tlist">`+RG_GUR.map(x=>{
+  +(true ? `<div class="ghead">GXR<span>${rgGurGot()} / ${RG_GUR.length}</span></div><div class="tlist">`+RG_GUR.map(x=>{
     const seen=(S.got[x.id]||0)>0, n=rgGurN(x.k);
     return `<div class="titem ${seen?"":"locked"}"><div class="tic">${seen?`<span class="cart">${x.art}</span>`:"✨"}</div><div class="tbody">
       <div class="tnm">${seen?esc(x.name):"？？？"}${seen?`<span class="tn">×${fmtNum(n)}</span>`:""}</div>
