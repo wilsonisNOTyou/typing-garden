@@ -1767,7 +1767,7 @@ html.mobile #g-cookShow .csnm{font-size:1.3rem}
 /* 薔薇の紋章・薔薇色の名前(チャット・番付) */
 .rrow{border-color:rgba(0,0,0,.25)!important; font-weight:800}   /* ランキングの行(薔薇色の名前): 行全体をその薔薇の色に */
 .rrow *{color:inherit!important}
-.rrow .rmark{box-sizing:border-box; width:1.45em; height:1.45em; padding:.14em; vertical-align:-.36em; margin-left:.3em; border-radius:50%; background:radial-gradient(circle,#fff 60%,#f3ece6); box-shadow:0 0 0 1px rgba(0,0,0,.25), 0 1px 3px rgba(0,0,0,.35)}   /* 色付きの行では、紋章を白い丸の台座に乗せる */
+.rmark.rbadge{box-sizing:border-box; width:1.45em; height:1.45em; padding:.14em; vertical-align:-.36em; margin-left:.3em; border-radius:50%; box-shadow:0 0 0 1px rgba(0,0,0,.25), 0 1px 3px rgba(0,0,0,.35)}   /* 紋章は丸い台座に乗せる(台座の色は薔薇の明るさで変える) */
 #screen-garden .grk-list li.rrow{border-radius:8px; border-bottom:none; margin:.2rem 0; padding-left:.5rem; padding-right:.5rem}
 .rmark{display:inline-block; width:1.15em; height:1.15em; vertical-align:-.22em; margin-left:.15em}
 .rmark svg{width:100%; height:100%; display:block}
@@ -9286,31 +9286,43 @@ function gxApply(){
 }
 /* 名前に飾りを付けた HTML(name はまだエスケープしていない名前) */
 /* ランキングの行: 薔薇色の名前を持っていれば、行全体をその薔薇の色に(何色もある薔薇は色の帯)。名前のあとに紋章 */
+/* 明るい色か(白い字より濃い字のほうがくっきり見える色)。見え方の差(コントラスト比)で決める */
+function roseLight(col,dk=0.02){   // dk: 濃いほうの色の明るさ
+  const h=col.replace("#",""), f=h.length<6 ? h.split("").map(c=>c+c).join("") : h.slice(0,6);
+  const v=[0,2,4].map(i=>{ const x=parseInt(f.slice(i,i+2),16)/255; return x<=0.03928 ? x/12.92 : Math.pow((x+0.055)/1.055,2.4); });
+  const L=0.2126*v[0]+0.7152*v[1]+0.0722*v[2];
+  return (L+0.05)/(dk+0.05) > 1.05/(L+0.05);
+}
+/* 紋章: 薔薇が背景に埋もれないよう丸い台座に乗せる。明るい薔薇は濃い台座、白黒の薔薇は灰色、それ以外は白い台座 */
+function roseCrest(code){
+  const art=roseCodeArt(code); if(!art) return "";
+  const pal=roseCodePal(code), col=roseCodeColor(code);
+  const bg = pal && pal.includes("#161616") ? "radial-gradient(circle,#a4a4ae 60%,#8a8a94)" : !pal && col && roseLight(col,0.045) ? "radial-gradient(circle,#4a3640 60%,#382830)" : "radial-gradient(circle,#fff 60%,#f3ece6)";
+  return `<span class="rmark rbadge" style="background:${bg}">${art}</span>`;
+}
 function roseNamePlate(name,m){
   const nm=String(name==null?"":name).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
   const art=m&&m.rk ? roseCodeArt(m.rk) : "";
-  return nm+(art ? `<span class="rmark">${art}</span>` : "");
+  return nm+(art ? roseCrest(m.rk) : "");
 }
 function roseRowStyle(m){
   if(!(m&&m.rc)) return "";
   const pal=roseCodePal(m.rc), col=roseCodeColor(m.rc);
   if(pal) return `background:linear-gradient(90deg,${pal.join(",")}); color:#fff; text-shadow:0 0 2px #000,0 0 2px #000`;
   if(!col) return "";
-  const h=col.replace("#",""), f=h.length<6 ? h.split("").map(c=>c+c).join("") : h.slice(0,6), L=(0.299*parseInt(f.slice(0,2),16)+0.587*parseInt(f.slice(2,4),16)+0.114*parseInt(f.slice(4,6),16))/255;
-  return `background:${col}; color:${L>0.6?"#3a2028":"#fff"}`;
+  return `background:${col}; color:${roseLight(col)?"#3a2028":"#fff"}`;
 }
 function roseNameHTML(name,m){
   const nm=String(name==null?"":name).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
   const col=m&&m.rc ? roseCodeColor(m.rc) : "", art=m&&m.rk ? roseCodeArt(m.rk) : "", pal=m&&m.rc ? roseCodePal(m.rc) : null;
   if(pal){   // 虹色・三原色・白黒: 1文字ずつ色を変える
     const chs=Array.from(String(name==null?"":name)).map((ch,i)=>`<span style="color:${pal[i%pal.length]}">${ch.replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]))}</span>`).join("");
-    return `<span style="background:${pal.includes("#161616")?"#9a9aa4":"rgba(40,20,30,.82)"}; border-radius:5px; padding:0 .25em; font-weight:800">${chs}</span>`+(art?`<span class="rmark">${art}</span>`:"");
+    return `<span style="background:${pal.includes("#161616")?"#9a9aa4":"rgba(40,20,30,.82)"}; border-radius:5px; padding:0 .25em; font-weight:800">${chs}</span>`+(art?roseCrest(m.rk):"");
   }
   if(col){   // 名前の色が背景に埋もれないよう、明るい色は濃い下地、暗い色は明るい下地に乗せる
-    const h=col.replace("#",""), f=h.length<6 ? h.split("").map(c=>c+c).join("") : h.slice(0,6), L=(0.299*parseInt(f.slice(0,2),16)+0.587*parseInt(f.slice(2,4),16)+0.114*parseInt(f.slice(4,6),16))/255;
-    return `<span style="color:${col}; background:${L>0.6?"rgba(40,20,30,.78)":"rgba(255,250,245,.9)"}; border-radius:5px; padding:0 .25em">${nm}</span>`+(art?`<span class="rmark">${art}</span>`:"");
+    return `<span style="color:${col}; background:${roseLight(col)?"rgba(40,20,30,.78)":"rgba(255,250,245,.9)"}; border-radius:5px; padding:0 .25em">${nm}</span>`+(art?roseCrest(m.rk):"");
   }
-  return nm+(art?`<span class="rmark">${art}</span>`:"");
+  return nm+(art?roseCrest(m.rk):"");
 }
 const rgGhrGot = () => RG_GHR.filter(x=>(S.got[x.id]||0)>0).length;
 /* 薔薇のかまど: 選べるのは咲かせたことのある色 */
