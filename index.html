@@ -1765,10 +1765,14 @@ html.mobile #g-cookShow .csnm{font-size:1.3rem}
 @media (prefers-reduced-motion:reduce){ #screen-garden .gcard.GXR{animation:none} }
 #screen-garden .gsumsec.GXR{position:relative; overflow:hidden}
 /* 薔薇の紋章・薔薇色の名前(チャット・番付) */
-.rrow{border-color:rgba(0,0,0,.25)!important; font-weight:800}   /* ランキングの行(薔薇色の名前): 行全体をその薔薇の色に */
-.rrow *{color:inherit!important}
-.rmark.rbadge{box-sizing:border-box; width:1.45em; height:1.45em; padding:.14em; vertical-align:-.36em; margin-left:.3em; border-radius:50%; box-shadow:0 0 0 1px rgba(0,0,0,.25), 0 1px 3px rgba(0,0,0,.35)}   /* 紋章は丸い台座に乗せる(台座の色は薔薇の明るさで変える) */
-#screen-garden .grk-list li.rrow{border-radius:8px; border-bottom:none; margin:.2rem 0; padding-left:.5rem; padding-right:.5rem}
+.rrow{border:1px solid transparent; font-weight:800; isolation:isolate}   /* 番付・ランキングの行(薔薇色の名前): 行全体をその薔薇の色に */
+.rrow:not(.rrow-clear) *{color:inherit!important}
+.rrow.me{outline:2px solid #f5b301; outline-offset:1px}
+.rrow-clear{backdrop-filter:blur(6px); -webkit-backdrop-filter:blur(6px)}   /* 透明: 枠なしのすりガラス。字の色はそのまま */
+.rrow-bw .pos,.rrow-bw .pscore,.rrow-bw .ps,.rrow-bw .pname,.rrow-bw .pn,.rrow-bw small{mix-blend-mode:difference}   /* 白黒: 白地では黒い字、黒地では白い字に見える */
+.rrow-bw .rmark{mix-blend-mode:normal}
+.rmark.rbadge{box-sizing:border-box; width:1.45em; height:1.45em; padding:.14em; vertical-align:-.36em; margin-left:.3em; border-radius:50%}   /* 紋章は丸い台座に乗せる(台座の色は薔薇の色から作る) */
+#screen-garden .grk-list li.rrow{border-radius:8px; border-bottom:1px solid transparent; margin:.25rem 0; padding-left:.55rem; padding-right:.6rem}
 .rmark{display:inline-block; width:1.15em; height:1.15em; vertical-align:-.22em; margin-left:.15em}
 .rmark svg{width:100%; height:100%; display:block}
 /* 薔薇のアーチ・薔薇の垣根・薔薇の冠の村人 */
@@ -4453,7 +4457,7 @@ async function openRanking(d,highlight){
       }
       li.innerHTML=`<span class="pos">${i+1}位</span><span class="pname"></span><span class="pscore">${scoreText}</span>`;
       li.querySelector(".pname").textContent = d==="barabara" ? baraName(r.n) : r.n;
-      if(isGardenRank(d) && (r.rk||r.rc)) try{ li.querySelector(".pname").innerHTML=Garden.roseNamePlate(r.n,r); const rs=Garden.roseRowStyle(r); if(rs){ li.classList.add("rrow"); li.style.cssText=rs; } }catch(e){}   // 薔薇の紋章・薔薇色の名前
+      if(isGardenRank(d) && (r.rk||r.rc)) try{ li.querySelector(".pname").innerHTML=Garden.roseNamePlate(r.n,r); const rs=Garden.roseRowStyle(r); if(rs){ li.className+=" "+Garden.roseRowCls(r); li.style.cssText=rs; } }catch(e){}   // 薔薇の紋章・薔薇色の名前
       // XSS対策でtextContent(バラバラは名前の文字がときどき入れ替わる)
       list.appendChild(li);
     });
@@ -9293,25 +9297,79 @@ function roseLight(col,dk=0.02){   // dk: 濃いほうの色の明るさ
   const L=0.2126*v[0]+0.7152*v[1]+0.0722*v[2];
   return (L+0.05)/(dk+0.05) > 1.05/(L+0.05);
 }
-/* 紋章: 薔薇が背景に埋もれないよう丸い台座に乗せる。明るい薔薇は濃い台座、白黒の薔薇は灰色、それ以外は白い台座 */
-function roseCrest(code){
+/* 番付・ランキングの行と紋章の色づくり */
+const rHex = c => { let h=String(c).replace("#",""); if(h.length<6) h=h.split("").map(x=>x+x).join(""); return [0,2,4].map(i=>parseInt(h.slice(i,i+2),16)); };
+const rMix = (a,b,t) => { const A=rHex(a), B=rHex(b); return "#"+A.map((v,i)=>Math.round(v+(B[i]-v)*t).toString(16).padStart(2,"0")).join(""); };   // t: b の割合
+const rLum = c => { const v=rHex(c).map(x=>{ x/=255; return x<=0.03928 ? x/12.92 : Math.pow((x+0.055)/1.055,2.4); }); return 0.2126*v[0]+0.7152*v[1]+0.0722*v[2]; };
+const rCon = (a,b) => { const A=rLum(a), B=rLum(b); return (Math.max(A,B)+0.05)/(Math.min(A,B)+0.05); };
+function roseCode2(code){ const x=roseCodeOk(code); if(!x) return ""; const c=CROP[x.id], v = x.g===3 && c.m ? c.m.c2 : x.g===5 && c.s ? c.s.c2 : c.c2; return /^#[0-9a-fA-F]{3,8}$/.test(v||"") ? v : ""; }
+const rHue = c => { const [r,g,b]=rHex(c).map(v=>v/255), mx=Math.max(r,g,b), mn=Math.min(r,g,b), d=mx-mn; if(d<0.08) return null; const h = mx===r ? ((g-b)/d)%6 : mx===g ? (b-r)/d+2 : (r-g)/d+4; return (h*60+360)%360; };
+const rDots = (col,pts) => pts.map(([x,y,r])=>`radial-gradient(circle at ${x}% ${y}%,${col} 0 ${r}px,transparent ${r+1.2}px)`).join(",")+",";
+const R_GLOSS = "linear-gradient(180deg,rgba(255,255,255,.26),rgba(255,255,255,0) 52%),";
+/* 背景の色たち(stops)に対して、いちばん読みやすい字の色を選ぶ */
+function rPickText(stops,dark){
+  const cand=[dark,"#ffffff"], score=t=>Math.min(...stops.map(c=>rCon(t,c)));
+  const t = score(cand[1])>=3.0 || score(cand[1])>score(cand[0]) ? cand[1] : cand[0];   // 白い字で十分読めるなら白い字(色が引き立つ)
+  return { fg:t, ts: score(t)<2.4 ? (t==="#ffffff" ? "0 1px 2px rgba(0,0,0,.45)" : "0 1px 0 rgba(255,255,255,.55)") : "none" };
+}
+/* 行の見た目。cls は特別な薔薇の飾り、fg 未指定は字の色を変えない(透明) */
+function roseRowSpec(code){
+  const x=roseCodeOk(code); if(!x) return null;
+  const c1=roseCodeColor(code), c2=roseCode2(code)||c1; if(!c1) return null;
+  const k=x.id.slice(5)+(x.g?"@"+x.g:""), pal=roseCodePal(code);
+  const metal=(a,b)=>`linear-gradient(105deg,${rMix(a,"#fff",.65)} 0%,${a} 22%,${rMix(a,b,.55)} 44%,${rMix(a,"#fff",.55)} 60%,${rMix(a,b,.4)} 82%,${rMix(a,"#fff",.45)} 100%)`;
+  let bg, stops, dark=rMix(c2,"#120a0e",.72), cls="", bd=rMix(c1,c2,.75), fg, ts;
+  if(k==="clear"){
+    return { cls:"rrow-clear", bg:"linear-gradient(180deg,rgba(255,255,255,.4),rgba(255,255,255,0) 55%),linear-gradient(105deg,rgba(225,238,248,.5),rgba(180,205,225,.32) 45%,rgba(210,228,242,.18) 70%,rgba(235,244,250,.45))", bd:"transparent", sh:"inset 0 0 0 1px rgba(255,255,255,.7),inset 0 -1px 0 rgba(120,150,175,.25),0 2px 10px rgba(110,140,165,.25)" };
+  }
+  if(k==="bw"){
+    return { cls:"rrow-bw", bg:"linear-gradient(105deg,#fbfbfb 0 50%,#121212 50% 100%)", fg:"#fff", ts:"none", bd:"#121212", sh:"0 2px 6px rgba(0,0,0,.3)" };
+  }
+  if(k==="rainbow"){ stops=pal.map(c=>rMix(c,"#fff",.42)); bg=R_GLOSS+`linear-gradient(105deg,${stops.join(",")})`; dark="#2a2036"; bd="#cbbfe6"; }
+  else if(k==="tri"){ stops=pal.map(c=>rMix(c,"#fff",.38)); bg=R_GLOSS+`linear-gradient(105deg,${stops[0]} 0 30%,${stops[1]} 37% 63%,${stops[2]} 70% 100%)`; dark="#1c1c2c"; bd="#9a9ad0"; }
+  else if(x.id==="rose_gold"){ stops=["#fff4c2","#ffd84a","#d9a52a","#fff0a6","#c8901a"]; bg=`linear-gradient(105deg,#fff4c2 0%,#ffd84a 20%,#d9a52a 42%,#fff0a6 58%,#c8901a 80%,#ffe58a 100%)`; dark="#4a2c00"; bd="#b8860b"; }
+  else if(x.id==="rose_ls" || k==="990@3" || k==="i2@5"){ stops=[rMix(c1,"#fff",.65),c1,rMix(c1,c2,.55)]; bg=metal(c1,c2); }
+  else if(x.id==="rose_dia"){ stops=["#f7fdff","#bfe9fb","#efe6ff"]; bg=rDots("#fff",[[14,28,1.6],[38,72,1.2],[61,30,1.4],[83,68,1.6],[93,22,1.1]])+`linear-gradient(105deg,#f7fdff 0%,#d4f3ff 28%,#bfe9fb 50%,#efe6ff 72%,#d9f6ff 100%)`; dark="#16485c"; bd="#9fd8ee"; }
+  else if(x.id==="rose_moon"){ stops=["#20285a","#34407e","#6a78b8"]; bg=rDots("rgba(255,255,255,.85)",[[22,25,1],[47,75,.8],[58,20,1.1],[76,62,.8]])+`linear-gradient(105deg,#1b2250 0%,#2e3a78 55%,#6a78b8 100%)`; bd="#4a5aa0"; }
+  else if(x.id==="rose_dawn"){ stops=["#ffe2b8","#ffb48a","#f08a8a"]; bg=R_GLOSS+`linear-gradient(105deg,#ffe2b8 0%,#ffb48a 40%,#f08a8a 72%,#e4708a 100%)`; dark="#4a1424"; bd="#d8607a"; }
+  else if(x.id==="rose_noon"){ stops=["#fffbe2","#fff0a0","#ffd860"]; bg=`radial-gradient(circle at 4% -30%,#fffef6 0,rgba(255,254,246,0) 45%),linear-gradient(105deg,#fffbe2 0%,#fff0a0 45%,#ffd860 80%,#f2c040 100%)`; dark="#4a3400"; bd="#eeb420"; }
+  else if(x.id==="rose_lucky"){ stops=["#fff0f6","#ffd6e8","#f6b8d4"]; bg=rDots("#fff",[[20,30,1.4],[45,74,1.1],[70,26,1.5],[90,70,1.1]])+`linear-gradient(105deg,#fff0f6 0%,#ffd6e8 40%,#ffc4de 70%,#f0a8c8 100%)`; dark="#6a1c40"; bd="#f0a8c8"; }
+  else if(x.id==="rose_jade"){ stops=["#d6f6e6","#8ee0bc","#5cc49c"]; bg=R_GLOSS+`linear-gradient(105deg,#d6f6e6 0%,#8ee0bc 35%,#5cc49c 65%,#3aa67c 100%)`; dark="#0e3a28"; bd="#2a9a70"; }
+  else {
+    const L=rLum(c1), hi=rMix(c1,"#fff",L<0.05?.16:.38), h1=rHue(c1), h2=rHue(c2);
+    const far = h1!=null && h2!=null && Math.min(Math.abs(h1-h2),360-Math.abs(h1-h2))>50;   // 色みが離れた2色は混ぜると濁るので、同じ色の濃い色にする
+    const deep = far ? rMix(c1,"#000",.2) : rMix(c1,c2,.38);
+    stops=[rMix(hi,c1,.75),c1,deep];   // 字が乗るあたりの色
+    const spark = x.id==="rose_u1" ? rDots("rgba(255,255,255,.9)",[[18,28,1],[36,70,.8],[55,24,1.2],[73,66,.9],[90,30,1]])
+                : x.id==="rose_u2" ? rDots("#fff",[[12,30,1.6],[30,72,1.2],[52,26,1.4],[70,70,1.6],[88,34,1.2]]) : "";
+    bg=spark+R_GLOSS+`linear-gradient(105deg,${hi} 0%,${c1} 36%,${c1} 62%,${deep} 100%)`;
+  }
+  ({fg,ts}=rPickText(stops,dark));
+  return { cls, bg, fg, ts, bd, sh:`inset 0 1px 0 rgba(255,255,255,.4),0 2px 6px ${rMix(c2,"#000",.2)}55` };
+}
+/* 紋章: 丸い台座に乗せる。台座はその薔薇の色から作る(明るい薔薇は同じ色みの濃い台座、そのほかは淡い台座) */
+function roseCrest(code,inRow){
   const art=roseCodeArt(code); if(!art) return "";
-  const pal=roseCodePal(code), col=roseCodeColor(code);
-  const bg = pal && pal.includes("#161616") ? "radial-gradient(circle,#a4a4ae 60%,#8a8a94)" : !pal && col && roseLight(col,0.045) ? "radial-gradient(circle,#4a3640 60%,#382830)" : "radial-gradient(circle,#fff 60%,#f3ece6)";
-  return `<span class="rmark rbadge" style="background:${bg}">${art}</span>`;
+  const x=roseCodeOk(code), c1=roseCodeColor(code)||"#e8384f", c2=roseCode2(code)||c1;
+  if(inRow && x && x.id==="rose_clear") return `<span class="rmark rbadge" style="background:radial-gradient(circle,rgba(255,255,255,.55),rgba(255,255,255,.12));box-shadow:inset 0 0 0 1px rgba(255,255,255,.7),0 1px 4px rgba(90,120,140,.3)">${art}</span>`;
+  let bg, ring;
+  if(roseCodePal(code)){ bg=x.id==="rose_bw" ? "#fbfbfb" : "#ffffff"; ring=x.id==="rose_bw" ? "#121212" : "#d6cce8"; }
+  else{
+    const pale=rMix(c1,"#fff",.86), deepB=rMix(c2,"#120a0e",.6);
+    if(rCon(c1,pale)>=rCon(c1,deepB)){ bg=pale; ring=rMix(c1,"#fff",.3); } else { bg=deepB; ring=rMix(c2,"#fff",.2); }
+  }
+  return `<span class="rmark rbadge" style="background:radial-gradient(circle,${bg} 58%,${rMix(bg,ring,.35)});box-shadow:0 0 0 1.5px ${ring},0 1px 3px rgba(0,0,0,.3)">${art}</span>`;
 }
 function roseNamePlate(name,m){
   const nm=String(name==null?"":name).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
   const art=m&&m.rk ? roseCodeArt(m.rk) : "";
-  return nm+(art ? roseCrest(m.rk) : "");
+  return nm+(art ? roseCrest(m.rk, !!(m.rc && roseRowSpec(m.rc))) : "");
 }
 function roseRowStyle(m){
-  if(!(m&&m.rc)) return "";
-  const pal=roseCodePal(m.rc), col=roseCodeColor(m.rc);
-  if(pal) return `background:linear-gradient(90deg,${pal.join(",")}); color:#fff; text-shadow:0 0 2px #000,0 0 2px #000`;
-  if(!col) return "";
-  return `background:${col}; color:${roseLight(col)?"#3a2028":"#fff"}`;
+  const sp=m&&m.rc ? roseRowSpec(m.rc) : null; if(!sp) return "";
+  return `background:${sp.bg}; border-color:${sp.bd}; box-shadow:${sp.sh}`+(sp.fg ? `; color:${sp.fg}; text-shadow:${sp.ts}` : "");
 }
+const roseRowCls = m => { const sp=m&&m.rc ? roseRowSpec(m.rc) : null; return sp ? "rrow"+(sp.cls?" "+sp.cls:"") : ""; };
 function roseNameHTML(name,m){
   const nm=String(name==null?"":name).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
   const col=m&&m.rc ? roseCodeColor(m.rc) : "", art=m&&m.rk ? roseCodeArt(m.rk) : "", pal=m&&m.rc ? roseCodePal(m.rc) : null;
@@ -11566,7 +11624,7 @@ async function renderGardenRank(){
       const me=r.o===S.owner;
       const val=rankExact(r)+gRankUnit(tab);
       const rs=roseRowStyle(r);
-      return `<li class="${i<3?"top"+(i+1):""}${me?" me":""}${rs?" rrow":""}"${rs?` style="${rs}"`:""}><span class="pos">${i+1}位</span><span class="pn">${roseNamePlate(r.n||"",r)}${me?' <small>(あなた)</small>':""}</span><span class="ps">${val}</span></li>`;
+      return `<li class="${i<3?"top"+(i+1):""}${me?" me":""}${rs?" "+roseRowCls(r):""}"${rs?` style="${rs}"`:""}><span class="pos">${i+1}位</span><span class="pn">${roseNamePlate(r.n||"",r)}${me?' <small>(あなた)</small>':""}</span><span class="ps">${val}</span></li>`;
     }).join("");
   }catch(e){ if(req===gRankReq) note.textContent="読み込めませんでした。通信環境を確認してください"; }
 }
@@ -11876,7 +11934,7 @@ function debugStart2(){
   save();
 }
 function alive(){ if(kitN("fridge")>0){ fridgeKeep(); save(); } }
-return { peek:()=>{ consumeInbox(); tick(); return tutState(); }, roseName:roseNameHTML, roseNamePlate, roseRowStyle, nameDeco, tqBoost:()=>({ rose:1+rgGurPct("sh")/100, sc:1+rgGurPct("pen")/100, min:1+rgGurPct("dial")/100 }), rose:(lv,n)=>{ roseGive(lv,n); S.roseIn=(S.roseIn||0)+Math.floor(n); save(); }, screwMul, charmLives, applyTheme, alive, themeScrewArt, enter, leave, onKey, summary, debugUnlock, debugStart2, tutState, tutGive, tutGrow, tutSeed, tutSandbox, refreshRank, openModal, ownerId, useName, baraOn, baraLeft, baraSeen, debugStart3, debugStart4 };
+return { peek:()=>{ consumeInbox(); tick(); return tutState(); }, roseName:roseNameHTML, roseNamePlate, roseRowStyle, roseRowCls, nameDeco, tqBoost:()=>({ rose:1+rgGurPct("sh")/100, sc:1+rgGurPct("pen")/100, min:1+rgGurPct("dial")/100 }), rose:(lv,n)=>{ roseGive(lv,n); S.roseIn=(S.roseIn||0)+Math.floor(n); save(); }, screwMul, charmLives, applyTheme, alive, themeScrewArt, enter, leave, onKey, summary, debugUnlock, debugStart2, tutState, tutGive, tutGrow, tutSeed, tutSandbox, refreshRank, openModal, ownerId, useName, baraOn, baraLeft, baraSeen, debugStart3, debugStart4 };
 })();
 
 function openGarden(){ show("garden"); Garden.enter(); }
