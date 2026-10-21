@@ -10291,7 +10291,7 @@ const EFFS = {
   Q:{ nm:"一括収穫",             n:"収穫すると、その畑の実りをぜんぶ収穫", s:"収穫すると、すべての畑の実りをぜんぶ収穫" },
   R:{ nm:"品質アップ",           n:"収穫する作物が1段上の品質になる",      s:"収穫する作物がかならず ☆☆☆ になる" },
   S:{ nm:"ガチャのレア度",       n:"ガチャの SR 以上が出る確率 1.2倍",     s:"ガチャの SR 以上が出る確率 1.5倍" },
-  V:{ nm:"ノーミス勝負のお守り", n:"ノーミス勝負でミスしても1回まで続く(効果中はランキングに載りません)", s:"ノーミス勝負でミスしても3回まで続く(効果中はランキングに載りません)" },
+  V:{ nm:"ノーミス勝負のお守り", n:"ノーミス勝負(タイピング・TOEIC)でミスしても1回まで続く(効果中はランキングに載りません)", s:"ノーミス勝負(タイピング・TOEIC)でミスしても3回まで続く(効果中はランキングに載りません)" },
   "α":{ nm:"種が戻る",           n:"収穫すると20%で同じ種が1つ戻る(貴重品は除く)", s:"収穫すると、かならず同じ種が1つ戻る(貴重品は除く)" },
   "β":{ nm:"時間を進める",       n:"食べた瞬間、水が効いている畑が3時間進む",    m:"食べた瞬間、水が効いている畑が12時間進む", s:"食べた瞬間、水が効いている畑が1日進む" },
   "γ":{ nm:"ガチャおかわり",     n:"ガチャ1回ごとに10%でもう1回",         s:"ガチャ1回ごとに50%でもう1回" },
@@ -13610,11 +13610,12 @@ function tqStart(lv){
   if(tqKind==="set"){ tqWords=tqPick(lv); }
   else{
     tqLadder=[lv]; tqUnl=1; tqClear=false; tqUsed=new Set(); tqOk=0; tqCkptDue=false;   // そのレベルだけ(全部正解でクリア)
+    tqLives=(()=>{ try{ return Garden.charmLives(); }catch(e){ return 0; } })(); tqCharm=tqLives>0;   // 料理のお守り(タイピングと同じ)
     const sv=!tqBara && tqSuspGet(tqFmt,lv);
     if(sv){   // 中断したところから続ける(届け物はもう届いている)
       tqSuspSet(tqFmt,lv,null);
       const pool=tqPool(lv), by=Object.fromEntries(pool.map(w=>[w.en,w]));
-      tqOk=sv.ok||0; tqUsed=new Set(sv.used||[]); tqPts=sv.pts||0; tqMin=sv.min||0; tqRoseN=sv.rose||0;
+      tqOk=sv.ok||0; tqLives=sv.lives||0; tqCharm=!!sv.charm; tqUsed=new Set(sv.used||[]); tqPts=sv.pts||0; tqMin=sv.min||0; tqRoseN=sv.rose||0;
       if(tqFmt==="type" && sv.sec){ tqSec=sv.sec; tqSaveOpt(); }
       tqLog=(sv.log||[]).map(([en,ok])=>by[en]?{ w:by[en], ok:!!ok }:null).filter(Boolean);
       tqPhase="play"; tqView("tqPlay"); tqNext();
@@ -13629,7 +13630,9 @@ const tqLeft = () => tqPool(tqLadder[tqUnl-1]).filter(w=>!tqUsed.has(w.en));
 function tqPickOne(){ const w=tqDraw(tqLeft()); tqUsed.add(w.en); return w; }
 const tqMeanHtml = w => w.means.map(m=>tqEsc(m.j)+(m.j===m.k?"":`<span class="rd">(${tqEsc(m.k)})</span>`)).join(" ・ ");   // 読みは、訳と同じなら出さない
 const tqLvRange = () => tqUnl>1 ? `${tqLvName(tqLadder[0])}〜${tqLvName(tqLadder[tqUnl-1])}` : tqLvName(tqLadder[0]);
-const tqOneProg = () => tqBara ? `バラバラ ・ ${tqFmtName(tqFmt)} ・ ${tqLvName((tqWords[tqI]||{}).lv||"")} ・ 正解 ${tqOk}` : `ノーミス勝負 ・ ${tqLvName(tqLadder[tqUnl-1])} 残り${tqLeft().length}${tqUnit()} ・ 次の正解で キー ${tqNum(tqGift().sc)}`;
+const tqCharmTxt = () => tqLives>0 ? ` ・ お守り残り${tqLives}回` : "";
+const tqOneProg = () => tqOneProg0()+tqCharmTxt();
+const tqOneProg0 = () => tqBara ? `バラバラ ・ ${tqFmtName(tqFmt)} ・ ${tqLvName((tqWords[tqI]||{}).lv||"")} ・ 正解 ${tqOk}` : `ノーミス勝負 ・ ${tqLvName(tqLadder[tqUnl-1])} 残り${tqLeft().length}${tqUnit()} ・ 次の正解で キー ${tqNum(tqGift().sc)}`;
 /* バラバラ: この問題の出題形式と単語(すべてのレベルから。リスニングは、リスニングを選んだときだけ混ざる) */
 function tqBaraFmt(){
   const fs = (tqBaseFmt==="listen" ? ["listen","choice","fill"] : ["choice","fill"]).concat(window.IS_MOBILE ? [] : ["word"]);   // word: タイピングゲームの言葉(パソコンだけ)
@@ -13785,8 +13788,8 @@ function tqReveal(){
   $("tqMean").className="tq-mean"; $("tqMean").innerHTML=tqMeanHtml(tqWords[tqI]);
   if(tqKind==="one"){   // ノーミス勝負: 時間切れで終わり
     const w=tqWords[tqI];
-    tqMarkFx(w.en,false); tqLog.push({ w, ok:false }); tqOver=true;
-    $("tqTyped").innerHTML=""; $("tqFb").className="tq-fb ng"; $("tqFb").textContent="時間切れ…";
+    tqMarkFx(w.en,false); tqLog.push({ w, ok:false }); tqOver=!tqCharmSave();
+    $("tqTyped").innerHTML=""; $("tqFb").className="tq-fb ng"; $("tqFb").textContent="時間切れ…"+(tqOver?"":`料理のお守りでセーフ!(お守り残り${tqLives}回)`);
     sndMiss(); tqI++; tqPhase="wait"; tqTimer=setTimeout(tqNext,2200);
     return;
   }
@@ -13895,7 +13898,7 @@ function tqChoose(i){
     if(tqKind==="one") tqOneOk(); else{ $("tqScore").textContent=tqNum(tqPts); }
   }else{
     $("tqFb").className="tq-fb ng"; $("tqFb").textContent = c.late ? "時間切れ…ここで終わり(緑が正解)" : c.idk ? (tqKind==="one" ? "分からない…ここで終わり(緑が正解)" : "答えは緑のものです") : tqKind==="one" ? "ざんねん…ここで終わり(緑が正解)" : "ざんねん…(緑が正解)";
-    if(tqKind==="one") tqOver=true;
+    if(tqKind==="one"){ tqOver=!tqCharmSave(); if(!tqOver) $("tqFb").textContent=$("tqFb").textContent.replace("ここで終わり",`料理のお守りでセーフ!(お守り残り${tqLives}回)`); }
   }
   c.ok ? sndClear() : sndMiss();
   tqI++; tqPhase="wait";
@@ -13905,6 +13908,8 @@ function tqChoose(i){
 }
 /* ノーミス勝負で1問正解: そのレベルを全部正解したらクリアで終わり */
 let tqClear=false, tqCkptDue=false;
+let tqLives=0, tqCharm=false;   // 料理のお守り: ミスしても続けられる残り回数 / お守りの効果中に始めたか(ランキングに載せない)
+const tqCharmSave = () => { if(tqKind!=="one" || tqLives<=0) return false; tqLives--; return true; };   // このミスを見逃してもらえたら true
 /* 10問ごとの中断ポイント */
 function tqCkpt(){
   clearTimeout(tqTimer); tqHush(); tqCkptDue=false; tqPhase="ckpt";
@@ -13916,7 +13921,7 @@ function tqCkpt(){
   $("tqHint").textContent="Enter 続ける ・ S 中断する(次にこの出題形式・レベルのノーミス勝負を始めると、続きから) ・ Esc やめる(ここまでの記録が残ります)";
 }
 function tqSuspend(){
-  tqSuspSet(tqFmt, tqLadder[0], { ok:tqOk, used:[...tqUsed], pts:tqPts, min:tqMin, rose:tqRoseN, sec:tqSec, log:tqLog.map(x=>[x.w.en, x.ok?1:0]), t:Date.now() });
+  tqSuspSet(tqFmt, tqLadder[0], { ok:tqOk, lives:tqLives, charm:tqCharm?1:0, used:[...tqUsed], pts:tqPts, min:tqMin, rose:tqRoseN, sec:tqSec, log:tqLog.map(x=>[x.w.en, x.ok?1:0]), t:Date.now() });
   sndDone(); tqMenu();
   $("tqNote").textContent=`${tqLvName(tqLadder[0])}のノーミス勝負を ${tqOk}問 で中断しました。次にこのレベルを選ぶと、続きから始まります`;
 }
@@ -13960,6 +13965,7 @@ async function tqRegister(){
   const box=$("tqReg"), d=TQ_RANK(tqFmt,tqLadder[0]), n=tqOk;
   const viewBtn=`<button class="btn" id="tqRankView">ランキングを見る <span class="kbdh">R</span></button>`;
   if(!n){ box.innerHTML=viewBtn; return; }
+  if(tqCharm){ box.innerHTML="料理のお守りの効果中に遊んだので、ランキングには載りません "+viewBtn; return; }
   if(isDebugSave()){ box.innerHTML="デバッグ用の記録はランキングに登録できません "+viewBtn; return; }
   if(!db){ box.textContent="※Firebase未設定のため登録できません"; return; }
   if(!playerName){ box.innerHTML=`名前を決めるとランキングに載せられます <button class="btn primary" id="tqRegBtn">名前を決めて登録 <span class="kbdh">N</span></button>`; return; }
