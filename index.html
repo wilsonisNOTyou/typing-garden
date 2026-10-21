@@ -3379,7 +3379,8 @@ const $=id=>document.getElementById(id);
 const screens={title:$("screen-title"),toeic:$("screen-toeic"),game:$("screen-game"),result:$("screen-result"),ranking:$("screen-ranking"),dict:$("screen-dict"),books:$("screen-books"),garden:$("screen-garden")};
 let scene="title";
 function show(name){
-  scene=name;
+  const prev=scene; scene=name;
+  if(prev==="ranking" && name!=="ranking"){ try{ if(syncDirty) syncPush(false); syncMaybePull(); }catch(e){} }   // ランキングを見ているあいだ待っていた同期を、閉じたときに送る
   try{ window.scrollTo(0,0); }catch(e){}
   for(const k in screens) screens[k].classList.toggle("active",k===name);
   document.body.classList.toggle("garden", name==="garden");
@@ -4049,7 +4050,7 @@ async function submitScore(name,d,extra){
     return {saved:false};
   }
   for(const x of mine) await ref.child(x.key).remove();
-  await ref.push(entry);
+  await ref.push(entry); rankCache={};
   return {saved:true};
 }
 
@@ -4061,7 +4062,7 @@ async function submitBara(name,md,val,unit){
   mine.sort((a,b)=>b.s-a.s);
   if(mine.length && mine[0].s>=val) return {saved:false};
   for(const x of mine) await ref.child(x.key).remove();
-  await ref.push({ n:name, s:val, t:Date.now(), o:myId(), md, u:unit });
+  await ref.push({ n:name, s:val, t:Date.now(), o:myId(), md, u:unit }); rankCache={};
   return {saved:true};
 }
 /* 名前の文字が、ときどき入れ替わって見える(保存されている名前はそのまま) */
@@ -4097,6 +4098,8 @@ async function fetchRanking(d){
 }
 
 let rankCur="normal", dictCur="easy";
+let rankCache={};   // ランキングの読み込み結果(タブごと)。記録を書いたら捨てる
+const RANK_CACHE_MS=30000;
 let rankReq=0;
 const baraSeen = () => { try{ return !!Garden.baraSeen(); }catch(e){ return false; } };   // 一度バラバラになったら、ランキングはずっと見られる
 const rankTabsNow = () => RANK_TABS.filter(t=>t!=="barabara" || baraSeen());
@@ -4116,7 +4119,9 @@ async function openRanking(d,highlight){
   }
   $("rankStatus").textContent="読み込み中...";
   try{
-    const rows=await fetchRanking(d);
+    const ck=d+"|"+JSON.stringify(window.tqRankMulti?tqRankMulti(d):null), hit=rankCache[ck];   // 横に移動して戻ったときは、読み直さない(30秒)
+    const rows = hit && Date.now()-hit.t<RANK_CACHE_MS ? hit.rows : await fetchRanking(d);
+    if(!(hit && Date.now()-hit.t<RANK_CACHE_MS)) rankCache[ck]={ t:Date.now(), rows };
     if(myReq!==rankReq) return;          // 別のタブに移っていたら何もしない
     list.innerHTML="";
     $("rankStatus").textContent=rows.length?"":"まだ記録がありません。一番乗りのチャンス!";
@@ -4222,7 +4227,7 @@ async function moveScores(from,to){
     if(!rows.length) return;
     rows.sort((a,b)=>betterRecord(b.v,a.v,d));
     const best=Object.assign({}, rows[0].v, { n:to, o:me });
-    await ref.push(best);
+    await ref.push(best); rankCache={};
     await Promise.all(rows.map(r=>ref.child(r.key).remove()));
   }));
 }
@@ -11165,6 +11170,7 @@ async function pushRank(name){
       .catch(e=>{ rankBookErr=String(e&&(e.code||e.message)||e); console.warn("[typinggarden rank] 図鑑の番付に書き込めませんでした",e); }),
   ]);
   await dropOtherNames(key);
+  try{ rankCache={}; }catch(e){}   // 庭の番付も読み直す
   return {ok:true};
 }
 /* 同じ庭(同じ持ち主の印)が別の名前でも載っていたら消す。1つの庭は番付に1つの名前だけ。
@@ -11683,7 +11689,7 @@ let syncPushing=false, syncPushAgain=false, syncBackupAt=null, syncDirtyTimer=nu
    中身を比べずに「持ち主のときにタップ・キー操作をしたか」で判断する */
 let syncDirty=false, syncActivating=false;
 /* タイピング中・結果画面では取り込まない(読み直しで遊んでいる途中が消えないように) */
-const syncBusyScene = () => scene==="game" || scene==="result" || (scene==="toeic" && $("tqPlay").classList.contains("on"));   // TOEIC は問題を解いているあいだ(結果・メニューに戻ったら送る)
+const syncBusyScene = () => scene==="ranking" || scene==="game" || scene==="result" || (scene==="toeic" && $("tqPlay").classList.contains("on"));   // TOEIC は問題を解いているあいだ(結果・メニューに戻ったら送る)
 let syncCode=null, syncDevice=null, syncLastT=0, syncReadOnly=false;
 let syncMetaRef=null, syncOwnerRef=null, syncLiveRef=null, syncHeart=null;
 let syncPending=false, syncPushAt=0, syncOwner=null, syncLive={}, syncOwnerLoaded=false, syncLiveLoaded=false;
