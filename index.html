@@ -1765,6 +1765,7 @@ html.mobile #g-cookShow .csnm{font-size:1.3rem}
 @media (prefers-reduced-motion:reduce){ #screen-garden .gcard.GXR{animation:none} }
 #screen-garden .gsumsec.GXR{position:relative; overflow:hidden}
 /* 薔薇の紋章・薔薇色の名前(チャット・番付) */
+.rplate{display:inline-block; padding:0 .5em; border-radius:6px; font-weight:800; box-shadow:inset 0 0 0 1px rgba(0,0,0,.18), 0 1px 2px rgba(0,0,0,.2)}   /* ランキングの名前の札(薔薇色の名前) */
 .rmark{display:inline-block; width:1.15em; height:1.15em; vertical-align:-.22em; margin-left:.15em}
 .rmark svg{width:100%; height:100%; display:block}
 /* 薔薇のアーチ・薔薇の垣根・薔薇の冠の村人 */
@@ -4143,7 +4144,7 @@ async function openRanking(d,highlight){
       }
       li.innerHTML=`<span class="pos">${i+1}位</span><span class="pname"></span><span class="pscore">${scoreText}</span>`;
       li.querySelector(".pname").textContent = d==="barabara" ? baraName(r.n) : r.n;
-      if(isGardenRank(d) && (r.rk||r.rc)) try{ li.querySelector(".pname").innerHTML=Garden.roseName(r.n,r); }catch(e){}   // 薔薇の紋章・薔薇色の名前
+      if(isGardenRank(d) && (r.rk||r.rc)) try{ li.querySelector(".pname").innerHTML=Garden.roseNamePlate(r.n,r); }catch(e){}   // 薔薇の紋章・薔薇色の名前
       // XSS対策でtextContent(バラバラは名前の文字がときどき入れ替わる)
       list.appendChild(li);
     });
@@ -8973,6 +8974,18 @@ function gxApply(){
   ar.innerHTML=`<div class="gxplate"><span class="gxpr">${rose("#e8384f")}</span><span class="gxpn">${roseNameHTML(plateName(),nameDeco())}</span><span class="gxpr">${rose("#e8384f")}</span></div>`;
 }
 /* 名前に飾りを付けた HTML(name はまだエスケープしていない名前) */
+/* ランキングの名前の札: 薔薇色の名前を持っていれば、札の色をその薔薇の色に(何色もある薔薇は色の帯) */
+function roseNamePlate(name,m){
+  const nm=String(name==null?"":name).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+  const col=m&&m.rc ? roseCodeColor(m.rc) : "", pal=m&&m.rc ? roseCodePal(m.rc) : null, art=m&&m.rk ? roseCodeArt(m.rk) : "";
+  const mark = art ? `<span class="rmark">${art}</span>` : "";
+  if(pal) return `<span class="rplate" style="background:linear-gradient(90deg,${pal.join(",")}); color:#fff; text-shadow:0 0 2px #000,0 0 2px #000">${nm}</span>${mark}`;
+  if(col){
+    const h=col.replace("#",""), f=h.length<6 ? h.split("").map(c=>c+c).join("") : h.slice(0,6), L=(0.299*parseInt(f.slice(0,2),16)+0.587*parseInt(f.slice(2,4),16)+0.114*parseInt(f.slice(4,6),16))/255;
+    return `<span class="rplate" style="background:${col}; color:${L>0.6?"#3a2028":"#fff"}">${nm}</span>${mark}`;
+  }
+  return nm+mark;
+}
 function roseNameHTML(name,m){
   const nm=String(name==null?"":name).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
   const col=m&&m.rc ? roseCodeColor(m.rc) : "", art=m&&m.rk ? roseCodeArt(m.rk) : "", pal=m&&m.rc ? roseCodePal(m.rc) : null;
@@ -9169,6 +9182,7 @@ function rtName(){   // N: 薔薇のプレートの名前を入れる
 }
 const treasTabs = () => [0].concat(kitAny()?[1]:[], roseTreAny()?[2]:[]);   // 出ているタブ
 function renderRoseTre(){
+  const keepTop=$("g-treasBody").scrollTop;   // 描き直しても、見ていた場所のまま
   const got=PETALS.filter(x=>petalN(x.k)>0).length;
   $("g-treasRate").textContent=`集めた花弁 ${got} / ${PETALS.length}`;
   $("g-treasBody").innerHTML=`<div class="ghead">GSR 花弁<span>${got} / ${PETALS.length}</span></div><div class="tlist">`+PETALS.map(x=>{
@@ -9205,13 +9219,15 @@ function renderRoseTre(){
       <div class="teff">${seen?esc(x.desc):"薔薇ガチャの GXR から出ます"}</div>
       ${seen?`<div class="teff glore">${esc(x.lore)}</div>`:""}
       ${seen?`<div class="tsum">いまの効果 <b>+${rgGurPct(x.k)}%</b>${n>=RG_GUR_MAX?"(上限)":""}</div>`:""}</div></div>`; }).join("")+`</div>` : "");
-  $("g-treasBody").querySelectorAll("[data-rkd]").forEach(b=>b.addEventListener("click",()=>rkamAct(+b.dataset.rkd)));
-  $("g-treasBody").querySelectorAll("[data-gxo]").forEach(b=>b.addEventListener("click",e=>{ e.stopPropagation(); gxToggle(b.dataset.gxo); }));
-  $("g-treasBody").querySelectorAll("[data-gxname]").forEach(b=>b.addEventListener("click",e=>{ e.stopPropagation(); gxSaveName(); }));
+  const pick = b => { const i=[...$("g-treasBody").querySelectorAll(".titem")].indexOf(b.closest(".titem")); if(i>=0) rtCur=i; };   // ボタンを押した項目を選んだことにする
+  $("g-treasBody").querySelectorAll("[data-rkd]").forEach(b=>b.addEventListener("click",e=>{ e.stopPropagation(); pick(b); rkamAct(+b.dataset.rkd); }));
+  $("g-treasBody").querySelectorAll("[data-gxo]").forEach(b=>b.addEventListener("click",e=>{ e.stopPropagation(); pick(b); gxToggle(b.dataset.gxo); }));
+  $("g-treasBody").querySelectorAll("[data-gxname]").forEach(b=>b.addEventListener("click",e=>{ e.stopPropagation(); pick(b); gxSaveName(); }));
   { const ip=$("g-plateName"); if(ip) ip.addEventListener("click",e=>e.stopPropagation()); }
   const its=[...$("g-treasBody").querySelectorAll(".titem")]; rtCur=Math.max(0,Math.min(rtCur,its.length-1));   // キーボードで選べるように
   its.forEach((el,i)=>{ el.classList.add("kitem"); el.dataset.k=i; el.classList.toggle("cur",i===rtCur); el.addEventListener("click",()=>{ if(rtCur!==i){ rtCur=i; its.forEach((x,j)=>x.classList.toggle("cur",j===i)); } }); });
-  const cur=its[rtCur]; if(cur && cur.scrollIntoView) cur.scrollIntoView({block:"nearest"});
+  $("g-treasBody").scrollTop=keepTop;
+  const cur=its[rtCur]; if(cur && cur.scrollIntoView) cur.scrollIntoView({block:"nearest"});   // 選んでいる項目が見えていなければ、そこまでだけ動かす
 }
 const ROSE_TRE_NOTE="薔薇ガチャの GSR・GHR・GUR・GXR から出る宝物です。花弁には、まだ誰も知らない色の薔薇の咲き方が書かれています(ほかの条件と重なると、別の色になることがあります)。";
 function renderTreas(){
@@ -11224,7 +11240,7 @@ async function renderGardenRank(){
     list.innerHTML=rows.map((r,i)=>{
       const me=r.o===S.owner;
       const val=rankExact(r)+gRankUnit(tab);
-      return `<li class="${i<3?"top"+(i+1):""}${me?" me":""}"><span class="pos">${i+1}位</span><span class="pn">${roseNameHTML(r.n||"",r)}${me?' <small>(あなた)</small>':""}</span><span class="ps">${val}</span></li>`;
+      return `<li class="${i<3?"top"+(i+1):""}${me?" me":""}"><span class="pos">${i+1}位</span><span class="pn">${roseNamePlate(r.n||"",r)}${me?' <small>(あなた)</small>':""}</span><span class="ps">${val}</span></li>`;
     }).join("");
   }catch(e){ if(req===gRankReq) note.textContent="読み込めませんでした。通信環境を確認してください"; }
 }
@@ -11534,7 +11550,7 @@ function debugStart2(){
   save();
 }
 function alive(){ if(kitN("fridge")>0){ fridgeKeep(); save(); } }
-return { peek:()=>{ consumeInbox(); tick(); return tutState(); }, roseName:roseNameHTML, nameDeco, tqBoost:()=>({ rose:1+rgGurPct("sh")/100, sc:1+rgGurPct("pen")/100, min:1+rgGurPct("dial")/100 }), rose:(lv,n)=>{ roseGive(lv,n); S.roseIn=(S.roseIn||0)+Math.floor(n); save(); }, screwMul, charmLives, applyTheme, alive, themeScrewArt, enter, leave, onKey, summary, debugUnlock, debugStart2, tutState, tutGive, tutGrow, tutSeed, tutSandbox, refreshRank, openModal, ownerId, useName, baraOn, baraLeft, baraSeen, debugStart3, debugStart4 };
+return { peek:()=>{ consumeInbox(); tick(); return tutState(); }, roseName:roseNameHTML, roseNamePlate, nameDeco, tqBoost:()=>({ rose:1+rgGurPct("sh")/100, sc:1+rgGurPct("pen")/100, min:1+rgGurPct("dial")/100 }), rose:(lv,n)=>{ roseGive(lv,n); S.roseIn=(S.roseIn||0)+Math.floor(n); save(); }, screwMul, charmLives, applyTheme, alive, themeScrewArt, enter, leave, onKey, summary, debugUnlock, debugStart2, tutState, tutGive, tutGrow, tutSeed, tutSandbox, refreshRank, openModal, ownerId, useName, baraOn, baraLeft, baraSeen, debugStart3, debugStart4 };
 })();
 
 function openGarden(){ show("garden"); Garden.enter(); }
