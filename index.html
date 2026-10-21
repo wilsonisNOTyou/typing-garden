@@ -1765,6 +1765,7 @@ html.mobile #g-cookShow .csnm{font-size:1.3rem}
 @media (prefers-reduced-motion:reduce){ #screen-garden .gcard.GXR{animation:none} }
 #screen-garden .gsumsec.GXR{position:relative; overflow:hidden}
 /* 薔薇の紋章・薔薇色の名前(チャット・番付) */
+.rplate{display:inline-block; padding:0 .5em; border-radius:6px; font-weight:800; box-shadow:inset 0 0 0 1px rgba(0,0,0,.18), 0 1px 2px rgba(0,0,0,.2)}   /* ランキングの名前の札(薔薇色の名前) */
 .rmark{display:inline-block; width:1.15em; height:1.15em; vertical-align:-.22em; margin-left:.15em}
 .rmark svg{width:100%; height:100%; display:block}
 /* 薔薇のアーチ・薔薇の垣根・薔薇の冠の村人 */
@@ -2898,6 +2899,160 @@ const WORDS_EASY = [
   { t: "かぼちゃのスープ", k: "かぼちゃのすーぷ" },
   { t: "川沿いを走る", k: "かわぞいをはしる" },
   { t: "ろうそくの明かり", k: "ろうそくのあかり" },
+  // ここから: 暮らし・季節・食べもの・ことわざなど、いろいろな言葉
+  { t: "冷蔵庫", k: "れいぞうこ" },
+  { t: "歯ブラシ", k: "はぶらし" },
+  { t: "傘立て", k: "かさたて" },
+  { t: "目覚まし", k: "めざまし" },
+  { t: "窓ガラス", k: "まどがらす" },
+  { t: "本棚", k: "ほんだな" },
+  { t: "画用紙", k: "がようし" },
+  { t: "天気雨", k: "てんきあめ" },
+  { t: "満月", k: "まんげつ" },
+  { t: "三日月", k: "みかづき" },
+  { t: "木漏れ日", k: "こもれび" },
+  { t: "春一番", k: "はるいちばん" },
+  { t: "初雪", k: "はつゆき" },
+  { t: "水たまり", k: "みずたまり" },
+  { t: "海辺", k: "うみべ" },
+  { t: "川遊び", k: "かわあそび" },
+  { t: "秋祭り", k: "あきまつり" },
+  { t: "お花見", k: "おはなみ" },
+  { t: "年越しそば", k: "としこしそば" },
+  { t: "お雑煮", k: "おぞうに" },
+  { t: "綿あめ", k: "わたあめ" },
+  { t: "たこ焼き", k: "たこやき" },
+  { t: "焼きそば", k: "やきそば" },
+  { t: "肉じゃが", k: "にくじゃが" },
+  { t: "ハンバーグ", k: "はんばーぐ" },
+  { t: "ラーメン", k: "らーめん" },
+  { t: "餃子", k: "ぎょうざ" },
+  { t: "お弁当", k: "おべんとう" },
+  { t: "デザート", k: "でざーと" },
+  { t: "プリン", k: "ぷりん" },
+  { t: "ドーナツ", k: "どーなつ" },
+  { t: "チョコレート", k: "ちょこれーと" },
+  { t: "アイスクリーム", k: "あいすくりーむ" },
+  { t: "ジュース", k: "じゅーす" },
+  { t: "牛乳", k: "ぎゅうにゅう" },
+  { t: "紅茶", k: "こうちゃ" },
+  { t: "麦茶", k: "むぎちゃ" },
+  { t: "電車", k: "でんしゃ" },
+  { t: "新幹線", k: "しんかんせん" },
+  { t: "飛行機", k: "ひこうき" },
+  { t: "バス停", k: "ばすてい" },
+  { t: "信号", k: "しんごう" },
+  { t: "横断歩道", k: "おうだんほどう" },
+  { t: "交差点", k: "こうさてん" },
+  { t: "商店街", k: "しょうてんがい" },
+  { t: "美術館", k: "びじゅつかん" },
+  { t: "公園", k: "こうえん" },
+  { t: "ブランコ", k: "ぶらんこ" },
+  { t: "すべり台", k: "すべりだい" },
+  { t: "砂場", k: "すなば" },
+  { t: "運動会", k: "うんどうかい" },
+  { t: "給食", k: "きゅうしょく" },
+  { t: "音楽室", k: "おんがくしつ" },
+  { t: "校庭", k: "こうてい" },
+  { t: "友だち", k: "ともだち" },
+  { t: "家族", k: "かぞく" },
+  { t: "おばあちゃん", k: "おばあちゃん" },
+  { t: "おじいちゃん", k: "おじいちゃん" },
+  { t: "赤ちゃん", k: "あかちゃん" },
+  { t: "金魚", k: "きんぎょ" },
+  { t: "カブトムシ", k: "かぶとむし" },
+  { t: "ちょうちょ", k: "ちょうちょ" },
+  { t: "ペンギン", k: "ぺんぎん" },
+  { t: "キリン", k: "きりん" },
+  { t: "ライオン", k: "らいおん" },
+  { t: "パンダ", k: "ぱんだ" },
+  { t: "うさぎ", k: "うさぎ" },
+  { t: "ふくろう", k: "ふくろう" },
+  { t: "いるか", k: "いるか" },
+  { t: "くじら", k: "くじら" },
+  { t: "カメラ", k: "かめら" },
+  { t: "テレビ", k: "てれび" },
+  { t: "ラジオ", k: "らじお" },
+  { t: "スマートフォン", k: "すまーとふぉん" },
+  { t: "パソコン", k: "ぱそこん" },
+  { t: "マウス", k: "まうす" },
+  { t: "イヤホン", k: "いやほん" },
+  { t: "手紙", k: "てがみ" },
+  { t: "切手", k: "きって" },
+  { t: "はがき", k: "はがき" },
+  { t: "地図", k: "ちず" },
+  { t: "時計", k: "とけい" },
+  { t: "カレンダー", k: "かれんだー" },
+  { t: "誕生日", k: "たんじょうび" },
+  { t: "プレゼント", k: "ぷれぜんと" },
+  { t: "風船", k: "ふうせん" },
+  { t: "花束", k: "はなたば" },
+  { t: "こんにちは", k: "こんにちは" },
+  { t: "いってきます", k: "いってきます" },
+  { t: "ただいま", k: "ただいま" },
+  { t: "おかえり", k: "おかえり" },
+  { t: "またね", k: "またね" },
+  { t: "昼寝", k: "ひるね" },
+  { t: "早起き", k: "はやおき" },
+  { t: "夜ふかし", k: "よふかし" },
+  { t: "散歩", k: "さんぽ" },
+  { t: "日なたぼっこ", k: "ひなたぼっこ" },
+  { t: "雨宿り", k: "あまやどり" },
+  { t: "かくれんぼ", k: "かくれんぼ" },
+  { t: "鬼ごっこ", k: "おにごっこ" },
+  { t: "なわとび", k: "なわとび" },
+  { t: "こま回し", k: "こままわし" },
+  { t: "積み木", k: "つみき" },
+  { t: "パズル", k: "ぱずる" },
+  { t: "トランプ", k: "とらんぷ" },
+  { t: "虫めがね", k: "むしめがね" },
+  { t: "懐中電灯", k: "かいちゅうでんとう" },
+  { t: "ハーモニカ", k: "はーもにか" },
+  { t: "木琴", k: "もっきん" },
+  { t: "ピアノ", k: "ぴあの" },
+  { t: "バイオリン", k: "ばいおりん" },
+  { t: "太鼓", k: "たいこ" },
+  { t: "ふえ", k: "ふえ" },
+  { t: "すず虫", k: "すずむし" },
+  { t: "こおろぎ", k: "こおろぎ" },
+  { t: "とんぼ", k: "とんぼ" },
+  { t: "せみの声", k: "せみのこえ" },
+  { t: "あじさい", k: "あじさい" },
+  { t: "すみれ", k: "すみれ" },
+  { t: "もみの木", k: "もみのき" },
+  { t: "どんぐり", k: "どんぐり" },
+  { t: "松ぼっくり", k: "まつぼっくり" },
+  { t: "栗ごはん", k: "くりごはん" },
+  { t: "おでん", k: "おでん" },
+  { t: "鍋料理", k: "なべりょうり" },
+  { t: "すき焼き", k: "すきやき" },
+  { t: "天ぷら", k: "てんぷら" },
+  { t: "お刺身", k: "おさしみ" },
+  { t: "茶わん蒸し", k: "ちゃわんむし" },
+  { t: "ぜんざい", k: "ぜんざい" },
+  { t: "みたらし団子", k: "みたらしだんご" },
+  { t: "せんべい", k: "せんべい" },
+  { t: "クッキー", k: "くっきー" },
+  { t: "マフィン", k: "まふぃん" },
+  { t: "サンドイッチ", k: "さんどいっち" },
+  { t: "スパゲッティ", k: "すぱげってぃ" },
+  { t: "グラタン", k: "ぐらたん" },
+  { t: "シチュー", k: "しちゅー" },
+  { t: "コロッケ", k: "ころっけ" },
+  { t: "からあげ", k: "からあげ" },
+  { t: "ぎゅうどん", k: "ぎゅうどん" },
+  { t: "うどん", k: "うどん" },
+  { t: "そうめん", k: "そうめん" },
+  { t: "冷やし中華", k: "ひやしちゅうか" },
+  { t: "長ぐつ", k: "ながぐつ" },
+  { t: "レインコート", k: "れいんこーと" },
+  { t: "マフラー", k: "まふらー" },
+  { t: "手ぶくろ", k: "てぶくろ" },
+  { t: "毛糸の帽子", k: "けいとのぼうし" },
+  { t: "リュック", k: "りゅっく" },
+  { t: "水筒", k: "すいとう" },
+  { t: "ハンカチ", k: "はんかち" },
+  { t: "ティッシュ", k: "てぃっしゅ" },
 ];
 const WORDS_NORMAL = [
   { t: "朝顔の観察日記", k: "あさがおのかんさつにっき" },
@@ -2982,6 +3137,97 @@ const WORDS_NORMAL = [
   { t: "休日の朝寝坊", k: "きゅうじつのあさねぼう" },
   { t: "好きな歌を口ずさむ", k: "すきなうたをくちずさむ" },
   { t: "夕飯の買い物に行く", k: "ゆうはんのかいものにいく" },
+  // ここから: 暮らし・季節・食べもの・ことわざなど、いろいろな言葉
+  { t: "自転車で坂道を下る", k: "じてんしゃでさかみちをくだる" },
+  { t: "冷たい麦茶を飲む", k: "つめたいむぎちゃをのむ" },
+  { t: "駅前のパン屋さん", k: "えきまえのぱんやさん" },
+  { t: "窓を開けて風を通す", k: "まどをあけてかぜをとおす" },
+  { t: "雨の音を聞きながら眠る", k: "あめのおとをききながらねむる" },
+  { t: "休みの日の朝寝坊", k: "やすみのひのあさねぼう" },
+  { t: "商店街の福引き", k: "しょうてんがいのふくびき" },
+  { t: "満員電車に揺られる", k: "まんいんでんしゃにゆられる" },
+  { t: "新しい靴をおろす", k: "あたらしいくつをおろす" },
+  { t: "図書館で本を借りる", k: "としょかんでほんをかりる" },
+  { t: "観覧車から町を見下ろす", k: "かんらんしゃからまちをみおろす" },
+  { t: "海辺で貝がらを拾う", k: "うみべでかいがらをひろう" },
+  { t: "夜空に花火が上がる", k: "よぞらにはなびがあがる" },
+  { t: "こたつでみかんを食べる", k: "こたつでみかんをたべる" },
+  { t: "雪の上に足あとをつける", k: "ゆきのうえにあしあとをつける" },
+  { t: "桜並木を歩く", k: "さくらなみきをあるく" },
+  { t: "夏休みの自由研究", k: "なつやすみのじゆうけんきゅう" },
+  { t: "宿題を先に終わらせる", k: "しゅくだいをさきにおわらせる" },
+  { t: "友だちと待ち合わせ", k: "ともだちとまちあわせ" },
+  { t: "誕生日のケーキを切る", k: "たんじょうびのけーきをきる" },
+  { t: "手紙を書いてポストに入れる", k: "てがみをかいてぽすとにいれる" },
+  { t: "猫が日なたで丸くなる", k: "ねこがひなたでまるくなる" },
+  { t: "犬と一緒に散歩する", k: "いぬといっしょにさんぽする" },
+  { t: "金魚にえさをあげる", k: "きんぎょにえさをあげる" },
+  { t: "カレーのいいにおい", k: "かれーのいいにおい" },
+  { t: "炊きたてのごはん", k: "たきたてのごはん" },
+  { t: "お弁当箱を洗う", k: "おべんとうばこをあらう" },
+  { t: "洗濯物をたたむ", k: "せんたくものをたたむ" },
+  { t: "部屋の片づけをする", k: "へやのかたづけをする" },
+  { t: "布団を干してふかふか", k: "ふとんをほしてふかふか" },
+  { t: "目覚まし時計が鳴る", k: "めざましどけいがなる" },
+  { t: "バスの時刻表を調べる", k: "ばすのじこくひょうをしらべる" },
+  { t: "地図を見ながら歩く", k: "ちずをみながらあるく" },
+  { t: "遠くの山がよく見える", k: "とおくのやまがよくみえる" },
+  { t: "川のせせらぎ", k: "かわのせせらぎ" },
+  { t: "森の中の小道", k: "もりのなかのこみち" },
+  { t: "虫の声が聞こえる秋の夜", k: "むしのこえがきこえるあきのよる" },
+  { t: "落ち葉を踏みしめる", k: "おちばをふみしめる" },
+  { t: "朝の空気がすがすがしい", k: "あさのくうきがすがすがしい" },
+  { t: "星座早見盤", k: "せいざはやみばん" },
+  { t: "天体観測の夜", k: "てんたいかんそくのよる" },
+  { t: "雲の形を何かに見立てる", k: "くものかたちをなにかにみたてる" },
+  { t: "虹が出たら教えてね", k: "にじがでたらおしえてね" },
+  { t: "公園のベンチでひと休み", k: "こうえんのべんちでひとやすみ" },
+  { t: "砂場で大きな山を作る", k: "すなばでおおきなやまをつくる" },
+  { t: "運動会のリレー", k: "うんどうかいのりれー" },
+  { t: "音楽の授業で歌う", k: "おんがくのじゅぎょうでうたう" },
+  { t: "給食の献立表", k: "きゅうしょくのこんだてひょう" },
+  { t: "黒板の文字を写す", k: "こくばんのもじをうつす" },
+  { t: "放課後の校庭", k: "ほうかごのこうてい" },
+  { t: "読みかけの小説", k: "よみかけのしょうせつ" },
+  { t: "映画館のポップコーン", k: "えいがかんのぽっぷこーん" },
+  { t: "好きな音楽を流す", k: "すきなおんがくをながす" },
+  { t: "写真を撮って残す", k: "しゃしんをとってのこす" },
+  { t: "新しいノートの一ページ目", k: "あたらしいのーとのいちぺーじめ" },
+  { t: "鉛筆をていねいに削る", k: "えんぴつをていねいにけずる" },
+  { t: "キーボードを軽やかにたたく", k: "きーぼーどをかろやかにたたく" },
+  { t: "パソコンの電源を入れる", k: "ぱそこんのでんげんをいれる" },
+  { t: "電車の窓から海が見える", k: "でんしゃのまどからうみがみえる" },
+  { t: "旅先で食べる名物料理", k: "たびさきでたべるめいぶつりょうり" },
+  { t: "温泉にゆっくりつかる", k: "おんせんにゆっくりつかる" },
+  { t: "おみやげを選ぶ楽しみ", k: "おみやげをえらぶたのしみ" },
+  { t: "駅弁を広げる", k: "えきべんをひろげる" },
+  { t: "帰りの新幹線", k: "かえりのしんかんせん" },
+  { t: "家族でボードゲーム", k: "かぞくでぼーどげーむ" },
+  { t: "おじいちゃんの昔話", k: "おじいちゃんのむかしばなし" },
+  { t: "赤ちゃんが笑った", k: "あかちゃんがわらった" },
+  { t: "ペンギンがよちよち歩く", k: "ぺんぎんがよちよちあるく" },
+  { t: "パンダがささを食べる", k: "ぱんだがささをたべる" },
+  { t: "いるかのジャンプ", k: "いるかのじゃんぷ" },
+  { t: "動物園の人気者", k: "どうぶつえんのにんきもの" },
+  { t: "水族館の大きな水そう", k: "すいぞくかんのおおきなすいそう" },
+  { t: "花屋さんの店先", k: "はなやさんのみせさき" },
+  { t: "八百屋さんの呼び声", k: "やおやさんのよびごえ" },
+  { t: "雨上がりのにおい", k: "あめあがりのにおい" },
+  { t: "傘をさして歩く帰り道", k: "かさをさしてあるくかえりみち" },
+  { t: "夕焼け空を見上げる", k: "ゆうやけぞらをみあげる" },
+  { t: "一番星を見つけた", k: "いちばんぼしをみつけた" },
+  { t: "ぐっすり眠れた朝", k: "ぐっすりねむれたあさ" },
+  { t: "今日もいい天気", k: "きょうもいいてんき" },
+  { t: "ちょっと寄り道して帰る", k: "ちょっとよりみちしてかえる" },
+  { t: "ていねいに字を書く", k: "ていねいにじをかく" },
+  { t: "深呼吸して落ち着く", k: "しんこきゅうしておちつく" },
+  { t: "新しいことに挑戦する", k: "あたらしいことにちょうせんする" },
+  { t: "小さな幸せを見つける", k: "ちいさなしあわせをみつける" },
+  { t: "笑顔であいさつ", k: "えがおであいさつ" },
+  { t: "ありがとうを伝える", k: "ありがとうをつたえる" },
+  { t: "ごめんねと言える勇気", k: "ごめんねといえるゆうき" },
+  { t: "みんなで力を合わせる", k: "みんなでちからをあわせる" },
+  { t: "最後まであきらめない", k: "さいごまであきらめない" },
 ];
 const WORDS_HARD = [
   { t: "百聞は一見にしかず", k: "ひゃくぶんはいっけんにしかず" },
@@ -3045,6 +3291,65 @@ const WORDS_HARD = [
   { t: "村人に畑の世話をまかせてひと休み", k: "むらびとにはたけのせわをまかせてひとやすみ" },
   { t: "図鑑のページが少しずつ埋まっていく", k: "ずかんのぺーじがすこしずつうまっていく" },
   { t: "こつこつ続けた練習が実を結んだ", k: "こつこつつづけたれんしゅうがみをむすんだ" },
+  // ここから: 暮らし・季節・食べもの・ことわざなど、いろいろな言葉
+  { t: "猿も木から落ちる", k: "さるもきからおちる" },
+  { t: "善は急げ", k: "ぜんはいそげ" },
+  { t: "備えあれば憂いなし", k: "そなえあればうれいなし" },
+  { t: "千里の道も一歩から", k: "せんりのみちもいっぽから" },
+  { t: "時は金なり", k: "ときはかねなり" },
+  { t: "井の中の蛙大海を知らず", k: "いのなかのかわずたいかいをしらず" },
+  { t: "良薬は口に苦し", k: "りょうやくはくちににがし" },
+  { t: "光陰矢のごとし", k: "こういんやのごとし" },
+  { t: "晴れた日の朝は、窓を開けて深呼吸をする", k: "はれたひのあさは、まどをあけてしんこきゅうをする" },
+  { t: "駅前の小さなパン屋さんは、朝から行列ができる", k: "えきまえのちいさなぱんやさんは、あさからぎょうれつができる" },
+  { t: "図書館の窓ぎわの席で、静かに本を読む", k: "としょかんのまどぎわのせきで、しずかにほんをよむ" },
+  { t: "自転車に乗って、海沿いの道をどこまでも走る", k: "じてんしゃにのって、うみぞいのみちをどこまでもはしる" },
+  { t: "夏休みの最後の日に、あわてて宿題を片づけた", k: "なつやすみのさいごのひに、あわててしゅくだいをかたづけた" },
+  { t: "雪の降る夜は、こたつで温かいお茶を飲む", k: "ゆきのふるよるは、こたつであたたかいおちゃをのむ" },
+  { t: "誕生日には、家族みんなでケーキを囲む", k: "たんじょうびには、かぞくみんなでけーきをかこむ" },
+  { t: "遠くに住む友だちに、久しぶりに手紙を書いた", k: "とおくにすむともだちに、ひさしぶりにてがみをかいた" },
+  { t: "観覧車のてっぺんから、夕焼けに染まる町を見た", k: "かんらんしゃのてっぺんから、ゆうやけにそまるまちをみた" },
+  { t: "電車の窓の外を、田んぼの景色が流れていく", k: "でんしゃのまどのそとを、たんぼのけしきがながれていく" },
+  { t: "猫は日なたを見つける名人で、一日中のんびりしている", k: "ねこはひなたをみつけるめいじんで、いちにちじゅうのんびりしている" },
+  { t: "犬との散歩は、季節の移り変わりを教えてくれる", k: "いぬとのさんぽは、きせつのうつりかわりをおしえてくれる" },
+  { t: "旅先で食べたご当地の料理が、今でも忘れられない", k: "たびさきでたべたごとうちのりょうりが、いまでもわすれられない" },
+  { t: "温泉につかりながら、星空をゆっくりながめる", k: "おんせんにつかりながら、ほしぞらをゆっくりながめる" },
+  { t: "商店街の福引きで、まさかの一等賞が当たった", k: "しょうてんがいのふくびきで、まさかのいっとうしょうがあたった" },
+  { t: "雨の日は、お気に入りの傘を差して出かけたくなる", k: "あめのひは、おきにいりのかさをさしてでかけたくなる" },
+  { t: "新しいノートを開くと、なんだかやる気がわいてくる", k: "あたらしいのーとをひらくと、なんだかやるきがわいてくる" },
+  { t: "キーボードを打つ音が、静かな部屋に心地よく響く", k: "きーぼーどをうつおとが、しずかなへやにここちよくひびく" },
+  { t: "間違えても気にせず、もう一度落ち着いて打ち直す", k: "まちがえてもきにせず、もういちどおちついてうちなおす" },
+  { t: "毎日少しずつ練習すれば、指が自然に動くようになる", k: "まいにちすこしずつれんしゅうすれば、ゆびがしぜんにうごくようになる" },
+  { t: "目標を決めたら、小さな一歩から始めてみよう", k: "もくひょうをきめたら、ちいさないっぽからはじめてみよう" },
+  { t: "ありがとうの一言で、まわりの空気がやわらかくなる", k: "ありがとうのひとことで、まわりのくうきがやわらかくなる" },
+  { t: "夜空を見上げると、流れ星がひとつ横切っていった", k: "よぞらをみあげると、ながれぼしがひとつよこぎっていった" },
+  { t: "砂浜で拾った貝がらを、小さなびんに集めている", k: "すなはまでひろったかいがらを、ちいさなびんにあつめている" },
+  { t: "水族館の大きな水そうで、くじらのように泳ぐ魚を見た", k: "すいぞくかんのおおきなすいそうで、くじらのようにおよぐさかなをみた" },
+  { t: "動物園のペンギンが、一列に並んで行進している", k: "どうぶつえんのぺんぎんが、いちれつにならんでこうしんしている" },
+  { t: "運動会のリレーで、最後の一人を抜いてゴールした", k: "うんどうかいのりれーで、さいごのひとりをぬいてごーるした" },
+  { t: "放課後の音楽室から、ピアノの音が聞こえてくる", k: "ほうかごのおんがくしつから、ぴあののおとがきこえてくる" },
+  { t: "朝ごはんの卵焼きは、少し甘めがちょうどいい", k: "あさごはんのたまごやきは、すこしあまめがちょうどいい" },
+  { t: "炊きたてのごはんとお味噌汁があれば、それで十分だ", k: "たきたてのごはんとおみそしるがあれば、それでじゅうぶんだ" },
+  { t: "洗濯物がよく乾く、気持ちのいい秋晴れの日", k: "せんたくものがよくかわく、きもちのいいあきばれのひ" },
+  { t: "休みの日は、朝からゆっくりパンケーキを焼く", k: "やすみのひは、あさからゆっくりぱんけーきをやく" },
+  { t: "映画館を出ると、外はすっかり暗くなっていた", k: "えいがかんをでると、そとはすっかりくらくなっていた" },
+  { t: "写真を見返すと、あの日の楽しい気持ちがよみがえる", k: "しゃしんをみかえすと、あのひのたのしいきもちがよみがえる" },
+  { t: "地図を持たずに歩いて、知らない路地を見つけた", k: "ちずをもたずにあるいて、しらないろじをみつけた" },
+  { t: "帰り道に見上げた空に、大きな虹がかかっていた", k: "かえりみちにみあげたそらに、おおきなにじがかかっていた" },
+  { t: "おばあちゃんの作る煮物は、どこよりもやさしい味がする", k: "おばあちゃんのつくるにものは、どこよりもやさしいあじがする" },
+  { t: "赤ちゃんの小さな手が、ぎゅっと指をにぎり返した", k: "あかちゃんのちいさなてが、ぎゅっとゆびをにぎりかえした" },
+  { t: "みんなで力を合わせれば、大きな山も動かせる", k: "みんなでちからをあわせれば、おおきなやまもうごかせる" },
+  { t: "雨垂れ石を穿つ", k: "あまだれいしをうがつ" },
+  { t: "二度あることは三度ある", k: "にどあることはさんどある" },
+  { t: "類は友を呼ぶ", k: "るいはともをよぶ" },
+  { t: "情けは人のためならず", k: "なさけはひとのためならず" },
+  { t: "三人寄れば文殊の知恵", k: "さんにんよればもんじゅのちえ" },
+  { t: "初心忘るべからず", k: "しょしんわするべからず" },
+  { t: "人の振り見て我が振り直せ", k: "ひとのふりみてわがふりなおせ" },
+  { t: "蒔かぬ種は生えぬ", k: "まかぬたねははえぬ" },
+  { t: "秋の夜長に、好きな本を一冊ゆっくり読み終えた", k: "あきのよながに、すきなほんをいっさつゆっくりよみおえた" },
+  { t: "春の風に乗って、どこからか花の香りがただよってくる", k: "はるのかぜにのって、どこからかはなのかおりがただよってくる" },
+  { t: "冬の朝、白い息をはきながら駅まで急いで歩いた", k: "ふゆのあさ、しろいいきをはきながらえきまでいそいであるいた" },
 ];
 /* ==================== ここまで ==================== */
 
@@ -3299,6 +3604,9 @@ function completeChunk(romaji){
   chunkIdx++;
   return chunkIdx>=chunks.length ? "done" : "ok";
 }
+/* 「っ」「ん」の見せ方(次の文字で決まる) */
+const sokuShow = i => { const nf=(chunks[i+1].alts[0]||"x")[0]; return VOWEL_N_Y.has(nf) ? chunks[i].alts.find(a=>a.length>1) : nf; };
+const nnShow = i => { const nc=chunks[i+1]; return nc && nc.alts.some(a=>!VOWEL_N_Y.has(a[0])) ? "n" : "nn"; };
 /* 残りローマ字の表示用文字列 */
 function remainingRomaji(){
   let s="";
@@ -3306,17 +3614,16 @@ function remainingRomaji(){
     const ch=chunks[i];
     let alt;
     if(i===chunkIdx){
-      alt=ch.alts.find(a=>a.startsWith(buf))||ch.alts[0];
-      s+=alt.slice(buf.length);
+      // 今打っている文字も、先の文字と同じ書き方で見せる(打って初めて変わるように。「ん」が番になった瞬間に n→nn に変わるとちらつく)
+      const b = nAmbig && buf==="n" ? "" : buf;   // 「んな」: nn と打ったn は「ん」のものとして見せる(表示どおり nnna と打っても通る)
+      const same = ch.nn ? nnShow(i) : (ch.soku && chunks[i+1]) ? sokuShow(i) : ch.alts[0];
+      alt = same && same.startsWith(b) ? same : (ch.alts.find(a=>a.startsWith(b))||ch.alts[0]);
+      s+=alt.slice(b.length);
       continue;
     }
-    if(ch.soku && chunks[i+1]){
-      const nf=(chunks[i+1].alts[0]||"x")[0];
-      alt=VOWEL_N_Y.has(nf)?ch.alts.find(a=>a.length>1):nf;
-    } else if(ch.nn){
-      const nc=chunks[i+1];
-      alt=(nc && nc.alts.some(a=>!VOWEL_N_Y.has(a[0])))?"n":"nn";
-    } else alt=ch.alts[0];
+    if(ch.soku && chunks[i+1]) alt=sokuShow(i);
+    else if(ch.nn) alt=nnShow(i);
+    else alt=ch.alts[0];
     s+=alt;
   }
   return s;
@@ -3379,7 +3686,8 @@ const $=id=>document.getElementById(id);
 const screens={title:$("screen-title"),toeic:$("screen-toeic"),game:$("screen-game"),result:$("screen-result"),ranking:$("screen-ranking"),dict:$("screen-dict"),books:$("screen-books"),garden:$("screen-garden")};
 let scene="title";
 function show(name){
-  scene=name;
+  const prev=scene; scene=name;
+  if(prev==="ranking" && name!=="ranking"){ try{ if(syncDirty) syncPush(false); syncMaybePull(); }catch(e){} }   // ランキングを見ているあいだ待っていた同期を、閉じたときに送る
   try{ window.scrollTo(0,0); }catch(e){}
   for(const k in screens) screens[k].classList.toggle("active",k===name);
   document.body.classList.toggle("garden", name==="garden");
@@ -4049,7 +4357,7 @@ async function submitScore(name,d,extra){
     return {saved:false};
   }
   for(const x of mine) await ref.child(x.key).remove();
-  await ref.push(entry);
+  await ref.push(entry); rankCache={};
   return {saved:true};
 }
 
@@ -4061,7 +4369,7 @@ async function submitBara(name,md,val,unit){
   mine.sort((a,b)=>b.s-a.s);
   if(mine.length && mine[0].s>=val) return {saved:false};
   for(const x of mine) await ref.child(x.key).remove();
-  await ref.push({ n:name, s:val, t:Date.now(), o:myId(), md, u:unit });
+  await ref.push({ n:name, s:val, t:Date.now(), o:myId(), md, u:unit }); rankCache={};
   return {saved:true};
 }
 /* 名前の文字が、ときどき入れ替わって見える(保存されている名前はそのまま) */
@@ -4097,6 +4405,8 @@ async function fetchRanking(d){
 }
 
 let rankCur="normal", dictCur="easy";
+let rankCache={};   // ランキングの読み込み結果(タブごと)。記録を書いたら捨てる
+const RANK_CACHE_MS=30000;
 let rankReq=0;
 const baraSeen = () => { try{ return !!Garden.baraSeen(); }catch(e){ return false; } };   // 一度バラバラになったら、ランキングはずっと見られる
 const rankTabsNow = () => RANK_TABS.filter(t=>t!=="barabara" || baraSeen());
@@ -4116,7 +4426,9 @@ async function openRanking(d,highlight){
   }
   $("rankStatus").textContent="読み込み中...";
   try{
-    const rows=await fetchRanking(d);
+    const ck=d+"|"+JSON.stringify(window.tqRankMulti?tqRankMulti(d):null), hit=rankCache[ck];   // 横に移動して戻ったときは、読み直さない(30秒)
+    const rows = hit && Date.now()-hit.t<RANK_CACHE_MS ? hit.rows : await fetchRanking(d);
+    if(!(hit && Date.now()-hit.t<RANK_CACHE_MS)) rankCache[ck]={ t:Date.now(), rows };
     if(myReq!==rankReq) return;          // 別のタブに移っていたら何もしない
     list.innerHTML="";
     $("rankStatus").textContent=rows.length?"":"まだ記録がありません。一番乗りのチャンス!";
@@ -4138,7 +4450,7 @@ async function openRanking(d,highlight){
       }
       li.innerHTML=`<span class="pos">${i+1}位</span><span class="pname"></span><span class="pscore">${scoreText}</span>`;
       li.querySelector(".pname").textContent = d==="barabara" ? baraName(r.n) : r.n;
-      if(isGardenRank(d) && (r.rk||r.rc)) try{ li.querySelector(".pname").innerHTML=Garden.roseName(r.n,r); }catch(e){}   // 薔薇の紋章・薔薇色の名前
+      if(isGardenRank(d) && (r.rk||r.rc)) try{ li.querySelector(".pname").innerHTML=Garden.roseNamePlate(r.n,r); }catch(e){}   // 薔薇の紋章・薔薇色の名前
       // XSS対策でtextContent(バラバラは名前の文字がときどき入れ替わる)
       list.appendChild(li);
     });
@@ -4222,7 +4534,7 @@ async function moveScores(from,to){
     if(!rows.length) return;
     rows.sort((a,b)=>betterRecord(b.v,a.v,d));
     const best=Object.assign({}, rows[0].v, { n:to, o:me });
-    await ref.push(best);
+    await ref.push(best); rankCache={};
     await Promise.all(rows.map(r=>ref.child(r.key).remove()));
   }));
 }
@@ -4536,6 +4848,8 @@ const NEWS=[
     "9000兆を超えても、キー・薔薇ガチャコイン・薔薇の種を1の位まで正しく数えます",
     "大連ガチャの演出を軽くしました",
     "水やりの持続が延びる貴重品は、300個までになりました",
+    "ローマ字の表示を、打っている途中で切り替わらないようにしました。表示どおりに打てば、最後まで同じ表示のままです",
+    "タイピングの言葉を、やさしい・ふつう・むずかしいに合わせて301語追加しました。季節や暮らし、ことわざなど、いろいろな言葉が出ます",
     "実績を追加しました",
   ]},
   { d:"2026-10-19", t:"1,111,111連と、大連ガチャの演出セット", items:[
@@ -6715,7 +7029,7 @@ function rgGurPct(k){ return Math.min(100, rgGurN(k)); }
 function roseMutK(id){ return CROP[id] && CROP[id].rose ? 1+rgGurPct("glove")/100 : 1; }   // 花守りの手袋: 薔薇が変異・超変異する確率
 function rfMul(){ return 1+rgGurPct("shears")/100; }   // 庭師の剪定ばさみ: 薔薇農家の咲く速さ
 function xAdd(o,k,x,ck=k){
-  x=Number(x)||0; if(!x) return;
+  x=Number(x)||0; if(!x || !Number.isFinite(x)) return;   // 無限大・数でないものは足さない(数が壊れないように)
   const a=o[k]||0, s=a+x, bp=s-a, ap=s-bp, err=(a-ap)+(x-bp);   // 足した結果と、丸めで消えた分(誤差なしで出せる)
   o[k]=s;
   const C=S.xc=S.xc||{};
@@ -8968,6 +9282,18 @@ function gxApply(){
   ar.innerHTML=`<div class="gxplate"><span class="gxpr">${rose("#e8384f")}</span><span class="gxpn">${roseNameHTML(plateName(),nameDeco())}</span><span class="gxpr">${rose("#e8384f")}</span></div>`;
 }
 /* 名前に飾りを付けた HTML(name はまだエスケープしていない名前) */
+/* ランキングの名前の札: 薔薇色の名前を持っていれば、札の色をその薔薇の色に(何色もある薔薇は色の帯) */
+function roseNamePlate(name,m){
+  const nm=String(name==null?"":name).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+  const col=m&&m.rc ? roseCodeColor(m.rc) : "", pal=m&&m.rc ? roseCodePal(m.rc) : null, art=m&&m.rk ? roseCodeArt(m.rk) : "";
+  const mark = art ? `<span class="rmark">${art}</span>` : "";
+  if(pal) return `<span class="rplate" style="background:linear-gradient(90deg,${pal.join(",")}); color:#fff; text-shadow:0 0 2px #000,0 0 2px #000">${nm}</span>${mark}`;
+  if(col){
+    const h=col.replace("#",""), f=h.length<6 ? h.split("").map(c=>c+c).join("") : h.slice(0,6), L=(0.299*parseInt(f.slice(0,2),16)+0.587*parseInt(f.slice(2,4),16)+0.114*parseInt(f.slice(4,6),16))/255;
+    return `<span class="rplate" style="background:${col}; color:${L>0.6?"#3a2028":"#fff"}">${nm}</span>${mark}`;
+  }
+  return nm+mark;
+}
 function roseNameHTML(name,m){
   const nm=String(name==null?"":name).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
   const col=m&&m.rc ? roseCodeColor(m.rc) : "", art=m&&m.rk ? roseCodeArt(m.rk) : "", pal=m&&m.rc ? roseCodePal(m.rc) : null;
@@ -9044,7 +9370,7 @@ function rgConvert(i,want){   // want: 変換する数(マイナスなら、そ�
   }
   if(sid){ if(x.kind==="useed" && !(S.seeds[x.id]>0) && S.seedId===x.id) S.seedId=nextSeed(x.id); }
   else S.inv[x.id][x.t]-=k;
-  const gB=kB*BigInt(x.v), gain=Number(gB);
+  const gB=kB*BigInt(Math.round(x.v)), gain=Number(gB);
   xAddBig(S,"roseCoin",gB); S.roseCoinTotal=(S.roseCoinTotal||0)+gain;
   sfx.sell();
   toast(`${x.ic} ${esc(x.nm)}を ${kB.toLocaleString("ja-JP")}つ、薔薇ガチャコイン ${gB.toLocaleString("ja-JP")}枚に変えました`,"good",2400,true);
@@ -9164,6 +9490,7 @@ function rtName(){   // N: 薔薇のプレートの名前を入れる
 }
 const treasTabs = () => [0].concat(kitAny()?[1]:[], roseTreAny()?[2]:[]);   // 出ているタブ
 function renderRoseTre(){
+  const keepTop=$("g-treasBody").scrollTop;   // 描き直しても、見ていた場所のまま
   const got=PETALS.filter(x=>petalN(x.k)>0).length;
   $("g-treasRate").textContent=`集めた花弁 ${got} / ${PETALS.length}`;
   $("g-treasBody").innerHTML=`<div class="ghead">GSR 花弁<span>${got} / ${PETALS.length}</span></div><div class="tlist">`+PETALS.map(x=>{
@@ -9200,13 +9527,15 @@ function renderRoseTre(){
       <div class="teff">${seen?esc(x.desc):"薔薇ガチャの GXR から出ます"}</div>
       ${seen?`<div class="teff glore">${esc(x.lore)}</div>`:""}
       ${seen?`<div class="tsum">いまの効果 <b>+${rgGurPct(x.k)}%</b>${n>=RG_GUR_MAX?"(上限)":""}</div>`:""}</div></div>`; }).join("")+`</div>` : "");
-  $("g-treasBody").querySelectorAll("[data-rkd]").forEach(b=>b.addEventListener("click",()=>rkamAct(+b.dataset.rkd)));
-  $("g-treasBody").querySelectorAll("[data-gxo]").forEach(b=>b.addEventListener("click",e=>{ e.stopPropagation(); gxToggle(b.dataset.gxo); }));
-  $("g-treasBody").querySelectorAll("[data-gxname]").forEach(b=>b.addEventListener("click",e=>{ e.stopPropagation(); gxSaveName(); }));
+  const pick = b => { const i=[...$("g-treasBody").querySelectorAll(".titem")].indexOf(b.closest(".titem")); if(i>=0) rtCur=i; };   // ボタンを押した項目を選んだことにする
+  $("g-treasBody").querySelectorAll("[data-rkd]").forEach(b=>b.addEventListener("click",e=>{ e.stopPropagation(); pick(b); rkamAct(+b.dataset.rkd); }));
+  $("g-treasBody").querySelectorAll("[data-gxo]").forEach(b=>b.addEventListener("click",e=>{ e.stopPropagation(); pick(b); gxToggle(b.dataset.gxo); }));
+  $("g-treasBody").querySelectorAll("[data-gxname]").forEach(b=>b.addEventListener("click",e=>{ e.stopPropagation(); pick(b); gxSaveName(); }));
   { const ip=$("g-plateName"); if(ip) ip.addEventListener("click",e=>e.stopPropagation()); }
   const its=[...$("g-treasBody").querySelectorAll(".titem")]; rtCur=Math.max(0,Math.min(rtCur,its.length-1));   // キーボードで選べるように
   its.forEach((el,i)=>{ el.classList.add("kitem"); el.dataset.k=i; el.classList.toggle("cur",i===rtCur); el.addEventListener("click",()=>{ if(rtCur!==i){ rtCur=i; its.forEach((x,j)=>x.classList.toggle("cur",j===i)); } }); });
-  const cur=its[rtCur]; if(cur && cur.scrollIntoView) cur.scrollIntoView({block:"nearest"});
+  $("g-treasBody").scrollTop=keepTop;
+  const cur=its[rtCur]; if(cur && cur.scrollIntoView) cur.scrollIntoView({block:"nearest"});   // 選んでいる項目が見えていなければ、そこまでだけ動かす
 }
 const ROSE_TRE_NOTE="薔薇ガチャの GSR・GHR・GUR・GXR から出る宝物です。花弁には、まだ誰も知らない色の薔薇の咲き方が書かれています(ほかの条件と重なると、別の色になることがあります)。";
 function renderTreas(){
@@ -10235,7 +10564,7 @@ function autoCookTick(){
       if(((S.dishes[a.id]||{})[plan.grade]||0)>=cap) break;
       if(cap===Infinity){   // 作れるだけ: 同じ材料の組み合わせで作れるぶんは、まとめて作る(材料がとても多いと、1つずつでは固まるため)
         let r=Infinity; for(const [kind,id,t,n] of plan.take) r=Math.min(r, Math.floor((kind==="c" ? invN(id,t) : (S.food[id]||0))/n));
-        if(r>1){
+        if(r>1 && Number.isFinite(r)){
           const used=r-binom(r,ev("P2",.2,.5,0));   // 料理: 材料の節約
           for(const [kind,id,t,n] of plan.take){ if(kind==="c") S.inv[id][t]-=n*used; else S.food[id]-=n*used; }
           const got=r+binom(r,ev("P1",.2,1,0)+kitVal("pot")/100);
@@ -11165,6 +11494,7 @@ async function pushRank(name){
       .catch(e=>{ rankBookErr=String(e&&(e.code||e.message)||e); console.warn("[typinggarden rank] 図鑑の番付に書き込めませんでした",e); }),
   ]);
   await dropOtherNames(key);
+  try{ rankCache={}; }catch(e){}   // 庭の番付も読み直す
   return {ok:true};
 }
 /* 同じ庭(同じ持ち主の印)が別の名前でも載っていたら消す。1つの庭は番付に1つの名前だけ。
@@ -11218,7 +11548,7 @@ async function renderGardenRank(){
     list.innerHTML=rows.map((r,i)=>{
       const me=r.o===S.owner;
       const val=rankExact(r)+gRankUnit(tab);
-      return `<li class="${i<3?"top"+(i+1):""}${me?" me":""}"><span class="pos">${i+1}位</span><span class="pn">${roseNameHTML(r.n||"",r)}${me?' <small>(あなた)</small>':""}</span><span class="ps">${val}</span></li>`;
+      return `<li class="${i<3?"top"+(i+1):""}${me?" me":""}"><span class="pos">${i+1}位</span><span class="pn">${roseNamePlate(r.n||"",r)}${me?' <small>(あなた)</small>':""}</span><span class="ps">${val}</span></li>`;
     }).join("");
   }catch(e){ if(req===gRankReq) note.textContent="読み込めませんでした。通信環境を確認してください"; }
 }
@@ -11528,7 +11858,7 @@ function debugStart2(){
   save();
 }
 function alive(){ if(kitN("fridge")>0){ fridgeKeep(); save(); } }
-return { peek:()=>{ consumeInbox(); tick(); return tutState(); }, roseName:roseNameHTML, nameDeco, tqBoost:()=>({ rose:1+rgGurPct("sh")/100, sc:1+rgGurPct("pen")/100, min:1+rgGurPct("dial")/100 }), rose:(lv,n)=>{ roseGive(lv,n); S.roseIn=(S.roseIn||0)+Math.floor(n); save(); }, screwMul, charmLives, applyTheme, alive, themeScrewArt, enter, leave, onKey, summary, debugUnlock, debugStart2, tutState, tutGive, tutGrow, tutSeed, tutSandbox, refreshRank, openModal, ownerId, useName, baraOn, baraLeft, baraSeen, debugStart3, debugStart4 };
+return { peek:()=>{ consumeInbox(); tick(); return tutState(); }, roseName:roseNameHTML, roseNamePlate, nameDeco, tqBoost:()=>({ rose:1+rgGurPct("sh")/100, sc:1+rgGurPct("pen")/100, min:1+rgGurPct("dial")/100 }), rose:(lv,n)=>{ roseGive(lv,n); S.roseIn=(S.roseIn||0)+Math.floor(n); save(); }, screwMul, charmLives, applyTheme, alive, themeScrewArt, enter, leave, onKey, summary, debugUnlock, debugStart2, tutState, tutGive, tutGrow, tutSeed, tutSandbox, refreshRank, openModal, ownerId, useName, baraOn, baraLeft, baraSeen, debugStart3, debugStart4 };
 })();
 
 function openGarden(){ show("garden"); Garden.enter(); }
@@ -11683,7 +12013,7 @@ let syncPushing=false, syncPushAgain=false, syncBackupAt=null, syncDirtyTimer=nu
    中身を比べずに「持ち主のときにタップ・キー操作をしたか」で判断する */
 let syncDirty=false, syncActivating=false;
 /* タイピング中・結果画面では取り込まない(読み直しで遊んでいる途中が消えないように) */
-const syncBusyScene = () => scene==="game" || scene==="result" || (scene==="toeic" && $("tqPlay").classList.contains("on"));   // TOEIC は問題を解いているあいだ(結果・メニューに戻ったら送る)
+const syncBusyScene = () => scene==="ranking" || scene==="game" || scene==="result" || (scene==="toeic" && $("tqPlay").classList.contains("on"));   // TOEIC は問題を解いているあいだ(結果・メニューに戻ったら送る)
 let syncCode=null, syncDevice=null, syncLastT=0, syncReadOnly=false;
 let syncMetaRef=null, syncOwnerRef=null, syncLiveRef=null, syncHeart=null;
 let syncPending=false, syncPushAt=0, syncOwner=null, syncLive={}, syncOwnerLoaded=false, syncLiveLoaded=false;
