@@ -9034,8 +9034,8 @@ function rgConvert(i,want){   // want: 変換する数(マイナスなら、そ�
   const rows=rgConvRows(), x=rows[i]; if(!x){ sfx.nope(); return; }
   const sid = x.kind==="seed" ? "rose" : x.kind==="useed" ? x.id : null, ck="seeds."+sid;
   // 種は端数まで入れた正確な数で数える(9000兆を超えても「〇個残す」がちょうどになるように)
-  const nB = sid ? xBig(S.seeds[sid],ck) : BigInt(Math.floor(x.n)), wB=BigInt(Math.trunc(want));
-  const kB = wB<0n ? nB+wB : (wB<nB ? wB : nB); if(kB<=0n){ sfx.nope(); return; }
+  const nB = sid ? xBig(S.seeds[sid],ck) : BigInt(Math.floor(x.n)), wB = Number.isFinite(want) ? BigInt(Math.trunc(want)) : null;   // 「全部」は Infinity
+  const kB = wB===null ? nB : wB<0n ? nB+wB : (wB<nB ? wB : nB); if(kB<=0n){ sfx.nope(); return; }
   const k=Number(kB);
   if(sid) xAddBig(S.seeds,sid,-kB,ck);
   if(x.kind==="seed"){   // 中身の色(袋)を、残った種の数まで多い色から削る
