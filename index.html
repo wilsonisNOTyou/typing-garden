@@ -1765,7 +1765,9 @@ html.mobile #g-cookShow .csnm{font-size:1.3rem}
 @media (prefers-reduced-motion:reduce){ #screen-garden .gcard.GXR{animation:none} }
 #screen-garden .gsumsec.GXR{position:relative; overflow:hidden}
 /* 薔薇の紋章・薔薇色の名前(チャット・番付) */
-.rplate{display:inline-block; padding:0 .5em; border-radius:6px; font-weight:800; box-shadow:inset 0 0 0 1px rgba(0,0,0,.18), 0 1px 2px rgba(0,0,0,.2)}   /* ランキングの名前の札(薔薇色の名前) */
+.rrow{border-color:rgba(0,0,0,.25)!important; font-weight:800}   /* ランキングの行(薔薇色の名前): 行全体をその薔薇の色に */
+.rrow *{color:inherit!important}
+#screen-garden .grk-list li.rrow{border-radius:8px; border-bottom:none; margin:.2rem 0; padding-left:.5rem; padding-right:.5rem}
 .rmark{display:inline-block; width:1.15em; height:1.15em; vertical-align:-.22em; margin-left:.15em}
 .rmark svg{width:100%; height:100%; display:block}
 /* 薔薇のアーチ・薔薇の垣根・薔薇の冠の村人 */
@@ -4450,7 +4452,7 @@ async function openRanking(d,highlight){
       }
       li.innerHTML=`<span class="pos">${i+1}位</span><span class="pname"></span><span class="pscore">${scoreText}</span>`;
       li.querySelector(".pname").textContent = d==="barabara" ? baraName(r.n) : r.n;
-      if(isGardenRank(d) && (r.rk||r.rc)) try{ li.querySelector(".pname").innerHTML=Garden.roseNamePlate(r.n,r); }catch(e){}   // 薔薇の紋章・薔薇色の名前
+      if(isGardenRank(d) && (r.rk||r.rc)) try{ li.querySelector(".pname").innerHTML=Garden.roseNamePlate(r.n,r); const rs=Garden.roseRowStyle(r); if(rs){ li.classList.add("rrow"); li.style.cssText=rs; } }catch(e){}   // 薔薇の紋章・薔薇色の名前
       // XSS対策でtextContent(バラバラは名前の文字がときどき入れ替わる)
       list.appendChild(li);
     });
@@ -9282,17 +9284,19 @@ function gxApply(){
   ar.innerHTML=`<div class="gxplate"><span class="gxpr">${rose("#e8384f")}</span><span class="gxpn">${roseNameHTML(plateName(),nameDeco())}</span><span class="gxpr">${rose("#e8384f")}</span></div>`;
 }
 /* 名前に飾りを付けた HTML(name はまだエスケープしていない名前) */
-/* ランキングの名前の札: 薔薇色の名前を持っていれば、札の色をその薔薇の色に(何色もある薔薇は色の帯) */
+/* ランキングの行: 薔薇色の名前を持っていれば、行全体をその薔薇の色に(何色もある薔薇は色の帯)。名前のあとに紋章 */
 function roseNamePlate(name,m){
   const nm=String(name==null?"":name).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
-  const col=m&&m.rc ? roseCodeColor(m.rc) : "", pal=m&&m.rc ? roseCodePal(m.rc) : null, art=m&&m.rk ? roseCodeArt(m.rk) : "";
-  const mark = art ? `<span class="rmark">${art}</span>` : "";
-  if(pal) return `<span class="rplate" style="background:linear-gradient(90deg,${pal.join(",")}); color:#fff; text-shadow:0 0 2px #000,0 0 2px #000">${nm}</span>${mark}`;
-  if(col){
-    const h=col.replace("#",""), f=h.length<6 ? h.split("").map(c=>c+c).join("") : h.slice(0,6), L=(0.299*parseInt(f.slice(0,2),16)+0.587*parseInt(f.slice(2,4),16)+0.114*parseInt(f.slice(4,6),16))/255;
-    return `<span class="rplate" style="background:${col}; color:${L>0.6?"#3a2028":"#fff"}">${nm}</span>${mark}`;
-  }
-  return nm+mark;
+  const art=m&&m.rk ? roseCodeArt(m.rk) : "";
+  return nm+(art ? `<span class="rmark">${art}</span>` : "");
+}
+function roseRowStyle(m){
+  if(!(m&&m.rc)) return "";
+  const pal=roseCodePal(m.rc), col=roseCodeColor(m.rc);
+  if(pal) return `background:linear-gradient(90deg,${pal.join(",")}); color:#fff; text-shadow:0 0 2px #000,0 0 2px #000`;
+  if(!col) return "";
+  const h=col.replace("#",""), f=h.length<6 ? h.split("").map(c=>c+c).join("") : h.slice(0,6), L=(0.299*parseInt(f.slice(0,2),16)+0.587*parseInt(f.slice(2,4),16)+0.114*parseInt(f.slice(4,6),16))/255;
+  return `background:${col}; color:${L>0.6?"#3a2028":"#fff"}`;
 }
 function roseNameHTML(name,m){
   const nm=String(name==null?"":name).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
@@ -11548,7 +11552,8 @@ async function renderGardenRank(){
     list.innerHTML=rows.map((r,i)=>{
       const me=r.o===S.owner;
       const val=rankExact(r)+gRankUnit(tab);
-      return `<li class="${i<3?"top"+(i+1):""}${me?" me":""}"><span class="pos">${i+1}位</span><span class="pn">${roseNamePlate(r.n||"",r)}${me?' <small>(あなた)</small>':""}</span><span class="ps">${val}</span></li>`;
+      const rs=roseRowStyle(r);
+      return `<li class="${i<3?"top"+(i+1):""}${me?" me":""}${rs?" rrow":""}"${rs?` style="${rs}"`:""}><span class="pos">${i+1}位</span><span class="pn">${roseNamePlate(r.n||"",r)}${me?' <small>(あなた)</small>':""}</span><span class="ps">${val}</span></li>`;
     }).join("");
   }catch(e){ if(req===gRankReq) note.textContent="読み込めませんでした。通信環境を確認してください"; }
 }
@@ -11858,7 +11863,7 @@ function debugStart2(){
   save();
 }
 function alive(){ if(kitN("fridge")>0){ fridgeKeep(); save(); } }
-return { peek:()=>{ consumeInbox(); tick(); return tutState(); }, roseName:roseNameHTML, roseNamePlate, nameDeco, tqBoost:()=>({ rose:1+rgGurPct("sh")/100, sc:1+rgGurPct("pen")/100, min:1+rgGurPct("dial")/100 }), rose:(lv,n)=>{ roseGive(lv,n); S.roseIn=(S.roseIn||0)+Math.floor(n); save(); }, screwMul, charmLives, applyTheme, alive, themeScrewArt, enter, leave, onKey, summary, debugUnlock, debugStart2, tutState, tutGive, tutGrow, tutSeed, tutSandbox, refreshRank, openModal, ownerId, useName, baraOn, baraLeft, baraSeen, debugStart3, debugStart4 };
+return { peek:()=>{ consumeInbox(); tick(); return tutState(); }, roseName:roseNameHTML, roseNamePlate, roseRowStyle, nameDeco, tqBoost:()=>({ rose:1+rgGurPct("sh")/100, sc:1+rgGurPct("pen")/100, min:1+rgGurPct("dial")/100 }), rose:(lv,n)=>{ roseGive(lv,n); S.roseIn=(S.roseIn||0)+Math.floor(n); save(); }, screwMul, charmLives, applyTheme, alive, themeScrewArt, enter, leave, onKey, summary, debugUnlock, debugStart2, tutState, tutGive, tutGrow, tutSeed, tutSandbox, refreshRank, openModal, ownerId, useName, baraOn, baraLeft, baraSeen, debugStart3, debugStart4 };
 })();
 
 function openGarden(){ show("garden"); Garden.enter(); }
