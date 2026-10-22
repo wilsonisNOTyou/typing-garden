@@ -3947,12 +3947,12 @@ function baraWord(w){
 function baraMaybeQuiz(){
   baraN++;
   if(baraN<2 || Math.random()>=.2 || typeof TQ==="undefined") return false;
-  const w=TQ[Math.random()*TQ.length|0];
-  baraQ={ w, ch:tqMakeChoices(w) };
+  const w=TQ[Math.random()*TQ.length|0], rev=Math.random()<.5;   // 半分は逆4択(日本語から英単語を選ぶ)
+  baraQ={ w, ch:rev ? tqRevChoices(w) : tqMakeChoices(w) };
   currentWord=null; setWord("");
   $("wordPanel").classList.add("quiz");
-  $("wordText").textContent=w.en;
-  $("wordKana").textContent="TOEIC 4択 ・ 1〜4 で答える(正解で1本)";
+  $("wordText").textContent = rev ? w.means.slice(0,2).map(m=>m.j).join("、") : w.en;
+  $("wordKana").textContent=`TOEIC ${rev?"逆4択":"4択"} ・ 1〜4 で答える(正解で1本)`;
   $("romaji").innerHTML=baraQ.ch.map((c,i)=>`<span class="bq" data-i="${i}"><b>${i+1}</b>${tqEsc(c.txt)}</span>`).join("");
   return true;
 }
@@ -13675,7 +13675,7 @@ const tqOneProg = () => tqOneProg0()+tqCharmTxt();
 const tqOneProg0 = () => tqBara ? `バラバラ ・ ${tqFmtName(tqFmt)} ・ ${tqLvName((tqWords[tqI]||{}).lv||"")} ・ 正解 ${tqOk}` : `ノーミス勝負 ・ ${tqLvName(tqLadder[tqUnl-1])} 残り${tqLeft().length}${tqUnit()} ・ 次の正解で キー ${tqNum(tqGift().sc)}`;
 /* バラバラ: この問題の出題形式と単語(すべてのレベルから。リスニングは、リスニングを選んだときだけ混ざる) */
 function tqBaraFmt(){
-  const fs = (tqBaseFmt==="listen" ? ["listen","choice","fill"] : ["choice","fill"]).concat(window.IS_MOBILE ? [] : ["word"]);   // word: タイピングゲームの言葉(パソコンだけ)
+  const fs = (tqBaseFmt==="listen" ? ["listen","choice","fill","rev"] : ["choice","fill","rev"]).concat(window.IS_MOBILE ? [] : ["word"]);   // word: タイピングゲームの言葉(パソコンだけ)
   return fs[Math.random()*fs.length|0];
 }
 function tqBaraWord(f){
