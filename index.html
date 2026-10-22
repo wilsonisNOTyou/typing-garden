@@ -218,6 +218,8 @@ html.mobile .tq-opt.tq-lo .tq-lk{display:none}
 .tq-ltabs .btn.on{border-color:#8fc2ff; color:#cfe4ff}
 .tq-lsum{display:flex; flex-wrap:wrap; gap:.3rem; justify-content:center; margin:.4rem 0 .5rem}
 .tq-lsum .btn{font-size:.82rem; padding:.25rem .6rem}
+.tq-lmode{display:inline-flex; gap:.2rem; margin-right:.6rem}
+.tq-lrow .st small{opacity:.7; font-size:.75em; margin-right:.2em}
 .tq-lsum .btn.on{outline:2px solid var(--amber,#e0a020)}
 .tq-opt-row{display:flex; flex-wrap:wrap; gap:.35rem .6rem; justify-content:center; align-items:center; margin:.3rem 0 .4rem; font-size:.85rem}
 .tq-opt-row .btn{font-size:.8rem; padding:.2rem .55rem}
@@ -2263,7 +2265,7 @@ html.mobile #screen-garden .grk-list{max-height:none; flex:1 1 auto; min-height:
     </div>
     <div class="tq-view" id="tqList">
       <h2 class="tq-title">単語リスト</h2>
-      <p class="tq-sub">✓ 覚えた(3回続けて正解) ・ ✕ 苦手(間違えたまま)</p>
+      <p class="tq-sub">✓ 覚えた 3回続けて正解 ・ ✕ 苦手 間違えたまま ・ 穴埋めは単語とは別に記録</p>
       <div class="tq-ltabs" id="tqLTabs"></div>
       <div class="tq-lsum" id="tqLSum"></div>
       <div class="tq-lbody" id="tqLBody"></div>
@@ -4860,6 +4862,13 @@ function endBookGame(){
 /* ---------- 更新情報 ----------
    新しいものを上に足していく。d は YYYY-MM-DD */
 const NEWS=[
+  { d:"2026-10-23", t:"TOEIC 英単語に逆4択と、記録の見直し", items:[
+    "出題形式に「逆4択」を追加しました。日本語を見て英単語を打ちます。打てたらキー・農園の時間・薔薇の種が倍で、出てこなければ4択で答えられます。スマホでは4択です",
+    "単語リストの上に、覚えた・2回連続で正解・1回正解・苦手・まだの数を出しました。押すと、その単語だけに絞りこめます。キーボードでも操作できます",
+    "「覚えた単語を出さない」設定を追加しました。覚えた単語しか残っていないときだけ出ます",
+    "苦手を、基本・470〜990点・熟語のまとまりごとに選べるようにしました",
+    "穴埋め4択の覚えた・苦手は、単語とは別に記録するようにしました。穴埋めの記録は、ここからまっさらに始まります",
+  ]},
   { d:"2026-10-21", t:"薔薇ガチャの新しいレア度と、たくさんの改善", items:[
     "薔薇ガチャに GUR(0.001%)と、いちばん上のレア度 GXR(0.0001%)を追加しました",
     "TOEIC 英単語の一本勝負: キー・薔薇の種・農園の時間が倍になるのは300問までになりました",
@@ -13505,10 +13514,13 @@ function tqSuspSet(f,lv,v){ const a=tqSuspAll(), k=tqBestKey(f,lv); if(v) a[k]=v
 const TQ_OPT_KEY="typinggarden:toeic-opt";     // 設定(入力で訳が出るまでの秒数)
 const TQ_RANK = (f,lv) => "toeic-"+f+"-"+lv;   // ランキングの保存場所(出題形式・始めたレベルごと)
 const tqBestKey = (f,lv) => f+"-"+lv;          // 自己ベストも出題形式・始めたレベルごと
-let tqStat={}, tqBest={}, tqSec=5;
+let tqStat={}, tqStatF={}, tqBest={}, tqSec=5;   // tqStatF: 穴埋め4択の記録(単語の記録とは別)
+const TQ_KEY_F=TQ_KEY+"-fill";
+const tqStore = fmt => fmt==="fill" ? tqStatF : tqStat;   // 4択・逆4択は単語の記録、穴埋めは穴埋めの記録
 const tqRevealMs = () => tqSec*1000;
 const tqLoad = () => {
   try{ tqStat=JSON.parse(localStorage.getItem(TQ_KEY)||"{}")||{}; }catch(e){ tqStat=tqStat||{}; }
+  try{ tqStatF=JSON.parse(localStorage.getItem(TQ_KEY_F)||"{}")||{}; }catch(e){ tqStatF=tqStatF||{}; }
   try{ tqBest=JSON.parse(localStorage.getItem(TQ_BEST_KEY)||"{}")||{}; }catch(e){ tqBest=tqBest||{}; }
   try{ const o=JSON.parse(localStorage.getItem(TQ_OPEN_KEY)||"[]"); tqOpenLv=Array.isArray(o)?o:[]; }catch(e){}
   try{ const o=JSON.parse(localStorage.getItem(TQ_OPT_KEY)||"{}")||{}; if(o.sec>=TQ_SEC_MIN && o.sec<=TQ_SEC_MAX) tqSec=o.sec|0; tqHideGood=!!o.hide; if(TQ_WG.some(x=>x[0]===o.wg)) tqWeakG=o.wg; }catch(e){}
@@ -13522,16 +13534,16 @@ const tqWgOk = w => tqWeakG==="all" || ((TQ_RANK_GROUPS.find(g=>g[0]===tqWeakG)|
 const tqWgName = () => (TQ_WG.find(x=>x[0]===tqWeakG)||TQ_WG[0])[1];
 let tqRevTyped=false, tqRevStage="", tqRevBuf="";   // 逆4択: 打てたか・打つ段階か4択の段階か・打った文字
 function tqSetSec(d){ const v=Math.max(TQ_SEC_MIN,Math.min(TQ_SEC_MAX,tqSec+d)); if(v===tqSec){ sndMiss(); return; } tqSec=v; tqSaveOpt(); tqMenu(); }
-const tqSaveStat = () => { try{ localStorage.setItem(TQ_KEY,JSON.stringify(tqStat)); }catch(e){} };
+const tqSaveStat = () => { try{ localStorage.setItem(TQ_KEY,JSON.stringify(tqStat)); localStorage.setItem(TQ_KEY_F,JSON.stringify(tqStatF)); }catch(e){} };
 const tqSaveBest = () => { try{ localStorage.setItem(TQ_BEST_KEY,JSON.stringify(tqBest)); }catch(e){} };
-const tqSt = en => tqStat[en] || {c:0,w:0,s:0};
-const tqGood = en => tqSt(en).s>=3;                                   // 覚えた: 3回続けて正解
-const tqWeak = en => { const t=tqSt(en); return t.w>0 && t.s<2; };     // 苦手: 間違えたあと、まだ2回続けて正解していない
+const tqSt = (en,fmt=tqFmt) => tqStore(fmt)[en] || {c:0,w:0,s:0};
+const tqGood = (en,fmt=tqFmt) => tqSt(en,fmt).s>=3;                                   // 覚えた: 3回続けて正解
+const tqWeak = (en,fmt=tqFmt) => { const t=tqSt(en,fmt); return t.w>0 && t.s<2; };     // 苦手: 間違えたあと、まだ2回続けて正解していない
 /* 出題時の単語の状態 */
 function tqWstShow(w){
   const el=$("tqWst"); if(!el) return;
   if(!w || w.word){ el.className="tq-wst"; el.textContent=""; return; }
-  const t=tqStat[w.en];
+  const t=tqStore(tqFmt)[w.en];
   const [c,txt] = !t ? ["new","はじめて"] : tqGood(w.en) ? ["good","✓ 覚えた単語"] : tqWeak(w.en) ? ["weak",`✕ 苦手な単語 ・ あと${2-t.s}回続けて正解で解消`] : t.s>0 ? ["run",`${t.s}回連続で正解中`] : ["",""];
   el.className="tq-wst "+c; el.textContent = tqFmt==="listen" ? txt.replace("単語","問題") : txt;
 }
@@ -13550,10 +13562,10 @@ function tqMarkFx(en,ok){
   const el=$("tqWmsg"); if(el) el.innerHTML=html;
   if(html){ const w=tqWords[tqI]; if(w) tqWstShow(w); }
 }
-function tqMark(en,ok){ const t=Object.assign({c:0,w:0,s:0},tqStat[en]); if(ok){ t.c++; t.s++; }else{ t.w++; t.s=0; } t.t=Date.now(); tqStat[en]=t; tqSaveStat(); }
+function tqMark(en,ok){ const st=tqStore(tqFmt), t=Object.assign({c:0,w:0,s:0},st[en]); if(ok){ t.c++; t.s++; }else{ t.w++; t.s=0; } t.t=Date.now(); st[en]=t; tqSaveStat(); }
 const tqHasSent = w => !!TQ_SENT[w.en];
 /* レベルの単語(穴埋めは例文のある単語だけ) */
-const tqPool = (lv,fmt=tqFmt) => fmt==="listen" ? (lv==="weak" ? TQL.filter(w=>tqWeak(w.en)) : lv==="ls" ? TQL : []) : (lv==="weak" ? TQ.filter(w=>tqWeak(w.en) && tqWgOk(w)) : TQ.filter(w=>w.lv===lv)).filter(w=>fmt!=="fill" || tqHasSent(w));
+const tqPool = (lv,fmt=tqFmt) => fmt==="listen" ? (lv==="weak" ? TQL.filter(w=>tqWeak(w.en)) : lv==="ls" ? TQL : []) : (lv==="weak" ? TQ.filter(w=>tqWeak(w.en,fmt) && tqWgOk(w)) : TQ.filter(w=>w.lv===lv)).filter(w=>fmt!=="fill" || tqHasSent(w));
 const tqLvName = lv => (TQ_LEVELS.concat(TQ_LEVELS_L.slice(0,1)).find(([k])=>k===lv)||[0,lv])[1];
 const tqFmtName = f => (TQ_FMTS.find(([k])=>k===f)||[0,f==="type"?"入力":f==="word"?"タイピング":f])[1];   // word: バラバラのときに混ざるタイピングの言葉
 const tqEsc = v => String(v).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
@@ -13612,7 +13624,7 @@ function tqMenu(){
   if(tqKind==="one" && !baraOn()) $("tqNote").textContent += ` ・ ${TQ_CKPT}問ごとに、中断して続きをあとで遊べます`;
 }
 /* 10語を選ぶ: 苦手・まだ出ていない単語ほど出やすく、覚えた単語は出にくい */
-const tqWt = w => tqWeak(w.en) ? 4 : !tqStat[w.en] ? 3 : tqGood(w.en) ? .5 : 2;
+const tqWt = w => tqWeak(w.en) ? 4 : !tqStore(tqFmt)[w.en] ? 3 : tqGood(w.en) ? .5 : 2;
 function tqDraw(rest){
   let r=Math.random()*rest.reduce((a,w)=>a+tqWt(w),0), i=0;
   for(; i<rest.length-1; i++){ r-=tqWt(rest[i]); if(r<0) break; }
@@ -14089,23 +14101,22 @@ function tqRankGroupStep(dir){ const n=TQ_RANK_GROUPS.length, i=TQ_RANK_GROUPS.f
 $("tqRankLvs").addEventListener("click",e=>{ const b=e.target.closest("[data-lv]"); if(!b) return; tqRankLv=b.dataset.lv; openRanking(rankCur, playerName); });
 setInterval(()=>{ if(tqRegWait && !nmOpen){ tqRegWait=false; if(playerName && tqPhase==="result" && scene==="toeic") tqRegister(); } },400);
 /* ---- 単語リスト ---- */
-let tqListF="all";   // 単語リストの絞り込み(状態)
+let tqListF="all", tqListM="word";   // 単語リストの絞り込み(状態)・見る記録(単語 / 穴埋め)
 function tqList(lv){
   if(lv && lv!==tqListLv) tqListF="all";
-  { const h=$("tqLHint"); if(h) h.innerHTML = window.IS_MOBILE ? "" : `<span class="kbdh">1〜0 -</span> <span class="kbdh">Tab</span> レベル ・ <span class="kbdh">← →</span> 絞りこみ ・ <span class="kbdh">↑ ↓</span> スクロール ・ <span class="kbdh">Esc</span> 戻る`; }
+  { const h=$("tqLHint"); if(h) h.innerHTML = window.IS_MOBILE ? "" : `<span class="kbdh">1〜0 -</span> <span class="kbdh">Tab</span> レベル ・ <span class="kbdh">← →</span> 絞りこみ ・ <span class="kbdh">F</span> 単語と穴埋め ・ <span class="kbdh">↑ ↓</span> スクロール ・ <span class="kbdh">Esc</span> 戻る`; }
   tqListLv=lv||tqListLv; tqPhase="list"; tqView("tqList");
   $("tqLTabs").innerHTML=TQ_LEVELS.map(([k,nm],i)=>`<button class="btn${k===tqListLv?" on":""}" data-lv="${k}">${nm} <span class="kbdh">${TQ_LVKEYS[i]}</span></button>`).join("");
-  const all=tqPool(tqListLv,"choice");
-  const stOf = w => tqGood(w.en) ? "good" : tqWeak(w.en) ? "weak" : !tqStat[w.en] ? "new" : tqSt(w.en).s>=2 ? "s2" : tqSt(w.en).s>=1 ? "s1" : "new";
+  const lf = tqListM==="fill" ? "fill" : "choice", all=tqPool(tqListLv,lf);
+  const stOf = (w,f=lf) => tqGood(w.en,f) ? "good" : tqWeak(w.en,f) ? "weak" : !tqStore(f)[w.en] ? "new" : tqSt(w.en,f).s>=2 ? "s2" : tqSt(w.en,f).s>=1 ? "s1" : "new";
   const cnt={ good:0, s2:0, s1:0, weak:0, new:0 }; for(const w of all) cnt[stOf(w)]++;
   if(!cnt[tqListF] && tqListF!=="all") tqListF="all";
-  $("tqLSum").innerHTML=[["all","ぜんぶ",all.length],["good","✓ 覚えた",cnt.good],["s2","2回連続で正解",cnt.s2],["s1","1回正解",cnt.s1],["weak","✕ 苦手",cnt.weak],["new","まだ",cnt.new]]
+  $("tqLSum").innerHTML=`<span class="tq-lmode">${[["word","単語"],["fill","穴埋め"]].map(([k,nm])=>`<button class="btn${k===tqListM?" on":""}" data-lm="${k}">${nm}</button>`).join("")}</span>`+[["all","ぜんぶ",all.length],["good","✓ 覚えた",cnt.good],["s2","2回連続で正解",cnt.s2],["s1","1回正解",cnt.s1],["weak","✕ 苦手",cnt.weak],["new","まだ",cnt.new]]
     .map(([k,nm,n])=>`<button class="btn${k===tqListF?" on":""}" data-lf="${k}" ${n||k==="all"?"":"disabled"}>${nm} <b>${n}</b>${k==="all"?"語":""}</button>`).join("");
   const pool = tqListF==="all" ? all : all.filter(w=>stOf(w)===tqListF);
   $("tqLBody").innerHTML = pool.length ? pool.map(w=>{
-    const t=tqSt(w.en);
-    const st = tqGood(w.en) ? `<span class="st good">✓ 覚えた</span>` : tqWeak(w.en) ? `<span class="st weak">✕ 苦手</span>` : tqStat[w.en] ? `<span class="st">${t.c} / ${t.c+t.w}回</span>` : `<span class="st">未</span>`;
-    return `<div class="tq-lrow"><span class="w">${tqEsc(w.en)}</span><span class="m">${tqEsc(w.means.map(m=>m.j).join("、"))}</span>${st}</div>`;
+    const mark = f => { const t=tqSt(w.en,f), x=stOf(w,f); return `<span class="st${x==="good"?" good":x==="weak"?" weak":""}"><small>${f==="fill"?"穴埋め":"単語"}</small> ${x==="good"?"✓ 覚えた":x==="weak"?"✕ 苦手":tqStore(f)[w.en]?`${t.c} / ${t.c+t.w}回`:"未"}</span>`; };
+    return `<div class="tq-lrow"><span class="w">${tqEsc(w.en)}</span><span class="m">${tqEsc(w.means.map(m=>m.j).join("、"))}</span>${mark("choice")}${tqHasSent(w)?mark("fill"):`<span class="st"></span>`}</div>`;
   }).join("") : `<p class="tq-sub" style="padding:1rem">苦手な単語はまだありません</p>`;
 }
 /* ---- キー操作 ---- */
@@ -14130,6 +14141,7 @@ function tqKey(e){
     else if(k==="r"||k==="R") tqRankOpen();
     else if(k==="ArrowLeft"||k==="ArrowRight"){ e.preventDefault(); const fs=[...$("tqLSum").querySelectorAll("[data-lf]:not([disabled])")].map(b=>[b.dataset.lf]); tqListF=tqCycle(fs,tqListF,k==="ArrowLeft"?-1:1); tqList(); }
     else if(k==="ArrowUp"||k==="ArrowDown"){ e.preventDefault(); $("tqLBody").scrollBy(0,k==="ArrowDown"?120:-120); }
+    else if(k==="f"||k==="F"){ tqListM = tqListM==="fill" ? "word" : "fill"; tqListF="all"; tqList(); }
     else if(k==="Tab"){ e.preventDefault(); tqList(tqCycle(TQ_LEVELS,tqListLv,e.shiftKey?-1:1)); }
     else if(li>=0) tqList(TQ_LEVELS[li][0]);
     return;
@@ -14173,7 +14185,7 @@ function tqKey(e){
 }
 /* ---- クリック・タップ ---- */
 $("tqFmts").addEventListener("click",e=>{ const b=e.target.closest("[data-f]"); if(b){ tqFmt=b.dataset.f; tqMenu(); } });
-$("tqLSum").addEventListener("click",e=>{ const b=e.target.closest("[data-lf]"); if(b && !b.disabled){ tqListF=b.dataset.lf; tqList(); } });
+$("tqLSum").addEventListener("click",e=>{ const m=e.target.closest("[data-lm]"); if(m){ tqListM=m.dataset.lm; tqListF="all"; tqList(); return; } const b=e.target.closest("[data-lf]"); if(b && !b.disabled){ tqListF=b.dataset.lf; tqList(); } });
 $("tqOptRow").addEventListener("click",e=>{ if(e.target.closest("#tqHideBtn")){ tqHideGood=!tqHideGood; tqSaveOpt(); tqMenu(); return; } const b=e.target.closest("[data-wg]"); if(b){ tqWeakG=b.dataset.wg; tqSaveOpt(); tqMenu(); } });
 $("tqKinds").addEventListener("click",e=>{ const b=e.target.closest("[data-k]"); if(b){ tqKind=b.dataset.k; tqMenu(); } });
 $("tqLevels").addEventListener("click",e=>{ const b=e.target.closest(".tq-lv"); if(b && !b.disabled) tqStart(b.dataset.lv); });
