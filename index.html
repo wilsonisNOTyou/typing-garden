@@ -4369,8 +4369,8 @@ async function submitScore(name,d,extra){
   const ref=db.ref("typinggarden/scores/"+d);
   const snap=await ref.orderByChild("n").equalTo(name).once("value");
   const mine=[];
-  snap.forEach(c=>{ const v=c.val(); mine.push({key:c.key, s:v.s, e:v.e, m:v.m}); });
-  const entry={n:name, s:extra.s, t:Date.now(), o:myId()};
+  snap.forEach(c=>{ const v=c.val(); mine.push({key:c.key, s:v.s, e:v.e, m:v.m, v}); });
+  const entry=Object.assign({n:name, s:extra.s, t:Date.now(), o:myId()}, rankDeco());   // 薔薇の紋章・薔薇色の名前
   if(extra.e!=null) entry.e=extra.e;
   if(extra.m!=null) entry.m=extra.m;
   if(extra.l!=null) entry.l=extra.l;   // TOEIC: 始めたレベル
@@ -4378,6 +4378,7 @@ async function submitScore(name,d,extra){
   mine.sort((a,b)=>betterRecord(b,a,d));   // 良い順
   if(mine.length && betterRecord(entry,mine[0],d)<=0){
     for(const x of mine.slice(MAX_ENTRIES_PER_PLAYER)) await ref.child(x.key).remove();
+    await rankRedeco(ref,mine[0]);
     return {saved:false};
   }
   for(const x of mine) await ref.child(x.key).remove();
@@ -4385,15 +4386,22 @@ async function submitScore(name,d,extra){
   return {saved:true};
 }
 
+const rankDeco = () => { try{ return Garden.nameDeco(); }catch(e){ return {}; } };   // 薔薇の紋章・薔薇色の名前
+/* 記録は更新しなくても、いまの薔薇の紋章・薔薇色の名前に付け替える(記録は書きかえられないので、消して同じ記録を載せ直す) */
+async function rankRedeco(ref,x){
+  const dk=rankDeco(), v=x&&x.v; if(!v || (v.rk||"")===(dk.rk||"") && (v.rc||"")===(dk.rc||"")) return;
+  const nv=Object.assign({},v); delete nv.rk; delete nv.rc; Object.assign(nv,dk);
+  await ref.child(x.key).remove(); await ref.push(nv); rankCache={};
+}
 /* バラバラのランキングに載せる(名前とモードごとに、数字が大きいほうを1件だけ残す) */
 async function submitBara(name,md,val,unit){
   const ref=db.ref("typinggarden/scores/barabara");
   const snap=await ref.orderByChild("n").equalTo(name).once("value");
-  const mine=[]; snap.forEach(c=>{ const v=c.val(); if((v.md||"")===md) mine.push({ key:c.key, s:v.s }); });
+  const mine=[]; snap.forEach(c=>{ const v=c.val(); if((v.md||"")===md) mine.push({ key:c.key, s:v.s, v }); });
   mine.sort((a,b)=>b.s-a.s);
-  if(mine.length && mine[0].s>=val) return {saved:false};
+  if(mine.length && mine[0].s>=val){ await rankRedeco(ref,mine[0]); return {saved:false}; }
   for(const x of mine) await ref.child(x.key).remove();
-  await ref.push({ n:name, s:val, t:Date.now(), o:myId(), md, u:unit }); rankCache={};
+  await ref.push(Object.assign({ n:name, s:val, t:Date.now(), o:myId(), md, u:unit }, rankDeco())); rankCache={};
   return {saved:true};
 }
 /* 名前の文字が、ときどき入れ替わって見える(保存されている名前はそのまま) */
@@ -4474,7 +4482,7 @@ async function openRanking(d,highlight){
       }
       li.innerHTML=`<span class="pos">${i+1}位</span><span class="pname"></span><span class="pscore">${scoreText}</span>`;
       li.querySelector(".pname").textContent = d==="barabara" ? baraName(r.n) : r.n;
-      if(isGardenRank(d) && (r.rk||r.rc)) try{ li.querySelector(".pname").innerHTML=Garden.roseNamePlate(r.n,r); const rs=Garden.roseRowStyle(r); if(rs){ li.className+=" "+Garden.roseRowCls(r); li.style.cssText=rs; } }catch(e){}   // 薔薇の紋章・薔薇色の名前
+      if(r.rk||r.rc) try{ li.querySelector(".pname").innerHTML=Garden.roseNamePlate(d==="barabara"?baraName(r.n):r.n,r); const rs=Garden.roseRowStyle(r); if(rs){ li.className+=" "+Garden.roseRowCls(r); li.style.cssText=rs; } }catch(e){}   // 薔薇の紋章・薔薇色の名前
       // XSS対策でtextContent(バラバラは名前の文字がときどき入れ替わる)
       list.appendChild(li);
     });
