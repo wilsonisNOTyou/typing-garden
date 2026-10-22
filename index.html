@@ -4393,6 +4393,25 @@ async function rankRedeco(ref,x){
   const nv=Object.assign({},v); delete nv.rk; delete nv.rc; Object.assign(nv,dk);
   await ref.child(x.key).remove(); await ref.push(nv); rankCache={};
 }
+/* 飾りが変わったら(ローズティーを飲んだ・貴重品を切り替えた・起動時)、ランキングにある自分の記録をまとめて付け替える */
+const RK_DECO_KEY="typinggarden:rkdeco";
+let rkDecoBusy=false;
+async function rankRedecoAll(){
+  if(!db || !playerName || rkDecoBusy) return;
+  const dk=rankDeco(), sig=(dk.rk||"")+"|"+(dk.rc||""), me=myId();
+  try{ if(localStorage.getItem(RK_DECO_KEY)===playerName+"|"+sig) return; }catch(e){}
+  rkDecoBusy=true;
+  try{
+    await Promise.all(SCORE_DIFFS.map(async d=>{
+      const ref=db.ref("typinggarden/scores/"+d), rows=[];
+      (await ref.orderByChild("n").equalTo(playerName).once("value")).forEach(c=>{ const v=c.val(); if(!v.o || v.o===me) rows.push({ key:c.key, v }); });
+      for(const x of rows) await rankRedeco(ref,x);
+    }));
+    try{ localStorage.setItem(RK_DECO_KEY,playerName+"|"+sig); }catch(e){}
+  }catch(e){}
+  rkDecoBusy=false;
+}
+setTimeout(rankRedecoAll,4000);
 /* バラバラのランキングに載せる(名前とモードごとに、数字が大きいほうを1件だけ残す) */
 async function submitBara(name,md,val,unit){
   const ref=db.ref("typinggarden/scores/barabara");
@@ -9303,7 +9322,7 @@ function gxSaveName(){
   const v=ip.value.trim().slice(0,12); S.plateName=v; ip.blur();
   sfx.buy(); toast(`薔薇のプレートを「${esc(plateName())}」にしました`,"good",2400); gxApply(); save(); renderTreas();
 }
-function gxToggle(k){ if(!(S.gx&&S.gx[k])){ sfx.nope(); return; } S.gxOff=S.gxOff||{}; S.gxOff[k]=!S.gxOff[k]; sfx.tab(); gxApply(); save(); renderAll(); renderTreas(); }
+function gxToggle(k){ if(!(S.gx&&S.gx[k])){ sfx.nope(); return; } S.gxOff=S.gxOff||{}; S.gxOff[k]=!S.gxOff[k]; sfx.tab(); gxApply(); save(); renderAll(); renderTreas(); setTimeout(()=>{ try{ rankRedecoAll(); }catch(e){} },500); }
 /* 最後に飲んだローズティー(紋章・名前の色に使う)。"rose_b1@3" のような印で番付に送る */
 const teaCode = () => S.lastTea && CROP[S.lastTea.r] && CROP[S.lastTea.r].rose ? S.lastTea.r+"@"+(S.lastTea.g||0) : "";
 function roseCodeOk(code){ const m=/^(rose_[a-z0-9]+)@([035])$/.exec(String(code||"")); return m && CROP[m[1]] && CROP[m[1]].rose ? { id:m[1], g:+m[2] } : null; }
@@ -10634,7 +10653,7 @@ function cookEat(id,g){
     if(two){ const lost=buff2Now(); S.buff2=old; if(lost) toast(`${esc(dishName(DISH[lost.d],lost.t))}の効果は終わりました(お弁当箱に入るのは2つまで)`,"warn",4200); }
     const dm=dishMinOf(d,g);   // 効く時間(分)
     S.buff={ d:id, t:g, until:Date.now()+dm*60000 };
-    if(d.rose) S.lastTea={ r:d.rose, g };   // 薔薇の紋章・薔薇色の名前は、最後に飲んだローズティーの薔薇
+    if(d.rose){ S.lastTea={ r:d.rose, g }; setTimeout(()=>{ try{ rankRedecoAll(); }catch(e){} },500); }   // 薔薇の紋章・薔薇色の名前は、最後に飲んだローズティーの薔薇
     what=`${esc(effText(d,g))}(${fmtMin(dm)})`;
     toast(`${dishIco(d,g)} ${esc(dishName(d,g))}を食べました。${esc(effText(d,g))}(${fmtMin(dm)})${two?` ・ ${esc(dishName(DISH[old.d],old.t))}の効果も続いています(お弁当箱)`:(old?` ・ ${esc(dishName(DISH[old.d],old.t))}の効果は上書きされました`:"")}`,"good",5200,true);
   }
