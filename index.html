@@ -218,6 +218,7 @@ html.mobile .tq-opt.tq-lo .tq-lk{display:none}
 .tq-ltabs .btn.on{border-color:#8fc2ff; color:#cfe4ff}
 .tq-lsum{display:flex; flex-wrap:wrap; gap:.3rem; justify-content:center; margin:.4rem 0 .5rem}
 .tq-lsum .btn{font-size:.82rem; padding:.25rem .6rem}
+.tq-rev4 .no{width:auto; padding:0 .4em}
 .tq-lmode{display:inline-flex; gap:.2rem; margin-right:.6rem}
 .tq-lrow .st small{opacity:.7; font-size:.75em; margin-right:.2em}
 .tq-lsum .btn.on{outline:2px solid var(--amber,#e0a020)}
@@ -4864,9 +4865,10 @@ function endBookGame(){
 const NEWS=[
   { d:"2026-10-23", t:"TOEIC 英単語に逆4択と、記録の見直し", items:[
     "出題形式に「逆4択」を追加しました。日本語を見て、設定した時間内に英単語のスペルをタイピングします。時間切れになると4択に移行します。タイピングできたらご褒美が2倍、4択で正解すれば1倍です。スマホでプレイするときは4択のみになります",
-    "単語リスト（L）の上に、覚えた・2回連続で正解・1回正解・苦手・まだの数を出しました。押すと、その単語だけに絞りこめます。覚えた単語を出さない設定を追加しました",
-    "苦手を、基本・470〜990点・熟語のまとまりごとに選べるようにしました",
+    "覚えた単語を出さない設定を追加しました",
     "穴埋め4択は難易度が高いため、覚えた・苦手を単語の4択とは別に記録するようにしました。穴埋めの記録は、ここからまっさらに始まります",
+    "苦手を、基本・470〜990点・熟語のまとまりごとに選べるようにしました",
+    "単語リスト（L）の上に、覚えた・2回連続で正解・1回正解・苦手・まだの数を出しました。押すと、その単語だけに絞りこめます",
   ]},
   { d:"2026-10-21", t:"薔薇ガチャの新しいレア度と、たくさんの改善", items:[
     "薔薇ガチャに GUR(0.001%)と、いちばん上のレア度 GXR(0.0001%)を追加しました",
@@ -13725,12 +13727,12 @@ function tqNext(){
     $("tqWord").innerHTML=`<span class="tq-revja">${tqEsc(w.means.slice(0,2).map(m=>m.j).join("、"))}</span>`;
     $("tqMean").className="tq-mean"; $("tqMean").textContent="";
     if(window.IS_MOBILE){ tqRevChoice(); return; }
-    tqRevStage="type"; $("tqOpts").innerHTML=""; $("tqBarW").style.display="";
+    tqRevStage="type"; $("tqOpts").innerHTML=`<button class="btn tq-opt tq-idk tq-rev4" data-rev="1"><span class="no">Enter</span><span>思い出せない → すぐ4択にする</span></button>`; $("tqBarW").style.display="";
     const bar=$("tqBar"); bar.style.transition="none"; bar.style.transform="scaleX(1)"; void bar.offsetWidth;
     bar.style.transition=`transform ${tqRevealMs()}ms linear`; bar.style.transform="scaleX(0)";
     tqTimer=setTimeout(tqRevChoice,tqRevealMs());
     tqRevRender();
-    $("tqHint").textContent=`英単語を打つ ・ 打てたら倍 ・ Enter で4択 ・ Esc やめる`;
+    $("tqHint").textContent=`英単語を打つ ・ 打てたら倍 ・ ${tqSec}秒たつか Enter で4択 ・ Esc やめる`;
     return;
   }
   if(tqFmt==="type"){
@@ -14190,7 +14192,7 @@ $("tqKinds").addEventListener("click",e=>{ const b=e.target.closest("[data-k]");
 $("tqLevels").addEventListener("click",e=>{ const b=e.target.closest(".tq-lv"); if(b && !b.disabled) tqStart(b.dataset.lv); });
 $("tqOpts").addEventListener("click",e=>{ const b=e.target.closest(".tq-opt"); if(!b) return;
   if(tqPhase==="ckpt"){ if(b.dataset.ck==="go"){ tqPhase="play"; tqNext(); } else if(b.dataset.ck==="stop") tqSuspend(); return; }
-  if(tqPhase==="wait"){ tqNext(); return; } tqChoose(+b.dataset.i); });
+  if(tqPhase==="wait"){ tqNext(); return; } if(b.dataset.rev){ tqRevChoice(); return; } tqChoose(+b.dataset.i); });
 $("screen-toeic").querySelector(".tq-card").addEventListener("click",e=>{
   if(e.target.closest("#tqListen")){ tqListenPlay(); return; }
   if(e.target.closest(".tq-slow")) return;
