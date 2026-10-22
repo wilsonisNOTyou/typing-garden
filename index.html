@@ -216,6 +216,17 @@ html.mobile .tq-opt.tq-lo .tq-lk{display:none}
 .tq-res .mk{text-align:center}
 .tq-ltabs{display:flex; gap:.4rem; justify-content:center; flex-wrap:wrap; margin-bottom:.6rem}
 .tq-ltabs .btn.on{border-color:#8fc2ff; color:#cfe4ff}
+.tq-lsum{display:flex; flex-wrap:wrap; gap:.3rem; justify-content:center; margin:.4rem 0 .5rem}
+.tq-lsum .btn{font-size:.82rem; padding:.25rem .6rem}
+.tq-rev4 .no{width:auto; padding:0 .4em}
+.tq-lmode{display:inline-flex; gap:.2rem; margin-right:.6rem}
+.tq-lrow .st small{opacity:.7; font-size:.75em; margin-right:.2em}
+.tq-lsum .btn.on{outline:2px solid var(--amber,#e0a020)}
+.tq-opt-row{display:flex; flex-wrap:wrap; gap:.35rem .6rem; justify-content:center; align-items:center; margin:.3rem 0 .4rem; font-size:.85rem}
+.tq-opt-row .btn{font-size:.8rem; padding:.2rem .55rem}
+.tq-opt-row .btn.on{outline:2px solid var(--amber,#e0a020)}
+.tq-wg{display:inline-flex; flex-wrap:wrap; gap:.25rem; align-items:center}
+.tq-revja{font-size:.9em}
 .tq-lbody{max-height:60vh; overflow:auto; text-align:left; border:1px solid var(--line); border-radius:8px; padding:.3rem .6rem}
 .tq-lrow{display:grid; grid-template-columns:8.5rem 1fr 4.5rem; gap:.5rem; padding:.35rem 0; border-bottom:1px dashed var(--line); font-size:.9rem; align-items:baseline}
 .tq-lrow .w{font-family:Georgia,'Times New Roman',serif; color:#fff}
@@ -2205,7 +2216,8 @@ html.mobile #screen-garden .grk-list{max-height:none; flex:1 1 auto; min-height:
       <p class="tq-sub">基本単語 2,288語・TOEIC 1,250語・熟語 250 ・ 正解すると農園にキーと薔薇の種が届きます</p>
       <p class="tq-rowl">出題形式<span class="kbdh">Tab</span></p>
       <div class="tq-modes" id="tqFmts"></div>
-      <p class="tq-sec" id="tqSecRow">訳が出るまで <button class="btn" id="tqSecDn" aria-label="1秒短く">−</button><b id="tqSecV">5</b>秒<button class="btn" id="tqSecUp" aria-label="1秒長く">＋</button><span class="kbdh">← →</span></p>
+      <p class="tq-sec" id="tqSecRow"><span id="tqSecL">訳が出るまで</span> <button class="btn" id="tqSecDn" aria-label="1秒短く">−</button><b id="tqSecV">5</b>秒<button class="btn" id="tqSecUp" aria-label="1秒長く">＋</button><span class="kbdh">← →</span></p>
+      <p class="tq-opt-row" id="tqOptRow"></p>
       <p class="tq-rowl">モード<span class="kbdh">M</span></p>
       <div class="tq-modes" id="tqKinds"></div>
       <p class="tq-rowl">レベル</p>
@@ -2254,9 +2266,11 @@ html.mobile #screen-garden .grk-list{max-height:none; flex:1 1 auto; min-height:
     </div>
     <div class="tq-view" id="tqList">
       <h2 class="tq-title">単語リスト</h2>
-      <p class="tq-sub">✓ 覚えた(3回続けて正解) ・ ✕ 苦手(間違えたまま)</p>
+      <p class="tq-sub">✓ 覚えた 3回続けて正解 ・ ✕ 苦手 間違えたまま ・ 穴埋めは単語とは別に記録</p>
       <div class="tq-ltabs" id="tqLTabs"></div>
+      <div class="tq-lsum" id="tqLSum"></div>
       <div class="tq-lbody" id="tqLBody"></div>
+      <p class="tq-sub" id="tqLHint"></p>
       <div class="btn-row" style="margin-top:.8rem"><button class="btn" id="tqListBack">戻る <span class="kbdh">Esc</span></button></div>
     </div>
   </section>
@@ -2329,6 +2343,7 @@ html.mobile #screen-garden .grk-list{max-height:none; flex:1 1 auto; min-height:
     <div class="rank-tabs">
       <button class="btn" id="tab-toeic-choice">4択</button>
       <button class="btn" id="tab-toeic-fill">穴埋め4択</button>
+      <button class="btn" id="tab-toeic-rev">逆4択</button>
       <button class="btn" id="tab-toeic-listen">リスニング</button>
     </div>
     <div class="rank-tabs tq-ranklv" id="tqRankLvs" hidden></div>
@@ -3431,8 +3446,8 @@ const DIFF_LABEL = {
 const MISS_PENALTY = { easy: 10, normal: 7, hard: 5, barabara: 7 }; // このミス数ごとにキー-1本
 const DICT_TABS = ["easy","normal","hard"];            // 辞典に並べる難易度
 /* ランキングのタブ: スコアアタック → タイムアタック → ノーミス勝負 の順 */
-const RANK_TABS = ["easy","normal","hard","barabara","ta-easy","ta-normal","ta-hard","oneshot", "toeic-choice","toeic-fill","toeic-listen", "g-money","g-earn","g-harvest","g-book","g-dbook","g-rose","g-goal"];
-DIFF_LABEL["toeic-type"]="TOEIC ノーミス勝負 入力"; DIFF_LABEL["toeic-choice"]="TOEIC ノーミス勝負 4択"; DIFF_LABEL["toeic-fill"]="TOEIC ノーミス勝負 穴埋め4択"; DIFF_LABEL["toeic-listen"]="TOEIC ノーミス勝負 リスニング";
+const RANK_TABS = ["easy","normal","hard","barabara","ta-easy","ta-normal","ta-hard","oneshot", "toeic-choice","toeic-fill","toeic-rev","toeic-listen", "g-money","g-earn","g-harvest","g-book","g-dbook","g-rose","g-goal"];
+DIFF_LABEL["toeic-type"]="TOEIC ノーミス勝負 入力"; DIFF_LABEL["toeic-choice"]="TOEIC ノーミス勝負 4択"; DIFF_LABEL["toeic-fill"]="TOEIC ノーミス勝負 穴埋め4択"; DIFF_LABEL["toeic-rev"]="TOEIC ノーミス勝負 逆4択"; DIFF_LABEL["toeic-listen"]="TOEIC ノーミス勝負 リスニング";
 const isGardenRank = d => d==="g-money" || d==="g-harvest" || d==="g-book" || d==="g-earn" || d==="g-dbook" || d==="g-rose" || d==="g-goal";
 const gRankUnit = d => (d==="g-money"||d==="g-earn") ? "キー" : (d==="g-book"||d==="g-dbook" ? "項目" : d==="g-rose" ? "色" : "個");
 DIFF_LABEL["g-money"]="キーボード農園 所持キー"; DIFF_LABEL["g-harvest"]="キーボード農園 累計収穫"; DIFF_LABEL["g-book"]="キーボード農園 図鑑"; DIFF_LABEL["g-dbook"]="キーボード農園 料理図鑑"; DIFF_LABEL["g-rose"]="キーボード農園 薔薇"; DIFF_LABEL["g-goal"]="キーボード農園 実績"; DIFF_LABEL["g-earn"]="キーボード農園 累計獲得キー";
@@ -4517,7 +4532,7 @@ function showRegName(){
 
 /* ---------- プレイヤー名(ランキングと番付で共通) ----------
    一度決めた名前は固定。変えるときは、今までのランキングと番付の記録もまとめて新しい名前に移す */
-const SCORE_DIFFS=["easy","normal","hard","barabara","ta-easy","ta-normal","ta-hard","oneshot","toeic-choice-b1","toeic-choice-b2","toeic-choice-b3","toeic-choice-470","toeic-choice-630","toeic-choice-730","toeic-choice-860","toeic-choice-990","toeic-choice-i1","toeic-choice-i2","toeic-fill-b1","toeic-fill-b2","toeic-fill-b3","toeic-fill-470","toeic-fill-630","toeic-fill-730","toeic-fill-860","toeic-fill-990","toeic-fill-i1","toeic-fill-i2","toeic-listen-ls"];
+const SCORE_DIFFS=["easy","normal","hard","barabara","ta-easy","ta-normal","ta-hard","oneshot","toeic-choice-b1","toeic-choice-b2","toeic-choice-b3","toeic-choice-470","toeic-choice-630","toeic-choice-730","toeic-choice-860","toeic-choice-990","toeic-choice-i1","toeic-choice-i2","toeic-fill-b1","toeic-fill-b2","toeic-fill-b3","toeic-fill-470","toeic-fill-630","toeic-fill-730","toeic-fill-860","toeic-fill-990","toeic-fill-i1","toeic-fill-i2","toeic-rev-b1","toeic-rev-b2","toeic-rev-b3","toeic-rev-470","toeic-rev-630","toeic-rev-730","toeic-rev-860","toeic-rev-990","toeic-rev-i1","toeic-rev-i2","toeic-listen-ls"];
 const myId = () => { try{ return Garden.ownerId(); }catch(e){ return ""; } };
 const nameKey = name => encodeURIComponent(name).replace(/\./g,"%2E");   // 番付の保存場所(庭の rankKey と同じ)
 const nameError = n => !n ? "名前を入れてください" : ([...n].length>10 ? "名前は10文字までです" : "");
@@ -4848,6 +4863,13 @@ function endBookGame(){
 /* ---------- 更新情報 ----------
    新しいものを上に足していく。d は YYYY-MM-DD */
 const NEWS=[
+  { d:"2026-10-23", t:"TOEIC 英単語に逆4択と、記録の見直し", items:[
+    "出題形式に「逆4択」を追加しました。日本語を見て、設定した時間内に英単語のスペルをタイピングします。時間切れになると4択に移行します。タイピングできたらご褒美が2倍、4択で正解すれば1倍です。スマホでプレイするときは4択のみになります",
+    "覚えた単語を出さない設定を追加しました",
+    "穴埋め4択は難易度が高いため、覚えた・苦手を単語の4択とは別に記録するようにしました。穴埋めの記録は、ここからまっさらに始まります",
+    "苦手を、基本・470〜990点・熟語のまとまりごとに選べるようにしました",
+    "単語リスト（L）の上に、覚えた・2回連続で正解・1回正解・苦手・まだの数を出しました。押すと、その単語だけに絞りこめます",
+  ]},
   { d:"2026-10-21", t:"薔薇ガチャの新しいレア度と、たくさんの改善", items:[
     "薔薇ガチャに GUR(0.001%)と、いちばん上のレア度 GXR(0.0001%)を追加しました",
     "TOEIC 英単語の一本勝負: キー・薔薇の種・農園の時間が倍になるのは300問までになりました",
@@ -13428,7 +13450,7 @@ const TQ_LEVELS=[["b1","基本1"],["b2","基本2"],["b3","基本3"],["470","470�
 const TQ_LVKEYS="1234567890-";   // レベルを選ぶキー(TQ_LEVELS の順)
 const TQ_FMTS=[
   // ["type","入力","意味をローマ字で打つ・決めた秒数で訳が出る"],   // 入力は一旦休止(戻すときはこの行を生かす)
-  ["choice","4択","英単語の意味を4つから選ぶ"],["fill","穴埋め4択","例文の空所に入る語句を選ぶ"],["listen","リスニング","質問を聞いて、3つの応答から選ぶ"]];
+  ["choice","4択","英単語の意味を4つから選ぶ"],["rev","逆4択",window.IS_MOBILE?"日本語から英単語を選ぶ":"日本語から英単語を打つ・選ぶ"],["fill","穴埋め4択","例文の空所に入る語句を選ぶ"],["listen","リスニング","質問を聞いて、3つの応答から選ぶ"]];
 /* リスニング(応答問題): レベルは1つ(と苦手)。問題は単語と同じ形に合わせ、en に質問文を入れて正解・間違いを記録する */
 const TQ_LEVELS_L=[["ls","会話"],["weak","苦手"]];
 const TQL=LQ_RAW.map(([q,ja,a])=>({ lv:"ls", en:q, ja, a, listen:true, pos:"", means:[{j:ja,k:ja}], conf:[] }));
@@ -13442,14 +13464,14 @@ const TQ_SET=10, TQ_SEC_MIN=2, TQ_SEC_MAX=15;
 const TQ_GIFT_SC=10, TQ_GIFT_MIN=180;   // 1問正解で農園に届くキーと、進む農園の時間(分)。ノーミス勝負は10問ごとに倍
 /* この1問の正解で届くもの(ノーミス勝負は、出題数10問ごとに倍。お守りで見逃したミスの問題も1問に数える) */
 const TQ_UP_N=10, TQ_UP_MIN=50, TQ_UP_MAX=300;   // 倍になるのは300問まで(それより先は増えない)。 ネジと薔薇の種は10問ごと、庭の時間は50問ごとに倍
-const TQ_LIMIT = { choice:10, fill:20, listen:10 };   // リスニングは読み終わってから   // 一本勝負の1問の秒数(4択・穴埋め4択)
+const TQ_LIMIT = { choice:10, fill:20, listen:10, rev:10 };   // リスニングは読み終わってから   // 一本勝負の1問の秒数(4択・穴埋め4択)
 function tqClock(sec){   // 残り時間のバー。0 になったら時間切れ
   $("tqBarW").style.display="";
   const bar=$("tqBar"); bar.style.transition="none"; bar.style.transform="scaleX(1)"; void bar.offsetWidth;
   bar.style.transition=`transform ${sec}s linear`; bar.style.transform="scaleX(0)";
   tqTimer=setTimeout(()=>tqChoose(-2), sec*1000);
 }
-const tqFillX = () => tqFmt==="fill"||tqFmt==="listen" ? 2 : 1;   // 穴埋め4択とリスニングは倍
+const tqFillX = () => tqFmt==="fill"||tqFmt==="listen"||(tqFmt==="rev"&&tqRevTyped) ? 2 : 1;   // 逆4択は英単語を打てたら倍   // 穴埋め4択とリスニングは倍
 const tqUpK = () => Math.min(tqAns, TQ_UP_MAX-1);   // それまでに出た問題の数。301問目からは300問目と同じ
 const tqBoost = () => { try{ return Garden.tqBoost(); }catch(e){ return { rose:1, sc:1, min:1 }; } };   // 薔薇ガチャの GUR で増える
 const tqGift = () => { const b=tqBoost(), x = (tqKind==="one" ? 2**Math.floor(tqUpK()/TQ_UP_N) : 1) * tqFillX(); return { sc:Math.round(TQ_GIFT_SC*x*b.sc), min:Math.round(TQ_GIFT_MIN*tqFillX()*(tqKind==="one" ? 2**Math.floor(tqUpK()/TQ_UP_MIN) : 1)*b.min), rose: tqKind==="one" ? Math.round(x*b.rose) : 0 }; };   // 時間は50問ごとに倍(10問ごとだと村人や料理と重なって進みすぎるため)
@@ -13493,26 +13515,36 @@ function tqSuspSet(f,lv,v){ const a=tqSuspAll(), k=tqBestKey(f,lv); if(v) a[k]=v
 const TQ_OPT_KEY="typinggarden:toeic-opt";     // 設定(入力で訳が出るまでの秒数)
 const TQ_RANK = (f,lv) => "toeic-"+f+"-"+lv;   // ランキングの保存場所(出題形式・始めたレベルごと)
 const tqBestKey = (f,lv) => f+"-"+lv;          // 自己ベストも出題形式・始めたレベルごと
-let tqStat={}, tqBest={}, tqSec=5;
+let tqStat={}, tqStatF={}, tqBest={}, tqSec=5;   // tqStatF: 穴埋め4択の記録(単語の記録とは別)
+const TQ_KEY_F=TQ_KEY+"-fill";
+const tqStore = fmt => fmt==="fill" ? tqStatF : tqStat;   // 4択・逆4択は単語の記録、穴埋めは穴埋めの記録
 const tqRevealMs = () => tqSec*1000;
 const tqLoad = () => {
   try{ tqStat=JSON.parse(localStorage.getItem(TQ_KEY)||"{}")||{}; }catch(e){ tqStat=tqStat||{}; }
+  try{ tqStatF=JSON.parse(localStorage.getItem(TQ_KEY_F)||"{}")||{}; }catch(e){ tqStatF=tqStatF||{}; }
   try{ tqBest=JSON.parse(localStorage.getItem(TQ_BEST_KEY)||"{}")||{}; }catch(e){ tqBest=tqBest||{}; }
   try{ const o=JSON.parse(localStorage.getItem(TQ_OPEN_KEY)||"[]"); tqOpenLv=Array.isArray(o)?o:[]; }catch(e){}
-  try{ const o=JSON.parse(localStorage.getItem(TQ_OPT_KEY)||"{}")||{}; if(o.sec>=TQ_SEC_MIN && o.sec<=TQ_SEC_MAX) tqSec=o.sec|0; }catch(e){}
+  try{ const o=JSON.parse(localStorage.getItem(TQ_OPT_KEY)||"{}")||{}; if(o.sec>=TQ_SEC_MIN && o.sec<=TQ_SEC_MAX) tqSec=o.sec|0; tqHideGood=!!o.hide; if(TQ_WG.some(x=>x[0]===o.wg)) tqWeakG=o.wg; }catch(e){}
 };
-const tqSaveOpt = () => { try{ localStorage.setItem(TQ_OPT_KEY,JSON.stringify({sec:tqSec})); }catch(e){} };
+const tqSaveOpt = () => { try{ localStorage.setItem(TQ_OPT_KEY,JSON.stringify({sec:tqSec, hide:tqHideGood, wg:tqWeakG})); }catch(e){} };
+let tqHideGood=false;   // 覚えた単語を出さない(出せる単語が覚えた単語だけになったら出す)
+/* 苦手は、レベルのまとまり(ランキングと同じ3つ)ごとに選べる */
+const TQ_WG=[["all","ぜんぶ"],["base","基本"],["score","470〜990点"],["idiom","熟語"]];
+let tqWeakG="all";
+const tqWgOk = w => tqWeakG==="all" || ((TQ_RANK_GROUPS.find(g=>g[0]===tqWeakG)||[0,0,[]])[2]).includes(w.lv);
+const tqWgName = () => (TQ_WG.find(x=>x[0]===tqWeakG)||TQ_WG[0])[1];
+let tqRevTyped=false, tqRevStage="", tqRevBuf="";   // 逆4択: 打てたか・打つ段階か4択の段階か・打った文字
 function tqSetSec(d){ const v=Math.max(TQ_SEC_MIN,Math.min(TQ_SEC_MAX,tqSec+d)); if(v===tqSec){ sndMiss(); return; } tqSec=v; tqSaveOpt(); tqMenu(); }
-const tqSaveStat = () => { try{ localStorage.setItem(TQ_KEY,JSON.stringify(tqStat)); }catch(e){} };
+const tqSaveStat = () => { try{ localStorage.setItem(TQ_KEY,JSON.stringify(tqStat)); localStorage.setItem(TQ_KEY_F,JSON.stringify(tqStatF)); }catch(e){} };
 const tqSaveBest = () => { try{ localStorage.setItem(TQ_BEST_KEY,JSON.stringify(tqBest)); }catch(e){} };
-const tqSt = en => tqStat[en] || {c:0,w:0,s:0};
-const tqGood = en => tqSt(en).s>=3;                                   // 覚えた: 3回続けて正解
-const tqWeak = en => { const t=tqSt(en); return t.w>0 && t.s<2; };     // 苦手: 間違えたあと、まだ2回続けて正解していない
+const tqSt = (en,fmt=tqFmt) => tqStore(fmt)[en] || {c:0,w:0,s:0};
+const tqGood = (en,fmt=tqFmt) => tqSt(en,fmt).s>=3;                                   // 覚えた: 3回続けて正解
+const tqWeak = (en,fmt=tqFmt) => { const t=tqSt(en,fmt); return t.w>0 && t.s<2; };     // 苦手: 間違えたあと、まだ2回続けて正解していない
 /* 出題時の単語の状態 */
 function tqWstShow(w){
   const el=$("tqWst"); if(!el) return;
   if(!w || w.word){ el.className="tq-wst"; el.textContent=""; return; }
-  const t=tqStat[w.en];
+  const t=tqStore(tqFmt)[w.en];
   const [c,txt] = !t ? ["new","はじめて"] : tqGood(w.en) ? ["good","✓ 覚えた単語"] : tqWeak(w.en) ? ["weak",`✕ 苦手な単語 ・ あと${2-t.s}回続けて正解で解消`] : t.s>0 ? ["run",`${t.s}回連続で正解中`] : ["",""];
   el.className="tq-wst "+c; el.textContent = tqFmt==="listen" ? txt.replace("単語","問題") : txt;
 }
@@ -13531,10 +13563,10 @@ function tqMarkFx(en,ok){
   const el=$("tqWmsg"); if(el) el.innerHTML=html;
   if(html){ const w=tqWords[tqI]; if(w) tqWstShow(w); }
 }
-function tqMark(en,ok){ const t=Object.assign({c:0,w:0,s:0},tqStat[en]); if(ok){ t.c++; t.s++; }else{ t.w++; t.s=0; } t.t=Date.now(); tqStat[en]=t; tqSaveStat(); }
+function tqMark(en,ok){ const st=tqStore(tqFmt), t=Object.assign({c:0,w:0,s:0},st[en]); if(ok){ t.c++; t.s++; }else{ t.w++; t.s=0; } t.t=Date.now(); st[en]=t; tqSaveStat(); }
 const tqHasSent = w => !!TQ_SENT[w.en];
 /* レベルの単語(穴埋めは例文のある単語だけ) */
-const tqPool = (lv,fmt=tqFmt) => fmt==="listen" ? (lv==="weak" ? TQL.filter(w=>tqWeak(w.en)) : lv==="ls" ? TQL : []) : (lv==="weak" ? TQ.filter(w=>tqWeak(w.en)) : TQ.filter(w=>w.lv===lv)).filter(w=>fmt!=="fill" || tqHasSent(w));
+const tqPool = (lv,fmt=tqFmt) => fmt==="listen" ? (lv==="weak" ? TQL.filter(w=>tqWeak(w.en)) : lv==="ls" ? TQL : []) : (lv==="weak" ? TQ.filter(w=>tqWeak(w.en,fmt) && tqWgOk(w)) : TQ.filter(w=>w.lv===lv)).filter(w=>fmt!=="fill" || tqHasSent(w));
 const tqLvName = lv => (TQ_LEVELS.concat(TQ_LEVELS_L.slice(0,1)).find(([k])=>k===lv)||[0,lv])[1];
 const tqFmtName = f => (TQ_FMTS.find(([k])=>k===f)||[0,f==="type"?"入力":f==="word"?"タイピング":f])[1];   // word: バラバラのときに混ざるタイピングの言葉
 const tqEsc = v => String(v).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
@@ -13568,7 +13600,7 @@ function tqMenu(){
     if(!tqIsOpen(k)) sub=`🔒 ${tqLvName(tqPrevLv(k))}で合格すると解放`;
     else if(tqKind==="one" && k==="weak") sub="ノーミス勝負では選べません";
     else if(!pool.length) sub = k==="weak" ? "まだありません" : "穴埋めはありません";
-    else if(k==="weak") sub=`${pool.length}${tqUnit()}`;
+    else if(k==="weak") sub=`${tqFmt==="listen"?"":tqWgName()+" "}${pool.length}${tqUnit()}`;
     else if(tqKind==="one"){ const sv=tqSuspGet(tqFmt,k); sub = sv ? `⏸ 中断中 ${sv.q!=null?sv.q:sv.ok}問から続き` : `${pool.length}${tqUnit()} ・ 自己ベスト ${tqBest[tqBestKey(tqFmt,k)]||0}問`; }
     else sub=`覚えた ${pool.filter(w=>tqGood(w.en)).length} / ${pool.length}${tqUnit()}`;
     return `<button class="btn tq-lv" data-lv="${k}" ${ok?"":"disabled"}><b>${nm}</b><small>${sub}</small><span class="kbdh">${TQ_LVKEYS[i]}</span></button>`;
@@ -13577,8 +13609,12 @@ function tqMenu(){
     if(!tqCracks){ tqCracks=new Set(); for(const k of TQ_FMTS.map(x=>"f:"+x[0]).concat(TQ_KINDS.map(x=>"k:"+x[0]), TQ_LEVELS.concat(TQ_LEVELS_L).map(x=>"lv:"+x[0]))) if(Math.random()<.2) tqCracks.add(k); }
     $("tqMenu").querySelectorAll("[data-f],[data-k],[data-lv]").forEach(b=>{ const d=b.dataset, key=d.f!=null?"f:"+d.f:d.k!=null?"k:"+d.k:"lv:"+d.lv; b.classList.toggle("bcrack",tqCracks.has(key)); });
   }
-  $("tqSecRow").hidden = tqFmt!=="type";
+  $("tqSecRow").hidden = !(tqFmt==="type" || (tqFmt==="rev" && !window.IS_MOBILE));
+  $("tqOptRow").innerHTML = tqFmt==="listen" ? "" :
+    `<button class="btn${tqHideGood?" on":""}" id="tqHideBtn">覚えた単語を出さない: <b>${tqHideGood?"オン":"オフ"}</b> <span class="kbdh">H</span></button>`
+    +` <span class="tq-wg">苦手のまとまり <span class="kbdh">W</span> ${TQ_WG.map(([k,nm])=>`<button class="btn${k===tqWeakG?" on":""}" data-wg="${k}">${nm}</button>`).join("")}</span>`;
   $("tqSecV").textContent=tqSec;
+  $("tqSecL").textContent = tqFmt==="rev" ? "4択になるまで" : "訳が出るまで";
   $("tqNote").textContent =
     tqFmt==="type" && window.IS_MOBILE ? "入力はパソコンで遊べます。スマホでは4択か穴埋め4択を選んでください"
     : tqKind==="one" ? `選んだレベルの単語を全部正解でクリア(1問でも間違えたら終わり${tqFmt!=="type"?`・1問${TQ_LIMIT[tqFmt]}秒まで`:""})。正解ごとにキーと農園の時間と薔薇の種が届きます。キーと薔薇の種は${TQ_UP_N}問ごとに、時間は${TQ_UP_MIN}問ごとに倍(${TQ_UP_MAX}問まで)`+(tqFmt==="fill"?"(穴埋め4択はさらに倍)":tqFmt==="listen"?"(リスニングはさらに倍)":"")
@@ -13589,15 +13625,17 @@ function tqMenu(){
   if(tqKind==="one" && !baraOn()) $("tqNote").textContent += ` ・ ${TQ_CKPT}問ごとに、中断して続きをあとで遊べます`;
 }
 /* 10語を選ぶ: 苦手・まだ出ていない単語ほど出やすく、覚えた単語は出にくい */
-const tqWt = w => tqWeak(w.en) ? 4 : !tqStat[w.en] ? 3 : tqGood(w.en) ? .5 : 2;
+const tqWt = w => tqWeak(w.en) ? 4 : !tqStore(tqFmt)[w.en] ? 3 : tqGood(w.en) ? .5 : 2;
 function tqDraw(rest){
   let r=Math.random()*rest.reduce((a,w)=>a+tqWt(w),0), i=0;
   for(; i<rest.length-1; i++){ r-=tqWt(rest[i]); if(r<0) break; }
   return rest.splice(i,1)[0];
 }
 function tqPick(lv){
-  const rest=tqPool(lv).slice(), out=[];
+  const all=tqPool(lv), out=[];
+  const rest = tqHideGood && lv!=="weak" ? all.filter(w=>!tqGood(w.en)) : all.slice();   // 覚えた単語を出さない
   while(out.length<TQ_SET && rest.length) out.push(tqDraw(rest));
+  if(out.length<TQ_SET && tqHideGood){ const good=all.filter(w=>tqGood(w.en)); while(out.length<TQ_SET && good.length) out.push(tqDraw(good)); }   // 足りなければ覚えた単語も
   return out;
 }
 function tqStart(lv){
@@ -13627,7 +13665,7 @@ function tqStart(lv){
 }
 /* ノーミス勝負の次の単語: いまのレベルのまだ出ていない単語から(全部正解したら次のレベルへ) */
 const tqLeft = () => tqPool(tqLadder[tqUnl-1]).filter(w=>!tqUsed.has(w.en));
-function tqPickOne(){ const w=tqDraw(tqLeft()); tqUsed.add(w.en); return w; }
+function tqPickOne(){ const left=tqLeft(), ng=tqHideGood ? left.filter(x=>!tqGood(x.en)) : []; const w=tqDraw(ng.length ? ng : left); tqUsed.add(w.en); return w; }   // 覚えた単語を出さない: 覚えた単語しか残っていなければ出す
 const tqMeanHtml = w => w.means.map(m=>tqEsc(m.j)+(m.j===m.k?"":`<span class="rd">(${tqEsc(m.k)})</span>`)).join(" ・ ");   // 読みは、訳と同じなら出さない
 const tqLvRange = () => tqUnl>1 ? `${tqLvName(tqLadder[0])}〜${tqLvName(tqLadder[tqUnl-1])}` : tqLvName(tqLadder[0]);
 const tqCharmTxt = () => tqLives>0 ? ` ・ お守り残り${tqLives}回` : "";
@@ -13682,6 +13720,19 @@ function tqNext(){
     $("tqHint").textContent = tqKind==="one"
       ? `L 聞く(1回だけ) ・ A / B / C で選ぶ ・ 5 分からない ・ 読み終わってから${TQ_LIMIT.listen}秒で時間切れ ・ 間違えたら終わり ・ Esc やめる(そこまでの記録が残ります)`
       : "L 聞く(何度でも) ・ S ゆっくり ・ A / B / C で選ぶ ・ 5 分からない ・ Esc やめる";
+    return;
+  }
+  if(tqFmt==="rev"){   // 逆4択: 日本語を見て英単語を打つ(パソコン)。出てこなければ4択
+    tqRevTyped=false; tqRevBuf=""; $("tqTyped").innerHTML="";
+    $("tqWord").innerHTML=`<span class="tq-revja">${tqEsc(w.means.slice(0,2).map(m=>m.j).join("、"))}</span>`;
+    $("tqMean").className="tq-mean"; $("tqMean").textContent="";
+    if(window.IS_MOBILE){ tqRevChoice(); return; }
+    tqRevStage="type"; $("tqOpts").innerHTML=`<button class="btn tq-opt tq-idk tq-rev4" data-rev="1"><span class="no">Enter</span><span>思い出せない → すぐ4択にする</span></button>`; $("tqBarW").style.display="";
+    const bar=$("tqBar"); bar.style.transition="none"; bar.style.transform="scaleX(1)"; void bar.offsetWidth;
+    bar.style.transition=`transform ${tqRevealMs()}ms linear`; bar.style.transform="scaleX(0)";
+    tqTimer=setTimeout(tqRevChoice,tqRevealMs());
+    tqRevRender();
+    $("tqHint").textContent=`英単語を打つ ・ 打てたら倍 ・ ${tqSec}秒たつか Enter で4択 ・ Esc やめる`;
     return;
   }
   if(tqFmt==="type"){
@@ -13821,6 +13872,57 @@ function tqMakeChoices(w){
     for(const x of tqShuffle(pool.slice())){ if(out.length>=4) break; if(x!==w && !overlap(x)) add(txt(x)); }
   return tqShuffle(out);
 }
+/* ---- 逆4択: 日本語 → 英単語 ---- */
+const tqRevNorm = c => c.toLowerCase();
+function tqRevRender(){
+  const w=tqWords[tqI]; if(!w) return;
+  const rest=[...w.en.slice(tqRevBuf.length)].map(c=>c===" "?"&nbsp;&nbsp;":"_").join(" ");
+  $("tqTyped").innerHTML=`<span class="done">${tqEsc(tqRevBuf)}</span><span class="rest"> ${rest}</span>`;
+}
+function tqRevKey(k){
+  const w=tqWords[tqI]; if(!w || tqRevStage!=="type") return;
+  if(k==="Enter"){ tqRevChoice(); return; }
+  if(k.length!==1) return;
+  const want=w.en[tqRevBuf.length];
+  if(want!=null && tqRevNorm(k)===tqRevNorm(want)){
+    tqRevBuf+=want; gardenKeys++; sndType(); tqRevRender();
+    if(tqRevBuf.length>=w.en.length) tqRevDone();
+  }else{ tqMiss++; sndMiss(); $("tqMissW").textContent=`ミス ${tqMiss}`; }
+}
+/* 打てた: 倍の届け物 */
+function tqRevDone(){
+  clearTimeout(tqTimer); tqRevStage=""; tqRevTyped=true;
+  const w=tqWords[tqI];
+  { const bar=$("tqBar"); bar.style.transform=getComputedStyle(bar).transform; bar.style.transition="none"; }
+  tqMarkFx(w.en,true); tqLog.push({ w, ok:true });
+  const g=tqGift(); tqPts+=g.sc; tqMin+=g.min;
+  sendToGarden(0, g.sc, g.min, true);
+  if(g.rose) tqRose(tqRoseLv(tqLadder[0]||w.lv), g.rose);
+  $("tqMean").className="tq-mean"; $("tqMean").innerHTML=`<b class="tq-hw">${tqEsc(w.en)}</b> ${tqMeanHtml(w)}`;
+  $("tqFb").className="tq-fb ok"; $("tqFb").textContent=`打てた! 倍 ・ キー +${tqNum(g.sc)} ・ 農園の時間 +${tqHours(g.min)}`+(g.rose?` ・ 🌹 薔薇の種 +${tqNum(g.rose)}`:"");
+  if(tqKind==="one") tqOneOk(); else $("tqScore").textContent=tqNum(tqPts);
+  sndClear();
+  tqI++; tqPhase="wait"; tqTimer=setTimeout(tqNext,900);
+}
+/* 4択にする(時間切れ・Enter・スマホ) */
+function tqRevChoice(){
+  if(tqPhase!=="play") return;
+  clearTimeout(tqTimer); tqRevStage="choice";
+  const w=tqWords[tqI];
+  tqChoices=tqRevChoices(w);
+  $("tqOpts").innerHTML=tqChoices.map((c,i)=>`<button class="btn tq-opt en" data-i="${i}"><span class="no">${i+1}</span><span>${tqEsc(c.txt)}</span></button>`).join("")
+    +`<button class="btn tq-opt tq-idk" data-i="-1"><span class="no">5</span><span>分からない</span></button>`;
+  $("tqHint").textContent = tqKind==="one" ? `1〜4 で選ぶ ・ 5 分からない ・ 間違えたら終わり ・ ${TQ_LIMIT.rev}秒で時間切れ ・ Esc やめる(そこまでの記録が残ります)` : "1〜4 で選ぶ ・ 5 分からない ・ Esc やめる";
+  if(tqKind==="one") tqClock(TQ_LIMIT.rev); else $("tqBarW").style.display="none";
+}
+/* はずれ: 形の似た英単語(用意してあるもの)→ 同じ品詞・同じレベル → 同じ品詞 → ぜんぶ */
+function tqRevChoices(w){
+  const used=new Set(w.means.map(m=>m.j)), out=[{ txt:w.en, ok:true }];
+  const add = x => { if(out.length<4 && x!==w && !out.some(o=>o.txt===x.en) && !x.means.some(m=>used.has(m.j))) out.push({ txt:x.en, ok:false }); };
+  for(const c of w.conf){ const x=TQ_BY[c]; if(x) add(x); }
+  for(const pool of [TQ.filter(x=>x.pos===w.pos && x.lv===w.lv), TQ.filter(x=>x.pos===w.pos), TQ]) for(const x of tqShuffle(pool.slice())){ if(out.length>=4) break; add(x); }
+  return tqShuffle(out);
+}
 /* ---- 穴埋め4択: 例文の空所に入る語句(はずれは例文ごとに用意した、形の似た語句) ---- */
 function tqFillChoices(w){
   const [s,ds]=TQ_SENT[w.en], ans=s.match(/\[([^\]]*)\]/)[1];
@@ -13888,7 +13990,8 @@ function tqChoose(i){
     $("tqMean").className="tq-mean tq-lexp";
     $("tqMean").innerHTML=`<div class="tq-lq">${tqEsc(w.en)}</div><div class="tq-lja">${tqEsc(w.ja)}</div><ul>`
       +tqChoices.map((o,j)=>`<li class="${o.ok?"c":""}">(${"ABC"[j]}) ${tqEsc(o.txt)} — ${tqEsc(o.ja)}</li>`).join("")+"</ul>";
-  }else $("tqMean").innerHTML=tqMeanHtml(w);
+  }else if(tqFmt==="rev") $("tqMean").innerHTML=`<b class="tq-hw">${tqEsc(w.en)}</b> ${tqMeanHtml(w)}`;
+  else $("tqMean").innerHTML=tqMeanHtml(w);
   if(c.ok){
     window.tqOkN=(window.tqOkN||0)+1;   // はじめてガイド(スマホ)で数える
     const g=tqGift(); tqPts+=g.sc; tqMin+=g.min;
@@ -13980,7 +14083,7 @@ async function tqRegister(){
 let tqRegWait=false;   // 名前を決めたあとに登録する
 function tqRegName(){ if(!playerName){ tqRegWait=true; openNameWin(); } else tqRegister(); }
 /* R: いま選んでいる出題形式のランキングへ(結果からは、その記録のランキング) */
-function tqRankOpen(){ window.tqFromRank=true; tqRankLv=tqRankGroupOf(tqLv); openRanking(tqFmt==="listen" ? "toeic-listen" : "toeic-"+(tqFmt==="fill"?"fill":"choice"), playerName); }
+function tqRankOpen(){ window.tqFromRank=true; tqRankLv=tqRankGroupOf(tqLv); openRanking(tqFmt==="listen" ? "toeic-listen" : "toeic-"+(tqFmt==="fill"?"fill":tqFmt==="rev"?"rev":"choice"), playerName); }
 function tqRankView(){ window.tqFromRank=true; tqRankLv=tqRankGroupOf(tqLadder[0]); openRanking(tqBara?"barabara":"toeic-"+tqFmt, playerName); }
 /* みんなのランキング: 出題形式のタブ(toeic-type など)は、下のレベルのボタンで選んだレベルの記録を出す */
 /* レベルは3つのまとまりで1つのランキングにする(記録はこれまでどおりレベルごとに保存し、見るときに集める) */
@@ -13989,7 +14092,7 @@ const tqRankGroupOf = lv => (TQ_RANK_GROUPS.find(g=>g[2].includes(lv))||TQ_RANK_
 const tqLvHard = lv => TQ_LEVELS.findIndex(([k])=>k===lv);   // 同じ問題数なら、難しい(後ろの)レベルが上
 let tqRankLv="base";
 window.tqRankKey = d => d==="toeic-listen" ? "toeic-listen-ls" : d;
-window.tqRankMulti = d => { if(!/^toeic-(type|choice|fill)$/.test(d)) return null; const g=TQ_RANK_GROUPS.find(x=>x[0]===tqRankLv)||TQ_RANK_GROUPS[0]; return g[2].map(lv=>[d+"-"+lv,lv]); };
+window.tqRankMulti = d => { if(!/^toeic-(type|choice|fill|rev)$/.test(d)) return null; const g=TQ_RANK_GROUPS.find(x=>x[0]===tqRankLv)||TQ_RANK_GROUPS[0]; return g[2].map(lv=>[d+"-"+lv,lv]); };
 window.tqRankSync = d => {
   const box=$("tqRankLvs"), on=/^toeic-/.test(d) && d!=="toeic-listen";   // リスニングはレベルがない
   box.hidden=!on; if(!on) return;
@@ -13999,14 +14102,22 @@ function tqRankGroupStep(dir){ const n=TQ_RANK_GROUPS.length, i=TQ_RANK_GROUPS.f
 $("tqRankLvs").addEventListener("click",e=>{ const b=e.target.closest("[data-lv]"); if(!b) return; tqRankLv=b.dataset.lv; openRanking(rankCur, playerName); });
 setInterval(()=>{ if(tqRegWait && !nmOpen){ tqRegWait=false; if(playerName && tqPhase==="result" && scene==="toeic") tqRegister(); } },400);
 /* ---- 単語リスト ---- */
+let tqListF="all", tqListM="word";   // 単語リストの絞り込み(状態)・見る記録(単語 / 穴埋め)
 function tqList(lv){
+  if(lv && lv!==tqListLv) tqListF="all";
+  { const h=$("tqLHint"); if(h) h.innerHTML = window.IS_MOBILE ? "" : `<span class="kbdh">1〜0 -</span> <span class="kbdh">Tab</span> レベル ・ <span class="kbdh">← →</span> 絞りこみ ・ <span class="kbdh">F</span> 単語と穴埋め ・ <span class="kbdh">↑ ↓</span> スクロール ・ <span class="kbdh">Esc</span> 戻る`; }
   tqListLv=lv||tqListLv; tqPhase="list"; tqView("tqList");
   $("tqLTabs").innerHTML=TQ_LEVELS.map(([k,nm],i)=>`<button class="btn${k===tqListLv?" on":""}" data-lv="${k}">${nm} <span class="kbdh">${TQ_LVKEYS[i]}</span></button>`).join("");
-  const pool=tqPool(tqListLv,"choice");
+  const lf = tqListM==="fill" ? "fill" : "choice", all=tqPool(tqListLv,lf);
+  const stOf = (w,f=lf) => tqGood(w.en,f) ? "good" : tqWeak(w.en,f) ? "weak" : !tqStore(f)[w.en] ? "new" : tqSt(w.en,f).s>=2 ? "s2" : tqSt(w.en,f).s>=1 ? "s1" : "new";
+  const cnt={ good:0, s2:0, s1:0, weak:0, new:0 }; for(const w of all) cnt[stOf(w)]++;
+  if(!cnt[tqListF] && tqListF!=="all") tqListF="all";
+  $("tqLSum").innerHTML=`<span class="tq-lmode">${[["word","単語"],["fill","穴埋め"]].map(([k,nm])=>`<button class="btn${k===tqListM?" on":""}" data-lm="${k}">${nm}</button>`).join("")}</span>`+[["all","ぜんぶ",all.length],["good","✓ 覚えた",cnt.good],["s2","2回連続で正解",cnt.s2],["s1","1回正解",cnt.s1],["weak","✕ 苦手",cnt.weak],["new","まだ",cnt.new]]
+    .map(([k,nm,n])=>`<button class="btn${k===tqListF?" on":""}" data-lf="${k}" ${n||k==="all"?"":"disabled"}>${nm} <b>${n}</b>${k==="all"?"語":""}</button>`).join("");
+  const pool = tqListF==="all" ? all : all.filter(w=>stOf(w)===tqListF);
   $("tqLBody").innerHTML = pool.length ? pool.map(w=>{
-    const t=tqSt(w.en);
-    const st = tqGood(w.en) ? `<span class="st good">✓ 覚えた</span>` : tqWeak(w.en) ? `<span class="st weak">✕ 苦手</span>` : tqStat[w.en] ? `<span class="st">${t.c} / ${t.c+t.w}回</span>` : `<span class="st">未</span>`;
-    return `<div class="tq-lrow"><span class="w">${tqEsc(w.en)}</span><span class="m">${tqEsc(w.means.map(m=>m.j).join("、"))}</span>${st}</div>`;
+    const mark = f => { const t=tqSt(w.en,f), x=stOf(w,f); return `<span class="st${x==="good"?" good":x==="weak"?" weak":""}"><small>${f==="fill"?"穴埋め":"単語"}</small> ${x==="good"?"✓ 覚えた":x==="weak"?"✕ 苦手":tqStore(f)[w.en]?`${t.c} / ${t.c+t.w}回`:"未"}</span>`; };
+    return `<div class="tq-lrow"><span class="w">${tqEsc(w.en)}</span><span class="m">${tqEsc(w.means.map(m=>m.j).join("、"))}</span>${mark("choice")}${tqHasSent(w)?mark("fill"):`<span class="st"></span>`}</div>`;
   }).join("") : `<p class="tq-sub" style="padding:1rem">苦手な単語はまだありません</p>`;
 }
 /* ---- キー操作 ---- */
@@ -14017,7 +14128,9 @@ function tqKey(e){
     if(k==="Escape"){ e.preventDefault(); show("title"); }
     else if(k==="Tab"){ e.preventDefault(); tqFmt=tqCycle(TQ_FMTS,tqFmt,e.shiftKey?-1:1); tqMenu(); }
     else if(k==="m"||k==="M"){ tqKind = tqKind==="set" ? "one" : "set"; tqMenu(); }
-    else if((k==="ArrowLeft"||k==="ArrowRight") && tqFmt==="type"){ e.preventDefault(); tqSetSec(k==="ArrowLeft"?-1:1); }
+    else if(k==="h"||k==="H"){ if(tqFmt!=="listen"){ tqHideGood=!tqHideGood; tqSaveOpt(); tqMenu(); } }
+    else if(k==="w"||k==="W"){ if(tqFmt!=="listen"){ tqWeakG=tqCycle(TQ_WG,tqWeakG,e.shiftKey?-1:1); tqSaveOpt(); tqMenu(); } }
+    else if((k==="ArrowLeft"||k==="ArrowRight") && (tqFmt==="type"||tqFmt==="rev")){ e.preventDefault(); tqSetSec(k==="ArrowLeft"?-1:1); }
     else if(k==="l"||k==="L") tqList(tqLv);
     else if(k==="r"||k==="R") tqRankOpen();
     else if(k==="g"||k==="G") tqToGarden();
@@ -14027,6 +14140,10 @@ function tqKey(e){
   if(tqPhase==="list"){
     if(k==="Escape"){ e.preventDefault(); tqMenu(); }
     else if(k==="r"||k==="R") tqRankOpen();
+    else if(k==="ArrowLeft"||k==="ArrowRight"){ e.preventDefault(); const fs=[...$("tqLSum").querySelectorAll("[data-lf]:not([disabled])")].map(b=>[b.dataset.lf]); tqListF=tqCycle(fs,tqListF,k==="ArrowLeft"?-1:1); tqList(); }
+    else if(k==="ArrowUp"||k==="ArrowDown"){ e.preventDefault(); $("tqLBody").scrollBy(0,k==="ArrowDown"?120:-120); }
+    else if(k==="f"||k==="F"){ tqListM = tqListM==="fill" ? "word" : "fill"; tqListF="all"; tqList(); }
+    else if(k==="Tab"){ e.preventDefault(); tqList(tqCycle(TQ_LEVELS,tqListLv,e.shiftKey?-1:1)); }
     else if(li>=0) tqList(TQ_LEVELS[li][0]);
     return;
   }
@@ -14061,6 +14178,7 @@ function tqKey(e){
     return;
   }
   if(tqFmt==="word"){ if(k==="Process" || e.isComposing){ imeWarn(); return; } if(/^[a-zA-Z0-9\-'!?,.~\/%&]$/.test(k)){ e.preventDefault(); tqWordKey(k); } return; }
+  if(tqFmt==="rev" && tqRevStage==="type"){ if(e.ctrlKey||e.metaKey||e.altKey) return; if(k==="Process"||e.isComposing){ $("tqFb").className="tq-fb ng"; $("tqFb").textContent="日本語入力をオフ(半角英数)にして打ってください"; return; } if(k.length===1||k==="Enter"){ e.preventDefault(); tqRevKey(k); } return; }
   if(tqFmt!=="type"){ if(n>=1 && n<=4){ e.preventDefault(); tqChoose(n-1); } else if(n===5){ e.preventDefault(); tqChoose(-1); } return; }   // 5: 分からない
   if(e.ctrlKey || e.metaKey || e.altKey) return;
   if(k==="Process" || e.isComposing){ $("tqFb").className="tq-fb ng"; $("tqFb").textContent="日本語入力をオフ(半角英数)にして打ってください"; return; }
@@ -14068,11 +14186,13 @@ function tqKey(e){
 }
 /* ---- クリック・タップ ---- */
 $("tqFmts").addEventListener("click",e=>{ const b=e.target.closest("[data-f]"); if(b){ tqFmt=b.dataset.f; tqMenu(); } });
+$("tqLSum").addEventListener("click",e=>{ const m=e.target.closest("[data-lm]"); if(m){ tqListM=m.dataset.lm; tqListF="all"; tqList(); return; } const b=e.target.closest("[data-lf]"); if(b && !b.disabled){ tqListF=b.dataset.lf; tqList(); } });
+$("tqOptRow").addEventListener("click",e=>{ if(e.target.closest("#tqHideBtn")){ tqHideGood=!tqHideGood; tqSaveOpt(); tqMenu(); return; } const b=e.target.closest("[data-wg]"); if(b){ tqWeakG=b.dataset.wg; tqSaveOpt(); tqMenu(); } });
 $("tqKinds").addEventListener("click",e=>{ const b=e.target.closest("[data-k]"); if(b){ tqKind=b.dataset.k; tqMenu(); } });
 $("tqLevels").addEventListener("click",e=>{ const b=e.target.closest(".tq-lv"); if(b && !b.disabled) tqStart(b.dataset.lv); });
 $("tqOpts").addEventListener("click",e=>{ const b=e.target.closest(".tq-opt"); if(!b) return;
   if(tqPhase==="ckpt"){ if(b.dataset.ck==="go"){ tqPhase="play"; tqNext(); } else if(b.dataset.ck==="stop") tqSuspend(); return; }
-  if(tqPhase==="wait"){ tqNext(); return; } tqChoose(+b.dataset.i); });
+  if(tqPhase==="wait"){ tqNext(); return; } if(b.dataset.rev){ tqRevChoice(); return; } tqChoose(+b.dataset.i); });
 $("screen-toeic").querySelector(".tq-card").addEventListener("click",e=>{
   if(e.target.closest("#tqListen")){ tqListenPlay(); return; }
   if(e.target.closest(".tq-slow")) return;
