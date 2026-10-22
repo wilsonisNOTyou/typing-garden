@@ -650,7 +650,7 @@ h2.rank-title{color:var(--amber); letter-spacing:.2em; margin-bottom:1rem; text-
   padding:.55rem .9rem; margin-bottom:.45rem; font-size:1rem;
 }
 .rank-row .pos{color:var(--amber); width:2.6em; flex-shrink:0}
-.rank-row .pname{flex:1; overflow:hidden; text-overflow:ellipsis; white-space:nowrap}
+.rank-row .pname{flex:1; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; padding-block:.3em; margin-block:-.3em}   /* 紋章の台座が上下で切れないように */
 .rank-row .pscore{color:var(--amber); flex-shrink:0}
 .rank-row.me{border-color:var(--amber); box-shadow:0 0 8px rgba(245,179,1,.3)}
 .rank-row.top1 .pos{font-size:1.25em}
@@ -1211,7 +1211,7 @@ body.garden.barag{background:radial-gradient(ellipse at 50% 120%, rgba(200,30,62
 #screen-garden .grk-list li{display:grid; grid-template-columns:3.2rem 1fr auto; gap:.5rem; align-items:center; padding:.45rem .3rem; border-bottom:1px dashed #e3d7bd; font-weight:700}
 #screen-garden .grk-list li:last-child{border-bottom:none}
 #screen-garden .grk-list .pos{color:var(--ink-l)}
-#screen-garden .grk-list .pn{overflow:hidden; text-overflow:ellipsis; white-space:nowrap}
+#screen-garden .grk-list .pn{overflow:hidden; text-overflow:ellipsis; white-space:nowrap; padding-block:.3em; margin-block:-.3em}   /* 紋章の台座が上下で切れないように */
 #screen-garden .grk-list .pn small{color:#a8801c; font-weight:700}
 #screen-garden .grk-list .ps{font-variant-numeric:tabular-nums}
 #screen-garden .grk-list li.top1 .pos{color:#c79100}
