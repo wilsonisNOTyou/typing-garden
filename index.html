@@ -163,6 +163,8 @@ html.mobile .tq-lv small{font-size:.68rem}
 .tq-typed{font-family:ui-monospace,Menlo,Consolas,monospace; font-size:1.4rem; letter-spacing:.06em; min-height:1.6em; margin-top:.4rem}
 .tq-typed .done{color:var(--amber)}
 .tq-typed .rest{color:#6b7484}
+.tq-caret{animation:tqCaret 1s steps(1) infinite}
+@keyframes tqCaret{50%{opacity:0}}
 .tq-opts{display:grid; grid-template-columns:1fr 1fr; gap:.6rem; margin-top:.6rem}
 .tq-opt{display:flex; align-items:center; gap:.6rem; text-align:left; padding:.8rem .9rem; font-size:1rem; min-height:3.4rem}
 .tq-opt .no{flex:none; width:1.6rem; height:1.6rem; border-radius:50%; display:grid; place-items:center; background:rgba(255,255,255,.1); font-size:.85rem}
@@ -13876,8 +13878,7 @@ function tqMakeChoices(w){
 const tqRevNorm = c => c.toLowerCase();
 function tqRevRender(){
   const w=tqWords[tqI]; if(!w) return;
-  const rest=[...w.en.slice(tqRevBuf.length)].map(c=>c===" "?"&nbsp;&nbsp;":"_").join(" ");
-  $("tqTyped").innerHTML=`<span class="done">${tqEsc(tqRevBuf)}</span><span class="rest"> ${rest}</span>`;
+  $("tqTyped").innerHTML=`<span class="done">${tqEsc(tqRevBuf)}</span><span class="rest tq-caret">_</span>`;   // 残りの文字数は出さない(4択の答えが分かってしまうので)
 }
 function tqRevKey(k){
   const w=tqWords[tqI]; if(!w || tqRevStage!=="type") return;
