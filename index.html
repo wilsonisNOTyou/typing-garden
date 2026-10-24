@@ -12237,7 +12237,7 @@ function renderBook(){
         <dt>育つまで</dt><dd>${b.yrs}年 ・ そのあとは1年ごとに実る</dd>
         <dt>手に入れ方</dt><dd>${how}</dd>
         <dt>早く育てる</dt><dd>${b.mode}で遊ぶと10倍早く育つ ・ 腐葉土でも早く育つ</dd>
-        ${btBookT?`<dt>なり方</dt><dd>実った瞬間に${btBookT===1?"変異":"超変異"}することがあります。${btBookT===1?"不思議な肥料":"摩訶不思議な肥料"}でも${btBookT===1?"変異":"超変異"}します</dd>`:""}
+        ${btBookT?`<dt>なり方</dt><dd>実った瞬間に${btBookT===1?"変異":"超変異"}することがあります</dd>`:""}
       </dl>${seen||!btBookT ? `<div class="lore">${esc([b.l0,b.l3,b.l5][btBookT])}</div>` : ""}` : `<div class="bic">❔</div><div class="bnm">？？？</div>
        <div class="lore unknown">${how}。苗木を手に入れると、名前がわかります。</div>`);
     keepVisible($("g-bookList"));
