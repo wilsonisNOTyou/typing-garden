@@ -1773,10 +1773,11 @@ html.mobile #g-cookShow .csnm{font-size:1.3rem}
 
 /* ---- 庭: 図鑑の品質切り替え ---- */
 #screen-garden .booklist .rowi{grid-template-columns:2rem 1fr auto}
-#screen-garden .qmarks{display:flex; gap:.15rem}
+#screen-garden .qmarks{display:flex; gap:.15rem; align-items:center}   /* 印の高さをそろえる */
+#screen-garden .qmarks .qm{line-height:1}
 #screen-garden .qm{font-size:.7rem; color:#d5c8ae}
 #screen-garden .qm.on{color:#e0a800}
-#screen-garden .qm.dot{font-size:.72rem; vertical-align:.04em; margin-right:.12em}   /* ふつうの印 */
+#screen-garden .qm.dot{font-size:.66rem; margin-right:.12em; position:relative; top:-.12em}   /* ふつうの印 */
 #screen-garden .qm.dot.on{text-shadow:0 0 3px rgba(255,190,0,.6)}
 #screen-garden .bookdetail .bic .cart.btbic{width:2em; height:2em}   /* 大木は大きく */
 #screen-garden .rowi .ic .cart svg[viewBox="30 14 220 220"]{transform:scale(1.25)}
