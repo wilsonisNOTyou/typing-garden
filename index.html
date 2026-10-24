@@ -6639,7 +6639,7 @@ function btInfo(k,p){
   else if(t.ready) sub.push(`実っています。${kb("素手(1)","素手")}で ${esc(FOOD[btItem(b.fruit,t.q)].name)}を収穫できます`);
   else sub.push(`次に実るまで 水が効いていれば あと ${fmtYears((BT_YEAR-(t.fr||0))/btRate(t))}`);
   sub.push(`タイピングの${b.mode}で遊ぶと、届いた時間でこの木だけ10倍早く育ちます`);
-  sub.push(`腐葉土 ${t.fert||0}回 ・ 成長速度 ×${+(t.mul||1).toFixed(2)}`+(S.axe?` ・ ${kb("斧(1 で ← →)","斧")}で切ると木材が取れます`:""));
+  sub.push(`腐葉土 ${t.fert||0}回 ・ 貴重品などと合わせた成長速度 ×${+(effGrowth()*(t.mul||1)).toFixed(2)}`+(S.axe?` ・ ${kb("斧(1 で ← →)","斧")}で切ると木材が取れます`:""));
   sub.push(BT_GROUPS[p.bt].some(x=>isWet(S.cur,x,now)) ? "💧 水が効いています(9マスのどれか1つでよい)" : "水切れ — 9マスのどれか1つに水をやると育ちます");
   return { big, sub };
 }
@@ -11022,10 +11022,10 @@ const roseTeaRecipeRow = () => ({ ic:"📜", nm:`ローズティーのレシピ 
   ds:"効果: ホーム画面とタイピングが、使った薔薇の色に染まる<br>材料: 🌹 薔薇×1(収穫したことのある色ごとに作れる)",
   keys:"<b>Enter</b> 買う", enter:buyRoseTea, shift:buyRoseTea });
 const roseTeaSeen = d => (S.harvestBy[d.rose]||0)>0 || Object.values(S.dishes[d.id]||{}).some(n=>n>0);
-const dishesAll = () => DISHES.concat(ROSE_TEAS.filter(roseTeaSeen));
+const dishesAll = () => DISHES.filter(d=>!d.bt).concat(ROSE_TEAS.filter(roseTeaSeen), DISHES.filter(d=>d.bt));   // 大木の料理はローズティーの後
 /* 料理図鑑: ローズティーは料理のあとに1行にまとめ、色のマスを ← → で選ぶ(シークレットは作ってから載る) */
 const TEA_BOOK = { id:"teabook", teabook:true, name:"ローズティー", icon:"🌹", eff:"M", ing:[], art:ROSE_TEAS[4].art };
-const DBK = () => DISHES.concat([TEA_BOOK]);
+const DBK = () => DISHES.filter(d=>!d.bt).concat([TEA_BOOK], DISHES.filter(d=>d.bt));
 const teaCells = () => ROSE_TEAS.filter(d=>!d.one).flatMap(d=>[[d,0],[d,3],[d,5]]).concat(ROSE_TEAS.filter(d=>d.one).map(d=>[d,0]));
 const teaMadeQ = () => ({0:teaCells().some(([d,t])=>t===0&&(S.dishMade[d.id]||{})[0]), 3:teaCells().some(([d,t])=>t===3&&(S.dishMade[d.id]||{})[3]), 5:teaCells().some(([d,t])=>t===5&&(S.dishMade[d.id]||{})[5])});
 let teaCur=0;
@@ -11455,8 +11455,8 @@ const WORKS = [
   { id:"w_fuyo", out:"fuyo", n:1, ing:[["sugileaf",1]], ds:"大木にまく腐葉土。その木の成長速度が2倍になります(1本に2回まで)" },
   { id:"w_sumi", out:"sumi", n:5, ing:[["umewood",1]], ds:"料理に使う梅の炭。料理が変異・超変異になることがあります(消耗品)" },
   { id:"w_chip", out:"chip", n:5, ing:[["grapewood",1]], ds:"燻製のおつまみの材料" },
-  { id:"w_taru", out:"taru", n:1, ing:[["sugiwood",2]], ds:"日本酒と古酒の材料" },
   { id:"w_chip2", out:"chip2", n:5, ing:[["grapewood2",1]], ds:"燻製チップの上位種。変異・超変異の燻製のおつまみの材料" },
+  { id:"w_taru", out:"taru", n:1, ing:[["sugiwood",2]], ds:"日本酒と古酒の材料" },
   { id:"w_taru2", out:"taru2", n:1, ing:[["sugiwood2",2]], ds:"杉樽の上位種。変異・超変異の日本酒と古酒の材料" },
 ];
 const workItem = out => out==="fuyo" ? FUYO : out==="sumi" ? SUMI : FOOD[out];
@@ -12071,7 +12071,7 @@ function roseBookDetail(quick){
 const roseHarv = () => ROSE_ALL.reduce((a,r)=>a+(S.harvestBy[r.id]||0),0);
 const roseQGot = t => ROSES.some(r=>qCount(r.id,t)>0) ? 1 : 0;
 const roseSecGot = () => ROSE_SECRET.some(r=>qCount(r.id,0)>0) ? 1 : 0;
-const FOOD_BOOK = FOODS.filter(f=>!f.up).sort((a,b)=>a.price-b.price);
+const FOOD_BOOK = FOODS.filter(f=>!f.up && !f.bt).sort((a,b)=>a.price-b.price).concat(FOODS.filter(f=>!f.up && f.bt));   // 大木の食材は最後に、材料 → できたものの順
 const BT_BOOK = Object.values(BTS).map(b=>({ id:b.id, name:b.name, bigtree:true, art:`<svg viewBox="30 14 220 220">${btArt(b.kind,5,0,200,200,140,226)}</svg>` }));
 let btBookT=0;   // 図鑑の大木: 0 ふつう / 1 変異 / 2 超変異
 const BOOK_CROPS = CROPS.filter(c=>!c.treasure).sort((a,b)=>a.price-b.price).concat([ROSE_BOOK], BT_BOOK, FOOD_BOOK, CROPS.filter(c=>c.treasure));
