@@ -6562,7 +6562,7 @@ function btPlant(k,id){
   if(!(S.seeds[id]>0)){ nope(k,"苗木がありません。タイピングの日替わりのご褒美でもらえます"); return; }
   const keys=BT_GROUPS[gi], why=x=>{ const q=f[x]; return q.crop ? "作物" : q.obj ? "設置物" : q.vil ? "村人" : (q.bt!=null && f.bt[q.bt]) ? "大木" : ""; };
   const busy=keys.filter(x=>why(x));
-  if(busy.length){ const m=`大木は3×3の9マス(${keys.slice(0,3).join(" ")} / ${keys.slice(3,6).join(" ")} / ${keys.slice(6).join(" ")})を使います。${busy.map(x=>x+"の"+why(x)).join("・")}をどけてから植えましょう`; nope(k,m); toast(m,"warn",5200); return; }
+  if(busy.length){ const m=`大木は3×3の9マス(${keys.slice(0,3).join(" ")} / ${keys.slice(3,6).join(" ")} / ${keys.slice(6).join(" ")})を使います。${busy.map(x=>x+"の"+why(x)).join("・")}をどけてから植えましょう`; nope(k,""); toast(m,"warn",5200); return; }
   for(const x of keys){ const q=f[x]; q.s="soil"; q.bt=gi; q.emptySince=0; }
   f.bt[gi]={ id, g:0, q:0, fert:0, mul:1, rip:false, ready:false, fr:0, t:Date.now() };
   S.seeds[id]--; S.btPlanted=(S.btPlanted||0)+1; btBookMark(id);
@@ -6618,7 +6618,7 @@ function btAct(k){
       if(S.axe && S.axeOn){
         if(!(btCutAsk && btCutAsk.k===k && btCutAsk.fi===S.cur && Date.now()-btCutAsk.at<4000)){
           btCutAsk={ k, fi:S.cur, at:Date.now() };
-          nope(k,`${esc(btName(t))}を斧で切りますか?${t.rip?"":"(まだ実っていないので、木材は取れません)"} もう一度押すと切ります`); return true;
+          nope(k,`${btName(t)}を斧で切りますか?${t.rip?"":"(まだ実っていないので、木材は取れません)"} もう一度押すと切ります`); return true;
         }
         btCutAsk=null; btCut(gi); return true;
       }
@@ -8926,7 +8926,7 @@ function buyFuyo(){
   if(fuyoToday()){ sfx.nope(); toast("腐葉土は1日1つまでです。また明日","warn"); return; }
   if(!spend(FUYO_COST)) return;
   S.fuyo=(S.fuyo||0)+1; S.fuyoDay=dayKey();
-  toast(`${ico(FUYO)} 腐葉土を買いました(手持ち ${S.fuyo})。${kb("5 で持って","肥料で選んで")}大木にまけます`,"good",3600);
+  toast(`${ico(FUYO)} 腐葉土を買いました(手持ち ${S.fuyo})。${kb("5 で持って","肥料で選んで")}大木にまけます`,"good",3600,true);
   save(); renderAll();
 }
 function buyObj(id){
