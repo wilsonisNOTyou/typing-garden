@@ -2448,7 +2448,7 @@ html.mobile #screen-garden .grk-list{max-height:none; flex:1 1 auto; min-height:
     </div>
 
     <div class="bar-row">
-      <div class="slot" data-tool="1"><span class="n">1</span><span class="ic">✋</span><span id="g-sickName">素手</span></div>
+      <div class="slot" data-tool="1"><span class="n">1</span><div class="seedsel"><span class="arr" id="g-sickArrL">◀</span><span class="ic" id="g-sickIc">✋</span><span id="g-sickName">素手</span><span class="arr" id="g-sickArrR">▶</span></div></div>
       <div class="slot" data-tool="2"><span class="n">2</span><span class="ic">⛏️</span><span id="g-hoeName">クワ</span></div>
       <div class="slot" data-tool="3"><span class="n">3</span><span class="ic">💧</span><span id="g-canName">じょうろ</span></div>
       <div class="slot" data-tool="4"><span class="n">4</span>
@@ -5044,18 +5044,18 @@ function endBookGame(){
    新しいものを上に足していく。d は YYYY-MM-DD */
 const NEWS=[
   { d:"2026-10-25", t:"大木と、日替わりのご褒美", items:[
+    "大木を追加しました。畑の3×3の9マスを使って、何年もかけて育つ木です。十年梅・三十年葡萄・百年杉の3種類があり、実ったあとは1年ごとに実ります",
+    "累計収穫1万で大木が開きます。腐葉土と斧がお店に並び、料理の画面に工房のタブが開きます",
+    "腐葉土をまくと、木の育つ速さが倍になります。斧で切ると木材が取れます",
+    "工房では、大木の実や木材からお酒やおつまみを作れます。お酒を飲むと、タイピングと TOEIC の画面がほろ酔いになり、その間の記録はほろ酔いランキングに載ります",
     "日替わりのご褒美を始めました。毎日、スコアアタックとタイムアタックのどれか1つずつに付き、タイトルで光ります。最後まで遊ぶと受け取れます。累計収穫100から始まります",
-    "どちらか一方には必ず大木の苗木が付きます。イージーは十年梅、ノーマルは三十年葡萄、ハードは百年杉で、1日3本までもらえます。苗木は大木が開いてからです",
-    "大木は畑の9マスを使って、何年もかけて育ちます。その木の苗木がもらえる難易度で遊ぶと、その木だけ10倍の速さで育ちます",
-    "累計収穫1万で、大木と一緒に腐葉土・斧・工房が開きます。工房では、大木の実や木材からお酒やおつまみを作れます",
-    "お酒を飲むと、タイピングと TOEIC の画面がほろ酔いになります。ほろ酔いの記録は、ほろ酔いランキングに載ります",
+    "大木が開いたあとは、どちらか一方に必ず大木の苗木が付きます。イージーは十年梅、ノーマルは三十年葡萄、ハードは百年杉で、1日3本までもらえます",
+    "その木の苗木がもらえる難易度で遊ぶと、届いた時間でその木だけ10倍早く育ちます",
     "図鑑と実績に大木を追加しました",
   ]},
   { d:"2026-10-25", t:"例文ボタンと、やめるボタン", items:[
     "TOEIC の単語リストと結果画面で、単語ごとに例文を見られるようにしました。E キーでまとめて開けます",
     "タイピングと TOEIC の画面に「やめる」ボタンを出しました。Esc キーでもやめられます",
-    "逆4択で、英単語の文字数が見えないようにしました",
-    "ランキングの名前の飾りが、タイピングや TOEIC のランキングにも出るようになりました",
   ]},
   { d:"2026-10-23", t:"TOEIC 英単語に逆4択と、記録の見直し", items:[
     "出題形式に「逆4択」を追加しました。日本語を見て、設定した時間内に英単語のスペルをタイピングします。時間切れになると4択に移行します。タイピングできたらご褒美が2倍、4択で正解すれば1倍です。スマホでプレイするときは4択のみになります",
@@ -6622,8 +6622,8 @@ function btAct(k){
         }
         btCutAsk=null; btCut(gi); return true;
       }
-      if(!t.rip){ nope(k,`まだ育っています。実るまで、農園の時間であと ${fmtYears((btNeed(t)-t.g)/btRate(t))}`); return true; }
-      if(!t.ready){ nope(k,`次に実るまで、農園の時間であと ${fmtYears((BT_YEAR-(t.fr||0))/btRate(t))}`); return true; }
+      if(!t.rip){ nope(k,`まだ育っています(実るまで 水が効いていれば あと ${fmtYears((btNeed(t)-t.g)/btRate(t))})`); return true; }
+      if(!t.ready){ nope(k,`次に実るまで 水が効いていれば あと ${fmtYears((BT_YEAR-(t.fr||0))/btRate(t))}`); return true; }
       btHarvest(gi,k); return true;
     }
     case 3: return false;   // 水やりはふつうどおり
@@ -6636,11 +6636,11 @@ function btAct(k){
 function btInfo(k,p){
   const t=field().bt[p.bt], b=BTS[t.id], st=btStage(t), now=Date.now(), sub=[];
   const big=`${k} ・ ${b.icon} ${esc(btName(t))} ・ ${b.st[st-1]}${t.q===5?"(超変異)":t.q===3?"(変異)":""}`;
-  if(!t.rip) sub.push(`育ち具合 ${(t.g/btNeed(t)*100).toFixed(2)}% ・ 実るまで、農園の時間であと ${fmtYears((btNeed(t)-t.g)/btRate(t))}`);
-  if(!t.rip) sub.push(`${b.yrs}年かけて実る木です。水が効いているあいだ、時間がたつと育ちます。タイピングで届く時間でも育ち、${b.mode}で遊ぶと10倍です`);
+  if(!t.rip) sub.push(`育成 ${(t.g/btNeed(t)*100).toFixed(2)}% ・ 実るまで 水が効いていれば あと ${fmtYears((btNeed(t)-t.g)/btRate(t))}`);
   else if(t.ready) sub.push(`実っています。${kb("素手(1)","素手")}で ${esc(FOOD[btItem(b.fruit,t.q)].name)}を収穫できます`);
-  else sub.push(`次に実るまで、農園の時間であと ${fmtYears((BT_YEAR-(t.fr||0))/btRate(t))}`);
-  sub.push(`腐葉土 ${t.fert||0}回 ・ 成長速度 ×${+(t.mul||1).toFixed(2)}`+(S.axe?` ・ ${kb("斧(1 をもう一度押して持ちかえ)","斧")}で切ると木材が取れます`:""));
+  else sub.push(`次に実るまで 水が効いていれば あと ${fmtYears((BT_YEAR-(t.fr||0))/btRate(t))}`);
+  sub.push(`タイピングの${b.mode}で遊ぶと、届いた時間でこの木だけ10倍早く育ちます`);
+  sub.push(`腐葉土 ${t.fert||0}回 ・ 成長速度 ×${+(t.mul||1).toFixed(2)}`+(S.axe?` ・ ${kb("斧(1 で ← →)","斧")}で切ると木材が取れます`:""));
   sub.push(BT_GROUPS[p.bt].some(x=>isWet(S.cur,x,now)) ? "💧 水が効いています(9マスのどれか1つでよい)" : "水切れ — 9マスのどれか1つに水をやると育ちます");
   return { big, sub };
 }
@@ -8143,6 +8143,8 @@ function renderBar(){
   const tn=[canInfo().name, S.axe&&S.axeOn ? "斧" : sickleInfo().name, hoeInfo().name];
   $("g-canName").textContent=tn[0];
   $("g-sickName").textContent=tn[1];
+  $("g-sickIc").textContent = S.axe&&S.axeOn ? "🪓" : "✋";
+  for(const a of ["g-sickArrL","g-sickArrR"]) $(a).style.display = S.axe ? "" : "none";   // 斧を持っていれば ← → で持ちかえ
   $("g-hoeName").textContent=tn[2];
   // 種
   const owned=ownedSeeds();
@@ -8490,12 +8492,14 @@ function magicFert(k,p,id){
   toast(`${ico(g)} ${esc(c.rose?"薔薇":c.name)}にまきました。${id==="mfert"?"超変異で3個穫れます":"変異で3個穫れます"}`,"good mut"+(id==="mfert"?" sup":""),4200,true);
 }
 function setTool(t){
-  if(t===1 && S.tool===1 && S.axe){ S.axeOn=!S.axeOn; toast(S.axeOn?"🪓 斧に持ちかえました(大木を切ります)":"✋ 素手に戻しました","",2000); }   // 斧を持っていれば、1 をもう一度押して持ちかえ
+  if(t===1 && S.tool===1 && S.axe) axeSwap();   // 斧を持っていれば、1 をもう一度押して持ちかえ
   S.tool=t; sfx.tool(); save(); renderBar();
 }
 /* ← →: 設置を持っているときは設置物、それ以外は種を切り替える */
+function axeSwap(){ S.axeOn=!S.axeOn; toast(S.axeOn?"🪓 斧に持ちかえました(大木を切ります)":"✋ 素手に戻しました","",2000); }
 const ownedFerts = () => ["fert", ...["sfert","mfert","fuyo"].filter(id=>S[id]>0)];
 function cycleSel(dir){
+  if(S.tool===1){ if(S.axe){ axeSwap(); sfx.cursor(); save(); renderBar(); } return; }   // 素手と斧
   if(S.tool===5 && ownedFerts().length>1){
     const o=ownedFerts();
     let i=o.indexOf(S.fertSel); if(i<0) i=0;
@@ -8613,7 +8617,7 @@ function shopRows(){
     const aOk=meets(BT_UNLOCK);   // 斧(大木と一緒に解放)
     rows.push({ locked:!aOk, ic: aOk?"🪓":"❔",
       nm: aOk ? (S.axe ? `斧 <span style="color:var(--ink-l)">購入済み</span>` : `斧 <span style="color:var(--ink-l)">${fmtNum(AXE_COST)}キー</span>`) : "？？？",
-      ds: aOk ? `大木を根元から切って、木材を取ります。${kb("素手(1)のときに、もう一度 1 を押すと素手と斧を持ちかえます","素手のときに、もう一度素手を押すと斧に持ちかえます")}` : unlockText(BT_UNLOCK),
+      ds: aOk ? `大木を根元から切って、木材を取ります。${kb("素手(1)を持って ← → で、素手と斧を持ちかえます","素手の ◀ ▶ で、素手と斧を持ちかえます")}` : unlockText(BT_UNLOCK),
       keys: aOk&&!S.axe?"<b>Enter</b> 買う":"", enter:()=>aOk&&!S.axe&&buyAxe(), shift:()=>aOk&&!S.axe&&buyAxe() });
     const nh=HOES[S.hoeLv];
     rows.push({ ic:"⛏️", nm: nh?`${nh.name} <span style="color:var(--ink-l)">${fmtNum(nh.cost)}キー</span>`:hoeInfo().name,
@@ -8919,7 +8923,7 @@ function buyFert(n){
 function buyAxe(){
   if(S.axe || !meets(BT_UNLOCK) || !spend(AXE_COST)) return;
   S.axe=true;
-  toast(`🪓 斧を買いました。${kb("素手(1)のときに、もう一度 1 を押すと持ちかえます","素手のときに、もう一度素手を押すと持ちかえます")}`,"good",4200);
+  toast(`🪓 斧を買いました。${kb("素手(1)を持って ← → で持ちかえます","素手の ◀ ▶ で持ちかえます")}`,"good",4200);
   save(); renderAll();
 }
 function buyFuyo(){
@@ -12774,7 +12778,7 @@ function onKeyMain(e){
 }
 root.querySelectorAll(".slot").forEach(s=>s.addEventListener("click",()=>setTool(+s.dataset.tool)));
 // ◀ ▶ で種・設置物を選ぶ(タップ・クリック用)
-[["g-seedArrL",4,-1],["g-seedArrR",4,1],["g-fertArrL",5,-1],["g-fertArrR",5,1],["g-objArrL",6,-1],["g-objArrR",6,1]].forEach(([id,tool,dir])=>{
+[["g-sickArrL",1,-1],["g-sickArrR",1,1],["g-seedArrL",4,-1],["g-seedArrR",4,1],["g-fertArrL",5,-1],["g-fertArrR",5,1],["g-objArrL",6,-1],["g-objArrR",6,1]].forEach(([id,tool,dir])=>{
   $(id).addEventListener("click",e=>{ e.stopPropagation(); S.tool=tool; cycleSel(dir); });
 });
 $("g-fieldUp").addEventListener("click",e=>{ e.stopPropagation(); switchField(-1); });
@@ -12941,7 +12945,7 @@ function debugUnlock(){
   for(const r of ROSE_USEEDS()) S.seeds[r.id]=10;
   for(const d of ROSE_TEAS){ const G=gradesOf(d); S.dishes[d.id]=Object.fromEntries(G.map(g=>[g,1])); S.dishMade[d.id]=Object.fromEntries(G.map(g=>[g,true])); S.dishEaten[d.id]=Object.fromEntries(G.map(g=>[g,true])); }
   try{ if(typeof tqOpenAll==="function") tqOpenAll(); }catch(e){}   // TOEIC のレベルもすべて開く
-  S.known=CROPS.map(c=>c.id).concat(["fert","obj:spr","obj:crow"]);
+  S.known=CROPS.map(c=>c.id).concat(["fert","obj:spr","obj:crow","bigtree"]);   // 大木の解放のお知らせは出さない
   S.lastTick=Date.now();
   save();
 }
