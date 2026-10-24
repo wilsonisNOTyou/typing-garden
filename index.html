@@ -6040,17 +6040,17 @@ const BTF_ART = (()=>{
 })();
 const BT_FOODS = [
   { id:"ume", r:"SR", name:"梅の実", icon:"🟢", price:3000, up:null, src:"十年梅", lore:"十年かけて育った梅の木の、青い実。梅酒にも、梅干しにもなる。" },
-  { id:"ume2", r:"UR", name:"完熟の梅の実", icon:"🟠", price:12000, up:"ume", src:"紅梅・金の梅", lore:"変わった梅の木だけが実らせる、香りの強い完熟の実。" },
+  { id:"ume2", r:"UR", name:"完熟の梅の実", icon:"🟠", price:12000, up:"ume", src:"変異・超変異の十年梅", lore:"変わった梅の木だけが実らせる、香りの強い完熟の実。" },
   { id:"vgrape", r:"SR", name:"古木の葡萄", icon:"🍇", price:6000, up:null, src:"三十年葡萄", lore:"三十年の古木から穫れる葡萄。粒は小さいけれど、味がぎゅっと詰まっている。" },
-  { id:"vgrape2", r:"UR", name:"宝石の葡萄", icon:"🍇", price:24000, up:"vgrape", src:"翡翠葡萄・宝石葡萄", lore:"一粒ごとに色が違う、宝石のような葡萄。" },
+  { id:"vgrape2", r:"UR", name:"宝石の葡萄", icon:"🍇", price:24000, up:"vgrape", src:"変異・超変異の三十年葡萄", lore:"一粒ごとに色が違う、宝石のような葡萄。" },
   { id:"sugileaf", r:"SR", name:"杉の葉", icon:"🌿", price:2000, up:null, src:"百年杉", lore:"百年杉の青い葉。工房で腐葉土にすると、木がよく育つ。" },
-  { id:"sugileaf2", r:"UR", name:"御神木の葉", icon:"🌿", price:8000, up:"sugileaf", src:"銀杉・黄金の御神木", lore:"御神木から落ちた、ほのかに光る葉。" },
+  { id:"sugileaf2", r:"UR", name:"御神木の葉", icon:"🌿", price:8000, up:"sugileaf", src:"変異・超変異の百年杉", lore:"御神木から落ちた、ほのかに光る葉。" },
   { id:"umewood", r:"HR", name:"梅の古木", icon:"🪵", price:20000, up:null, src:"十年梅を斧で切る", lore:"ごつごつした梅の幹。工房で焼くと、よい炭になる。" },
-  { id:"umewood2", r:"GSR", name:"銘木の梅", icon:"🪵", price:80000, up:"umewood", src:"紅梅・金の梅を斧で切る", lore:"変わった梅の木の幹。木目まで美しい。" },
+  { id:"umewood2", r:"GSR", name:"銘木の梅", icon:"🪵", price:80000, up:"umewood", src:"変異・超変異の十年梅を斧で切る", lore:"変わった梅の木の幹。木目まで美しい。" },
   { id:"grapewood", r:"HR", name:"葡萄の古株", icon:"🪵", price:40000, up:null, src:"三十年葡萄を斧で切る", lore:"ねじれた葡萄の古株。工房で砕くと燻製チップになる。" },
-  { id:"grapewood2", r:"GSR", name:"銘木の葡萄株", icon:"🪵", price:160000, up:"grapewood", src:"翡翠葡萄・宝石葡萄を斧で切る", lore:"変わった葡萄の古株。燻すと甘い香りがする。" },
+  { id:"grapewood2", r:"GSR", name:"銘木の葡萄株", icon:"🪵", price:160000, up:"grapewood", src:"変異・超変異の三十年葡萄を斧で切る", lore:"変わった葡萄の古株。燻すと甘い香りがする。" },
   { id:"sugiwood", r:"HR", name:"百年杉の木材", icon:"🪵", price:80000, up:null, src:"百年杉を斧で切る", lore:"まっすぐで香りのよい杉の木材。工房で樽になる。" },
-  { id:"sugiwood2", r:"GSR", name:"御神木の木材", icon:"🪵", price:320000, up:"sugiwood", src:"銀杉・黄金の御神木を斧で切る", lore:"御神木から取れた木材。手に持つと、背すじが伸びる。" },
+  { id:"sugiwood2", r:"GSR", name:"御神木の木材", icon:"🪵", price:320000, up:"sugiwood", src:"変異・超変異の百年杉を斧で切る", lore:"御神木から取れた木材。手に持つと、背すじが伸びる。" },
   { id:"chip", r:"SR", name:"燻製チップ", icon:"🪵", price:10000, up:null, src:"工房", lore:"葡萄の古株を砕いたチップ。燻すと、おつまみになる。" },
   { id:"taru", r:"HR", name:"杉樽", icon:"🛢️", price:50000, up:null, src:"工房", lore:"百年杉で組んだ樽。お酒を仕込むと、杉の香りがうつる。" },
   { id:"chip2", r:"UR", name:"香木チップ", icon:"🪵", price:40000, up:"chip", src:"工房", lore:"銘木の葡萄株を砕いた、甘い香りのチップ。燻すと、煙まで紫に色づく。" },
@@ -11442,13 +11442,15 @@ function ingHave(id,g){
   return haveFood(id) + (upOf(id)?haveFood(upOf(id).id):0);
 }
 /* 材料の出どころ(まだ手に入れていない材料に添える) */
+/* 材料の横に出す出どころ。大木から取れる品は出さない(木の説明は図鑑で) */
+const srcTag = id => { const f=FOOD[id]; if(f && f.bt && f.src!=="工房" && f.src!=="仕込み") return ""; return `<small class="isrc">(${srcOf(id)})</small>`; };
 const srcOf = id => { const c=CROP[id]; if(c) return c.waku?"わくわくガチャ":c.gacha?"種ガチャ":c.day!=null?"曜日のお店":"お店"; return FOOD[id]&&FOOD[id].src ? FOOD[id].src : isPrepFood(id)?"仕込み":"わくわくガチャ"; };
 /* 材料の名前(料理を始めたばかりでも分かるように、いつも名前を出す) */
 function ingLabel(id,g){
   const mutG = g===3 || g===5;
   const shown = mutG && FOOD[id] && upOf(id) ? upOf(id) : itemOf(id);
   const nm = CROP[id] && mutG ? `${gradeName(g)}の${shown.name}` : shown.name;
-  return `${ico(shown)}${esc(nm)}${itemKnown(shown.id)?"":`<small class="isrc">(${srcOf(shown.id)})</small>`}`;
+  return `${ico(shown)}${esc(nm)}${itemKnown(shown.id)?"":srcTag(shown.id)}`;
 }
 const ingHaveText = (ing,g) => ing.map(([id,n])=>{
   const have=ingHave(id,g), ok=have>=n;
@@ -11508,7 +11510,7 @@ function cookRowsOf(){
           nm:`${esc(out.name)}${up?' <span class="upnm">上位種</span>':""} <small class="dhave">持っている ×${foodN(out.id)}</small>`,
           ds:`材料(持っている/要る): ${ing.map(([id,n])=>{ const it=itemOf(id), nm = CROP[id]&&up ? `変異の${it.name}` : it.name;
             const have = CROP[id] ? (up ? invN(id,3)+invN(id,5) : TIERS.reduce((a,t)=>a+invN(id,t),0)) : foodN(id);   // 仕込みの数え方(prepPlan と同じ)
-            return `<span class="${have>=n?"ingok":"ingng"}">${ico(it)}${esc(nm)} ${fmtNum(have)}/${n}</span>${itemKnown(id)?"":`<small class="isrc">(${srcOf(id)})</small>`}`; }).join(" ・ ")}${plan?"":` <b class="dlack">(材料が足りません)</b>`}`,
+            return `<span class="${have>=n?"ingok":"ingng"}">${ico(it)}${esc(nm)} ${fmtNum(have)}/${n}</span>${itemKnown(id)?"":srcTag(id)}`; }).join(" ・ ")}${plan?"":` <b class="dlack">(材料が足りません)</b>`}`,
           keys: plan?"<b>Enter</b> 1つ仕込む<br><b>Shift+Enter</b> 仕込めるだけ":"", locked:!plan,
           enter:()=>prepMake(p.id,up,1), shift:()=>prepMake(p.id,up,99) });
       }
@@ -11521,7 +11523,7 @@ function cookRowsOf(){
       const it=workItem(w.out), ok=w.ing.every(([id,n])=>workHave(id)>=n);
       rows.push({ ic:ico(it), locked:!ok,
         nm:`${esc(it.name)}${w.n>1?` ×${w.n}`:""} <small class="dhave">持っている ×${fmtNum(workN(w.out))}</small>`,
-        ds:`${esc(w.ds)}<br>材料(持っている/要る): ${w.ing.map(([id,n])=>{ const have=workHave(id); return `<span class="${have>=n?"ingok":"ingng"}">${ico(FOOD[id])}${esc(FOOD[id].name)} ${fmtNum(have)}/${n}</span>${itemKnown(id)?"":`<small class="isrc">(${srcOf(id)})</small>`}`; }).join(" ・ ")}${ok?"":` <b class="dlack">(材料が足りません)</b>`}`,
+        ds:`${esc(w.ds)}<br>材料(持っている/要る): ${w.ing.map(([id,n])=>{ const have=workHave(id); return `<span class="${have>=n?"ingok":"ingng"}">${ico(FOOD[id])}${esc(FOOD[id].name)} ${fmtNum(have)}/${n}</span>${itemKnown(id)?"":srcTag(id)}`; }).join(" ・ ")}${ok?"":` <b class="dlack">(材料が足りません)</b>`}`,
         keys: ok?"<b>Enter</b> 1回作る<br><b>Shift+Enter</b> 作れるだけ":"", enter:()=>workMake(w.id,1), shift:()=>workMake(w.id,999) });
     }
   }
