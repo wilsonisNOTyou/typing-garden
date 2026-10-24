@@ -2802,6 +2802,20 @@ html.mobile #screen-garden .grk-list{max-height:none; flex:1 1 auto; min-height:
   </div>
 </div>
 
+<!-- 日替わりのご褒美が始まったお知らせ -->
+<div id="dbInfo" class="bk-modal">
+  <div class="bk-panel">
+    <div class="bk-head"><h2>🎁 日替わりのご褒美が始まりました</h2><button class="btn bk-x" id="dbInfoClose">閉じる ✕</button></div>
+    <ul class="news-list" style="line-height:1.8; padding-left:1.2rem">
+      <li>毎日、スコアアタックとタイムアタックのどれか1つずつに、ご褒美が付きます。付いたモードは、タイトルで光ります。</li>
+      <li>そのモードを最後まで遊ぶと受け取れます。途中でやめたときや、バラバラ中はもらえません。</li>
+      <li>ご褒美は日本時間の0時に切り替わり、みんな同じです。</li>
+      <li>累計収穫1万で大木が解放されると、片方には大木の苗木が付くようになります。</li>
+    </ul>
+    <p class="keynav"><b>Enter</b> / <b>Esc</b> 閉じる</p>
+  </div>
+</div>
+
 <!-- 更新情報 -->
 <div id="news" class="bk-modal">
   <div class="bk-panel">
@@ -3836,6 +3850,7 @@ function refreshDaily(){
   const sig=JSON.stringify(bon)+"|"+(()=>{ try{ return Garden.dailySapLeft(); }catch(e){ return ""; } })()+"|"+dbNeji(2);
   const lost=Object.keys(bon).some(d=>{ const b=document.querySelector(`#screen-title .diff-btn[data-diff="${d}"]`); return b && !b.querySelector(".dbtag"); });   // 表示が消えていたら描き直す
   if(sig===dbShown && !lost) return; dbShown=sig;
+  dbInfoMaybe(bon);
   document.querySelectorAll("#screen-title .diff-btn[data-diff]").forEach(b=>{
     const x=bon[b.dataset.diff]; b.classList.toggle("dbon",!!x);
     let t=b.querySelector(".dbtag"); if(!x){ if(t) t.remove(); return; }
@@ -3844,6 +3859,15 @@ function refreshDaily(){
     t.textContent = `🎁 今日のご褒美 ${dbLabel(x)}` + (left!=null ? (left>0 ? ` ・ あと${left}本` : " ・ 今日はもらいました") : "");
   });
 }
+/* 日替わりのご褒美が始まったお知らせ: 初めて付いたときに1回だけ(大木の解放のお知らせで話している人には出さない) */
+let dbInfoOpen=false;
+const DB_INFO_KEY = () => NEWS_SEEN_KEY.replace("newsSeen","dailyInfo");
+function dbInfoMaybe(bon){
+  if(!Object.keys(bon).length || window.IS_MOBILE || scene!=="title" || document.querySelector(".bk-modal.open")) return;
+  try{ if(localStorage.getItem(DB_INFO_KEY())) return; localStorage.setItem(DB_INFO_KEY(),"1"); if(Garden.btOpen()) return; }catch(e){ return; }
+  dbInfoOpen=true; $("dbInfo").classList.add("open");
+}
+function closeDbInfo(){ dbInfoOpen=false; $("dbInfo").classList.remove("open"); }
 setInterval(()=>{ if(scene==="title") refreshDaily(); },5000);
 for(const ms of [200,1000]) setTimeout(()=>{ if(scene==="title") refreshDaily(); },ms);   // 開いた直後から出す
 let typePk=null;   // このプレイの届け物に付ける印(大木の10倍・時短・変異)。sendToGarden で使う
@@ -4298,6 +4322,7 @@ document.addEventListener("keydown",e=>{
     else if(e.key==="Escape"){ e.preventDefault(); closeNameWin(); }
     return;
   }
+  if(dbInfoOpen){ if(e.key==="Enter"||e.key==="Escape"){ e.preventDefault(); closeDbInfo(); } return; }
   // 更新情報のウィンドウ
   if(newsOpen){
     if(e.key==="Escape"||e.key==="u"||e.key==="U"){ e.preventDefault(); closeNews(); }
@@ -5241,6 +5266,8 @@ function openNews(){
 function closeNews(){ newsOpen=false; $("news").classList.remove("open"); }
 $("newsBtn").addEventListener("click",openNews);
 $("newsClose").addEventListener("click",closeNews);
+$("dbInfoClose").addEventListener("click",closeDbInfo);
+$("dbInfo").addEventListener("click",e=>{ if(e.target===$("dbInfo")) closeDbInfo(); });
 $("news").addEventListener("click",e=>{ if(e.target===$("news")) closeNews(); });
 refreshNewsBadge();
 
@@ -11849,7 +11876,7 @@ function renderDbook(){
       <dt>材料</dt><dd>${ingText(d.ing,t)}</dd>
       <dt>効果</dt><dd>${effLine(d,t)}</dd>
       <dt>効く時間</dt><dd>${effKnown(d,t)?durTxt:"？？？"}</dd>
-      <dt>レシピ</dt><dd>${d.rose?"いりません(その色の薔薇を咲かせると作れます)":S.recipes[d.id]?"持っている":`お店で買えます(${fmtNum(recipeCost(d))}キー)`}</dd>
+      <dt>レシピ</dt><dd>${d.rose?"いりません(その色の薔薇を咲かせると作れます)":S.recipes[d.id]?"持っている":d.bt&&!meets(BT_UNLOCK)?"累計収穫1万で、お店に並びます":`お店で買えます(${fmtNum(recipeCost(d))}キー)`}</dd>
     </dl>
     <div class="lore ${made?"":"unknown"}">${made?esc(lore):(t===5?"作物をすべて超変異に、食材をすべて上位種にして作ると、ここに載ります。":t===3?"作物をすべて変異に、食材をすべて上位種にして作ると、ここに載ります。":"一度作ると、ここに説明が書き込まれます。")}</div>`;
   keepVisible($("g-dbookList"));
@@ -12202,7 +12229,7 @@ function renderBook(){
   if(c.bigtree){   // 大木: ふつう / 変異 / 超変異 を ← → で切り替える
     const b=BTS[c.id], q=[0,3,5][btBookT], nm=[b.name,b.n3,b.n5][btBookT], seen=btBookQ(c.id,q);
     const tabs=`<div class="btabs">${["ふつう","変異","超変異"].map((x,i)=>`<span class="btab${i?(i===1?" mut":" sup"):""}${i===btBookT?" on":""}${btBookQ(c.id,[0,3,5][i])?"":" dim"}" data-t="${i}">${x}</span>`).join("")}</div>`;
-    const how=`タイピングの日替わりのご褒美で、${b.mode}に苗木が付いた日にもらえます`;
+    const how=(meets(BT_UNLOCK)?"":"累計収穫1万で大木が解放されると、")+`タイピングの日替わりのご褒美で、${b.mode}に苗木が付いた日にもらえます`;
     $("g-bookDetail").innerHTML = tabs + (known ? `
       <div class="bic${btBookT?" q2":""}"><span class="cart btbic">${seen||!btBookT ? `<svg viewBox="30 14 220 220">${btArt(b.kind,5,btBookT,200,200,140,226)}</svg>` : "❔"}</span></div>
       <div class="bnm">${seen||!btBookT ? esc(nm) : "？？？"}</div>
