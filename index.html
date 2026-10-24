@@ -6694,11 +6694,120 @@ function treeSVG(t,stage,v,W,H,cx,base){
     if(v===2) for(let i=0;i<12;i++){ const a=i/12*Math.PI*2; o.push(`<path d="M${f1(cx)} ${f1(base-ht*.55)} L${f1(cx+Math.cos(a-.08)*W*.55)} ${f1(base-ht*.55+Math.sin(a-.08)*H*.55)} L${f1(cx+Math.cos(a+.08)*W*.55)} ${f1(base-ht*.55+Math.sin(a+.08)*H*.55)} Z" fill="#fff3b0" opacity=".14"/>`); }
     o.push(`<ellipse cx="${f1(cx)}" cy="${f1(base-ht*.55)}" rx="${f1(W*.62)}" ry="${f1(ht*.62)}" fill="url(#${id}g)"/>`);
   }
-  if(t==="sugi") sugi(); else if(t==="ume") ume(); else grape();
+  if(t==="sugi") (v===2?sugiGold:v===1?sugiSilver:sugi)(); else if(t==="ume") ume(); else (v===2?grapeGem:v===1?grapeJade:grape)();   // 葡萄と杉は、変異・超変異で形から変わる
   // きらめき
   if(v>0 && stage>=2) for(let i=0;i<(v===2?16:9);i++) o.push(star(cx+(R()-.5)*W*.95, base-ht*(.1+R()*.95), 2.5+R()*4, v===2?"#fffbd0":"#f0e0ff", R()*2));
   return o.join("");
 
+  /* --- 銀杉: 平たい銀の葉の段が枝垂れる。てっぺんに三日月 --- */
+  function sugiSilver(){
+    if(stage<3){ sugi(); return; }
+    const L=P.leaf, tw=[3,6,8,12,13][stage-1], bk=`url(#${id}b)`;
+    if(stage>=4) for(const d of [-1,1]) o.push(limb([[cx+d*tw*.2,base-6],[cx+d*tw*.9,base],[cx+d*W*.14,base+4]],tw*.4,2,bk));
+    o.push(limb([[cx,base+2],[cx,base-ht*.5],[cx,top+6]],tw,tw*.18,bk));
+    for(let i=0;i<9;i++){ const yy=base-ht*(.05+i*.09); o.push(`<path d="M${f1(cx-tw*.35)} ${f1(yy)} h${f1(tw*.7)}" stroke="#e8eef2" stroke-width="1.3" opacity=".55"/>`); }
+    const n=[0,0,3,5,6][stage-1], plates=[];
+    for(let i=0;i<n;i++){
+      const y=top+ht*(.1+i*.72/n), w=W*(.13+.36*Math.pow((i+1)/n,.9)), h=ht*.022;
+      plates.push([y,w]);
+      o.push(limb([[cx,y+h*1.2],[cx+(i%2?1:-1)*w*.4,y+h*.6],[cx+(i%2?1:-1)*w*.8,y+h*.8]],2.4,1,bk));
+      let d=`M${f1(cx-w)} ${f1(y+h)} Q${f1(cx-w*.6)} ${f1(y-h*1.2)} ${f1(cx)} ${f1(y-h*1.3)} Q${f1(cx+w*.6)} ${f1(y-h*1.2)} ${f1(cx+w)} ${f1(y+h)}`;
+      const k=10+i*2;
+      for(let j=k;j>=0;j--){ const x=cx-w+2*w*j/k, dip=(j%2?h*3.2:h*.8)+R()*2; d+=` L${f1(x)} ${f1(y+h+dip)}`; }
+      d+="Z";
+      o.push(`<path d="${d}" fill="${L[0]}" transform="translate(1.5 3)" opacity=".6"/><path d="${d}" fill="${L[1]}"/><path d="${d}" fill="${L[2]}" transform="translate(0 -2) scale(1 .96)" transform-origin="${f1(cx)} ${f1(y)}" opacity=".75"/>`);
+      o.push(`<path d="M${f1(cx-w*.8)} ${f1(y+h*.2)} Q${f1(cx)} ${f1(y-h*1.6)} ${f1(cx+w*.8)} ${f1(y+h*.2)}" stroke="#f2fbff" stroke-width="1.6" fill="none" stroke-linecap="round" opacity=".9"/>`);
+      for(let j=0;j<5;j++){ const x=cx-w*.85+w*1.7*R(); o.push(`<path d="M${f1(x)} ${f1(y+h)} q${f1((R()-.5)*3)} 7 0 ${f1(10+R()*6)}" stroke="${L[2]}" stroke-width="1" fill="none" opacity=".75"/><circle cx="${f1(x)}" cy="${f1(y+h+12+R()*4)}" r="1.1" fill="#fff" opacity=".85"/>`); }
+    }
+    if(stage===5){
+      const my=top-ht*.06, mr=W*.075;   // 三日月
+      o.push(`<circle cx="${f1(cx)}" cy="${f1(my)}" r="${f1(mr*1.9)}" fill="#dfeeff" opacity=".22"/><path d="M${f1(cx)} ${f1(my-mr)} A${f1(mr)} ${f1(mr)} 0 1 0 ${f1(cx)} ${f1(my+mr)} A${f1(mr*.55)} ${f1(mr)} 0 1 1 ${f1(cx)} ${f1(my-mr)}Z" fill="#f6faff" stroke="#c8d6e4" stroke-width=".8"/>`);
+      for(const [y,w] of plates.slice(2)) for(const s of [-1,1]){ const x=cx+s*w*.7, yy=y+ht*.07;   // 氷のしずくの飾り
+        o.push(`<path d="M${f1(x)} ${f1(yy-6)} v4" stroke="#c8d4de" stroke-width=".8"/><path d="M${f1(x)} ${f1(yy-2)} q4 6 0 11 q-4 -5 0 -11Z" fill="#eaf6ff" stroke="#9fb6c8" stroke-width=".7"/>`); }
+    }
+  }
+  /* --- 黄金の御神木: 太い幹から枝が広がり、雲のような金の葉。しめ縄と鳥居 --- */
+  function sugiGold(){
+    if(stage<3){ sugi(); return; }
+    const L=P.leaf, tw=[3,6,13,21,23][stage-1], bk=`url(#${id}b)`;
+    for(const d of (stage>=4?[-1,-.5,.5,1]:[-1,1])) o.push(limb([[cx+d*tw*.25,base-8],[cx+d*tw*.9,base-1],[cx+d*W*(.16+Math.abs(d)*.06),base+5]],tw*.42,2,bk));
+    const fy=base-ht*.42;
+    o.push(limb([[cx,base+2],[cx-tw*.25,base-ht*.2],[cx+tw*.15,fy]],tw,tw*.75,bk));
+    for(let i=0;i<6;i++) o.push(`<path d="M${f1(cx-tw*.4+R()*tw*.8)} ${f1(base-2)} q${f1((R()-.5)*6)} ${f1(-ht*.15)} 0 ${f1(-ht*.32)}" stroke="${P.bark[1]}" stroke-width="1.2" fill="none" opacity=".5"/>`);
+    const cy0=top+ht*.3, cw=W*[0,0,.3,.4,.42][stage-1], ends=[];
+    for(const a of [-.85,-.45,0,.45,.85]){ const e=[cx+Math.sin(a)*cw*.75, cy0+(1-Math.cos(a))*cw*.35]; ends.push(e); o.push(limb([[cx+tw*.1,fy],[(cx+e[0])/2,(fy+e[1])/2+4],e],tw*.42,2.5,bk)); }
+    const cl=stage===3?7:12;
+    for(let i=0;i<cl;i++){ const a=-Math.PI+Math.PI*(i+.5)/cl, rr=cw*(.75+R()*.2), x=cx+Math.cos(a)*rr, y=cy0+Math.sin(a)*rr*.55+cw*.15; o.push(clump(x,y,cw*(.3+R()*.08),L,R,8)); }
+    o.push(clump(cx,cy0-cw*.05,cw*.42,L,R,10));
+    if(stage>=4) for(let i=0;i<8;i++){ const x=cx+(R()-.5)*cw*1.6, y=cy0+(R()-.3)*cw*.6; o.push(`<circle cx="${f1(x)}" cy="${f1(y)}" r="${f1(3+R()*2)}" fill="#fff6c0" opacity=".55"/><circle cx="${f1(x)}" cy="${f1(y)}" r="1.6" fill="#fff"/>`); }
+    if(stage>=4){   // 太いしめ縄と紙垂
+      const y=base-ht*.24, wl=tw*.6+4;
+      o.push(`<path d="M${f1(cx-wl)} ${f1(y)} Q${f1(cx)} ${f1(y+16)} ${f1(cx+wl)} ${f1(y)}" stroke="#8a6a2e" stroke-width="12" fill="none" stroke-linecap="round"/><path d="M${f1(cx-wl)} ${f1(y)} Q${f1(cx)} ${f1(y+16)} ${f1(cx+wl)} ${f1(y)}" stroke="#ecd690" stroke-width="9" fill="none" stroke-linecap="round"/>`);
+      for(let i=0;i<9;i++){ const t2=(i+.5)/9, x=cx-wl+2*wl*t2, yy=y+16*4*t2*(1-t2)*.5; o.push(`<path d="M${f1(x-3)} ${f1(yy-4)} L${f1(x+3)} ${f1(yy+4)}" stroke="#b8963e" stroke-width="2"/>`); }
+      for(const dx of [-wl*.6,0,wl*.6]){ const x=cx+dx, yy=y+(dx?9:13); o.push(`<path d="M${f1(x)} ${f1(yy)} h6 l-4 6 h6 l-4 6 h6 l-4 7 h-7 l4 -6 h-6 l4 -6 h-6 Z" fill="#fff" stroke="#d8d0c0" stroke-width=".6"/>`); }
+    }
+    if(stage===5){   // 小さな鳥居
+      const tx=cx-W*.33, th=ht*.22, tw2=W*.13;
+      o.push(`<rect x="${f1(tx-tw2/2)}" y="${f1(base-th)}" width="3.5" height="${f1(th)}" fill="#d8402a"/><rect x="${f1(tx+tw2/2-3.5)}" y="${f1(base-th)}" width="3.5" height="${f1(th)}" fill="#d8402a"/>`
+        +`<path d="M${f1(tx-tw2*.68)} ${f1(base-th-2)} Q${f1(tx)} ${f1(base-th+3)} ${f1(tx+tw2*.68)} ${f1(base-th-2)} L${f1(tx+tw2*.62)} ${f1(base-th+3)} Q${f1(tx)} ${f1(base-th+7)} ${f1(tx-tw2*.62)} ${f1(base-th+3)}Z" fill="#2a1a14"/>`
+        +`<rect x="${f1(tx-tw2*.55)}" y="${f1(base-th+8)}" width="${f1(tw2*1.1)}" height="3" fill="#d8402a"/>`);
+    }
+  }
+  /* 葡萄の葉と巻きひげ(変異・超変異の絵で使う) */
+  function gLeaf(x,y,s,rot,c,vein="rgba(0,0,0,.22)"){ return `<g transform="translate(${f1(x)} ${f1(y)}) rotate(${rot|0}) scale(${f1(s)})"><path d="M0 9 C-3 6 -11 6 -11 -1 C-8 -1 -9 -6 -6 -8 C-4 -5 -3 -10 0 -11 C3 -10 4 -5 6 -8 C9 -6 8 -1 11 -1 C11 6 3 6 0 9Z" fill="${c}"/><path d="M0 8 V-8 M0 2 L-7 -3 M0 2 L7 -3" stroke="${vein}" stroke-width=".9" fill="none"/></g>`; }
+  function gTendril(x,y,d,c){ return `<path d="M${f1(x)} ${f1(y)} q${4*d} 2 ${3*d} 6 q-${2*d} 3 -${4*d} 0 q0 -3 2 -2" stroke="${c}" stroke-width="1.1" fill="none"/>`; }
+  /* --- 翡翠葡萄: 翡翠の丸い門に絡み、透きとおる長い房 --- */
+  function grapeJade(){
+    if(stage<3){ grape(); return; }
+    const L=P.leaf, bk=`url(#${id}b)`, tw=[2,4,7,10,10][stage-1];
+    const r=W*.29, gy=base-ht*.52, onRing=a=>[cx+Math.cos(a)*r, gy+Math.sin(a)*r];
+    o.push(`<rect x="${f1(cx-r*.7)}" y="${f1(base-5)}" width="${f1(r*1.4)}" height="8" rx="3" fill="#cfe6d2" stroke="#7fae8a"/>`);
+    o.push(`<clipPath id="${id}j"><circle cx="${f1(cx)}" cy="${f1(gy)}" r="${f1(r)}"/></clipPath><g clip-path="url(#${id}j)" opacity=".35">`);
+    for(let d=-W;d<W;d+=12) o.push(`<path d="M${f1(cx+d)} ${f1(gy-r)} v${f1(r*2)}" stroke="#9fd2ae" stroke-width="1.4"/>`);
+    o.push(`</g><circle cx="${f1(cx)}" cy="${f1(gy)}" r="${f1(r)}" fill="none" stroke="#4e8a62" stroke-width="10"/><circle cx="${f1(cx)}" cy="${f1(gy)}" r="${f1(r)}" fill="none" stroke="#9fd8ae" stroke-width="7"/><circle cx="${f1(cx)}" cy="${f1(gy)}" r="${f1(r+1.5)}" fill="none" stroke="#eafff0" stroke-width="1.4" stroke-dasharray="18 10" opacity=".9"/>`);
+    o.push(`<path d="M${f1(cx-r*.15)} ${f1(gy+r)} L${f1(cx-r*.25)} ${f1(base-4)} M${f1(cx+r*.15)} ${f1(gy+r)} L${f1(cx+r*.25)} ${f1(base-4)}" stroke="#7fae8a" stroke-width="5"/>`);
+    if(stage>=4) for(const d of [-1,1]) o.push(limb([[cx,base-4],[cx+d*tw*.8,base],[cx+d*W*.1,base+4]],tw*.45,2,bk));
+    o.push(limb([[cx,base+2],[cx+tw*.6,base-ht*.08],[cx-tw*.5,base-ht*.16],onRing(Math.PI*.5)],tw,tw*.6,bk));
+    for(const s of [1,-1]){ const pts=[]; for(let i=0;i<=8;i++){ const a=Math.PI*.5+s*Math.PI*(stage===3?.7:1)*i/8; pts.push(onRing(a)); } o.push(limb(pts,tw*.5,1.6,bk)); }
+    const nL=stage===3?20:40;
+    for(let i=0;i<nL;i++){ const a=Math.PI*.5+(R()<.5?1:-1)*Math.PI*(.2+R()*(stage===3?.5:.8)), e=onRing(a), off=(R()-.5)*14;
+      o.push(gLeaf(e[0]+Math.cos(a)*off, e[1]+Math.sin(a)*off, .7+R()*.45, (R()-.5)*140, L[R()<.3?0:R()<.6?1:2], "rgba(255,255,255,.55)")); }
+    for(let i=0;i<5;i++){ const e=onRing(-Math.PI*(.15+R()*.7)); o.push(gTendril(e[0],e[1]+6,R()<.5?1:-1,L[2])); }
+    if(stage===5) [-1.95,-1.6,-1.25,-2.35,-.85].forEach((a,k)=>{ const e=onRing(a), x0=e[0], y0=e[1]+10, rows=[3,3,3,2,2,2,1,1];
+      o.push(`<path d="M${f1(e[0])} ${f1(e[1])} v8" stroke="#5a7a3a" stroke-width="1.2"/>`);
+      rows.forEach((n,rw)=>{ for(let c=0;c<n;c++){ const x=x0+(c-(n-1)/2)*4.6, y=y0+rw*4.2;
+        o.push(`<circle cx="${f1(x)}" cy="${f1(y)}" r="2.9" fill="#7cbf5a" opacity=".9"/><circle cx="${f1(x-.3)}" cy="${f1(y-.4)}" r="2.4" fill="#dcf8bc" opacity=".88"/><circle cx="${f1(x-1)}" cy="${f1(y-1.1)}" r=".9" fill="#fff"/>`); } });
+      if(k<3) o.push(`<circle cx="${f1(x0+3)}" cy="${f1(y0+rows.length*4.2+3)}" r="1.5" fill="#eafff6" stroke="#9fd8c0" stroke-width=".5"/>`); });
+  }
+  /* --- 宝石葡萄: 金の東屋に絡み、色とりどりの宝石が実る --- */
+  function grapeGem(){
+    if(stage<3){ grape(); return; }
+    const L=P.leaf, bk=`url(#${id}b)`, tw=[2,4,7,10,10][stage-1];
+    const px=W*.28, py=base-ht*.55, tp=base-ht*.96;
+    o.push(`<linearGradient id="${id}au" x1="0" x2="1"><stop offset="0" stop-color="#a87a18"/><stop offset=".45" stop-color="#ffe48a"/><stop offset="1" stop-color="#b8861e"/></linearGradient>`);
+    const dome=`M${f1(cx-px)} ${f1(py)} C${f1(cx-px)} ${f1(py-ht*.2)} ${f1(cx-px*.25)} ${f1(py-ht*.18)} ${f1(cx)} ${f1(tp+8)} C${f1(cx+px*.25)} ${f1(py-ht*.18)} ${f1(cx+px)} ${f1(py-ht*.2)} ${f1(cx+px)} ${f1(py)}`;
+    for(const s of [-1,1]){ const x=cx+s*px;
+      o.push(`<rect x="${f1(x-3.5)}" y="${f1(py)}" width="7" height="${f1(base-py)}" fill="url(#${id}au)"/>`);
+      for(let y=py+4;y<base;y+=7) o.push(`<path d="M${f1(x-3.5)} ${f1(y)} l7 -4" stroke="#8a5e10" stroke-width="1" opacity=".6"/>`);
+      o.push(`<path d="M${f1(x)} ${f1(py+2)} q${f1(-s*10)} 2 ${f1(-s*9)} 10 q${f1(s*1)} 4 ${f1(s*5)} 1" stroke="#f2cc58" stroke-width="2" fill="none"/>`); }
+    o.push(`<path d="${dome}" stroke="#7a5410" stroke-width="7" fill="none"/><path d="${dome}" stroke="url(#${id}au)" stroke-width="5" fill="none"/>`);
+    for(const f of [.35,.68]) o.push(`<path d="M${f1(cx)} ${f1(tp+8)} Q${f1(cx-px*f)} ${f1(py-ht*.1)} ${f1(cx-px*f*1.05)} ${f1(py)} M${f1(cx)} ${f1(tp+8)} Q${f1(cx+px*f)} ${f1(py-ht*.1)} ${f1(cx+px*f*1.05)} ${f1(py)}" stroke="#e8c24a" stroke-width="1.6" fill="none" opacity=".8"/>`);
+    o.push(`<path d="M${f1(cx-px)} ${f1(py)} H${f1(cx+px)}" stroke="#c8962a" stroke-width="3"/>`);
+    o.push(`<path d="M${f1(cx)} ${f1(tp-6)} l5 7 l-5 9 l-5 -9 Z" fill="#9ff0ff" stroke="#3aa0c8" stroke-width=".8"/><path d="M${f1(cx)} ${f1(tp-6)} l5 7 h-10 Z" fill="#e8fcff" opacity=".8"/>`);
+    if(stage>=4) for(const d of [-1,1]) o.push(limb([[cx,base-4],[cx+d*tw*.8,base],[cx+d*W*.1,base+4]],tw*.45,2,bk));
+    o.push(limb([[cx,base+2],[cx-tw*.5,base-ht*.18],[cx+tw*.5,base-ht*.32],[cx,py]],tw,tw*.65,bk));
+    for(const s of [-1,1]) o.push(limb([[cx,py],[cx+s*px*.5,py-8],[cx+s*px,py-2]],tw*.5,2,bk));
+    const nL=stage===3?16:34;
+    for(let i=0;i<nL;i++){ const t=R(), x=cx+(t*2-1)*px, y=py-Math.sin(t*Math.PI)*ht*.3*(stage===3?.4:1)+(R()-.5)*10; o.push(gLeaf(x,y,.7+R()*.4,(R()-.5)*120,L[R()<.3?0:R()<.6?1:2],"rgba(120,80,0,.35)")); }
+    for(let i=0;i<4;i++) o.push(gTendril(cx+(R()-.5)*px*1.6,py+4,R()<.5?1:-1,L[2]));
+    if(stage===5){
+      const gem=(x,y,c)=>`<path d="M${f1(x)} ${f1(y-4.4)} L${f1(x+3.9)} ${f1(y-1.5)} L${f1(x+2.9)} ${f1(y+3.6)} L${f1(x-2.9)} ${f1(y+3.6)} L${f1(x-3.9)} ${f1(y-1.5)}Z" fill="${c[1]}"/><path d="M${f1(x)} ${f1(y-4.4)} L${f1(x+3.9)} ${f1(y-1.5)} L${f1(x)} ${f1(y+.5)} L${f1(x-3.9)} ${f1(y-1.5)}Z" fill="${c[0]}"/><circle cx="${f1(x-.9)}" cy="${f1(y-1.6)}" r=".7" fill="#fff"/>`;
+      [-.68,-.34,0,.34,.68].forEach((f,k)=>{ const x0=cx+f*px, y0=py+9+(k%2)*8, rows=[3,3,2,2,1];
+        o.push(`<path d="M${f1(x0)} ${f1(py)} v${f1(y0-py-3)}" stroke="#c8962a" stroke-width="1"/>`);
+        rows.forEach((n,rw)=>{ for(let c=0;c<n;c++) o.push(gem(x0+(c-(n-1)/2)*7.2, y0+rw*7, GEMS[(k+rw+c)%5])); }); });
+      for(const s of [-1,1]){ const x=cx+s*px*.92; o.push(`<path d="M${f1(x)} ${f1(py)} v10" stroke="#e8c24a" stroke-width=".8"/><path d="M${f1(x)} ${f1(py+10)} l3 4 l-3 6 l-3 -6Z" fill="${s<0?"#ff8aa8":"#8ac8ff"}" stroke="#fff" stroke-width=".5"/>`); }
+    }
+  }
   /* --- 杉 --- */
   function sugi(){
     const L=P.leaf, tw=[3,6,11,17,18][stage-1];
