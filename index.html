@@ -6546,8 +6546,9 @@ function btPlant(k,id){
   f.bt=f.bt||{};
   if(f.bt[gi]){ nope(k,"この区画には、もう大木が植わっています"); return; }
   if(!(S.seeds[id]>0)){ nope(k,"苗木がありません。タイピングの日替わりのご褒美でもらえます"); return; }
-  const keys=BT_GROUPS[gi], busy=keys.filter(x=>{ const q=f[x]; return q.crop || q.obj || q.vil || q.bt!=null; });
-  if(busy.length){ nope(k,`大木は9マス(${keys.join(" ")})を使います。${busy.join(" ")} を空けてから植えましょう`); return; }
+  const keys=BT_GROUPS[gi], why=x=>{ const q=f[x]; return q.crop ? "作物" : q.obj ? "設置物" : q.vil ? "村人" : (q.bt!=null && f.bt[q.bt]) ? "大木" : ""; };
+  const busy=keys.filter(x=>why(x));
+  if(busy.length){ const m=`大木は3×3の9マス(${keys.slice(0,3).join(" ")} / ${keys.slice(3,6).join(" ")} / ${keys.slice(6).join(" ")})を使います。${busy.map(x=>x+"の"+why(x)).join("・")}をどけてから植えましょう`; nope(k,m); toast(m,"warn",5200); return; }
   for(const x of keys){ const q=f[x]; q.s="soil"; q.bt=gi; q.emptySince=0; }
   f.bt[gi]={ id, g:0, q:0, fert:0, mul:1, rip:false, ready:false, fr:0, t:Date.now() };
   S.seeds[id]--; S.btPlanted=(S.btPlanted||0)+1; btBookMark(id);
@@ -7927,6 +7928,7 @@ function checkUnlocks(){
     S.cookNotice=true;   // 説明のお知らせ(農園が開いているときに出す)
     renderCookLock();
   }
+  if(meets(BT_UNLOCK) && !S.known.includes("bigtree")){ S.known.push("bigtree"); S.btNotice=true; }   // 大木の解放のお知らせ(農園が開いているときに出す)
   for(const it of items){
     if(it.ok && !S.known.includes(it.key)){
       S.known.push(it.key);
@@ -12793,6 +12795,23 @@ function showCookNotice(){
   $("g-noticeOk").textContent=kb("わかった(Enter)","わかった");
   openModal("notice"); sfx.vil();
 }
+/* 大木の解放のお知らせ: 累計収穫1万で1回だけ */
+function showBtNotice(){
+  if(!S.btNotice || scene!=="garden" || modal || realFields) return;
+  S.btNotice=false; save();
+  $("g-noticeTitle").textContent="🌳 大木が解放されました!";
+  $("g-noticeBody").innerHTML=`<ul>
+    <li>🌳 <b>大木</b>は、畑の<b>3×3の9マス</b>を使って何年もかけて育つ木です。🌸 十年梅・🍇 三十年葡萄・🌲 百年杉の3種類があり、実ったあとは1年ごとに実ります。</li>
+    <li>🎁 苗木は、タイピングの<b>日替わりのご褒美</b>でもらえます。苗木が付いたモードを最後まで遊ぶと受け取れます。1日3本までです。</li>
+    <li>🌱 ${kb("<b>4</b> の種の中の「苗木」から選んで","種の中の「苗木」から選んで")}、空いている3×3の区画のどこかを押すと植わります。9マスとも空けておきましょう。</li>
+    <li>⚡ 苗木と同じ難易度で遊ぶと、届いた時間でその木だけ<b>10倍</b>早く育ちます。イージーは十年梅、ノーマルは三十年葡萄、ハードは百年杉です。</li>
+    <li>🍂 <b>腐葉土</b>を使うと、木がもっと早く育ちます。お店で1日1つ買えるほか、工房で杉の葉から作れます。</li>
+    <li>🪓 実ったら${kb("素手(<b>1</b>)","素手")}で収穫できます。お店の<b>斧</b>で切ると木材が取れます。</li>
+    <li>🍶 料理の画面に<b>工房</b>が加わりました。大木の実や木材から、お酒やおつまみを作れます。お酒を飲むと、タイピングがほろ酔いになります。</li>
+  </ul>`;
+  $("g-noticeOk").textContent=kb("わかった(Enter)","わかった");
+  openModal("notice"); sfx.vil();
+}
 /* 薔薇ガチャの解放のお知らせ: 薔薇を10色集めたとき(更新の前から10色持っている人には、更新後に庭を開いたとき)に1回だけ */
 function showRoseNotice(){
   if(S.rgNoticed || !roseGachaOpen() || scene!=="garden" || modal || realFields) return;
@@ -12843,7 +12862,7 @@ function enter(){
   reportVillagers();
   crowVisit();
   clearInterval(loopId); clearInterval(saveId);
-  loopId=setInterval(()=>{ const q3=ev("Q3",30/60,3,0); /* 料理: 農園の時計(分) */ if(q3) applySkip(q3,"k"); showCookNotice(); showRoseNotice(); autoCookTick(); tick(); reportVillagers(); renderBar(); renderField(); renderInfo(); renderCounter(); renderBuff(); if(modal==="cook") $("g-cookNow").innerHTML=cookNowText(); },1000);
+  loopId=setInterval(()=>{ const q3=ev("Q3",30/60,3,0); /* 料理: 農園の時計(分) */ if(q3) applySkip(q3,"k"); showCookNotice(); showRoseNotice(); showBtNotice(); autoCookTick(); tick(); reportVillagers(); renderBar(); renderField(); renderInfo(); renderCounter(); renderBuff(); if(modal==="cook") $("g-cookNow").innerHTML=cookNowText(); },1000);
   saveId=setInterval(save,15000);
 }
 function leave(){
@@ -12935,6 +12954,30 @@ function debugStart3(){
   S.lastTick=Date.now();
   save();
 }
+/* デバッグ5: 大木が解放された直後の記録(累計収穫1万をちょうど越えたところ。日替わりで十年梅の苗木を1本もらった) */
+function debugStart5(){
+  debugStart2();
+  S.money=5000000; S.totalSales=30000000; S.totalHarvest=10000; S.gachaCount=300;
+  S.fields=[makeField(),makeField(),makeField(),makeField(),makeField()];
+  for(const f of S.fields) for(const k of KEYS){ const p=f[k]; if(p.s!=="post") p.s="soil"; }
+  S.canLv=CANS.length; S.hoeLv=HOES.length; S.sickLv=SICKLES.length;
+  S.known=S.known.concat(["cook"]).filter(x=>x!=="bigtree"); S.cookNotice=false;
+  S.seeds.bt_ume=1; btBookMark("bt_ume"); S.dbSap={ d:new Date(Date.now()+9*3600000).toISOString().slice(0,10), n:1 }; S.dbSapGot=1; S.dbGot=1;
+  S.lastTick=Date.now();
+  save();
+}
+/* デバッグ6: すべて解放・貴重品がすべて上限・畑50枚すべてにシゴデキ案山子 */
+function debugStart6(){
+  debugUnlock();
+  S.fields=Array.from({length:FIELD_MAX},()=>makeField());
+  for(const f of S.fields){ f[POST].obj="sgk"; for(const k of KEYS){ const p=f[k]; if(p.s!=="post") p.s="soil"; } }
+  for(const c of TREASURES){ const n=treasNeed(c); S.treas[c.id]=n!=null?n:1; }
+  S.kit=S.kit||{}; for(const id of KIT_ORDER){ const g=GUR[id]; if(g && g.kit) S.kit[id]=Math.ceil(g.kit.cap/g.kit.per-1e-9); }
+  S.kit.fridge=1; S.kit.kamado=1;
+  S.mfert=99; S.sfert=99; S.hourglass=99; S.bento=99; S.sgVil=50; S.deeds=0; S.objs.sgk=0;
+  S.lastTick=Date.now();
+  save();
+}
 /* デバッグ2: 料理とわくわくガチャが解放された直後くらいの記録(キーの木の条件をちょうど越えたところ) */
 function debugStart2(){
   S=newState();
@@ -12962,7 +13005,7 @@ function debugStart2(){
   save();
 }
 function alive(){ if(kitN("fridge")>0){ fridgeKeep(); save(); } }
-return { peek:()=>{ consumeInbox(); tick(); return tutState(); }, roseName:roseNameHTML, roseNamePlate, roseRowStyle, roseRowCls, nameDeco, drunkNow, horoSeen:()=>!!S.horoSeen, tqBoost:()=>({ rose:(1+rgGurPct("sh")/100)*otsuMul("Z2"), sc:1+rgGurPct("pen")/100, min:1+rgGurPct("dial")/100 }), rose:(lv,n)=>{ roseGive(lv,n); S.roseIn=(S.roseIn||0)+Math.floor(n); save(); }, screwMul, charmLives, applyTheme, alive, themeScrewArt, enter, leave, onKey, summary, dailyGive, dailyNeji, dailySapLeft, dailyOpen, btOpen, debugUnlock, debugStart2, tutState, tutGive, tutGrow, tutSeed, tutSandbox, refreshRank, openModal, ownerId, useName, baraOn, baraLeft, baraSeen, debugStart3, debugStart4 };
+return { peek:()=>{ consumeInbox(); tick(); return tutState(); }, roseName:roseNameHTML, roseNamePlate, roseRowStyle, roseRowCls, nameDeco, drunkNow, horoSeen:()=>!!S.horoSeen, tqBoost:()=>({ rose:(1+rgGurPct("sh")/100)*otsuMul("Z2"), sc:1+rgGurPct("pen")/100, min:1+rgGurPct("dial")/100 }), rose:(lv,n)=>{ roseGive(lv,n); S.roseIn=(S.roseIn||0)+Math.floor(n); save(); }, screwMul, charmLives, applyTheme, alive, themeScrewArt, enter, leave, onKey, summary, dailyGive, dailyNeji, dailySapLeft, dailyOpen, btOpen, debugUnlock, debugStart2, tutState, tutGive, tutGrow, tutSeed, tutSandbox, refreshRank, openModal, ownerId, useName, baraOn, baraLeft, baraSeen, debugStart5, debugStart6, debugStart3, debugStart4 };
 })();
 
 function openGarden(){ show("garden"); Garden.enter(); }
@@ -13029,6 +13072,20 @@ function backupImport(){
       Garden.debugStart4();
     }catch(e){ note.textContent="うまくいきませんでした"; return; }
     note.textContent="9000兆を超えた記録にしました。画面を読み直します…";
+    setTimeout(()=>location.reload(),600);
+    return;
+  }
+  // デバッグ用の合言葉5・6: 大木の解放直後 / すべて解放・貴重品が上限・畑50枚にシゴデキ案山子
+  for(const [w,fn,nm,msg] of [["typinggarden-debug5","debugStart5","デバッグ5","大木が解放された直後の記録"],["typinggarden-debug6","debugStart6","デバッグ6","すべて解放し、貴重品をすべて上限、畑50枚すべてにシゴデキ案山子を置いた記録"]]){
+    if(str.trim().toLowerCase()!==w) continue;
+    if(!confirm(`デバッグ用: ${msg}に置き換えます。今の記録は消えます。よろしいですか?`)) return;
+    try{
+      localStorage.setItem(LS_PREFIX+"playerName",nm);
+      localStorage.setItem(LS_PREFIX+"garden:inbox", JSON.stringify({keys:0,screws:0}));
+      localStorage.setItem(LS_PREFIX+"debug","1");   // この記録はランキングに載せない
+      Garden[fn]();
+    }catch(e){ note.textContent="うまくいきませんでした"; return; }
+    note.textContent=msg+"にしました。画面を読み直します…";
     setTimeout(()=>location.reload(),600);
     return;
   }
