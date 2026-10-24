@@ -3832,7 +3832,7 @@ function dbLabel(b){
 /* タイトル: ご褒美の付いたモードを光らせて、中身を出す */
 let dbShown="";
 function refreshDaily(){
-  const day=dbDay(), bon=myBonus(day); if(!bon) return;   // 読めないときは、出ている表示をそのまま残す
+  const day=dbDay(), bon=baraOn() ? {} : myBonus(day); if(!bon) return;   // バラバラ中はもらえないので出さない   // 読めないときは、出ている表示をそのまま残す
   const sig=JSON.stringify(bon)+"|"+(()=>{ try{ return Garden.dailySapLeft(); }catch(e){ return ""; } })()+"|"+dbNeji(2);
   const lost=Object.keys(bon).some(d=>{ const b=document.querySelector(`#screen-title .diff-btn[data-diff="${d}"]`); return b && !b.querySelector(".dbtag"); });   // 表示が消えていたら描き直す
   if(sig===dbShown && !lost) return; dbShown=sig;
@@ -7572,6 +7572,10 @@ function renderCounter(){
     const cov=covered(fi);
     for(const k of KEYS){
       const p=f[k]; if(p.s==="post" || p.obj) continue;
+      if(p.bt!=null && f.bt && f.bt[p.bt]){   // 大木: まん中のマスで1本として数える
+        if(k===BT_GROUPS[p.bt][4]){ const t=f.bt[p.bt]; if(t.ready) ripe++; else if(!BT_GROUPS[p.bt].some(x=>isWet(fi,x,now,cov))) dry++; }
+        continue;
+      }
       if(p.crop && isRipe(p)){ ripe++; continue; }
       if(p.vil) continue;
       if(p.s==="soil" && !p.crop) empty++;
@@ -8259,6 +8263,7 @@ function act(k){
   }
   switch(S.tool){
     case 1: {   // 素手/カマ: 実っている区画を押すと、カマの範囲ぶんまとめて収穫する
+      if(S.axe && S.axeOn){ nope(k,`斧では大木を切ることしかできません。${kb("1 で ← →","◀ ▶")}で${sickleInfo().name}に持ちかえましょう`); break; }
       if(p.obj){
         if(isScare(p.obj)){ nope(k,"案山子を回収するには 6 で案山子を持って押します"); break; }
         const o=OBJS[p.obj];
@@ -8490,7 +8495,7 @@ function setTool(t){
   S.tool=t; sfx.tool(); save(); renderBar();
 }
 /* ← →: 設置を持っているときは設置物、それ以外は種を切り替える */
-function axeSwap(){ S.axeOn=!S.axeOn; toast(S.axeOn?"🪓 斧に持ちかえました(大木を切ります)":"✋ 素手に戻しました","",2000); }
+function axeSwap(){ S.axeOn=!S.axeOn; toast(S.axeOn?"🪓 斧に持ちかえました(大木を切ります)":`✋ ${sickleInfo().name}に持ちかえました`,"",2000); }
 const ownedFerts = () => ["fert", ...["sfert","mfert","fuyo"].filter(id=>S[id]>0)];
 function cycleSel(dir){
   if(S.tool===1){ if(S.axe){ axeSwap(); sfx.cursor(); save(); renderBar(); } return; }   // 素手と斧
@@ -11604,7 +11609,7 @@ function cookEat(id,g){
     what=`${esc(effText(d,g))}(${fmtMin(dm)})`;
     toast(`${dishIco(d,g)} ${esc(dishName(d,g))}を${isDrinkD(id)?"飲み":"食べ"}ました。${esc(effText(d,g))}(${fmtMin(dm)})${two?` ・ ${esc(dishName(DISH[old.d],old.t))}の効果も続いています(お弁当箱)`:(old?` ・ ${esc(dishName(DISH[old.d],old.t))}の効果は上書きされました`:"")}`,"good",5200,true);
   }
-  if(!bigShow("eat",{ art:d.art[g===5?2:g===3?1:0], title:dishName(d,g), grade:g, top:"いただきます!", sub:what })) sfx.vil();
+  if(!bigShow("eat",{ art:d.art[g===5?2:g===3?1:0], title:dishName(d,g), grade:g, top:isDrinkD(id)?"かんぱい!":"いただきます!", sub:what })) sfx.vil();
   save(); renderAll(); renderCook();
 }
 /* 料理番の村人: 任せた料理を、作り置きが10個になるまで材料があるかぎり作る(1分ごと) */
@@ -12554,7 +12559,7 @@ function tutState(){
       if(p.s==="soil") soil++;
       if(p.obj) continue;
       if(p.s==="grass") grass++;
-      else if(p.s==="soil" && !p.crop) empty++;
+      else if(p.s==="soil" && !p.crop && p.bt==null) empty++;
       if(p.crop){ crops++; if(isRipe(p)) ripe++; else if(isWet(fi,k,now,cov)) wet++; else dry++; }
     }
   });
