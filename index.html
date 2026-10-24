@@ -3813,7 +3813,7 @@ function dailyBonus(day=dbDay()){
 }
 /* その人に見えるご褒美: 累計収穫100で始まる。大木が開くまでは、苗木と腐葉土のかわりに別のご褒美 */
 function myBonus(day){
-  let open=false, bt=false; try{ open=Garden.dailyOpen(); bt=Garden.btOpen(); }catch(e){}
+  let open=false, bt=false; try{ open=Garden.dailyOpen(); bt=Garden.btOpen(); }catch(e){ return null; }   // 庭の記録がまだ読めないとき: 分からないので null
   if(!open) return {};
   const out=dailyBonus(day);
   if(!bt) for(const d in out) if(out[d].kind==="sap" || out[d].kind==="fuyo") out[d].kind=out[d].alt;
@@ -3834,8 +3834,10 @@ function dbLabel(b){
 /* タイトル: ご褒美の付いたモードを光らせて、中身を出す */
 let dbShown="";
 function refreshDaily(){
-  const day=dbDay(), bon=myBonus(day), sig=JSON.stringify(bon)+"|"+(()=>{ try{ return Garden.dailySapLeft(); }catch(e){ return ""; } })()+"|"+dbNeji(2);
-  if(sig===dbShown) return; dbShown=sig;
+  const day=dbDay(), bon=myBonus(day); if(!bon) return;   // 読めないときは、出ている表示をそのまま残す
+  const sig=JSON.stringify(bon)+"|"+(()=>{ try{ return Garden.dailySapLeft(); }catch(e){ return ""; } })()+"|"+dbNeji(2);
+  const lost=Object.keys(bon).some(d=>{ const b=document.querySelector(`#screen-title .diff-btn[data-diff="${d}"]`); return b && !b.querySelector(".dbtag"); });   // 表示が消えていたら描き直す
+  if(sig===dbShown && !lost) return; dbShown=sig;
   document.querySelectorAll("#screen-title .diff-btn[data-diff]").forEach(b=>{
     const x=bon[b.dataset.diff]; b.classList.toggle("dbon",!!x);
     let t=b.querySelector(".dbtag"); if(!x){ if(t) t.remove(); return; }
@@ -3844,12 +3846,13 @@ function refreshDaily(){
     t.textContent = `🎁 今日のご褒美 ${dbLabel(x)}` + (left!=null ? (left>0 ? ` ・ あと${left}本` : " ・ 今日はもらいました") : "");
   });
 }
-setInterval(()=>{ if(scene==="title") refreshDaily(); },30000);
+setInterval(()=>{ if(scene==="title") refreshDaily(); },5000);
+for(const ms of [200,1000]) setTimeout(()=>{ if(scene==="title") refreshDaily(); },ms);   // 開いた直後から出す
 let typePk=null;   // このプレイの届け物に付ける印(大木の10倍・時短・変異)。sendToGarden で使う
 /* 遊んだ難易度の印。done: 最後まで遊んだ(日替わりのご褒美の時短・変異が付く) */
 function dbPk(d,done){
   if(!(d in DB_LVS)) return null;
-  const lv=DB_LVS[d], pk={ t:DB_TREE[lv] }, b=done && myBonus()[d];
+  const lv=DB_LVS[d], pk={ t:DB_TREE[lv] }, b=done && (myBonus()||{})[d];
   if(b && b.kind==="min") pk.a=DB_VAL.min[lv];
   if(b && b.kind==="mut") pk.m=DB_VAL.mut[lv]/100;
   if(b && b.kind==="sup") pk.s=DB_VAL.sup[lv]/100;
@@ -3858,7 +3861,7 @@ function dbPk(d,done){
 /* 最後まで遊んだ: 日替わりのご褒美を受け取る(結果画面に出す) */
 function dbFinish(d){
   const el=$("resultBonus"); if(el){ el.hidden=true; el.textContent=""; }
-  const b=myBonus()[d]; if(!b || !el) return;
+  const b=(myBonus()||{})[d]; if(!b || !el) return;
   let msg="";
   try{ msg=Garden.dailyGive(b.kind,b.lv); }catch(e){ msg=""; }
   if(!msg) return;
