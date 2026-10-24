@@ -1776,6 +1776,10 @@ html.mobile #g-cookShow .csnm{font-size:1.3rem}
 #screen-garden .qmarks{display:flex; gap:.15rem}
 #screen-garden .qm{font-size:.7rem; color:#d5c8ae}
 #screen-garden .qm.on{color:#e0a800}
+#screen-garden .qm.dot{font-size:.72rem; vertical-align:.04em; margin-right:.12em}   /* ふつうの印 */
+#screen-garden .qm.dot.on{text-shadow:0 0 3px rgba(255,190,0,.6)}
+#screen-garden .bookdetail .bic .cart.btbic{width:2em; height:2em}   /* 大木は大きく */
+#screen-garden .rowi .ic .cart svg[viewBox="30 14 220 220"]{transform:scale(1.25)}
 #screen-garden .qm.st{font-size:.85rem; margin-left:-.05em}
 #screen-garden .qm.st.on{color:#f0b400; text-shadow:0 0 5px rgba(255,190,0,.9)}
 #screen-garden .btabs{display:flex; flex-wrap:wrap; justify-content:center; gap:.3rem; margin-bottom:.4rem}
@@ -6462,9 +6466,9 @@ const BT_GROUPS = [["Q","W","E","A","S","D","Z","X","C"],["R","T","Y","F","G","H
 const BT_UNLOCK = { harvest:10000 };   // 苗木・斧・腐葉土・工房・新しい料理は、累計収穫1万で一緒に解放
 const BT_YEAR = 365*24*HOUR;
 const BTS = {
-  bt_ume:  { id:"bt_ume", mode:"イージー",   name:"十年梅",     n3:"紅梅",     n5:"金の梅",       icon:"🌸", kind:"ume",   yrs:10,  cost:1000000,  fruit:"ume",      wood:"umewood",   fN:5,  wN:3,  st:["芽","若木","成木","古木","実り"] },
-  bt_grape:{ id:"bt_grape", mode:"ノーマル", name:"三十年葡萄", n3:"翡翠葡萄", n5:"宝石葡萄",     icon:"🍇", kind:"grape", yrs:30,  cost:3000000,  fruit:"vgrape",   wood:"grapewood", fN:5,  wN:3,  st:["芽","つる","格子","古株","実り"] },
-  bt_sugi: { id:"bt_sugi", mode:"ハード",  name:"百年杉",     n3:"銀杉",     n5:"黄金の御神木", icon:"🌲", kind:"sugi",  yrs:100, cost:10000000, fruit:"sugileaf", wood:"sugiwood",  fN:10, wN:10, st:["芽","若木","成木","古木","御神木"] },
+  bt_ume:  { id:"bt_ume", l0:"十年かけて根を張る梅の木。早春に白い花を咲かせ、そのあとは毎年、青い実をたっぷりつける。実は梅干しや梅酒に、古い枝は燻製の薪になる。", l3:"花も実もほんのり紅い梅。香りが強く、梅酒にすると色まで美しく仕上がる。", l5:"枝の先まで金色に光る梅。実はひと粒ずつ蜜のように甘く、農園の守り木と呼ばれる。", mode:"イージー",   name:"十年梅",     n3:"紅梅",     n5:"金の梅",       icon:"🌸", kind:"ume",   yrs:10,  cost:1000000,  fruit:"ume",      wood:"umewood",   fN:5,  wN:3,  st:["芽","若木","成木","古木","実り"] },
+  bt_grape:{ id:"bt_grape", l0:"格子に絡みながら、三十年かけて太くなる葡萄の古木。毎年、房いっぱいに実をつけ、ワインや干し葡萄になる。古い株は燻製のチップにも。", l3:"翡翠のように透きとおる緑の葡萄。冷やすと香りが立ち、すっきりとしたお酒になる。", l5:"ひと粒ごとに色の違う、宝石のような葡萄。光にかざすと虹のようにきらめく。", mode:"ノーマル", name:"三十年葡萄", n3:"翡翠葡萄", n5:"宝石葡萄",     icon:"🍇", kind:"grape", yrs:30,  cost:3000000,  fruit:"vgrape",   wood:"grapewood", fN:5,  wN:3,  st:["芽","つる","格子","古株","実り"] },
+  bt_sugi: { id:"bt_sugi", l0:"百年かけて空へまっすぐ伸びる杉。毎年落ちる葉は腐葉土に、切り出した木は樽や工房の材料になる。", l3:"幹も葉も銀色に光る杉。月の夜には、畑全体が白く照らされる。", l5:"百年を越えて神様が宿った杉。金色の葉が風に鳴り、そばにいるだけで心が落ち着く。", mode:"ハード",  name:"百年杉",     n3:"銀杉",     n5:"黄金の御神木", icon:"🌲", kind:"sugi",  yrs:100, cost:10000000, fruit:"sugileaf", wood:"sugiwood",  fN:10, wN:10, st:["芽","若木","成木","古木","御神木"] },
 };
 for(const b of Object.values(BTS)){
   OBJS[b.id]={ id:b.id, name:b.name+"の苗木", icon:b.icon, area:null, cost:b.cost, unlock:BT_UNLOCK, tree:true,
@@ -11866,7 +11870,7 @@ const roseHarv = () => ROSE_ALL.reduce((a,r)=>a+(S.harvestBy[r.id]||0),0);
 const roseQGot = t => ROSES.some(r=>qCount(r.id,t)>0) ? 1 : 0;
 const roseSecGot = () => ROSE_SECRET.some(r=>qCount(r.id,0)>0) ? 1 : 0;
 const FOOD_BOOK = FOODS.filter(f=>!f.up).sort((a,b)=>a.price-b.price);
-const BT_BOOK = Object.values(BTS).map(b=>({ id:b.id, name:b.name, bigtree:true, art:`<svg viewBox="0 0 280 280">${btArt(b.kind,5,0,200,200,140,226)}</svg>` }));
+const BT_BOOK = Object.values(BTS).map(b=>({ id:b.id, name:b.name, bigtree:true, art:`<svg viewBox="30 14 220 220">${btArt(b.kind,5,0,200,200,140,226)}</svg>` }));
 let btBookT=0;   // 図鑑の大木: 0 ふつう / 1 変異 / 2 超変異
 const BOOK_CROPS = CROPS.filter(c=>!c.treasure).sort((a,b)=>a.price-b.price).concat([ROSE_BOOK], BT_BOOK, FOOD_BOOK, CROPS.filter(c=>c.treasure));
 const bookSeen = c => c.bigtree ? !!(S.btBook && S.btBook[c.id]) : c.rosebook ? ROSE_ALL.some(r=>(S.harvestBy[r.id]||0)>0 || [0,3,5].some(t=>roseSeen(r.id,t))) : c.food ? (S.got[c.id]||0)>0 : c.treasure ? tre(c.id)>0 : (isUnlocked(c)||S.harvestBy[c.id]>0);
@@ -11957,12 +11961,12 @@ function renderBook(){
     const up=c.food?upOf(c.id):null;
     const known=bookSeen(c) || (up && bookSeen(up));
     const marks=c.rosebook ? `<small class="rcount">${roseGot()} / ${roseCells().length}</small>` : c.bigtree
-      ? `<span class="qm${btBookQ(c.id,0)?" on":""}">・</span><span class="qm mut${btBookQ(c.id,3)?" on":""}">✦</span><span class="qm sup${btBookQ(c.id,5)?" on":""}">✦</span>`
+      ? `<span class="qm dot${btBookQ(c.id,0)?" on":""}">●</span><span class="qm mut${btBookQ(c.id,3)?" on":""}">✦</span><span class="qm sup${btBookQ(c.id,5)?" on":""}">✦</span>`
       : c.food
-      ? `<span class="qm${bookSeen(c)?" on":""}">・</span>`+(up?`<span class="qm upm${bookSeen(up)?" on":""}">✦</span>`:"")
+      ? `<span class="qm dot${bookSeen(c)?" on":""}">●</span>`+(up?`<span class="qm upm${bookSeen(up)?" on":""}">✦</span>`:"")
       : c.treasure
       ? `<span class="qm${known?" on":""}">✨</span>`
-      : `<span class="qm${qCount(c.id,0)>0?" on":""}">・</span>`
+      : `<span class="qm dot${qCount(c.id,0)>0?" on":""}">●</span>`
         + [1,2,4].map(t=>`<span class="qm st${qCount(c.id,t)>0?" on":""}">☆</span>`).join("")   // ☆・☆☆・☆☆☆ を穫るたびに1つずつ光る
         + (hasMut(c.id)?`<span class="qm mut${qCount(c.id,3)>0?" on":""}">✦</span>`:"")
         + (hasSup(c.id)?`<span class="qm sup${qCount(c.id,5)>0?" on":""}">✦</span>`:"");
@@ -11996,15 +12000,15 @@ function renderBook(){
     const tabs=`<div class="btabs">${["ふつう","変異","超変異"].map((x,i)=>`<span class="btab${i?(i===1?" mut":" sup"):""}${i===btBookT?" on":""}${btBookQ(c.id,[0,3,5][i])?"":" dim"}" data-t="${i}">${x}</span>`).join("")}</div>`;
     const how=`タイピングの日替わりのご褒美で、${b.mode}に苗木が付いた日にもらえます`;
     $("g-bookDetail").innerHTML = tabs + (known ? `
-      <div class="bic${btBookT?" q2":""}"><span class="cart">${seen||!btBookT ? `<svg viewBox="0 0 280 280">${btArt(b.kind,5,btBookT,200,200,140,226)}</svg>` : "❔"}</span></div>
+      <div class="bic${btBookT?" q2":""}"><span class="cart btbic">${seen||!btBookT ? `<svg viewBox="30 14 220 220">${btArt(b.kind,5,btBookT,200,200,140,226)}</svg>` : "❔"}</span></div>
       <div class="bnm">${seen||!btBookT ? esc(nm) : "？？？"}</div>
       <dl>
         <dt>実らせた数</dt><dd>${fmtNum((S.btRipeBy||{})[c.id]||0)}本</dd>
         <dt>育つまで</dt><dd>${b.yrs}年 ・ そのあとは1年ごとに実る</dd>
         <dt>手に入れ方</dt><dd>${how}</dd>
-        <dt>早く育てる</dt><dd>${b.mode}で遊ぶと届いた時間で10倍 ・ 腐葉土</dd>
+        <dt>早く育てる</dt><dd>${b.mode}で遊ぶと、届いた時間で10倍早く育つ ・ 腐葉土でも早く育つ</dd>
         ${btBookT?`<dt>なり方</dt><dd>実った瞬間に${btBookT===1?"変異":"超変異"}することがあります。不思議な肥料でも${btBookT===1?"変異":"超変異"}します</dd>`:""}
-      </dl>` : `<div class="bic">❔</div><div class="bnm">？？？</div>
+      </dl>${seen||!btBookT ? `<div class="lore">${esc([b.l0,b.l3,b.l5][btBookT])}</div>` : ""}` : `<div class="bic">❔</div><div class="bnm">？？？</div>
        <div class="lore unknown">${how}。苗木を手に入れると、名前がわかります。</div>`);
     keepVisible($("g-bookList"));
     return;
