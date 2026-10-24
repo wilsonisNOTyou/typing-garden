@@ -152,6 +152,14 @@ html.mobile .tq-lv small{font-size:.68rem}
 .tq-credit{color:#6b7484; font-size:.72rem; margin-top:.8rem}
 .tq-hud{display:flex; justify-content:center; gap:1.4rem; color:var(--steel); font-variant-numeric:tabular-nums; margin-bottom:.6rem}
 .tq-hud b{color:var(--amber)}
+.tq-hud{align-items:center}
+.btn.tq-quit,.game-esc .btn{font-size:.8rem; padding:.2rem .7rem; min-height:0}
+.game-esc{text-align:center; margin:.8rem 0 0}
+.btn.tq-exb{font-size:.75rem; padding:.1rem .55rem; min-height:0; justify-self:end; align-self:center}
+.tq-ex{grid-column:1/-1; margin:.1rem 0 .3rem; padding:.45rem .7rem; border-left:3px solid var(--amber); background:rgba(255,255,255,.04); border-radius:4px; font-family:Georgia,'Times New Roman',serif; color:#e8e4da; font-size:.92rem; line-height:1.5}
+.tq-ex b{color:var(--amber)}
+.tq-ex small{display:block; font-family:inherit; color:var(--steel); font-size:.82rem}
+.tq-res .tq-ex small,.tq-lrow .tq-ex small{font-family:system-ui,sans-serif}
 .tq-card{position:relative; background:linear-gradient(180deg,var(--panel-hi,#3a414d),var(--panel,#2a2f38)); border:2px solid var(--line); border-radius:12px; padding:1.4rem 1rem 1.2rem; min-height:16rem}
 .tq-pos{display:inline-block; font-size:.8rem; color:#cfe4ff; background:rgba(143,194,255,.15); border-radius:999px; padding:.05rem .7rem}
 .tq-word{font-size:clamp(2rem,7vw,3.2rem); font-family:Georgia,'Times New Roman',serif; color:#fff; letter-spacing:.03em; margin:.3rem 0 .6rem; overflow-wrap:anywhere}
@@ -212,7 +220,7 @@ html.mobile .tq-opt.tq-lo .tq-lk{display:none}
 .tq-fb.ok{color:#7fdc8a}
 .tq-fb.ng{color:#ff8a7a}
 .tq-res{list-style:none; padding:0; margin:1rem auto; max-width:620px; text-align:left}
-.tq-res li{display:grid; grid-template-columns:1.8rem 9rem 1fr; gap:.5rem; padding:.45rem .3rem; border-bottom:1px dashed var(--line); align-items:baseline}
+.tq-res li{display:grid; grid-template-columns:1.8rem 9rem 1fr auto; gap:.5rem; padding:.45rem .3rem; border-bottom:1px dashed var(--line); align-items:baseline}
 .tq-res .w{font-family:Georgia,'Times New Roman',serif; color:#fff}
 .tq-res .m{color:var(--steel); font-size:.9rem}
 .tq-res .mk{text-align:center}
@@ -230,7 +238,7 @@ html.mobile .tq-opt.tq-lo .tq-lk{display:none}
 .tq-wg{display:inline-flex; flex-wrap:wrap; gap:.25rem; align-items:center}
 .tq-revja{font-size:.9em}
 .tq-lbody{max-height:60vh; overflow:auto; text-align:left; border:1px solid var(--line); border-radius:8px; padding:.3rem .6rem}
-.tq-lrow{display:grid; grid-template-columns:8.5rem 1fr 4.5rem; gap:.5rem; padding:.35rem 0; border-bottom:1px dashed var(--line); font-size:.9rem; align-items:baseline}
+.tq-lrow{display:grid; grid-template-columns:8.5rem 1fr auto auto auto; gap:.5rem; padding:.35rem 0; border-bottom:1px dashed var(--line); font-size:.9rem; align-items:baseline}
 .tq-lrow .w{font-family:Georgia,'Times New Roman',serif; color:#fff}
 .tq-lrow .m{color:var(--steel)}
 .tq-lrow .st{text-align:right; font-size:.8rem; white-space:nowrap}
@@ -239,8 +247,8 @@ html.mobile .tq-opt.tq-lo .tq-lk{display:none}
 html.mobile #screen-toeic .hint{display:none}
 html.mobile .tq-opts, html.mobile .tq-opts.three{grid-template-columns:1fr}
 html.mobile .tq-mode{min-width:0; flex:1 1 40%}
-html.mobile .tq-res li{grid-template-columns:1.6rem 7rem 1fr}
-html.mobile .tq-lrow{grid-template-columns:7rem 1fr 3.8rem}
+html.mobile .tq-res li{grid-template-columns:1.6rem 7rem 1fr auto}
+html.mobile .tq-lrow{grid-template-columns:6rem 1fr auto auto auto}
 /* ローズティー: 白黒の薔薇は画面をモノトーンに、透明な薔薇はすりガラスのように */
 body.dishmono:not(.garden):not(.washi) #app{filter:grayscale(1)}
 body.dishglass:not(.garden):not(.washi) #app{position:relative; z-index:1}
@@ -2236,7 +2244,7 @@ html.mobile #screen-garden .grk-list{max-height:none; flex:1 1 auto; min-height:
       <p class="tq-credit">基本単語: New General Service List 1.2(Browne, C., Culligan, B. &amp; Phillips, J., 2013)・ TOEIC: TOEIC Service List 1.2(Browne, C. &amp; Culligan, B., 2016)の頻度順 ・ CC BY-SA 4.0 ・ 熟語・例文・訳はこのゲームで作成</p>
     </div>
     <div class="tq-view" id="tqPlay">
-      <div class="tq-hud"><span id="tqProg"></span><span><span id="tqScoreL">得点</span> <b id="tqScore">0</b></span><span id="tqMissW"></span></div>
+      <div class="tq-hud"><span id="tqProg"></span><span><span id="tqScoreL">得点</span> <b id="tqScore">0</b></span><span id="tqMissW"></span><button class="btn tq-quit" id="tqQuit" tabindex="-1">やめる <span class="kbdh">Esc</span></button></div>
       <div class="tq-card">
         <span class="tq-pos" id="tqPos"></span>
         <span class="tq-wst" id="tqWst"></span>
@@ -2265,6 +2273,7 @@ html.mobile #screen-garden .grk-list{max-height:none; flex:1 1 auto; min-height:
       </div>
       <div class="gstat tq-gstat" id="tqGstatR"></div>
       <ol class="tq-res" id="tqResList"></ol>
+      <p class="hint pc-only">E 例文をまとめて開く・閉じる</p>
     </div>
     <div class="tq-view" id="tqList">
       <h2 class="tq-title">単語リスト</h2>
@@ -2296,6 +2305,7 @@ html.mobile #screen-garden .grk-list{max-height:none; flex:1 1 auto; min-height:
     <div id="nextWord">&nbsp;</div>
 
     <div class="plate" id="plate"></div>
+    <p class="game-esc"><button class="btn" id="gameQuit" tabindex="-1">やめる <span class="kbdh">Esc</span></button></p>
   </section>
 
   <!-- リザルト画面 -->
@@ -13594,6 +13604,11 @@ function tqMarkFx(en,ok){
 }
 function tqMark(en,ok){ const st=tqStore(tqFmt), t=Object.assign({c:0,w:0,s:0},st[en]); if(ok){ t.c++; t.s++; }else{ t.w++; t.s=0; } t.t=Date.now(); st[en]=t; tqSaveStat(); }
 const tqHasSent = w => !!TQ_SENT[w.en];
+/* 単語リストと結果画面: 単語ごとの例文ボタンと、開くと出る例文 */
+const tqExBtn = w => tqHasSent(w) ? `<button class="btn tq-exb" type="button" tabindex="-1">例文</button>` : `<span></span>`;
+const tqExHtml = w => { const x=TQ_SENT[w.en]; return x ? `<div class="tq-ex" hidden>${tqEsc(x[0]).replace(/\[([^\]]*)\]/,"<b>$1</b>")}<small>${tqEsc(x[2])}</small></div>` : ""; };
+function tqExToggle(e){ const b=e.target.closest(".tq-exb"); if(!b) return; const ex=b.parentElement.querySelector(".tq-ex"); if(ex){ ex.hidden=!ex.hidden; b.classList.toggle("on",!ex.hidden); } }
+function tqExAll(box){ const exs=[...box.querySelectorAll(".tq-ex")], open=exs.some(x=>x.hidden); exs.forEach(x=>x.hidden=!open); box.querySelectorAll(".tq-exb").forEach(b=>b.classList.toggle("on",open)); }
 /* レベルの単語(穴埋めは例文のある単語だけ) */
 const tqPool = (lv,fmt=tqFmt) => fmt==="listen" ? (lv==="weak" ? TQL.filter(w=>tqWeak(w.en)) : lv==="ls" ? TQL : []) : (lv==="weak" ? TQ.filter(w=>tqWeak(w.en,fmt) && tqWgOk(w)) : TQ.filter(w=>w.lv===lv)).filter(w=>fmt!=="fill" || tqHasSent(w));
 const tqLvName = lv => (TQ_LEVELS.concat(TQ_LEVELS_L.slice(0,1)).find(([k])=>k===lv)||[0,lv])[1];
@@ -14089,7 +14104,7 @@ function tqFinish(){
     $("tqResSum").innerHTML=`${tqLvName(tqLv)} ・ ${tqFmtName(tqFmt)} ・ 正解 <b>${ok}</b> / ${tqLog.length}${tqUnit()}`+openMsg+sent+roseMsg;
   }
   $("tqAgain").innerHTML=(tqKind==="one"?"もう一回":"もう1セット")+' <span class="kbdh">Enter</span>';
-  $("tqResList").innerHTML=tqLog.map(x=>`<li><span class="mk">${x.ok?"○":x.half?"△":x.late?"⏱":x.idk?"？":"✕"}</span><span class="w">${tqEsc(x.w.en)}</span><span class="m">${tqEsc(x.w.means.map(m=>m.j).join("、"))}</span></li>`).join("");
+  $("tqResList").innerHTML=tqLog.map(x=>`<li><span class="mk">${x.ok?"○":x.half?"△":x.late?"⏱":x.idk?"？":"✕"}</span><span class="w">${tqEsc(x.w.en)}</span><span class="m">${tqEsc(x.w.means.map(m=>m.j).join("、"))}</span>${x.w.means&&!x.w.word?tqExBtn(x.w):"<span></span>"}${x.w.word?"":tqExHtml(x.w)}</li>`).join("");
   tqFarm(); tqView("tqResult");
 }
 /* ノーミス勝負の記録をみんなのランキングに載せる(名前が決まっていれば自動) */
@@ -14133,7 +14148,7 @@ setInterval(()=>{ if(tqRegWait && !nmOpen){ tqRegWait=false; if(playerName && tq
 let tqListF="all", tqListM="word";   // 単語リストの絞り込み(状態)・見る記録(単語 / 穴埋め)
 function tqList(lv){
   if(lv && lv!==tqListLv) tqListF="all";
-  { const h=$("tqLHint"); if(h) h.innerHTML = window.IS_MOBILE ? "" : `<span class="kbdh">1〜0 -</span> <span class="kbdh">Tab</span> レベル ・ <span class="kbdh">← →</span> 絞りこみ ・ <span class="kbdh">F</span> 単語と穴埋め ・ <span class="kbdh">↑ ↓</span> スクロール ・ <span class="kbdh">Esc</span> 戻る`; }
+  { const h=$("tqLHint"); if(h) h.innerHTML = window.IS_MOBILE ? "" : `<span class="kbdh">1〜0 -</span> <span class="kbdh">Tab</span> レベル ・ <span class="kbdh">← →</span> 絞りこみ ・ <span class="kbdh">F</span> 単語と穴埋め ・ <span class="kbdh">E</span> 例文をまとめて開く・閉じる ・ <span class="kbdh">↑ ↓</span> スクロール ・ <span class="kbdh">Esc</span> 戻る`; }
   tqListLv=lv||tqListLv; tqPhase="list"; tqView("tqList");
   $("tqLTabs").innerHTML=TQ_LEVELS.map(([k,nm],i)=>`<button class="btn${k===tqListLv?" on":""}" data-lv="${k}">${nm} <span class="kbdh">${TQ_LVKEYS[i]}</span></button>`).join("");
   const lf = tqListM==="fill" ? "fill" : "choice", all=tqPool(tqListLv,lf);
@@ -14145,7 +14160,7 @@ function tqList(lv){
   const pool = tqListF==="all" ? all : all.filter(w=>stOf(w)===tqListF);
   $("tqLBody").innerHTML = pool.length ? pool.map(w=>{
     const mark = f => { const t=tqSt(w.en,f), x=stOf(w,f); return `<span class="st${x==="good"?" good":x==="weak"?" weak":""}"><small>${f==="fill"?"穴埋め":"単語"}</small> ${x==="good"?"✓ 覚えた":x==="weak"?"✕ 苦手":tqStore(f)[w.en]?`${t.c} / ${t.c+t.w}回`:"未"}</span>`; };
-    return `<div class="tq-lrow"><span class="w">${tqEsc(w.en)}</span><span class="m">${tqEsc(w.means.map(m=>m.j).join("、"))}</span>${mark("choice")}${tqHasSent(w)?mark("fill"):`<span class="st"></span>`}</div>`;
+    return `<div class="tq-lrow"><span class="w">${tqEsc(w.en)}</span><span class="m">${tqEsc(w.means.map(m=>m.j).join("、"))}</span>${mark("choice")}${tqHasSent(w)?mark("fill"):`<span class="st"></span>`}${tqExBtn(w)}${tqExHtml(w)}</div>`;
   }).join("") : `<p class="tq-sub" style="padding:1rem">苦手な単語はまだありません</p>`;
 }
 /* ---- キー操作 ---- */
@@ -14170,6 +14185,7 @@ function tqKey(e){
     else if(k==="r"||k==="R") tqRankOpen();
     else if(k==="ArrowLeft"||k==="ArrowRight"){ e.preventDefault(); const fs=[...$("tqLSum").querySelectorAll("[data-lf]:not([disabled])")].map(b=>[b.dataset.lf]); tqListF=tqCycle(fs,tqListF,k==="ArrowLeft"?-1:1); tqList(); }
     else if(k==="ArrowUp"||k==="ArrowDown"){ e.preventDefault(); $("tqLBody").scrollBy(0,k==="ArrowDown"?120:-120); }
+    else if(k==="e"||k==="E"){ e.preventDefault(); tqExAll($("tqLBody")); }
     else if(k==="f"||k==="F"){ tqListM = tqListM==="fill" ? "word" : "fill"; tqListF="all"; tqList(); }
     else if(k==="Tab"){ e.preventDefault(); tqList(tqCycle(TQ_LEVELS,tqListLv,e.shiftKey?-1:1)); }
     else if(li>=0) tqList(TQ_LEVELS[li][0]);
@@ -14178,6 +14194,7 @@ function tqKey(e){
   if(tqPhase==="result"){
     if(k==="Enter"){ e.preventDefault(); if(tqCan(tqLv)) tqStart(tqLv); else tqMenu(); }
     else if(k==="Escape"){ e.preventDefault(); tqMenu(); }
+    else if(k==="e"||k==="E"){ e.preventDefault(); tqExAll($("tqResList")); }
     else if((k==="n"||k==="N") && $("tqRegBtn")){ e.preventDefault(); tqRegName(); }
     else if(k==="r"||k==="R"){ e.preventDefault(); if($("tqRankView")) tqRankView(); else tqRankOpen(); }
     else if(k==="g"||k==="G") tqToGarden();
@@ -14214,6 +14231,12 @@ function tqKey(e){
 }
 /* ---- クリック・タップ ---- */
 $("tqFmts").addEventListener("click",e=>{ const b=e.target.closest("[data-f]"); if(b){ tqFmt=b.dataset.f; tqMenu(); } });
+$("tqLBody").addEventListener("click",tqExToggle);
+$("tqResList").addEventListener("click",tqExToggle);
+$("tqQuit").addEventListener("mousedown",e=>e.preventDefault());
+$("tqQuit").addEventListener("click",()=>document.body.dispatchEvent(new KeyboardEvent("keydown",{ key:"Escape", bubbles:true })));   // Esc と同じ
+$("gameQuit").addEventListener("mousedown",e=>e.preventDefault());
+$("gameQuit").addEventListener("click",()=>document.body.dispatchEvent(new KeyboardEvent("keydown",{ key:"Escape", bubbles:true })));
 $("tqLSum").addEventListener("click",e=>{ const m=e.target.closest("[data-lm]"); if(m){ tqListM=m.dataset.lm; tqListF="all"; tqList(); return; } const b=e.target.closest("[data-lf]"); if(b && !b.disabled){ tqListF=b.dataset.lf; tqList(); } });
 $("tqOptRow").addEventListener("click",e=>{ if(e.target.closest("#tqHideBtn")){ tqHideGood=!tqHideGood; tqSaveOpt(); tqMenu(); return; } const b=e.target.closest("[data-wg]"); if(b){ tqWeakG=b.dataset.wg; tqSaveOpt(); tqMenu(); } });
 $("tqKinds").addEventListener("click",e=>{ const b=e.target.closest("[data-k]"); if(b){ tqKind=b.dataset.k; tqMenu(); } });
