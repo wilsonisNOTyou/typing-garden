@@ -5046,7 +5046,7 @@ const NEWS=[
   { d:"2026-10-25", t:"大木と、日替わりのご褒美", items:[
     "日替わりのご褒美を始めました。毎日、スコアアタックとタイムアタックのどれか1つずつに付き、タイトルで光ります。最後まで遊ぶと受け取れます。累計収穫100から始まります",
     "どちらか一方には必ず大木の苗木が付きます。イージーは十年梅、ノーマルは三十年葡萄、ハードは百年杉で、1日3本までもらえます。苗木は大木が開いてからです",
-    "大木は畑の9マスを使って、何年もかけて育ちます。苗木と同じ難易度で遊ぶと、その木だけ10倍の速さで育ちます",
+    "大木は畑の9マスを使って、何年もかけて育ちます。その木の苗木がもらえる難易度で遊ぶと、その木だけ10倍の速さで育ちます",
     "累計収穫1万で、大木と一緒に腐葉土・斧・工房が開きます。工房では、大木の実や木材からお酒やおつまみを作れます",
     "お酒を飲むと、タイピングと TOEIC の画面がほろ酔いになります。ほろ酔いの記録は、ほろ酔いランキングに載ります",
     "図鑑と実績に大木を追加しました",
@@ -5961,6 +5961,9 @@ const BTF_ART = (()=>{
     umeboshi:`<svg viewBox="0 0 32 32"><ellipse cx="16" cy="24" rx="12" ry="4" fill="#e8e2d6"/><circle cx="16" cy="17" r="9" fill="#b81e3a"/><path d="M10 15c2-2 4 1 6-1s4 1 6-1M11 20c2-1 4 1 6 0s3 1 5 0" stroke="#7a0a20" stroke-width="1" fill="none"/><circle cx="12.5" cy="13.5" r="1.8" fill="#fff" opacity=".45"/></svg>`,
     umeboshi2:`<svg viewBox="0 0 32 32">${glow(1)}<ellipse cx="16" cy="25" rx="13" ry="4.4" fill="#1a1a1a"/><ellipse cx="16" cy="24.2" rx="11.4" ry="3.4" fill="#b8202a"/><path d="M6 24.2q10 3 20 0" stroke="#e8c24a" stroke-width=".8" fill="none"/><defs><radialGradient id="ub2" cx=".35" cy=".3" r=".75"><stop offset="0" stop-color="#ff9a7a"/><stop offset=".55" stop-color="#d81e3a"/><stop offset="1" stop-color="#8a0a24"/></radialGradient></defs><circle cx="16" cy="16" r="8.4" fill="url(#ub2)"/><path d="M9.6 14c2-1.6 4 .8 6-.8s4 .8 6-.8M10.4 19c2-1 4 .8 6 0s3.6.8 5.2 0" stroke="#7a0a1e" stroke-width=".8" fill="none" opacity=".6"/><path d="M11 11.5q3-2.6 7-1.6" stroke="#fff" stroke-width="1.4" fill="none" stroke-linecap="round" opacity=".75"/><path d="M21 21q2 2.6 0 4.2q-1.6-1.6 0-4.2z" fill="#ffc84a" opacity=".9"/><circle cx="20.6" cy="8.6" r="1" fill="#fff6c0"/></svg>`,
     raisin2:`<svg viewBox="0 0 32 32">${glow(2)}<path d="M5 19h22l-2.4 7c-.4 1.2-1.4 2-2.8 2H10.2c-1.4 0-2.4-.8-2.8-2z" fill="#e8f6ff" opacity=".8" stroke="#a8c8e0" stroke-width=".6"/>${[[10,17,0],[14.6,15.6,1],[19.4,16.4,2],[23,18,3],[12,20.6,4],[17,20,0],[21.6,21,1],[16,13,3]].map(([x,y,k])=>{ const c=[["#ff8aa8","#c8204a"],["#ffd27a","#d0801a"],["#9af08a","#2a9a3a"],["#8ac8ff","#2a5ad0"],["#d6a8ff","#7a3ad0"]][k]; return `<path d="M${x-2.6} ${y}q.6-2.4 2.6-2.4t2.6 2.4q-.6 2.2-2.6 2.2t-2.6-2.2z" fill="${c[1]}"/><path d="M${x-1.8} ${y-.4}q.6-1.4 1.8-1.4" stroke="${c[0]}" stroke-width="1.1" fill="none"/><circle cx="${x+.8}" cy="${y-.8}" r=".5" fill="#fff"/>`; }).join("")}</svg>`,
+    chip2:`<svg viewBox="0 0 32 32">${glow(1)}<path d="M9 10c-2-2 1-3-1-5M15 9c-2-2 1-3-1-5M21 10c-2-2 1-3-1-5" stroke="#b07ad8" stroke-width="1.2" fill="none" stroke-linecap="round" opacity=".9"/><path d="M5 24l4-6 5 2-3 6z" fill="#8a3a4a"/><path d="M12 25l5-8 5 3-4 7z" fill="#a84a5a"/><path d="M19 24l5-6 4 3-4 5z" fill="#7a2e44"/><path d="M9 17l4-5 4 3-4 4z" fill="#c06070"/><path d="M6 23l3-4M13 23l3-5M20 23l3-4M10 16l3-3" stroke="#ffd8e0" stroke-width=".6" opacity=".7"/><path d="M23 13c2-2 5-1 5 1-2 1-4 0-5-1z" fill="#6aa878"/></svg>`,
+    taru2:`<svg viewBox="0 0 32 32">${glow(2)}<path d="M8 5h16c2 4 2 18 0 22H8C6 23 6 9 8 5z" fill="#e8b850"/><path d="M8 5h16c2 4 2 18 0 22H8C6 23 6 9 8 5z" fill="none" stroke="#a8781e" stroke-width="1"/><path d="M7 9h18M7 23h18" stroke="#8a5a10" stroke-width="1.6"/><path d="M12 5.5v21M16 5v22M20 5.5v21" stroke="#c8962a" stroke-width=".6" opacity=".7"/><path d="M6.6 15.5q9.4 3 18.8 0" stroke="#f2e2b0" stroke-width="3.4" fill="none"/><path d="M6.6 15.5q9.4 3 18.8 0" stroke="#b8963e" stroke-width=".7" stroke-dasharray="1.6 1.2" fill="none"/>${[11,16,21].map(x=>`<path d="M${x} 17l2 2.4-1.6 1 2 2.4" stroke="#fff" stroke-width="2" fill="none"/><path d="M${x} 17l2 2.4-1.6 1 2 2.4" stroke="#d8d0c0" stroke-width=".4" fill="none"/>`).join("")}</svg>`,
+    koji2:`<svg viewBox="0 0 32 32">${glow(1)}<path d="M4 18h24c0 6-5 10-12 10S4 24 4 18z" fill="#1e1e22"/><path d="M5 20q11 3 22 0" stroke="#c8202a" stroke-width="1.2" fill="none"/><ellipse cx="16" cy="18" rx="12" ry="4" fill="#fffdf6"/>${[[9,17],[13,15.6],[17,16],[21,17],[11,19],[15,19],[19,19],[23,18.6],[16,13.4],[12,14]].map(([x,y],i)=>`<ellipse cx="${x}" cy="${y}" rx="2" ry="1.3" fill="${i%3?"#fbf6e8":"#fff2c0"}" stroke="#e8dcc0" stroke-width=".4"/>`).join("")}<path d="M10 9l.6 1.4 1.4.6-1.4.6-.6 1.4-.6-1.4-1.4-.6 1.4-.6zM22 7l.5 1.2 1.2.5-1.2.5-.5 1.2-.5-1.2-1.2-.5 1.2-.5z" fill="#ffe27a"/><path d="M16 12c-1-3 1-5 3-6" stroke="#f4a8c0" stroke-width="1" fill="none"/><circle cx="19.4" cy="5.8" r="1.4" fill="#ffc0d4"/></svg>`,
     raisin:`<svg viewBox="0 0 32 32"><ellipse cx="16" cy="24" rx="12" ry="4" fill="#e8e2d6"/>${[[10,20],[15,18],[20,20],[13,23],[18,23],[23,23],[16,14]].map(([x,y])=>`<ellipse cx="${x}" cy="${y}" rx="3" ry="2.2" fill="#4a2a3a"/><path d="M${x-2} ${y} q2 -1 4 0" stroke="#7a4a5a" stroke-width=".8" fill="none"/>`).join("")}</svg>`,
   };
 })();
@@ -5979,6 +5982,9 @@ const BT_FOODS = [
   { id:"sugiwood2", r:"GSR", name:"御神木の木材", icon:"🪵", price:320000, up:"sugiwood", src:"銀杉・黄金の御神木を斧で切る", lore:"御神木から取れた木材。手に持つと、背すじが伸びる。" },
   { id:"chip", r:"SR", name:"燻製チップ", icon:"🪵", price:10000, up:null, src:"工房", lore:"葡萄の古株を砕いたチップ。燻すと、おつまみになる。" },
   { id:"taru", r:"HR", name:"杉樽", icon:"🛢️", price:50000, up:null, src:"工房", lore:"百年杉で組んだ樽。お酒を仕込むと、杉の香りがうつる。" },
+  { id:"chip2", r:"UR", name:"香木チップ", icon:"🪵", price:40000, up:"chip", src:"工房", lore:"銘木の葡萄株を砕いた、甘い香りのチップ。燻すと、煙まで紫に色づく。" },
+  { id:"taru2", r:"UR", name:"御神木の樽", icon:"🛢️", price:200000, up:"taru", src:"工房", lore:"御神木の木材で組んだ樽。しめ縄を巻くと、中のお酒が少し光って見える。" },
+  { id:"koji2", r:"SR", name:"吟醸麹", icon:"🍚", price:2000, up:"koji", src:"仕込み", lore:"変わった稲のお米に育てた麹。ふわりと花のような香りが立つ。" },
   { id:"koji", r:"R", name:"米麹", icon:"🍚", price:500, up:null, src:"仕込み", lore:"蒸したお米に、麹がふわふわと育ったもの。日本酒のもと。" },
   { id:"umeboshi", r:"SR", name:"梅干し", icon:"🔴", price:4000, up:null, src:"仕込み", lore:"梅の実を塩で漬けて干したもの。ひと口で目が覚める。" },
   { id:"umeboshi2", r:"UR", name:"蜜漬けの梅干し", icon:"🔴", price:16000, up:"umeboshi", src:"仕込み", lore:"完熟の梅を天空の塩で漬け、蜜をまとわせた梅干し。すっぱさの奥から、とろりと甘い。" },
@@ -6025,7 +6031,8 @@ const KIT_ORDER=["sfert","pan","pot","board","loupe","hourglass","mfert","bento"
 const kitN = id => ({ sfert:S.sfert, mfert:S.mfert, hourglass:S.hourglass, bento:S.bento, sgk:(S.objs.sgk||0)+FS().filter(f=>f[POST].obj==="sgk").length, sgvil:S.sgVil, deed:S.deeds||0 })[id] ?? ((S.kit&&S.kit[id])||0);
 const kitVal = id => { const g=GUR[id]; if(!g||!g.kit) return 0; return Math.min(g.kit.cap, g.kit.per*((S.kit&&S.kit[id])||0)); };   // 鍋・まな板など(%)
 const SG_SLOTS = 3;   // シゴデキ村人1人が世話する区画の数
-const isPrepFood = id => ["miso","shoyu","butter","cream","cheese","oldmiso","oldshoyu","kbutter","angelcream","chesking","koji","umeboshi","raisin"].includes(id);   // 仕込みで作る食材(ガチャからは出ない)
+const foodHow = f => f.bt ? (f.src==="工房" ? "工房で作る" : f.src==="仕込み" ? "仕込みで作る" : /斧/.test(f.src) ? f.src : `${f.src}から収穫する`) : isPrepFood(f.id) ? "料理の仕込みで作る" : `わくわくガチャ(レア度 ${f.r})`;   // 図鑑の「手に入れ方」
+const isPrepFood = id => ["miso","shoyu","butter","cream","cheese","oldmiso","oldshoyu","kbutter","angelcream","chesking","koji","umeboshi","raisin","koji2","umeboshi2","raisin2"].includes(id);   // 仕込みで作る食材(ガチャからは出ない)
 const itemOf = id => CROP[id] || FOOD[id] || GUR[id] || (typeof RG!=="undefined" && RG[id]);   // ガチャから出るもの(作物の種・食材・GUR)
 const foodN = id => (S.food && S.food[id]) || 0;
 const FIELD_MAX = 50;   // 畑の上限(お店で買えるのは10枚まで。その先はわくわくガチャの畑チケット)
@@ -11181,7 +11188,7 @@ const PREPS = [
   { id:"p_cheese", out:"cheese", ing:[["milk", 3], ["salt", 1]], upOut:"chesking", upIng:[["jersey", 6], ["skysalt", 1]] },
 ];
 PREPS.push(   // 大木の品を使う仕込み(梅干しと干し葡萄は上位種もある。大木と一緒に解放)
-  { id:"p_koji", out:"koji", ing:[["rice", 3]], bt:true },
+  { id:"p_koji", out:"koji", ing:[["rice", 3]], upOut:"koji2", upIng:[["rice", 3]], bt:true },
   { id:"p_umeboshi", out:"umeboshi", ing:[["ume", 2], ["salt", 1]], upOut:"umeboshi2", upIng:[["ume2", 2], ["skysalt", 1]], bt:true },
   { id:"p_raisin", out:"raisin", ing:[["vgrape", 2]], upOut:"raisin2", upIng:[["vgrape2", 2]], bt:true },
 );
@@ -11443,6 +11450,8 @@ const WORKS = [
   { id:"w_sumi", out:"sumi", n:5, ing:[["umewood",1]], ds:"料理に使う梅の炭。料理が変異・超変異になることがあります(消耗品)" },
   { id:"w_chip", out:"chip", n:5, ing:[["grapewood",1]], ds:"燻製のおつまみの材料" },
   { id:"w_taru", out:"taru", n:1, ing:[["sugiwood",2]], ds:"日本酒と古酒の材料" },
+  { id:"w_chip2", out:"chip2", n:5, ing:[["grapewood2",1]], ds:"燻製チップの上位種。変異・超変異の燻製のおつまみの材料" },
+  { id:"w_taru2", out:"taru2", n:1, ing:[["sugiwood2",2]], ds:"杉樽の上位種。変異・超変異の日本酒と古酒の材料" },
 ];
 const workItem = out => out==="fuyo" ? FUYO : out==="sumi" ? SUMI : FOOD[out];
 const workN = out => out==="fuyo" ? (S.fuyo||0) : out==="sumi" ? (S.sumi||0) : foodN(out);
@@ -12179,11 +12188,11 @@ function renderBook(){
       <dl>
         <dt>持っている数</dt><dd>${fmtNum(foodN(f.id))}個</dd>
         <dt>売値</dt><dd>${fmtNum(f.price)}キー</dd>
-        <dt>手に入れ方</dt><dd>${isPrepFood(f.id)?"料理の仕込みで作る":`わくわくガチャ(レア度 ${f.r})`}</dd>
+        <dt>手に入れ方</dt><dd>${foodHow(f)}</dd>
       </dl>
       <div class="lore">${esc(f.lore)}</div>`
     : `<div class="bic">❔</div><div class="bnm">？？？</div>
-       <div class="lore unknown">${isPrepFood(f.id)?"料理の仕込みで作る食材です。一度作ると、名前がわかります。":`わくわくガチャ(レア度 ${f.r})から出る${f.up?"上位種の":""}食材です。引き当てると、名前がわかります。`}</div>`);
+       <div class="lore unknown">${f.bt ? `${foodHow(f)}品です。手に入れると、名前がわかります。` : isPrepFood(f.id)?"料理の仕込みで作る食材です。一度作ると、名前がわかります。":`わくわくガチャ(レア度 ${f.r})から出る${f.up?"上位種の":""}食材です。引き当てると、名前がわかります。`}</div>`);
     keepVisible($("g-bookList"));
     return;
   }
