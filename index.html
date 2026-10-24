@@ -683,7 +683,6 @@ body.dk-chi.dk-st #screen-game.active #wordText, body.dk-chi.dk-st #screen-game.
 body.dk-chi #screen-game.active::after, body.dk-chi #screen-toeic.active::after{content:""; position:fixed; inset:0; pointer-events:none; z-index:31; background:radial-gradient(ellipse at center, rgba(255,255,255,0) 50%, rgba(240,244,248,.55) 100%)}
 body.dk-chi.dk-st #screen-game.active::after, body.dk-chi.dk-st #screen-toeic.active::after{background:radial-gradient(ellipse at center, rgba(255,255,255,0) 30%, rgba(240,244,248,.75) 100%)}
 @media (prefers-reduced-motion:reduce){ body[class*="dk-"] #wordPanel, body[class*="dk-"] #wordText, body[class*="dk-"] #wordKana, body[class*="dk-"] #tqWord, body[class*="dk-"] .tq-word{animation-duration:12s} }
-#tab-horoyoi{background:linear-gradient(180deg,#ffd6c8,#f4a08a); color:#5a1a1a}
 /* ---- ペナルティ / 辞典 ---- */
 .screw.back .cap{animation:keyback .55s ease-out}
 @keyframes keyback{
@@ -2390,7 +2389,6 @@ html.mobile #screen-garden .grk-list{max-height:none; flex:1 1 auto; min-height:
       <button class="btn" id="tab-normal">ノーマル</button>
       <button class="btn" id="tab-hard">ハード</button>
       <button class="btn bara" id="tab-barabara" hidden>バラバラ</button>
-      <button class="btn horo" id="tab-horoyoi" hidden>ほろ酔い</button>
     </div>
     <p class="tab-group-label">タイムアタック(タイム)</p>
     <div class="rank-tabs">
@@ -3502,14 +3500,14 @@ const GAME_SECONDS = 60;
 const SCREWS_PER_PLATE = 8;
 const WORD_SETS = { easy: WORDS_EASY, normal: WORDS_NORMAL, hard: WORDS_HARD };
 const DIFF_LABEL = {
-  easy:"イージー", normal:"ノーマル", hard:"ハード", barabara:"バラバラ", horoyoi:"ほろ酔い",
+  easy:"イージー", normal:"ノーマル", hard:"ハード", barabara:"バラバラ",
   "ta-easy":"タイムアタック イージー", "ta-normal":"タイムアタック ノーマル", "ta-hard":"タイムアタック ハード",
   oneshot:"ノーミス勝負"
 };
 const MISS_PENALTY = { easy: 10, normal: 7, hard: 5, barabara: 7 }; // このミス数ごとにキー-1本
 const DICT_TABS = ["easy","normal","hard"];            // 辞典に並べる難易度
 /* ランキングのタブ: スコアアタック → タイムアタック → ノーミス勝負 の順 */
-const RANK_TABS = ["easy","normal","hard","barabara","horoyoi","ta-easy","ta-normal","ta-hard","oneshot", "toeic-choice","toeic-fill","toeic-rev","toeic-listen", "g-money","g-earn","g-harvest","g-book","g-dbook","g-rose","g-goal"];
+const RANK_TABS = ["easy","normal","hard","barabara","ta-easy","ta-normal","ta-hard","oneshot", "toeic-choice","toeic-fill","toeic-rev","toeic-listen", "g-money","g-earn","g-harvest","g-book","g-dbook","g-rose","g-goal"];
 DIFF_LABEL["toeic-type"]="TOEIC ノーミス勝負 入力"; DIFF_LABEL["toeic-choice"]="TOEIC ノーミス勝負 4択"; DIFF_LABEL["toeic-fill"]="TOEIC ノーミス勝負 穴埋め4択"; DIFF_LABEL["toeic-rev"]="TOEIC ノーミス勝負 逆4択"; DIFF_LABEL["toeic-listen"]="TOEIC ノーミス勝負 リスニング";
 const isGardenRank = d => d==="g-money" || d==="g-harvest" || d==="g-book" || d==="g-earn" || d==="g-dbook" || d==="g-rose" || d==="g-goal";
 const gRankUnit = d => (d==="g-money"||d==="g-earn") ? "キー" : (d==="g-book"||d==="g-dbook" ? "項目" : d==="g-rose" ? "色" : "個");
@@ -4061,9 +4059,7 @@ function clearWordPanel(){
    ネジの色がばらばら・ネジが勝手に外れる・板が逆さま・正解とミスの音が入れ替わる。記録はバラバラのランキング1つにまとめて載せる */
 const baraOn = () => { try{ return !!Garden.baraOn(); }catch(e){ return false; } };
 let gameBara=false, baraQ=null, baraN=0;
-let gameDrunk=false;   // お酒の効果中に始めた(記録はほろ酔いランキングへ)
 const drunkNowG = () => { try{ return Garden.drunkNow(); }catch(e){ return { any:false }; } };
-const horoSeen = () => { try{ return !!Garden.horoSeen(); }catch(e){ return false; } };
 let baraWordsCache=null;
 function baraWords(){
   if(baraWordsCache) return baraWordsCache;
@@ -4160,7 +4156,6 @@ function startGame(d){
   if(window.IS_MOBILE) return;   // スマホではタイピングできない
   if(d==="barabara") d="normal";
   gameBara = baraOn() && d!=="book"; baraQ=null; baraN=0;
-  gameDrunk = !gameBara && d!=="book" && drunkNowG().any;
   diff=d;
   $("wordPanel").classList.toggle("bara", gameBara); $("wordPanel").classList.remove("quiz");
   const ta=isQ(d), oneshot=(d==="oneshot");
@@ -4238,7 +4233,7 @@ async function endGame(){
   $("imeWarn").classList.remove("show");
   resetStage();   // 背景の熱演出を戻す
   const toGarden=gardenScrews(diff,score);
-  typePk=dbPk(diff,true); dbFinish(diff);
+  typePk=gameBara?null:dbPk(diff,true); dbFinish(gameBara?null:diff);   // バラバラ中は、日替わりのご褒美も10倍もなし
   recordStats(score, toGarden); // ランキング登録の有無に関係なく記録(農園には難易度などに応じたキーを届ける)
   showGardenScrews("resultGarden", toGarden);
   if(diff==="book"){ endBookGame(); return; }
@@ -4247,10 +4242,10 @@ async function endGame(){
   const ta=isTA(diff);
   const value = ta ? Number(elapsed.toFixed(2)) : score;
   const best=await loadBest(diff);
-  const isNew=!gameBara && !gameDrunk && isBetterValue(value,best,diff);   // バラバラ・お酒の間の記録は自己ベストに入れない
+  const isNew=!gameBara && isBetterValue(value,best,diff);   // バラバラの間の記録は自己ベストに入れない
   if(isNew) await saveBest(diff,value);
   const shownBest = isNew ? value : best;
-  $("resultDiff").textContent=`— ${DIFF_LABEL[diff]}${gameBara?" ・ バラバラ":gameDrunk?" ・ ほろ酔い":""} —`;
+  $("resultDiff").textContent=`— ${DIFF_LABEL[diff]}${gameBara?" ・ バラバラ":""} —`;
   $("resultCount").classList.toggle("ta",ta);
   if(ta){
     $("resultCaption").textContent=`${taGoal}語タイム`;
@@ -4384,7 +4379,7 @@ document.addEventListener("keydown",e=>{
     if(e.key==="Enter") startGame(diff);
     if(e.key==="Escape"){ if(diff==="book") openBooks(); else show("title"); }
     if((e.key==="n"||e.key==="N") && !playerName){ e.preventDefault(); $("nameInput").focus(); $("nameInput").select&&$("nameInput").select(); }
-    if((e.key==="r"||e.key==="R") && playerName) openRanking(gameBara?"barabara":gameDrunk?"horoyoi":diff,playerName);
+    if((e.key==="r"||e.key==="R") && playerName) openRanking(gameBara?"barabara":diff,playerName);
     if(e.key==="g"||e.key==="G") openGarden();
     return;
   }
@@ -4393,7 +4388,7 @@ document.addEventListener("keydown",e=>{
     clearInterval(timerId); clearInterval(cdId); cdId=null;   // カウントダウン中に抜けても始まらないように
     $("countdown").style.display="none";
     running=false; resetStage(); clearWordPanel();
-    typePk=dbPk(diff,false); sendToGarden(gardenKeys,0); gardenKeys=0;
+    typePk=gameBara?null:dbPk(diff,false); sendToGarden(gardenKeys,0); gardenKeys=0;
     if(diff==="book") openBooks(); else show("title");
     return;
   }
@@ -4561,8 +4556,8 @@ async function rankRedecoAll(){
 }
 setTimeout(rankRedecoAll,4000);
 /* バラバラのランキングに載せる(名前とモードごとに、数字が大きいほうを1件だけ残す) */
-async function submitBara(name,md,val,unit,key="barabara"){   // key: barabara / horoyoi(お酒)
-  const ref=db.ref("typinggarden/scores/"+key);
+async function submitBara(name,md,val,unit){
+  const ref=db.ref("typinggarden/scores/barabara");
   const snap=await ref.orderByChild("n").equalTo(name).once("value");
   const mine=[]; snap.forEach(c=>{ const v=c.val(); if((v.md||"")===md) mine.push({ key:c.key, s:v.s, v }); });
   mine.sort((a,b)=>b.s-a.s);
@@ -4575,8 +4570,8 @@ async function submitBara(name,md,val,unit,key="barabara"){   // key: barabara /
 const baraName = n => { const a=Array.from(n); if(a.length>1 && Math.random()<.5){ const i=Math.random()*(a.length-1)|0; [a[i],a[i+1]]=[a[i+1],a[i]]; } return a.join(""); };
 const baraEsc = v => String(v==null?"":v).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
 async function fetchRanking(d){
-  if(d==="barabara" || d==="horoyoi"){
-    const snap=await db.ref("typinggarden/scores/"+d).orderByChild("s").limitToLast(RANKING_SIZE*5).once("value");
+  if(d==="barabara"){
+    const snap=await db.ref("typinggarden/scores/barabara").orderByChild("s").limitToLast(RANKING_SIZE*5).once("value");
     const rows=[]; snap.forEach(c=>{ rows.push(c.val()); });
     rows.sort((a,b)=>(b.s-a.s) || (a.t-b.t));
     const per={};   // 1人(同じ名前)3つまで
@@ -4608,12 +4603,10 @@ let rankCache={};   // ランキングの読み込み結果(タブごと)。記�
 const RANK_CACHE_MS=30000;
 let rankReq=0;
 const baraSeen = () => { try{ return !!Garden.baraSeen(); }catch(e){ return false; } };   // 一度バラバラになったら、ランキングはずっと見られる
-const rankTabsNow = () => RANK_TABS.filter(t=>(t!=="barabara" || baraSeen()) && (t!=="horoyoi" || horoSeen()));
+const rankTabsNow = () => RANK_TABS.filter(t=>t!=="barabara" || baraSeen());
 async function openRanking(d,highlight){
   if(d==="barabara" && !baraSeen()) d="normal";
-  if(d==="horoyoi" && !horoSeen()) d="normal";
   $("tab-barabara").hidden=!baraSeen();
-  $("tab-horoyoi").hidden=!horoSeen();   // 一度お酒を飲んだら見られる
   rankCur=d;
   const myReq=++rankReq;   // 素早く切り替えたとき、古い読み込み結果を捨てる
   for(const t of RANK_TABS) $("tab-"+t).classList.toggle("active",d===t);
@@ -4637,8 +4630,8 @@ async function openRanking(d,highlight){
       const li=document.createElement("li");
       li.className="rank-row"+(i===0?" top1":"")+(highlight&&r.n===highlight?" me":"");
       let scoreText;
-      if(d==="barabara" || d==="horoyoi"){
-        scoreText = `${baraEsc(r.s)}${baraEsc(r.u||"")} <span style="color:var(--steel);font-size:.85em">${baraEsc(r.md||(d==="horoyoi"?"ほろ酔い":"バラバラ"))}</span>`;
+      if(d==="barabara"){
+        scoreText = `${baraEsc(r.s)}${baraEsc(r.u||"")} <span style="color:var(--steel);font-size:.85em">${baraEsc(r.md||"バラバラ")}</span>`;
       }else if(isGardenRank(d)){
         scoreText = rankExact(r) + gRankUnit(d);
       }else if(isTimeRanked(d)){
@@ -4681,11 +4674,10 @@ async function registerResult(){
     const extra={s:score};
     if(isTA(diff)){ extra.e=Number(elapsed.toFixed(2)); extra.m=miss; }
     else if(diff==="oneshot"){ extra.e=Number(elapsed.toFixed(2)); }
-    const res = gameBara ? await submitBara(name, DIFF_LABEL[diff], isTA(diff)?Number(elapsed.toFixed(2)):score, $("resultUnit").textContent)
-              : gameDrunk ? await submitBara(name, DIFF_LABEL[diff], isTA(diff)?Number(elapsed.toFixed(2)):score, $("resultUnit").textContent, "horoyoi") : await submitScore(name,diff,extra);
+    const res = gameBara ? await submitBara(name, DIFF_LABEL[diff], isTA(diff)?Number(elapsed.toFixed(2)):score, $("resultUnit").textContent) : await submitScore(name,diff,extra);
     if(res.saved){
       $("regStatus").innerHTML=`ランキングを更新しました! <button class="btn" id="regView">ランキングを見る (R)</button>`;
-      $("regView").onclick=()=>openRanking(gameBara?"barabara":gameDrunk?"horoyoi":diff,name);
+      $("regView").onclick=()=>openRanking(gameBara?"barabara":diff,name);
     }else{
       $("regStatus").textContent = isTA(diff)
         ? "ランキングの記録(自己ベスト)より遅かったので、ランキングはそのままです"
@@ -4712,7 +4704,7 @@ function showRegName(){
 
 /* ---------- プレイヤー名(ランキングと番付で共通) ----------
    一度決めた名前は固定。変えるときは、今までのランキングと番付の記録もまとめて新しい名前に移す */
-const SCORE_DIFFS=["easy","normal","hard","barabara","horoyoi","ta-easy","ta-normal","ta-hard","oneshot","toeic-choice-b1","toeic-choice-b2","toeic-choice-b3","toeic-choice-470","toeic-choice-630","toeic-choice-730","toeic-choice-860","toeic-choice-990","toeic-choice-i1","toeic-choice-i2","toeic-fill-b1","toeic-fill-b2","toeic-fill-b3","toeic-fill-470","toeic-fill-630","toeic-fill-730","toeic-fill-860","toeic-fill-990","toeic-fill-i1","toeic-fill-i2","toeic-rev-b1","toeic-rev-b2","toeic-rev-b3","toeic-rev-470","toeic-rev-630","toeic-rev-730","toeic-rev-860","toeic-rev-990","toeic-rev-i1","toeic-rev-i2","toeic-listen-ls"];
+const SCORE_DIFFS=["easy","normal","hard","barabara","ta-easy","ta-normal","ta-hard","oneshot","toeic-choice-b1","toeic-choice-b2","toeic-choice-b3","toeic-choice-470","toeic-choice-630","toeic-choice-730","toeic-choice-860","toeic-choice-990","toeic-choice-i1","toeic-choice-i2","toeic-fill-b1","toeic-fill-b2","toeic-fill-b3","toeic-fill-470","toeic-fill-630","toeic-fill-730","toeic-fill-860","toeic-fill-990","toeic-fill-i1","toeic-fill-i2","toeic-rev-b1","toeic-rev-b2","toeic-rev-b3","toeic-rev-470","toeic-rev-630","toeic-rev-730","toeic-rev-860","toeic-rev-990","toeic-rev-i1","toeic-rev-i2","toeic-listen-ls"];
 const myId = () => { try{ return Garden.ownerId(); }catch(e){ return ""; } };
 const nameKey = name => encodeURIComponent(name).replace(/\./g,"%2E");   // 番付の保存場所(庭の rankKey と同じ)
 const nameError = n => !n ? "名前を入れてください" : ([...n].length>10 ? "名前は10文字までです" : "");
@@ -5044,10 +5036,11 @@ function endBookGame(){
    新しいものを上に足していく。d は YYYY-MM-DD */
 const NEWS=[
   { d:"2026-10-25", t:"大木と、日替わりのご褒美", items:[
-    "大木を追加しました。畑の3×3の9マスを使って、何年もかけて育つ木です。十年梅・三十年葡萄・百年杉の3種類があり、苗木はタイピングの日替わりのご褒美でもらえます。実ったら鎌で実を収穫でき、そのあとも1年ごとにまた実ります。斧で木ごと切ると、木材が取れます",
+    "大木を追加しました。畑の3×3の9マスを使って、何年もかけて育つ木です。十年梅・三十年葡萄・百年杉の3種類があり、苗木はタイピングの日替わりのご褒美でもらえます。実ったら素手や鎌で実を収穫でき、そのあとも1年ごとにまた実ります。斧で木ごと切ると、木材が取れます",
     "累計収穫1万で大木が解放されます。腐葉土と斧がお店に並び、料理の画面に工房のタブが開きます",
-    "腐葉土をまくと、木の育つ速さが倍になります。肥料なので、ふつうは1本の木に2回まで使えます。斧で切ると木材が取れます",
-    "工房では、大木の木材や葉から、腐葉土・梅の炭・燻製チップ・杉樽を作れます。それを使うお酒やおつまみのレシピも、お店に並びます。お酒を飲むと、タイピングと TOEIC の画面がほろ酔いになり、その間の記録はほろ酔いランキングに載ります",
+    "腐葉土をまくと、木の育つ速さが倍になります。肥料なので、ふつうは1本の木に2回まで使えます",
+    "工房では、大木の木材や葉から、腐葉土・梅の炭・燻製チップ・杉樽を作れます。梅の炭は、工房でオンにしておくと、料理が変異・超変異になりやすくなります",
+    "仕込みに米麹・梅干し・干し葡萄が加わり、お酒・おつまみ・梅干しおにぎり・レーズンパンのレシピがお店に並びます。お酒を飲むと、タイピングと TOEIC の画面がほろ酔いになります",
     "日替わりのご褒美を始めました。毎日、スコアアタックとタイムアタックのどれか1つずつに付き、タイトルで光ります。最後まで遊ぶと受け取れます。累計収穫100から始まります。大木が解放されると、片方には必ず大木の苗木が付きます。イージーは十年梅、ノーマルは三十年葡萄、ハードは百年杉で、1日3本までもらえます",
     "十年梅はイージー、三十年葡萄はノーマル、百年杉はハードで遊ぶと、10倍早く育ちます",
     "図鑑と実績に大木を追加しました",
@@ -6495,13 +6488,13 @@ const BT_GROUPS = [["Q","W","E","A","S","D","Z","X","C"],["R","T","Y","F","G","H
 const BT_UNLOCK = { harvest:10000 };   // 苗木・斧・腐葉土・工房・新しい料理は、累計収穫1万で一緒に解放
 const BT_YEAR = 365*24*HOUR;
 const BTS = {
-  bt_ume:  { id:"bt_ume", l0:"十年かけて根を張る梅の木。早春に白い花を咲かせ、そのあとは毎年、青い実をたっぷりつける。実は梅干しや梅酒に、古い枝は燻製の薪になる。", l3:"花も実もほんのり紅い梅。香りが強く、梅酒にすると色まで美しく仕上がる。", l5:"枝の先まで金色に光る梅。実はひと粒ずつ蜜のように甘く、農園の守り木と呼ばれる。", mode:"イージー",   name:"十年梅",     n3:"紅梅",     n5:"金の梅",       icon:"🌸", kind:"ume",   yrs:10,  cost:1000000,  fruit:"ume",      wood:"umewood",   fN:5,  wN:3,  st:["芽","若木","成木","古木","実り"] },
+  bt_ume:  { id:"bt_ume", l0:"十年かけて根を張る梅の木。早春に白い花を咲かせ、そのあとは毎年、青い実をたっぷりつける。実は梅干しや梅酒に、古い幹は工房で炭になる。", l3:"花も実もほんのり紅い梅。香りが強く、梅酒にすると色まで美しく仕上がる。", l5:"枝の先まで金色に光る梅。実はひと粒ずつ蜜のように甘く、農園の守り木と呼ばれる。", mode:"イージー",   name:"十年梅",     n3:"紅梅",     n5:"金の梅",       icon:"🌸", kind:"ume",   yrs:10,  cost:1000000,  fruit:"ume",      wood:"umewood",   fN:5,  wN:3,  st:["芽","若木","成木","古木","実り"] },
   bt_grape:{ id:"bt_grape", l0:"格子に絡みながら、三十年かけて太くなる葡萄の古木。毎年、房いっぱいに実をつけ、ワインや干し葡萄になる。古い株は燻製のチップにも。", l3:"翡翠のように透きとおる緑の葡萄。冷やすと香りが立ち、すっきりとしたお酒になる。", l5:"ひと粒ごとに色の違う、宝石のような葡萄。光にかざすと虹のようにきらめく。", mode:"ノーマル", name:"三十年葡萄", n3:"翡翠葡萄", n5:"宝石葡萄",     icon:"🍇", kind:"grape", yrs:30,  cost:3000000,  fruit:"vgrape",   wood:"grapewood", fN:5,  wN:3,  st:["芽","つる","格子","古株","実り"] },
   bt_sugi: { id:"bt_sugi", l0:"百年かけて空へまっすぐ伸びる杉。毎年落ちる葉は腐葉土に、切り出した木は樽や工房の材料になる。", l3:"幹も葉も銀色に光る杉。月の夜には、畑全体が白く照らされる。", l5:"百年を越えて神様が宿った杉。金色の葉が風に鳴り、そばにいるだけで心が落ち着く。", mode:"ハード",  name:"百年杉",     n3:"銀杉",     n5:"黄金の御神木", icon:"🌲", kind:"sugi",  yrs:100, cost:10000000, fruit:"sugileaf", wood:"sugiwood",  fN:10, wN:10, st:["芽","若木","成木","古木","御神木"] },
 };
 for(const b of Object.values(BTS)){
   OBJS[b.id]={ id:b.id, name:b.name+"の苗木", icon:b.icon, area:null, cost:b.cost, unlock:BT_UNLOCK, tree:true,
-    what:`3×3の区画(Q W E / A S D / Z X C など)のどこかを押すと、9マスを使って植えます。${b.yrs}年かけて育ち、そのあとは1年ごとに実ります。タイピングの${b.mode}で遊ぶと、届いた時間でこの木だけ10倍の速さで育ちます` };
+    what:`3×3の区画(Q W E / A S D / Z X C など)のどこかを押すと、9マスを使って植えます。${b.yrs}年かけて育ち、そのあとは1年ごとに実ります。タイピングの${b.mode}で遊ぶと、この木だけ10倍早く育ちます` };
 }
 /* 苗木は種のなかま: 4 の「苗木」で選んで植える。持っている数は S.seeds に入る */
 const SAPS = Object.values(BTS).map(b=>{ const c={ id:b.id, name:b.name, icon:b.icon, sap:true, price:b.cost }; CROP[b.id]=c; return c; });
@@ -6519,7 +6512,7 @@ const btTrees = f => f && f.bt ? Object.keys(f.bt).filter(gi=>f.bt[gi]).map(gi=>
 const btItem = (base,q) => q ? base+"2" : base;   // 変異・超変異の木からは上位の品
 const fmtYears = ms => { const d=Math.ceil(ms/(24*HOUR)); if(d<=1) return fmtDur(Math.max(0,ms)); const y=Math.floor(d/365), m=Math.floor((d%365)/30), dd=(d%365)%30; return (y?y+"年":"")+(m?m+"か月":"")+(!y&&dd?dd+"日":"") || "1日"; };
 const AXE_COST = 5000, FUYO_COST = 100000, BT_FERT = 2;
-const dayKey = () => { const d=new Date(); return d.getFullYear()+"-"+(d.getMonth()+1)+"-"+d.getDate(); };
+const dayKey = () => new Date(Date.now()+9*3600000).toISOString().slice(0,10);   // 日本時間の日付(日替わりのご褒美と同じ区切り)
 const fuyoToday = () => S.fuyoDay===dayKey();
 const FUYO_ART = `<svg viewBox="0 0 32 32"><ellipse cx="16" cy="25" rx="13" ry="4.5" fill="#3e2716"/><path d="M4 24c2-7 6-11 12-11s10 4 12 11z" fill="#5a3a22"/><path d="M7 22c3-1 5 0 7-2M17 20c3 0 5 1 8 0" stroke="#7a5232" stroke-width="1.4" fill="none"/><path d="M10 13c2-5 7-6 9-4-3 0-6 2-9 4z" fill="#c8862e"/><path d="M17 12c3-4 8-3 9 0-3-1-6-1-9 0z" fill="#9a6a24"/><path d="M13 16c1-3 4-4 6-3-2 1-4 2-6 3z" fill="#7aa848"/></svg>`;
 const FUYO = { id:"fuyo", name:"腐葉土", art:FUYO_ART };
@@ -6636,9 +6629,9 @@ function btInfo(k,p){
   const t=field().bt[p.bt], b=BTS[t.id], st=btStage(t), now=Date.now(), sub=[];
   const big=`${k} ・ ${b.icon} ${esc(btName(t))} ・ ${b.st[st-1]}${t.q===5?"(超変異)":t.q===3?"(変異)":""}`;
   if(!t.rip) sub.push(`育成 ${(t.g/btNeed(t)*100).toFixed(2)}% ・ 実るまで 水が効いていれば あと ${fmtYears((btNeed(t)-t.g))}`);
-  else if(t.ready) sub.push(`実っています。${kb("素手(1)","素手")}で ${esc(FOOD[btItem(b.fruit,t.q)].name)}を収穫できます`);
+  else if(t.ready) sub.push(`実っています。${kb(sickleInfo().name+"(1)",sickleInfo().name)}で ${esc(FOOD[btItem(b.fruit,t.q)].name)}を収穫できます`);
   else sub.push(`次に実るまで 水が効いていれば あと ${fmtYears((BT_YEAR-(t.fr||0)))}`);
-  sub.push(`タイピングの${b.mode}で遊ぶと、届いた時間でこの木だけ10倍早く育ちます`);
+  sub.push(`タイピングの${b.mode}で遊ぶと、この木だけ10倍早く育ちます`);
   sub.push(`腐葉土 ${t.fert||0}回 ・ 貴重品などと合わせた成長速度 ×${+(effGrowth()*(t.mul||1)).toFixed(2)}`+(S.axe?` ・ ${kb("斧(1 で ← →)","斧")}で切ると木材が取れます`:""));
   sub.push(BT_GROUPS[p.bt].some(x=>isWet(S.cur,x,now)) ? "💧 水が効いています(9マスのどれか1つでよい)" : "水切れ — 9マスのどれか1つに水をやると育ちます");
   return { big, sub };
@@ -11288,10 +11281,10 @@ function eff(k){
   return x;
 }
 Object.assign(EFFS, {   // 大木の料理
-  Y1:{ nm:"ほろ酔い",   n:"タイピング・TOEICの画面がゆらゆら揺れ、文字がときどき二重に見える(効果中の記録は、ほろ酔いランキングに載ります)", s:"タイピング・TOEICの画面が大きく揺れ、文字がよく二重に見える(効果中の記録は、ほろ酔いランキングに載ります)" },
-  Y2:{ nm:"赤ら顔",     n:"タイピング・TOEICの画面がほんのり赤くなり、言葉が少し傾く(効果中の記録は、ほろ酔いランキングに載ります)", s:"タイピング・TOEICの画面が赤く染まり、言葉が大きく傾く(効果中の記録は、ほろ酔いランキングに載ります)" },
-  Y3:{ nm:"千鳥足",     n:"打つ言葉が左右にふらふら歩き、画面の端が湯気でかすむ(効果中の記録は、ほろ酔いランキングに載ります)", s:"打つ言葉が大きくふらふら歩き、画面が湯気でかすむ(効果中の記録は、ほろ酔いランキングに載ります)" },
-  Y4:{ nm:"泥酔",       n:"ほろ酔い・赤ら顔・千鳥足が全部かかる(効果中の記録は、ほろ酔いランキングに載ります)", s:"強いほろ酔い・赤ら顔・千鳥足が全部かかる(効果中の記録は、ほろ酔いランキングに載ります)" },
+  Y1:{ nm:"ほろ酔い",   n:"タイピング・TOEICの画面がゆらゆら揺れ、文字がときどき二重に見える", s:"タイピング・TOEICの画面が大きく揺れ、文字がよく二重に見える" },
+  Y2:{ nm:"赤ら顔",     n:"タイピング・TOEICの画面がほんのり赤くなり、言葉が少し傾く", s:"タイピング・TOEICの画面が赤く染まり、言葉が大きく傾く" },
+  Y3:{ nm:"千鳥足",     n:"打つ言葉が左右にふらふら歩き、画面の端が湯気でかすむ", s:"打つ言葉が大きくふらふら歩き、画面が湯気でかすむ" },
+  Y4:{ nm:"泥酔",       n:"ほろ酔い・赤ら顔・千鳥足が全部かかる", s:"強いほろ酔い・赤ら顔・千鳥足が全部かかる" },
   Z1:{ nm:"燻製たまご", n:"食べた瞬間、お酒の残り時間が1.5倍。酔っている間、タイピングで届くキー1.2倍", s:"食べた瞬間、お酒の残り時間が3倍。酔っている間、タイピングで届くキー2倍" },
   Z2:{ nm:"燻製チーズ", n:"食べた瞬間、お酒の残り時間が1.5倍。酔っている間、TOEICの薔薇の種1.2倍", s:"食べた瞬間、お酒の残り時間が3倍。酔っている間、TOEICの薔薇の種2倍" },
   Z3:{ nm:"燻製ベーコン", n:"食べた瞬間、お酒の残り時間が1.5倍。酔っている間、タイピングで進む農園の時間1.2倍", s:"食べた瞬間、お酒の残り時間が3倍。酔っている間、タイピングで進む農園の時間2倍" },
@@ -11578,7 +11571,6 @@ function cookEat(id,g){
   if(d.eff==="P8" && !buffList().length){ sfx.nope(); toast("今かかっている料理の効果がないので、延ばせません","warn",3200); return; }
   if(/^Z[1-4]$/.test(d.eff) && !drinkList().length){ sfx.nope(); toast(d.eff==="Z4"?"今はお酒の効果がかかっていません":"お酒の効果がかかっていないので、おつまみは食べられません","warn",3200); return; }
   st[g]--; S.ateCount=(S.ateCount||0)+1;
-  if(isDrinkD(id)) S.horoSeen=true;   // ほろ酔いランキングが見られるようになる
   const bk=bookKeyOf(g); S.dishEaten[id]=S.dishEaten[id]||{}; S.dishEaten[id][bk]=true;
   let what="";   // 演出に出す、食べて起きたこと
   if(d.eff==="β"){   // 時間を進める: その場で効く(今の効果は消えない)
@@ -12198,7 +12190,7 @@ function renderBook(){
       </dl>
       <div class="lore">${esc(f.lore)}</div>`
     : `<div class="bic">❔</div><div class="bnm">？？？</div>
-       <div class="lore unknown">${f.bt ? `${foodHow(f)}品です。手に入れると、名前がわかります。` : isPrepFood(f.id)?"料理の仕込みで作る食材です。一度作ると、名前がわかります。":`わくわくガチャ(レア度 ${f.r})から出る${f.up?"上位種の":""}食材です。引き当てると、名前がわかります。`}</div>`);
+       <div class="lore unknown">${f.bt ? `${f.src==="工房"?"工房で作る":f.src==="仕込み"?"仕込みで作る":/斧/.test(f.src)?f.src+"と取れる":f.src+"から収穫できる"}品です。手に入れると、名前がわかります。` : isPrepFood(f.id)?"料理の仕込みで作る食材です。一度作ると、名前がわかります。":`わくわくガチャ(レア度 ${f.r})から出る${f.up?"上位種の":""}食材です。引き当てると、名前がわかります。`}</div>`);
     keepVisible($("g-bookList"));
     return;
   }
@@ -12213,8 +12205,8 @@ function renderBook(){
         <dt>実らせた数</dt><dd>${fmtNum((S.btRipeBy||{})[c.id]||0)}本</dd>
         <dt>育つまで</dt><dd>${b.yrs}年 ・ そのあとは1年ごとに実る</dd>
         <dt>手に入れ方</dt><dd>${how}</dd>
-        <dt>早く育てる</dt><dd>${b.mode}で遊ぶと、届いた時間で10倍早く育つ ・ 腐葉土でも早く育つ</dd>
-        ${btBookT?`<dt>なり方</dt><dd>実った瞬間に${btBookT===1?"変異":"超変異"}することがあります。不思議な肥料でも${btBookT===1?"変異":"超変異"}します</dd>`:""}
+        <dt>早く育てる</dt><dd>${b.mode}で遊ぶと10倍早く育つ ・ 腐葉土でも早く育つ</dd>
+        ${btBookT?`<dt>なり方</dt><dd>実った瞬間に${btBookT===1?"変異":"超変異"}することがあります。${btBookT===1?"不思議な肥料":"摩訶不思議な肥料"}でも${btBookT===1?"変異":"超変異"}します</dd>`:""}
       </dl>${seen||!btBookT ? `<div class="lore">${esc([b.l0,b.l3,b.l5][btBookT])}</div>` : ""}` : `<div class="bic">❔</div><div class="bnm">？？？</div>
        <div class="lore unknown">${how}。苗木を手に入れると、名前がわかります。</div>`);
     keepVisible($("g-bookList"));
@@ -12827,10 +12819,11 @@ function showBtNotice(){
     <li>🌳 <b>大木</b>は、畑の<b>3×3の9マス</b>を使って何年もかけて育つ木です。🌸 十年梅・🍇 三十年葡萄・🌲 百年杉の3種類があり、実ったあとは1年ごとに実ります。</li>
     <li>🎁 苗木は、タイピングの<b>日替わりのご褒美</b>でもらえます。<b>イージー</b>に付いた日は🌸 十年梅、<b>ノーマル</b>は🍇 三十年葡萄、<b>ハード</b>は🌲 百年杉の苗木です。苗木が付いたモードを最後まで遊ぶと受け取れます。1日3本までです。</li>
     <li>🌱 ${kb("<b>4</b> の種の中の「苗木」から選んで","種の中の「苗木」から選んで")}、空いている3×3の区画のどこかを押すと植わります。9マスとも空けておきましょう。</li>
-    <li>⚡ その木の苗木がもらえる難易度で遊ぶと、届いた時間でその木だけ<b>10倍</b>早く育ちます。十年梅ならイージー、三十年葡萄ならノーマル、百年杉ならハードです。</li>
+    <li>⚡ その木の苗木がもらえる難易度で遊ぶと、その木だけ<b>10倍</b>早く育ちます。十年梅ならイージー、三十年葡萄ならノーマル、百年杉ならハードです。</li>
     <li>🍂 <b>腐葉土</b>を使うと、木の育つ速さが<b>倍</b>になります。肥料なので、ふつうは1本の木に<b>2回まで</b>です。お店で1日1つ買えるほか、工房で杉の葉から作れます。</li>
     <li>🪓 実ったら${kb("素手や鎌(<b>1</b>)","素手や鎌")}で実を収穫できます。お店の<b>斧</b>で木ごと切ると、木材が取れます。</li>
-    <li>🍶 料理の画面に<b>工房</b>が加わりました。大木の木材や葉から、腐葉土・梅の炭・燻製チップ・杉樽を作れます。それを使うお酒やおつまみのレシピも、お店に並びます。お酒を飲むと、タイピングがほろ酔いになります。</li>
+    <li>🔨 料理の画面に<b>工房</b>が加わりました。大木の木材や葉から、腐葉土・梅の炭・燻製チップ・杉樽を作れます。梅の炭は、工房でオンにしておくと、料理が変異・超変異になりやすくなります。</li>
+    <li>🍶 仕込みに米麹・梅干し・干し葡萄が加わり、お酒・おつまみ・梅干しおにぎり・レーズンパンのレシピがお店に並びます。お酒を飲むと、タイピングと TOEIC の画面がほろ酔いになります。</li>
   </ul>`;
   $("g-noticeOk").textContent=kb("わかった(Enter)","わかった");
   openModal("notice"); sfx.vil();
@@ -12935,7 +12928,7 @@ function debugUnlock(){
   for(const d of DISHES){ S.recipes[d.id]=true; S.dishes[d.id]={0:1,3:1,5:1}; S.dishMade[d.id]={0:true,3:true,5:true}; S.dishEaten[d.id]={0:true,3:true,5:true}; }
   for(const r of ROSE_ALL){ S.harvestBy[r.id]=50; S.harvestQ[r.id]=r.secret?[5]:[20,0,0,3,0,1]; S.inv[r.id]=r.secret?[2]:[3,0,0,2,0,1]; }   // 薔薇
   S.roseTeaRecipe=true; S.baraSeen=true; S.rgNoticed=true;
-  S.seeds.bt_ume=3; S.seeds.bt_grape=3; S.seeds.bt_sugi=3; S.axe=true; S.fuyo=30; S.sumi=30; S.horoSeen=true; for(const id of Object.keys(BTS)) for(const q of [0,3,5]) btBookMark(id,q);   // 図鑑の大木も全部   // 大木: 苗木・斧・腐葉土・梅の炭
+  S.seeds.bt_ume=3; S.seeds.bt_grape=3; S.seeds.bt_sugi=3; S.axe=true; S.fuyo=30; S.sumi=30; for(const id of Object.keys(BTS)) for(const q of [0,3,5]) btBookMark(id,q);   // 図鑑の大木も全部   // 大木: 苗木・斧・腐葉土・梅の炭
   // 薔薇ガチャ: コイン・権利・花弁・GHR をすべて
   S.roseCoin=100000000; S.megaSet=true; S.layoutOwned=true; S.gachaPass.r1111=true; S.gachaPass.r11111=true; S.gachaPass.r111111=true; S.gachaPass.r1111111=true;
   for(const id in RG) S.got[id]=1;
@@ -13028,7 +13021,7 @@ function debugStart2(){
   save();
 }
 function alive(){ if(kitN("fridge")>0){ fridgeKeep(); save(); } }
-return { peek:()=>{ consumeInbox(); tick(); return tutState(); }, roseName:roseNameHTML, roseNamePlate, roseRowStyle, roseRowCls, nameDeco, drunkNow, horoSeen:()=>!!S.horoSeen, tqBoost:()=>({ rose:(1+rgGurPct("sh")/100)*otsuMul("Z2"), sc:1+rgGurPct("pen")/100, min:1+rgGurPct("dial")/100 }), rose:(lv,n)=>{ roseGive(lv,n); S.roseIn=(S.roseIn||0)+Math.floor(n); save(); }, screwMul, charmLives, applyTheme, alive, themeScrewArt, enter, leave, onKey, summary, dailyGive, dailyNeji, dailySapLeft, dailyOpen, btOpen, debugUnlock, debugStart2, tutState, tutGive, tutGrow, tutSeed, tutSandbox, refreshRank, openModal, ownerId, useName, baraOn, baraLeft, baraSeen, debugStart5, debugStart6, debugStart3, debugStart4 };
+return { peek:()=>{ consumeInbox(); tick(); return tutState(); }, roseName:roseNameHTML, roseNamePlate, roseRowStyle, roseRowCls, nameDeco, drunkNow, tqBoost:()=>({ rose:(1+rgGurPct("sh")/100)*otsuMul("Z2"), sc:1+rgGurPct("pen")/100, min:1+rgGurPct("dial")/100 }), rose:(lv,n)=>{ roseGive(lv,n); S.roseIn=(S.roseIn||0)+Math.floor(n); save(); }, screwMul, charmLives, applyTheme, alive, themeScrewArt, enter, leave, onKey, summary, dailyGive, dailyNeji, dailySapLeft, dailyOpen, btOpen, debugUnlock, debugStart2, tutState, tutGive, tutGrow, tutSeed, tutSandbox, refreshRank, openModal, ownerId, useName, baraOn, baraLeft, baraSeen, debugStart5, debugStart6, debugStart3, debugStart4 };
 })();
 
 function openGarden(){ show("garden"); Garden.enter(); }
@@ -14734,7 +14727,7 @@ function tqStart(lv){
   if(tqFmt==="listen" && !tqSynth){ sndMiss(); return; }
   if(tqFmt==="listen") tqWarm();
   if(!tqCan(lv)){ sndMiss(); return; }
-  tqBara=baraOn(); tqBaseFmt=tqFmt; tqDrunk=!tqBara && drunkNowG().any;
+  tqBara=baraOn(); tqBaseFmt=tqFmt;
   tqLv=lv; tqWords=[]; tqI=0; tqPts=0; tqMin=0; tqRoseN=0; tqMiss=0; tqLog=[]; gardenKeys=0; tqOver=false;
   if(tqKind==="set"){ tqWords=tqPick(lv); }
   else{
@@ -15103,7 +15096,7 @@ function tqChoose(i){
 let tqClear=false, tqCkptDue=false;
 let tqAns=0;   // 一本勝負: 答えた問題の数(正解 + お守りで見逃したミス)。倍になる時期と中断ポイントはこれで数える
 const tqAnsInc = () => { tqAns++; if(!tqBara && tqAns%TQ_CKPT===0 && tqLeft().length) tqCkptDue=true; };   // 次へ進む前に、続けるか中断するかを選べる
-let tqLives=0, tqCharm=false, tqDrunk=false;   // tqDrunk: お酒の効果中に始めた(ほろ酔いランキングへ)   // 料理のお守り: ミスしても続けられる残り回数 / お守りの効果中に始めたか(ランキングに載せない)
+let tqLives=0, tqCharm=false;   // 料理のお守り: ミスしても続けられる残り回数 / お守りの効果中に始めたか(ランキングに載せない)
 const tqCharmSave = () => { if(tqKind!=="one" || tqLives<=0) return false; tqLives--; return true; };   // このミスを見逃してもらえたら true
 /* 10問ごとの中断ポイント */
 function tqCkpt(){
@@ -15142,7 +15135,7 @@ function tqFinish(){
   const openMsg = opened ? `<br><b class="tq-new">🔓 ${tqLvName(opened)}が解放されました!</b>` : "";
   if(tqKind==="one"){
     const bk=tqBestKey(tqFmt,tqLadder[0]), old=tqBest[bk]||0, isBest=tqOk>old;
-    if(isBest && !tqBara && !tqDrunk){ tqBest[bk]=tqOk; tqSaveBest(); }   // バラバラの間の記録は自己ベストに入れない
+    if(isBest && !tqBara){ tqBest[bk]=tqOk; tqSaveBest(); }   // バラバラの間の記録は自己ベストに入れない
     $("tqResSum").innerHTML=`ノーミス勝負 ・ ${tqFmtName(tqFmt)}${tqFmt==="type"?`(${tqSec}秒)`:""} ・ ${tqLvName(tqLadder[0])}<br><span class="tq-big">${tqOk}<small>問 正解</small></span>`
       +(tqClear ? `<br><b class="tq-new">${tqLvName(tqLadder[0])}を全部正解! クリア!</b>` : "")
       +(isBest&&old ? `<br><b class="tq-new">自己ベスト更新!</b>(これまで ${old}問)` : `<br>自己ベスト ${Math.max(old,tqOk)}問`)+openMsg+sent+roseMsg;
@@ -15166,8 +15159,7 @@ async function tqRegister(){
   box.textContent="ランキングに登録しています...";
   try{
     const extra={s:n, l:tqLadder[0]}; if(tqFmt==="type") extra.w=tqSec;   // 始めたレベル・訳が出るまでの秒数も載せる
-    const res = tqBara ? await submitBara(playerName, 'TOEIC '+tqFmtName(tqFmt)+' ノーミス勝負', n, "問")
-              : tqDrunk ? await submitBara(playerName, 'TOEIC '+tqFmtName(tqFmt)+' ノーミス勝負', n, "問", "horoyoi") : await submitScore(playerName,d,extra);
+    const res = tqBara ? await submitBara(playerName, 'TOEIC '+tqFmtName(tqFmt)+' ノーミス勝負', n, "問") : await submitScore(playerName,d,extra);
     box.innerHTML=(res.saved ? "ランキングを更新しました! " : "ランキングの記録(自己ベスト)を超えられなかったので、ランキングはそのままです ")+viewBtn;
   }catch(e){ box.textContent = /permission/i.test(String(e&&(e.code||e.message)||"")) ? "登録できませんでした(ランキングの保存先の設定が、まだこの記録に対応していません)" : "登録に失敗しました。通信環境を確認してください。"; }
 }
@@ -15175,7 +15167,7 @@ let tqRegWait=false;   // 名前を決めたあとに登録する
 function tqRegName(){ if(!playerName){ tqRegWait=true; openNameWin(); } else tqRegister(); }
 /* R: いま選んでいる出題形式のランキングへ(結果からは、その記録のランキング) */
 function tqRankOpen(){ window.tqFromRank=true; tqRankLv=tqRankGroupOf(tqLv); openRanking(tqFmt==="listen" ? "toeic-listen" : "toeic-"+(tqFmt==="fill"?"fill":tqFmt==="rev"?"rev":"choice"), playerName); }
-function tqRankView(){ window.tqFromRank=true; tqRankLv=tqRankGroupOf(tqLadder[0]); openRanking(tqBara?"barabara":tqDrunk?"horoyoi":"toeic-"+tqFmt, playerName); }
+function tqRankView(){ window.tqFromRank=true; tqRankLv=tqRankGroupOf(tqLadder[0]); openRanking(tqBara?"barabara":"toeic-"+tqFmt, playerName); }
 /* みんなのランキング: 出題形式のタブ(toeic-type など)は、下のレベルのボタンで選んだレベルの記録を出す */
 /* レベルは3つのまとまりで1つのランキングにする(記録はこれまでどおりレベルごとに保存し、見るときに集める) */
 const TQ_RANK_GROUPS=[["base","基本",["b1","b2","b3"]],["score","470〜990点",["470","630","730","860","990"]],["idiom","熟語",["i1","i2"]]];
