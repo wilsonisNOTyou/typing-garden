@@ -5956,6 +5956,8 @@ const BTF_ART = (()=>{
     taru:`<svg viewBox="0 0 32 32"><path d="M8 5h16c2 4 2 18 0 22H8C6 23 6 9 8 5z" fill="#c07a46"/><path d="M8 5h16c2 4 2 18 0 22" fill="none" stroke="#8a4a22" stroke-width="1"/><path d="M7 10h18M7 22h18" stroke="#4a4a50" stroke-width="2.2"/><path d="M12 5c-1 7-1 15 0 22M20 5c1 7 1 15 0 22" stroke="#9a5a2e" stroke-width="1"/><circle cx="16" cy="16" r="2.4" fill="#e8d6a8" stroke="#8a6a3a"/></svg>`,
     koji:`<svg viewBox="0 0 32 32"><path d="M4 18h24c0 6-5 10-12 10S4 24 4 18z" fill="#8a6a4a"/><ellipse cx="16" cy="18" rx="12" ry="4" fill="#fbf8ee"/>${[[10,16],[14,15],[18,16],[22,17],[12,19],[17,19],[21,19]].map(([x,y])=>`<ellipse cx="${x}" cy="${y}" rx="2" ry="1.2" fill="#fff" stroke="#e8e0c8" stroke-width=".5"/><circle cx="${x}" cy="${y-1}" r="1.4" fill="#f4f0d0" opacity=".8"/>`).join("")}</svg>`,
     umeboshi:`<svg viewBox="0 0 32 32"><ellipse cx="16" cy="24" rx="12" ry="4" fill="#e8e2d6"/><circle cx="16" cy="17" r="9" fill="#b81e3a"/><path d="M10 15c2-2 4 1 6-1s4 1 6-1M11 20c2-1 4 1 6 0s3 1 5 0" stroke="#7a0a20" stroke-width="1" fill="none"/><circle cx="12.5" cy="13.5" r="1.8" fill="#fff" opacity=".45"/></svg>`,
+    umeboshi2:`<svg viewBox="0 0 32 32">${glow(1)}<ellipse cx="16" cy="25" rx="13" ry="4.4" fill="#1a1a1a"/><ellipse cx="16" cy="24.2" rx="11.4" ry="3.4" fill="#b8202a"/><path d="M6 24.2q10 3 20 0" stroke="#e8c24a" stroke-width=".8" fill="none"/><defs><radialGradient id="ub2" cx=".35" cy=".3" r=".75"><stop offset="0" stop-color="#ff9a7a"/><stop offset=".55" stop-color="#d81e3a"/><stop offset="1" stop-color="#8a0a24"/></radialGradient></defs><circle cx="16" cy="16" r="8.4" fill="url(#ub2)"/><path d="M9.6 14c2-1.6 4 .8 6-.8s4 .8 6-.8M10.4 19c2-1 4 .8 6 0s3.6.8 5.2 0" stroke="#7a0a1e" stroke-width=".8" fill="none" opacity=".6"/><path d="M11 11.5q3-2.6 7-1.6" stroke="#fff" stroke-width="1.4" fill="none" stroke-linecap="round" opacity=".75"/><path d="M21 21q2 2.6 0 4.2q-1.6-1.6 0-4.2z" fill="#ffc84a" opacity=".9"/><circle cx="20.6" cy="8.6" r="1" fill="#fff6c0"/></svg>`,
+    raisin2:`<svg viewBox="0 0 32 32">${glow(2)}<path d="M5 19h22l-2.4 7c-.4 1.2-1.4 2-2.8 2H10.2c-1.4 0-2.4-.8-2.8-2z" fill="#e8f6ff" opacity=".8" stroke="#a8c8e0" stroke-width=".6"/>${[[10,17,0],[14.6,15.6,1],[19.4,16.4,2],[23,18,3],[12,20.6,4],[17,20,0],[21.6,21,1],[16,13,3]].map(([x,y,k])=>{ const c=[["#ff8aa8","#c8204a"],["#ffd27a","#d0801a"],["#9af08a","#2a9a3a"],["#8ac8ff","#2a5ad0"],["#d6a8ff","#7a3ad0"]][k]; return `<path d="M${x-2.6} ${y}q.6-2.4 2.6-2.4t2.6 2.4q-.6 2.2-2.6 2.2t-2.6-2.2z" fill="${c[1]}"/><path d="M${x-1.8} ${y-.4}q.6-1.4 1.8-1.4" stroke="${c[0]}" stroke-width="1.1" fill="none"/><circle cx="${x+.8}" cy="${y-.8}" r=".5" fill="#fff"/>`; }).join("")}</svg>`,
     raisin:`<svg viewBox="0 0 32 32"><ellipse cx="16" cy="24" rx="12" ry="4" fill="#e8e2d6"/>${[[10,20],[15,18],[20,20],[13,23],[18,23],[23,23],[16,14]].map(([x,y])=>`<ellipse cx="${x}" cy="${y}" rx="3" ry="2.2" fill="#4a2a3a"/><path d="M${x-2} ${y} q2 -1 4 0" stroke="#7a4a5a" stroke-width=".8" fill="none"/>`).join("")}</svg>`,
   };
 })();
@@ -5976,6 +5978,8 @@ const BT_FOODS = [
   { id:"taru", r:"HR", name:"杉樽", icon:"🛢️", price:50000, up:null, src:"工房", lore:"百年杉で組んだ樽。お酒を仕込むと、杉の香りがうつる。" },
   { id:"koji", r:"R", name:"米麹", icon:"🍚", price:500, up:null, src:"仕込み", lore:"蒸したお米に、麹がふわふわと育ったもの。日本酒のもと。" },
   { id:"umeboshi", r:"SR", name:"梅干し", icon:"🔴", price:4000, up:null, src:"仕込み", lore:"梅の実を塩で漬けて干したもの。ひと口で目が覚める。" },
+  { id:"umeboshi2", r:"UR", name:"蜜漬けの梅干し", icon:"🔴", price:16000, up:"umeboshi", src:"仕込み", lore:"完熟の梅を天空の塩で漬け、蜜をまとわせた梅干し。すっぱさの奥から、とろりと甘い。" },
+  { id:"raisin2", r:"UR", name:"宝石の干し葡萄", icon:"🍇", price:28000, up:"raisin", src:"仕込み", lore:"宝石の葡萄を干したもの。一粒ずつ光を閉じこめて、かむと甘さがはじける。" },
   { id:"raisin", r:"SR", name:"干し葡萄", icon:"🍇", price:7000, up:null, src:"仕込み", lore:"古木の葡萄を干したもの。甘さがぎゅっと詰まっている。" },
 ].map(f=>Object.assign({ food:true, bt:true, art:BTF_ART[f.id] }, f));
 FOODS.push(...BT_FOODS);
@@ -8404,7 +8408,7 @@ function layoutLoad(i,ok){
   lyAsk=null;
   tick();
   const fs=FS(), want=(fi,k)=>((L.f[fi]||{})[k])||[0,null];
-  let nVil=0, nObj=0, skipV=0, skipO=0;
+  let nVil=0, nObj=0, skipV=0, skipO=0, skipT=0;
   // 1. セットと違う村人・設置物を外す(設置物は持ち物に戻る。植わっている作物はそのまま)
   fs.forEach((f,fi)=>{ for(const k of KEYS){ const p=f[k], [wv,wo]=want(fi,k);
     if(p.vil && lyCode(p.vil)!==wv){ p.vil=false; p.vWait=false; if(!p.crop) p.emptySince=Date.now(); }
@@ -8413,20 +8417,22 @@ function layoutLoad(i,ok){
   // 2. 設置物を置く(作物が植わっている区画と、持っていない設置物は置けない)
   fs.forEach((f,fi)=>{ for(const k of KEYS){ const p=f[k], [,wo]=want(fi,k);
     if(!wo || p.obj===wo) continue;
-    if(p.vil || p.bt!=null || (p.crop && !isScare(wo)) || (isScare(wo)!==(p.s==="post")) || !(S.objs[wo]>0)){ skipO++; continue; }
+    if(p.bt!=null){ skipT++; continue; }   // 大木の区画には置かない(木が優先)
+    if(p.vil || (p.crop && !isScare(wo)) || (isScare(wo)!==(p.s==="post")) || !(S.objs[wo]>0)){ skipO++; continue; }
     p.obj=wo; S.objs[wo]--; p.emptySince=0; nObj++;
   } });
   // 3. 村人を任せる。植わっている作物は、そのまま村人の速さで育ててから切り替わる
   const free={ v:vilFree(), sg:sgFree(), rf:rfFree() };
   fs.forEach((f,fi)=>{ for(const k of KEYS){ const p=f[k], [wv]=want(fi,k);
     if(!wv || lyCode(p.vil)===wv) continue;
-    if(p.obj || p.bt!=null || p.s==="post" || (p.crop && CROP[p.crop.id].half) || !(free[wv]>0)){ skipV++; continue; }
+    if(p.bt!=null){ skipT++; continue; }   // 大木の区画は村人に任せない(木が優先)
+    if(p.obj || p.s==="post" || (p.crop && CROP[p.crop.id].half) || !(free[wv]>0)){ skipV++; continue; }
     free[wv]--; p.vil=lyVil(wv); p.vWait=false; p.emptySince=0; if(p.s==="grass") p.s="soil";
     if(!p.crop){ if(wv==="rf") roseFarm(p,0,Date.now(),"t"); else villagerAdvance(p,0); }
     nVil++;
   } });
   sfx.vil();
-  toast(`🗂️ 「${esc(lyName(i))}」を読み込みました ・ 村人 ${nVil}区画・設置物 ${nObj}個を置きました`+(skipV?` ・ 手が足りないなどで村人を置けなかった区画 ${skipV}`:"")+(skipO?` ・ 作物がある・数が足りないなどで置けなかった設置物 ${skipO}`:""),skipV||skipO?"warn":"good",6000,true);
+  toast(`🗂️ 「${esc(lyName(i))}」を読み込みました ・ 村人 ${nVil}区画・設置物 ${nObj}個を置きました`+(skipV?` ・ 手が足りないなどで村人を置けなかった区画 ${skipV}`:"")+(skipO?` ・ 作物がある・数が足りないなどで置けなかった設置物 ${skipO}`:"")+(skipT?` ・ 大木の区画 ${skipT}マスには置きませんでした`:""),skipV||skipO?"warn":"good",6000,true);
   save(); renderAll(); closeModal(true);
 }
 function layoutKey(e){
@@ -11171,10 +11177,10 @@ const PREPS = [
   { id:"p_cream", out:"cream", ing:[["milk", 3]], upOut:"angelcream", upIng:[["jersey", 3]] },
   { id:"p_cheese", out:"cheese", ing:[["milk", 3], ["salt", 1]], upOut:"chesking", upIng:[["jersey", 6], ["skysalt", 1]] },
 ];
-PREPS.push(   // 大木の品を使う仕込み(上位種はなし。大木と一緒に解放)
+PREPS.push(   // 大木の品を使う仕込み(梅干しと干し葡萄は上位種もある。大木と一緒に解放)
   { id:"p_koji", out:"koji", ing:[["rice", 3]], bt:true },
-  { id:"p_umeboshi", out:"umeboshi", ing:[["ume", 2], ["salt", 1]], bt:true },
-  { id:"p_raisin", out:"raisin", ing:[["vgrape", 2]], bt:true },
+  { id:"p_umeboshi", out:"umeboshi", ing:[["ume", 2], ["salt", 1]], upOut:"umeboshi2", upIng:[["ume2", 2], ["skysalt", 1]], bt:true },
+  { id:"p_raisin", out:"raisin", ing:[["vgrape", 2]], upOut:"raisin2", upIng:[["vgrape2", 2]], bt:true },
 );
 /* 効果: n ふつうの料理 / s 変異・超変異の料理 */
 const EFFS = {
@@ -12802,10 +12808,10 @@ function showBtNotice(){
   $("g-noticeTitle").textContent="🌳 大木が解放されました!";
   $("g-noticeBody").innerHTML=`<ul>
     <li>🌳 <b>大木</b>は、畑の<b>3×3の9マス</b>を使って何年もかけて育つ木です。🌸 十年梅・🍇 三十年葡萄・🌲 百年杉の3種類があり、実ったあとは1年ごとに実ります。</li>
-    <li>🎁 苗木は、タイピングの<b>日替わりのご褒美</b>でもらえます。苗木が付いたモードを最後まで遊ぶと受け取れます。1日3本までです。</li>
+    <li>🎁 苗木は、タイピングの<b>日替わりのご褒美</b>でもらえます。<b>イージー</b>に付いた日は🌸 十年梅、<b>ノーマル</b>は🍇 三十年葡萄、<b>ハード</b>は🌲 百年杉の苗木です。苗木が付いたモードを最後まで遊ぶと受け取れます。1日3本までです。</li>
     <li>🌱 ${kb("<b>4</b> の種の中の「苗木」から選んで","種の中の「苗木」から選んで")}、空いている3×3の区画のどこかを押すと植わります。9マスとも空けておきましょう。</li>
-    <li>⚡ 苗木と同じ難易度で遊ぶと、届いた時間でその木だけ<b>10倍</b>早く育ちます。イージーは十年梅、ノーマルは三十年葡萄、ハードは百年杉です。</li>
-    <li>🍂 <b>腐葉土</b>を使うと、木がもっと早く育ちます。お店で1日1つ買えるほか、工房で杉の葉から作れます。</li>
+    <li>⚡ その木の苗木がもらえる難易度で遊ぶと、届いた時間でその木だけ<b>10倍</b>早く育ちます。十年梅ならイージー、三十年葡萄ならノーマル、百年杉ならハードです。</li>
+    <li>🍂 <b>腐葉土</b>を使うと、木の育つ速さが<b>倍</b>になります。肥料なので、ふつうは1本の木に<b>2回まで</b>です。お店で1日1つ買えるほか、工房で杉の葉から作れます。</li>
     <li>🪓 実ったら${kb("素手(<b>1</b>)","素手")}で収穫できます。お店の<b>斧</b>で切ると木材が取れます。</li>
     <li>🍶 料理の画面に<b>工房</b>が加わりました。大木の実や木材から、お酒やおつまみを作れます。お酒を飲むと、タイピングがほろ酔いになります。</li>
   </ul>`;
