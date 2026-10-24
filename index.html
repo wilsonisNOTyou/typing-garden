@@ -6621,8 +6621,8 @@ function btAct(k){
         }
         btCutAsk=null; btCut(gi); return true;
       }
-      if(!t.rip){ nope(k,`まだ育っています(実るまで 水が効いていれば あと ${fmtYears((btNeed(t)-t.g)/btRate(t))})`); return true; }
-      if(!t.ready){ nope(k,`次に実るまで 水が効いていれば あと ${fmtYears((BT_YEAR-(t.fr||0))/btRate(t))}`); return true; }
+      if(!t.rip){ nope(k,`まだ育っています(実るまで 水が効いていれば あと ${fmtYears((btNeed(t)-t.g))})`); return true; }
+      if(!t.ready){ nope(k,`次に実るまで 水が効いていれば あと ${fmtYears((BT_YEAR-(t.fr||0)))}`); return true; }
       btHarvest(gi,k); return true;
     }
     case 3: return false;   // 水やりはふつうどおり
@@ -6635,9 +6635,9 @@ function btAct(k){
 function btInfo(k,p){
   const t=field().bt[p.bt], b=BTS[t.id], st=btStage(t), now=Date.now(), sub=[];
   const big=`${k} ・ ${b.icon} ${esc(btName(t))} ・ ${b.st[st-1]}${t.q===5?"(超変異)":t.q===3?"(変異)":""}`;
-  if(!t.rip) sub.push(`育成 ${(t.g/btNeed(t)*100).toFixed(2)}% ・ 実るまで 水が効いていれば あと ${fmtYears((btNeed(t)-t.g)/btRate(t))}`);
+  if(!t.rip) sub.push(`育成 ${(t.g/btNeed(t)*100).toFixed(2)}% ・ 実るまで 水が効いていれば あと ${fmtYears((btNeed(t)-t.g))}`);
   else if(t.ready) sub.push(`実っています。${kb("素手(1)","素手")}で ${esc(FOOD[btItem(b.fruit,t.q)].name)}を収穫できます`);
-  else sub.push(`次に実るまで 水が効いていれば あと ${fmtYears((BT_YEAR-(t.fr||0))/btRate(t))}`);
+  else sub.push(`次に実るまで 水が効いていれば あと ${fmtYears((BT_YEAR-(t.fr||0)))}`);
   sub.push(`タイピングの${b.mode}で遊ぶと、届いた時間でこの木だけ10倍早く育ちます`);
   sub.push(`腐葉土 ${t.fert||0}回 ・ 貴重品などと合わせた成長速度 ×${+(effGrowth()*(t.mul||1)).toFixed(2)}`+(S.axe?` ・ ${kb("斧(1 で ← →)","斧")}で切ると木材が取れます`:""));
   sub.push(BT_GROUPS[p.bt].some(x=>isWet(S.cur,x,now)) ? "💧 水が効いています(9マスのどれか1つでよい)" : "水切れ — 9マスのどれか1つに水をやると育ちます");
