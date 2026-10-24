@@ -3793,6 +3793,16 @@ function dailyBonus(day=dbDay()){
     if((g==="ta")!==sapTa){ let x=r()*100; kind=(DB_KINDS.find(([,w])=>(x-=w)<0)||DB_KINDS[0])[0]; }
     out[d]={ kind, lv };
   }
+  const alt=DB_KINDS.filter(([k])=>k!=="fuyo"), aw=alt.reduce((a,[,w])=>a+w,0);   // 大木が開く前の代わり(苗木と腐葉土の代わりに出す)
+  for(const d in out){ let x=r()*aw; out[d].alt=(alt.find(([,w])=>(x-=w)<0)||alt[0])[0]; }
+  return out;
+}
+/* その人に見えるご褒美: 累計収穫100で始まる。大木が開くまでは、苗木と腐葉土のかわりに別のご褒美 */
+function myBonus(day){
+  let open=false, bt=false; try{ open=Garden.dailyOpen(); bt=Garden.btOpen(); }catch(e){}
+  if(!open) return {};
+  const out=dailyBonus(day);
+  if(!bt) for(const d in out) if(out[d].kind==="sap" || out[d].kind==="fuyo") out[d].kind=out[d].alt;
   return out;
 }
 const dbNeji = lv => { try{ return Garden.dailyNeji(lv); }catch(e){ return 0; } };
@@ -3810,7 +3820,7 @@ function dbLabel(b){
 /* タイトル: ご褒美の付いたモードを光らせて、中身を出す */
 let dbShown="";
 function refreshDaily(){
-  const day=dbDay(), bon=dailyBonus(day), sig=day+"|"+(()=>{ try{ return Garden.dailySapLeft(); }catch(e){ return ""; } })()+"|"+dbNeji(2);
+  const day=dbDay(), bon=myBonus(day), sig=JSON.stringify(bon)+"|"+(()=>{ try{ return Garden.dailySapLeft(); }catch(e){ return ""; } })()+"|"+dbNeji(2);
   if(sig===dbShown) return; dbShown=sig;
   document.querySelectorAll("#screen-title .diff-btn[data-diff]").forEach(b=>{
     const x=bon[b.dataset.diff]; b.classList.toggle("dbon",!!x);
@@ -3825,7 +3835,7 @@ let typePk=null;   // このプレイの届け物に付ける印(大木の10倍�
 /* 遊んだ難易度の印。done: 最後まで遊んだ(日替わりのご褒美の時短・変異が付く) */
 function dbPk(d,done){
   if(!(d in DB_LVS)) return null;
-  const lv=DB_LVS[d], pk={ t:DB_TREE[lv] }, b=done && dailyBonus()[d];
+  const lv=DB_LVS[d], pk={ t:DB_TREE[lv] }, b=done && myBonus()[d];
   if(b && b.kind==="min") pk.a=DB_VAL.min[lv];
   if(b && b.kind==="mut") pk.m=DB_VAL.mut[lv]/100;
   if(b && b.kind==="sup") pk.s=DB_VAL.sup[lv]/100;
@@ -3834,7 +3844,7 @@ function dbPk(d,done){
 /* 最後まで遊んだ: 日替わりのご褒美を受け取る(結果画面に出す) */
 function dbFinish(d){
   const el=$("resultBonus"); if(el){ el.hidden=true; el.textContent=""; }
-  const b=dailyBonus()[d]; if(!b || !el) return;
+  const b=myBonus()[d]; if(!b || !el) return;
   let msg="";
   try{ msg=Garden.dailyGive(b.kind,b.lv); }catch(e){ msg=""; }
   if(!msg) return;
@@ -5017,8 +5027,8 @@ function endBookGame(){
    新しいものを上に足していく。d は YYYY-MM-DD */
 const NEWS=[
   { d:"2026-10-25", t:"大木と、日替わりのご褒美", items:[
-    "日替わりのご褒美を始めました。毎日、スコアアタックとタイムアタックのどれか1つずつに付き、タイトルで光ります。最後まで遊ぶと受け取れます",
-    "どちらか一方には必ず大木の苗木が付きます。イージーは十年梅、ノーマルは三十年葡萄、ハードは百年杉で、1日3本までもらえます",
+    "日替わりのご褒美を始めました。毎日、スコアアタックとタイムアタックのどれか1つずつに付き、タイトルで光ります。最後まで遊ぶと受け取れます。累計収穫100から始まります",
+    "どちらか一方には必ず大木の苗木が付きます。イージーは十年梅、ノーマルは三十年葡萄、ハードは百年杉で、1日3本までもらえます。苗木は大木が開いてからです",
     "大木は畑の9マスを使って、何年もかけて育ちます。苗木と同じ難易度で遊ぶと、その木だけ10倍の速さで育ちます",
     "累計収穫1万で、大木と一緒に腐葉土・斧・工房が開きます。工房では、大木の実や木材からお酒やおつまみを作れます",
     "お酒を飲むと、タイピングと TOEIC の画面がほろ酔いになります。ほろ酔いの記録は、ほろ酔いランキングに載ります",
@@ -6613,7 +6623,9 @@ function btRender(f){
     const svg=document.createElementNS("http://www.w3.org/2000/svg","svg");
     svg.setAttribute("class","btov"); svg.setAttribute("width",x1-x0+pad*2); svg.setAttribute("height",H+pad*2);
     svg.style.left=(x0-pad)+"px"; svg.style.top=(y0-pad)+"px";
-    svg.innerHTML=`<g class="sway">${btArt(BTS[t.id].kind, btStage(t), t.q===5?2:t.q===3?1:0, W, H, cx, base)}</g>`;
+    const fw=x1-x0-4, fh=H-4, fx=pad+2, fy=pad+2;   // 9マスを使っていると分かる木の囲い(となりの区画の囲いと重ならない内側)
+    const fence=`<g class="btfence"><rect x="${fx}" y="${fy}" width="${fw}" height="${fh}" rx="16" fill="rgba(110,70,30,.10)" stroke="#6b4423" stroke-width="3"/><rect x="${fx}" y="${fy}" width="${fw}" height="${fh}" rx="16" fill="none" stroke="#a8743f" stroke-width="7" stroke-dasharray="4 22" stroke-linecap="round"/></g>`;
+    svg.innerHTML=fence+`<g class="sway">${btArt(BTS[t.id].kind, btStage(t), t.q===5?2:t.q===3?1:0, W, H, cx, base)}</g>`;
     pl.appendChild(svg);
   }
 }
@@ -7505,11 +7517,15 @@ function dailyNeji(lv){
   if(!rw){ const g=GOALS.find(x=>x.id==="s1k"); rw=g?g.rw:200; }
   return Math.floor(rw*[.1,.2,.4][lv]);
 }
+const DB_OPEN_HARVEST = 100;   // 日替わりのご褒美が始まる累計収穫
+const dailyOpen = () => S.totalHarvest>=DB_OPEN_HARVEST;
+const btOpen = () => S.totalHarvest>=BT_UNLOCK.harvest;
 const dailySapLeft = () => DBG_SAP_MAX - (S.dbSap && S.dbSap.d===dbgDay() ? S.dbSap.n : 0);
 function dailyGive(kind,lv){
   lv=Math.max(0,Math.min(2,lv|0)); let msg="";
   if(kind==="sap"){
     const id=DBG_TREE[lv], b=BTS[id];
+    if(!btOpen()) return "";   // 大木が開くまでは苗木を渡さない
     if(dailySapLeft()<=0) return `${b.name}の苗木は、今日はもう${DBG_SAP_MAX}本もらいました`;
     if(!(S.dbSap && S.dbSap.d===dbgDay())) S.dbSap={ d:dbgDay(), n:0 };
     S.dbSap.n++; S.objs[id]=(S.objs[id]||0)+1; btBookMark(id); S.dbSapGot=(S.dbSapGot||0)+1;
@@ -12687,7 +12703,7 @@ function debugUnlock(){
   for(const d of DISHES){ S.recipes[d.id]=true; S.dishes[d.id]={0:1,3:1,5:1}; S.dishMade[d.id]={0:true,3:true,5:true}; S.dishEaten[d.id]={0:true,3:true,5:true}; }
   for(const r of ROSE_ALL){ S.harvestBy[r.id]=50; S.harvestQ[r.id]=r.secret?[5]:[20,0,0,3,0,1]; S.inv[r.id]=r.secret?[2]:[3,0,0,2,0,1]; }   // 薔薇
   S.roseTeaRecipe=true; S.baraSeen=true; S.rgNoticed=true;
-  S.objs.bt_ume=3; S.objs.bt_grape=3; S.objs.bt_sugi=3; S.axe=true; S.fuyo=30; S.sumi=30; S.horoSeen=true;   // 大木: 苗木・斧・腐葉土・梅の炭
+  S.objs.bt_ume=3; S.objs.bt_grape=3; S.objs.bt_sugi=3; S.axe=true; S.fuyo=30; S.sumi=30; S.horoSeen=true; for(const id of Object.keys(BTS)) for(const q of [0,3,5]) btBookMark(id,q);   // 図鑑の大木も全部   // 大木: 苗木・斧・腐葉土・梅の炭
   // 薔薇ガチャ: コイン・権利・花弁・GHR をすべて
   S.roseCoin=100000000; S.megaSet=true; S.layoutOwned=true; S.gachaPass.r1111=true; S.gachaPass.r11111=true; S.gachaPass.r111111=true; S.gachaPass.r1111111=true;
   for(const id in RG) S.got[id]=1;
@@ -12756,7 +12772,7 @@ function debugStart2(){
   save();
 }
 function alive(){ if(kitN("fridge")>0){ fridgeKeep(); save(); } }
-return { peek:()=>{ consumeInbox(); tick(); return tutState(); }, roseName:roseNameHTML, roseNamePlate, roseRowStyle, roseRowCls, nameDeco, drunkNow, horoSeen:()=>!!S.horoSeen, tqBoost:()=>({ rose:(1+rgGurPct("sh")/100)*otsuMul("Z2"), sc:1+rgGurPct("pen")/100, min:1+rgGurPct("dial")/100 }), rose:(lv,n)=>{ roseGive(lv,n); S.roseIn=(S.roseIn||0)+Math.floor(n); save(); }, screwMul, charmLives, applyTheme, alive, themeScrewArt, enter, leave, onKey, summary, dailyGive, dailyNeji, dailySapLeft, debugUnlock, debugStart2, tutState, tutGive, tutGrow, tutSeed, tutSandbox, refreshRank, openModal, ownerId, useName, baraOn, baraLeft, baraSeen, debugStart3, debugStart4 };
+return { peek:()=>{ consumeInbox(); tick(); return tutState(); }, roseName:roseNameHTML, roseNamePlate, roseRowStyle, roseRowCls, nameDeco, drunkNow, horoSeen:()=>!!S.horoSeen, tqBoost:()=>({ rose:(1+rgGurPct("sh")/100)*otsuMul("Z2"), sc:1+rgGurPct("pen")/100, min:1+rgGurPct("dial")/100 }), rose:(lv,n)=>{ roseGive(lv,n); S.roseIn=(S.roseIn||0)+Math.floor(n); save(); }, screwMul, charmLives, applyTheme, alive, themeScrewArt, enter, leave, onKey, summary, dailyGive, dailyNeji, dailySapLeft, dailyOpen, btOpen, debugUnlock, debugStart2, tutState, tutGive, tutGrow, tutSeed, tutSandbox, refreshRank, openModal, ownerId, useName, baraOn, baraLeft, baraSeen, debugStart3, debugStart4 };
 })();
 
 function openGarden(){ show("garden"); Garden.enter(); }
