@@ -1258,6 +1258,10 @@ body.garden.barag{background:radial-gradient(ellipse at 50% 120%, rgba(200,30,62
 #screen-garden .planter{position:relative}
 #screen-garden .plot.big{background:radial-gradient(ellipse at 50% 60%, rgba(255,255,255,.06), transparent 70%), repeating-linear-gradient(180deg, rgba(0,0,0,.16) 0 3px, transparent 3px 11px), linear-gradient(180deg,#5f402a,#46301e); box-shadow:inset 0 -4px 0 rgba(0,0,0,.18), 0 2px 0 rgba(0,0,0,.22), inset 0 0 0 2px rgba(255,220,150,.3)}   /* 大木の区画 */
 #screen-garden .btov{position:absolute; pointer-events:none; z-index:1; overflow:visible}
+#screen-garden .btmeter{height:5px; background:rgba(40,25,10,.35); border-radius:3px; z-index:2; overflow:hidden; box-shadow:0 0 0 1px rgba(255,255,255,.35)}
+#screen-garden .btmeter i{display:block; height:100%; background:#9bd96a; border-radius:3px; min-width:2px}
+#screen-garden .btmeter.dry i{background:#c8b48a}
+#screen-garden .btmeter.ripe i{background:#f4c542}
 @keyframes btsw{0%,100%{transform:rotate(-1.2deg)} 50%{transform:rotate(1.2deg)}}
 @keyframes bttw{0%,100%{opacity:.15; transform:scale(.5)} 50%{opacity:1; transform:scale(1)}}
 #screen-garden .btov .sway{animation:btsw 5s ease-in-out infinite; transform-box:fill-box; transform-origin:50% 100%}
@@ -1774,7 +1778,12 @@ html.mobile #g-cookShow .csnm{font-size:1.3rem}
 /* ---- 庭: 図鑑の品質切り替え ---- */
 #screen-garden .booklist .rowi{grid-template-columns:2rem 1fr auto}
 #screen-garden .qmarks{display:flex; gap:.15rem; align-items:center}   /* 印の高さをそろえる */
-#screen-garden .qmarks .qm{line-height:1}
+#screen-garden .qmarks .qm{line-height:1; font-size:.92rem !important; width:1em; height:1em; display:inline-flex; margin:0 !important; position:static !important; top:auto !important; vertical-align:middle}   /* 印はどれも同じ大きさの箱にそろえる */
+#screen-garden .qmarks .qm .qmi{width:100%; height:100%; display:block; fill:currentColor}
+#screen-garden .qmarks .qm.st.on .qmi{filter:drop-shadow(0 0 2px rgba(255,190,0,.9))}
+#screen-garden .qmarks .qm.mut.on .qmi{filter:drop-shadow(0 0 2px rgba(178,124,232,.8))}
+#screen-garden .qmarks .qm.sup.on{color:#f4c542; background:none; animation:none}
+#screen-garden .qmarks .qm.sup.on .qmi{fill:url(#qmRain); filter:drop-shadow(0 0 2px rgba(255,200,120,.8))}
 #screen-garden .qm{font-size:.7rem; color:#d5c8ae}
 #screen-garden .qm.on{color:#e0a800}
 #screen-garden .qm.dot{font-size:.66rem; margin-right:.12em; position:relative; top:-.12em}   /* ふつうの印 */
@@ -5931,12 +5940,18 @@ const BTF_ART = (()=>{
   const leaf = (a,b,g) => `<svg viewBox="0 0 32 32">${glow(g)}<path d="M6 27L26 5" stroke="#7a5232" stroke-width="1.8"/>${[0,1,2,3,4,5].map(i=>{ const x=8+i*3.2, y=24.5-i*3.6; return `<path d="M${x} ${y} l-5 -2 M${x} ${y} l2 5 M${x} ${y} l-4 2 M${x} ${y} l1 -5" stroke="${i%2?a:b}" stroke-width="1.6" stroke-linecap="round"/>`; }).join("")}</svg>`;
   const wood = (bark,core,ring,g) => `<svg viewBox="0 0 32 32">${glow(g)}<path d="M5 11h18v12H5z" fill="${bark}"/><path d="M5 13h18M5 17h18M5 21h18" stroke="rgba(0,0,0,.18)" stroke-width="1"/><ellipse cx="5" cy="17" rx="3" ry="6" fill="${bark}"/><ellipse cx="23" cy="17" rx="4" ry="6" fill="${core}"/><ellipse cx="23" cy="17" rx="2.6" ry="4" fill="none" stroke="${ring}" stroke-width=".8"/><ellipse cx="23" cy="17" rx="1.2" ry="2" fill="none" stroke="${ring}" stroke-width=".8"/><path d="M14 11c1-3 4-4 6-3" stroke="#6aa83a" stroke-width="1.4" fill="none"/></svg>`;
   return {
-    ume:fruit("#cfe070","#9ab236",0), ume2:fruit("#ff8a5a","#d04a3a",1),
-    vgrape:grape("#8a4ab0","#3a1450",0), vgrape2:grape(null,null,2,[["#ff8aa8","#c8204a"],["#ffd27a","#d0801a"],["#9af08a","#2a9a3a"],["#8ac8ff","#2a5ad0"],["#d6a8ff","#7a3ad0"]]),
-    sugileaf:leaf("#2c6640","#4f9a58",0), sugileaf2:leaf("#c99a28","#ffe07a",2),
-    umewood:wood("#6a4a36","#e8c8a8","#b08a68",0), umewood2:wood("#7a2a30","#ffd0c0","#c86a5a",1),
-    grapewood:wood("#7a5a3a","#e2cfa8","#a88a5a",0), grapewood2:wood("#3e6a48","#d8f0d0","#6aa878",1),
-    sugiwood:wood("#a0552f","#f0d0a0","#c88a5a",0), sugiwood2:wood("#b08a2a","#fff0b8","#d8b040",2),
+    ume:fruit("#cfe070","#9ab236",0),
+    ume2:`<svg viewBox="0 0 32 32">${glow(1)}<path d="M15 9c-1-3 1-6 4-6" stroke="#5a7a2a" stroke-width="1.5" fill="none"/>${[[5,6],[9,3],[13,6],[11,10],[7,10]].map(([x,y])=>`<circle cx="${x}" cy="${y}" r="2" fill="#ff9ab8"/>`).join("")}<circle cx="9" cy="7" r="1.3" fill="#ffe27a"/><defs><radialGradient id="u2g" cx=".35" cy=".35" r=".7"><stop offset="0" stop-color="#ffe680"/><stop offset=".55" stop-color="#ffb040"/><stop offset="1" stop-color="#e0483a"/></radialGradient></defs><circle cx="12" cy="20" r="7" fill="url(#u2g)"/><circle cx="21" cy="19" r="6.4" fill="url(#u2g)"/><path d="M21 13v-2" stroke="#6a4a2a" stroke-width="1.2"/><path d="M12 13.5q1.2 6 0 13M21 13q1 5.5 0 12" stroke="#d0602a" stroke-width=".7" fill="none" opacity=".6"/><circle cx="9.5" cy="17" r="1.6" fill="#fff" opacity=".7"/><circle cx="19" cy="16.5" r="1.3" fill="#fff" opacity=".7"/><path d="M24 26q1.2 2 0 3.2q-1.2-1.2 0-3.2z" fill="#bfe8ff"/></svg>`,
+    vgrape2:`<svg viewBox="0 0 32 32">${glow(2)}<path d="M16 2v5" stroke="#c8962a" stroke-width="1.8"/><path d="M16 5c3-3 8-2 9 1-4 1-7 0-9-1z" fill="#5fc08a"/><path d="M16 5c-3-2-7-1-8 1 3 1 6 0 8-1z" fill="#3a9a6a"/>${[[10,10,0],[16,9,1],[22,10,2],[13,15,3],[19,15,4],[10,20,1],[16,20,2],[22,20,0],[13,25,4],[19,25,3],[16,29,1]].map(([x,y,k])=>{ const c=[["#ff8aa8","#c8204a"],["#ffd27a","#d0801a"],["#9af08a","#2a9a3a"],["#8ac8ff","#2a5ad0"],["#d6a8ff","#7a3ad0"]][k]; return `<path d="M${x} ${y-3.4}L${x+3} ${y-1.2}L${x+2.2} ${y+2.6}L${x-2.2} ${y+2.6}L${x-3} ${y-1.2}Z" fill="${c[1]}"/><path d="M${x} ${y-3.4}L${x+3} ${y-1.2}L${x} ${y+.3}L${x-3} ${y-1.2}Z" fill="${c[0]}"/><circle cx="${x-1}" cy="${y-1.7}" r=".6" fill="#fff"/>`; }).join("")}</svg>`,
+    sugileaf2:`<svg viewBox="0 0 32 32">${glow(2)}<path d="M7 28C12 20 15 12 24 4" stroke="#8a6a3a" stroke-width="1.6" fill="none"/>${[[10,22,-40],[13,18,-30],[16,14,-25],[19,10,-20],[22,7,-15],[12,24,40],[15,20,45],[18,16,50],[21,12,55]].map(([x,y,r],i)=>`<ellipse cx="${x}" cy="${y}" rx="4.2" ry="1.9" fill="${i%2?"#e8f4ff":"#ffd84a"}" stroke="${i%2?"#9ab8d0":"#c8962a"}" stroke-width=".5" transform="rotate(${r} ${x} ${y})"/>`).join("")}<path d="M18 17l2-1" stroke="#d8402a" stroke-width="1.6"/><path d="M19 17l3 1-1.6 2.4 3 1-1.6 2.6 3 1" stroke="#fff" stroke-width="2.6" fill="none" stroke-linejoin="bevel"/><path d="M19 17l3 1-1.6 2.4 3 1-1.6 2.6 3 1" stroke="#d8d0c0" stroke-width=".5" fill="none"/></svg>`,
+    umewood2:`<svg viewBox="0 0 32 32">${glow(1)}<path d="M4 22c3-6 6-8 10-9 4-1 8-4 10-8l3 2c-2 5-6 8-10 9-4 1-6 3-8 8z" fill="#5a2a2a"/><path d="M8 21c2-3 4-5 7-6M17 12c3-1 5-3 7-6" stroke="#8a4a4a" stroke-width=".8" fill="none"/><ellipse cx="25.5" cy="6" rx="2.2" ry="2.6" fill="#ffd0c0" transform="rotate(35 25.5 6)"/><ellipse cx="25.5" cy="6" rx="1.2" ry="1.5" fill="none" stroke="#c86a5a" stroke-width=".5" transform="rotate(35 25.5 6)"/>${[[13,10],[19,20],[8,15]].map(([x,y])=>[0,72,144,216,288].map(d=>`<circle cx="${(x+Math.cos(d*Math.PI/180)*1.7).toFixed(1)}" cy="${(y+Math.sin(d*Math.PI/180)*1.7).toFixed(1)}" r="1.5" fill="#ff7a9a"/>`).join("")+`<circle cx="${x}" cy="${y}" r=".9" fill="#ffe27a"/>`).join("")}<path d="M11 10q2-1 2 0M17 20q2-1 2 0" stroke="#5a2a2a" stroke-width=".8" fill="none"/></svg>`,
+    grapewood2:`<svg viewBox="0 0 32 32">${glow(1)}<path d="M13 29c-2-4 2-6 0-10s3-6 1-10 2-6 5-5c-2 2-1 4 0 6 2 4-2 6 0 10s-2 6 1 9z" fill="#4a6a4a"/><path d="M14 27c-1-3 2-5 0-8M15 16c-1-2 1-4 0-6" stroke="#8ac898" stroke-width=".8" fill="none"/><path d="M19 4c4-1 7 1 7 4" stroke="#6aa878" stroke-width="1.2" fill="none"/><path d="M26 8q2 1 1 3q-2 0-1-3" stroke="#6aa878" stroke-width=".9" fill="none"/>${[[21,14],[24,14],[22.5,17],[25.5,17],[24,20]].map(([x,y])=>`<circle cx="${x}" cy="${y}" r="1.6" fill="#9ff0b0" stroke="#3a9a5a" stroke-width=".5"/>`).join("")}<path d="M22 11l1 2" stroke="#4a6a4a" stroke-width=".8"/><ellipse cx="12" cy="29" rx="7" ry="1.6" fill="#2a4a2a" opacity=".35"/></svg>`,
+    sugiwood2:`<svg viewBox="0 0 32 32">${glow(2)}<path d="M3 13l6-4h20l-6 4z" fill="#ffe8a8"/><path d="M23 13l6-4v12l-6 4z" fill="#d8a83a"/><rect x="3" y="13" width="20" height="12" fill="#f0c860"/>${[16,19,22].map(y=>`<path d="M3 ${y}q10 -1.5 20 0" stroke="#c8962a" stroke-width=".7" fill="none"/>`).join("")}<path d="M11 13v12M15 13v12" stroke="#f2e8c8" stroke-width="3"/><path d="M11 13v12M15 13v12" stroke="#c8a860" stroke-width=".6" stroke-dasharray="1.5 1.2"/><path d="M12 25l2 2.4-1.6 1 2 2.4" stroke="#fff" stroke-width="2.2" fill="none"/><path d="M12 25l2 2.4-1.6 1 2 2.4" stroke="#d8d0c0" stroke-width=".4" fill="none"/></svg>`,
+    vgrape:grape("#8a4ab0","#3a1450",0),
+    sugileaf:leaf("#2c6640","#4f9a58",0),
+    umewood:wood("#6a4a36","#e8c8a8","#b08a68",0),
+    grapewood:wood("#7a5a3a","#e2cfa8","#a88a5a",0),
+    sugiwood:wood("#a0552f","#f0d0a0","#c88a5a",0),
     chip:`<svg viewBox="0 0 32 32"><path d="M5 24l4-6 5 2-3 6z" fill="#b8865a"/><path d="M12 25l5-8 5 3-4 7z" fill="#a0703e"/><path d="M19 24l5-6 4 3-4 5z" fill="#c89a6a"/><path d="M9 17l4-5 4 3-4 4z" fill="#9a6a3a"/><path d="M16 14c1-4 3-6 2-9M20 15c2-3 2-6 4-8" stroke="#c8c8c8" stroke-width="1.4" fill="none" opacity=".7"/></svg>`,
     taru:`<svg viewBox="0 0 32 32"><path d="M8 5h16c2 4 2 18 0 22H8C6 23 6 9 8 5z" fill="#c07a46"/><path d="M8 5h16c2 4 2 18 0 22" fill="none" stroke="#8a4a22" stroke-width="1"/><path d="M7 10h18M7 22h18" stroke="#4a4a50" stroke-width="2.2"/><path d="M12 5c-1 7-1 15 0 22M20 5c1 7 1 15 0 22" stroke="#9a5a2e" stroke-width="1"/><circle cx="16" cy="16" r="2.4" fill="#e8d6a8" stroke="#8a6a3a"/></svg>`,
     koji:`<svg viewBox="0 0 32 32"><path d="M4 18h24c0 6-5 10-12 10S4 24 4 18z" fill="#8a6a4a"/><ellipse cx="16" cy="18" rx="12" ry="4" fill="#fbf8ee"/>${[[10,16],[14,15],[18,16],[22,17],[12,19],[17,19],[21,19]].map(([x,y])=>`<ellipse cx="${x}" cy="${y}" rx="2" ry="1.2" fill="#fff" stroke="#e8e0c8" stroke-width=".5"/><circle cx="${x}" cy="${y-1}" r="1.4" fill="#f4f0d0" opacity=".8"/>`).join("")}</svg>`,
@@ -6631,10 +6646,30 @@ function btRender(f){
     const svg=document.createElementNS("http://www.w3.org/2000/svg","svg");
     svg.setAttribute("class","btov"); svg.setAttribute("width",x1-x0+pad*2); svg.setAttribute("height",H+pad*2);
     svg.style.left=(x0-pad)+"px"; svg.style.top=(y0-pad)+"px";
-    const fw=x1-x0-4, fh=H-4, fx=pad+2, fy=pad+2;   // 9マスを使っていると分かる木の囲い(となりの区画の囲いと重ならない内側)
-    const fence=`<g class="btfence"><rect x="${fx}" y="${fy}" width="${fw}" height="${fh}" rx="16" fill="rgba(110,70,30,.10)" stroke="#6b4423" stroke-width="3"/><rect x="${fx}" y="${fy}" width="${fw}" height="${fh}" rx="16" fill="none" stroke="#a8743f" stroke-width="7" stroke-dasharray="4 22" stroke-linecap="round"/></g>`;
+    // 9マスを囲う柵: 段ごとに右へずれる区画の並びに沿って、階段の形で囲う(となりの区画に入らない)
+    const X=v=>v-br.left-x0+pad, Y=v=>v-br.top-y0+pad, ins=3;
+    const row=r=>({ l:X(rs[r*3].left)+ins, r:X(rs[r*3+2].right)-ins, t:Y(rs[r*3].top), b:Y(rs[r*3].bottom) });
+    const A=row(0), B=row(1), C=row(2), m1=(A.b+B.t)/2, m2=(B.b+C.t)/2;
+    const pts=[[A.l,A.t+ins],[A.r,A.t+ins],[A.r,m1],[B.r,m1],[B.r,m2],[C.r,m2],[C.r,C.b-ins],[C.l,C.b-ins],[C.l,m2],[B.l,m2],[B.l,m1],[A.l,m1]];
+    const fp="M"+pts.map(([a,b])=>a.toFixed(1)+" "+b.toFixed(1)).join(" L")+"Z";
+    const fence=`<g class="btfence"><path d="${fp}" fill="rgba(110,70,30,.10)" stroke="#6b4423" stroke-width="3" stroke-linejoin="round"/><path d="${fp}" fill="none" stroke="#a8743f" stroke-width="7" stroke-dasharray="4 22" stroke-linecap="round" stroke-linejoin="round"/></g>`;
     svg.innerHTML=fence+`<g class="sway">${btArt(BTS[t.id].kind, btStage(t), t.q===5?2:t.q===3?1:0, W, H, cx, base)}</g>`;
     pl.appendChild(svg);
+    const r7=rs[7], mw=r7.width*1.8, mt=document.createElement("div");   // 育ち具合のメーター(いちばん下の段のまん中)
+    mt.className="btov btmeter"; mt.dataset.gi=gi; mt.innerHTML="<i></i>";
+    mt.style.left=(r7.left+r7.width/2-mw/2-br.left)+"px"; mt.style.top=(r7.bottom-br.top-9)+"px"; mt.style.width=mw+"px";
+    pl.appendChild(mt);
+  }
+}
+/* 大木の育ち具合のメーター(毎回の描画で幅だけ変える) */
+function btMeters(f){
+  const pl=$("g-planter"); if(!pl) return;
+  for(const el of pl.querySelectorAll(".btmeter")){
+    const t=f.bt && f.bt[el.dataset.gi]; if(!t) continue;
+    const r = !t.rip ? t.g/btNeed(t) : t.ready ? 1 : (t.fr||0)/BT_YEAR;
+    el.firstChild.style.width=(Math.min(1,Math.max(0,r))*100).toFixed(3)+"%";
+    el.classList.toggle("ripe",!!t.ready);
+    el.classList.toggle("dry",!BT_GROUPS[el.dataset.gi].some(k=>isWet(S.cur,k,Date.now())));
   }
 }
 /* 大木の絵(区画の上に重ねる SVG) */
@@ -7974,7 +8009,7 @@ function renderField(){
       cropEl.textContent=""; cropEl.className="crop";
     }
   }
-  btRender(f);
+  btRender(f); btMeters(f);
 }
 function renderInfo(){
   if(!selKey) return;
@@ -11049,7 +11084,38 @@ const BTD_ART = (()=>{
   const kame = (body,rope,g) => W(g,`<path d="M10 6h12v3c4 2 6 6 6 11 0 5-5 8-12 8S4 25 4 20c0-5 2-9 6-11z" fill="${body}"/><path d="M6 15c5 2 15 2 20 0" stroke="${rope}" stroke-width="2.4" fill="none"/><path d="M16 17v6M14 23l2 3 2-3" stroke="${rope}" stroke-width="1.4" fill="none"/><rect x="9" y="4" width="14" height="3" rx="1" fill="#d8c8a8"/><path d="M8 12c-1 4-1 9 1 12" stroke="#fff" stroke-width="1" opacity=".4" fill="none"/>`);
   const plate = (g,inner) => W(g,`<ellipse cx="16" cy="23" rx="13" ry="5" fill="#f2ede4"/><ellipse cx="16" cy="22" rx="10" ry="3.4" fill="#e6dfd2"/>${inner}`);
   const smoke = `<path d="M10 9c-1.4-1.6 1.4-2.4 0-4.4M16 8c-1.4-1.6 1.4-2.4 0-4.4M22 9c-1.4-1.6 1.4-2.4 0-4.4" stroke="#c8c8c8" stroke-width="1.1" fill="none" stroke-linecap="round" opacity=".8"/>`;
-  return {
+
+  /* 変異・超変異は、ふつうの色違いではなく別の絵 */
+  const V = {
+    umeshu:[
+      W(1,`<rect x="13" y="1.5" width="6" height="3" rx="1" fill="#b07a4a"/><path d="M13 4h6v4c4 2 6 5 6 10v8c0 2-2 3-4 3H11c-2 0-4-1-4-3v-8c0-5 2-8 6-10z" fill="#fff2f4" opacity=".9"/><path d="M7.4 15h17.2v11c0 1.6-1.6 2.6-3.6 2.6H11c-2 0-3.6-1-3.6-2.6z" fill="#c8203e" opacity=".88"/><rect x="10" y="17.5" width="12" height="7.5" rx="1" fill="#fff8f2"/>${[0,72,144,216,288].map(d=>`<circle cx="${(16+Math.cos(d*Math.PI/180)*1.8).toFixed(1)}" cy="${(21.2+Math.sin(d*Math.PI/180)*1.8).toFixed(1)}" r="1.4" fill="#ff7a9a"/>`).join("")}<circle cx="16" cy="21.2" r=".9" fill="#ffe27a"/><path d="M9.5 9c-1 3-1 6-1 9" stroke="#fff" stroke-width="1" opacity=".7"/>`),
+      W(2,`<path d="M7 9h18l-2 17c-.2 1.6-1.4 2.6-3 2.6h-8c-1.6 0-2.8-1-3-2.6z" fill="#f2f8ff" opacity=".8"/><path d="M8 15h16l-1.2 10.6c-.2 1.3-1.2 2-2.6 2h-8.4c-1.4 0-2.4-.7-2.6-2z" fill="#f0a830" opacity=".88"/><rect x="9.5" y="10.5" width="6.5" height="6.5" rx="1.2" fill="#eaf8ff" opacity=".9" transform="rotate(-14 12.7 13.7)"/><circle cx="19.5" cy="21.5" r="3.4" fill="#ffd84a"/><circle cx="18.5" cy="20.4" r="1" fill="#fff" opacity=".8"/>${[[11,20],[14,24],[22,17],[17,26],[12,16],[21,24]].map(([x,y],i)=>`<rect x="${x}" y="${y}" width="1.6" height="1.2" fill="#fff0a0" transform="rotate(${i*37} ${x} ${y})"/>`).join("")}`)],
+    wine:[
+      W(1,`<rect x="14" y="1.5" width="4" height="3" rx="1" fill="#2a6a4a"/><path d="M14 4h4v6c5 2 9 6 9 11 0 5-5 8-11 8S5 26 5 21c0-5 4-9 9-11z" fill="#f2fbff" opacity=".85"/><path d="M5.6 19h20.8c.4.6.6 1.3.6 2 0 5-5 8-11 8S5 26 5 21c0-.7.2-1.4.6-2z" fill="#2fa86a" opacity=".85"/><path d="M8 17c1-2 3-4 5-5" stroke="#fff" stroke-width="1" opacity=".7" fill="none"/>${[[24,26],[27,26],[25.5,28.6]].map(([x,y])=>`<circle cx="${x}" cy="${y}" r="1.6" fill="#9ff0b0" stroke="#2a8a4a" stroke-width=".5"/>`).join("")}`),
+      W(2,`<path d="M8 3h16c0 8-3.6 12-8 12S8 11 8 3z" fill="#f8faff" opacity=".85"/><path d="M8.3 6h15.4c-.2 1.4-.5 2.7-1 3.8H9.3c-.5-1.1-.8-2.4-1-3.8z" fill="#ff7aa8"/><path d="M9.3 9.8h13.4c-.5 1.2-1.1 2.2-1.9 3H11.2c-.8-.8-1.4-1.8-1.9-3z" fill="#ffd25a"/><path d="M11.2 12.8h9.6C19.6 14.2 17.9 15 16 15s-3.6-.8-4.8-2.2z" fill="#6ad0ff"/><path d="M16 15v9" stroke="#e8c24a" stroke-width="1.8"/><ellipse cx="16" cy="26" rx="6" ry="1.8" fill="#e8c24a"/>${[[8,3,"#ff8aa8"],[12,3,"#8ac8ff"],[16,3,"#9af08a"],[20,3,"#d6a8ff"],[24,3,"#ffd27a"]].map(([x,y,c])=>`<path d="M${x} ${y-1.6}l1.4 1.6-1.4 1.6-1.4-1.6z" fill="${c}" stroke="#fff" stroke-width=".4"/>`).join("")}`)],
+    sake:[
+      W(1,`<path d="M9 4a5 5 0 1 0 5 7 4 4 0 1 1-5-7z" fill="#fff2a0"/><circle cx="20" cy="5" r=".8" fill="#fff6c0"/><circle cx="25" cy="9" r=".6" fill="#fff6c0"/><path d="M26 25c-1-6 0-10 2-14M27 25c0-5 1-8 3-10" stroke="#c8b070" stroke-width=".8" fill="none"/><path d="M11 22h10l-1.2 3.4h-7.6z" fill="#a8181e"/><ellipse cx="16" cy="20" rx="12" ry="4" fill="#c8202a"/><ellipse cx="16" cy="19.4" rx="10.4" ry="2.9" fill="#e6eef6"/><ellipse cx="18.5" cy="19.4" rx="2.6" ry="1" fill="#fff4a8"/><path d="M8 19.4q8 2 16 0" stroke="#fff" stroke-width=".5" fill="none" opacity=".6"/>`),
+      W(2,`<path d="M3 26h26l-2 4H5z" fill="#e8d4a0"/><path d="M3 26h26" stroke="#c8a860" stroke-width="1"/>${[10,22].map(x=>`<path d="M${x-1} 6h2v3c2 1 3.2 3 3.2 6v8.4c0 1.8-1.2 2.6-3 2.6h-2.4c-1.8 0-3-.8-3-2.6V15c0-3 1.2-5 3.2-6z" fill="#fdfbf6" stroke="#d8d0c0" stroke-width=".5"/><path d="M${x-2.2} 3.6l2.2-1.4 2.2 1.4-2.2 2.6z" fill="#e8c24a"/><path d="M${x-2.4} 6.5l4.8 0" stroke="#d8402a" stroke-width="1.2"/><path d="M${x-3} 16h6" stroke="#d8402a" stroke-width="1"/><path d="M${x-3} 17.4h6" stroke="#fff" stroke-width="1"/>`).join("")}<path d="M16 9l1.2 2.6 2.8.4-2 2 .5 2.8-2.5-1.3-2.5 1.3.5-2.8-2-2 2.8-.4z" fill="#ffe27a" opacity=".85"/>`)],
+    koshu:[
+      W(1,`<path d="M9 4.5h14v4H9z" fill="#f2e6c8"/><path d="M9 7h14" stroke="#8a5a3a" stroke-width="1.2"/><path d="M10 8.5h12v1.5c4 2 6 6 6 10 0 5-5 8-12 8S4 25 4 20c0-4 2-8 6-10z" fill="#7a4a2e"/>${[[9,15],[22,14],[12,25],[24,22],[7,21]].map(([x,y])=>`<circle cx="${x}" cy="${y}" r=".8" fill="#5a3420"/>`).join("")}<rect x="11.5" y="15" width="9" height="9" fill="#f2e6c8"/><text x="16" y="22.4" font-size="7.4" text-anchor="middle" fill="#3a2010" font-family="serif" font-weight="bold">百</text><path d="M24 9l5 5M26 9l3 3M24 11l3 3M24 9v5M24 9h5" stroke="#e8e8e8" stroke-width=".4" fill="none" opacity=".9"/>`),
+      W(2,`<defs><linearGradient id="kshp" x1="0" x2="1" y1="0" y2="1"><stop offset="0" stop-color="#fff4fa"/><stop offset=".45" stop-color="#d8f4ff"/><stop offset="1" stop-color="#f0d8ff"/></linearGradient></defs><path d="M10 6h12v3c4 2 6 6 6 11 0 5-5 8-12 8S4 25 4 20c0-5 2-9 6-11z" fill="url(#kshp)" stroke="#b8a0d0" stroke-width=".5"/>${[[8,18],[13,18],[18,18],[23,18],[10.5,23],[15.5,23],[20.5,23]].map(([x,y])=>`<path d="M${x-3} ${y}a3 3 0 0 1 6 0M${x-1.8} ${y}a1.8 1.8 0 0 1 3.6 0" stroke="#3aa0b8" stroke-width=".7" fill="none"/>`).join("")}<path d="M9 4h14v3H9z" fill="#c8202a"/><path d="M9 7h14" stroke="#e8c24a" stroke-width="1"/><circle cx="16" cy="3" r="2" fill="#fbf8ff" stroke="#c8b8e0" stroke-width=".5"/><circle cx="15.4" cy="2.4" r=".6" fill="#fff"/>`)],
+    smokedegg:[
+      plate(1,`<path d="M9 12c-2-2 1-3-1-5M13 10c-2-2 1-3-1-5" stroke="#9a7ab8" stroke-width="1.1" fill="none" stroke-linecap="round" opacity=".85"/><circle cx="16" cy="17" r="7" fill="#3a3448"/><circle cx="13.5" cy="14.5" r="2" fill="#6a6480" opacity=".8"/><path d="M19 11q2-3 5-3" stroke="#a8784a" stroke-width="1.4" fill="none"/><path d="M24 8l1.6-1.6M24 8l2 .4M24 8l.4-2.2" stroke="#ffb030" stroke-width="1" stroke-linecap="round"/><circle cx="24" cy="8" r="1" fill="#ffe27a"/><path d="M11 18h10" stroke="#8a7ab0" stroke-width="1" opacity=".7"/>`),
+      plate(2,`${[0,1,2,3,4,5,6].map(i=>`<path d="M${6+i*3.3} 22q-1-4 1-8q1 3 2 0q1 4-1 8z" fill="${["#ff5a2a","#ffa030","#ffd84a"][i%3]}"/>`).join("")}<path d="M7 22c3 2 15 2 18 0" stroke="#c8a060" stroke-width="2" fill="none"/><path d="M8 21l3-2M14 22l2-2M20 22l3-2" stroke="#a87a3a" stroke-width=".8"/><defs><radialGradient id="phx" cx=".4" cy=".35" r=".7"><stop offset="0" stop-color="#fff4a0"/><stop offset=".6" stop-color="#ffa030"/><stop offset="1" stop-color="#e83a2a"/></radialGradient></defs><ellipse cx="16" cy="15" rx="5.4" ry="7" fill="url(#phx)"/><path d="M14 10q2 2 0 4q2 1 0 3" stroke="#fff4c0" stroke-width=".8" fill="none" opacity=".8"/>`)],
+    smokedcheese:[
+      plate(1,`<path d="M5 22V13c0-5 5-8 11-8s11 3 11 8v9" fill="#6a6a72"/><path d="M8 13l1 2 1-2M14 9l1 2 1-2M21 11l1 2 1-2" stroke="#9a9aa4" stroke-width=".8" fill="#9a9aa4"/><path d="M9 21v-5h14v5z" fill="#4a3424"/><ellipse cx="16" cy="16" rx="7" ry="2.2" fill="#5a3e2a"/><path d="M16 16l7 0 0 5-7 0z" fill="#f2d890"/><ellipse cx="16" cy="16" rx="7" ry="2.2" fill="none" stroke="#3a2818" stroke-width=".5"/><circle cx="19" cy="18" r=".8" fill="#d8b860"/><circle cx="21" cy="19.5" r=".6" fill="#d8b860"/>`),
+      plate(2,`<circle cx="8" cy="8" r=".8" fill="#fff6c0"/><circle cx="25" cy="6" r="1" fill="#fff6c0"/><path d="M27 12l.6 1.4 1.4.6-1.4.6-.6 1.4-.6-1.4-1.4-.6 1.4-.6z" fill="#fff6c0"/><path d="M19 6a9 9 0 1 0 0 16 7 7 0 1 1 0-16z" fill="#fff2b0" stroke="#e8c860" stroke-width=".6"/><circle cx="12" cy="11" r="1.4" fill="#f0d880"/><circle cx="10.6" cy="16" r="1" fill="#f0d880"/><circle cx="13.6" cy="19" r="1.6" fill="#f0d880"/>`)],
+    smokedbacon:[
+      plate(1,`<path d="M6 17h20M6 20h20M8 14v9M13 14v9M18 14v9M23 14v9" stroke="#4a4a50" stroke-width="1"/><rect x="8" y="10" width="16" height="8" rx="2" fill="#c84a3a"/><path d="M8 12.6h16M8 15.4h16" stroke="#f4d8c8" stroke-width="1.4"/><path d="M10 10v8M15 10v8M20 10v8" stroke="#5a2a20" stroke-width=".9" opacity=".7"/><circle cx="9" cy="24" r="1" fill="#ff7a2a"/><circle cx="16" cy="25" r="1.1" fill="#ffb030"/><circle cx="23" cy="24" r="1" fill="#ff5a2a"/>`),
+      plate(2,`<path d="M4 20c4-8 9 2 13-6s8-3 11-10" stroke="#a8301e" stroke-width="5" fill="none" stroke-linecap="round"/><path d="M4 20c4-8 9 2 13-6s8-3 11-10" stroke="#f4c8b0" stroke-width="1.4" fill="none" stroke-dasharray="3 2"/>${[[7,15],[11,16],[16,11],[21,9],[25,5]].map(([x,y])=>`<path d="M${x-1.6} ${y}l1.6-3.2 1.6 3.2z" fill="#ffc83a"/>`).join("")}<path d="M27 4l3-1-1 3z" fill="#ffc83a"/>`)],
+    umeonigiri:[
+      plate(1,`<path d="M10 8c3 0 7 8 7 11 0 2-2 2.6-7 2.6S3 21 3 19c0-3 4-11 7-11z" fill="#ffd0dc"/><path d="M22 8c3 0 7 8 7 11 0 2-2 2.6-7 2.6S15 21 15 19c0-3 4-11 7-11z" fill="#fbfaf5"/><path d="M5 17.5h10v3.6c-1.4.5-3 .6-5 .6s-3.6-.1-5-.6zM17 17.5h10v3.6c-1.4.5-3 .6-5 .6s-3.6-.1-5-.6z" fill="#2a3a2a"/><circle cx="22" cy="13" r="2.2" fill="#c81e3a"/><circle cx="10" cy="13" r="1.4" fill="#fff"/>`),
+      plate(2,`${[0,30,60,90,120,150].map(d=>`<path d="M16 15L${(16+Math.cos((d+180)*Math.PI/180)*15).toFixed(1)} ${(15+Math.sin((d+180)*Math.PI/180)*15).toFixed(1)}" stroke="#ffd84a" stroke-width="2.6" opacity=".55"/>`).join("")}<path d="M16 4c5 0 12 11 12 15 0 2.6-4 3.6-12 3.6S4 21.6 4 19c0-4 7-15 12-15z" fill="#fffdf5"/><circle cx="16" cy="14" r="4.4" fill="#e01e2a"/><path d="M7 19h18v3.2c-2 .4-5 .5-9 .5s-7-.1-9-.5z" fill="#2a3a2a"/><path d="M8 19h16" stroke="#e8c24a" stroke-width=".8"/>`)],
+    raisinbread:[
+      plate(1,`<path d="M5 20c0-7 5-12 11-12s11 5 11 12z" fill="#b8763a"/><path d="M16 9v10M16 13l-5-2M16 13l5-2M16 17l-6-2M16 17l6-2" stroke="#f0d8a8" stroke-width="1.2" fill="none" stroke-linecap="round"/><path d="M5 20h22" stroke="#7a4a22" stroke-width="1.2"/>${[[24,10],[26.5,10],[25.2,12.3]].map(([x,y])=>`<circle cx="${x}" cy="${y}" r="1.3" fill="#6a2a6a"/>`).join("")}<path d="M25 8.5l1-2" stroke="#5a7a2a" stroke-width=".8"/>`),
+      plate(2,`<path d="M8 22V14h16v8z" fill="#e8c24a"/><path d="M8 15h16M8 21h16" stroke="#c8202a" stroke-width="1.4"/><path d="M8 18h16" stroke="#fff" stroke-width=".8" stroke-dasharray="2 1.6"/><path d="M7 14c0-6 4-10 9-10s9 4 9 10z" fill="#e8a850"/><path d="M8.6 10q7.4-4 14.8 0" stroke="#fff" stroke-width="1.8" fill="none" opacity=".75" stroke-linecap="round"/>${[[11,9,"#ff8aa8"],[15,7,"#8ac8ff"],[19,8,"#9af08a"],[13,12,"#d6a8ff"],[18,11.5,"#ffd27a"],[22,12,"#ff8aa8"]].map(([x,y,c])=>`<path d="M${x} ${y-1.4}l1.3 1.4-1.3 1.4-1.3-1.4z" fill="${c}" stroke="#fff" stroke-width=".3"/>`).join("")}`)],
+  };
+  const base = {
     umeshu:[jar("#f0c860","#b8c840",0), jar("#ff9a5a","#e8384f",1), jar("#ffd84a","#fff07a",2)],
     wine:[glass("#7a1a3a",0), glass("#3aa86a",1), glass("#ffb84a",2)],
     sake:[tokkuri("#f4f0e6","#2a4a8a",0), tokkuri("#e8eef4","#9aa8c0",1), tokkuri("#fff2b8","#d8a020",2)],
@@ -11060,35 +11126,36 @@ const BTD_ART = (()=>{
     umeonigiri:[0,1,2].map(g=>plate(g,`<path d="M16 7c5 0 10 9 10 13 0 2-3 3-10 3S6 22 6 20c0-4 5-13 10-13z" fill="${g===2?"#fff6d0":"#fbfaf5"}"/><path d="M8 18h16v5c-2 .6-5 1-8 1s-6-.4-8-1z" fill="#2a3a2a"/><circle cx="16" cy="13" r="3" fill="${g===2?"#ffb020":g===1?"#c83a8a":"#c81e3a"}"/>`)),
     raisinbread:[0,1,2].map(g=>plate(g,`<path d="M5 20c0-6 5-10 11-10s11 4 11 10z" fill="${g===2?"#f0c060":g===1?"#d8a8c8":"#d8984a"}"/><path d="M5 20h22" stroke="#a86a2a" stroke-width="1.2"/>${[[10,16],[15,13],[20,15],[13,18],[19,18],[23,18]].map(([x,y])=>`<ellipse cx="${x}" cy="${y}" rx="1.4" ry="1" fill="#4a2a3a"/>`).join("")}`)),
   };
+  return Object.fromEntries(Object.keys(base).map(k=>[k,[base[k][0]].concat(V[k]||base[k].slice(1))]));
 })();
 const BT_DISHES = [
-  { id:"umeshu", name:"梅酒", n3:"紅梅酒", n5:"金梅酒", icon:"🍶", ing:[["ume",3],["sugarcane",1]], eff:"Y1", cost:100000,
+  { id:"umeshu", name:"梅酒", n3:"紅梅酒", n5:"金箔の梅酒", icon:"🍶", ing:[["ume",3],["sugarcane",1]], eff:"Y1", cost:100000,
     l0:"梅の実をさとうきびの甘さで漬けた、琥珀色のお酒。ひと口で、まわりの景色がやさしく揺れはじめる。",
-    l3:"完熟の梅で漬けた紅色の梅酒。揺れがいつもより大きい。", l5:"金色に光る梅酒。世界がまるごと、ゆらゆら踊りだす。" },
+    l3:"完熟の梅で漬けた紅色の梅酒。揺れがいつもより大きい。", l5:"金の梅と金箔を浮かべた、ロックの梅酒。世界がまるごと、ゆらゆら踊りだす。" },
   { id:"wine", name:"ワイン", n3:"翡翠のワイン", n5:"宝石のワイン", icon:"🍷", ing:[["vgrape",4]], eff:"Y2", cost:100000,
     l0:"三十年の古木の葡萄から作った赤ワイン。頬がほんのり赤くなり、言葉が少しかたむく。",
     l3:"翡翠色のワイン。顔がかっと熱くなる。", l5:"色とりどりにきらめくワイン。目に映るものが、すっかり赤く染まる。" },
-  { id:"sake", name:"日本酒", n3:"銀の日本酒", n5:"黄金の日本酒", icon:"🍶", ing:[["koji",3],["taru",1]], eff:"Y3", cost:100000,
+  { id:"sake", name:"日本酒", n3:"月見酒", n5:"御神酒", icon:"🍶", ing:[["koji",3],["taru",1]], eff:"Y3", cost:100000,
     l0:"米麹を杉樽で仕込んだ日本酒。打つ言葉が、ふらふらと千鳥足で歩きだす。",
-    l3:"銀色に澄んだ日本酒。言葉の足どりが、もっとあやしくなる。", l5:"黄金に輝く日本酒。言葉が画面じゅうをふらふら歩きまわる。" },
-  { id:"koshu", name:"古酒", n3:"紫の古酒", n5:"黄金の古酒", icon:"🏺", ing:[["ume",2],["vgrape",2],["koji",2],["taru",1]], eff:"Y4", cost:300000,
+    l3:"盃に月を浮かべて飲む日本酒。言葉の足どりが、もっとあやしくなる。", l5:"御神木の樽で仕込み、神様にお供えした酒。言葉が画面じゅうをふらふら歩きまわる。" },
+  { id:"koshu", name:"古酒", n3:"百年古酒", n5:"竜宮の古酒", icon:"🏺", ing:[["ume",2],["vgrape",2],["koji",2],["taru",1]], eff:"Y4", cost:300000,
     l0:"梅と葡萄と米麹を、杉樽でじっくり寝かせた古酒。ほろ酔い・赤ら顔・千鳥足が、いっぺんにやってくる。",
-    l3:"紫色にとろりとした古酒。何もかもが揺れて、赤くて、ふらふらする。", l5:"黄金の古酒。もう何がなんだか分からない。" },
-  { id:"smokedegg", name:"燻製たまご", n3:"夜霧の燻製たまご", n5:"黄金の燻製たまご", icon:"🥚", ing:[["egg",2],["chip",1]], eff:"Z1", cost:50000,
+    l3:"蜘蛛の巣が張るほど寝かせた古酒。何もかもが揺れて、赤くて、ふらふらする。", l5:"竜宮城から流れ着いたという、真珠色のかめの古酒。もう何がなんだか分からない。" },
+  { id:"smokedegg", name:"燻製たまご", n3:"忍びの煙玉", n5:"不死鳥のたまご", icon:"🥚", ing:[["egg",2],["chip",1]], eff:"Z1", cost:50000,
     l0:"葡萄の古株のチップで燻したたまご。お酒がすすみ、酔いが長く続く。酔っている間はキーがよく届く。",
-    l3:"紫の煙で燻したたまご。酔いがぐんと長くなる。", l5:"黄金色の燻製たまご。酔いもキーも、たっぷり。" },
-  { id:"smokedcheese", name:"燻製チーズ", n3:"夜霧の燻製チーズ", n5:"黄金の燻製チーズ", icon:"🧀", ing:[["cheese",1],["chip",1]], eff:"Z2", cost:50000,
+    l3:"煙ごと閉じこめた、まっ黒なたまご。導火線のような芽が出ている。酔いがぐんと長くなる。", l5:"炎の羽に包まれて燻されたたまご。酔いもキーも、たっぷり。" },
+  { id:"smokedcheese", name:"燻製チーズ", n3:"洞窟熟成チーズ", n5:"月のかけらチーズ", icon:"🧀", ing:[["cheese",1],["chip",1]], eff:"Z2", cost:50000,
     l0:"香ばしく燻したチーズ。お酒がすすみ、酔いが長く続く。酔っている間は TOEIC の薔薇の種がよく届く。",
-    l3:"紫の煙で燻したチーズ。酔いがぐんと長くなる。", l5:"黄金色の燻製チーズ。酔いも薔薇の種も、たっぷり。" },
-  { id:"smokedbacon", name:"燻製ベーコン", n3:"夜霧の燻製ベーコン", n5:"黄金の燻製ベーコン", icon:"🥓", ing:[["bacon",1],["chip",1]], eff:"Z3", cost:50000,
+    l3:"洞窟の奥でじっくり燻し、熟成させたチーズ。酔いがぐんと長くなる。", l5:"三日月の形をした、月から落ちてきたようなチーズ。酔いも薔薇の種も、たっぷり。" },
+  { id:"smokedbacon", name:"燻製ベーコン", n3:"炭火の厚切りベーコン", n5:"竜のしっぽベーコン", icon:"🥓", ing:[["bacon",1],["chip",1]], eff:"Z3", cost:50000,
     l0:"もう一度燻した、香りの強いベーコン。お酒がすすみ、酔いが長く続く。酔っている間は農園の時間がよく進む。",
-    l3:"紫の煙で燻したベーコン。酔いがぐんと長くなる。", l5:"黄金色の燻製ベーコン。酔いも農園の時間も、たっぷり。" },
-  { id:"umeonigiri", name:"梅干しおにぎり", n3:"紅の梅干しおにぎり", n5:"黄金の梅干しおにぎり", icon:"🍙", ing:[["umeboshi",1],["rice",2]], eff:"Z4", cost:50000,
+    l3:"梅の炭火でじっくり焼いた、分厚いベーコン。酔いがぐんと長くなる。", l5:"竜のしっぽのように長く、とげとげに反りかえったベーコン。酔いも農園の時間も、たっぷり。" },
+  { id:"umeonigiri", name:"梅干しおにぎり", n3:"紅白おむすび", n5:"日の丸の大おむすび", icon:"🍙", ing:[["umeboshi",1],["rice",2]], eff:"Z4", cost:50000,
     l0:"すっぱい梅干しの入ったおにぎり。ひと口で目が覚めて、お酒の酔いがすっと消える。",
-    l3:"紅色の梅干しのおにぎり。酔いが一瞬で消える。", l5:"黄金の梅干しのおにぎり。酔いも眠気も吹きとぶ。" },
-  { id:"raisinbread", name:"レーズンパン", n3:"夜明けのレーズンパン", n5:"黄金のレーズンパン", icon:"🍞", ing:[["raisin",2],["wheat",2],["butter",1]], eff:"Z5", cost:50000,
+    l3:"紅と白、ふたつ並んだおめでたいおむすび。酔いが一瞬で消える。", l5:"まっ赤な梅干しがどんと入った、日の丸の大きなおむすび。酔いも眠気も吹きとぶ。" },
+  { id:"raisinbread", name:"レーズンパン", n3:"葡萄畑のカンパーニュ", n5:"宝石箱のパネトーネ", icon:"🍞", ing:[["raisin",2],["wheat",2],["butter",1]], eff:"Z5", cost:50000,
     l0:"干し葡萄をたっぷり練りこんだパン。食べると手がよく動き、工房でときどき二つぶんできあがる。",
-    l3:"紫がかった、香りの強いレーズンパン。工房の手がもっと進む。", l5:"黄金色のレーズンパン。工房の品が、どんどんできあがる。" },
+    l3:"葡萄の葉の模様を刻んだ、大きな丸パン。工房の手がもっと進む。", l5:"宝石のような干し葡萄をちりばめた、背の高いパン。工房の品が、どんどんできあがる。" },
 ].map(d=>Object.assign({ bt:true, art:BTD_ART[d.id] }, d));
 DISHES.push(...BT_DISHES);
 const DISH = Object.fromEntries(DISHES.concat(ROSE_TEAS).map(d=>[d.id,d]));
@@ -11744,7 +11811,7 @@ function renderDbook(){
   $("g-dbookRate").textContent=`料理図鑑 ${got} / ${DISHES.length*3+3}`;
   $("g-dbookList").phtml=DL.map((d,i)=>{
     const m=d.teabook?teaMadeQ():(S.dishMade[d.id]||{}), known=d.teabook?roseTeaN()>0:dishMadeAny(d);
-    const marks=`<span class="qm d0${m[0]?" on":""}">●</span><span class="qm mut${m[3]?" on":""}">✦</span><span class="qm sup${m[5]?" on":""}">✦</span>`;
+    const marks=`<span class="qm d0${m[0]?" on":""}">${QMI.dot}</span><span class="qm mut${m[3]?" on":""}">${QMI.spark}</span><span class="qm sup${m[5]?" on":""}">${QMI.spark}</span>`;
     return `<div class="rowi ${known?"":"locked"} ${i===dbookCur?"cur":""}${q && !dh.hits.includes(i)?" qhide":""}" data-i="${i}">
       <div class="ic">${known?`<span class="dic">${dishIco(d,[0,3,5].find(t=>m[t]))}</span>`:"❔"}</div><div class="nm">${known?esc(d.name):"？？？"}${qAlt(q && qMatch(dishBookEntries(d),q))}</div><div class="qmarks">${marks}</div></div>`;
   }).join("");
@@ -11985,6 +12052,11 @@ let btBookT=0;   // 図鑑の大木: 0 ふつう / 1 変異 / 2 超変異
 const BOOK_CROPS = CROPS.filter(c=>!c.treasure).sort((a,b)=>a.price-b.price).concat([ROSE_BOOK], BT_BOOK, FOOD_BOOK, CROPS.filter(c=>c.treasure));
 const bookSeen = c => c.bigtree ? !!(S.btBook && S.btBook[c.id]) : c.rosebook ? ROSE_ALL.some(r=>(S.harvestBy[r.id]||0)>0 || [0,3,5].some(t=>roseSeen(r.id,t))) : c.food ? (S.got[c.id]||0)>0 : c.treasure ? tre(c.id)>0 : (isUnlocked(c)||S.harvestBy[c.id]>0);
 let bookCur=0, bookTier=0, foodUp=false;   // foodUp: 食材の図鑑で上位種を見ているか
+/* 図鑑の印(絵にして、どの印も同じ高さにそろえる) */
+const QMI = { dot:`<svg class="qmi" viewBox="0 0 10 10"><circle cx="5" cy="5" r="1.7"/></svg>`,
+  star:`<svg class="qmi" viewBox="0 0 10 10"><path d="M5 1l1.18 2.5 2.72.32-2 1.9.52 2.72L5 7.1 2.58 8.44l.52-2.72-2-1.9 2.72-.32z" fill="none" stroke="currentColor" stroke-width=".95" stroke-linejoin="round"/></svg>`,
+  spark:`<svg class="qmi" viewBox="0 0 10 10"><path d="M5 .8Q5.55 4.45 9.2 5Q5.55 5.55 5 9.2Q4.45 5.55 .8 5Q4.45 4.45 5 .8Z"/></svg>` };
+if(!document.getElementById("qmRainDefs")) document.body.insertAdjacentHTML("beforeend",`<svg id="qmRainDefs" width="0" height="0" style="position:absolute" aria-hidden="true"><defs><linearGradient id="qmRain" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#ff5f6d"/><stop offset=".3" stop-color="#f4c542"/><stop offset=".55" stop-color="#5fd08a"/><stop offset=".8" stop-color="#4fb3ff"/><stop offset="1" stop-color="#b07cff"/></linearGradient></defs></svg>`);
 const qCount = (id,t) => (S.harvestQ[id]&&S.harvestQ[id][t])||0;
 const roseSeen = (id,t) => qCount(id,t)>0 || ((S.rgBook&&S.rgBook[id]&&S.rgBook[id][t])||0)>0;   // 図鑑に載っているか(咲かせた・薔薇ガチャで出た)
 /* ☆☆☆(300個目)の説明文 */
@@ -12071,15 +12143,15 @@ function renderBook(){
     const up=c.food?upOf(c.id):null;
     const known=bookSeen(c) || (up && bookSeen(up));
     const marks=c.rosebook ? `<small class="rcount">${roseGot()} / ${roseCells().length}</small>` : c.bigtree
-      ? `<span class="qm dot${btBookQ(c.id,0)?" on":""}">●</span><span class="qm mut${btBookQ(c.id,3)?" on":""}">✦</span><span class="qm sup${btBookQ(c.id,5)?" on":""}">✦</span>`
+      ? `<span class="qm dot${btBookQ(c.id,0)?" on":""}">${QMI.dot}</span><span class="qm mut${btBookQ(c.id,3)?" on":""}">${QMI.spark}</span><span class="qm sup${btBookQ(c.id,5)?" on":""}">${QMI.spark}</span>`
       : c.food
-      ? `<span class="qm dot${bookSeen(c)?" on":""}">●</span>`+(up?`<span class="qm upm${bookSeen(up)?" on":""}">✦</span>`:"")
+      ? `<span class="qm dot${bookSeen(c)?" on":""}">${QMI.dot}</span>`+(up?`<span class="qm upm${bookSeen(up)?" on":""}">${QMI.spark}</span>`:"")
       : c.treasure
       ? `<span class="qm${known?" on":""}">✨</span>`
-      : `<span class="qm dot${qCount(c.id,0)>0?" on":""}">●</span>`
-        + [1,2,4].map(t=>`<span class="qm st${qCount(c.id,t)>0?" on":""}">☆</span>`).join("")   // ☆・☆☆・☆☆☆ を穫るたびに1つずつ光る
-        + (hasMut(c.id)?`<span class="qm mut${qCount(c.id,3)>0?" on":""}">✦</span>`:"")
-        + (hasSup(c.id)?`<span class="qm sup${qCount(c.id,5)>0?" on":""}">✦</span>`:"");
+      : `<span class="qm dot${qCount(c.id,0)>0?" on":""}">${QMI.dot}</span>`
+        + [1,2,4].map(t=>`<span class="qm st${qCount(c.id,t)>0?" on":""}">${QMI.star}</span>`).join("")   // ☆・☆☆・☆☆☆ を穫るたびに1つずつ光る
+        + (hasMut(c.id)?`<span class="qm mut${qCount(c.id,3)>0?" on":""}">${QMI.spark}</span>`:"")
+        + (hasSup(c.id)?`<span class="qm sup${qCount(c.id,5)>0?" on":""}">${QMI.spark}</span>`:"");
     return `<div class="rowi ${known?"":"locked"} ${i===bookCur?"cur":""}${q && !bh.hits.includes(i)?" qhide":""}" data-i="${i}">
       <div class="ic">${known?ico(c):"❔"}</div>
       <div class="nm">${known?c.name:"？？？"}${qAlt(q && qMatch(cropBookEntries(c),q))}</div>
