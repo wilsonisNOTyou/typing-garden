@@ -6469,8 +6469,10 @@ const BTS = {
 for(const b of Object.values(BTS)){
   OBJS[b.id]={ id:b.id, name:b.name+"の苗木", icon:b.icon, area:null, cost:b.cost, unlock:BT_UNLOCK, tree:true,
     what:`3×3の区画(Q W E / A S D / Z X C など)のどこかを押すと、9マスを使って植えます。${b.yrs}年かけて育ち、そのあとは1年ごとに実ります。タイピングの${b.mode}で遊ぶと、届いた時間でこの木だけ10倍の速さで育ちます` };
-  OBJ_ALL.push(b.id);   // 苗木はお店に並べない(日替わりのご褒美でもらう)
 }
+/* 苗木は種のなかま: 4 の「苗木」で選んで植える。持っている数は S.seeds に入る */
+const SAPS = Object.values(BTS).map(b=>{ const c={ id:b.id, name:b.name, icon:b.icon, sap:true, price:b.cost }; CROP[b.id]=c; return c; });
+const isSap = id => !!(CROP[id] && CROP[id].sap);
 const isTreeObj = id => !!(OBJS[id] && OBJS[id].tree);
 /* 図鑑: q=0/3/5 は実った品質。q を省くと「知っている」だけ */
 function btBookMark(id,q){ S.btBook=S.btBook||{}; const b=S.btBook[id]=S.btBook[id]||{}; if(q!=null) b[q]=1; }
@@ -6523,12 +6525,12 @@ function btPlant(k,id){
   if(gi<0){ nope(k,"ここには植えられません"); return; }
   f.bt=f.bt||{};
   if(f.bt[gi]){ nope(k,"この区画には、もう大木が植わっています"); return; }
-  if(!(S.objs[id]>0)){ nope(k,"苗木がありません。タイピングの日替わりのご褒美でもらえます"); return; }
+  if(!(S.seeds[id]>0)){ nope(k,"苗木がありません。タイピングの日替わりのご褒美でもらえます"); return; }
   const keys=BT_GROUPS[gi], busy=keys.filter(x=>{ const q=f[x]; return q.crop || q.obj || q.vil || q.bt!=null; });
   if(busy.length){ nope(k,`大木は9マス(${keys.join(" ")})を使います。${busy.join(" ")} を空けてから植えましょう`); return; }
   for(const x of keys){ const q=f[x]; q.s="soil"; q.bt=gi; q.emptySince=0; }
   f.bt[gi]={ id, g:0, q:0, fert:0, mul:1, rip:false, ready:false, fr:0, t:Date.now() };
-  S.objs[id]--; S.btPlanted=(S.btPlanted||0)+1; btBookMark(id);
+  S.seeds[id]--; S.btPlanted=(S.btPlanted||0)+1; btBookMark(id);
   hit(k); floatAt(k,"🌱 植えた"); sfx.plant();
   toast(`${BTS[id].icon} ${esc(BTS[id].name)}の苗木を植えました。9マスのどれか1つに水が効いていれば育ちます(${BTS[id].yrs}年)`,"good",5200,true);
 }
@@ -6591,7 +6593,8 @@ function btAct(k){
     }
     case 3: return false;   // 水やりはふつうどおり
     case 5: btFert(k,t); return true;
-    case 6: nope(k, isTreeObj(S.objSel) ? "この区画には、もう大木が植わっています" : "大木の区画には置けません"); return true;
+    case 4: nope(k, isSap(S.seedId) ? "この区画には、もう大木が植わっています" : "大木の区画には植えられません"); return true;
+    case 6: nope(k,"大木の区画には置けません"); return true;
     default: nope(k,"大木の区画です"); return true;
   }
 }
@@ -7528,7 +7531,7 @@ function dailyGive(kind,lv){
     if(!btOpen()) return "";   // 大木が開くまでは苗木を渡さない
     if(dailySapLeft()<=0) return `${b.name}の苗木は、今日はもう${DBG_SAP_MAX}本もらいました`;
     if(!(S.dbSap && S.dbSap.d===dbgDay())) S.dbSap={ d:dbgDay(), n:0 };
-    S.dbSap.n++; S.objs[id]=(S.objs[id]||0)+1; btBookMark(id); S.dbSapGot=(S.dbSapGot||0)+1;
+    S.dbSap.n++; S.seeds[id]=(S.seeds[id]||0)+1; btBookMark(id); S.dbSapGot=(S.dbSapGot||0)+1;
     msg=`${b.icon} ${b.name}の苗木を受け取りました ・ 今日はあと${dailySapLeft()}本`;
   }else if(kind==="neji"){ const a=dailyNeji(lv); xAdd(S,"money",a); msg=`🔩 ${fmtNum(a)}キーを受け取りました`; }
   else if(kind==="own"){ const a=Math.floor(Math.max(0,S.money)*[.005,.01,.02][lv]); xAdd(S,"money",a); msg=`💰 所持キーの${[.5,1,2][lv]}% ${fmtNum(a)}キーを受け取りました`; }
@@ -7952,7 +7955,7 @@ function toggleFav(kind,id){
   toast(m[id] ? `★ ${esc(nm)}をお気に入りにしました(一番上に並びます)` : `${esc(nm)}をお気に入りから外しました`,"",2200,true);
 }
 const starHtml = (kind,id) => { const on = kind==="s" ? isFavS(id) : isFavD(id); return `<span class="fstar${on?" on":""}" data-star="${kind}:${id}" title="お気に入り(S)">${on?"★":"☆"}</span>`; };
-const seedAll = () => CROPS.concat(ROSE_SEED,ROSE_USEEDS(),ROSE_HALF);
+const seedAll = () => CROPS.concat(ROSE_SEED,ROSE_USEEDS(),ROSE_HALF,SAPS);
 let seedIdx=null;
 const seedOrder = (a,b) => { if(!seedIdx){ seedIdx={}; seedAll().forEach((c,i)=>seedIdx[c.id]=i); }   // 種の並び: お気に入り → 安い順 → 同じ値段なら作物の順
   return (isFavS(b)-isFavS(a)) || seedRank(a)-seedRank(b) || (seedIdx[a]??0)-(seedIdx[b]??0); };
@@ -7979,7 +7982,7 @@ function renderBar(){
   const owned=ownedSeeds();
   if(!owned.includes(S.seedId) && owned.length) S.seedId=nextSeed(S.seedId);
   const n=S.seeds[S.seedId]||0;
-  if(n>0){ const c=CROP[S.seedId]; $("g-seedIc").innerHTML=ico(c); $("g-seedNm").textContent=c.name+"の種"; $("g-seedCnt").textContent="×"+xFmt(n,"seeds."+S.seedId); }
+  if(n>0){ const c=CROP[S.seedId]; $("g-seedIc").innerHTML=ico(c); $("g-seedNm").textContent=c.name+(c.sap?"の苗木":"の種"); $("g-seedCnt").textContent="×"+xFmt(n,"seeds."+S.seedId); }
   else   { $("g-seedIc").innerHTML="🌱"; $("g-seedNm").textContent="種がありません"; $("g-seedCnt").textContent=""; }
   // 肥料(GUR の肥料を持っていれば ← → で切り替え)
   if(S.fertSel!=="fert" && !(S[S.fertSel]>0)) S.fertSel="fert";
@@ -8143,6 +8146,7 @@ function act(k){
       break;
     }
     case 4: { // 種: 植える
+      if(isSap(S.seedId)){ btPlant(k,S.seedId); break; }   // 苗木: 3×3の区画を使って植える
       const n=S.seeds[S.seedId]||0;
       if(p.obj){ nope(k,"設置物があります"); break; }
       if(p.s==="grass"){ nope(k,kb("先にクワ(2)で耕しましょう","先にクワで耕しましょう")); break; }
@@ -8179,7 +8183,6 @@ function act(k){
     }
     case 6: { // 設置: スプリンクラーや案山子を置く / 村人に区画をまかせる
       const id=S.objSel;
-      if(isTreeObj(id)){ btPlant(k,id); break; }   // 大木の苗木
       if(id==="vil"||id==="sgvil"||id==="rfvil"){
         const sg=id==="sgvil", rf=id==="rfvil", kind=rf?"rf":sg?"sg":true, who=rf?"薔薇農家":sg?"シゴデキ村人":"村人";
         if((rf?(S.roseVil||0):sg?(S.sgVil||0):S.villagers)<=0){ nope(k,`${who}がいません`); break; }
@@ -10301,8 +10304,8 @@ function renderTreas(){
 /* ---------- 一覧から選ぶ ----------
    種(4 の長押し・スマホは種の欄の長押し)と、シゴデキ村人が育てる作物(台所の宝物でシゴデキ村人を選んで Enter)。
    レア度ごとに並べ、矢印キーで選んで Enter で決める */
-const PICK_RANKS=["お気に入り","N","R","SR","HR","UR","GSR","GHR","曜日限定","薔薇"];
-const pickGroup = id => pickKind==="seed" && isFavS(id) ? "お気に入り" : /^rose/.test(id) ? "薔薇" : CROP[id].day!=null ? "曜日限定" : (CROP[id].r||"N");   // お気に入りは一番上、曜日限定の作物はレア度と分けて並べる
+const PICK_RANKS=["お気に入り","N","R","SR","HR","UR","GSR","GHR","曜日限定","薔薇","苗木"];
+const pickGroup = id => pickKind==="seed" && isFavS(id) ? "お気に入り" : /^rose/.test(id) ? "薔薇" : isSap(id) ? "苗木" : CROP[id].day!=null ? "曜日限定" : (CROP[id].r||"N");   // お気に入りは一番上、曜日限定の作物はレア度と分けて並べる
 let pickKind="seed", pickCur=0, pickIds=[], lastFour=0;
 function openPick(kind){
   pickKind=kind;
@@ -12629,6 +12632,7 @@ root.querySelectorAll("button").forEach(b=>b.setAttribute("tabindex","-1"));
 /* ---------- 画面の出入り(タイピングから呼ばれる) ---------- */
 let loopId=null, saveId=null, welcomed=false;
 const hadSave=load();
+for(const id of Object.keys(BTS)) if(S.objs && S.objs[id]>0){ S.seeds[id]=(S.seeds[id]||0)+S.objs[id]; delete S.objs[id]; }   // 苗木は設置物から種へ
 tick(); checkUnlocks(); buildPlanter();
 function enter(){
   tick(); checkUnlocks(); renderAll(); save();
@@ -12703,7 +12707,7 @@ function debugUnlock(){
   for(const d of DISHES){ S.recipes[d.id]=true; S.dishes[d.id]={0:1,3:1,5:1}; S.dishMade[d.id]={0:true,3:true,5:true}; S.dishEaten[d.id]={0:true,3:true,5:true}; }
   for(const r of ROSE_ALL){ S.harvestBy[r.id]=50; S.harvestQ[r.id]=r.secret?[5]:[20,0,0,3,0,1]; S.inv[r.id]=r.secret?[2]:[3,0,0,2,0,1]; }   // 薔薇
   S.roseTeaRecipe=true; S.baraSeen=true; S.rgNoticed=true;
-  S.objs.bt_ume=3; S.objs.bt_grape=3; S.objs.bt_sugi=3; S.axe=true; S.fuyo=30; S.sumi=30; S.horoSeen=true; for(const id of Object.keys(BTS)) for(const q of [0,3,5]) btBookMark(id,q);   // 図鑑の大木も全部   // 大木: 苗木・斧・腐葉土・梅の炭
+  S.seeds.bt_ume=3; S.seeds.bt_grape=3; S.seeds.bt_sugi=3; S.axe=true; S.fuyo=30; S.sumi=30; S.horoSeen=true; for(const id of Object.keys(BTS)) for(const q of [0,3,5]) btBookMark(id,q);   // 図鑑の大木も全部   // 大木: 苗木・斧・腐葉土・梅の炭
   // 薔薇ガチャ: コイン・権利・花弁・GHR をすべて
   S.roseCoin=100000000; S.megaSet=true; S.layoutOwned=true; S.gachaPass.r1111=true; S.gachaPass.r11111=true; S.gachaPass.r111111=true; S.gachaPass.r1111111=true;
   for(const id in RG) S.got[id]=1;
