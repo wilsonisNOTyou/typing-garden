@@ -683,6 +683,39 @@ body.dk-chi.dk-st #screen-game.active #wordText, body.dk-chi.dk-st #screen-game.
 body.dk-chi #screen-game.active::after, body.dk-chi #screen-toeic.active::after{content:""; position:fixed; inset:0; pointer-events:none; z-index:31; background:radial-gradient(ellipse at center, rgba(255,255,255,0) 50%, rgba(240,244,248,.55) 100%)}
 body.dk-chi.dk-st #screen-game.active::after, body.dk-chi.dk-st #screen-toeic.active::after{background:radial-gradient(ellipse at center, rgba(255,255,255,0) 30%, rgba(240,244,248,.75) 100%)}
 @media (prefers-reduced-motion:reduce){ body[class*="dk-"] #wordPanel, body[class*="dk-"] #wordText, body[class*="dk-"] #wordKana, body[class*="dk-"] #tqWord, body[class*="dk-"] .tq-word{animation-duration:12s} }
+/* お酒の演出(強め): 1文字ずつの波・鼓動・ひっく・選択肢の揺れ・泥酔のぐらっ */
+:root{--dkA:3px}
+body.dk-st{--dkA:6px}
+html.mobile body{--dkA:2px}
+html.mobile body.dk-st{--dkA:3px}
+@keyframes dkWave{0%,100%{translate:0 0} 50%{translate:0 calc(var(--dkA)*-1.6)}}
+body.dk-hor #screen-game.active #wordText .dkc{display:inline-block; animation:dkWave 1.6s ease-in-out infinite; animation-delay:calc(var(--i)*-.14s)}
+body.dk-chi #screen-game.active #romaji .rest{display:inline-block; animation:dkWalk 5s ease-in-out infinite; animation-delay:-.5s}
+body.dk-chi.dk-st #screen-game.active #romaji .rest{animation:dkWalk2 3.6s ease-in-out infinite; animation-delay:-.45s}
+@keyframes dkBeat{0%,100%{opacity:.55} 12%{opacity:1} 24%{opacity:.7} 36%{opacity:.95}}
+body.dk-aka #screen-game.active::before, body.dk-aka #screen-toeic.active::before{animation:dkBeat 1.5s ease-in-out infinite}
+.dkhic{position:absolute; right:10%; top:-.4rem; z-index:5; pointer-events:none; font-weight:bold; font-size:1.1rem; color:#ff8a9a; text-shadow:0 2px 0 rgba(0,0,0,.4); animation:dkHic .9s ease-out forwards}
+@keyframes dkHic{0%{opacity:0; translate:0 6px; scale:.6} 20%{opacity:1; translate:0 -6px; scale:1.15} 40%{translate:0 0; scale:1} 100%{opacity:0; translate:0 -18px}}
+@keyframes dkBob{0%,100%{translate:0 0} 50%{translate:0 calc(var(--dkA)*-1)}}
+@keyframes dkStep{0%,100%{translate:0 0} 25%{translate:var(--dkA) 0} 75%{translate:calc(var(--dkA)*-1) 0}}
+@keyframes dkBoth{0%,100%{translate:0 0} 25%{translate:var(--dkA) calc(var(--dkA)*-1)} 50%{translate:0 0} 75%{translate:calc(var(--dkA)*-1) calc(var(--dkA)*-1)}}
+body.dk-hor #screen-toeic.active .tq-opt{animation:dkBob 2.4s ease-in-out infinite}
+body.dk-chi #screen-toeic.active .tq-opt{animation:dkStep 3.2s ease-in-out infinite}
+body.dk-hor.dk-chi #screen-toeic.active .tq-opt{animation:dkBoth 3s ease-in-out infinite}
+body[class*="dk-"] #screen-toeic.active .tq-opt:nth-child(2){animation-delay:-.7s; animation-direction:reverse}
+body[class*="dk-"] #screen-toeic.active .tq-opt:nth-child(3){animation-delay:-1.4s}
+body[class*="dk-"] #screen-toeic.active .tq-opt:nth-child(4){animation-delay:-2.1s; animation-direction:reverse}
+body.dk-aka #screen-toeic.active .tq-opt:nth-child(odd){rotate:-1deg}
+body.dk-aka #screen-toeic.active .tq-opt:nth-child(even){rotate:1.2deg}
+body.dk-aka.dk-st #screen-toeic.active .tq-opt:nth-child(odd){rotate:-2deg}
+body.dk-aka.dk-st #screen-toeic.active .tq-opt:nth-child(even){rotate:2.4deg}
+body.dk-aka #screen-toeic.active .tq-opt{text-shadow:0 0 6px rgba(255,90,110,.45)}
+@keyframes dkGura{0%,84%,100%{rotate:0deg} 88%{rotate:-3.5deg} 93%{rotate:2.5deg} 97%{rotate:-.8deg}}
+body.dk-hor.dk-aka.dk-chi #screen-game.active #wordPanel{animation:dkSway 3.4s ease-in-out infinite, dkGura 10s ease-in-out infinite}
+body.dk-hor.dk-aka.dk-chi.dk-st #screen-game.active #wordPanel{animation:dkSway2 2.6s ease-in-out infinite, dkGura 8s ease-in-out infinite}
+body.dk-hor.dk-aka.dk-chi #screen-toeic.active .tq-card{animation:dkGura 10s ease-in-out infinite}
+body.dk-hor.dk-aka.dk-chi.dk-st #screen-toeic.active .tq-card{animation:dkGura 8s ease-in-out infinite}
+@media (prefers-reduced-motion:reduce){ body[class*="dk-"] #wordText .dkc, body[class*="dk-"] #romaji .rest, body[class*="dk-"] .tq-opt, body[class*="dk-"] .tq-card, body[class*="dk-"] #wordPanel, body.dk-aka #screen-game.active::before, body.dk-aka #screen-toeic.active::before{animation:none !important} }
 /* ---- ペナルティ / 辞典 ---- */
 .screw.back .cap{animation:keyback .55s ease-out}
 @keyframes keyback{
@@ -4020,7 +4053,7 @@ function setCurrentWord(w){
   if(gameBara) w=baraWord(w);
   currentWord=w;
   setWord(w.k);
-  $("wordText").textContent=w.t;
+  $("wordText").textContent=w.t; dkWrap();
   $("wordKana").textContent=w.t===w.k?"\u00a0":w.k;
   renderRomaji();
 }
@@ -4082,6 +4115,9 @@ function clearWordPanel(){
    ネジの色がばらばら・ネジが勝手に外れる・板が逆さま・正解とミスの音が入れ替わる。記録はバラバラのランキング1つにまとめて載せる */
 const baraOn = () => { try{ return !!Garden.baraOn(); }catch(e){ return false; } };
 let gameBara=false, baraQ=null, baraN=0;
+/* お酒: ほろ酔いのときは、言葉を1文字ずつ包んで波打たせる / 赤ら顔のときは、ミスで「ひっく」 */
+function dkWrap(){ const el=$("wordText"); if(!el || !document.body.classList.contains("dk-hor")) return; const t=el.textContent; el.innerHTML=[...t].map((c,i)=>`<span class="dkc" style="--i:${i}">${escH(c)}</span>`).join(""); }
+function dkHic(box){ if(!box || !document.body.classList.contains("dk-aka")) return; const h=document.createElement("span"); h.className="dkhic"; h.textContent="ひっく"; box.appendChild(h); setTimeout(()=>h.remove(),900); }
 const drunkNowG = () => { try{ return Garden.drunkNow(); }catch(e){ return { any:false }; } };
 let baraWordsCache=null;
 function baraWords(){
@@ -4425,7 +4461,7 @@ document.addEventListener("keydown",e=>{
   if(r==="skip") return;
   if(r==="miss"){
     miss++; $("miss").textContent=miss;
-    const p=$("wordPanel");
+    const p=$("wordPanel"); dkHic(p);
     p.classList.remove("shake"); void p.offsetWidth; p.classList.add("shake");
     // ノーミス勝負: 1ミスで即終了
     if(diff==="oneshot" && osLives>0){ osLives--; sndMiss(); return; }   // 料理のお守り: このミスは見逃してもらえる
@@ -14911,7 +14947,7 @@ function tqType(key){
   }
   if(!alive.length){
     if(tqPend) return tqPendDone();   // 続きではないキー: 短い訳で正解
-    tqMiss++; sndMiss(); $("tqMissW").textContent=`ミス ${tqMiss}`; return;
+    tqMiss++; sndMiss(); dkHic(document.querySelector("#tqPlay .tq-card")); $("tqMissW").textContent=`ミス ${tqMiss}`; return;
   }
   tqCands=alive; gardenKeys++; sndType();
   if(done){
@@ -14935,7 +14971,7 @@ function tqRenderTyped(){
 function tqRenderWord(){ $("tqTyped").innerHTML=`<span class="done">${tqEsc(typedRomaji+buf)}</span><span class="rest">${tqEsc(remainingRomaji())}</span>`; }
 function tqWordKey(key){
   const r=handleKey(key);
-  if(r==="miss"){ tqMiss++; sndMiss(); $("tqMissW").textContent=`ミス ${tqMiss}`; return; }
+  if(r==="miss"){ tqMiss++; sndMiss(); dkHic(document.querySelector("#tqPlay .tq-card")); $("tqMissW").textContent=`ミス ${tqMiss}`; return; }
   gardenKeys++; sndType(); tqRenderWord();
   if(r!=="done") return;
   const w=tqWords[tqI]; tqLog.push({ w, ok:true });
@@ -15001,7 +15037,7 @@ function tqRevKey(k){
   if(want!=null && tqRevNorm(k)===tqRevNorm(want)){
     tqRevBuf+=want; gardenKeys++; sndType(); tqRevRender();
     if(tqRevBuf.length>=w.en.length) tqRevDone();
-  }else{ tqMiss++; sndMiss(); $("tqMissW").textContent=`ミス ${tqMiss}`; }
+  }else{ tqMiss++; sndMiss(); dkHic(document.querySelector("#tqPlay .tq-card")); $("tqMissW").textContent=`ミス ${tqMiss}`; }
 }
 /* 打てた: 倍の届け物 */
 function tqRevDone(){
