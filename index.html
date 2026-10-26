@@ -2731,6 +2731,73 @@ html.mobile #screen-garden .grk-list{max-height:none; flex:1 1 auto; min-height:
 }
 /* TOEIC のメニュー: 説明を1行に */
 @media (min-width:701px) and (max-height:880px){ #tqMenu .tq-mode small{white-space:nowrap} #tqMenu #tqFmts .tq-mode{flex:1 1 0} #tqKinds .tq-mode{flex-basis:clamp(17rem,40vh,22rem)} }
+/* 低い画面のタイトル: 自己ベストは出さず、総プレイ回数だけ。更新情報の行が画面の下に来るまで大きく(タイマーは少し切れてもよい) */
+@media (min-width:701px) and (max-height:880px){
+  #screen-title #bestLine, #screen-title #bestLineTa, #screen-title #bestLinePoem{display:none}
+  #screen-title #statsLine{width:auto; display:block}
+  #screen-title h1{font-size:clamp(2.5rem,7.6vh,4.3rem)}
+  #screen-title h1.logo{font-size:clamp(2.1rem,6.4vh,3.6rem)}
+  #screen-title .subtitle{font-size:clamp(.85rem,1.8vh,1.05rem); margin-bottom:clamp(.45rem,1.5vh,1.1rem)}
+  #screen-title .gstat{font-size:clamp(.82rem,1.75vh,1rem); margin-bottom:clamp(.5rem,1.6vh,1.1rem)}
+  #screen-title .mode-group{margin-bottom:clamp(.45rem,1.6vh,1.1rem)}
+  #screen-title .mode-head{font-size:clamp(.8rem,1.7vh,1rem); margin-bottom:clamp(.25rem,1vh,.7rem)}
+  #screen-title .diff-row{gap:clamp(.55rem,1.6vh,1rem)}
+  #screen-title .diff-btn{width:clamp(210px,38vh,300px); padding:clamp(.4rem,1.5vh,.9rem) clamp(.8rem,1.8vh,1.2rem)}
+  #screen-title .diff-btn .name{font-size:clamp(1.05rem,3.1vh,1.55rem)}
+  #screen-title .diff-btn .desc{font-size:clamp(.7rem,2vh,.92rem)}
+  #screen-title .mode-group:has(.oneshot) .diff-btn{padding:clamp(.4rem,1.5vh,.9rem) clamp(.55rem,1.3vh,.95rem)}
+  #screen-title .mode-group:has(.oneshot) .diff-btn .name{font-size:clamp(.98rem,2.8vh,1.4rem)}
+  #screen-title .mode-group:has(.oneshot) .diff-btn .desc{font-size:clamp(.66rem,1.85vh,.86rem)}
+  body:has(#screen-title.active) #app{width:min(clamp(1060px,165vh,1360px),97vw)}
+  #screen-title .best-line{font-size:clamp(.78rem,1.7vh,.95rem); margin-top:clamp(.1rem,.8vh,.5rem)}
+  #screen-title .name-line{font-size:clamp(.82rem,1.75vh,1rem); margin-top:clamp(.15rem,.8vh,.5rem)}
+  #screen-title .btn-row{margin-top:clamp(.35rem,1.3vh,.9rem)}
+  #screen-title .btn-row .btn{font-size:clamp(.82rem,1.8vh,1.02rem); padding:clamp(.3rem,1.1vh,.65rem) clamp(.75rem,1.6vh,1.2rem)}
+}
+/* TOEIC のメニュー: さらに大きく */
+@media (min-width:701px) and (min-height:721px) and (max-height:880px){
+  #tqMenu .tq-title{font-size:clamp(1.4rem,4.4vh,2.4rem)}
+  #tqMenu .tq-sub{font-size:clamp(.85rem,1.9vh,1.05rem); margin-bottom:clamp(.5rem,1.9vh,1.3rem)}
+  #tqMenu .tq-rowl{font-size:clamp(.82rem,1.8vh,1rem); margin:clamp(.2rem,1vh,.6rem) 0 clamp(.25rem,1vh,.6rem)}
+  #tqMenu .tq-modes{margin-bottom:clamp(.4rem,1.8vh,1.2rem)}
+  #tqMenu .tq-mode{padding:clamp(.45rem,2.3vh,1.3rem) .6rem; font-size:clamp(1.05rem,3vh,1.5rem)}
+  #tqMenu .tq-mode small{font-size:clamp(.7rem,1.75vh,.95rem)}
+  #tqMenu .tq-opt-row{font-size:clamp(.85rem,1.8vh,1rem)}
+  #tqMenu .tq-levels{gap:clamp(.4rem,1.4vh,.8rem); margin-bottom:clamp(.5rem,1.9vh,1.3rem)}
+  #tqMenu .tq-lv{padding:clamp(.45rem,2.6vh,1.5rem) .15rem}
+  #tqMenu .tq-lv b{font-size:clamp(1rem,3.2vh,1.7rem)}
+  #tqMenu .tq-lv small{font-size:clamp(.65rem,1.75vh,.92rem)}
+  #tqMenu .tq-note{font-size:clamp(.82rem,1.8vh,1rem)}
+  #tqMenu .gstat{font-size:clamp(.85rem,1.8vh,1rem)}
+  #tqMenu .btn-row{margin-top:clamp(.4rem,1.8vh,1.2rem)}
+  #tqMenu .btn-row .btn{font-size:clamp(.85rem,1.9vh,1.05rem); padding:clamp(.35rem,1.3vh,.75rem) clamp(.9rem,1.8vh,1.3rem)}
+  #tqMenu .tq-credit{font-size:clamp(.62rem,1.35vh,.78rem); margin-top:clamp(.3rem,1.2vh,.8rem)}
+}
+/* タイトル: 高い画面ではもうひと回り(更新情報の行が下の端に来るまで) */
+@media (min-width:701px) and (min-height:661px) and (max-height:880px){
+  #screen-title h1{font-size:clamp(2.5rem,8.3vh,4.6rem)}
+  #screen-title h1.logo{font-size:clamp(2.1rem,7vh,3.9rem)}
+  #screen-title .mode-group{margin-bottom:clamp(.45rem,2vh,1.3rem)}
+  #screen-title .diff-row{gap:clamp(.55rem,1.8vh,1.1rem)}
+  #screen-title .diff-btn{width:clamp(210px,41vh,320px); padding:clamp(.4rem,1.8vh,1rem) clamp(.8rem,2vh,1.3rem)}
+  #screen-title .diff-btn .name{font-size:clamp(1.05rem,3.4vh,1.7rem)}
+  #screen-title .diff-btn .desc{font-size:clamp(.7rem,2.15vh,1rem)}
+  #screen-title .mode-group:has(.oneshot) .diff-btn{padding:clamp(.4rem,1.8vh,1rem) clamp(.55rem,1.4vh,1rem)}
+  #screen-title .mode-group:has(.oneshot) .diff-btn .name{font-size:clamp(.98rem,3vh,1.5rem)}
+  #screen-title .mode-group:has(.oneshot) .diff-btn .desc{font-size:clamp(.66rem,2vh,.92rem)}
+  body:has(#screen-title.active) #app{width:min(clamp(1060px,175vh,1440px),97vw)}
+  #screen-title .btn-row .btn{font-size:clamp(.82rem,1.95vh,1.08rem); padding:clamp(.3rem,1.25vh,.7rem) clamp(.75rem,1.8vh,1.3rem)}
+}
+/* 調整: 下の段の説明が変なところで折れないように広げる・TOEIC の文字が枠からはみ出さないように */
+@media (min-width:701px) and (min-height:661px) and (max-height:880px){
+  body:has(#screen-title.active) #app{width:min(clamp(1060px,200vh,1440px),98vw)}
+  #screen-title .mode-group:has(.oneshot) .diff-btn .desc{font-size:clamp(.66rem,1.85vh,.88rem)}
+}
+@media (min-width:701px) and (min-height:721px) and (max-height:880px){
+  #tqMenu .tq-mode small{font-size:clamp(.7rem,1.55vh,.88rem)}
+  #tqMenu .tq-lv b{font-size:clamp(1rem,2.75vh,1.5rem)}
+  body:has(#screen-toeic.active #tqMenu.on) #app{width:min(clamp(1010px,160vh,1300px),96vw)}
+}
 </style>
 </head>
 <body>
@@ -2846,7 +2913,7 @@ html.mobile #screen-garden .grk-list{max-height:none; flex:1 1 auto; min-height:
         <button class="btn" id="tqBack">タイトルへ <span class="kbdh">Esc</span></button>
       </div>
       <p class="hint">Tab 出題形式 ・ M モード ・ 1〜9, 0, - レベルを選んで始める ・ L 単語リスト ・ R ランキング ・ G 農園へ ・ Esc タイトルへ</p>
-      <p class="tq-credit">基本単語: New General Service List 1.2(Browne, C., Culligan, B. &amp; Phillips, J., 2013)・ TOEIC: TOEIC Service List 1.2(Browne, C. &amp; Culligan, B., 2016)の頻度順 ・ CC BY-SA 4.0 ・ 熟語・例文・訳はこのゲームで作成</p>
+      <p class="tq-credit">出典: New General Service List 1.2・TOEIC Service List 1.2(Browne, Culligan, Phillips)・CC BY-SA 4.0 ・ 熟語・例文・訳はこのゲームで作成</p>
     </div>
     <div class="tq-view" id="tqPlay">
       <div class="tq-hud"><span id="tqProg"></span><span><span id="tqScoreL">得点</span> <b id="tqScore">0</b></span><span id="tqMissW"></span><button class="btn tq-quit" id="tqQuit" tabindex="-1">やめる <span class="kbdh">Esc</span></button></div>
