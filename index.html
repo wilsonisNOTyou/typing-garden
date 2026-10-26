@@ -102,10 +102,25 @@ body.dishtheme.dishsplit3:not(.garden):not(.washi){
       color-mix(in srgb, var(--dishC) 72%, #0c0c10) 240deg 360deg);
   background-attachment:scroll, fixed, fixed;
 }
+/* 料理の色を4つ(かまど + お弁当箱 + もらった料理): 背景を上・右・下・左の4つに分ける */
+body.dishtheme.dishsplit4:not(.garden):not(.washi){
+  background-image:
+    repeating-linear-gradient(45deg, transparent 0 34px, rgba(255,255,255,.05) 34px 36px),
+    radial-gradient(circle at 50% 50%, rgba(255,255,255,.16) 0%, transparent 42%, rgba(0,0,0,.42) 100%),
+    conic-gradient(from -45deg at 50% 50%,
+      color-mix(in srgb, var(--dishA) 72%, #0c0c10) 0deg 90deg,
+      color-mix(in srgb, var(--dishB) 72%, #0c0c10) 90deg 180deg,
+      color-mix(in srgb, var(--dishC) 72%, #0c0c10) 180deg 270deg,
+      color-mix(in srgb, var(--dishD) 72%, #0c0c10) 270deg 360deg);
+  background-attachment:scroll, fixed, fixed;
+}
 /* ---- TOEIC 英単語 ---- */
 .diff-btn.toeic{border-color:#3b5f8f}
 .diff-btn.toeic .name{color:#8fc2ff}
 .diff-btn.toeic:hover,.diff-btn.toeic:focus-visible{border-color:#8fc2ff}
+.diff-btn.world{border-color:#8a6a3a; width:min(220px,90vw)}
+.diff-btn.world .name{color:#ffd84a}
+.diff-btn.world:hover,.diff-btn.world:focus-visible{border-color:#ffd84a}
 #screen-toeic{max-width:880px; margin:0 auto}
 .tq-view{display:none}
 .tq-view.on{display:block}
@@ -597,6 +612,306 @@ h1.logo .gd::after{content:'🌱'; position:absolute; right:-.55em; top:-.55em; 
 #ptWarn.show{display:block}
 .keynav b{color:var(--steel); background:rgba(255,255,255,.08); border-radius:4px; padding:0 .35em; font-weight:400}
 /* ---- 記録の引き継ぎ ---- */
+/* ---- 農園の寄り合い(ワールドチャット) ---- */
+.wc-panel{width:min(44rem,94vw)}
+/* 対戦: 待合室と結果 */
+.mt-panel{width:min(34rem,94vw)}
+.mt-left{font-size:1.05rem; margin:.4rem 0 .6rem}
+.mt-left b{color:var(--amber); font-size:1.3rem}
+.mt-ps{list-style:none; padding:0; margin:0 0 .6rem; display:grid; gap:.3rem}
+.mt-ps li{padding:.45rem .7rem; border-radius:8px; background:rgba(255,255,255,.06); border:1px solid var(--line)}
+.mt-ps li.me{border-color:#4ee6ff; box-shadow:0 0 10px rgba(78,230,255,.35)}
+.mt-ps li.empty{opacity:.35}
+.mt-ps small{color:var(--steel); margin-left:.4rem}
+.mt-rules{margin:.2rem 0 .4rem; padding-left:1.2rem; font-size:.8rem; line-height:1.6; color:var(--steel); text-align:left}
+.mt-rules b{color:#ff7ad9; font-weight:700}
+.mt-bgmb{font-size:.8rem; padding:.3rem .7rem}
+.mt-ilist{grid-column:1/-1; display:grid; grid-template-columns:repeat(auto-fill,minmax(13rem,1fr)); gap:.15rem .8rem; margin:.3rem 0 .2rem; padding:.4rem .6rem; border-radius:8px; background:rgba(255,210,74,.06); border:1px solid rgba(255,210,74,.25); font-size:.8rem; text-align:left}
+.mt-ilist > b{grid-column:1/-1; color:#ffd24a}
+.wc-panel #wcMatch{max-height:min(30rem,56vh)}   /* 対戦の欄はアイテム一覧まで見えるように */
+.mt-ilist span small{color:var(--steel); margin-left:.4rem; font-size:.72rem}
+.mt-ilist .mt-inote{grid-column:1/-1; color:var(--steel); font-size:.72rem}
+.mt-result{max-width:30rem; margin:.4rem auto .6rem; text-align:left}
+.mt-result h3{text-align:center; margin:.2rem 0 .5rem; color:#ffd24a; letter-spacing:.15em; text-shadow:0 0 12px rgba(255,210,74,.6)}
+.mt-res{list-style:none; padding:0; margin:0; display:grid; gap:.3rem}
+.mt-res li{display:grid; grid-template-columns:3rem 1fr 4.5rem 7.5rem; gap:.5rem; padding:.45rem .7rem; border-radius:8px; background:rgba(20,10,40,.55); border:1px solid rgba(160,110,255,.35)}
+.mt-res li:first-child{border-color:#ffd24a; box-shadow:0 0 14px rgba(255,210,74,.35)}
+.mt-res li:first-child .mt-rk{color:#ffd24a; font-weight:bold}
+.mt-res li.me{outline:2px solid #4ee6ff}
+.mt-res li.quit{opacity:.45}
+.mt-res .mt-sc{text-align:right; font-variant-numeric:tabular-nums}
+.mt-res .mt-mi{color:var(--steel); font-size:.8rem; text-align:right}
+.wc-msg .mt-rsn{display:inline-block; margin:0 .5rem 0 .2rem; white-space:nowrap}
+.mt-bonus{text-align:center; color:#ffe08a; font-weight:bold; margin:.6rem 0 0}
+#screen-result.mtr .result-count{color:#4ee6ff; text-shadow:0 0 18px rgba(78,230,255,.7), 0 4px 0 #1a3b6a}
+#screen-result.mtr #resultDiff{color:#ff7ad9; letter-spacing:.3em}
+/* 対戦: 試合会場の見た目(ネオンの会場・ライト・レーン) */
+body.mtb{background:#07060f; background-image:radial-gradient(ellipse at 50% 120%, rgba(160,60,255,.35), transparent 55%), radial-gradient(ellipse at 50% -20%, rgba(40,200,255,.25), transparent 55%), repeating-linear-gradient(90deg, rgba(120,90,255,.06) 0 1px, transparent 1px 48px), repeating-linear-gradient(0deg, rgba(120,90,255,.06) 0 1px, transparent 1px 48px)}
+body.mtb::before{content:""; position:fixed; inset:-20%; pointer-events:none; z-index:0; background:conic-gradient(from 200deg at 15% -10%, transparent 0 20deg, rgba(78,230,255,.10) 24deg, transparent 30deg), conic-gradient(from 130deg at 85% -10%, transparent 0 20deg, rgba(255,122,217,.10) 24deg, transparent 30deg); animation:mtSpot 6s ease-in-out infinite alternate}
+@keyframes mtSpot{to{transform:rotate(4deg) translateX(2%)}}
+body.mtb #app{position:relative; z-index:1}
+body.mtb #screen-game .hud{color:#b8a8ff}
+body.mtb #screen-game .hud b{color:#4ee6ff; text-shadow:0 0 10px rgba(78,230,255,.8)}
+body.mtb #screen-game .timebar{border-color:#5a3aa8; background:#120c24}
+body.mtb #screen-game .timebar>i{background:linear-gradient(90deg,#4ee6ff,#ff7ad9)}
+body.mtb #screen-game .word-panel{background:linear-gradient(180deg,#1c1638,#120e26); border-color:#4ee6ff; box-shadow:0 0 0 1px rgba(78,230,255,.4), 0 0 24px rgba(78,230,255,.35), inset 0 0 30px rgba(120,80,255,.25)}
+body.mtb #screen-game #romaji .done{color:#4ee6ff}
+body.mtb #screen-game .plate{background:linear-gradient(180deg,#221a44,#16112e); border-color:#5a3aa8; box-shadow:0 0 18px rgba(160,110,255,.35)}
+body.mtb #countdown{opacity:0}
+body.mtb #roseFx, body.mtb #dishFloat, body.mtb #rosePetals{display:none}
+body.mtb #screen-game .game-esc{display:flex; gap:.6rem; justify-content:center}
+#screen-game .mt-bgm{font-size:.8rem; padding:.2rem .7rem; min-height:0}
+#screen-game .mt-bgm[hidden]{display:none}
+.mt-board{display:grid; gap:.3rem; margin:0 0 .6rem; font-size:.9rem}
+.mt-board[hidden], .mt-hud[hidden], .mt-vs[hidden]{display:none}
+.mt-row{display:grid; grid-template-columns:1.6rem 8rem 3.2rem 1fr 3.6rem 5.2rem; gap:.5rem; align-items:center; padding:.3rem .55rem; border-radius:8px; background:rgba(20,12,44,.75); border:1px solid rgba(120,90,255,.35); transition:transform .3s}
+.mt-row.me{border-color:#4ee6ff; box-shadow:0 0 12px rgba(78,230,255,.45)}
+.mt-row:first-child .mt-rk{color:#ffd24a; text-shadow:0 0 8px rgba(255,210,74,.8)}
+.mt-row.quit{opacity:.45}
+.mt-row .mt-rk{color:#b8a8ff; text-align:center; font-weight:bold}
+.mt-row .mt-nm{overflow:hidden; text-overflow:ellipsis; white-space:nowrap; text-align:left}
+.mt-row .mt-x{font-size:.8rem; white-space:nowrap; overflow:hidden}
+.mt-row .mt-track{position:relative; height:10px; border-radius:5px; background:rgba(0,0,0,.5); overflow:hidden}
+.mt-row .mt-lane{position:absolute; left:0; top:0; bottom:0; background:linear-gradient(90deg,rgba(160,110,255,.5),rgba(255,122,217,.7)); transition:width .3s}
+.mt-row .mt-cur{position:absolute; left:0; bottom:0; height:3px; background:#4ee6ff; box-shadow:0 0 6px #4ee6ff; transition:width .25s linear}
+.mt-row .mt-sc{color:#4ee6ff; font-weight:bold; font-variant-numeric:tabular-nums; text-align:right}
+.mt-row .mt-sc small{font-size:.7em; color:#b8a8ff; margin-left:.1em}
+.mt-row .mt-kpm{color:#b8a8ff; font-size:.78rem; text-align:right; font-variant-numeric:tabular-nums}
+.mt-hud{display:flex; gap:.8rem; align-items:center; justify-content:center; flex-wrap:wrap; margin:0 0 .6rem; font-size:.85rem; color:#d8ccff}
+.mt-chain{font-size:1.4rem; font-weight:bold; color:#b8a8ff; font-variant-numeric:tabular-nums}
+.mt-chain small{font-size:.65em; margin-left:.15em}
+.mt-chain.hot{color:#ff7ad9; text-shadow:0 0 10px rgba(255,122,217,.8)}
+.mt-items{display:inline-flex; gap:.4rem; align-items:center}
+.mt-items small{color:#8a7ab8; font-size:.75rem}
+.mt-it{display:inline-flex; align-items:center; gap:.25rem; padding:.2rem .55rem; border-radius:8px; border:1px solid #ffd24a; background:rgba(255,210,74,.12); color:#ffe9a8}
+.mt-it b{font-size:1.1rem; font-weight:400}
+.mt-items.ready .mt-it:first-child{border-width:2px; box-shadow:0 0 14px rgba(255,210,74,.8); animation:mtReady .9s ease-in-out infinite}
+.mt-space{padding:.2rem .7rem; border-radius:6px; background:#ffd24a; color:#2a1a00; font-weight:bold; font-size:.95rem; box-shadow:0 3px 0 #8a6a10, 0 0 16px rgba(255,210,74,.7); animation:mtReady .9s ease-in-out infinite}
+@keyframes mtReady{50%{transform:scale(1.08)}}
+.mt-ask{position:fixed; inset:0; z-index:70; display:flex; align-items:center; justify-content:center; background:rgba(5,4,12,.7)}
+.mt-ask[hidden]{display:none}
+.mt-askin{padding:1.2rem 1.6rem; border-radius:12px; background:#1c1638; border:2px solid #ff7ad9; box-shadow:0 0 30px rgba(255,122,217,.5); text-align:center; max-width:min(26rem,90vw)}
+.mt-askin b{display:block; font-size:1.4rem; color:#fff; margin-bottom:.4rem}
+.mt-askin small{display:block; color:var(--steel); font-size:.85rem; line-height:1.6}
+.mt-it.spin{border-color:#4ee6ff; background:rgba(78,230,255,.15); animation:mtBlink .13s steps(2) infinite}
+.mt-it.empty{border-style:dashed; border-color:#5a4a8a; background:none; color:#5a4a8a}
+.mt-pend{color:#ff8ad8; font-weight:bold; animation:mtBlink .6s steps(2) infinite}
+@keyframes mtBlink{50%{opacity:.4}}
+.mt-pop{position:absolute; right:14%; top:.6rem; font-size:1.4rem; font-weight:bold; color:#4ee6ff; opacity:0; pointer-events:none; text-shadow:0 0 10px currentColor}
+.mt-pop.on{animation:mtPop .9s ease-out}
+.mt-pop.dbl{color:#ff7ad9} .mt-pop.gold{color:#ffd24a; font-size:1.8rem} .mt-pop.big{color:#ffd24a; font-size:2rem} .mt-pop.oj{color:#a888c8}
+@keyframes mtPop{0%{opacity:0; transform:translateY(10px) scale(.7)} 20%{opacity:1; transform:translateY(-4px) scale(1.15)} 100%{opacity:0; transform:translateY(-30px)}}
+.mt-feed{position:fixed; left:50%; bottom:1rem; transform:translateX(-50%); z-index:50; display:flex; flex-direction:column-reverse; align-items:center; gap:.25rem; pointer-events:none}
+.mt-feed div{padding:.25rem .8rem; border-radius:999px; background:rgba(20,12,44,.85); border:1px solid rgba(160,110,255,.6); color:#f0e8ff; font-size:.85rem; white-space:nowrap; transition:opacity .5s, transform .5s; animation:mtFeedIn .25s ease-out}
+.mt-feed div.out{opacity:0; transform:translateY(-8px)}
+@keyframes mtFeedIn{from{opacity:0; transform:translateY(8px)}}
+/* 対戦の会場(TOEIC・農業) */
+#screen-battle .hud{color:#b8a8ff; display:flex; justify-content:space-between; gap:.6rem; align-items:baseline}
+#screen-battle .hud b{color:#4ee6ff; text-shadow:0 0 10px rgba(78,230,255,.8); font-size:1.2em}
+#screen-battle .hud small{color:#8a7ab8; font-size:.72rem; margin-left:.3rem}
+#screen-battle .timebar{border-color:#5a3aa8; background:#120c24}
+#screen-battle .timebar>i{background:linear-gradient(90deg,#4ee6ff,#ff7ad9); transition:width .1s linear}
+#screen-battle .game-esc{display:flex; gap:.6rem; justify-content:center}
+#screen-battle .mt-bgm{font-size:.8rem; padding:.2rem .7rem; min-height:0}
+.mta-main{position:relative; margin:.2rem auto .4rem; max-width:40rem}
+.mta-main.hit{animation:mtaHit .4s}
+@keyframes mtaHit{25%{transform:translateX(-6px)} 50%{transform:translateX(6px)} 75%{transform:translateX(-3px)}}
+.mtq-x2{color:#ffd24a; text-shadow:0 0 8px rgba(255,210,74,.8)}
+.mtq-card{padding:1rem 1.1rem 1.1rem; border-radius:14px; background:linear-gradient(180deg,#1c1638,#120e26); border:2px solid #4ee6ff; box-shadow:0 0 24px rgba(78,230,255,.3), inset 0 0 30px rgba(120,80,255,.2)}
+.mtq-no{color:#b8a8ff; font-size:.85rem; letter-spacing:.1em}
+.mtq-word{font-size:clamp(1.8rem,6vw,2.6rem); font-weight:bold; color:#fff; letter-spacing:.03em; text-shadow:0 0 14px rgba(78,230,255,.6); margin:.2rem 0 0; overflow-wrap:anywhere}
+.mtq-pos{color:#8a7ab8; font-size:.8rem; margin-bottom:.7rem}
+.mtq-opts{display:grid; grid-template-columns:1fr 1fr; gap:.5rem}
+.mtq-word.ja{font-size:clamp(1.3rem,4.5vw,1.9rem); letter-spacing:.05em}
+.mtq-sent{font-size:clamp(1.05rem,3.4vw,1.35rem); line-height:1.7; color:#fff; margin:.4rem 0 .1rem; text-align:left}
+.mtq-blank{display:inline-block; min-width:5em; border-bottom:2px solid #4ee6ff; margin:0 .2em}
+.mtq-blank.on{min-width:0; color:#6dff9a; border-color:#6dff9a; padding:0 .2em}
+.mtq-opt.en .tx{font-family:Georgia,"Times New Roman",serif; font-size:1.1rem; letter-spacing:.02em}
+.mtq-opt{display:flex; flex-direction:column; align-items:flex-start; gap:.25rem; text-align:left; padding:.6rem .8rem; min-height:3.4rem; border-radius:10px; background:rgba(20,12,44,.85); border:1px solid rgba(160,110,255,.55); color:#f0e8ff; transition:filter .4s, opacity .3s}
+.mtq-opt .no{display:inline-block; min-width:1.4rem; padding:0 .3rem; border-radius:4px; background:#4ee6ff; color:#07060f; font-weight:bold; font-size:.8rem; text-align:center}
+.mtq-opt .tx{font-size:1rem; line-height:1.4}
+.mtq-opt.pick{border:2px solid #4ee6ff; box-shadow:0 0 14px rgba(78,230,255,.6)}
+.mtq-opt.dim{opacity:.45}
+.mtq-opt.ok{border:2px solid #6dff9a; background:rgba(40,120,70,.45); box-shadow:0 0 16px rgba(109,255,154,.5); opacity:1}
+.mtq-opt.ng{border:2px solid #ff5a7a; background:rgba(120,30,50,.45); opacity:1}
+.mtq-who{display:flex; flex-wrap:wrap; gap:.25rem}
+.mtq-who i{font-style:normal; font-size:.72rem; padding:.05rem .45rem; border-radius:999px; background:rgba(255,255,255,.14); color:#fff}
+.mtq-who i.me{background:#4ee6ff; color:#07060f; font-weight:bold}
+.mtq-fb{margin:.7rem 0 .2rem; font-weight:bold; color:#ffe08a; min-height:1.4em}
+.mtq-ans{display:flex; flex-wrap:wrap; gap:.3rem .8rem; justify-content:center; font-size:.78rem; color:#8a7ab8}
+.mtq-ans .on{color:#6dff9a}
+.mtq-tags{display:flex; flex-wrap:wrap; gap:.3rem; justify-content:center; margin:.3rem 0 .1rem}
+.mtq-tag{font-size:.78rem; padding:.1rem .55rem; border-radius:999px; font-weight:bold}
+.mtq-tag.atk{background:rgba(255,90,122,.2); border:1px solid #ff5a7a; color:#ffb3c2}
+.mtq-tag.me{background:rgba(255,210,74,.15); border:1px solid #ffd24a; color:#ffe9a8}
+.mtq-typed{font-family:Georgia,"Times New Roman",serif; font-size:clamp(1.5rem,5vw,2rem); min-height:2.4rem; margin:.4rem 0 .2rem; color:#4ee6ff; letter-spacing:.04em}
+.mtq-typed .done{color:#4ee6ff; text-shadow:0 0 10px rgba(78,230,255,.6)}
+.mtq-hint{color:#b8a8ff; font-size:.82rem; margin:.2rem 0 .4rem}
+.mtq-hint b{color:#ffd24a}
+.mtq-wait{padding:1.6rem 0; color:#ffb3c2; font-weight:bold; animation:mtBlink .6s steps(2) infinite}
+.mtq-opt.cut{opacity:.25; text-decoration:line-through}
+.mta-items{margin:.5rem 0 0; min-height:2rem}
+.mta-items .mt-space{cursor:pointer}
+@media (max-width:640px){
+  #screen-battle .mt-row{grid-template-columns:1.2rem minmax(0,1.4fr) minmax(0,1fr) 4.2rem 3.4rem; gap:.35rem; font-size:.8rem}
+  #screen-battle .mt-row .mt-x{display:none}
+  .mtq-opts{grid-template-columns:1fr}
+  .mta-items .mt-it{font-size:.78rem; white-space:nowrap}
+  .mta-items .mt-space{font-size:.85rem; white-space:nowrap}
+  .mt-feed{width:92vw}
+  .mt-feed div{white-space:normal; text-align:center}
+  #screen-battle .hud small{display:none}
+  #screen-battle .hud{font-size:.85rem}
+}
+@media (prefers-reduced-motion:reduce){ .mta-main.hit{animation:none} }
+.mt-banner{position:fixed; left:0; right:0; top:38%; z-index:55; text-align:center; pointer-events:none; opacity:0}
+.mt-banner b{display:block; font-size:clamp(2rem,6vw,3.4rem); color:#ffd24a; letter-spacing:.12em; text-shadow:0 0 18px rgba(255,210,74,.9), 0 4px 0 #6a3a00}
+.mt-banner small{display:block; color:#fff; font-size:1rem; margin-top:.2rem; text-shadow:0 2px 6px #000}
+.mt-banner.on{animation:mtBanner 2.2s ease-out}
+@keyframes mtBanner{0%{opacity:0; transform:scale(1.6)} 12%{opacity:1; transform:scale(1)} 80%{opacity:1} 100%{opacity:0; transform:translateY(-20px)}}
+.mt-vs{position:fixed; inset:0; z-index:60; display:flex; align-items:center; justify-content:center; background:radial-gradient(circle, rgba(40,20,90,.85), rgba(5,4,12,.95)); pointer-events:none}
+.mtvs-in{text-align:center; animation:mtVsIn .5s ease-out}
+.mtvs-t{color:#ff7ad9; letter-spacing:.4em; font-size:1rem; margin-bottom:1rem}
+.mtvs-ns{display:flex; flex-wrap:wrap; gap:.8rem 1.2rem; align-items:center; justify-content:center; font-size:clamp(1.4rem,4vw,2.2rem); color:#fff; text-shadow:0 0 12px rgba(78,230,255,.8)}
+.mtvs-x{color:#ffd24a; font-size:.8em; text-shadow:0 0 12px rgba(255,210,74,.9)}
+.mtvs-n{margin-top:1.4rem; font-size:clamp(4rem,12vw,7rem); line-height:1; color:#ffd24a; text-shadow:0 0 26px rgba(255,210,74,.9), 0 6px 0 #6a3a00; animation:mtTick .7s ease-out}
+.mtvs-n.tick{animation:mtTick .7s ease-out}
+@keyframes mtTick{from{transform:scale(1.8); opacity:0} 30%{transform:scale(1); opacity:1}}
+.mtvs-go{font-size:clamp(4rem,14vw,8rem); color:#4ee6ff; text-shadow:0 0 30px rgba(78,230,255,.9), 0 6px 0 #1a3b6a; animation:mtGo .7s ease-out}
+@keyframes mtVsIn{from{opacity:0; transform:scale(1.3)}}
+@keyframes mtGo{from{transform:scale(2.5); opacity:0} 25%{transform:scale(1); opacity:1} 60%{opacity:1} 100%{opacity:0; transform:translateY(-20px)}}
+.mt-vs.go{background:none; align-items:flex-start; padding-top:3vh}   /* 「打て!」の時はもう始まっている: 暗い幕を外し、言葉に重ならない上のほうに出す */
+.mt-vs.go .mtvs-go{font-size:clamp(2.6rem,8vw,4.4rem); animation:mtGo .8s ease-out forwards}
+/* 言葉の種類: おじゃま・金・アイテム箱・大キー */
+body.mtb .word-panel.oj{border-color:#a060ff; background:repeating-linear-gradient(45deg,#2a1840 0 12px,#22123a 12px 24px); box-shadow:0 0 22px rgba(160,96,255,.6)}
+body.mtb .word-panel.oj #wordText{color:#d0a8ff}
+body.mtb .word-panel.gold{border-color:#ffd24a; box-shadow:0 0 30px rgba(255,210,74,.75), inset 0 0 30px rgba(255,210,74,.2)}
+body.mtb .word-panel.gold #wordText{color:#ffe08a; text-shadow:0 0 12px rgba(255,210,74,.8)}
+body.mtb .word-panel.box::after{content:"🎁"; position:absolute; top:-.7rem; right:-.5rem; font-size:1.6rem; background:none; box-shadow:none; width:auto; height:auto; animation:mtBob 1s ease-in-out infinite}
+@keyframes mtBob{50%{transform:translateY(-4px) rotate(8deg)}}
+body.mtb .word-panel.big{border-color:#ff5a5a; box-shadow:0 0 34px rgba(255,90,90,.7)}
+body.mtb .word-panel.big::before{content:"大キー"; position:absolute; top:-.75rem; left:50%; transform:translateX(-50%); width:auto; height:auto; padding:0 .6rem; border-radius:999px; background:#ff5a5a; color:#fff; font-size:.8rem; box-shadow:none}
+body.mtb .word-panel.flip #wordText, body.mtb .word-panel.flip #wordKana, body.mtb .word-panel.flip #romaji{display:inline-block; transform:rotate(180deg)}   /* 言葉もよみがなもローマ字も */
+body.mtb .word-panel.flip{display:flex; flex-direction:column; align-items:center}
+body.mtb .word-panel.hit{animation:mtHit .35s}
+@keyframes mtHit{20%{transform:translate(-8px,3px)} 40%{transform:translate(7px,-3px)} 60%{transform:translate(-4px,2px)} 80%{transform:translate(3px,0)}}
+body.mtb-fog #romaji .rest, body.mtb-fog #wordKana{filter:blur(6px); opacity:.25}   /* よみがなもローマ字もかくす */
+body.mtb-fog #screen-game .word-panel{box-shadow:inset 0 0 60px rgba(220,220,240,.35)}
+/* フィーバー・2倍・ラストスパート */
+body.mtb-fever #screen-game .word-panel{border-color:transparent; background:linear-gradient(#1c1638,#120e26) padding-box, linear-gradient(90deg,#ff5a5a,#ffd24a,#5aff8a,#4ee6ff,#ff7ad9,#ff5a5a) border-box; background-size:auto, 300% 100%; animation:mtRainbow 1.2s linear infinite}
+@keyframes mtRainbow{to{background-position:0 0, 300% 0}}
+body.mtb-fever{background-color:#1a0626}
+body.mtb-fever #screen-game .hud b{color:#ff7ad9; text-shadow:0 0 12px rgba(255,122,217,.9)}
+body.mtb-double #screen-game .timebar>i, body.mtb-goldrush #screen-game .timebar>i{background:linear-gradient(90deg,#ffd24a,#ff9a3a)}
+body.mtb-spurt #screen-game .timebar>i{background:linear-gradient(90deg,#ff3a5a,#ffd24a); animation:mtBlink .5s steps(2) infinite}
+body.mtb-spurt::after{content:""; position:fixed; inset:0; pointer-events:none; z-index:0; box-shadow:inset 0 0 120px rgba(255,40,80,.45); animation:mtBlink 1s ease-in-out infinite}
+@media (prefers-reduced-motion:reduce){ .mt-space, .mt-items.ready .mt-it:first-child, body.mtb::before, body.mtb-spurt::after, .mt-pend, body.mtb-fever #screen-game .word-panel, body.mtb .word-panel.box::after{animation:none} }
+.wc-list{height:min(52vh,26rem); overflow:auto; display:flex; flex-direction:column; gap:.35rem; padding:.5rem; border-radius:10px; background:rgba(0,0,0,.25); margin:.4rem 0}
+.wc-msg{line-height:1.5; word-break:break-word}
+.wc-msg .wc-t{color:var(--steel); opacity:.6; font-size:.75rem; margin-right:.4rem; font-variant-numeric:tabular-nums}
+.wc-msg .wc-n{font-weight:800; color:var(--amber); margin-right:.4rem}
+.wc-msg.me .wc-n{color:#8ad0ff}
+.wc-msg.sys{color:var(--steel); font-size:.88rem}
+.wc-msg.sys .wc-n{color:#9ad88a}
+.wc-msg.dish{background:rgba(255,216,74,.1); border:1px solid rgba(255,216,74,.35); border-radius:8px; padding:.3rem .5rem}
+.wc-msg .wc-eff{display:block; font-size:.8rem; color:var(--steel); opacity:.85}
+.wc-msg .wc-got{font-size:.8rem; color:var(--steel); opacity:.7; margin-left:.4rem}
+.wc-msg .btn{padding:.1rem .7rem; font-size:.85rem; margin-left:.4rem}
+.wc-row{display:flex; gap:.4rem; align-items:center; flex-wrap:wrap}
+.wc-msg svg, .wc-pop svg, .wc-dish svg{display:inline-block; width:1.4em; height:1.4em; vertical-align:-.3em}
+.wc-row .wc-text{flex:1; min-width:10rem; margin:0; text-transform:none; letter-spacing:0; font-family:inherit}   /* 引き継ぎコード用の入力欄の見た目(大文字・等幅)を使わない */
+.wc-dish{display:flex; flex-wrap:wrap; gap:.3rem; max-height:11rem; overflow:auto; padding:.4rem; border-radius:10px; background:rgba(255,255,255,.06); margin-bottom:.4rem}
+.wc-dish[hidden], .wc-pop[hidden], #screen-garden .wcmini[hidden]{display:none}
+.wc-dish{display:grid; grid-template-columns:repeat(auto-fill,minmax(15rem,1fr)); max-height:14rem}
+.wc-dish .btn{font-size:.85rem; padding:.3rem .6rem; text-align:left; display:flex; flex-direction:column; gap:.1rem; min-width:0}
+.wc-dish .btn .wdn{font-weight:700}
+.wc-dish .btn .wde{font-size:.72rem; opacity:.8; line-height:1.35; white-space:normal}
+.wc-dish .btn.cur{outline:2px solid var(--amber)}
+.wc-dish{overscroll-behavior:contain; -webkit-overflow-scrolling:touch}
+.wc-acts{margin-bottom:.35rem}
+/* 目標・報告・下のメニューが、スクロールしないで1画面に収まる(報告の欄が残りの高さを使う) */
+.wc-panel{display:flex; flex-direction:column; height:min(48rem,calc(100vh - 2rem)); height:min(48rem,calc(100dvh - 2rem)); max-height:none; overflow:hidden}
+.wc-panel > *{flex:none}
+.wc-panel .wc-list{flex:1 1 auto; height:auto; min-height:5rem; overscroll-behavior:contain}   /* 端までスクロールしても、後ろの画面は動かさない */
+html.wc-lock, html.wc-lock body{overflow:hidden; overscroll-behavior:none}   /* 報告を開いているあいだは、後ろの画面をスクロールさせない */
+#wc{overscroll-behavior:contain}
+.wc-panel .wc-dish{max-height:min(13rem,24vh)}
+@media (max-height:720px){ .wc-panel .keynav{display:none} .wc-panel .wc-goal div+.gsub{display:none} }
+.wc-panel .keynav{margin:.25rem 0 0; font-size:.7rem; line-height:1.4}
+.wc-panel{padding-block:.7rem .6rem}
+.wc-panel .bk-head{margin-bottom:.3rem}
+.wc-panel .bk-head h2{font-size:1.15rem}
+.wc-panel .bk-head .btn{padding:.2rem .6rem; font-size:.8rem}
+.wc-panel .wc-list{margin:.3rem 0; padding:.35rem .45rem; gap:.25rem}
+.wc-panel .wc-msg{font-size:.9rem; line-height:1.45}
+.wc-panel .wc-msg.dish, .wc-panel .wc-msg.card{padding:.2rem .45rem}
+.wc-bottom{flex-wrap:nowrap}
+.wc-bottom .wc-text{min-width:6rem; padding:.35rem .6rem}
+.wc-sm{padding:.3rem .6rem; font-size:.85rem; white-space:nowrap; flex:none}
+.wc-panel .bk-note{margin:.2rem 0 0; font-size:.8rem}
+.wc-goal{padding:.3rem .55rem; font-size:.8rem; margin-top:0}
+.wc-goal .gbar{height:.35rem; margin:.2rem 0}
+.wc-goal .gsub{font-size:.7rem}
+/* リアクション: 文のうしろに続けて並べる。付けるボタンは、さわったときだけ */
+.wc-panel .wc-rx{display:inline-flex; margin:0 0 0 .35rem; vertical-align:middle}
+.wc-panel .wc-rx button.add{opacity:0}
+.wc-panel .wc-msg:hover .wc-rx button.add, .wc-panel .wc-rx button.add.open, html.mobile .wc-panel .wc-rx button.add{opacity:.55}
+
+.wc-panel .bk-note:empty{display:none}
+html.mobile .wc-panel{height:calc(100vh - 1rem); height:calc(100dvh - 1rem)}
+html.mobile .wc-panel .keynav{display:none}
+html.mobile .wc-bottom .wc-sm .kbdh, html.mobile .wc-panel .kbdh{display:none}
+.wc-goal{border:1px solid rgba(138,208,255,.4); background:rgba(138,208,255,.08); border-radius:10px; padding:.4rem .6rem; font-size:.85rem; line-height:1.45; margin-top:.3rem}
+.wc-goal b{color:#8ad0ff}
+.wc-goal.done{border-color:#ffd84a; background:rgba(255,216,74,.12)}
+.wc-goal .gleft{font-size:.72rem; color:#ffd84a; border:1px solid rgba(255,216,74,.5); border-radius:99px; padding:0 .45rem; white-space:nowrap}
+.wc-goal .gleft:empty{display:none}
+.wc-goal .ground{font-size:.72rem; font-weight:800; color:#1b1405; background:#ffd84a; border-radius:99px; padding:0 .45rem; white-space:nowrap}
+/* ごほうびを受け取ったときの演出 */
+.wc-prize{position:absolute; inset:0; z-index:5; display:flex; align-items:center; justify-content:center; background:rgba(10,12,18,.72); border-radius:inherit; overflow:hidden; cursor:pointer; animation:wcpFade .3s ease-out}
+.wc-prize .pbox{text-align:center; padding:1.2rem 1.6rem; border-radius:16px; background:linear-gradient(180deg,#3a3122,#24201a); border:2px solid #ffd84a; box-shadow:0 0 40px rgba(255,216,74,.45); animation:wcpPop .55s cubic-bezier(.2,1.6,.4,1) .55s both}
+.wc-prize .pgift{font-size:4rem; line-height:1; animation:wcpShake .55s ease-in-out both}
+.wc-prize.open .pgift{display:none}
+.wc-prize .ptitle{font-weight:900; font-size:1.2rem; color:#ffd84a; letter-spacing:.08em; margin:.2rem 0 .6rem}
+.wc-prize .pitems{display:flex; gap:.8rem; justify-content:center; flex-wrap:wrap}
+.wc-prize .pit{display:flex; flex-direction:column; align-items:center; gap:.2rem; min-width:7rem; padding:.5rem .6rem; border-radius:12px; background:rgba(255,255,255,.07); border:1px solid rgba(255,255,255,.18); animation:wcpPop .5s cubic-bezier(.2,1.6,.4,1) both}
+.wc-prize .pit:nth-child(2){animation-delay:.25s}
+.wc-prize .pit:nth-child(3){animation-delay:.5s}
+.wc-prize .pit .pic{font-size:2.2rem; line-height:1}
+.wc-prize .pit .pic svg{width:2.6rem; height:2.6rem}
+.wc-prize .pit .pnm{font-weight:800; font-size:.9rem}
+.wc-prize .phint{font-size:.72rem; color:var(--steel); margin-top:.6rem}
+.wc-prize i{position:absolute; top:-10px; width:.5rem; height:.8rem; border-radius:2px; animation:wcpFall linear forwards}
+@keyframes wcpFade{from{opacity:0}to{opacity:1}}
+@keyframes wcpPop{0%{transform:scale(.3); opacity:0}100%{transform:scale(1); opacity:1}}
+@keyframes wcpShake{0%{transform:scale(.4) rotate(0)}30%{transform:scale(1.15) rotate(-12deg)}55%{transform:scale(1.1) rotate(12deg)}80%{transform:scale(1.2) rotate(-6deg)}100%{transform:scale(1.4) rotate(0); opacity:.9}}
+@keyframes wcpFall{to{transform:translateY(110vh) rotate(720deg)}}
+.wc-goal.done-fx{animation:wcGoalFx 1.6s ease-out}
+@keyframes wcGoalFx{0%{box-shadow:0 0 0 0 rgba(255,216,74,.9)}40%{box-shadow:0 0 18px 6px rgba(255,216,74,.7)}100%{box-shadow:0 0 0 0 rgba(255,216,74,0)}}
+.wc-goal .gbar{height:.5rem; border-radius:99px; background:rgba(255,255,255,.12); overflow:hidden; margin:.25rem 0}
+.wc-goal .gbar i{display:block; height:100%; background:linear-gradient(90deg,#8ad0ff,#ffd84a)}
+.wc-goal .gsub{font-size:.75rem; color:var(--steel)}
+.wc-goal .btn{padding:.1rem .7rem; font-size:.85rem; margin-left:.4rem}
+.wc-rx{display:flex; flex-wrap:wrap; gap:.25rem; margin-top:.15rem; align-items:center}
+.wc-rx button{font:inherit; font-size:.8rem; line-height:1.2; padding:.05rem .4rem; border-radius:99px; border:1px solid rgba(255,255,255,.18); background:rgba(255,255,255,.06); color:inherit; cursor:pointer}
+.wc-rx button.mine{border-color:var(--amber); background:rgba(255,216,74,.18)}
+.wc-rx button.add{opacity:.45}
+.wc-msg:hover .wc-rx button.add, .wc-rx button.add.open{opacity:1}
+.wc-msg.card{border-radius:8px; padding:.3rem .5rem}
+.wc-msg.card{background:rgba(138,208,255,.08); border:1px solid rgba(138,208,255,.35)}
+.wc-card{display:flex; gap:.6rem; align-items:center; margin:.25rem 0; padding:.45rem .6rem; border-radius:10px; background:linear-gradient(135deg,rgba(255,255,255,.1),rgba(255,255,255,.02)); border:1px solid rgba(255,255,255,.2); max-width:22rem}
+.wc-card .ci{font-size:2rem; line-height:1; flex:none}
+.wc-card .ci svg{width:2.4rem; height:2.4rem}
+.wc-card .cn{font-weight:800}
+.wc-card .cs{font-size:.78rem; color:var(--steel)}
+.wc-card.t5{border-color:#ffd84a; box-shadow:0 0 10px rgba(255,216,74,.35)}
+.wc-card.t3{border-color:#c79bff}
+.wc-msg .wc-who{display:block; font-size:.75rem; color:var(--steel); opacity:.85}
+.wc-pop{position:fixed; left:50%; bottom:1.2rem; transform:translateX(-50%); z-index:60; max-width:min(36rem,92vw); background:#2a2f38; color:#fff; border:2px solid #ffd84a; border-radius:12px; padding:.5rem .9rem; box-shadow:0 6px 18px rgba(0,0,0,.4); cursor:pointer; animation:wc-pop .4s cubic-bezier(.2,.9,.3,1.3)}
+@keyframes wc-pop{0%{transform:translate(-50%,40px); opacity:0}100%{transform:translate(-50%,0); opacity:1}}
+#screen-garden .wcmini{position:fixed; right:.8rem; bottom:.8rem; z-index:6; display:flex; align-items:center; gap:.3rem; background:rgba(255,250,238,.94); border:2px solid #c8a06a; border-radius:999px; padding:.2rem .65rem; font-size:.78rem; font-weight:900; color:#5a3a12; cursor:pointer; box-shadow:0 3px 8px rgba(60,35,10,.2)}
+#screen-garden .wcmini .wck{font-size:.66rem; color:#8a6a3a; font-weight:700}
+html.mobile #screen-garden .wcmini{right:.5rem; bottom:.5rem}
 .bk-modal{position:fixed; inset:0; z-index:20; display:none; align-items:center; justify-content:center; background:rgba(8,10,14,.7); cursor:pointer}
 .bk-modal.open{display:flex}
 .bk-panel{
@@ -2297,6 +2612,10 @@ html.mobile #screen-garden .grk-list{max-height:none; flex:1 1 auto; min-height:
           <div class="name">TOEIC 英単語<span class="kbd">E</span></div>
           <div class="desc">英単語・熟語の4択と穴埋め<br>会話のリスニング</div>
         </button>
+        <button class="diff-btn world" id="wcBtn">
+          <div class="name">農園の寄り合い <span class="news-new" id="wcNew"></span><span class="kbd">C</span></div>
+          <div class="desc">みんなでひとこと書き合う<br>料理を投げて分け合う</div>
+        </button>
       </div>
     </div>
 
@@ -2394,7 +2713,10 @@ html.mobile #screen-garden .grk-list{max-height:none; flex:1 1 auto; min-height:
     </div>
     <div class="timebar" id="timebar"><i id="timefill"></i></div>
 
+    <div class="mt-board" id="mtBoard" hidden></div>
+    <div class="mt-hud" id="mtHud" hidden></div>
     <div class="word-panel" id="wordPanel">
+      <div class="mt-pop" id="mtPop"></div>
       <span class="corner"></span>
       <div id="penaltyPop">ミス上限! キーが1個はまった…</div>
       <div id="wordText">&nbsp;</div>
@@ -2404,7 +2726,17 @@ html.mobile #screen-garden .grk-list{max-height:none; flex:1 1 auto; min-height:
     <div id="nextWord">&nbsp;</div>
 
     <div class="plate" id="plate"></div>
-    <p class="game-esc"><button class="btn" id="gameQuit" tabindex="-1">やめる <span class="kbdh">Esc</span></button></p>
+    <p class="game-esc"><button class="btn" id="gameQuit" tabindex="-1">やめる <span class="kbdh">Esc</span></button><button class="btn mt-bgm" id="mtBgm" tabindex="-1" hidden>🔊 BGM</button></p>
+  </section>
+
+  <!-- 対戦の会場(TOEIC・農業) -->
+  <section id="screen-battle" class="screen">
+    <div class="hud mta-hud"><span id="mtaL"></span><span id="mtaC"></span><span id="mtaR"></span></div>
+    <div class="timebar"><i id="mtaBar"></i></div>
+    <div class="mt-board" id="mtaBoard"></div>
+    <div class="mta-main" id="mtaMain"></div>
+    <div class="mt-hud mta-items" id="mtaItems"></div>
+    <p class="game-esc"><button class="btn" id="mtaQuit" tabindex="-1">やめる <span class="kbdh">Esc</span></button><button class="btn mt-bgm" id="mtaBgm" tabindex="-1">🔊 BGM</button></p>
   </section>
 
   <!-- リザルト画面 -->
@@ -2416,6 +2748,7 @@ html.mobile #screen-garden .grk-list{max-height:none; flex:1 1 auto; min-height:
     <p class="result-new" id="resultNew"></p>
     <p class="result-garden" id="resultGarden"></p>
     <p class="result-bonus" id="resultBonus" hidden></p>
+    <div class="mt-result" id="mtResult" hidden></div>
     <div class="register" id="registerBox">
       <p class="reg-as" id="regAs" style="display:none"><b id="regAsName"></b> としてランキングに登録します</p>
       <input id="nameInput" class="name-input" maxlength="10" placeholder="プレイヤー名" autocomplete="off">
@@ -2485,6 +2818,7 @@ html.mobile #screen-garden .grk-list{max-height:none; flex:1 1 auto; min-height:
       <div class="money"><span class="kicon"></span><span id="g-money">0</span><small>キー</small></div>
       <div class="rate" id="g-rate"></div>
       <div class="buff" id="g-buff" hidden></div>
+      <div class="wcmini" id="wcMini" hidden></div>
       <div class="sp"></div>
       <button class="tbtn shop" id="g-shopBtn">お店<span class="kb">Tab</span></button>
       <button class="tbtn gacha" id="g-gachaBtn">ガチャ<span class="kb">7</span></button>
@@ -2833,6 +3167,36 @@ html.mobile #screen-garden .grk-list{max-height:none; flex:1 1 auto; min-height:
 </div>
 <div id="ptLock"><div class="pt-box"><div class="pt-big">⏰</div><h2>今は遊べません</h2><p id="ptLockMsg"></p><button class="btn" id="ptLockSet">タイマーの設定 (L)</button></div></div>
 <div id="ptWarn"></div>
+<div id="wc" class="bk-modal">
+  <div class="bk-panel wc-panel">
+    <div class="bk-head"><h2>🌾 農園の寄り合い</h2><button class="btn bk-x" id="wcClose">閉じる ✕ <span class="kbdh">Esc</span></button></div>
+    <div class="wc-goal" id="wcGoal" hidden></div>
+    <div class="wc-list" id="wcList"></div>
+    <div class="wc-dish wc-pane" id="wcDish" hidden></div>
+    <div class="wc-dish wc-pane" id="wcCard" hidden></div>
+    <div class="wc-dish wc-pane" id="wcMatch" hidden></div>
+    <div class="wc-row wc-bottom">
+      <button class="btn wc-sm" id="wcDishBtn" title="料理を投げる">🍳 料理 <span class="kbdh">F</span></button>
+      <button class="btn wc-sm" id="wcCardBtn" title="自慢する">🏅 自慢 <span class="kbdh">J</span></button>
+      <button class="btn wc-sm" id="wcMatchBtn" title="対戦">⚔️ 対戦 <span class="kbdh">V</span></button>
+      <input class="bk-codein wc-text" id="wcText" maxlength="200" placeholder="T か Enter で書く ・ 200文字まで" autocomplete="off">
+      <button class="btn primary wc-sm" id="wcSend">送る <span class="kbdh">Enter</span></button>
+    </div>
+    <p class="bk-note" id="wcNote"></p>
+    <p class="keynav"><b>T</b> / <b>Enter</b> 書く ・ 入力欄で <b>Enter</b> 送る ・ <b>F</b> 料理 ・ <b>J</b> 自慢 ・ <b>V</b> 対戦(開いたら <b>矢印</b> か <b>数字</b> で選んで <b>Enter</b>) ・ <b>A</b> 募集に参加 ・ <b>R</b> 届いた料理を受け取る ・ <b>G</b> 目標のごほうび ・ <b>↑ ↓</b> 読む ・ <b>Esc</b> 閉じる</p>
+  </div>
+</div>
+<div id="wcPop" class="wc-pop" hidden></div>
+<div class="mt-ask" id="mtAsk" hidden><div class="mt-askin"><b>本当にやめますか?</b><small>やめると「やめました」になり、ごほうびはもらえません。試合はそのまま進んでいます</small><div class="btn-row"><button class="btn primary" id="mtAskYes">やめる <span class="kbdh">Enter</span></button><button class="btn" id="mtAskNo">つづける <span class="kbdh">Esc</span></button></div></div></div>
+<div class="mt-feed" id="mtFeed"></div><div class="mt-banner" id="mtBanner"></div><div class="mt-vs" id="mtVs" hidden></div>
+<div id="mt" class="bk-modal">
+  <div class="bk-panel mt-panel">
+    <div class="bk-head"><h2 id="mtTitle">⚔️ 対戦の待合室</h2></div>
+    <div id="mtBody"></div>
+    <div class="btn-row"><button class="btn primary" id="mtStart" hidden>今すぐ始める <span class="kbdh">Enter</span></button><button class="btn" id="mtLeave">抜ける <span class="kbdh">Esc</span></button><button class="btn mt-bgmb" id="mtBgmL">🔊 BGM</button></div>
+    <p class="keynav"><b>M</b> BGM のオンとオフ</p>
+  </div>
+</div>
 <div id="fb" class="bk-modal">
   <div class="bk-panel">
     <div class="bk-head"><h2>要望・バグ報告</h2><button class="btn bk-x" id="fbClose">閉じる ✕</button></div>
@@ -3831,18 +4195,20 @@ const fmtTime = s => Number(s).toFixed(2)+"秒";
 
 /* ---------- 画面制御 ---------- */
 const $=id=>document.getElementById(id);
-const screens={title:$("screen-title"),toeic:$("screen-toeic"),game:$("screen-game"),result:$("screen-result"),ranking:$("screen-ranking"),dict:$("screen-dict"),books:$("screen-books"),garden:$("screen-garden")};
+const screens={title:$("screen-title"),toeic:$("screen-toeic"),game:$("screen-game"),result:$("screen-result"),ranking:$("screen-ranking"),dict:$("screen-dict"),books:$("screen-books"),garden:$("screen-garden"),battle:$("screen-battle")};
 let scene="title";
 /* お酒の演出: タイピングと TOEIC の画面だけ */
-setInterval(()=>{ const d=drunkNowG(), b=document.body.classList, st=Math.max(d.hor||0,d.aka||0,d.chi||0)>=2;
+setInterval(()=>{ const d=mtOn()?mtDrunkFx():drunkNowG(),   // 対戦中はお酒の演出を切る(「酔わせる」を受けたときだけ揺らす)
+  b=document.body.classList, st=Math.max(d.hor||0,d.aka||0,d.chi||0)>=2;
   b.toggle("dk-hor",!!d.hor); b.toggle("dk-aka",!!d.aka); b.toggle("dk-chi",!!d.chi); b.toggle("dk-st",st); b.toggle("dk-dei",!!d.dei); b.toggle("dk-dei2",d.dei>=2); },1000);
 function show(name){
   const prev=scene; scene=name;
+  if(name!=="result" && typeof mtRes!=="undefined" && mtRes) mtResultClose();   // 対戦の結果から離れた
   if(prev==="ranking" && name!=="ranking"){ try{ if(syncDirty) syncPush(false); syncMaybePull(); }catch(e){} }   // ランキングを見ているあいだ待っていた同期を、閉じたときに送る
   try{ window.scrollTo(0,0); }catch(e){}
   for(const k in screens) screens[k].classList.toggle("active",k===name);
   document.body.classList.toggle("garden", name==="garden");
-  try{ Garden.applyTheme(); }catch(e){}   // 料理の色(ホーム画面とタイピング)
+  if(!(mtOn() || mtRes)){ try{ Garden.applyTheme(); }catch(e){} }   // 料理の色(ホーム画面とタイピング)。対戦中は付けない
   if(name==="title"){ dbShown=""; refreshDaily(); refreshBara(true); refreshStatsLine(); refreshGardenStat(); syncOnTitle(); }
 }
 
@@ -4087,6 +4453,7 @@ function renderNextWord(){
 }
 
 function pickWord(){
+  if(mtOn()){ const w=mtNextWord(); lastWordKey=w.k; setCurrentWord(w); return; }   // 対戦: 全員同じ順番
   if(gameBara && baraMaybeQuiz()) return;   // バラバラ: TOEIC の4択
   if(isQ(diff)){
     // キューの先頭を出題し、その次を先読み表示する
@@ -4231,7 +4598,7 @@ setInterval(()=>{ if(scene==="title") refreshBara(); },15000);
 function startGame(d){
   if(window.IS_MOBILE) return;   // スマホではタイピングできない
   if(d==="barabara") d="normal";
-  gameBara = baraOn() && d!=="book"; baraQ=null; baraN=0;
+  gameBara = baraOn() && d!=="book" && !mtOn(); baraQ=null; baraN=0;   // 対戦中はバラバラにしない
   diff=d;
   $("wordPanel").classList.toggle("bara", gameBara); $("wordPanel").classList.remove("quiz");
   const ta=isQ(d), oneshot=(d==="oneshot");
@@ -4309,6 +4676,11 @@ async function endGame(){
   $("imeWarn").classList.remove("show");
   resetStage();   // 背景の熱演出を戻す
   const toGarden=gardenScrews(diff,score);
+  if(mtOn()){   // 対戦: 料理の倍率なし・日替わりのご褒美なし・ランキングに載せない
+    typePk=null; dbFinish(null); recordStats(score, toGarden, true);
+    $("resultGarden").textContent = toGarden>0 ? `農園に ${toGarden.toLocaleString("ja-JP")}キー 届きます` : "";
+    mtFinish(toGarden); return;
+  }
   typePk=gameBara?null:dbPk(diff,true); dbFinish(gameBara?null:diff);   // バラバラ中は、日替わりのご褒美も10倍もなし
   recordStats(score, toGarden); // ランキング登録の有無に関係なく記録(農園には難易度などに応じたキーを届ける)
   showGardenScrews("resultGarden", toGarden);
@@ -4320,6 +4692,7 @@ async function endGame(){
   const best=await loadBest(diff);
   const isNew=!gameBara && isBetterValue(value,best,diff);   // バラバラの間の記録は自己ベストに入れない
   if(isNew) await saveBest(diff,value);
+  if(isNew && best!=null) wcAnnounce(`タイピングの${DIFF_LABEL[diff]}で自己ベストを出しました(${isTA(diff)?fmtTime(value):value+"個"})`, 5);
   const shownBest = isNew ? value : best;
   $("resultDiff").textContent=`— ${DIFF_LABEL[diff]}${gameBara?" ・ バラバラ":""} —`;
   $("resultCount").classList.toggle("ta",ta);
@@ -4363,7 +4736,33 @@ const showGardenScrews = (el,n) => { const m=gardenScrewMul(); $(el).textContent
 /* ---------- 入力 ---------- */
 const START_KEYS={"1":"easy","2":"normal","3":"hard","4":"ta-easy","5":"ta-normal","6":"ta-hard","7":"oneshot"};
 document.addEventListener("keydown",e=>{
+  if(mtLobbyOpen){ if(e.key==="Enter"){ e.preventDefault(); mtStartNow(); } else if(e.key==="Escape"){ e.preventDefault(); mtLeave(); } else if(e.key==="m"||e.key==="M"){ e.preventDefault(); mtBgmToggle(); } return; }   // 対戦の待合室
+  // 農園の寄り合いが開いているときは、そちらだけを操作
+  if(wcOpen){
+    const k=e.key, inText=e.target && e.target.id==="wcText";
+    if(inText){
+      if(k==="Enter" && !e.isComposing){ e.preventDefault(); wcSend(); }
+      else if(k==="Escape"){ e.preventDefault(); e.target.blur(); }
+      return;
+    }
+    if(e.target && (e.target.tagName==="INPUT"||e.target.tagName==="TEXTAREA")) return;
+    if(k==="Escape" && wcPaneOpen()){ e.preventDefault(); wcPaneOpen().hidden=true; }
+    else if(k==="Escape"||k==="c"||k==="C"){ e.preventDefault(); closeWorld(); }
+    else if(k==="Enter" && wcPaneOpen() && wcCur>=0){ e.preventDefault(); wcPanePick(); }
+    else if(k==="t"||k==="T"||k==="Enter"){ e.preventDefault(); $("wcText").focus(); }
+    else if(k==="f"||k==="F"){ e.preventDefault(); wcDishToggle(); }
+    else if(k==="j"||k==="J"){ e.preventDefault(); wcCardToggle(); }
+    else if(k==="v"||k==="V"){ e.preventDefault(); wcMatchToggle(); }
+    else if((k==="a"||k==="A") && !window.IS_MOBILE){ e.preventDefault(); const bs=$("wcList").querySelectorAll("[data-wcmt]"); if(bs.length) bs[bs.length-1].click(); else $("wcNote").textContent="参加できる対戦はありません"; }   // いちばん新しい募集に参加
+    else if(k==="g"||k==="G"){ e.preventDefault(); wcGoalGet(); }
+    else if(/^[0-9]$/.test(k) && wcPaneOpen()){ e.preventDefault(); const bs=[...wcPaneOpen().querySelectorAll("button.btn")]; const b=bs[k==="0"?9:+k-1]; if(b && !b.disabled) b.click(); }   // 選ぶ欄の番号
+    else if(k.startsWith("Arrow") && wcPaneOpen()){ e.preventDefault(); wcPaneMove(k); }
+    else if(k==="r"||k==="R"){ e.preventDefault(); const bs=$("wcList").querySelectorAll("[data-wcget]"); if(bs.length) bs[bs.length-1].click(); else $("wcNote").textContent="受け取れる料理はありません"; }   // いちばん新しいものを受け取る
+    else if(k==="ArrowUp"||k==="ArrowDown"){ e.preventDefault(); $("wcList").scrollBy(0,k==="ArrowDown"?80:-80); }
+    return;
+  }
   if(scene==="garden"){ Garden.onKey(e); return; }
+  if(scene==="battle"){ mtaKey(e); return; }   // 対戦の会場(TOEIC・農業)
   // 引き継ぎウィンドウが開いているときは、そちらだけを操作
   if(backupOpen && !(e.target && (e.target.tagName==="TEXTAREA"||e.target.tagName==="INPUT"))){
     backupKey(e); return;
@@ -4419,6 +4818,7 @@ document.addEventListener("keydown",e=>{
     if(e.key==="k"||e.key==="K") openBackup();
     if(e.key==="8") openBooks();
     if(e.key==="f"||e.key==="F") openFeedback();
+    if(e.key==="c"||e.key==="C") openWorld();
     if(e.key==="u"||e.key==="U") openNews();
     if(e.key==="e"||e.key==="E") openToeic();
     if(e.key==="l"||e.key==="L") ptOpenWin();
@@ -4453,6 +4853,14 @@ document.addEventListener("keydown",e=>{
   }
   if(scene==="result"){
     if(Date.now()-resultAt<800) return;   // 時間切れの直後に打ち続けたキーで、名前欄などが動かないように
+    if(mtRes){   // 対戦の結果
+      if(e.key==="Enter"){ e.preventDefault(); mtRematch(); }
+      else if((e.key==="c"||e.key==="C") && !mtRes.m.ghost){ mtResultClose(); show("title"); openWorld(); }
+      else if(e.key==="Escape"){ mtResultClose(); show("title"); }
+      else if(e.key==="g"||e.key==="G"){ mtResultClose(); openGarden(); }
+      else if(e.key==="m"||e.key==="M"){ mtBgmToggle(); }
+      return;
+    }
     if(e.key==="Enter") startGame(diff);
     if(e.key==="Escape"){ if(diff==="book") openBooks(); else show("title"); }
     if((e.key==="n"||e.key==="N") && !playerName){ e.preventDefault(); $("nameInput").focus(); $("nameInput").select&&$("nameInput").select(); }
@@ -4461,16 +4869,25 @@ document.addEventListener("keydown",e=>{
     return;
   }
   // ゲーム中
+  if(mtOn() && mtAskIsOpen()){   // 対戦: 「本当にやめますか?」が出ているとき
+    e.preventDefault();
+    if(e.key==="Enter"||e.key==="y"||e.key==="Y") mtQuitGame();
+    else if(e.key==="Escape"||e.key==="n"||e.key==="N") mtAskClose();
+    return;
+  }
+  if(mtOn() && e.key==="Escape"){ e.preventDefault(); mtAskOpen(); return; }   // 対戦は、やめる前に聞く
   if(e.key==="Escape"){
     clearInterval(timerId); clearInterval(cdId); cdId=null;   // カウントダウン中に抜けても始まらないように
     $("countdown").style.display="none";
     running=false; resetStage(); clearWordPanel();
-    typePk=gameBara?null:dbPk(diff,false); sendToGarden(gardenKeys,0); gardenKeys=0;
+    const inMt=mtOn(); if(inMt) mtQuit();   // 対戦をやめる
+    typePk=gameBara||inMt?null:dbPk(diff,false); sendToGarden(gardenKeys,0); gardenKeys=0;
     if(diff==="book") openBooks(); else show("title");
     return;
   }
   if(!running) return;
   const key=e.key;
+  if(key===" " && mtOn()){ e.preventDefault(); mtUseItem(); return; }   // 対戦: アイテムを使う
   if(key==="Process" || e.isComposing){ imeWarn(); return; }
   if(!/^[a-zA-Z0-9\-'!?,.~\/%&]$/.test(key)) return;
   e.preventDefault();
@@ -4478,6 +4895,7 @@ document.addEventListener("keydown",e=>{
   if(r==="skip") return;
   if(r==="miss"){
     miss++; $("miss").textContent=miss;
+    if(mtOn()) mtMiss();   // 対戦: 連鎖が切れる
     const p=$("wordPanel");
     p.classList.remove("shake"); void p.offsetWidth; p.classList.add("shake");
     // ノーミス勝負: 1ミスで即終了
@@ -4493,7 +4911,7 @@ document.addEventListener("keydown",e=>{
     // タイムアタック・単語帳はミスしてもペナルティ無し(回数だけ記録)
     if(isQ(diff)) return;
     // ミス上限でキーが1個はまる
-    if(miss % MISS_PENALTY[diff]===0 && score>0){
+    if(miss % MISS_PENALTY[diff]===0 && score>0 && !mtOn()){   // 対戦では戻さない
       score--; $("score").textContent=score;
       reviveScrew();
       sndPenalty();
@@ -4507,11 +4925,10 @@ document.addEventListener("keydown",e=>{
     if(diff==="oneshot") sndTypeStage(); else sndType();
     renderRomaji();
     if(r==="done"){
-      score++;
-      sndDone();
+      if(mtOn()) mtWordDone(); else { score++; sndDone(); }   // 対戦: 金・2倍・おじゃま・連鎖・アイテム
       removeScrew();
       if(currentWord && currentWord.bara) baraPetalRain();   // バラバラの薔薇(辞典には載せない)
-      else if(diff!=="book" && currentWord) unlockWord((currentWord.orig||currentWord).k);   // 単語帳の言葉は辞典に載せない(逆さまの言葉は、もとの言葉で載せる)
+      else if(diff!=="book" && currentWord && !currentWord.oj) unlockWord((currentWord.orig||currentWord).k);   // 単語帳の言葉は辞典に載せない(逆さまの言葉は、もとの言葉で載せる)
       if(isQ(diff)){
         // 残り本数とゲージを更新
         const remain=Math.max(taGoal-score,0);
@@ -4535,7 +4952,7 @@ document.querySelectorAll(".diff-btn").forEach(b=>{
     else startGame(b.dataset.diff);
   });
 });
-$("retryBtn").addEventListener("click",()=>startGame(diff));
+$("retryBtn").addEventListener("click",()=>{ if(mtRes){ mtRematch(); return; } startGame(diff); });
 $("titleBtn").addEventListener("click",()=>{ if(diff==="book") openBooks(); else show("title"); });
 
 let resultAt=0;
@@ -5112,6 +5529,12 @@ function endBookGame(){
 /* ---------- 更新情報 ----------
    新しいものを上に足していく。d は YYYY-MM-DD */
 const NEWS=[
+  { d:"2026-10-26", t:"みんなで話せる「農園の寄り合い」と、対戦", items:[
+    "みんなとリアルタイムでチャットができる「農園の寄り合い」ができました。ランキングと同じ名前で書き込みます。タイトルの「農園の寄り合い」か C キー、農園では右下の「チャット」ボタンか Enter で開けます",
+    "作り置きの料理を投げられます。30分以内に「受け取る」を押した人に、食べたときと同じ効果が半分の時間かかります",
+    "「みんなの目標」が出ます。達成すると、手伝った人はごほうびを受け取れます",
+    "寄り合いの「⚔️ 対戦」から、タイピングか TOEIC 英単語の対戦相手を募集できます。2〜4人で同時に遊べて、だれも来なければゴーストと遊べます",
+  ]},
   { d:"2026-10-25", t:"大木と、日替わりのご褒美", items:[
     "大木を追加しました。畑の3×3の9マスを使って、何年もかけて育つ木です。十年梅・三十年葡萄・百年杉の3種類があり、苗木はタイピングの日替わりのご褒美でもらえます。実ったら素手や鎌で実を収穫でき、収穫したあとも1年たつとまた実ります。斧で木ごと切ると、木材が取れます",
     "累計収穫1万で大木が解放されます。腐葉土と斧がお店に並び、料理の画面に工房のタブが開きます",
@@ -5323,6 +5746,1237 @@ $("dbInfo").addEventListener("click",e=>{ if(e.target===$("dbInfo")) closeDbInfo
 $("news").addEventListener("click",e=>{ if(e.target===$("news")) closeNews(); });
 refreshNewsBadge();
 
+/* ---------- 農園の寄り合い(ワールドチャット) ----------
+   typinggarden/world に { n 名前, x ひとこと, t 時刻, o 端末, d 料理, g 段階 } を書き込み、最新100件をみんなで見る。
+   料理を投げると作り置きが1つ減り、30分以内に開いた人が「受け取る」で同じ効果を受け取れる */
+const WC_PATH="typinggarden/world", WC_KEEP=100, WC_GIFT_MS=30*60000, WC_WAIT=3000;
+let wcStick=false;   // 次に描くとき、いちばん下へ(自分が書いた・新しい報告が届いた)
+let wcOpen=false, wcMsgs=[], wcStarted=false, wcT0=0, wcLast=0, wcSeen=0;
+const wcEsc = v => String(v==null?"":v).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+const wcTime = t => { const d=new Date(t), p=n=>String(n).padStart(2,"0"); return (Date.now()-t>86400000?`${d.getMonth()+1}/${d.getDate()} `:"")+`${p(d.getHours())}:${p(d.getMinutes())}`; };
+try{ wcSeen=+(localStorage.getItem("typinggarden:wcSeen")||0); }catch(e){}
+function wcStart(){
+  if(wcStarted || !db) return; wcStarted=true; wcT0=Date.now();
+  const ref=db.ref(WC_PATH);
+  ref.orderByChild("t").limitToLast(WC_KEEP).on("child_added", snap=>{
+    const v=snap.val(); if(!v || typeof v.t!=="number") return;
+    if(wcMsgs.some(m=>m.key===snap.key)) return;   // 同じ報告は1回だけ
+    v.key=snap.key; wcMsgs.push(v); wcMsgs.sort((a,b)=>a.t-b.t); while(wcMsgs.length>WC_KEEP) wcMsgs.shift();
+    if(v.t>wcT0-2000 && v.o!==myId() && v.d && !wcOpen){   // 開いているときに料理が飛んできたら知らせる
+      const lb=Garden.wcLabel(v.d,+v.g||0);
+      if(lb) wcPopup(`🍳 <b>${wcEsc(v.n)}</b>さんが ${lb.html} を投げました! 30分以内なら「農園の寄り合い」で受け取れます`);
+    }
+    else if(v.t>wcT0-2000 && v.o!==myId() && !wcOpen && v.c){
+      wcPopup(`🏅 <b>${wcEsc(v.n)}</b>さんが 自慢のカードを貼りました`);
+    }
+    else if(v.t>wcT0-2000 && v.o!==myId() && !wcOpen && v.x){   // ひとことや自動のお知らせも、少しのあいだだけ出す
+      const x=String(v.x); wcPopup(`🌾 <b>${wcEsc(v.n)}</b>${v.s?"さんが ":" "}${wcEsc(x.length>60?x.slice(0,60)+"…":x)}`);
+    }
+    wcRenderSoon();
+  }, e=>console.warn("[typinggarden world]",e));
+  ref.on("child_removed", snap=>{ wcMsgs=wcMsgs.filter(m=>m.key!==snap.key); wcRenderSoon(); });
+  ref.on("child_changed", snap=>{ const v=snap.val(), m=wcMsgs.find(x=>x.key===snap.key); if(!v || !m) return; m.r=v.r; wcRenderSoon(); });   // リアクション
+  wcGoalWatch();
+  wcRenderSoon();   // 農園の小窓を出す
+  // 1週間より前の発言は消す(少しずつ)
+  ref.orderByChild("t").endAt(Date.now()-7*86400000).limitToFirst(30).once("value").then(sn=>sn.forEach(c=>{ c.ref.remove().catch(()=>{}); })).catch(()=>{});
+}
+let wcRT=0; function wcRenderSoon(){ if(wcRT) return; wcRT=requestAnimationFrame(()=>{ wcRT=0; wcRender(); }); }
+/* タイピング・キーの詩・TOEIC を遊んでいる最中は知らせを出さない(タイトルやモード選択、農園に戻ったら出す) */
+const wcQuiet = () => scene==="game" || scene==="battle" || scene==="poem" || (scene==="toeic" && ["play","wait","ckpt"].includes(tqPhase));   // TOEIC は答えを見ているあいだ・中断の確認中も
+let wcPend=null;
+function wcPopup(html){
+  if(wcQuiet()){ wcPend=html; return; }
+  const el=$("wcPop"); el.innerHTML=html; el.hidden=false;
+  clearTimeout(wcPopup.t); wcPopup.t=setTimeout(()=>{ el.hidden=true; },6000);
+}
+setInterval(()=>{ if(wcPend && !wcQuiet()){ const h=wcPend; wcPend=null; wcPopup(h); } if(wcQuiet()) $("wcPop").hidden=true; },1500);
+$("wcPop").addEventListener("click",()=>{ $("wcPop").hidden=true; openWorld(); });
+const wcNum = v => Math.floor(+v||0).toLocaleString("ja-JP");
+/* リアクション: 発言ごとに、ひとり1つの絵文字(もう一度押すと取り消し) */
+const WC_RX=["👍","🌹","😂","😮","🎉","🙏"];
+let wcRxOpen=null;
+function wcRxHTML(m){
+  if(!m.key || String(m.key).startsWith("dbg")) return "";
+  const r=m.r||{}, me=myId(), cnt={}, who={}, mine=wcRxE(r[me]);
+  for(const k of Object.keys(r)){ const e=wcRxE(r[k]); if(!WC_RX.includes(e)) continue; cnt[e]=(cnt[e]||0)+1; (who[e]=who[e]||[]).push(k===me?"あなた":(r[k]&&r[k].n)||"だれか"); }   // カーソルを合わせると、だれが付けたか見える
+  const chips=WC_RX.filter(e=>cnt[e]).map(e=>`<button data-rx="${wcEsc(m.key)}" data-e="${e}" class="${mine===e?"mine":""}" title="${wcEsc(who[e].join("、"))}">${e} ${cnt[e]}</button>`).join("");
+  const pick = wcRxOpen===m.key ? WC_RX.map(e=>`<button data-rx="${wcEsc(m.key)}" data-e="${e}" class="${mine===e?"mine":""}">${e}</button>`).join("") : "";
+  return `<span class="wc-rx">${chips}${pick}<button class="add${wcRxOpen===m.key?" open":""}" data-rxk="${wcEsc(m.key)}" title="リアクション">${wcRxOpen===m.key?"✕":"☺+"}</button></span>`;
+}
+const wcRxE = v => v && typeof v==="object" ? v.e : v;   // リアクション: { e 絵文字, n 名前 }(前の形の、絵文字だけのものも読む)
+function wcReact(key,e){
+  wcRxOpen=null;
+  const m=wcMsgs.find(x=>x.key===key); if(!m || !db) return;
+  const me=myId(), cur=wcRxE((m.r||{})[me]), v = cur===e ? null : { e, n:(playerName||"名無し").slice(0,10) };
+  m.r=Object.assign({},m.r); if(v) m.r[me]=v; else delete m.r[me];
+  wcRender();
+  db.ref(`${WC_PATH}/${key}/r/${me}`).set(v).catch(()=>{});
+}
+function wcCardHTML(c){
+  if(!c || typeof c!=="object") return "";
+  if(c.k==="rec") return `<div class="wc-card t3"><span class="ci">🏆</span><span><span class="cn">${wcEsc(c.v)}</span><br><span class="cs">${wcEsc(c.l)}</span></span></div>`;
+  const g=Garden.wcCard(c); if(!g) return "";
+  return `<div class="wc-card ${g.cls||""}"><span class="ci">${g.ic}</span><span><span class="cn">${g.nm}</span><br><span class="cs">${g.sub}</span></span></div>`;
+}
+function wcMsgHTML(m){
+  const me=m.o===myId(), head=`<span class="wc-t">${wcTime(m.t)}</span><span class="wc-n">${m.rk||m.rc ? (()=>{ try{ return Garden.roseName(m.n,m); }catch(e){ return wcEsc(m.n); } })() : wcEsc(m.n)}</span>`;
+  if(m.c){ const ch=wcCardHTML(m.c); if(ch) return `<div class="wc-msg card${me?" me":""}">${head}🏅 自慢のカード${wcRxHTML(m)}${ch}${m.x?`<span class="wc-who">${wcEsc(m.x)}</span>`:""}</div>`; }
+  if(m.mr && Array.isArray(m.rs)) return `<div class="wc-msg dish mtm">${head}⚔️ 対戦の結果(${wcEsc(mtLabel(m.mo||"type",m.md))}) ${m.rs.map((x,i)=>`<span class="mt-rsn">${["🥇","🥈","🥉","4位"][i]||""} ${wcEsc(x.n)} ${x.s<0?"やめました":wcEsc(x.s)+mtUnit(m.mo||"type",m.md)}</span>`).join("")}${wcRxHTML(m)}</div>`;   // 対戦の結果
+  if(m.mt) return wcMatchHTML(m,head);   // 対戦の募集
+  if(m.d){
+    const lb=Garden.wcLabel(m.d,+m.g||0); if(!lb) return "";
+    const left=WC_GIFT_MS-(Date.now()-m.t), got=Garden.wcTaken(m.key);
+    const act = me ? `<span class="wc-got">投げました</span>` : got ? `<span class="wc-got">受け取りました</span>` : left>0 ? `<button class="btn primary" data-wcget="${wcEsc(m.key)}">受け取る</button><span class="wc-got">あと${Math.ceil(left/60000)}分</span>` : `<span class="wc-got">受け取りの時間は終わりました</span>`;
+    return `<div class="wc-msg dish${me?" me":""}">${head}🍳 ${lb.html} を投げました!${act}<span class="wc-eff">${wcEsc(lb.eff)}${lb.min?`(${lb.min})`:""}${m.x?` ・ ${wcEsc(m.x)}`:""}${wcRxHTML(m)}</span></div>`;
+  }
+  if(m.s) return `<div class="wc-msg sys">${head.replace('<span class="wc-n">','<span class="wc-n">📣 ')}さんが ${wcEsc(m.x)}${wcRxHTML(m)}</div>`;   // 自動のお知らせ
+  if(!m.x) return "";
+  return `<div class="wc-msg${me?" me":""}">${head}${wcEsc(m.x)}${wcRxHTML(m)}</div>`;
+}
+function wcRender(){
+  // 農園: チャット(農園の寄り合い)へ行く小さなボタン(読んでいない数つき)
+  const mini=$("wcMini");
+  if(mini){
+    const un=wcMsgs.filter(m=>m.t>wcSeen && m.o!==myId()).length;
+    mini.hidden=!db;
+    mini.innerHTML=`💬 チャット${un?`<span class="news-new">${Math.min(un,99)}</span>`:""}${window.IS_MOBILE?"":`<span class="wck">Enter</span>`}`;
+  }
+  const unseen=wcMsgs.filter(m=>m.t>wcSeen && m.o!==myId()).length;
+  const nb=$("wcNew"); if(nb) nb.textContent = unseen ? `${Math.min(unseen,99)}` : "";
+  if(!wcOpen) return;
+  wcGoalRender();
+  const box=$("wcList"), atEnd=wcStick || box.scrollHeight-box.scrollTop-box.clientHeight<120; wcStick=false;
+  box.innerHTML = wcMsgs.length ? wcMsgs.map(wcMsgHTML).join("") : `<p class="bk-p">まだ書き込みはありません。ひとこと書いてみましょう</p>`;
+  if(atEnd) box.scrollTop=box.scrollHeight;
+  wcSeen=Date.now(); try{ localStorage.setItem("typinggarden:wcSeen",String(wcSeen)); }catch(e){}
+}
+function openWorld(){
+  $("wcPop").hidden=true; document.documentElement.classList.add("wc-lock");
+  wcSeen=Date.now(); try{ localStorage.setItem("typinggarden:wcSeen",String(wcSeen)); }catch(e){}   // 開いたら未読は消す
+  wcStart(); wcOpen=true; $("wc").classList.add("open"); for(const x of ["wcDish","wcCard","wcMatch"]) $(x).hidden=true;
+  $("wcNote").textContent = !db ? "※Firebase未設定のため使えません" : playerName ? `名前「${playerName}」で書き込みます` : "書き込むには名前を決めてください(タイトルの N)";
+  wcRender(); const box=$("wcList"); box.scrollTop=box.scrollHeight;
+  clearInterval(openWorld.iv); openWorld.iv=setInterval(()=>{ if(wcOpen) wcRender(); },30000);   // 受け取りの残り時間を更新
+}
+function closeWorld(){ document.documentElement.classList.remove("wc-lock"); if(scene==="title") refreshBara(); wcOpen=false; $("wc").classList.remove("open"); clearInterval(openWorld.iv); const ae=document.activeElement; if(ae && ae.blur) ae.blur(); }
+const wcDeco = () => { try{ return Garden.nameDeco(); }catch(e){ return {}; } };   // 薔薇の紋章・薔薇色の名前
+async function wcPost(item){
+  if(!db){ $("wcNote").textContent="※Firebase未設定のため使えません"; return false; }
+  if(!playerName){ $("wcNote").textContent="書き込むには名前を決めてください"; closeWorld(); openNameWin(); return false; }
+  const wait=WC_WAIT-(Date.now()-wcLast);
+  if(wait>0){ $("wcNote").textContent=`続けて書き込むには、あと${Math.ceil(wait/1000)}秒待ってください`; return false; }
+  wcLast=Date.now();
+  try{ wcStick=true; await db.ref(WC_PATH).push(Object.assign({ n:playerName.slice(0,10), t:Date.now(), o:myId() }, wcDeco(), item)); wcStick=true; wcRenderSoon(); return true; }
+  catch(e){ $("wcNote").textContent=/permission/i.test(String(e&&(e.code||e.message)||"")) ? "※書き込めませんでした(Firebase のルールに typinggarden/world を追加してください)" : "※書き込めませんでした。通信環境を確認してください"; return false; }
+}
+/* 自動のお知らせ: 自分で育てた変異・超変異の収穫、自己ベスト、ガチャの大当たりなど。
+   10分に1回まで。待っているあいだに起きたことは、いちばん目立つもの(prio が大きいもの)を1つだけ残して、あとで載せる
+   目立つ順: 自己ベスト 5 > 超変異 4 > GHR 以上 3 > 変異 2 > GSR 1 */
+const WC_ANN_MS=10*60000;
+let wcAnnPend=null;
+function wcAnnounce(text,prio=1){
+  if(!db || !playerName || isDebugSave()) return;
+  if(!wcAnnPend || prio>=wcAnnPend.prio) wcAnnPend={ text:String(text).slice(0,200), prio };
+  wcAnnFlush();
+}
+function wcAnnFlush(){
+  if(!wcAnnPend || !db || !playerName) return;
+  let last=0; try{ last=+(localStorage.getItem("typinggarden:wcAnn")||0); }catch(e){}
+  if(Date.now()-last<WC_ANN_MS) return;
+  const a=wcAnnPend; wcAnnPend=null;
+  try{ localStorage.setItem("typinggarden:wcAnn",String(Date.now())); }catch(e){}
+  db.ref(WC_PATH).push({ n:playerName.slice(0,10), t:Date.now(), o:myId(), x:a.text, s:1 }).catch(()=>{});
+}
+setInterval(wcAnnFlush,30000);
+async function wcSend(){
+  const inp=$("wcText"), x=inp.value.trim(); if(!x){ inp.focus(); return; }
+  if(await wcPost({ x:x.slice(0,200) })){ inp.value=""; $("wcNote").textContent=""; inp.blur(); }   // 送ったら入力欄から出る(キーで操作できるように)
+}
+/* 下の選ぶ欄(料理・自慢・お年玉)は1つだけ開く。矢印か 1〜9 で選んで Enter */
+let wcCur=-1;
+const wcPaneOpen = () => ["wcDish","wcCard","wcMatch"].map($).find(b=>!b.hidden) || null;
+function wcPaneShow(id){
+  for(const x of ["wcDish","wcCard","wcMatch"]) if(x!==id) $(x).hidden=true;
+  $(id).hidden=false; wcCur=-1; $(id).scrollTop=0;
+  const l=$("wcList"); l.scrollTop=l.scrollHeight;   // 欄を開いて報告の欄が縮んでも、新しい報告が見えるように
+}
+function wcPaneMove(d){
+  const box=wcPaneOpen(); if(!box) return false;
+  const bs=[...box.querySelectorAll("button.btn")]; if(!bs.length) return true;
+  const cols=Math.max(1,getComputedStyle(box).gridTemplateColumns.split(" ").filter(Boolean).length);
+  const step = d==="ArrowUp" ? -cols : d==="ArrowDown" ? cols : d==="ArrowLeft" ? -1 : 1;
+  wcCur = wcCur<0 ? 0 : Math.max(0,Math.min(bs.length-1,wcCur+step));
+  bs.forEach((b,i)=>b.classList.toggle("cur",i===wcCur));
+  bs[wcCur].scrollIntoView({block:"nearest"});
+  return true;
+}
+function wcPanePick(i){
+  const box=wcPaneOpen(); if(!box) return false;
+  const bs=[...box.querySelectorAll("button.btn")], b=bs[i==null?wcCur:i];
+  if(b){ b.click(); return true; }
+  return false;
+}
+function wcDishToggle(){
+  const box=$("wcDish");
+  if(!box.hidden){ box.hidden=true; return; }
+  wcPaneShow("wcDish");
+  const list=Garden.wcDishes();
+  box.innerHTML = list.length ? list.map((x,i)=>{ const lb=Garden.wcLabel(x.id,x.g); return `<button class="btn" data-wcd="${x.id}" data-wcg="${x.g}"><span class="wdn">${i<9?`<span class="kbdh">${i+1}</span> `:""}${x.html} ×${x.n}</span><span class="wde">${lb?wcEsc(lb.eff)+(lb.min?` ・ もらった人は${lb.min}`:""):""}</span></button>`; }).join("") : `<span class="bk-p">投げられる作り置きの料理がありません</span>`;
+  box.hidden=false;
+}
+/* 自慢のカード: 収穫した変異・超変異の作物、農園のようす、自己ベスト */
+async function wcCardToggle(){
+  const box=$("wcCard");
+  if(!box.hidden){ box.hidden=true; return; }
+  wcPaneShow("wcCard");
+  box.innerHTML=`<span class="bk-p">読み込み中…</span>`;
+  const opts=Garden.wcCardOpts();
+  for(const d of ["easy","normal","hard","ta-easy","ta-normal","ta-hard","oneshot"]){
+    let v=null; try{ v=await loadBest(d); }catch(e){}
+    if(v!=null && v>0) opts.push({ c:{ k:"rec", l:`タイピング ${DIFF_LABEL[d]} の自己ベスト`, v:isTA(d)?fmtTime(v):`${v}個` } });
+  }
+  try{ tqLoad(); for(const k of Object.keys(tqBest||{})) if(tqBest[k]>0){ const [f,lv]=k.split("-"); opts.push({ c:{ k:"rec", l:`TOEIC 英単語 ノーミス勝負(${tqFmtName(f)}・${tqLvName(lv)})の自己ベスト`, v:`${tqBest[k]}問` } }); } }catch(e){}
+  if(box.hidden) return;
+  wcCardOptsNow=opts;
+  box.innerHTML = opts.length ? opts.map((o,i)=>`<button class="btn" data-wcc="${i}"><span class="wdn">${i<9?`<span class="kbdh">${i+1}</span> `:""}${o.c.k==="rec"?"🏆 "+wcEsc(o.c.v):o.label}</span><span class="wde">${o.c.k==="rec"?wcEsc(o.c.l):o.sub||""}</span></button>`).join("") : `<span class="bk-p">自慢できるものがまだありません。変異の作物を収穫したり、自己ベストを出したりしてみましょう</span>`;
+}
+let wcCardOptsNow=[];
+async function wcCardPost(i){
+  const o=wcCardOptsNow[i]; if(!o) return;
+  const x=$("wcText").value.trim().slice(0,200);
+  const c = o.c.k==="farm" ? Object.assign({},o.c,Garden.wcFarmNow()) : o.c;
+  if(await wcPost(Object.assign({ c }, x?{ x }:{}))){ $("wcText").value=""; $("wcCard").hidden=true; $("wcNote").textContent="自慢のカードを貼りました"; }
+}
+/* みんなの目標: 達成したら手伝った人はごほうびを受け取れ、次の目標に移る */
+const WC_GOALS=[
+  { k:"mut",   nm:"変異・超変異の作物を、みんなで100個収穫", need:100,     u:"個", note:"村人が植えた畑のぶんは数えません" },
+  { k:"type",  nm:"タイピングで、みんなで1,000個のキーを外す", need:1000,    u:"個", note:"実際に外した数で数えます。料理で増えるぶんは入りません" },
+  { k:"toeic", nm:"TOEIC 英単語で、みんなで500問正解",      need:500,     u:"問" },
+  { k:"cook",  nm:"料理を、みんなで1,000回作る",            need:1000,    u:"回" },
+  { k:"gacha", nm:"ガチャを、みんなで1,000,000回引く",      need:1000000, u:"回" },
+];
+/* ごほうび: 100万キーと、次のどれか1つ(受け取るときに決まる) */
+/* ごほうび: キーと薔薇ガチャコインは必ず。ほかに6種類からランダムで1つ(中身は Garden.wcGoalPicks) */
+const WC_GOAL_PRIZE={ money:1000000, coin:10000 };
+const wcPrizeText = () => `${wcNum(WC_GOAL_PRIZE.money)}キー と 薔薇ガチャコイン${wcNum(WC_GOAL_PRIZE.coin)}枚 は必ず。ほかに、貴重品などの6種類からランダムで1つ`;   // 6種類の名前はここでは出さない(まだ見ていない人もいるため)
+const wcWeek = () => Math.floor((Date.now()+9*3600000-4*86400000)/(7*86400000));   // 月曜0時(日本時間)で切り替わる
+const WC_GOAL_KEY="live";   // 週の区切りはなし。ひとつの目標を達成したら、次の目標へ
+const wcGoalNow = () => ({ wk:WC_GOAL_KEY, g:WC_GOALS[(wcWeek()+1)%WC_GOALS.length] });   // 記録がまだないときの最初の目標
+/* 達成したら、同じ週のうちに次の目標へ移る。cur.k: いまの目標(なければ、その週の最初の目標) */
+const wcGoalOf = cur => (cur && WC_GOALS.find(x=>x.k===cur.k)) || wcGoalNow().g;
+const wcGoalNext = g => WC_GOALS[(WC_GOALS.indexOf(g)+1)%WC_GOALS.length];
+const wcGoalCur = () => ({ wk:WC_GOAL_KEY, g:wcGoalOf(wcGoalV) });   // いま見えている目標
+/* ごほうびを受け取れる目標(手伝って達成した目標で、まだ受け取っていないもの)。win[人] = { 何番目の目標: 1 } */
+const wcGoalMine = v => { const w=((v||{}).win||{})[myId()]; return w && typeof w==="object" ? Object.keys(w).map(Number).filter(r=>!Garden.wcGoalGot("g"+r)).sort((a,b)=>a-b) : []; };
+const wcGoalLeft = () => { const end=(wcWeek()+1)*7*86400000+4*86400000-9*3600000, ms=Math.max(0,end-Date.now()), d=Math.floor(ms/86400000), h=Math.floor(ms%86400000/3600000);
+  return d>=1 ? `あと${d}日${h?`${h}時間`:""}` : h>=1 ? `あと${h}時間` : `あと${Math.max(1,Math.ceil(ms/60000))}分`; };   // 締め切り(次の月曜0時)まで
+let wcGoalV=null, wcGoalWk=null, wcGoalPend=0;
+function wcGoalWatch(){
+  if(!db) return;
+  const { wk }=wcGoalNow(); if(wcGoalWk===wk) return;
+  wcGoalWk=wk; wcGoalV=null;
+  db.ref(`typinggarden/worldGoal/${wk}`).on("value", snap=>{ if(wcGoalWk!==wk) return;
+    const before=wcGoalV, v=wcGoalNorm(snap.val()); wcGoalV=v;
+    if(before && v && (v.r||1)>(before.r||1)){   // 見ているあいだに達成した(次の目標に移った)
+      const mine=wcGoalMine(v).length>0, was=wcGoalOf(before), next=wcGoalOf(v);
+      if(!wcOpen) wcPopup(`🎉 みんなの目標「${wcEsc(was.nm)}」を達成しました!${mine?" 手伝ったので、農園の寄り合いからごほうびを受け取れます":""} 次の目標は「${wcEsc(next.nm)}」です`);
+      if(wcOpen) wcGoalFx();
+    }
+    if(wcOpen) wcGoalRender(); }, ()=>{});
+}
+/* みんなの目標に足す。達成したら次の目標に移って0から始め、達成した目標を手伝った人を win に入れる(ごほうびは目標ごと)。
+   cur = { k いまの目標, n その数, by その目標を手伝った人, r いくつ目の目標か, win ごほうびを受け取れる人(目標ごと) } */
+function wcGoalDone(cur){   // 手伝った人に、この目標のごほうびを付ける(古いぶんは30個まで残す)
+  const g=wcGoalOf(cur);
+  for(const u of Object.keys(cur.by)) if(cur.by[u].n>0){ const w=cur.win[u] && typeof cur.win[u]==="object" ? cur.win[u] : {}; w[cur.r]=1; for(const k of Object.keys(w)) if(+k<=cur.r-30) delete w[k]; cur.win[u]=w; }
+  cur.r++; cur.n=0; cur.by={}; cur.k=wcGoalNext(g).k;
+}
+/* 数が目標に届いたまま次に移っていないもの(前のしくみで達成した週など)は、ここで次の目標に移す */
+function wcGoalNorm(cur){
+  if(!cur) return cur;
+  cur=JSON.parse(JSON.stringify(cur)); cur.r=cur.r||1; cur.by=cur.by||{}; cur.win=cur.win||{}; cur.k=wcGoalOf(cur).k;
+  if((cur.n||0)>=wcGoalOf(cur).need) wcGoalDone(cur);
+  return cur;
+}
+function wcGoalApply(cur,me,nm,add,kind){   // kind: 数えた目標(途中で次の目標に移っていたら、前の目標のぶんは足さない)
+  cur=wcGoalNorm(cur)||{ n:0, by:{}, r:1, win:{}, k:wcGoalNow().g.k };
+  if(kind && cur.k!==kind) return { cur, crossed:0 };
+  cur.n=(cur.n||0)+add; const b=cur.by[me]||{ n:0 }; cur.by[me]={ n:(b.n||0)+add, nm };
+  let crossed=null;
+  if(cur.n>=wcGoalOf(cur).need){ crossed=wcGoalOf(cur); wcGoalDone(cur); }   // あまりは次の目標に持ち越さない
+  return { cur, crossed };
+}
+let wcGoalPendK="";   // 数えている目標
+function wcGoalAdd(kind,n){
+  if(!db || !(n>0) || (isDebugSave() && !window.__pvDb)) return;   // デバッグでは数えない(プレビューは数える)
+  if(wcGoalCur().g.k!==kind) return;
+  if(wcGoalPendK!==kind){ wcGoalPend=0; wcGoalPendK=kind; }
+  wcGoalPend+=n;
+}
+function wcGoalFlush(){
+  wcGoalWatch();
+  if(!db || !wcGoalPend) return;
+  const n=wcGoalPend, kind=wcGoalPendK, { wk }=wcGoalNow(), me=myId(), nm=(playerName||"名無し").slice(0,10); wcGoalPend=0;
+  let crossed=null;
+  db.ref(`typinggarden/worldGoal/${wk}`).transaction(cur=>{ const r=wcGoalApply(cur,me,nm,n,kind); crossed=r.crossed; return r.cur; })
+    .then(res=>{ if(crossed && res && res.committed && playerName) db.ref(WC_PATH).push({ n:nm, t:Date.now(), o:me, s:1, x:`みんなの目標「${crossed.nm}」を達成させました! 🎉 手伝った人はごほうびを受け取れます。次の目標は「${wcGoalNext(crossed).nm}」です` }).catch(()=>{}); })   // 最後のひと押しをした人が報告に載せる
+    .catch(()=>{ wcGoalPend+=n; });
+}
+setInterval(wcGoalFlush,20000);
+function wcGoalRender(){
+  const el=$("wcGoal"); if(!el) return;
+  if(!db){ el.hidden=true; return; }
+  const { wk, g }=wcGoalCur(), v=wcGoalV||{}, n=v.n||0, by=v.by||{}, me=myId(), mine=((by[me]||{}).n||0)+wcGoalPend, r=v.r||1, done=wcGoalMine(v).length>0;
+  const top=Object.values(by).sort((a,b)=>b.n-a.n).slice(0,3).map(x=>`${wcEsc(x.nm)} ${wcNum(x.n)}`).join(" ・ ");
+  const can=wcGoalMine(v).length;
+  const act = can ? `<button class="btn primary" id="wcGoalGet">🎁 ごほうびを受け取る${can>1?`(${can}つ)`:""} <span class="kbdh">G</span></button>` : `<span class="wc-got">達成すると、手伝った人はごほうびを受け取れます</span>`;
+  el.hidden=false; el.classList.toggle("done",done);
+  el.innerHTML=`🎯 みんなの目標 <b>${g.nm}</b>${r>1?` <span class="ground">これまで${r-1}個達成 🎉</span>`:""}${g.note?` <span class="gsub">${g.note}</span>`:""}${act}
+    <div class="gbar"><i style="width:${Math.min(100,n/g.need*100).toFixed(1)}%"></i></div>
+    <span class="gsub">${wcNum(Math.min(n,g.need))} / ${wcNum(g.need)}${g.u} ・ あなた ${wcNum(mine)}${g.u}${top?` ・ ${top}`:""} ・ <span title="${wcPrizeText()}">ごほうび ${wcNum(WC_GOAL_PRIZE.money)}キー・薔薇ガチャコイン${wcNum(WC_GOAL_PRIZE.coin)}枚 と、6種類から1つ</span></span>`;
+}
+/* 達成したとき: 目標の帯を光らせる */
+function wcGoalFx(){ const el=$("wcGoal"); if(!el) return; el.classList.remove("done-fx"); void el.offsetWidth; el.classList.add("done-fx"); }
+function wcGoalGet(){   // 手伝って達成した目標の数だけ、まとめて受け取る
+  const rs=wcGoalMine(wcGoalV); if(!rs.length) return;
+  const its=rs.map(r=>Garden.wcGoalPrize("g"+r, WC_GOAL_PRIZE.money, WC_GOAL_PRIZE.coin)).filter(Boolean); if(!its.length) return;
+  const k=its.length;
+  $("wcNote").textContent=`🎁 みんなの目標のごほうび${k>1?` ${k}つぶん`:""} ${wcNum(WC_GOAL_PRIZE.money*k)}キー・薔薇ガチャコイン${wcNum(WC_GOAL_PRIZE.coin*k)}枚・${its.map(x=>x.name).join("・")} を受け取りました`;
+  wcGoalRender(); wcGoalFx(); wcPrizeShow(its[0], k);
+}
+/* ごほうびの演出: 箱がゆれて開き、中身が出てくる。紙ふぶき。押すか少しすると閉じる */
+function wcPrizeShow(it,k=1){
+  const panel=document.querySelector(".wc-panel"); if(!panel) return;
+  const old=panel.querySelector(".wc-prize"); if(old) old.remove();
+  const C=["#ffd84a","#ff7a7a","#8ad0ff","#9ad88a","#c79bff","#ffffff"];
+  const conf=Array.from({length:60},()=>`<i style="left:${(Math.random()*100).toFixed(1)}%;background:${C[Math.random()*C.length|0]};animation-duration:${(1.6+Math.random()*1.6).toFixed(2)}s;animation-delay:${(.5+Math.random()*.9).toFixed(2)}s"></i>`).join("");
+  const el=document.createElement("div"); el.className="wc-prize";
+  el.innerHTML=`<div class="pbox"><div class="ptitle">🎉 みんなの目標 達成のごほうび</div><div class="pitems">
+    <div class="pit"><span class="pic"><span class="kicon"></span></span><span class="pnm">${wcNum(WC_GOAL_PRIZE.money*k)}キー</span></div>
+    <div class="pit"><span class="pic">🌹</span><span class="pnm">薔薇ガチャコイン ${wcNum(WC_GOAL_PRIZE.coin*k)}枚</span></div>
+    <div class="pit"><span class="pic">${it.ic}</span><span class="pnm">${wcEsc(it.name)}${k>1?` ほか${k-1}つ`:""}</span></div></div>
+    <div class="phint">押すと閉じます</div></div><span class="pgift">🎁</span>${conf}`;
+  el.querySelector(".pgift").style.cssText="position:absolute";
+  panel.style.position="relative"; panel.appendChild(el);
+  try{ Garden.wcFanfare(); }catch(e){}
+  setTimeout(()=>el.classList.add("open"),550);
+  const close=()=>{ el.remove(); };
+  el.addEventListener("click",close); setTimeout(close,6000);
+}
+async function wcThrow(id,g){
+  if(!Garden.wcUse(id,g)){ $("wcNote").textContent="その料理はもうありません"; return; }
+  const x=$("wcText").value.trim().slice(0,200);
+  if(await wcPost(Object.assign({ d:id, g }, x?{ x }:{}))){ $("wcText").value=""; $("wcDish").hidden=true; $("wcNote").textContent="料理を投げました! 30分以内に開いた人が受け取れます"; }
+  else Garden.wcRefund(id,g);
+}
+$("wcBtn").addEventListener("click",openWorld);
+$("wcClose").addEventListener("click",closeWorld);
+$("wc").addEventListener("click",e=>{ if(e.target===$("wc")) closeWorld(); });
+$("wcSend").addEventListener("click",wcSend);
+$("wcDishBtn").addEventListener("click",wcDishToggle);
+$("wcDish").addEventListener("click",e=>{ const b=e.target.closest("[data-wcd]"); if(b) wcThrow(b.dataset.wcd, +b.dataset.wcg); });
+$("wcCard").addEventListener("click",e=>{ const b=e.target.closest("[data-wcc]"); if(b) wcCardPost(+b.dataset.wcc); });
+$("wcCardBtn").addEventListener("click",wcCardToggle);
+$("wcMatchBtn").addEventListener("click",wcMatchToggle);
+$("wcMatch").addEventListener("click",e=>{ const m=e.target.closest("[data-mtm]"); if(m){ wcMatchPane(m.dataset.mtm); return; } const c=e.target.closest("[data-mtc]"); if(c) mtCreate(c.dataset.mtc,c.dataset.mo); });
+$("mtaMain").addEventListener("pointerdown",e=>{   // 会場: 選択肢(押した瞬間に)
+  if(!mtOn() || e.button>0) return;
+  const j=e.target.closest("[data-k]"); if(j){ e.preventDefault(); mtqPick(+j.dataset.k); return; }
+});
+$("mtaItems").addEventListener("pointerdown",e=>{ if(mtOn() && e.target.closest("[data-item]")){ e.preventDefault(); mtqUseItem(); } });
+$("mtaQuit").addEventListener("mousedown",e=>e.preventDefault());
+$("mtaQuit").addEventListener("click",()=>{ if(mtOn()) mtAskOpen(); });
+$("mtaBgm").addEventListener("click",mtBgmToggle);
+$("mtStart").addEventListener("click",mtStartNow);
+$("mtLeave").addEventListener("click",mtLeave);
+$("mtBgm").addEventListener("mousedown",e=>e.preventDefault());
+$("mtBgm").addEventListener("click",mtBgmToggle);
+$("mtBgmL").addEventListener("click",mtBgmToggle);
+for(const id of ["mtAskYes","mtAskNo"]) $(id).addEventListener("mousedown",e=>e.preventDefault());
+$("mtAskYes").addEventListener("click",mtQuitGame);
+$("mtAskNo").addEventListener("click",mtAskClose);
+$("wcGoal").addEventListener("click",e=>{ if(e.target.closest("#wcGoalGet")) wcGoalGet(); });
+$("wcList").addEventListener("click",e=>{
+  const rx=e.target.closest("[data-rx]"); if(rx){ wcReact(rx.dataset.rx, rx.dataset.e); return; }
+  const ra=e.target.closest("[data-rxk]"); if(ra){ wcRxOpen = wcRxOpen===ra.dataset.rxk ? null : ra.dataset.rxk; wcRender(); return; }
+  const mj=e.target.closest("[data-wcmt]"); if(mj){ mtJoin(mj.dataset.wcmt); return; }   // 対戦に参加
+  const b=e.target.closest("[data-wcget]"); if(!b) return;
+  const m=wcMsgs.find(x=>x.key===b.dataset.wcget); if(!m) return;
+  if(Date.now()-m.t>WC_GIFT_MS){ $("wcNote").textContent="受け取りの時間(30分)は終わりました"; wcRender(); return; }
+  const r=Garden.wcReceive(m); $("wcNote").textContent=r||"受け取れませんでした"; wcRender();
+});
+$("wcMini").addEventListener("click",openWorld);
+setTimeout(wcStart,1500);   // 開いているあいだ、新しい報告と飛んできた料理を受け取る
+/* ---------- 対戦(タイピング): 農園の寄り合いで募集し、2〜4人で60秒のタイピングを競う ----------
+   typinggarden/match/{id}: { h 募集した人, mo 種類(type タイピング / toeic。ないときは type), d 難易度・レベル, st 始まる時刻(サーバーの時計), t 募集した時刻,
+     p: { 人: { n 名前, s 外したキーの数, c 今の言葉の進み(0〜1), k 正しく打った数, m ミス, x 状態の印, mc 最大連鎖, so 送ったおじゃま, f 終わった, fs 最後の数, q 途中でやめた } },
+     ev: { 送った攻撃・アイテム・大キー: { f 送った人, to 相手("all" は全員), k 種類, n 量, t 時刻 } } }
+   言葉: 一人ひとり違う言葉で、長さの並びだけそろえる。ときどき金の言葉(3個)と、アイテム箱つきの言葉が出る
+   連鎖: ミスなしで続けて打つと伸びる。3連鎖ごとにおじゃまキーを送り、送られていれば先に相殺する。10連鎖でフィーバー(8秒間2倍)
+   ほかに: 試合中に1回の全員イベント、残り10秒のラストスパート(2倍)
+   ゴースト: 待っても相手が来なかったときに選べる。通信なしで、決まった速さで打ち、攻撃もしてくる */
+const MT_PATH="typinggarden/match", MT_LOBBY=60000, MT_MAX=4, MT_SEND_MS=250;
+const MT_GHOSTS=[{ n:"ゴースト・ゆっくり", kps:3.2 },{ n:"ゴースト・ふつう", kps:4.6 },{ n:"ゴースト・はやい", kps:6.2 }];
+/* 順位のごほうび(人と対戦したときだけ): 種類はくじ。1位は参加した人数ぶん、2位からは1つずつ減る。やめた人はなし
+   まだ開いていないもの(腐葉土は大木、コインは薔薇ガチャ)が当たった人には、かわりに肥料 */
+const MT_GIFTS=["sfert","fuyo","coin"];
+const MT_OJ=["おじゃまします","きーきーきー","からまったきー","さびついたきー","かたいきーぼーど","じゃましにきた","ぐるぐるきーぼーど","きーがはずれない"].map(k=>({ t:k, k, oj:true }));
+/* アイテム: atk 相手へ(1位を狙う。自分が1位なら2位) / all ほかの全員へ / me 自分に */
+const MT_ITEMS={
+  fog:    { ic:"🌫️", nm:"霧",           to:"atk", ds:"相手のよみがなとローマ字を6秒かくす" },
+  flip:   { ic:"🙃", nm:"さかさま",     to:"atk", ds:"相手の言葉・よみがな・ローマ字を2語さかさまにする" },
+  drunk:  { ic:"🍶", nm:"酔わせる",     to:"atk", ds:"相手の画面を7秒ゆらす" },
+  bomb:   { ic:"💣", nm:"おじゃま爆弾", to:"atk", ds:"相手におじゃまキーを送る(2人なら2つ、3人以上なら3つ)" },
+  thief:  { ic:"🧲", nm:"キー泥棒",     to:"atk", ds:"相手からキーをとる(2人なら1個、3人以上なら2個)" },
+  thunder:{ ic:"⚡", nm:"かみなり",     to:"all", ds:"ほかの全員に、おじゃま1つと霧(2人なら2秒、3人以上なら3秒)" },
+  shield: { ic:"🛡️", nm:"盾",           to:"me",  ds:"たまったおじゃまを消して、次の攻撃も1回ふせぐ" },
+  rocket: { ic:"🚀", nm:"ロケット",     to:"me",  ds:"次の3語が2倍" },
+};
+/* 拾ったときに出す、ひと目で分かる説明(人数で量が変わるものは、その数で) */
+const mtItemShort = (k,all) => ({ fog:"相手のよみがなとローマ字をかくす", flip:"相手の言葉を全部さかさまに", drunk:"相手の画面をゆらす", bomb:all?"相手におじゃま ×2〜3":`相手におじゃま ×${mtDuo()?2:3}`, thief:all?"相手から1〜2個とる":`相手から${mtDuo()?1:2}個とる`, thunder:"みんなにおじゃまと霧", shield:"おじゃまを消して、次の攻撃をふせぐ", rocket:"次の3語が2倍" })[k]||"";
+const mtItemList = () => `<div class="mt-ilist"><b>アイテム</b>${Object.entries(MT_ITEMS).map(([k,it])=>`<span>${it.ic} ${it.nm}<small>${mtItemShort(k,true)}</small></span>`).join("")}<small class="mt-inote">🎁つきの言葉を打つと手に入る ・ Space で使う ・ 2つまで ・ ×2〜3 などは2人のときは少なめ</small></div>`;
+const mtDuo = () => Object.values(mt.p).filter(p=>!p.q).length<=2;   // 2人の対戦(攻撃が必ず同じ相手に当たるので、少し弱める)
+/* 順位ごとの出やすさ: 上位は守りと自分強化、下位は強い攻撃が出やすい */
+const MT_ITEM_W=[
+  { shield:5, rocket:3, fog:2, flip:2, drunk:1, bomb:1, thief:0, thunder:0 },
+  { shield:3, rocket:3, fog:3, flip:3, drunk:2, bomb:2, thief:2, thunder:1 },
+  { shield:2, rocket:3, fog:3, flip:2, drunk:3, bomb:3, thief:3, thunder:2 },
+  { shield:2, rocket:3, fog:2, flip:2, drunk:3, bomb:4, thief:4, thunder:3 },
+];
+const MT_EVENTS={
+  double:{ nm:"全員2倍タイム", ds:"10秒間、全員1語2個" },
+  big:   { nm:"大キー争奪",     ds:"全員に同じ言葉。先に打った人だけ +5個" },
+  gold:  { nm:"ゴールドラッシュ", ds:"10秒間、出る言葉が全部金(3個)" },
+};
+let mt=null, mtSrvOff=0, mtIv=0, mtLobbyOpen=false;
+var mtRes=null;   // 最後の対戦の結果(show から先に参照されるので var)
+if(db) db.ref(".info/serverTimeOffset").on("value",s=>{ mtSrvOff=+s.val()||0; });
+const mtNow = () => Date.now()+mtSrvOff;
+function mtOn(){ return !!(mt && mt.playing); }   // 関数の宣言(画面の切り替えから先に呼ばれても大丈夫なように)
+const mtMe = () => myId()||"me";
+const mtRomaLen = k => { try{ return tokenize(k).reduce((a,c)=>a+((c.alts&&c.alts[0])||"").length,0)||k.length*2; }catch(e){ return k.length*2; } };
+const mtPick = (r,w) => { let x=r()*Object.values(w).reduce((a,b)=>a+b,0); for(const [k,v] of Object.entries(w)){ x-=v; if(x<0) return k; } return Object.keys(w)[0]; };
+
+/* ---- 音: 試合だけの効果音と BGM(ファイルを使わず、その場で作る) ---- */
+const mtAC = () => { try{ audioCtx=audioCtx||new (window.AudioContext||window.webkitAudioContext)(); if(audioCtx.state==="suspended") audioCtx.resume(); return audioCtx; }catch(e){ return null; } };
+function mtTone(f,dur,type="square",vol=.05,delay=0,f2=null){
+  const ac=mtAC(); if(!ac) return;
+  try{ const t=ac.currentTime+delay, o=ac.createOscillator(), g=ac.createGain();
+    o.type=type; o.frequency.setValueAtTime(f,t); if(f2) o.frequency.exponentialRampToValueAtTime(f2,t+dur);
+    g.gain.setValueAtTime(vol,t); g.gain.exponentialRampToValueAtTime(.0001,t+dur);
+    o.connect(g); g.connect(ac.destination); o.start(t); o.stop(t+dur+.02); }catch(e){}
+}
+function mtNoise(dur,vol=.05,delay=0,hp=800){
+  const ac=mtAC(); if(!ac) return;
+  try{ const t=ac.currentTime+delay, n=Math.floor(ac.sampleRate*dur), buf=ac.createBuffer(1,n,ac.sampleRate), d=buf.getChannelData(0);
+    for(let i=0;i<n;i++) d[i]=Math.random()*2-1;
+    const s=ac.createBufferSource(), f=ac.createBiquadFilter(), g=ac.createGain(); s.buffer=buf; f.type="highpass"; f.frequency.value=hp;
+    g.gain.setValueAtTime(vol,t); g.gain.exponentialRampToValueAtTime(.0001,t+dur); s.connect(f); f.connect(g); g.connect(ac.destination); s.start(t); }catch(e){}
+}
+const mtSfx={
+  go(){ mtTone(196,1.2,"triangle",.12); mtTone(392,1,"sine",.06); mtTone(587,.8,"sine",.03); mtNoise(.3,.05,0,2000); },
+  count(){ mtTone(523,.12,"square",.05); },
+  type(){ mtTone(1760,.03,"square",.02); },
+  done(p){ const b=p>=3?988:p>=2?880:784; mtTone(b,.07,"square",.05); mtTone(b*1.5,.1,"square",.05,.05); if(p>=2) mtTone(b*2,.12,"triangle",.04,.1); },
+  miss(){ mtTone(140,.14,"sawtooth",.06,0,90); },
+  oj(){ mtTone(220,.15,"sawtooth",.05); mtTone(180,.2,"sawtooth",.05,.08); },
+  chain(n){ mtTone(660+Math.min(n,15)*40,.06,"square",.035); },
+  send(){ mtNoise(.25,.06,0,1500); mtTone(300,.25,"sawtooth",.04,0,1200); },
+  hit(){ mtTone(90,.35,"sine",.14,0,50); mtNoise(.18,.08,0,300); },
+  block(){ mtTone(1200,.08,"square",.05); mtTone(1600,.15,"triangle",.05,.06); },
+  offset(){ [523,659,784].forEach((f,i)=>mtTone(f,.18,"triangle",.05,i*.04)); },
+  item(){ [784,988,1175,1568].forEach((f,i)=>mtTone(f,.09,"square",.04,i*.05)); },
+  use(){ mtTone(1400,.2,"sawtooth",.05,0,300); mtNoise(.15,.04,.02,2500); },
+  gold(){ [1319,1568,2093,2637].forEach((f,i)=>mtTone(f,.12,"triangle",.05,i*.04)); },
+  fever(){ [523,659,784,1047,1319,1568].forEach((f,i)=>mtTone(f,.1,"square",.05,i*.05)); },
+  event(){ mtTone(880,.15,"square",.06); mtTone(660,.15,"square",.06,.18); mtTone(880,.3,"square",.06,.36); },
+  up(){ mtTone(784,.08,"square",.05); mtTone(1175,.14,"square",.05,.07); },
+  down(){ mtTone(587,.08,"square",.04); mtTone(392,.16,"square",.04,.07); },
+  tick(){ mtTone(1568,.05,"square",.04); },
+  spurt(){ mtTone(988,.12,"square",.06); mtTone(988,.12,"square",.06,.18); mtTone(1319,.25,"square",.07,.36); },
+  win(){ [523,659,784,1047,784,1047].forEach((f,i)=>mtTone(f,i===5?.5:.14,"square",.06,i*.13)); },
+  lose(){ [392,349,330,262].forEach((f,i)=>mtTone(f,.22,"triangle",.05,i*.18)); },
+};
+/* BGM: 16拍のくり返し(キック・ハイハット・ベース)。ラストスパートで速くなる。M で消せる */
+let mtBgmOn=(()=>{ try{ return localStorage.getItem("typinggarden:mtBgm")!=="0"; }catch(e){ return true; } })();
+let mtBgmT=0, mtBgmStep=0, mtBgmNext=0, mtBgmBpm=132;
+const MT_BASS=[0,0,12,0, 3,3,15,3, 5,5,17,5, 7,7,10,12];
+function mtBgmStart(){
+  mtBgmStop(); if(!mtBgmOn) return; const ac=mtAC(); if(!ac) return;
+  mtBgmStep=0; mtBgmNext=ac.currentTime+.05; mtBgmBpm=132;
+  mtBgmT=setInterval(()=>{
+    if(!mtOn()){ mtBgmStop(); return; }   // 試合が終わっていたら止める
+    const ac=mtAC(); if(!ac) return; const sp=60/mtBgmBpm/4;
+    while(mtBgmNext<ac.currentTime+.12){
+      const t=mtBgmNext-ac.currentTime, i=mtBgmStep%16;
+      if(i%4===0){ mtTone(110,.18,"sine",.09,t,45); }
+      if(i%2===1) mtNoise(.04,.012,t,6000);
+      if(i%4===2) mtNoise(.08,.02,t,2500);
+      mtTone(55*Math.pow(2,MT_BASS[i]/12),sp*.9,"triangle",.035,t);
+      if(i===0 && Math.floor(mtBgmStep/16)%2===1) mtTone(440*Math.pow(2,MT_BASS[(mtBgmStep>>4)%16]/12),sp*3,"square",.012,t);
+      mtBgmStep++; mtBgmNext+=sp;
+    }
+  },25);
+}
+function mtBgmStop(){ clearInterval(mtBgmT); mtBgmT=0; }
+function mtBgmToggle(){ mtBgmOn=!mtBgmOn; try{ localStorage.setItem("typinggarden:mtBgm",mtBgmOn?"1":"0"); }catch(e){} if(mtBgmOn && mtOn() && (running || mt.mo!=="type")) mtBgmStart(); else mtBgmStop(); mtBgmBtn(); }
+const mtBgmBtn = () => { for(const id of ["mtBgm","mtBgmL","mtaBgm"]){ const b=$(id); if(b) b.innerHTML = (mtBgmOn ? "🔊 BGM" : "🔇 BGM") + (id==="mtBgm" ? "" : ' <span class="kbdh">M</span>'); } };   // タイピングの最中は M を打つので、キーなし
+
+/* ---- 言葉: 長さの並びは全員同じ、言葉は一人ひとり違う ---- */
+function mtWords(id,d,me){
+  const r=dbRand("match-"+id), base=WORD_SETS[d].slice();
+  for(let i=base.length-1;i>0;i--){ const j=Math.floor(r()*(i+1)); [base[i],base[j]]=[base[j],base[i]]; }
+  const r2=dbRand("match-"+id+"-"+me), used=new Set(), out=[];
+  for(let i=0;i<160;i++){
+    const L=base[i%base.length].k.length;
+    let c=base.filter(w=>Math.abs(w.k.length-L)<=1 && !used.has(w.k));
+    if(!c.length) c=base.filter(w=>Math.abs(w.k.length-L)<=2 && !used.has(w.k));
+    if(!c.length){ used.clear(); c=base.filter(w=>Math.abs(w.k.length-L)<=1); }
+    const w=c[Math.floor(r2()*c.length)]; used.add(w.k);
+    const x=r2(); out.push(Object.assign({},w,{ gold:x<.08, box:x>=.08 && x<.24 }));
+  }
+  return out;
+}
+/* 試合のイベント(id から決まる。全員同じ) */
+function mtEventOf(id,d){
+  const r=dbRand("event-"+id), ks=Object.keys(MT_EVENTS), k=ks[Math.floor(r()*ks.length)], at=18+r()*22;
+  const pool=WORD_SETS[d].filter(w=>w.k.length>=(d==="easy"?5:d==="normal"?10:16)), w=pool[Math.floor(r()*pool.length)]||WORD_SETS[d][0];
+  return { k, at, w:Object.assign({},w,{ big:true }) };
+}
+
+/* ---- 募集・参加・待合室 ---- */
+const mtMyP = () => ({ n:(playerName||"あなた").slice(0,10), s:0, c:0, k:0, m:0, pc:window.IS_MOBILE?0:1 });   // pc: パソコンで参加(全員そうなら TOEIC の第2ラウンドで打てる)
+async function mtCreate(d,mo="type"){
+  if(window.IS_MOBILE && mo==="type") return;
+  if(!db){ closeWorld(); mtEnterLocal(d,mo); return; }   // 通信なし(プレビューなど): 手元だけの待合室。だれも来ないので、ゴーストと遊べる
+  if(!playerName){ $("wcNote").textContent="対戦するには名前を決めてください"; closeWorld(); openNameWin(); return; }
+  const ref=db.ref(MT_PATH).push(), id=ref.key, st=mtNow()+MT_LOBBY, me=mtMe();
+  try{
+    await ref.set({ h:me, mo, d, st, t:mtNow(), p:{ [me]:mtMyP() } });
+    if(!(await wcPost({ x:`対戦相手を募集しています(${mtLabel(mo,d)})`, mt:id, mo, md:d, ms:st }))){ ref.remove().catch(()=>{}); return; }
+  }catch(e){ $("wcNote").textContent=/permission/i.test(String(e&&(e.code||e.message)||"")) ? "※募集できませんでした(Firebase のルールに typinggarden/match を追加してください)" : "※募集できませんでした。通信環境を確認してください"; return; }
+  db.ref(MT_PATH).orderByChild("t").endAt(mtNow()-86400000).limitToFirst(20).once("value").then(sn=>sn.forEach(c=>{ c.ref.remove().catch(()=>{}); })).catch(()=>{});   // 1日より前の対戦は消す
+  closeWorld(); mtEnter(id,d,mo);
+}
+async function mtJoin(id){
+  if(!db) return;
+  if(!playerName){ $("wcNote").textContent="対戦するには名前を決めてください"; closeWorld(); openNameWin(); return; }
+  try{
+    const v=(await db.ref(`${MT_PATH}/${id}`).once("value")).val();
+    if(!v){ $("wcNote").textContent="この対戦はもうありません"; return; }
+    if(window.IS_MOBILE && (v.mo||"type")==="type"){ $("wcNote").textContent="タイピングの対戦はパソコンで遊べます"; return; }
+    const me=mtMe(), ps=v.p||{};
+    if(!ps[me]){
+      if(mtNow()>=v.st){ $("wcNote").textContent="この対戦はもう始まっています"; return; }
+      if(Object.keys(ps).length>=MT_MAX){ $("wcNote").textContent=`満員です(${MT_MAX}人まで)`; return; }
+      await db.ref(`${MT_PATH}/${id}/p/${me}`).set(mtMyP());
+    }
+    closeWorld(); mtEnter(id,v.d,v.mo||"type");
+  }catch(e){ $("wcNote").textContent="参加できませんでした。通信環境を確認してください"; }
+}
+function mtEnter(id,d,mo="type"){
+  mtLeaveQuiet();
+  mt={ id, d, mo, st:mtNow()+MT_LOBBY, h:"", p:{}, ghost:false, playing:false };
+  mt.ref=db.ref(`${MT_PATH}/${id}`);
+  mt.on=mt.ref.on("value",sn=>{ const v=sn.val(); if(!mt || mt.id!==id) return; if(!v){ if(!mt.playing && !mt.over) mtCancel("募集した人が対戦をやめました"); return; }
+    mt.h=v.h; mt.st=v.st; mt.d=v.d; mt.mo=v.mo||"type"; mt.prev=v.prev||null; if(v.rm!==mt.rm){ mt.rm=v.rm||null; if(mtRes && mtRes.m===mt) mtResultBtns(); }
+    const me=mtMe(), mine=mt.p[me];
+    mt.p=v.p||{}; if(mine && mt.p[me] && (mt.playing||mt.over)) mt.p[me]=Object.assign(mt.p[me],mine,{ q:mt.p[me].q });   // 自分の数字は手元のものを使う
+    if(mt.playing) mtBoard(); else if(!mt.over) mtLobby(); });
+  mtLobbyOpen=true; $("mt").classList.add("open"); mtBgmBtn();
+  clearInterval(mtIv); mtIv=setInterval(mtLobbyTick,250);
+  mtLobby();
+}
+const MT_LOBBY_LOCAL=10000;
+function mtEnterLocal(d,mo){
+  mtLeaveQuiet();
+  mt={ id:"l"+Date.now().toString(36), d, mo, st:mtNow()+MT_LOBBY_LOCAL, h:mtMe(), p:{ [mtMe()]:mtMyP() }, ghost:false, local:true, playing:false };
+  mtLobbyOpen=true; $("mt").classList.add("open"); mtBgmBtn();
+  clearInterval(mtIv); mtIv=setInterval(mtLobbyTick,250);
+  mtLobby();
+}
+/* だれも来なかった: ゴーストと遊ぶか、やめるかを選ぶ */
+function mtAlone(){
+  if(mt.ref){ if(mt.h===mtMe()) mt.ref.remove().catch(()=>{}); mt.ref.off("value",mt.on); }
+  mt.alone=true; clearInterval(mtIv); mtLobby();
+}
+function mtLobbyTick(){
+  if(!mt || mt.playing || mt.alone) return;
+  const left=mt.st-mtNow();
+  if(mt.prev && mt.h===mtMe() && left>1600 && mt.prev.every(u=>mt.p[u]) && Object.keys(mt.p).length>=2) mtStartNow();   // もう一回: 前のメンバーがそろったらすぐ始める
+  if(left<=0){
+    if(Object.keys(mt.p).length<2){ mtAlone(); return; }
+    mtBegin(); return;
+  }
+  mtLobby();
+}
+function mtLobby(){
+  if(!mt || mt.playing || !mtLobbyOpen) return;
+  const ps=Object.entries(mt.p), host=mt.h===mtMe(), left=Math.max(0,Math.ceil((mt.st-mtNow())/1000));
+  $("mtTitle").textContent=`⚔️ 対戦の待合室 ・ ${mtLabel(mt.mo,mt.d)}`;
+  if(mt.alone){
+    $("mtBody").innerHTML=`<p class="mt-left">相手が集まりませんでした</p><p class="bk-p">強さの違う3人のゴーストと遊べます。ゴーストとの対戦でも、ふだんと同じようにキーと農園の時間が届きます(順位のごほうびはありません)</p>${mtRules(mt.mo)}`;
+    $("mtStart").innerHTML='👻 ゴーストと遊ぶ <span class="kbdh">Enter</span>'; $("mtStart").hidden=false;
+    $("mtLeave").innerHTML='やめる <span class="kbdh">Esc</span>';
+    return;
+  }
+  $("mtStart").innerHTML='今すぐ始める <span class="kbdh">Enter</span>'; $("mtLeave").innerHTML='抜ける <span class="kbdh">Esc</span>';
+  $("mtBody").innerHTML=`<p class="mt-left">${ps.length>=2?`あと <b>${left}</b> 秒で始まります`:`相手を待っています ・ あと <b>${left}</b> 秒`}</p>
+    <ol class="mt-ps">${ps.map(([u,p])=>`<li${u===mtMe()?' class="me"':""}>${wcEsc(p.n)}${u===mt.h?' <small>募集した人</small>':""}</li>`).join("")}${Array.from({length:Math.max(0,MT_MAX-ps.length)},()=>`<li class="empty">…</li>`).join("")}</ol>
+    ${mtRules(mt.mo)}`;
+  $("mtStart").hidden=!(host && ps.length>=2);
+}
+/* 待合室の遊び方(種類ごと) */
+function mtRules(mo){
+  if(mo==="toeic") return `<ul class="mt-rules"><li>全員に同じ問題が${MTQ_N}問。3ラウンドで、${MTQ_ROUNDS.map((r,i)=>`第${i+1}は<b>${r.nm}</b>(${r.ds})`).join("、")}を${MTQ_PER}問ずつ</li><li>正解すると ${MTQ_ROUNDS.map(r=>`${r.nm} ${r.pt}点`).join("・")}。早く答えるほど、さらに最大でその半分。いちばん早く正解した人は +30点</li><li>全員パソコンなら、逆4択は英単語を打てる。打てたら ${MTQ_TYPE_PT}点(Enter ですぐ4択にもできる)</li><li>いちばん早く正解した人と、最下位で正解した人は🎁<b>アイテム</b>をもらえる。<b>Space</b> で使うと、次の問題に効く</li><li>答え合わせで、だれがどれを選んだか見えます</li><li>料理とお酒の効果はかかりません</li></ul>${mtqItemList()}`;
+  return `<ul class="mt-rules"><li>60秒で多く外した人の勝ち。言葉は一人ひとり違い、長さだけそろっています</li><li>ミスなしで続けて打つと連鎖。3連鎖ごとに上の人へ<b>おじゃまキー</b>、10連鎖で<b>フィーバー</b></li><li>🎁つきの言葉を打つとアイテム。<b>Space</b> で使う ・ 金の言葉は3個</li><li>試合中に1回、全員イベント。残り10秒は<b>ラストスパート</b>で2倍</li><li>料理とお酒の効果はかかりません。ミスしてもキーは戻りません</li></ul>${mtItemList()}`;
+}
+function mtStartNow(){ if(mt && mt.alone){ const d=mt.d, mo=mt.mo; mtLeaveQuiet(); mtCloseLobby(); mtGhost(d,mo); return; } if(mt && !mt.playing && mt.h===mtMe() && Object.keys(mt.p).length>=2) mt.ref.child("st").set(mtNow()+1500).catch(()=>{}); }
+function mtCloseLobby(){ mtLobbyOpen=false; $("mt").classList.remove("open"); }
+function mtLeaveQuiet(){
+  clearInterval(mtIv);
+  if(mt && mt.ref){ mt.ref.off("value",mt.on); if(mt.evRef) mt.evRef.off("child_added",mt.evOn); if(!mt.playing && !mt.over && !mt.alone) mt.ref.child(`p/${mtMe()}`).remove().catch(()=>{}); }
+  mt=null;
+}
+function mtLeave(){
+  if(mt && mt.ref && !mt.alone && mt.h===mtMe() && Object.keys(mt.p).length<=1) mt.ref.remove().catch(()=>{});
+  mtLeaveQuiet(); mtCloseLobby();
+}
+function mtCancel(msg){ mtLeaveQuiet(); mtCloseLobby(); wcPopup(`⚔️ ${wcEsc(msg)}`); }
+function mtGhost(d,mo="type"){
+  if(window.IS_MOBILE && mo==="type") return;
+  mtLeaveQuiet(); closeWorld();
+  const me=mtMe(), id="g"+Date.now().toString(36);
+  mt={ id, d, mo, st:Date.now(), h:me, ghost:true, playing:false, p:{ [me]:mtMyP() } };
+  MT_GHOSTS.forEach((g,i)=>{ mt.p["ghost"+i]={ n:g.n, s:0, c:0, k:0, m:0, g:i, debt:0, minus:0 }; });
+  mtBegin();
+}
+
+/* ---- 試合 ---- */
+function mtBegin(){
+  mtCloseLobby(); clearInterval(mtIv);
+  if(scene==="garden"){ try{ Garden.leave(); }catch(e){} }   // 農園から参加したとき
+  const me=mtMe();
+  if(mt.mo!=="type"){   // TOEIC と農業は会場の画面で
+    Object.assign(mt,{ playing:true, items:[], shield:0, spurt:false, startAt:mtNow() });
+    if(!mt.ghost){ mt.evRef=mt.ref.child("ev"); mt.evOn=mt.evRef.on("child_added",sn=>{ const v=sn.val(); if(v && v.f!==mtMe() && (+v.t||0)>=mt.startAt-5000) mtRecv(v); }); }
+    document.body.classList.add("mtb"); for(const c of [...document.body.classList]) if(/^dish/.test(c)) document.body.classList.remove(c);
+    mtaBegin(); return;
+  }
+  Object.assign(mt,{ playing:true, words:mtWords(mt.id,mt.d,me), wi:0, queue:[], t0:null, sent:"", chain:0, maxChain:0, wordMiss:false, pend:0, items:[], shield:0, boost:0,
+    feverUntil:0, fogUntil:0, drunkUntil:0, flip:0, so:0, ev:mtEventOf(mt.id,mt.d), evStarted:false, bigDone:false, rank:0, spurt:false, lastSec:99, startAt:mtNow() });
+  if(mt.ghost){ mt.gcum=(()=>{ const c=[0]; for(let i=0;i<400;i++) c.push(c[c.length-1]+mtRomaLen(mt.words[i%mt.words.length].k)); return c; })(); mtGhostPlan(); }
+  else { mt.evRef=mt.ref.child("ev"); mt.evOn=mt.evRef.on("child_added",sn=>{ const v=sn.val(); if(v && v.f!==mtMe() && (+v.t||0)>=mt.startAt-5000) mtRecv(v); }); }
+  document.body.classList.add("mtb");
+  for(const c of [...document.body.classList]) if(/^dish/.test(c)) document.body.classList.remove(c);   // 料理の色を外す
+  startGame(mt.d);
+  $("mtBgm").hidden=false; mtBgmBtn();
+  $("mtBoard").hidden=false; $("mtHud").hidden=false; mtBoard(); mtHud();
+  mtVs();
+  mtIv=setInterval(mtTick,MT_SEND_MS);
+}
+/* 始まる前の VS 画面(カウントダウンのあいだ) */
+function mtVs(){
+  const el=$("mtVs"), ps=Object.values(mt.p);
+  el.innerHTML=`<div class="mtvs-in"><div class="mtvs-t">${mt.ghost?"PRACTICE":"BATTLE"} ・ ${mtLabel(mt.mo,mt.d)}</div><div class="mtvs-ns">${ps.map((p,i)=>`${i?'<b class="mtvs-x">VS</b>':""}<span>${wcEsc(p.n)}</span>`).join("")}</div><div class="mtvs-n" id="mtVsN">3</div></div>`;
+  el.hidden=false; el.classList.remove("go"); mtSfx.count();
+  let n=0; const cd=mt.vsT=setInterval(()=>{ if(!mtOn()){ clearInterval(cd); return; } n++;   // 3・2・1 のあとに「打て!」(ゲームのカウントダウンと同じ 0.7秒ごと)
+    if(n<3){ const c=$("mtVsN"); if(c){ c.textContent=3-n; c.classList.remove("tick"); void c.offsetWidth; c.classList.add("tick"); } mtSfx.count(); }
+    else { clearInterval(cd); el.classList.add("go"); el.innerHTML=`<div class="mtvs-go">${mt.mo==="toeic"?"はじめ!":"打て!"}</div>`; mtSfx.go(); mtBgmStart(); setTimeout(()=>{ el.hidden=true; },700); } },700);
+}
+function mtNextWord(){
+  const pn=$("wordPanel"); let w;
+  if(mt.ev.k==="big" && mt.evStarted && !mt.bigDone && !mt.bigShown){ mt.bigShown=true; w=mt.ev.w; }
+  else if(mt.pend>0){ mt.pend--; w=MT_OJ[Math.floor(Math.random()*MT_OJ.length)]; mtSfx.oj(); }
+  else { w=mt.words[mt.wi%mt.words.length]; mt.wi++; if(mtGoldRush()) w=Object.assign({},w,{ gold:true, box:false }); }
+  mt.wordMiss=false;
+  pn.classList.toggle("oj",!!w.oj); pn.classList.toggle("gold",!!w.gold); pn.classList.toggle("box",!!w.box); pn.classList.toggle("big",!!w.big);
+  pn.classList.toggle("flip",mt.flip>0); if(mt.flip>0) mt.flip--;
+  return w;
+}
+const mtSec = () => mt && mt.t0 ? (Date.now()-mt.t0)/1000 : 0;
+const mtEvActive = k => mt.ev.k===k && mt.evStarted && mtSec()<mt.ev.at+10;
+const mtGoldRush = () => mtEvActive("gold");
+const mtFever = () => Date.now()<mt.feverUntil;
+const mtDouble = () => mtFever() || mt.spurt || mtEvActive("double") || mt.boost>0;
+/* 1語打ち終わった(数・連鎖・アイテム・攻撃) */
+function mtWordDone(){
+  const w=currentWord||{}, me=mtMe();
+  if(w.oj){ score+=0; mtPop("おじゃま","oj"); }
+  else if(w.big){ if(!mt.bigDone){ mt.bigDone=true; score+=5; mtPop("大キー! +5","big"); mtSfx.gold(); mtFeed("🏆 大キーを取った!"); mtSend("all","bigwin",1); } }
+  else {
+    const p=(w.gold?3:1)*(mtDouble()?2:1); score+=p; mtPop(`+${p}`,w.gold?"gold":p>1?"dbl":""); if(w.gold) mtSfx.gold(); else mtSfx.done(p);
+    if(mt.boost>0) mt.boost--;
+    if(w.box) mtGetItem();
+  }
+  if(!mt.wordMiss){ mt.chain++; mt.maxChain=Math.max(mt.maxChain,mt.chain); mtSfx.chain(mt.chain);
+    if(mt.chain%3===0) mtAttack(mtFever()?2:1);
+    if(mt.chain%10===0){ mt.feverUntil=Date.now()+8000; mtSfx.fever(); mtFeed("🔥 フィーバー! 8秒間2倍"); }
+  }
+  mtHud();
+}
+function mtMiss(){ mt.wordMiss=true; if(mt.chain>=3) mtFeed(`連鎖が切れた(${mt.chain})`); mt.chain=0; mtHud(); }
+/* 連鎖の攻撃: 自分にたまっていれば、先に相殺する */
+function mtAttack(n){
+  if(mt.pend>0){ const c=Math.min(mt.pend,n); mt.pend-=c; n-=c; mtSfx.offset(); mtFeed(`💥 相殺! おじゃま -${c}`); }
+  if(n>0){ const to=mtTarget(); if(to){ mtSend(to,"oj",n); mt.so+=n; mtSfx.send(); mtFeed(`➡️ ${wcEsc(mt.p[to].n)}におじゃまキー ×${n}`); } }
+}
+/* 攻撃の相手: 1位の人。自分が1位なら2位 */
+function mtTarget(){ const me=mtMe(), rows=mtSort(Object.entries(mt.p).filter(([u,p])=>!p.q)); const r=rows.find(([u])=>u!==me); return rows.length && rows[0][0]!==me ? rows[0][0] : r ? r[0] : null; }
+function mtGetItem(){
+  if(mt.items.length>=2){ mtFeed("🎁 アイテムがいっぱいです(2つまで)"); return; }
+  const rank=Math.max(0,mtSort(Object.entries(mt.p)).findIndex(([u])=>u===mtMe())), k=mtPick(Math.random,MT_ITEM_W[Math.min(3,rank)]);
+  mt.items.push(k); mtRoulette(mt.items.length-1,k);
+}
+/* アイテムのルーレット: 少し回ってから止まる(止まるまでは使えない) */
+function mtRoulette(i,k){
+  const ks=Object.keys(MT_ITEMS); let n=0;
+  mt.spin={ i, ic:MT_ITEMS[ks[0]].ic }; clearInterval(mt.spinT);
+  mt.spinT=setInterval(()=>{
+    if(!mt || !mt.spin){ return; }
+    n++; mt.spin.ic=MT_ITEMS[ks[n%ks.length]].ic; mtTone(900+(n%4)*120,.03,"square",.025); mtHud();
+    if(n>=12){ clearInterval(mt.spinT); mt.spin=null; mtSfx.item(); mtFeed(`🎁 ${MT_ITEMS[k].ic} ${MT_ITEMS[k].nm}: ${mtItemShort(k)} ・ Space で使う`); mtHud(); if(mt.useAfter){ mt.useAfter=false; mtUseItem(); } }
+  },65);
+}
+function mtUseItem(){
+  if(mt.spin && mt.spin.i===0){ mt.useAfter=true; return; }   // ルーレットが止まったら使う
+  const k=mt.items.shift(); if(!k){ mtSfx.miss(); return; }
+  if(mt.spin) mt.spin.i--;
+  const it=MT_ITEMS[k], me=mtMe(); mtSfx.use();
+  if(it.to==="me"){
+    if(k==="shield"){ const c=mt.pend; mt.pend=0; mt.shield++; mtFeed(`${it.ic} 盾!${c?` おじゃま ${c}つを消した。`:""} 次の攻撃を1回ふせぐ`); }
+    if(k==="rocket"){ mt.boost+=3; mtFeed(`${it.ic} ロケット! 次の3語が2倍`); }
+  }else if(it.to==="all"){ mtSend("all",k,mtDuo()?2:3); mtFeed(`${it.ic} ${it.nm}をみんなに!`); }
+  else { const to=mtTarget(); if(!to){ mtFeed("相手がいません"); return; }
+    let n=1;
+    if(k==="bomb") n=mtDuo()?2:3;
+    if(k==="thief"){ n=Math.min(mtDuo()?1:2, mt.p[to].s||0); score+=n; $("score").textContent=score; }
+    mtSend(to,k,n); mtFeed(`${it.ic} ${wcEsc(mt.p[to].n)}に${it.nm}!${k==="bomb"?` おじゃま ×${n}`:k==="thief"?` ${n}個とった`:""}`); }
+  mtHud();
+}
+/* 送る: 通信の対戦は Firebase に、ゴーストは手元で */
+function mtSend(to,k,n){
+  if(mt.ghost){ for(const u of Object.keys(mt.p)) if(u!==mtMe() && (to==="all"||to===u)) if(mt.mo==="type") mtGhostHit(u,k,n); return; }
+  mt.evRef.push({ f:mtMe(), to, k, n, t:mtNow() }).catch(()=>{});
+}
+/* 受ける */
+function mtRecv(v){
+  if(!mtOn()) return;
+  const me=mtMe(), from=(mt.p[v.f]||{}).n||"だれか";
+  if(v.k==="bigwin"){ mt.bigDone=true; if(currentWord && currentWord.big){ mtFeed(`🏆 ${wcEsc(from)}が大キーを取った`); clearWordPanelKeep(); pickWord(); } else mtFeed(`🏆 ${wcEsc(from)}が大キーを取った`); return; }
+  if(mt.mo==="toeic"){ mtqHit(v); return; }   // 点数どろぼうは、自分あてでなくても覚える
+  if(v.to!==me && v.to!=="all") return;
+  if(mt.shield>0){ mt.shield--; mtSfx.block(); mtFeed(`🛡️ ${wcEsc(from)}の攻撃を盾でふせいだ`); mtHud(); return; }
+  mtSfx.hit(); const pn=$("wordPanel"); pn.classList.remove("hit"); void pn.offsetWidth; pn.classList.add("hit");
+  const now=Date.now();
+  if(v.k==="oj"){ mt.pend+=v.n; mtFeed(`💜 ${wcEsc(from)}からおじゃまキー ×${v.n}`); }
+  else if(v.k==="bomb"){ const n=v.n||3; mt.pend+=n; mtFeed(`💣 ${wcEsc(from)}のおじゃま爆弾! ×${n}`); }
+  else if(v.k==="fog"){ mt.fogUntil=now+6000; mtFeed(`🌫️ ${wcEsc(from)}の霧`); }
+  else if(v.k==="flip"){ mt.flip+=1; $("wordPanel").classList.add("flip"); /* 今の言葉と次の言葉の2語 */ mtFeed(`🙃 ${wcEsc(from)}のさかさま`); }
+  else if(v.k==="drunk"){ mt.drunkUntil=now+7000; mtFeed(`🍶 ${wcEsc(from)}に酔わされた`); }
+  else if(v.k==="thief"){ const n=Math.min(v.n||2,score); score-=n; $("score").textContent=score; mtFeed(`🧲 ${wcEsc(from)}に${n}個とられた`); }
+  else if(v.k==="thunder"){ mt.pend+=1; mt.fogUntil=Math.max(mt.fogUntil,now+((v.n||3)<=2?2000:3000)); mtFeed(`⚡ ${wcEsc(from)}のかみなり`); }
+  mtHud();
+}
+function clearWordPanelKeep(){ chunks=[]; chunkIdx=0; buf=""; typedRomaji=""; nAmbig=false; }
+/* お酒の演出を、試合の「酔わせる」に使う */
+const mtDrunkFx = () => mt && Date.now()<mt.drunkUntil ? { hor:2, chi:1, any:true } : {};
+/* 0.25秒ごと: 時間で起きること・自分のようすを送る・ゴースト・表 */
+function mtTick(){
+  if(!mtOn()) return;
+  if(running && !mt.t0) mt.t0=Date.now();
+  const sec=mtSec(), me=mtMe(), b=document.body.classList, now=Date.now();
+  if(mt.t0){
+    if(!mt.evStarted && sec>=mt.ev.at){ mt.evStarted=true; mtSfx.event(); mtBanner(`${MT_EVENTS[mt.ev.k].nm}!`, MT_EVENTS[mt.ev.k].ds); if(mt.ev.k==="big" && mt.ghost) mt.bigGhostAt=mt.ev.at+4.5; }
+    const left=GAME_SECONDS-sec;
+    if(!mt.spurt && left<=10){ mt.spurt=true; mtSfx.spurt(); mtBanner("ラストスパート!","残り10秒、1語2個"); mtBgmBpm=156; }
+    if(mt.spurt && Math.ceil(left)!==mt.lastSec && left>0){ mt.lastSec=Math.ceil(left); mtSfx.tick(); }
+    if(mt.ghost && mt.bigGhostAt && !mt.bigDone && sec>=mt.bigGhostAt){ mt.bigDone=true; mtRecv({ f:"ghost2", to:"all", k:"bigwin", n:1 }); mt.p.ghost2.minus-=5; }
+  }
+  b.toggle("mtb-fever",mtFever()); b.toggle("mtb-spurt",mt.spurt); b.toggle("mtb-fog",now<mt.fogUntil);
+  b.toggle("mtb-double",mtEvActive("double")); b.toggle("mtb-goldrush",mtGoldRush());
+  const x=(mtFever()?"🔥":"")+(mt.shield?"🛡️":"")+(mt.boost?"🚀":"")+(mt.pend?`💜${mt.pend}`:"")+(now<mt.fogUntil?"🌫️":"")+(now<mt.drunkUntil?"🍶":"");
+  const p=mt.p[me]=Object.assign(mt.p[me]||{}, { s:score, c:+mtFrac().toFixed(2), k:gardenKeys, m:miss, x, mc:mt.maxChain, so:mt.so });
+  if(!mt.ghost){ const sig=[p.s,p.c,p.k,p.m,p.x,p.mc].join(","); if(sig!==mt.sent){ mt.sent=sig; mt.ref.child(`p/${me}`).update({ s:p.s, c:p.c, k:p.k, m:p.m, x:p.x, mc:p.mc, so:p.so }).catch(()=>{}); } }
+  else if(mt.t0) mtGhostStep(sec);
+  const rank=mtSort(Object.entries(mt.p)).findIndex(([u])=>u===me);
+  if(mt.t0 && sec>2 && rank!==mt.rank){ if(rank<mt.rank) mtSfx.up(); else mtSfx.down(); }
+  mt.rank=rank;
+  mtBoard(); mtHud();
+}
+const mtFrac = () => { if(!currentWord) return 0; const a=(typedRomaji+buf).length, b=remainingRomaji().length; return a+b ? a/(a+b) : 0; };
+/* ---- ゴースト: 決まった速さで打ち、ときどき攻撃してくる ---- */
+function mtGhostPlan(){
+  const r=dbRand(mt.id+"-plan"), acts=[];
+  MT_GHOSTS.forEach((g,i)=>{ for(let t=9+i*3+r()*4;t<57;t+=10+r()*6) acts.push({ t, i, k:mtPick(r,{ oj:4, fog:2, flip:2, drunk:2, bomb:1, thief:1 }) }); });
+  mt.gplan=acts.sort((a,b)=>a.t-b.t);
+}
+function mtGhostStep(sec){
+  sec=Math.min(sec,GAME_SECONDS);
+  const me=mtMe();
+  while(mt.gplan && mt.gplan.length && mt.gplan[0].t<=sec){   // ゴーストの攻撃: 1位を狙う(自分が1位なら2位)
+    const a=mt.gplan.shift(), gu="ghost"+a.i, rows=mtSort(Object.entries(mt.p)), to=rows[0][0]!==gu ? rows[0][0] : rows[1] && rows[1][0];
+    if(!to) continue;
+    const n=a.k==="oj"?1+Math.floor(a.i/2):a.k==="bomb"?(mtDuo()?2:3):a.k==="thief"?(mtDuo()?1:2):1;
+    if(to===me) mtRecv({ f:gu, to:me, k:a.k, n }); else mtGhostHit(to,a.k,n);
+  }
+  MT_GHOSTS.forEach((g,i)=>{
+    const p=mt.p["ghost"+i]; if(!p) return;
+    const r=dbRand(mt.id+"-g"+i), wob=1+(r()-.5)*.2, eff=Math.max(0,sec-(p.debt||0)), keys=g.kps*wob*eff, c=mt.gcum;
+    let w=0; while(w+1<c.length && c[w+1]<=keys) w++;
+    let s=0; for(let j=0;j<w;j++){ const tj=c[j+1]/(g.kps*wob)+(p.debt||0)*(j/(w||1)), gold=dbRand(mt.id+"-gw"+i+"-"+j)()<.08; s+=(gold?3:1)*((tj>=GAME_SECONDS-10 || (mt.ev.k==="double" && tj>=mt.ev.at && tj<mt.ev.at+10))?2:1); }
+    p.s=Math.max(0,s-(p.minus||0)); p.k=Math.floor(keys); p.c=+((keys-c[w])/((c[w+1]-c[w])||1)).toFixed(2); p.m=Math.floor(eff/12*(3-i)); p.mc=4+i*3;
+    p.x=(p.foggy>Date.now()?"🌫️":"")+(p.drunky>Date.now()?"🍶":"");
+  });
+}
+function mtGhostHit(u,k,n){   // ゴーストが攻撃を受けると、少し遅れる
+  const p=mt.p[u]; if(!p) return;
+  const sec={ oj:1.4*n, bomb:1.4*n, fog:2.5, flip:1.5, drunk:2.5, thunder:2, thief:0 }[k]||0;
+  p.debt=(p.debt||0)+sec; if(k==="thief") p.minus=(p.minus||0)+n;
+  if(k==="fog"||k==="thunder") p.foggy=Date.now()+4000; if(k==="drunk") p.drunky=Date.now()+5000;
+}
+/* ---- 表示 ---- */
+const mtKpm = p => { const sec=mt && mt.t0 ? Math.max(1,Math.min(GAME_SECONDS,(Date.now()-mt.t0)/1000)) : 0; return sec ? Math.round((p.k||0)/sec*60) : 0; };
+const mtSort = ps => ps.sort((a,b)=>((b[1].fs??b[1].s??0)-(a[1].fs??a[1].s??0)) || ((a[1].m||0)-(b[1].m||0)));
+function mtBoard(){
+  const el=$(mt && mt.mo!=="type"?"mtaBoard":"mtBoard"); if(!el || !mt || !mt.playing) return;
+  const me=mtMe(), rows=mtSort(Object.entries(mt.p)), top=Math.max(1,...rows.map(([u,p])=>p.s||0)), unit=mtUnit(mt.mo,mt.d);
+  const sub = p => p.q ? "やめました" : mt.mo==="toeic" ? `正解 ${p.cor||0}` : `${mtKpm(p)}打/分`;
+  el.innerHTML=rows.map(([u,p],i)=>`<div class="mt-row${u===me?" me":""}${p.q?" quit":""}"><span class="mt-rk">${i+1}</span><span class="mt-nm">${wcEsc(p.n)}</span><span class="mt-x">${wcEsc(p.x||"")}</span><span class="mt-track"><i class="mt-lane" style="width:${Math.round((p.s||0)/top*100)}%"></i><i class="mt-cur" style="width:${Math.round((p.c||0)*100)}%"></i></span><span class="mt-sc">${(p.s||0).toLocaleString("ja-JP")}<small>${unit}</small></span><span class="mt-kpm">${sub(p)}</span></div>`).join("");
+}
+function mtHud(){
+  const el=$("mtHud"); if(!el || !mt || !mt.playing) return;
+  const it=(k,i)=>mt.spin && mt.spin.i===i ? `<span class="mt-it spin"><b>${mt.spin.ic}</b>…</span>` : k?`<span class="mt-it"><b>${MT_ITEMS[k].ic}</b>${MT_ITEMS[k].nm}</span>`:`<span class="mt-it empty">空き</span>`;
+  const ready=mt.items.length && !(mt.spin && mt.spin.i===0);   // 使えるアイテムがある
+  el.innerHTML=`<span class="mt-chain${mt.chain>=3?" hot":""}">${mt.chain}<small>連鎖</small></span><span class="mt-items${ready?" ready":""}">${it(mt.items[0],0)}${it(mt.items[1],1)}${ready?`<span class="mt-space">Space で使う!</span>`:""}</span>${mt.pend?`<span class="mt-pend">💜 おじゃま ×${mt.pend}</span>`:""}`;
+}
+function mtPop(t,cls){ const el=$("mtPop"); if(!el) return; el.textContent=t; el.className="mt-pop "+(cls||""); void el.offsetWidth; el.classList.add("on"); }
+function mtFeed(html){ const el=$("mtFeed"); if(!el) return; const d=document.createElement("div"); d.innerHTML=html; el.prepend(d); while(el.children.length>4) el.lastChild.remove(); setTimeout(()=>d.classList.add("out"),2600); setTimeout(()=>d.remove(),3200); }
+function mtBanner(t,sub){ const el=$("mtBanner"); if(!el) return; el.innerHTML=`<b>${wcEsc(t)}</b><small>${wcEsc(sub||"")}</small>`; el.classList.remove("on"); void el.offsetWidth; el.classList.add("on"); }
+/* ---- 終わり ---- */
+function mtStopFx(){ mtBgmStop(); const ask=$("mtAsk"); if(ask) ask.hidden=true; if(mt){ clearInterval(mt.spinT); clearInterval(mt.vsT); mt.spin=null; } const bb=$("mtBgm"); if(bb) bb.hidden=true; const am=$("mtaMain"); if(am) am.classList.remove("mtq-fog","hit"); try{ Garden.applyTheme(); }catch(e){} document.body.classList.remove("mtb","mtb-fever","mtb-spurt","mtb-fog","mtb-double","mtb-goldrush"); const pn=$("wordPanel"); if(pn) pn.classList.remove("oj","gold","box","big","flip","hit"); for(const id of ["mtBoard","mtHud","mtVs"]){ const e=$(id); if(e) e.hidden=true; } const f=$("mtFeed"); if(f) f.innerHTML=""; }
+function mtFinish(toGarden){
+  const me=mtMe(), m=mt; m.playing=false; m.over=true; clearInterval(mtIv); mtStopFx(); document.body.classList.add("mtb"); for(const c of [...document.body.classList]) if(/^dish/.test(c)) document.body.classList.remove(c);   // 結果も会場の見た目のまま
+  if(m.evRef) m.evRef.off("child_added",m.evOn);
+  const p=m.p[me]; Object.assign(p,{ s:score, fs:score, m:miss, f:1, mc:m.maxChain, so:m.so });
+  if(m.ghost){ mtGhostStep(GAME_SECONDS); for(const u in m.p) if(u!==me) m.p[u].fs=m.p[u].s; }
+  else m.ref.child(`p/${me}`).update({ s:score, fs:score, m:miss, f:1, mc:m.maxChain, so:m.so }).catch(()=>{});
+  mtRes={ m, toGarden, at:Date.now(), paid:false };
+  $("resultDiff").textContent=`— 対戦 ・ ${DIFF_LABEL[m.d]}${m.ghost?"(ゴーストと対戦)":""} —`;
+  $("resultCount").classList.remove("ta"); $("resultCaption").textContent="外したキー";
+  $("resultScore").textContent=score; $("resultUnit").textContent="個";
+  $("resultSubLine").textContent=`ミス ${miss}回 ・ 最大 ${m.maxChain}連鎖 ・ 送ったおじゃま ${m.so}`; $("resultNew").textContent="";
+  $("registerBox").style.display="none";
+  mtResultBtns();
+  document.getElementById("screen-result").classList.add("mtr");
+  $("mtResult").hidden=false; mtResult();
+  show("result"); resultAt=Date.now();
+  clearInterval(mtIv); mtIv=setInterval(mtResult,500);
+}
+function mtResultBtns(){
+  const m=mtRes&&mtRes.m; if(!m) return;
+  $("resultKeys").innerHTML = `<b>Enter</b> ${m.ghost?"もう一回募集する":m.rm?"もう一回に参加":"同じメンバーでもう一回"}${m.ghost?"":" ・ <b>C</b> 農園の寄り合いへ"} ・ <b>Esc</b> タイトルへ ・ <b>G</b> 農園へ ・ <b>M</b> BGM`;
+  $("retryBtn").textContent = m.ghost ? "もう一回募集する (Enter)" : m.rm ? "もう一回に参加 (Enter)" : "もう一回 (Enter)";
+}
+/* もう一回: だれかが先に作っていれば参加、なければ作って、前のメンバーを30秒待つ(そろえばすぐ始まる) */
+async function mtRematch(){
+  const m=mtRes&&mtRes.m; if(!m) return;
+  if(m.ghost){ const d=m.d, mo=m.mo; mtResultClose(); show("title"); mtCreate(d,mo); return; }   // ゴーストとの対戦のあとは、もう一度募集する
+  if(m.rm){ const id=m.rm; mtResultClose(); show("title"); mtJoin(id); return; }
+  if(!db || !playerName) return;
+  const ref=db.ref(MT_PATH).push(), id=ref.key, st=mtNow()+30000, me=mtMe(), prev=Object.keys(m.p).filter(u=>!m.p[u].q && m.p[u].g==null), d=m.d, mo=m.mo||"type", old=m.ref;
+  try{
+    await ref.set({ h:me, mo, d, st, t:mtNow(), prev, p:{ [me]:mtMyP() } });
+    await old.child("rm").set(id);
+    db.ref(WC_PATH).push({ n:playerName.slice(0,10), t:Date.now(), o:myId(), x:`もう一回 対戦します(${mtLabel(mo,d)})`, mt:id, mo, md:d, ms:st }).catch(()=>{});
+  }catch(e){ return; }
+  mtResultClose(); show("title"); mtEnter(id,d,mo);
+}
+function mtResult(){
+  const r=mtRes; if(!r) return;
+  const me=mtMe(), ps=Object.entries(r.m.p), waiting=ps.some(([u,p])=>!p.f && !p.q && p.g==null);
+  const fixed=!waiting || Date.now()-r.at>5000;
+  const rows=mtSort(ps.map(([u,p])=>[u,Object.assign({},p,{ fs:p.fs??p.s??0 })]));
+  const humans=ps.filter(([u,p])=>p.g==null && !p.q).length, rank=rows.findIndex(([u])=>u===me), mo=r.m.mo||"type", unit=mtUnit(mo,r.m.d);
+  if(fixed && !r.paid){
+    r.paid=true;
+    const poster=(rows.find(([u,p])=>!p.q && p.g==null)||[])[0];   // 結果は、残っている人のうち一番上の人がチャットに貼る
+    if(!r.m.ghost && humans>=2 && poster===me && db && !wcMsgs.some(x=>x.mr===r.m.id)){
+      const rs=rows.map(([u,p])=>({ n:String(p.n||"").slice(0,10), s:p.q?-1:p.fs }));
+      db.ref(WC_PATH).push({ n:(playerName||"").slice(0,10), t:Date.now(), o:myId(), mr:r.m.id, mo, md:r.m.d, rs, x:`対戦の結果(${mtLabel(mo,r.m.d)}): 1位 ${rs[0].n} ${rs[0].s}${unit}` }).catch(()=>{});
+    }
+    if(!r.m.ghost && humans>=2 && !(r.m.p[me]||{}).q){
+      const n=ps.filter(([u,p])=>p.g==null).length;
+      const rk=rows.filter(([u,p])=>!p.q).findIndex(([u])=>u===me);   // やめた人は数えない順位
+      r.rk=rk; const k=Math.max(0,n-rk), kind=MT_GIFTS[Math.floor(Math.random()*MT_GIFTS.length)];
+      if(k>0) try{ r.gift=Garden.mtGive(kind,k); }catch(e){ r.gift=""; }
+    }
+    if(rank===0) mtSfx.win(); else mtSfx.lose();
+  }
+  $("mtResult").innerHTML=`<h3>${fixed?(rank===0?"🏆 優勝!":"対戦の結果"):"集計中…"}</h3><ol class="mt-res">${rows.map(([u,p],i)=>`<li class="${u===me?"me":""}${p.q?" quit":""}"><span class="mt-rk">${i+1}位</span><span class="mt-nm">${wcEsc(p.n)}</span><span class="mt-sc">${p.q?"やめました":`${(+p.fs||0).toLocaleString("ja-JP")}${unit}`}</span><span class="mt-mi">${mo==="type"?`${p.mc||0}連鎖 ・ ミス ${p.m||0}`:wcEsc(p.dt||"")}</span></li>`).join("")}</ol>`
+    + (fixed ? (r.m.ghost ? `<p class="bk-note">ゴーストとの対戦には、順位のごほうびはありません</p>` : r.gift ? `<p class="mt-bonus">🏅 ${r.rk+1}位のごほうび ${r.gift}</p>` : humans<2 ? `<p class="bk-note">相手がいなかったので、ごほうびはありません</p>` : "") : "");
+}
+function mtQuit(){
+  if(!mt) return; const me=mtMe();
+  if(!mt.ghost && mt.ref) mt.ref.child(`p/${me}`).update({ q:1, f:1, fs:mt.mo==="type"?score:(mt.p[me]&&mt.p[me].s)||0 }).catch(()=>{});
+  mtEndAll();
+}
+window.addEventListener("pagehide",()=>{ if(mtOn()) mtQuit(); });
+/* 試合中の「本当にやめますか?」(試合は止まらずに進む) */
+const mtAskIsOpen = () => !$("mtAsk").hidden;
+function mtAskOpen(){ $("mtAsk").hidden=false; }
+function mtAskClose(){ $("mtAsk").hidden=true; }
+function mtQuitGame(){
+  mtAskClose();
+  if(mt && mt.mo!=="type"){ mtQuit(); show("title"); return; }
+  clearInterval(timerId); clearInterval(cdId); cdId=null; $("countdown").style.display="none";
+  running=false; resetStage(); clearWordPanel();
+  mtQuit(); typePk=null; sendToGarden(gardenKeys,0); gardenKeys=0;
+  show("title");
+}   // 試合中に閉じた・読み直した: やめたことにする
+function mtEndAll(){ clearInterval(mtIv); mtStopFx(); if(mt && mt.ref){ mt.ref.off("value",mt.on); if(mt.evRef) mt.evRef.off("child_added",mt.evOn); } mt=null; }
+function mtResultClose(){ if(mtRes){ mtEndAll(); document.body.classList.remove("mtb"); mtRes=null; try{ Garden.applyTheme(); }catch(e){} mtRes=null; $("mtResult").hidden=true; $("registerBox").style.display=""; $("retryBtn").textContent="もう一回 (Enter)"; document.getElementById("screen-result").classList.remove("mtr"); $("resultKeys").innerHTML='<b>N</b> 名前を入力 → <b>Enter</b> で登録 ・ 入力中の <b>Esc</b> で入力をやめる'; } }
+/* ---- TOEIC の対戦: 会場の画面(screen-battle)で遊ぶ ----
+   全員に同じ問題を同じ順番で出し、時間で次へ進む。答えたあと、だれがどれを選んだかを見せて答え合わせ
+   3ラウンド(4択・逆4択・穴埋め4択を4問ずつ)。レベルはランキングと同じ区分け(基本・470〜990点・熟語)
+   逆4択は、全員パソコンなら英単語を打てる(打てたら点が倍)。4択にもできる
+   答え: p/{人}/a/{問}=[選んだ番号(4・5 は増やされたはずれ), 答えた時間(ms), 打てた, ダブルチャンス]
+   アイテム: いちばん早く正解した人と、最下位で正解した人がもらう。点数どろぼうだけは、全員の点数に関わるので全員が覚える */
+const MT_MODES={ type:{ nm:"タイピング", ic:"⌨️" }, toeic:{ nm:"TOEIC", ic:"📘" } };
+const MT_MODE_DS={ type:"60秒で多く外した人の勝ち。おじゃまキーとアイテムで邪魔し合う", toeic:"4択・逆4択・穴埋め4択を4問ずつ、早く正しく答える。アイテムで邪魔し合う" };
+const MTQ_ROUNDS=[
+  { f:"choice", nm:"4択",       ds:"英単語の意味を選ぶ",         lim:8000,  pt:100 },
+  { f:"rev",    nm:"逆4択",     ds:"日本語に合う英単語を選ぶ",   lim:8000,  pt:100 },
+  { f:"fill",   nm:"穴埋め4択", ds:"例文の空所に入る語句を選ぶ", lim:12000, pt:200 },
+];
+const MTQ_TYPE_LIM=12000, MTQ_TYPE_OPEN=6000, MTQ_TYPE_PT=200;   // 打てるとき: 制限時間・4択が出るまで・打てたときの点
+const MTQ_PER=4, MTQ_N=MTQ_ROUNDS.length*MTQ_PER, MTQ_REV=2600, MTQ_GAP=3800;   // 答え合わせ(次のラウンドの前は少し長く)
+const MTQ_ITEMS={
+  tshort:{ ic:"⏳", nm:"時間どろぼう",   to:"atk", ds:"相手の次の問題が3秒短くなる" },
+  late:  { ic:"🐢", nm:"出遅れ",         to:"atk", ds:"相手の次の問題で、選択肢が2秒遅れて出る" },
+  more:  { ic:"➕", nm:"選択肢ふやし",   to:"atk", ds:"相手の次の問題の選択肢が6つになる" },
+  steal: { ic:"🧲", nm:"点数どろぼう",   to:"atk", ds:"次の問題で相手が正解したら、その点の半分をもらう" },
+  fifty: { ic:"✂️", nm:"しぼりこみ",     to:"me",  ds:"自分の次の問題のはずれを2つ消す" },
+  peek:  { ic:"👀", nm:"のぞき見",       to:"me",  ds:"自分の次の問題で、先に答えた人の選択が見える" },
+  dbl:   { ic:"🎲", nm:"ダブルチャンス", to:"me",  ds:"自分の次の問題は点が2倍。間違えたら −100点" },
+};
+const MTQ_ITEM_W=[   // 順位ごとの出やすさ: 上位は自分用、下位は攻撃が出やすい
+  { tshort:2, late:2, more:1, steal:1, fifty:2, peek:2, dbl:3 },
+  { tshort:3, late:3, more:2, steal:2, fifty:2, peek:2, dbl:2 },
+  { tshort:3, late:3, more:3, steal:3, fifty:2, peek:1, dbl:2 },
+  { tshort:3, late:3, more:3, steal:4, fifty:2, peek:1, dbl:2 },
+];
+const mtqItemList = () => `<div class="mt-ilist"><b>アイテム</b>${Object.values(MTQ_ITEMS).map(it=>`<span>${it.ic} ${it.nm}<small>${it.ds}</small></span>`).join("")}<small class="mt-inote">いちばん早く正解した人と、最下位で正解した人がもらえる ・ Space で使う ・ 2つまで ・ どれも次の問題に効く</small></div>`;
+const mtqLvName = d => (TQ_RANK_GROUPS.find(g=>g[0]===d)||[,""])[1];
+const mtLabel = (mo,d) => mo==="toeic" ? `TOEIC ${mtqLvName(d)}` : DIFF_LABEL[d]||"";
+const mtUnit = mo => mo==="toeic" ? "点" : "個";
+const mtShuf = (a,r) => { for(let i=a.length-1;i>0;i--){ const j=Math.floor(r()*(i+1)); [a[i],a[j]]=[a[j],a[i]]; } return a; };
+function mtaBegin(){
+  mt.base=(mt.ghost?mtNow():mt.st)+2100;   // 3・2・1 のあと
+  mt.over2=false; gardenKeys=0; $("mtaMain").innerHTML=""; $("mtaMain").className="mta-main";
+  mtqInit();
+  show("battle"); mtBgmBtn();
+  mtVs(); mtqRender(); mtqItems(); mtBoard();
+  clearInterval(mtIv); mtIv=setInterval(()=>{ if(mtOn()) mtqTick(); },100);
+}
+function mtaKey(e){
+  const k=e.key;
+  if(mtAskIsOpen()){ e.preventDefault(); if(k==="Enter"||k==="y"||k==="Y") mtQuitGame(); else if(k==="Escape"||k==="n"||k==="N") mtAskClose(); return; }
+  if(k==="Escape"){ e.preventDefault(); if(mtOn()) mtAskOpen(); return; }
+  if(mtOn() && mtqTyping()){ e.preventDefault(); mtqTypeKey(k); return; }   // 逆4択で英単語を打っているあいだ(M も打つ)
+  if(k==="m"||k==="M"){ e.preventDefault(); mtBgmToggle(); return; }
+  if(!mtOn()) return;
+  if(k===" "){ e.preventDefault(); mtqUseItem(); return; }
+  if(/^[1-6]$/.test(k)){ e.preventDefault(); mtqPick(+k-1); }
+}
+function mtaHud(l,c,r,frac){ $("mtaL").innerHTML=l; $("mtaC").innerHTML=c; $("mtaR").innerHTML=r; $("mtaBar").style.width=Math.max(0,Math.min(1,frac))*100+"%"; }
+/* 終わり(タイピングと同じ結果の画面へ) */
+function mtFinishCommon(o){
+  const me=mtMe(), m=mt; m.playing=false; m.over=true; clearInterval(mtIv); mtStopFx();
+  document.body.classList.add("mtb"); for(const c of [...document.body.classList]) if(/^dish/.test(c)) document.body.classList.remove(c);   // 結果も会場の見た目のまま
+  if(m.evRef) m.evRef.off("child_added",m.evOn);
+  Object.assign(m.p[me],{ s:o.s, fs:o.s, f:1, dt:o.dt });
+  if(m.ghost){ if(o.ghostFinal) o.ghostFinal(); for(const u in m.p) if(u!==me) m.p[u].fs=m.p[u].s; }
+  else m.ref.child(`p/${me}`).update({ s:o.s, fs:o.s, f:1, dt:o.dt }).catch(()=>{});
+  mtRes={ m, toGarden:o.toGarden, at:Date.now(), paid:false };
+  typePk=null; sendToGarden(gardenKeys,o.toGarden,o.mins||0,true); gardenKeys=0;   // 逆4択で打った文字も、ふだんと同じく農園の時間に
+  $("resultDiff").textContent=`— 対戦 ・ ${mtLabel(m.mo,m.d)}${m.ghost?"(ゴーストと対戦)":""} —`;
+  $("resultCount").classList.remove("ta"); $("resultCaption").textContent=o.cap;
+  $("resultScore").textContent=o.s.toLocaleString("ja-JP"); $("resultUnit").textContent=o.unit;
+  $("resultSubLine").textContent=o.sub; $("resultNew").textContent="";
+  $("resultGarden").textContent = o.toGarden>0 ? `農園に ${o.toGarden.toLocaleString("ja-JP")}キー${o.mins?` ・ 農園の時間 +${tqHours(o.mins)}`:""} 届きました` : "";
+  $("registerBox").style.display="none";
+  mtResultBtns();
+  document.getElementById("screen-result").classList.add("mtr");
+  $("mtResult").hidden=false; mtResult();
+  show("result"); resultAt=Date.now();
+  clearInterval(mtIv); mtIv=setInterval(mtResult,500);
+}
+
+/* ---- 問題: 乱数は対戦の id から(全員同じ問題・同じ選択肢の並び) ---- */
+function mtqChoices(w,r){   // 4択: 英単語 → 意味
+  const txt = x => x.means.slice(0,2).map(m=>m.j).join("、"), used=new Set(w.means.map(m=>m.j)), overlap = x => x.means.some(m=>used.has(m.j));
+  const out=[{ txt:txt(w), ok:true }], add = t => { if(out.length<4 && !out.some(o=>o.txt===t)) out.push({ txt:t, ok:false }); };
+  for(const c of w.conf){ const x=TQ_BY[c]; if(x){ if(!overlap(x)) add(txt(x)); } else if(TQ_CONF[c] && !used.has(TQ_CONF[c])) add(TQ_CONF[c]); }
+  for(const pool of [TQ.filter(x=>x.pos===w.pos && x.lv===w.lv), TQ.filter(x=>x.pos===w.pos), TQ]) for(const x of mtShuf(pool.slice(),r)){ if(out.length>=4) break; if(x!==w && !overlap(x)) add(txt(x)); }
+  return mtShuf(out,r);
+}
+function mtqRevChoices(w,r){   // 逆4択: 意味 → 英単語
+  const used=new Set(w.means.map(m=>m.j)), out=[{ txt:w.en, ok:true }];
+  const add = x => { if(out.length<4 && x!==w && !out.some(o=>o.txt===x.en) && !x.means.some(m=>used.has(m.j))) out.push({ txt:x.en, ok:false }); };
+  for(const c of w.conf){ const x=TQ_BY[c]; if(x) add(x); }
+  for(const pool of [TQ.filter(x=>x.pos===w.pos && x.lv===w.lv), TQ.filter(x=>x.pos===w.pos), TQ]) for(const x of mtShuf(pool.slice(),r)){ if(out.length>=4) break; add(x); }
+  return mtShuf(out,r);
+}
+function mtqFillChoices(w,r){   // 穴埋め4択: 例文の空所
+  const [s,ds]=TQ_SENT[w.en], ans=s.match(/\[([^\]]*)\]/)[1];
+  return mtShuf([{ txt:ans, ok:true }, ...ds.split("/").map(t=>({ txt:t, ok:false }))],r);
+}
+function mtqInit(){
+  const r=dbRand("tq-"+mt.id), lvs=(TQ_RANK_GROUPS.find(g=>g[0]===mt.d)||TQ_RANK_GROUPS[0])[2];
+  const pool=mtShuf(TQ.filter(w=>lvs.includes(w.lv) && TQ_SENT[w.en]),r).slice(0,MTQ_N);
+  mt.typeRev=Object.values(mt.p).every(p=>p.g!=null || p.pc);   // 全員パソコン
+  mt.qs=pool.map((w,i)=>{ const rd=Object.assign({},MTQ_ROUNDS[Math.floor(i/MTQ_PER)]); if(rd.f==="rev" && mt.typeRev) rd.lim=MTQ_TYPE_LIM;
+    return { w, rd, o:rd.f==="rev"?mtqRevChoices(w,r):rd.f==="fill"?mtqFillChoices(w,r):mtqChoices(w,r) }; });
+  let at=0; mt.qs.forEach((q,i)=>{ q.ok=q.o.findIndex(o=>o.ok); q.at=at; q.end=at+q.rd.lim; at=q.end+((i+1)%MTQ_PER===0?MTQ_GAP:MTQ_REV); });
+  mt.qEnd=at; mt.qi=-1; mt.phase=""; mt.items=[]; mt.eff={}; mt.self={}; mt.steals=[]; mt.got={}; mt.view={}; mt.buf="";
+  for(const u of Object.keys(mt.p)) mt.p[u].a=mt.p[u].a||{};
+  mt.gq={};
+  if(mt.ghost){   // ゴースト: 正答率と速さが違う。答えは、その秒数がたってから出す
+    const acc=[.55,.72,.88], spd=[.65,.48,.33], typ=[.25,.45,.65];
+    Object.keys(mt.p).filter(u=>mt.p[u].g!=null).forEach(u=>{ const g=mt.p[u].g, gr=dbRand(mt.id+"-q"+g); mt.gq[u]=[];
+      mt.qs.forEach((q,i)=>{ const ok=gr()<acc[g]-(q.rd.f==="fill"?.08:0), c=ok?q.ok:[0,1,2,3].filter(x=>x!==q.ok)[Math.floor(gr()*3)], t=Math.min(q.rd.lim-300,Math.max(700,q.rd.lim*spd[g]*(.6+gr()*.8)));
+        const tp=ok && q.rd.f==="rev" && mt.typeRev && gr()<typ[g];
+        mt.gq[u][i]=[c,Math.round(tp?Math.min(q.rd.lim-300,t*1.3):t),tp?1:0,0]; }); });
+  }
+}
+/* 1問の点数: 正解でラウンドの点(4択100・逆4択100・打てたら200・穴埋め200)。早く答えるほど、さらに最大でその半分。いちばん早く正解した人は +30
+   ダブルチャンスは2倍か −100。点数どろぼうは、その問題で相手が取った点の半分を移す */
+function mtqScore(upTo){
+  const us=Object.keys(mt.p), tot={}, per={}, cor={}, first={};
+  for(const u of us){ tot[u]=0; cor[u]=0; per[u]={}; }
+  for(let i=0;i<=upTo && i<MTQ_N;i++){
+    const q=mt.qs[i], ok = u => { const a=(mt.p[u].a||{})[i]; return a && a[0]===q.ok; };
+    const oks=us.filter(ok), fu=oks.slice().sort((a,b)=>mt.p[a].a[i][1]-mt.p[b].a[i][1])[0]; first[i]=fu;
+    const pt={};
+    for(const u of us){
+      const a=(mt.p[u].a||{})[i]; let x=0;
+      if(ok(u)){ cor[u]++; const base=a[2]?MTQ_TYPE_PT:q.rd.pt; x=base+Math.round(base/2*Math.max(0,1-a[1]/q.rd.lim)); if(u===fu && oks.length>1) x+=30; }
+      if(a && a[3]) x = ok(u) ? x*2 : -100;
+      pt[u]=x;
+    }
+    for(const st of mt.steals) if(st.q===i && pt[st.to]>0 && pt[st.f]!=null){ const x=Math.floor(pt[st.to]/2); pt[st.to]-=x; pt[st.f]+=x; }
+    for(const u of us){ tot[u]+=pt[u]; per[u][i]=pt[u]; }
+  }
+  return { tot, per, cor, first };
+}
+/* 自分の画面の選択肢: 選択肢ふやし(+2)・しぼりこみ(-2)を入れたもの。番号は元の選択肢の番号(増やしたはずれは 4・5) */
+function mtqView(i){
+  if(mt.view[i]) return mt.view[i];
+  const q=mt.qs[i]; let v=q.o.map((o,j)=>({ txt:o.txt, j }));
+  if(mt.eff[i] && mt.eff[i].more){
+    const xs=mtShuf(mt.qs.filter((x,k)=>k!==i && x.rd.f===q.rd.f).flatMap(x=>x.o.filter(o=>!o.ok).map(o=>o.txt)).filter(t=>!q.o.some(o=>o.txt===t)),Math.random).slice(0,2);
+    v=mtShuf(v.concat(xs.map((t,k)=>({ txt:t, j:4+k }))),Math.random);
+  }
+  return mt.view[i]=v;
+}
+function mtqCut(i){   // しぼりこみで消すはずれ(選択肢ふやしのあとで決める)
+  const sf=mt.self[i]; if(!sf || !sf.fifty) return [];
+  if(!sf.cut) sf.cut=mtShuf(mtqView(i).filter(o=>o.j!==mt.qs[i].ok).map(o=>o.j),Math.random).slice(0,2);
+  return sf.cut;
+}
+const mtqLim = i => mt.qs[i].rd.lim - (mt.eff[i] && mt.eff[i].tshort ? 3000 : 0);   // 時間どろぼうで短くなる
+const mtqTyping = () => { const i=mt && mt.qi; return mt && mt.mo==="toeic" && mt.phase==="q" && i>=0 && mt.qs[i].rd.f==="rev" && mt.typeRev && !mt.revOpen && !(mt.p[mtMe()].a||{})[i] && !mtqOut(); };
+const mtqOut = () => mtNow()-(mt.base+mt.qs[mt.qi].at) >= mtqLim(mt.qi);   // 自分だけ時間切れ(時間どろぼう)
+function mtqTick(){
+  const now=mtNow(), t=now-mt.base, me=mtMe();
+  if(t<0){ mtaHud(`得点 <b>0</b>`,`第1ラウンド ${MTQ_ROUNDS[0].nm}`,`<b>${MTQ_ROUNDS[0].lim/1000}</b> 秒`,1); return; }
+  if(t>=mt.qEnd){ mtqFinish(); return; }
+  let i=0; while(i+1<MTQ_N && t>=mt.qs[i+1].at) i++;
+  const q=mt.qs[i], w=t-q.at, ph=t<q.end?"q":"rev", ri=Math.floor(i/MTQ_PER);
+  if(i!==mt.qi || ph!==mt.phase){
+    const newQ=i!==mt.qi; mt.qi=i; mt.phase=ph;
+    if(newQ){ mt.qAt=now; mt.buf=""; mt.revOpen=!(q.rd.f==="rev" && mt.typeRev); mt.lateShown=!(mt.eff[i] && mt.eff[i].late); mt.outShown=false;
+      if(i===MTQ_N-MTQ_PER && !mt.spurt){ mt.spurt=true; mtBgmBpm=156; } mtSfx.count(); }
+    if(ph==="rev"){ mtqReveal();   // 次のラウンドは、答え合わせのあいだに知らせる(問題に重ならないように)
+      const nr=MTQ_ROUNDS[ri+1]; if((i+1)%MTQ_PER===0 && nr){ mtSfx.event(); mtBanner(`次は第${ri+2}ラウンド ${nr.nm}`, nr.f==="rev" && mt.typeRev ? `英単語を打てたら ${MTQ_TYPE_PT}点 ・ 4択なら ${nr.pt}点` : `${nr.ds} ・ 正解 ${nr.pt}点`); } }
+    mt.ansSig=null; mtqRender();
+  }
+  if(ph==="q"){   // 時間で変わる表示: 打てるときの4択・出遅れ・時間どろぼう
+    if(!mt.revOpen && w>=MTQ_TYPE_OPEN){ mt.revOpen=true; mtqRender(); }
+    if(!mt.lateShown && now-mt.qAt>=2000){ mt.lateShown=true; mtqRender(); }
+    if(!mt.outShown && mtqOut()){ mt.outShown=true; mtqRender(); }
+  }
+  for(const u in mt.gq) for(let j=0;j<=i;j++){ const a=mt.gq[u][j]; if(a && !mt.p[u].a[j] && (j<i || ph==="rev" || w>=a[1])) mt.p[u].a[j]=a; }
+  const us=Object.keys(mt.p), sig=us.map(u=>(mt.p[u].a||{})[i]?1:0).join("");
+  if(sig!==mt.ansSig){ mt.ansSig=sig; if(ph==="rev" || (mt.self[i] && mt.self[i].peek)) mtqRender(); else mtqAns(); }   // 遅れて届いた答えも出す
+  const sc=mtqScore(ph==="rev"?i:i-1); for(const u of us){ mt.p[u].s=sc.tot[u]||0; mt.p[u].cor=sc.cor[u]||0; }
+  const lim=mtqLim(i), left=ph==="q"?Math.max(0,lim-w)/1000:0;
+  mtaHud(`得点 <b>${(sc.tot[me]||0).toLocaleString("ja-JP")}</b>`,`第${ri+1}ラウンド ${q.rd.nm} <b>${i%MTQ_PER+1}</b> / ${MTQ_PER}`,ph==="q"?`<b>${Math.ceil(left)}</b> 秒`:`答え合わせ`, ph==="q"?left/(q.rd.lim/1000):0);
+  document.body.classList.toggle("mtb-spurt",!!mt.spurt);
+  mtBoard();
+}
+/* 答える */
+function mtqAnswer(j,typed){
+  const i=mt.qi, me=mtMe();
+  if(mt.phase!=="q" || i<0 || (mt.p[me].a||{})[i] || mtqOut()) return;
+  const t=Math.max(0,Math.round(mtNow()-(mt.base+mt.qs[i].at))), a=[j,t,typed?1:0,mt.self[i]&&mt.self[i].dbl?1:0];
+  mt.p[me].a=mt.p[me].a||{}; mt.p[me].a[i]=a; mtSfx.type(); mtSfx.done(typed?2:1);
+  if(!mt.ghost) mt.ref.child(`p/${me}/a/${i}`).set(a).catch(()=>{});
+  mtqRender();
+}
+function mtqPick(k){   // 番号キー・タップ: 画面に出ている順の k 番目
+  const i=mt.qi; if(i<0 || mt.phase!=="q" || !mt.revOpen || !mt.lateShown) return;
+  const cut=mtqCut(i), v=mtqView(i).filter(o=>!cut.includes(o.j));
+  if(v[k]) mtqAnswer(v[k].j,false);
+}
+/* 逆4択で英単語を打つ: 合っている文字だけ進む。Enter で4択にする */
+function mtqTypeKey(k){
+  const i=mt.qi, w=mt.qs[i].w;
+  if(k==="Enter"){ mt.revOpen=true; mtqRender(); return; }
+  if(k.length!==1) return;
+  const want=w.en[mt.buf.length];
+  if(want!=null && k.toLowerCase()===want.toLowerCase()){ mt.buf+=want; gardenKeys++; mtSfx.type();
+    if(mt.buf.length>=w.en.length){ mtqAnswer(mt.qs[i].ok,true); return; }
+    const el=$("mtqTyped"); if(el) el.innerHTML=`<span class="done">${tqEsc(mt.buf)}</span><span class="tq-caret">_</span>`; }
+  else if(k===" "){ mtqUseItem(); }   // 空白を打つところでなければ、アイテム
+  else mtTone(200,.05,"square",.02);
+}
+/* 答え合わせ: アイテムを配る(いちばん早く正解した人・最下位で正解した人) */
+function mtqReveal(){
+  const i=mt.qi, me=mtMe(), sc=mtqScore(i), a=(mt.p[me].a||{})[i], ok=a && a[0]===mt.qs[i].ok;
+  if(ok) mtSfx.gold(); else mtSfx.miss();
+  const rows=mtSort(Object.entries(mt.p).filter(([u,p])=>!p.q)), last=rows.length>1 ? rows[rows.length-1][0] : null;
+  const gets = u => { const b=(mt.p[u].a||{})[i]; return b && b[0]===mt.qs[i].ok && (sc.first[i]===u || u===last); };
+  if(gets(me) && !mt.got[i]){ mt.got[i]=1; mtqGetItem(sc.first[i]===me?"いちばん早く正解":"最下位で正解"); }
+  if(mt.ghost && i<MTQ_N-1) for(const u of Object.keys(mt.p)) if(mt.p[u].g!=null && gets(u)){   // ゴーストも、もらったらすぐ攻撃する
+    const gr=dbRand(mt.id+"-gi"+i+u); if(gr()>.6) continue;
+    const k=mtPick(gr,{ tshort:3, late:3, more:2, steal:2 }), to=mtTarget0(u); if(!to) continue;
+    if(to===me) mtRecv({ f:u, to:me, k, q:i+1 }); else { if(k==="steal") mt.steals.push({ f:u, to, q:i+1 }); mtqGhostHit(to,k,i+1); }
+  }
+}
+function mtqGetItem(why){
+  if(mt.items.length>=2){ mtFeed(`🎁 ${why}! でもアイテムがいっぱいです(2つまで)`); return; }
+  const rank=Math.max(0,mtSort(Object.entries(mt.p)).findIndex(([u])=>u===mtMe())), k=mtPick(Math.random,MTQ_ITEM_W[Math.min(3,rank)]);
+  mt.items.push(k);
+  const ks=Object.keys(MTQ_ITEMS); let n=0; mt.spin={ i:mt.items.length-1, ic:MTQ_ITEMS[ks[0]].ic }; clearInterval(mt.spinT);
+  mtFeed(`🎁 ${why}! アイテムをもらった`);
+  mt.spinT=setInterval(()=>{ if(!mt || !mt.spin) return; n++; mt.spin.ic=MTQ_ITEMS[ks[n%ks.length]].ic; mtTone(900+(n%4)*120,.03,"square",.025); mtqItems();
+    if(n>=12){ clearInterval(mt.spinT); mt.spin=null; mtSfx.item(); mtFeed(`${MTQ_ITEMS[k].ic} ${MTQ_ITEMS[k].nm}: ${MTQ_ITEMS[k].ds}`); mtqItems(); } },65);
+  mtqItems();
+}
+/* アイテムを使う(先に持ったほうから) */
+function mtqUseItem(){
+  if(mt.spin && mt.spin.i===0){ mtFeed("ルーレットが止まったら使えます"); return; }
+  const k=mt.items[0]; if(!k){ mtSfx.miss(); return; }
+  const it=MTQ_ITEMS[k], i=mt.qi, me=mtMe();
+  if(it.to==="me"){   // 自分用も、次の問題に効く
+    const q=i+1; if(q>=MTQ_N){ mtFeed("もう次の問題がありません"); mtSfx.miss(); return; }
+    const sf=mt.self[q]=mt.self[q]||{}; if(sf[k]){ mtFeed(`第${q+1}問には、もう${it.nm}を使っています`); return; }
+    sf[k]=1;
+    mtFeed(`${it.ic} ${it.nm}! 第${q+1}問で${{ fifty:"はずれを2つ消す", peek:"先に答えた人の選択が見える", dbl:"点が2倍(間違えたら −100)" }[k]}`);
+  }else{
+    const q=i+1; if(q>=MTQ_N){ mtFeed("もう次の問題がありません"); mtSfx.miss(); return; }
+    const to=mtTarget(); if(!to){ mtFeed("相手がいません"); return; }
+    if(k==="steal") mt.steals.push({ f:me, to, q });
+    if(mt.ghost) mtqGhostHit(to,k,q); else mt.evRef.push({ f:me, to, k, q, t:mtNow() }).catch(()=>{});
+    mtSfx.send(); mtFeed(`${it.ic} ${wcEsc(mt.p[to].n)}に${it.nm}! (第${q+1}問)`);
+  }
+  mt.items.shift(); if(mt.spin) mt.spin.i--; mtSfx.use(); mtqItems(); mtqRender();
+}
+/* 受けた攻撃: 次の問題(q)に効く */
+function mtqHit(v){
+  const it=MTQ_ITEMS[v.k], from=(mt.p[v.f]||{}).n||"だれか"; if(!it || v.q==null) return;
+  if(v.k==="steal"){ if(!mt.steals.some(x=>x.f===v.f && x.to===v.to && x.q===v.q)) mt.steals.push({ f:v.f, to:v.to, q:v.q }); }
+  if(v.to!==mtMe()) return;
+  (mt.eff[v.q]=mt.eff[v.q]||{})[v.k]=from;
+  mtSfx.hit(); const mm=$("mtaMain"); mm.classList.remove("hit"); void mm.offsetWidth; mm.classList.add("hit");
+  mtFeed(`${it.ic} ${wcEsc(from)}の${it.nm}! 第${v.q+1}問: ${{ tshort:"3秒短くなる", late:"選択肢が2秒遅れて出る", more:"選択肢が6つになる", steal:"正解すると点の半分をとられる" }[v.k]}`);
+}
+function mtqGhostHit(u,k,q){   // ゴーストが攻撃を受けた: 答えが遅れたり、間違えやすくなる
+  const a=mt.gq[u] && mt.gq[u][q]; if(!a) return; const lim=mt.qs[q].rd.lim;
+  if(k==="tshort" && a[1]>lim-3000) mt.gq[u][q]=null;
+  if(k==="late") a[1]=Math.min(lim-300,a[1]+2000);
+  if(k==="more" && a[0]===mt.qs[q].ok && Math.random()<.3) a[0]=4;
+}
+const mtTarget0 = from => { const rows=mtSort(Object.entries(mt.p).filter(([u,p])=>!p.q)); return rows[0] && rows[0][0]!==from ? rows[0][0] : rows[1] && rows[1][0]; };
+/* 問題文: 4択は英単語、逆4択は意味、穴埋めは例文(答え合わせで訳も出す) */
+function mtqPrompt(q,rev){
+  const w=q.w;
+  if(q.rd.f==="rev") return `<div class="mtq-word ja">${tqEsc(w.means.slice(0,2).map(m=>m.j).join("、"))}</div><div class="mtq-pos">${tqEsc(TQ_POS[w.pos]||"")}${rev?` ・ <b>${tqEsc(w.en)}</b>`:""}</div>`;
+  if(q.rd.f==="fill"){ const [s,,ja]=TQ_SENT[w.en];
+    return `<div class="mtq-sent">${tqEsc(s).replace(/\[([^\]]*)\]/,(m,a)=>rev?`<b class="mtq-blank on">${a}</b>`:'<span class="mtq-blank">　　　　</span>')}</div><div class="mtq-pos">${rev?tqEsc(ja):"&nbsp;"}</div>`; }
+  return `<div class="mtq-word">${tqEsc(w.en)}</div><div class="mtq-pos">${tqEsc(TQ_POS[w.pos]||"")}</div>`;
+}
+function mtqRender(){
+  const i=mt.qi, el=$("mtaMain"); if(!el) return;
+  if(i<0){ el.innerHTML=`<div class="mtq-card"><div class="mtq-no">第1ラウンド ${MTQ_ROUNDS[0].nm}</div><div class="mtq-word">…</div></div>`; return; }
+  const q=mt.qs[i], me=mtMe(), my=(mt.p[me].a||{})[i], rev=mt.phase==="rev", sc=rev?mtqScore(i):null, us=Object.keys(mt.p), en=q.rd.f!=="choice";
+  const sf=mt.self[i]||{}, ef=mt.eff[i]||{}, out=!rev && !my && mtqOut();
+  const tags=[...Object.keys(ef).map(k=>`<span class="mtq-tag atk">${MTQ_ITEMS[k].ic} ${MTQ_ITEMS[k].nm}(${wcEsc(ef[k])})</span>`), ...["fifty","peek","dbl"].filter(k=>sf[k]).map(k=>`<span class="mtq-tag me">${MTQ_ITEMS[k].ic} ${MTQ_ITEMS[k].nm}</span>`)].join("");
+  const ptTxt = q.rd.f==="rev" && mt.typeRev ? `打てたら ${MTQ_TYPE_PT}点 ・ 4択 ${q.rd.pt}点` : `正解 ${q.rd.pt}点`;
+  let opts;
+  if(!rev && !mt.revOpen && !my) opts=`<div class="mtq-typed" id="mtqTyped"><span class="done">${tqEsc(mt.buf)}</span><span class="tq-caret">_</span></div><p class="mtq-hint">英単語を打つ(打てたら ${MTQ_TYPE_PT}点) ・ <b>Enter</b> ですぐ4択(${q.rd.pt}点) ・ ${MTQ_TYPE_OPEN/1000}秒で4択が出ます</p>`;
+  else if(!rev && !mt.lateShown && !my) opts=`<div class="mtq-wait">🐢 出遅れ… 選択肢はもうすぐ</div>`;
+  else {
+    const cuts=mtqCut(i), v=mtqView(i).filter(o=>!cuts.includes(o.j) || rev), peek=!rev && sf.peek;
+    opts=`<div class="mtq-opts${v.length>4?" six":""}">${v.map((o,k)=>{ const who=(rev||peek)?us.filter(u=>u!==me || rev).filter(u=>{ const a=(mt.p[u].a||{})[i]; return a && a[0]===o.j; }):[];
+      const cut=rev && cuts.includes(o.j);
+      const cls=rev?(o.j===q.ok?" ok":(my&&my[0]===o.j?" ng":" dim")):(my?(my[0]===o.j?" pick":" dim"):"");
+      return `<button class="btn mtq-opt${en?" en":""}${cls}${cut?" cut":""}" data-k="${k}"><span class="no">${k+1}</span><span class="tx">${tqEsc(o.txt)}</span>${who.length?`<span class="mtq-who">${who.map(u=>`<i class="${u===me?"me":""}">${wcEsc(mt.p[u].n)}${rev&&sc.per[u][i]?` ${sc.per[u][i]>0?"+":""}${sc.per[u][i]}`:""}</i>`).join("")}</span>`:""}</button>`; }).join("")}</div>`;
+  }
+  const fb = rev ? (my ? (my[0]===q.ok ? `⭕ ${my[2]?"打てた! ":""}正解! ${sc.per[me][i]>=0?"+":""}${sc.per[me][i]}` : `❌ ざんねん${sc.per[me][i]<0?` ${sc.per[me][i]}`:sc.per[me][i]>0?` ・ 🧲 点数どろぼうで +${sc.per[me][i]}`:""}`) : "⏱ 時間切れ")
+    : out ? "⏳ 時間切れ(時間どろぼう)" : my ? (my[2]?"打てた! みんなを待っています":"答えました。みんなを待っています") : (!mt.revOpen ? "" : window.IS_MOBILE ? "答えをタップ" : `1〜${mtqView(i).length} で答える(クリックでも)`);
+  el.innerHTML=`<div class="mtq-card${rev?" rev":""}"><div class="mtq-no">第${Math.floor(i/MTQ_PER)+1}ラウンド ${q.rd.nm} ・ ${i%MTQ_PER+1}問目 ・ ${ptTxt}</div>
+    ${tags?`<div class="mtq-tags">${tags}</div>`:""}
+    ${mtqPrompt(q,rev)}${opts}
+    <div class="mtq-fb">${fb}</div>
+    <div class="mtq-ans" id="mtqAns"></div></div>`;
+  if(!rev) mtqAns();
+}
+function mtqAns(){ const el=$("mtqAns"), i=mt.qi; if(!el || i<0) return; el.innerHTML=Object.keys(mt.p).filter(u=>!mt.p[u].q).map(u=>`<span class="${(mt.p[u].a||{})[i]?"on":""}">${wcEsc(mt.p[u].n)} ${(mt.p[u].a||{})[i]?"✔":"…"}</span>`).join(""); }
+/* 持っているアイテム(タイピングの対戦と同じ見た目。使えるときは光る) */
+function mtqItems(){
+  const el=$("mtaItems"); if(!el || !mt) return;
+  const it=(k,i)=>mt.spin && mt.spin.i===i ? `<span class="mt-it spin"><b>${mt.spin.ic}</b>…</span>` : k?`<span class="mt-it"><b>${MTQ_ITEMS[k].ic}</b>${MTQ_ITEMS[k].nm}</span>`:`<span class="mt-it empty">空き</span>`;
+  const ready=mt.items.length && !(mt.spin && mt.spin.i===0);
+  el.innerHTML=`<span class="mt-items${ready?" ready":""}">${it(mt.items[0],0)}${it(mt.items[1],1)}${ready?`<span class="mt-space" data-item="1">${window.IS_MOBILE?"タップで使う!":"Space で使う!"}</span>`:""}</span>`;
+}
+function mtqFinish(){
+  if(mt.over2) return; mt.over2=true;
+  const me=mtMe(), sc=mtqScore(MTQ_N-1), s=sc.tot[me]||0, c=sc.cor[me]||0;
+  let gs=0, gm=0; mt.qs.forEach((q,i)=>{ const a=(mt.p[me].a||{})[i]; if(a && a[0]===q.ok){ const x=(q.rd.f==="fill"||a[2])?2:1; gs+=TQ_GIFT_SC*x; gm+=TQ_GIFT_MIN*x; } });   // ふだんの TOEIC と同じ: 穴埋めと、打てた逆4択は倍
+  mtFinishCommon({ s, unit:"点", cap:"得点", sub:`正解 ${c} / ${MTQ_N}問`, dt:`正解 ${c}/${MTQ_N}`, toGarden:gs, mins:gm,
+    ghostFinal:()=>{ for(const u of Object.keys(mt.p)) if(mt.p[u].g!=null){ mt.p[u].s=sc.tot[u]||0; mt.p[u].dt=`正解 ${sc.cor[u]||0}/${MTQ_N}`; } } });
+}
+/* ---- チャットの対戦の欄 ---- */
+function wcMatchToggle(){
+  const box=$("wcMatch");
+  if(!box.hidden){ box.hidden=true; return; }
+  wcPaneShow("wcMatch"); wcMatchPane("");
+}
+/* 対戦の欄: まず種類を選び、次に難易度・レベルを選んで募集する */
+function wcMatchPane(mo){
+  const box=$("wcMatch"); wcCur=-1; box.scrollTop=0;
+  const btn = (attrs,key,nm,ds) => `<button class="btn" ${attrs}><span class="wdn">${key!==""?`<span class="kbdh">${key}</span> `:""}${nm}</span>${ds?`<span class="wde">${ds}</span>`:""}</button>`;
+  if(!mo){
+    const ms=Object.keys(MT_MODES).filter(k=>!(window.IS_MOBILE && k==="type"));
+    box.innerHTML=ms.map((k,i)=>btn(`data-mtm="${k}"`,i+1,`${MT_MODES[k].ic} ${MT_MODES[k].nm}の対戦`,MT_MODE_DS[k])).join("")
+      + (window.IS_MOBILE?`<small class="mt-inote">タイピングの対戦はパソコンで遊べます</small>`:"");
+    return;
+  }
+  const ds=mo==="toeic"?TQ_RANK_GROUPS.map(g=>g[0]):["easy","normal","hard"];
+  box.innerHTML = ds.map((d,i)=>btn(`data-mtc="${d}" data-mo="${mo}"`,i+1,`⚔️ ${mtLabel(mo,d)}で募集`,`1分間、参加する人を待ちます(${MT_MAX}人まで)。だれも来なければゴーストと遊べます`)).join("")
+    + btn(`data-mtm=""`,ds.length+1,"← 種類を選びなおす","")
+    + (mo==="type"?mtItemList():mtqItemList());
+}
+function wcMatchHTML(m,head){
+  const left=Math.ceil(((+m.ms||0)-mtNow())/1000), me=m.o===myId();
+  const act = left<=0 ? `<span class="wc-got">締め切りました</span>` : me ? `<span class="wc-got">あと${left}秒</span>` : window.IS_MOBILE && (m.mo||"type")==="type" ? `<span class="wc-got">パソコンで参加できます ・ あと${left}秒</span>` : `<button class="btn primary" data-wcmt="${wcEsc(m.mt)}">参加する</button><span class="wc-got">あと${left}秒</span>`;
+  if(left>0) setTimeout(wcRenderSoon,1000);
+  return `<div class="wc-msg dish mtm${me?" me":""}">${head}⚔️ ${wcEsc(mtLabel(m.mo||"type",m.md))}の対戦相手を募集しています!${act}${wcRxHTML(m)}</div>`;
+}
 /* ---------- 要望・バグ報告 ----------
    Firebase の typinggarden/feedback に書き込むだけ(読むのは作者だけ) */
 let fbOpen=false, fbCat="feature";
@@ -5431,8 +7085,9 @@ $("dictBackBtn").addEventListener("click",()=>show("title"));
 
 /* ---------- 全体統計(総プレイ回数・外したキー累計) ---------- */
 /* screws: 実際に外した個数(統計に数える) / toGarden: 農園に届けるキー */
-async function recordStats(screws, toGarden=screws){
-  sendToGarden(gardenKeys, toGarden); gardenKeys=0;
+async function recordStats(screws, toGarden=screws, noMul=false){
+  sendToGarden(gardenKeys, toGarden, 0, noMul); gardenKeys=0;
+  wcGoalAdd("type",screws);
   // 端末ローカルにも記録(オフライン時のフォールバック用)
   try{
     let s={plays:0,screws:0};
@@ -7270,10 +8925,15 @@ function halfGone(p){
   try{ toast(`🍂 ${nm}の種は、ひとりで実って消えてしまいました`,"warn",4200); }catch(e){}
 }
 /* いま画面の色が何色に分かれているか(applyTheme と同じ数え方) */
+function themeParts(){   // 画面の色の料理: nb あとに食べた / ob 先に食べた / gb もらった料理 / kd 永遠のかまど
+  const own=[buffNow(), buff2Now()].filter(x=>x && DISH[x.d] && DISH[x.d].eff==="M");
+  const nb=own[0]||null, ob=(own[1] && nb && own[1].d!==nb.d) ? own[1] : null;
+  const g=giftNow(), gb = g && DISH[g.d] && DISH[g.d].eff==="M" && ![nb,ob].some(x=>x && x.d===g.d && x.t===g.t) ? g : null;
+  return { nb, ob, gb, kd:kamadoNow(nb,ob) };
+}
 function roseThemeN(){
-  const ms=buffList().filter(x=>DISH[x.d] && DISH[x.d].eff==="M");
-  const nb=ms[0]||null, ob=(ms[1] && nb && ms[1].d!==nb.d) ? ms[1] : null;
-  return [kamadoNow(nb,ob), ob, nb].filter(Boolean).length;
+  const { nb, ob, gb, kd }=themeParts();
+  return [kd, ob, nb, gb].filter(Boolean).length;
 }
 /* 実ったまま24時間置いておくと、錆色に変わる(変異・超変異とシークレットは変わらない) */
 function roseRust(p,now){
@@ -7757,6 +9417,18 @@ const DBG_TREE=["bt_ume","bt_grape","bt_sugi"], DBG_SAP_MAX=3;
 const DBG_ROSE=["b1","b2","b3","470","630","730","860","990","i1","i2","ls","lt"];   // 薔薇の種12種
 const dbgDay = () => new Date(Date.now()+9*3600000).toISOString().slice(0,10);
 /* キー: 取った累計売上の実績のうち、一番上のごほうびの 10% / 20% / 40% */
+/* 対戦の順位のごほうび(k 個ぶん)。まだ開いていないものは肥料にかえる。受け取ったものの説明を返す */
+const MT_COIN=100;   // コイン1つぶん(薔薇ガチャ10回)
+function mtGive(kind,k){
+  k=Math.max(0,k|0); if(!k) return "";
+  if(kind==="fuyo" && !btOpen()) kind="sfert";
+  if(kind==="coin" && !roseGachaOpen()) kind="sfert";
+  let t="";
+  if(kind==="fuyo"){ S.fuyo=(S.fuyo||0)+k; t=`🍂 腐葉土 ${k}個`; }
+  else if(kind==="coin"){ const a=MT_COIN*k; xAdd(S,"roseCoin",a); S.roseCoinTotal=(S.roseCoinTotal||0)+a; t=`🪙 薔薇ガチャコイン ${fmtNum(a)}枚`; }
+  else { S.sfert=(S.sfert||0)+k; t=`✨ ${GUR.sfert.name} ${k}個`; }
+  save(); return t;
+}
 function dailyNeji(lv){
   let rw=0; for(const g of GOALS) if(g.cat==="売上" && /^s\d/.test(g.id) && S.totalSales>=g.need) rw=Math.max(rw,g.rw);
   if(!rw){ const g=GOALS.find(x=>x.id==="s1k"); rw=g?g.rw:200; }
@@ -8314,6 +9986,8 @@ function harvestOne(k){
   for(let i=0;i<num;i++) recordHarvest(c.id,t,false);
   if(mut){
     toast(`${t===5?"✧ 超変異!":"✦ 変異!"} ${icoQ(c,t)} ${esc(qName(c.id,t))}${num>1?` ×${num}`:""} が穫れました${first?"(図鑑に載りました)":""}`,t===5?"good mut sup":"good mut",t===5?9000:6000,true);
+    if(!byVil) wcGoalAdd("mut",num);   // みんなの目標・自動のお知らせには、村人が植えた畑のぶんは入れない
+    if(!c.secret && !byVil) wcAnnounce(`${t===5?"超変異":"変異"}の「${qName(c.id,t)}」を収穫しました${num>1?` ×${num}`:""}${first?"(はじめて!)":""}`, t===5?4:2);
     sfx.vil();
   }
   else if(first) toast(`${ico(c)} ${esc(qName(c.id,t))} を初めて収穫しました。${kb("図鑑(Space)","図鑑")}に載りました`,"good",4000,true);
@@ -9327,10 +11001,11 @@ function drawGacha(n){
   }finally{ drawMemo=null; }
   const C=gachaCtx();
   for(const x of res) gachaApply(x,C);
-  S.gachaCount=(S.gachaCount||0)+res.length;   // ガチャおかわりで増えた分も、引いた回数に数える
+  S.gachaCount=(S.gachaCount||0)+res.length; wcGoalAdd("gacha",res.length);   // ガチャおかわりで増えた分も、引いた回数に数える
   if(gachaM==="r") S.roseGachaCount=(S.roseGachaCount||0)+res.length;
   if(!ownedSeeds().includes(S.seedId)){ const sd=res.find(x=>CROP[x.id] && S.seeds[x.id]>0); if(sd) S.seedId=sd.id; }
   checkUnlocks(); save();
+  { const top=res.reduce((a,x)=>RARITY_ORDER.indexOf(x.r)>RARITY_ORDER.indexOf(a.r)?x:a,res[0]); gachaAnnounce(top); }
   if(n>=1111){
     gachaRes=[]; gachaShown=0;
     gachaBig=summarizeGacha(n,res);
@@ -9668,10 +11343,10 @@ function megaEnd(keep){
   if(M.sweep) M.sweep.stop();
   drawMemo=null; gachaMega=null;
   const total=M.n+M.extra;
-  S.gachaCount=(S.gachaCount||0)+total;
+  S.gachaCount=(S.gachaCount||0)+total; wcGoalAdd("gacha",total);
   if(gachaM==="r") S.roseGachaCount=(S.roseGachaCount||0)+total;
   if(!ownedSeeds().includes(S.seedId)){ const sd=Object.values(M.by).find(x=>CROP[x.id] && S.seeds[x.id]>0); if(sd) S.seedId=sd.id; }
-  checkUnlocks();
+  checkUnlocks(); gachaAnnounce(M.bestItem);
   gachaBig=gachaGroups(M.n,M.by,M.extra);
   if(M.fx===7){ renderBar(); save(); renderGacha(); revealBigNext(); return; }   // いつもの: 低いレア度から段ごとに
   gachaBig.stage=gachaBig.groups.length; gachaBig.done=true; gachaBig.mega=true;
@@ -9703,6 +11378,12 @@ function megaFinale(M){
   }, 150+k*260);
   if(gachaM==="r") rosePetalStorm(70);
   if(gachaM==="w") wakuConfetti(60);
+}
+/* ガチャで GSR 以上が出たら、農園の寄り合いに載せる(10分に1回まで) */
+function gachaAnnounce(x){
+  if(!x) return; const ri=RARITY_ORDER.indexOf(x.r); if(ri<5) return;
+  const c=itemOf(x.id); if(!c) return;
+  wcAnnounce(`${MACHINES[gachaM].name}で ${RARITY[x.r].label} の「${c.name}」を引きました`, ri>=6?3:1);
 }
 /* 料理の効果(引くあいだ変わらない) */
 const gachaCtx = () => ({ upP:ev("P3",.05,.2,0)+kitVal("loupe")/100, dblFood:ev("ζ",.2,1,0), dblSeed:ev("Q1",.2,.5,0) });
@@ -11338,6 +13019,12 @@ function buffNow(){
   if(Date.now()>=b.until){ S.buff=null; return null; }
   return b;
 }
+/* 農園の寄り合いで受け取った料理: 自分の料理の枠とは別に1つだけ */
+function giftNow(){
+  const b=S.gift; if(!b) return null;
+  if(Date.now()>=b.until){ S.gift=null; return null; }
+  return b;
+}
 /* 二段重ねのお弁当箱: 使っている間は、2つ目の効果を持てる */
 const bentoOn = () => (S.bentoUntil||0) > Date.now();
 function buff2Now(){
@@ -11351,17 +13038,18 @@ function fridgeKeep(){
   if(((S.kit&&S.kit.fridge)||0)>0 && gap>20000){
     if(S.buff) S.buff.until+=gap;
     if(S.buff2) S.buff2.until+=gap;
+    if(S.gift) S.gift.until+=gap;
     if(S.bentoUntil>0) S.bentoUntil+=gap;
   }
   S.aliveAt=now;
 }
 /* いまかかっている効果(1つ目が先に切れて、お弁当箱の2つ目だけ残っていることもある) */
-const buffList = () => [buffNow(), buff2Now()].filter(Boolean);
+const buffList = () => [buffNow(), buff2Now(), giftNow()].filter(Boolean);   // 3つ目は、もらった料理
 const mBuff = () => buffList().find(b=>DISH[b.d] && DISH[b.d].eff==="M") || null;   // 画面の色の料理
 /* 効果の強さ: 0 なし / 1 ふつうの料理 / 2 変異・超変異の料理(お弁当箱の2つ目も見る) */
 function eff(k){
   let x=0;
-  for(const b of [buffNow(), buff2Now()]){ if(!b) continue; const d=DISH[b.d]; if(d && d.eff===k) x=Math.max(x, isMutT(b.t)?2:1); }
+  for(const b of [buffNow(), buff2Now(), giftNow()]){ if(!b) continue; const d=DISH[b.d]; if(d && d.eff===k) x=Math.max(x, isMutT(b.t)?2:1); }
   return x;
 }
 Object.assign(EFFS, {   // 大木の料理
@@ -11643,7 +13331,7 @@ function cookMake(id,times){
     const bk=bookKeyOf(grade); S.dishMade[id]=S.dishMade[id]||{};
     const first=!S.dishMade[id][bk]; S.dishMade[id][bk]=true;
     if(first){ isFirst=true; toast(`📖 ${dishIco(d,bk)} ${esc(dishName(d,bk))}が料理図鑑に載りました`,"good",3600,true); }
-    made++; S.cookCount=(S.cookCount||0)+1;
+    made++; S.cookCount=(S.cookCount||0)+1; wcGoalAdd("cook",1);
   }
   if(!made){ sfx.nope(); toast("材料が足りません","warn"); return; }
   if(!cookShow(d,grade,made+extra,isFirst)) sfx.buy();
@@ -11692,6 +13380,45 @@ function cookEat(id,g){
   }
   if(!bigShow("eat",{ art:d.art[g===5?2:g===3?1:0], title:dishName(d,g), grade:g, top:isDrinkD(id)?"かんぱい!":"いただきます!", sub:what })) sfx.vil();
   save(); renderAll(); renderCook();
+}
+/* ---- 農園の寄り合い: 料理を投げる・受け取る ---- */
+const wcCanThrow = id => !!DISH[id] && !DISH[id].bt;   // お酒やおつまみは投げられない(ほかの人を酔わせてしまうため)
+function wcDishes(){   // 投げられる作り置き
+  const out=[];
+  for(const id of Object.keys(S.dishes||{})) for(const g of [0,3,5]){ const n=(S.dishes[id]||{})[g]||0; if(n>0 && wcCanThrow(id)) out.push({ id, g, n, html:`${isFavD(id)?"★ ":""}${dishIco(DISH[id],g)} ${esc(dishName(DISH[id],g))}` }); }
+  return out.map((x,i)=>[x,i]).sort((a,b)=>(isFavD(b[0].id)-isFavD(a[0].id)) || a[1]-b[1]).map(a=>a[0]);   // お気に入りの料理を上に
+}
+function wcUse(id,g){ const st=S.dishes[id]; if(!st || !(st[g]>0) || !wcCanThrow(id)) return false; st[g]--; save(); try{ renderAll(); }catch(e){} return true; }
+function wcRefund(id,g){ S.dishes[id]=S.dishes[id]||{}; S.dishes[id][g]=(S.dishes[id][g]||0)+1; save(); }
+const wcGiftMin = (d,g) => Math.max(1, Math.round(dishMinOf(d,g)/2));   // もらった料理の効果は、食べたときの半分の時間
+const wcGiftHours = g => (g===5 ? 24 : g===3 ? 12 : 3)/2, wcGiftAdd = g => (g===5 ? 60 : g===3 ? 30 : 10)/2;   // 時間を進める・効果を延ばす料理も、もらうと半分
+const wcLabel = (id,g) => { const d=DISH[id]; if(!d) return null;
+  const eff = d.eff==="β" ? `受け取った瞬間、水が効いている畑が${fmtMin(wcGiftHours(g)*60)}進む` : d.eff==="P8" ? `受け取った瞬間、今かかっている料理の効果が${fmtMin(wcGiftAdd(g))}延びる` : effText(d,g);
+  return { html:`${dishIco(d,g)} ${esc(dishName(d,g))}`, eff, min: instantEff(d.eff) ? "" : fmtMin(wcGiftMin(d,g)) }; };
+const wcTaken = key => !!(S.wcTaken && S.wcTaken[key]);
+/* 受け取る: 効果は食べたときと同じで、時間は半分。自分の料理の枠は使わない(もらった料理は1つだけ。新しくもらうと入れ替わる) */
+function wcReceive(m){
+  const d=DISH[m.d], g=+m.g||0; if(!d || !wcCanThrow(m.d) || wcTaken(m.key)) return null;
+  let msg;
+  if(d.eff==="β"){
+    const hours = wcGiftHours(g);   // もらった料理は半分
+    tick(); advanceAll(hours*HOUR,true);
+    msg=`水が効いている畑が ${fmtMin(hours*60)} 進みました`;
+  }else if(d.eff==="P8"){
+    const bs=buffList(); if(!bs.length) return "今かかっている料理の効果がないので、受け取れません(効果を延ばす料理です)";
+    const add = wcGiftAdd(g);   // もらった料理は半分
+    for(const x of bs) x.until+=add*60000;
+    msg=`かかっている効果が ${fmtMin(add)} 延びました`;
+  }else{
+    if(m.d==="rt_barabara") S.baraSeen=true;
+    const old=giftNow(), dm=wcGiftMin(d,g);
+    S.gift={ d:m.d, t:g, until:Date.now()+dm*60000, from:String(m.n||"").slice(0,10) };
+    msg=`${effText(d,g)}(${fmtMin(dm)})`+(old?` ・ 前にもらった ${dishName(DISH[old.d],old.t)} と入れ替わりました`:"");
+  }
+  S.wcTaken=S.wcTaken||{}; S.wcTaken[m.key]=Date.now();
+  for(const k of Object.keys(S.wcTaken)) if(Date.now()-S.wcTaken[k]>3*86400000) delete S.wcTaken[k];   // 古い印は消す
+  save(); try{ renderAll(); }catch(e){}
+  return `🎁 ${m.n}さんの ${dishName(d,g)} を受け取りました。${msg}`;
 }
 /* 料理番の村人: 任せた料理を、作り置きが10個になるまで材料があるかぎり作る(1分ごと) */
 function toggleAutoCook(id,g){
@@ -11804,7 +13531,11 @@ function renderCook(){
   keepVisible(body);
 }
 function cookNowText(){
-  const [b,b2]=buffList();
+  const gf=giftNow(), gl = gf ? `<br>🎁 ${esc(gf.from)}さんからもらった料理: ${dishIco(DISH[gf.d],gf.t)} ${esc(dishName(DISH[gf.d],gf.t))} ・ ${esc(effText(DISH[gf.d],gf.t))} ・ 残り ${fmtLeft(gf.until-Date.now())}` : "";
+  return cookNowText0()+gl;
+}
+function cookNowText0(){
+  const [b,b2]=[buffNow(), buff2Now()].filter(Boolean);
   const one = x => `${dishIco(DISH[x.d],x.t)} ${esc(dishName(DISH[x.d],x.t))} ・ ${esc(effText(DISH[x.d],x.t))} ・ 残り ${fmtLeft(x.until-Date.now())}`;
   return b ? `今の効果: ${one(b)}${b2?`<br>2つ目: ${one(b2)}`:""}${bentoOn()?` ・ 🍱 お弁当箱 残り ${fmtLeft(S.bentoUntil-Date.now())}`:""}` : (bentoOn()?`🍱 お弁当箱 残り ${fmtLeft(S.bentoUntil-Date.now())}(料理の効果を2つまでかけられます)`:"今かかっている料理の効果はありません");
 }
@@ -11976,8 +13707,13 @@ root.querySelectorAll(".sptabs").forEach(el=>el.addEventListener("click",e=>{ co
 
 /* ---- 今かかっている効果(農園の上に出す)・農園の色 ---- */
 function renderBuff(){
-  const el=$("g-buff"), [b,b2]=buffList();
+  const el=$("g-buff"), [b,b2]=[buffNow(), buff2Now()].filter(Boolean), gf=giftNow();
   applyTheme();
+  if(!b && gf){   // もらった料理だけ
+    const dg=DISH[gf.d]; el.hidden=false; el.className="buff"+(gf.t===5?" sup":gf.t===3?" mut":"");
+    el.innerHTML=`🎁 ${dishIco(dg,gf.t)} ${esc(EFFS[dg.eff].nm)} <b>${fmtLeft(gf.until-Date.now())}</b>`; el.title=`${gf.from}さんからもらった ${dishName(dg,gf.t)}: ${effText(dg,gf.t)}`;
+    return;
+  }
   if(!b){ el.hidden=true; return; }
   const d=DISH[b.d];
   el.hidden=false;
@@ -12022,14 +13758,13 @@ function themeFloat(on,d,t,two){
 }
 function applyTheme(){
   rosePetals();   // 薔薇のかまど
-  // 画面の色: 食べている色の料理(お弁当箱なら2つ)と、永遠のかまどの色。同じ料理は1つに数えて、最大3色
-  const ms=buffList().filter(x=>DISH[x.d] && DISH[x.d].eff==="M");   // [あとに食べた, 先に食べた]
-  const nb=ms[0]||null, ob=(ms[1] && nb && ms[1].d!==nb.d) ? ms[1] : null;
-  const kd=kamadoNow(nb,ob);   // 永遠のかまど(食べたことのある料理の色)
-  const order=[kd, ob, nb].filter(Boolean);   // かまど → 先に食べた料理 → あとに食べた料理
+  // 画面の色: 食べている色の料理(お弁当箱なら2つ)と、永遠のかまどの色と、もらった料理。同じ料理は1つに数えて、最大4色
+  const { nb, ob, gb, kd }=themeParts();
+  const ms=[nb,ob,gb].filter(Boolean);
+  const order=[kd, ob, nb, gb].filter(Boolean);   // かまど → 先に食べた料理 → あとに食べた料理 → もらった料理
   const de=document.documentElement;
-  if(!order.length){ themeKey=""; document.body.classList.remove("dishtheme","dishfun","dishsplit","dishsplit3","dishmono","dishglass","dishlight"); roseFx(""); for(const v of THEME_VARS) de.style.removeProperty(v); themeFloat(false); return; }
-  const b=nb||kd, d=DISH[b.d];   // 板などの色の基準: いちばんあとに食べた料理(なければかまど)
+  if(!order.length){ themeKey=""; document.body.classList.remove("dishtheme","dishfun","dishsplit","dishsplit3","dishsplit4","dishmono","dishglass","dishlight"); roseFx(""); for(const v of THEME_VARS) de.style.removeProperty(v); themeFloat(false); return; }
+  const b=nb||gb||ob||kd, d=DISH[b.d];   // 板などの色の基準: いちばんあとに食べた料理(なければ、もらった料理・かまど)
   const key=order.map(x=>x.d+":"+x.t).join("|"); if(key===themeKey) return; themeKey=key;
   const colOf = x => { const d=DISH[x.d]; return (d.colors && d.colors[x.t]) || d.accent||d.tint||d.color; };   // ローズティーは段階ごとの色
   const cols=order.map(colOf);
@@ -12049,8 +13784,10 @@ function applyTheme(){
   for(const v of ["--dishL","--dishR","--dishA","--dishB","--dishC"]) de.style.removeProperty(v);
   if(cols.length===2){ de.style.setProperty("--dishL",cols[0]); de.style.setProperty("--dishR",cols[1]); }
   if(cols.length===3){ de.style.setProperty("--dishA",cols[0]); de.style.setProperty("--dishB",cols[2]); de.style.setProperty("--dishC",cols[1]); }
+  if(cols.length===4){ de.style.setProperty("--dishA",cols[0]); de.style.setProperty("--dishB",cols[1]); de.style.setProperty("--dishC",cols[2]); de.style.setProperty("--dishD",cols[3]); }
   // 板などは、すべての色を同じ割合で混ぜる
-  const cf = cols.length===1 ? cols[0] : cols.length===2 ? `color-mix(in srgb, ${cols[0]} 50%, ${cols[1]})` : `color-mix(in srgb, color-mix(in srgb, ${cols[0]} 50%, ${cols[1]}) 67%, ${cols[2]})`;
+  const cf = cols.length===1 ? cols[0] : cols.length===2 ? `color-mix(in srgb, ${cols[0]} 50%, ${cols[1]})` : cols.length===3 ? `color-mix(in srgb, color-mix(in srgb, ${cols[0]} 50%, ${cols[1]}) 67%, ${cols[2]})`
+    : `color-mix(in srgb, color-mix(in srgb, ${cols[0]} 50%, ${cols[1]}) 50%, color-mix(in srgb, ${cols[2]} 50%, ${cols[3]}))`;
   const a=colOf(b);
   document.body.classList.add("dishtheme");
   if(ms.some(x=>isMutT(x.t))){   // 変異・超変異: 背景をはっきり料理の色に。作物が舞い、キーが料理に変わる
@@ -12064,7 +13801,7 @@ function applyTheme(){
     de.style.setProperty("--amber",`color-mix(in srgb, ${a} 35%, #ffffff)`);
     de.style.setProperty("--amber-dim",`color-mix(in srgb, ${a} 60%, #000)`);
     de.style.setProperty("--steel",`color-mix(in srgb, ${a} 20%, #f0f2f6)`);
-    themeFloat(true,DISH[nb.d],nb.t,ob && { d:DISH[ob.d], t:ob.t });
+    { const f1=nb||gb||ob, f2=[ob,gb].find(x=>x && x!==f1); themeFloat(true,DISH[f1.d],f1.t,f2 && { d:DISH[f2.d], t:f2.t }); }
     return;
   }
   // ふつう: 演出はなし。背景と板の色だけ、はっきり料理の色に(変異・超変異より少し落ち着いた色)
@@ -12526,6 +14263,9 @@ const GOALS = [
   { cat:"台所の宝物", ser:"ktU", id:"ktGUR",ic:"💠", nm:"伝説の台所",       ds:"GUR の台所の宝物を手に入れる",    need:1,  now:()=>kitKinds("GUR"), rw:1000000 },
   { cat:"台所の宝物", ser:"ktU", id:"ktGURall",ic:"💠", nm:"伝説の台所のすべて", ds:"GUR の台所の宝物を8種類すべて手に入れる", need:()=>KIT_ORDER.filter(id=>GUR[id].r==="GUR").length, now:()=>kitKinds("GUR"), rw:5000000 },
   { cat:"台所の宝物", id:"ktCap",ic:"⭐", nm:"使い込んだ道具",   ds:"重ねる台所の宝物を、どれか1つ上限まで重ねる", need:1, now:kitCapped, rw:3000000 },
+  { cat:"みんなの目標", ser:"wcg", id:"wcg1",  ic:"🎯", nm:"みんなで達成",     ds:"みんなの目標のごほうびを受け取る",   need:1,  now:()=>Object.keys(S.wcGoal||{}).filter(k=>/^g\d+$/.test(k)).length, rw:500000 },
+  { cat:"みんなの目標", ser:"wcg", id:"wcg10", ic:"🎯", nm:"頼れる仲間",       ds:"みんなの目標のごほうびを10回受け取る", need:10, now:()=>Object.keys(S.wcGoal||{}).filter(k=>/^g\d+$/.test(k)).length, rw:5000000 },
+  { cat:"みんなの目標", ser:"wcg", id:"wcg50", ic:"🏅", nm:"農園の英雄",         ds:"みんなの目標のごほうびを50回受け取る", need:50, now:()=>Object.keys(S.wcGoal||{}).filter(k=>/^g\d+$/.test(k)).length, rw:30000000 },
   { cat:"大木", id:"btp1",  ic:"🌱", nm:"大木を植える",       ds:"大木の苗木を植える",                 need:1,  now:()=>S.btPlanted||0, rw:100000, vis:btGoalVis },
   { cat:"大木", ser:"btr", id:"btr1",  ic:"🌳", nm:"実りの大木",     ds:"大木を1本実らせる",                  need:1,  now:()=>S.btRipe||0, rw:1000000, vis:btGoalVis },
   { cat:"大木", ser:"btr", id:"btr10", ic:"🌳", nm:"大木の森",       ds:"大木を合計10本実らせる",             need:10, now:()=>S.btRipe||0, rw:10000000, vis:btGoalVis },
@@ -12843,6 +14583,7 @@ function onKeyMain(e){
   if(k==="Escape"){ backToTitle(); return; }
   if(k==="-"){ e.preventDefault(); leave(); openToeic(); return; }   // TOEIC 英単語へ
   if(k==="/"){ e.preventDefault(); openLayout(); return; }   // 配置セット
+  if(k==="Enter"){ e.preventDefault(); openWorld(); return; }   // 農園の寄り合い
   if(k==="4" && e.repeat){ openPick("seed"); return; }   // 4 を長押し: 種の一覧
   if(k==="4"){ const now=Date.now(); if(now-lastFour<350){ lastFour=0; openPick("seed"); return; } lastFour=now; }   // 4 をすばやく2回: 種の一覧
   if(/^[1-6]$/.test(k)){ setTool(+k); return; }
@@ -13108,7 +14849,23 @@ function debugStart2(){
   save();
 }
 function alive(){ if(kitN("fridge")>0){ fridgeKeep(); save(); } }
-return { peek:()=>{ consumeInbox(); tick(); return tutState(); }, roseName:roseNameHTML, roseNamePlate, roseRowStyle, roseRowCls, nameDeco, drunkNow, tqBoost:()=>({ rose:(1+rgGurPct("sh")/100)*otsuMul("Z2"), sc:1+rgGurPct("pen")/100, min:1+rgGurPct("dial")/100 }), rose:(lv,n)=>{ roseGive(lv,n); S.roseIn=(S.roseIn||0)+Math.floor(n); save(); }, screwMul, charmLives, applyTheme, alive, themeScrewArt, enter, leave, onKey, summary, dailyGive, dailyNeji, dailySapLeft, dailyOpen, btOpen, dbInfoSeen:()=>!!S.dbInfoSeen, dbInfoMark:()=>{ S.dbInfoSeen=true; save(); }, debugUnlock, debugStart2, tutState, tutGive, tutGrow, tutSeed, tutSandbox, refreshRank, openModal, ownerId, useName, baraOn, baraLeft, baraSeen, debugStart5, debugStart6, debugStart3, debugStart4 };
+return { peek:()=>{ consumeInbox(); tick(); return tutState(); }, roseName:roseNameHTML, roseNamePlate, roseRowStyle, roseRowCls, nameDeco, drunkNow, tqBoost:()=>({ rose:(1+rgGurPct("sh")/100)*otsuMul("Z2"), sc:1+rgGurPct("pen")/100, min:1+rgGurPct("dial")/100 }), rose:(lv,n)=>{ roseGive(lv,n); S.roseIn=(S.roseIn||0)+Math.floor(n); save(); }, screwMul, charmLives, applyTheme, alive, themeScrewArt, enter, leave, onKey, summary, dailyGive, dailyNeji, dailySapLeft, dailyOpen, btOpen, mtGive, dbInfoSeen:()=>!!S.dbInfoSeen, dbInfoMark:()=>{ S.dbInfoSeen=true; save(); }, debugUnlock, debugStart2, tutState, tutGive, tutGrow, tutSeed, tutSandbox, refreshRank, openModal, ownerId, useName, baraOn, baraLeft, baraSeen, debugStart5, debugStart6, debugStart3, debugStart4, wcDishes, wcUse, wcRefund, wcLabel, wcReceive, wcTaken, wcAllDishes:()=>Object.keys(DISH).filter(wcCanThrow), wcCropIds:()=>CROPS.filter(c=>!c.secret && SUPER[c.id]).map(c=>c.id), wcFarmNow:()=>({ m:Math.floor(S.money), h:Math.floor(S.totalHarvest||0) }),
+  wcGoalPicks:()=>[
+    { name:"不思議な肥料と摩訶不思議な肥料", ic:ico(GUR.mfert), give:()=>{ S.sfert=(S.sfert||0)+1; S.mfert=(S.mfert||0)+1; } },
+    { name:GUR.bento.name, ic:ico(GUR.bento), give:()=>{ S.bento=(S.bento||0)+1; } },
+    ...RG_GHR.filter(x=>x.k!=="rkam").map(x=>({ name:x.name, ic:ico(x), give:x.give })) ],   // 薔薇ガチャの GHR から、かまど以外の4つ
+  wcFanfare:()=>{ seq([523,659,784,1047],110,"triangle",.06,.25); setTimeout(()=>seq([1047,1319,1568,2093],70,"sine",.04,.2),520); },
+  wcGoalGot:wk=>!!(S.wcGoal && S.wcGoal[wk]), wcGoalPrize:(wk,money,coin)=>{ S.wcGoal=S.wcGoal||{}; if(S.wcGoal[wk]) return null; S.wcGoal[wk]=1; xAdd(S,"money",money); xAdd(S,"roseCoin",coin);
+    const ps=Garden.wcGoalPicks(), it=ps[Math.floor(Math.random()*ps.length)]; it.give(); save(); try{ renderAll(); }catch(e){} return { name:it.name, ic:it.ic }; },
+  wcCardOpts:()=>{ const out=[];
+    for(const c of CROPS){ const q=S.harvestQ[c.id]||[]; for(const t of [5,3]) if(q[t]>0){ out.push({ c:{ k:"crop", id:c.id, t, n:q[t] }, label:`${icoQ(c,t)} ${esc(qName(c.id,t))}`, sub:`${t===5?"超変異":"変異"} ・ ${fmtNum(q[t])}個収穫`, p:t*1e9+c.price }); break; } }
+    out.sort((a,b)=>b.p-a.p);
+    out.unshift({ c:{ k:"farm" }, label:"🏡 わたしの農園", sub:`所持キー ${xFmt(S.money,"money")} ・ 累計収穫 ${fmtNum(S.totalHarvest)}個` });
+    return out; },
+  wcCard:c=>{ if(c.k==="farm"){ const m=+c.m||0, h=+c.h||0; return { ic:"🏡", nm:"わたしの農園", sub:`所持キー ${fmtNum(m)} ・ 累計収穫 ${fmtNum(h)}個`, cls:"" }; }
+    if(c.k!=="crop" || !CROP[c.id] || ![3,5].includes(+c.t)) return null; const cr=CROP[c.id], t=+c.t;
+    return { ic:icoQ(cr,t), nm:esc(qName(c.id,t)), sub:`${t===5?"超変異":"変異"}${c.n>0?` ・ ${fmtNum(+c.n)}個収穫`:""}`, cls:"t"+t }; },
+  wcTestDishes:()=>Object.values(DISH).filter(d=>d.eff==="M"||d.id==="rt_barabara").flatMap(d=>gradesOf(d).map(g=>[d.id,g])) };
 })();
 
 function openGarden(){ show("garden"); Garden.enter(); }
@@ -13277,7 +15034,7 @@ let syncPushing=false, syncPushAgain=false, syncBackupAt=null, syncDirtyTimer=nu
    中身を比べずに「持ち主のときにタップ・キー操作をしたか」で判断する */
 let syncDirty=false, syncActivating=false;
 /* タイピング中・結果画面では取り込まない(読み直しで遊んでいる途中が消えないように) */
-const syncBusyScene = () => scene==="ranking" || scene==="game" || scene==="result" || (scene==="toeic" && $("tqPlay").classList.contains("on"));   // TOEIC は問題を解いているあいだ(結果・メニューに戻ったら送る)
+const syncBusyScene = () => scene==="ranking" || scene==="game" || scene==="battle" || scene==="result" || (scene==="toeic" && $("tqPlay").classList.contains("on"));   // TOEIC は問題を解いているあいだ(結果・メニューに戻ったら送る)
 let syncCode=null, syncDevice=null, syncLastT=0, syncReadOnly=false;
 let syncMetaRef=null, syncOwnerRef=null, syncLiveRef=null, syncHeart=null;
 let syncPending=false, syncPushAt=0, syncOwner=null, syncLive={}, syncOwnerLoaded=false, syncLiveLoaded=false;
@@ -14188,7 +15945,7 @@ document.addEventListener("visibilitychange",()=>{
 // 庭にいる間も、ときどきクラウドに送る
 setInterval(()=>{ if(scene==="garden" && syncCode) syncPush(false); }, 60000);
 setInterval(()=>{ if(scene==="title") refreshGardenStat(); }, 30000);
-setInterval(()=>{ try{ Garden.alive(); Garden.applyTheme(); }catch(e){} }, 5000);   // 料理の色が切れたら戻す・魔法の冷蔵庫の時刻
+setInterval(()=>{ try{ Garden.alive(); if(!mtOn() && !mtRes) Garden.applyTheme(); }catch(e){} }, 5000);   // 料理の色が切れたら戻す・魔法の冷蔵庫の時刻
 
 /* ---------- タイマー(遊ぶ時間) ----------
    遊べない時間帯と、1日に遊べる時間。この端末だけの設定(同期・記録の引き継ぎには入れない)。
@@ -14729,7 +16486,7 @@ function tqMarkFx(en,ok){
   const el=$("tqWmsg"); if(el) el.innerHTML=html;
   if(html){ const w=tqWords[tqI]; if(w) tqWstShow(w); }
 }
-function tqMark(en,ok){ const st=tqStore(tqFmt), t=Object.assign({c:0,w:0,s:0},st[en]); if(ok){ t.c++; t.s++; }else{ t.w++; t.s=0; } t.t=Date.now(); st[en]=t; tqSaveStat(); }
+function tqMark(en,ok){ const st=tqStore(tqFmt), t=Object.assign({c:0,w:0,s:0},st[en]); if(ok){ t.c++; t.s++; wcGoalAdd("toeic",1); }else{ t.w++; t.s=0; } t.t=Date.now(); st[en]=t; tqSaveStat(); }
 const tqHasSent = w => !!TQ_SENT[w.en];
 /* 単語リストと結果画面: 単語ごとの例文ボタンと、開くと出る例文 */
 const tqExBtn = w => tqHasSent(w) ? `<button class="btn tq-exb" type="button" tabindex="-1">例文</button>` : `<span></span>`;
@@ -15222,7 +16979,7 @@ function tqFinish(){
   const openMsg = opened ? `<br><b class="tq-new">🔓 ${tqLvName(opened)}が解放されました!</b>` : "";
   if(tqKind==="one"){
     const bk=tqBestKey(tqFmt,tqLadder[0]), old=tqBest[bk]||0, isBest=tqOk>old;
-    if(isBest && !tqBara){ tqBest[bk]=tqOk; tqSaveBest(); }   // バラバラの間の記録は自己ベストに入れない
+    if(isBest && !tqBara){ tqBest[bk]=tqOk; tqSaveBest(); if(old>0) wcAnnounce(`TOEIC 英単語のノーミス勝負(${tqFmtName(tqFmt)}・${tqLvName(tqLadder[0])})で自己ベスト ${tqOk}問を出しました`, 5); }   // バラバラの間の記録は自己ベストに入れない
     $("tqResSum").innerHTML=`ノーミス勝負 ・ ${tqFmtName(tqFmt)}${tqFmt==="type"?`(${tqSec}秒)`:""} ・ ${tqLvName(tqLadder[0])}<br><span class="tq-big">${tqOk}<small>問 正解</small></span>`
       +(tqClear ? `<br><b class="tq-new">${tqLvName(tqLadder[0])}を全部正解! クリア!</b>` : "")
       +(isBest&&old ? `<br><b class="tq-new">自己ベスト更新!</b>(これまで ${old}問)` : `<br>自己ベスト ${Math.max(old,tqOk)}問`)+openMsg+sent+roseMsg;

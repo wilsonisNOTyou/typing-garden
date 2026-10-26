@@ -51,6 +51,38 @@
           ".write": "!data.exists()",
           ".validate": "newData.hasChildren(['c', 'x', 't']) && newData.child('c').isString() && newData.child('c').val().matches(/^(word|crop|gacha|feature|bug|other)$/) && newData.child('x').isString() && newData.child('x').val().length >= 1 && newData.child('x').val().length <= 1000 && newData.child('t').isNumber() && (!newData.child('n').exists() || (newData.child('n').isString() && newData.child('n').val().length <= 20)) && (!newData.child('d').exists() || (newData.child('d').isString() && newData.child('d').val().length <= 10))"
         }
+      },
+      "world": {
+        ".read": true,
+        ".indexOn": [
+          "t"
+        ],
+        "$id": {
+          ".write": "(!data.exists() && newData.exists()) || (!newData.exists() && data.child('t').isNumber() && data.child('t').val() < now - 604800000)",
+          ".validate": "newData.hasChildren(['n', 't']) && newData.child('n').isString() && newData.child('n').val().length >= 1 && newData.child('n').val().length <= 10 && newData.child('t').isNumber() && (!newData.child('x').exists() || (newData.child('x').isString() && newData.child('x').val().length <= 200)) && (!newData.child('o').exists() || (newData.child('o').isString() && newData.child('o').val().length <= 60)) && (!newData.child('d').exists() || (newData.child('d').isString() && newData.child('d').val().length <= 40)) && (!newData.child('g').exists() || newData.child('g').isNumber())",
+          "r": {
+            "$u": {
+              ".write": "data.parent().parent().exists()",
+              ".validate": "$u.matches(/^[a-z0-9]{1,40}$/) && ((newData.hasChildren(['e']) && newData.child('e').isString() && newData.child('e').val().length <= 8 && (!newData.child('n').exists() || (newData.child('n').isString() && newData.child('n').val().length <= 10))) || (newData.isString() && newData.val().length <= 8))"
+            }
+          }
+        }
+      },
+      "worldGoal": {
+        ".read": true,
+        "$w": {
+          ".write": "newData.exists()",
+          ".validate": "newData.hasChildren(['n']) && newData.child('n').isNumber() && newData.child('n').val() >= 0 && (!newData.child('r').exists() || newData.child('r').isNumber()) && (!data.exists() || !data.child('r').exists() || (newData.child('r').val() === data.child('r').val() + 1 || (newData.child('r').val() === data.child('r').val() && newData.child('n').val() >= data.child('n').val())))"
+        }
+      },
+      "match": {
+        ".read": true,
+        ".indexOn": [
+          "t"
+        ],
+        "$m": {
+          ".write": true
+        }
       }
     }
   }
