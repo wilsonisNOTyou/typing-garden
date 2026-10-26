@@ -12942,6 +12942,7 @@ const hadSave=load();
 for(const id of Object.keys(BTS)) if(S.objs && S.objs[id]>0){ S.seeds[id]=(S.seeds[id]||0)+S.objs[id]; delete S.objs[id]; }   // 苗木は設置物から種へ
 tick(); checkUnlocks(); buildPlanter();
 function enter(){
+  S.tool=1; S.axeOn=false;   // 開いたときは素手(すぐ収穫できるように)
   tick(); checkUnlocks(); renderAll(); save();
   // 番付の名前をプレイヤー名にそろえる(前の名前で載っている分は移す)
   try{
