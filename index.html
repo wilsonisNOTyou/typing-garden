@@ -6443,7 +6443,7 @@ setTimeout(wcStart,1500);   // 開いているあいだ、新しい報告と飛�
      p: { 人: { n 名前, s 外したキーの数, c 今の言葉の進み(0〜1), k 正しく打った数, m ミス, x 状態の印, mc 最大連鎖, so 送ったおじゃま, f 終わった, fs 最後の数, q 途中でやめた } },
      ev: { 送った攻撃・アイテム・大キー: { f 送った人, to 相手("all" は全員), k 種類, n 量, t 時刻 } } }
    言葉: 一人ひとり違う言葉で、長さの並びだけそろえる。ときどき金の言葉(3個)と、アイテム箱つきの言葉が出る
-   連鎖: ミスなしで続けて打つと伸びる。3連鎖ごとにおじゃまキーを送り、送られていれば先に相殺する。10連鎖でフィーバー(8秒間2倍)
+   連鎖: ミスなしで続けて打つと伸びる。難易度ごとの間隔(MT_CHAIN)でおじゃまキーを送り、送られていれば先に相殺する。10連鎖でフィーバー(8秒間2倍)
    ほかに: 試合中に1回の全員イベント、残り10秒のラストスパート(2倍)
    ゴースト: 待っても相手が来なかったときに選べる。通信なしで、決まった速さで打ち、攻撃もしてくる */
 /* 🎁の言葉の出やすさ: ローマ字の長さに比例(およそ MT_BOX_KEYS 打ごとに1つ)。長い言葉ほど出やすく、難易度で数が変わらないように */
@@ -6453,20 +6453,23 @@ const MT_GHOSTS=[{ n:"ゴースト・ゆっくり", kps:3.2 },{ n:"ゴースト�
 /* 順位のごほうび(人と対戦したときだけ): 種類はくじ。1位は参加した人数ぶん、2位からは1つずつ減る。やめた人はなし
    まだ開いていないもの(腐葉土は大木、コインは薔薇ガチャ)が当たった人には、かわりに肥料 */
 const MT_GIFTS=["sfert","fuyo","coin"];
-const MT_OJ=["おじゃまします","きーきーきー","からまったきー","さびついたきー","ねじれたきー","じゃましにきた","ぐるぐるきーぼーど","きーがはずれない"].map(k=>({ t:k, k, oj:true }));
+/* 難易度ごとの連鎖: おじゃまを送る間隔とフィーバーになる連鎖(言葉が長いほど少なく)・大キーの数・キー泥棒の上限 */
+const MT_CHAIN={ easy:{ oj:3, fever:10, big:5, thief:2 }, normal:{ oj:2, fever:6, big:3, thief:2 }, hard:{ oj:2, fever:3, big:2, thief:1 } };
+const mtCh = () => MT_CHAIN[mt && mt.d] || MT_CHAIN.easy;
+const MT_OJ=["おじゃまします","きーきーきー","からまったきー","さびついたきー","ねじれたきー","じゃましにきた","ぐるぐるきー","はずれないきー"].map(k=>({ t:k, k, oj:true }));
 /* アイテム: atk 相手へ(1位を狙う。自分が1位なら2位) / all ほかの全員へ / me 自分に */
 const MT_ITEMS={
   fog:    { ic:"🌫️", nm:"霧",           to:"atk", ds:"相手のよみがなとローマ字を6秒かくす" },
   flip:   { ic:"🙃", nm:"さかさま",     to:"atk", ds:"相手の言葉・よみがな・ローマ字を2語さかさまにする" },
   drunk:  { ic:"🍶", nm:"酔わせる",     to:"atk", ds:"相手の画面を7秒ゆらす" },
   bomb:   { ic:"💣", nm:"おじゃま爆弾", to:"atk", ds:"相手におじゃまキーを送る(2人なら2つ、3人以上なら3つ)" },
-  thief:  { ic:"🧲", nm:"キー泥棒",     to:"atk", ds:"相手からキーをとる(2人なら1個、3人以上なら2個)" },
+  thief:  { ic:"🧲", nm:"キー泥棒",     to:"atk", ds:"相手からキーをとる(2人かハードなら1個、ほかは2個)" },
   thunder:{ ic:"⚡", nm:"かみなり",     to:"all", ds:"ほかの全員に、おじゃま1つと霧(2人なら2秒、3人以上なら3秒)" },
   shield: { ic:"🛡️", nm:"盾",           to:"me",  ds:"たまったおじゃまを消して、次の攻撃も1回ふせぐ" },
   rocket: { ic:"🚀", nm:"ロケット",     to:"me",  ds:"次の3語が2倍" },
 };
 /* 拾ったときに出す、ひと目で分かる説明(人数で量が変わるものは、その数で) */
-const mtItemShort = (k,all) => ({ fog:"相手のよみがなとローマ字をかくす", flip:"相手の言葉を全部さかさまに", drunk:"相手の画面をゆらす", bomb:all?"相手におじゃま ×2〜3":`相手におじゃま ×${mtDuo()?2:3}`, thief:all?"相手から1〜2個とる":`相手から${mtDuo()?1:2}個とる`, thunder:"みんなにおじゃまと霧", shield:"おじゃまを消して、次の攻撃をふせぐ", rocket:"次の3語が2倍" })[k]||"";
+const mtItemShort = (k,all) => ({ fog:"相手のよみがなとローマ字をかくす", flip:"相手の言葉を全部さかさまに", drunk:"相手の画面をゆらす", bomb:all?"相手におじゃま ×2〜3":`相手におじゃま ×${mtDuo()?2:3}`, thief:all?"相手から1〜2個とる":`相手から${mtDuo()?1:mtCh().thief}個とる`, thunder:"みんなにおじゃまと霧", shield:"おじゃまを消して、次の攻撃をふせぐ", rocket:"次の3語が2倍" })[k]||"";
 const mtItemList = () => `<div class="mt-ilist"><b>アイテム</b>${Object.entries(MT_ITEMS).map(([k,it])=>`<span>${it.ic} ${it.nm}<small>${mtItemShort(k,true)}</small></span>`).join("")}<small class="mt-inote">🎁つきの言葉を打つと手に入る ・ Space で使う ・ 2つまで ・ ×2〜3 などは2人のときは少なめ</small></div>`;
 const mtDuo = () => Object.values(mt.p).filter(p=>!p.q).length<=2;   // 2人の対戦(攻撃が必ず同じ相手に当たるので、少し弱める)
 /* 順位ごとの出やすさ: 上位は守りと自分強化、下位は強い攻撃が出やすい */
@@ -6478,7 +6481,7 @@ const MT_ITEM_W=[
 ];
 const MT_EVENTS={
   double:{ nm:"全員2倍タイム", ds:"10秒間、全員1語2個" },
-  big:   { nm:"大キー争奪",     ds:"全員に同じ言葉。先に打った人だけ +5個" },
+  big:   { nm:"大キー争奪",     ds:"全員に同じ言葉。先に打った人だけ +5個(ノーマル +3・ハード +2)" },
   gold:  { nm:"ゴールドラッシュ", ds:"10秒間、出る言葉が全部金(3個)" },
 };
 let mt=null, mtSrvOff=0, mtIv=0, mtLobbyOpen=false;
@@ -6666,7 +6669,7 @@ function mtLobby(){
 /* 待合室の遊び方(種類ごと) */
 function mtRules(mo){
   if(mo==="toeic") return `<ul class="mt-rules"><li>全員に同じ問題が${MTQ_N}問。3ラウンドで、${MTQ_ROUNDS.map((r,i)=>`第${i+1}は<b>${r.nm}</b>(${r.ds})`).join("、")}を${MTQ_PER}問ずつ</li><li>正解すると ${MTQ_ROUNDS.map(r=>`${r.nm} ${r.pt}点`).join("・")}。早く答えるほど、さらに最大でその半分。いちばん早く正解した人は +30点</li><li>全員パソコンなら、逆4択は英単語を打てる。打てたら ${MTQ_TYPE_PT}点。${MTQ_TYPE_OPEN/1000}秒たつと4択になる</li><li>🎁の付いた問題に正解すると<b>アイテム</b>をもらえる。<b>Space</b> で使うと、次の問題に効く</li><li>答え合わせで、だれがどれを選んだか見えます</li><li>料理とお酒の効果はかかりません</li></ul>${mtqItemList()}`;
-  return `<ul class="mt-rules"><li>60秒でキーを多く外した人の勝ち。言葉は一人ひとり違い、長さだけそろっています</li><li>ミスなしで続けて打つと連鎖。3連鎖ごとに上の人へ<b>おじゃまキー</b>、10連鎖で<b>フィーバー</b></li><li>🎁つきの言葉を打つとアイテム。<b>Space</b> で使う ・ 金の言葉は3個</li><li>試合中に1回、全員イベント。残り10秒は<b>ラストスパート</b>で2倍</li><li>料理とお酒の効果はかかりません。ミスしてもキーは戻りません</li></ul>${mtItemList()}`;
+  return `<ul class="mt-rules"><li>60秒でキーを多く外した人の勝ち。言葉は一人ひとり違い、長さだけそろっています</li><li>ミスなしで続けて打つと連鎖。${MT_CHAIN[mt.d].oj}連鎖ごとに上の人へ<b>おじゃまキー</b>、${MT_CHAIN[mt.d].fever}連鎖で<b>フィーバー</b></li><li>🎁つきの言葉を打つとアイテム。<b>Space</b> で使う ・ 金の言葉は3個</li><li>試合中に1回、全員イベント。残り10秒は<b>ラストスパート</b>で2倍</li><li>料理とお酒の効果はかかりません。ミスしてもキーは戻りません</li></ul>${mtItemList()}`;
 }
 /* 待っているあいだに、ゴーストと遊ぶ(募集はやめる) */
 function mtGhostNow(){
@@ -6746,15 +6749,15 @@ const mtDouble = () => mtFever() || mt.spurt || mtEvActive("double") || mt.boost
 function mtWordDone(){
   const w=currentWord||{}, me=mtMe();
   if(w.oj){ score+=0; mtPop("おじゃま","oj"); }
-  else if(w.big){ if(!mt.bigDone){ mt.bigDone=true; score+=5; mtPop("大キー! +5","big"); mtSfx.gold(); mtFeed("🏆 大キーを取った!"); mtSend("all","bigwin",1); } }
+  else if(w.big){ if(!mt.bigDone){ mt.bigDone=true; score+=mtCh().big; mtPop(`大キー! +${mtCh().big}`,"big"); mtSfx.gold(); mtFeed("🏆 大キーを取った!"); mtSend("all","bigwin",1); } }
   else {
     const p=(w.gold?3:1)*(mtDouble()?2:1); score+=p; mtPop(`+${p}`,w.gold?"gold":p>1?"dbl":""); if(w.gold) mtSfx.gold(); else mtSfx.done(p);
     if(mt.boost>0) mt.boost--;
     if(w.box) mtGetItem();
   }
   if(!mt.wordMiss){ mt.chain++; mt.maxChain=Math.max(mt.maxChain,mt.chain); mtSfx.chain(mt.chain);
-    if(mt.chain%3===0) mtAttack(mtFever()?2:1);
-    if(mt.chain%10===0){ mt.feverUntil=Date.now()+8000; mtSfx.fever(); mtFeed("🔥 フィーバー! 8秒間2倍"); }
+    if(mt.chain%mtCh().oj===0) mtAttack(mtFever()?2:1);
+    if(mt.chain%mtCh().fever===0){ mt.feverUntil=Date.now()+8000; mtSfx.fever(); mtFeed("🔥 フィーバー! 8秒間2倍"); }
   }
   mtHud();
 }
@@ -6793,7 +6796,7 @@ function mtUseItem(){
   else { const to=mtTarget(); if(!to){ mtFeed("相手がいません"); return; }
     let n=1;
     if(k==="bomb") n=mtDuo()?2:3;
-    if(k==="thief"){ n=Math.min(mtDuo()?1:2, mt.p[to].s||0); score+=n; $("score").textContent=score; }
+    if(k==="thief"){ n=Math.min(mtDuo()?1:mtCh().thief, mt.p[to].s||0); score+=n; $("score").textContent=score; }
     mtSend(to,k,n); mtFeed(`${it.ic} ${wcEsc(mt.p[to].n)}に${it.nm}!${k==="bomb"?` おじゃま ×${n}`:k==="thief"?` ${n}個とった`:""}`); }
   mtHud();
 }
@@ -6834,7 +6837,7 @@ function mtTick(){
     const left=GAME_SECONDS-sec;
     if(!mt.spurt && left<=10){ mt.spurt=true; mtSfx.spurt(); mtBanner("ラストスパート!","残り10秒、1語2個"); mtBgmBpm=156; }
     if(mt.spurt && Math.ceil(left)!==mt.lastSec && left>0){ mt.lastSec=Math.ceil(left); mtSfx.tick(); }
-    if(mt.ghost && mt.bigGhostAt && !mt.bigDone && sec>=mt.bigGhostAt){ mt.bigDone=true; mtRecv({ f:"ghost2", to:"all", k:"bigwin", n:1 }); mt.p.ghost2.minus-=5; }
+    if(mt.ghost && mt.bigGhostAt && !mt.bigDone && sec>=mt.bigGhostAt){ mt.bigDone=true; mtRecv({ f:"ghost2", to:"all", k:"bigwin", n:1 }); mt.p.ghost2.minus-=mtCh().big; }
   }
   b.toggle("mtb-fever",mtFever()); b.toggle("mtb-spurt",mt.spurt); b.toggle("mtb-fog",now<mt.fogUntil);
   b.toggle("mtb-double",mtEvActive("double")); b.toggle("mtb-goldrush",mtGoldRush());
@@ -6860,7 +6863,7 @@ function mtGhostStep(sec){
   while(mt.gplan && mt.gplan.length && mt.gplan[0].t<=sec){   // ゴーストの攻撃: 1位を狙う(自分が1位なら2位)
     const a=mt.gplan.shift(), gu="ghost"+a.i, rows=mtSort(Object.entries(mt.p)), to=rows[0][0]!==gu ? rows[0][0] : rows[1] && rows[1][0];
     if(!to) continue;
-    const n=a.k==="oj"?1+Math.floor(a.i/2):a.k==="bomb"?(mtDuo()?2:3):a.k==="thief"?(mtDuo()?1:2):1;
+    const n=a.k==="oj"?1+Math.floor(a.i/2):a.k==="bomb"?(mtDuo()?2:3):a.k==="thief"?(mtDuo()?1:mtCh().thief):1;
     if(to===me) mtRecv({ f:gu, to:me, k:a.k, n }); else mtGhostHit(to,a.k,n);
   }
   MT_GHOSTS.forEach((g,i)=>{
