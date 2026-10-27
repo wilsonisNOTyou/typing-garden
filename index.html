@@ -898,6 +898,14 @@ body.mtb-spurt::after{content:""; position:fixed; inset:0; pointer-events:none; 
 .wc-panel .wc-list{flex:1 1 auto; height:auto; min-height:5rem; overscroll-behavior:contain}   /* 端までスクロールしても、後ろの画面は動かさない */
 html.wc-lock, html.wc-lock body{overflow:hidden; overscroll-behavior:none}   /* 報告を開いているあいだは、後ろの画面をスクロールさせない */
 #wc{overscroll-behavior:contain}
+/* 待合室を開いているあいだ(広い画面): チャットを左、待合室を右に並べて、募集が見えるように */
+@media (min-width:1100px){
+  #wc.open:has(~ #mt.open){justify-content:flex-start; padding-left:1.5vw}
+  #wc.open:has(~ #mt.open) .wc-panel{width:min(44rem,49vw)}
+  #mt.open{justify-content:flex-end; padding-right:1.5vw; background:transparent; pointer-events:none}
+  #mt.open .bk-panel{pointer-events:auto; width:min(34rem,47vw)}
+  html:not(.wc-lock) #mt.open{justify-content:center; padding-right:0; background:rgba(8,10,14,.7); pointer-events:auto}
+}
 .wc-panel .wc-dish{max-height:min(13rem,24vh)}
 @media (max-height:720px){ .wc-panel .keynav{display:none} .wc-panel .wc-goal div+.gsub{display:none} }
 .wc-panel .keynav{margin:.25rem 0 0; font-size:.7rem; line-height:1.4}
@@ -6573,7 +6581,7 @@ function mtEventOf(id,d){
 const mtMyP = () => ({ n:(playerName||"あなた").slice(0,10), s:0, c:0, k:0, m:0, pc:window.IS_MOBILE?0:1 });   // pc: パソコンで参加(全員そうなら TOEIC の第2ラウンドで打てる)
 async function mtCreate(d,mo="type"){
   if(window.IS_MOBILE && mo==="type") return;
-  if(!db){ closeWorld(); mtEnterLocal(d,mo); return; }   // 通信なし(プレビューなど): 手元だけの待合室。だれも来ないので、ゴーストと遊べる
+  if(!db){ mtEnterLocal(d,mo); return; }   // 通信なし(プレビューなど): 手元だけで本番と同じ流れ(チャットに募集・1分の待合室)。だれも来ないので、ゴーストと遊べる
   if(!playerName){ $("wcNote").textContent="対戦するには名前を決めてください"; closeWorld(); openNameWin(); return; }
   const ref=db.ref(MT_PATH).push(), id=ref.key, st=mtNow()+MT_LOBBY, me=mtMe();
   try{
@@ -6581,7 +6589,7 @@ async function mtCreate(d,mo="type"){
     if(!(await wcPost({ x:`対戦相手を募集しています(${mtLabel(mo,d)})`, mt:id, mo, md:d, ms:st }))){ ref.remove().catch(()=>{}); return; }
   }catch(e){ $("wcNote").textContent=/permission/i.test(String(e&&(e.code||e.message)||"")) ? "※募集できませんでした(Firebase のルールに typinggarden/match を追加してください)" : "※募集できませんでした。通信環境を確認してください"; return; }
   db.ref(MT_PATH).orderByChild("t").endAt(mtNow()-86400000).limitToFirst(20).once("value").then(sn=>sn.forEach(c=>{ c.ref.remove().catch(()=>{}); })).catch(()=>{});   // 1日より前の対戦は消す
-  closeWorld(); mtEnter(id,d,mo);
+  if(!wcOpen) openWorld(); mtEnter(id,d,mo);   // 待合室の後ろはチャット(募集が出たのが見えるように)
 }
 async function mtJoin(id){
   if(!db) return;
@@ -6596,7 +6604,7 @@ async function mtJoin(id){
       if(Object.keys(ps).length>=MT_MAX){ $("wcNote").textContent=`満員です(${MT_MAX}人まで)`; return; }
       await db.ref(`${MT_PATH}/${id}/p/${me}`).set(mtMyP());
     }
-    closeWorld(); mtEnter(id,v.d,v.mo||"type");
+    if(!wcOpen) openWorld(); mtEnter(id,v.d,v.mo||"type");
   }catch(e){ $("wcNote").textContent="参加できませんでした。通信環境を確認してください"; }
 }
 function mtEnter(id,d,mo="type"){
@@ -6608,15 +6616,18 @@ function mtEnter(id,d,mo="type"){
     const me=mtMe(), mine=mt.p[me];
     mt.p=v.p||{}; if(mine && mt.p[me] && (mt.playing||mt.over)) mt.p[me]=Object.assign(mt.p[me],mine,{ q:mt.p[me].q });   // 自分の数字は手元のものを使う
     if(mt.playing) mtBoard(); else if(!mt.over) mtLobby(); });
-  mtLobbyOpen=true; $("mt").classList.add("open"); mtBgmBtn();
+  mtLobbyOpen=true; $("mt").classList.add("open"); mtBgmBtn(); $("wcMatch").hidden=true;
   clearInterval(mtIv); mtIv=setInterval(mtLobbyTick,250);
   mtLobby();
 }
-const MT_LOBBY_LOCAL=10000;
+const MT_LOBBY_LOCAL=MT_LOBBY;
 function mtEnterLocal(d,mo){
   mtLeaveQuiet();
-  mt={ id:"l"+Date.now().toString(36), d, mo, st:mtNow()+MT_LOBBY_LOCAL, h:mtMe(), p:{ [mtMe()]:mtMyP() }, ghost:false, local:true, playing:false };
-  mtLobbyOpen=true; $("mt").classList.add("open"); mtBgmBtn();
+  const lid="l"+Date.now().toString(36), lst=mtNow()+MT_LOBBY_LOCAL;
+  wcMsgs.push({ key:"local-"+lid, n:(playerName||"あなた").slice(0,10), t:Date.now(), o:myId(), x:`対戦相手を募集しています(${mtLabel(mo,d)})`, mt:lid, mo, md:d, ms:lst });   // 手元のチャットにだけ募集を出す
+  if(!wcOpen) openWorld(); else wcRender();
+  mt={ id:lid, d, mo, st:lst, h:mtMe(), p:{ [mtMe()]:mtMyP() }, ghost:false, local:true, playing:false };
+  mtLobbyOpen=true; $("mt").classList.add("open"); mtBgmBtn(); $("wcMatch").hidden=true;
   clearInterval(mtIv); mtIv=setInterval(mtLobbyTick,250);
   mtLobby();
 }
@@ -6686,7 +6697,7 @@ function mtGhost(d,mo="type"){
 
 /* ---- 試合 ---- */
 function mtBegin(){
-  mtCloseLobby(); clearInterval(mtIv);
+  mtCloseLobby(); clearInterval(mtIv); if(wcOpen) closeWorld();
   if(scene==="garden"){ try{ Garden.leave(); }catch(e){} }   // 農園から参加したとき
   const me=mtMe();
   if(mt.mo!=="type"){   // TOEIC と農業は会場の画面で
@@ -6924,7 +6935,7 @@ async function mtRematch(){
     await old.child("rm").set(id);
     db.ref(WC_PATH).push({ n:playerName.slice(0,10), t:Date.now(), o:myId(), x:`もう一回 対戦します(${mtLabel(mo,d)})`, mt:id, mo, md:d, ms:st }).catch(()=>{});
   }catch(e){ return; }
-  mtResultClose(); show("title"); mtEnter(id,d,mo);
+  mtResultClose(); show("title"); if(!wcOpen) openWorld(); mtEnter(id,d,mo);
 }
 function mtResult(){
   const r=mtRes; if(!r) return;
