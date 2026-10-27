@@ -6669,7 +6669,7 @@ function mtLobby(){
 /* 待合室の遊び方(種類ごと) */
 function mtRules(mo){
   if(mo==="toeic") return `<ul class="mt-rules"><li>全員に同じ問題が${MTQ_N}問。3ラウンドで、${MTQ_ROUNDS.map((r,i)=>`第${i+1}は<b>${r.nm}</b>(${r.ds})`).join("、")}を${MTQ_PER}問ずつ</li><li>正解すると ${MTQ_ROUNDS.map(r=>`${r.nm} ${r.pt}点`).join("・")}。早く答えるほど、さらに最大でその半分。いちばん早く正解した人は +30点</li><li>全員パソコンなら、逆4択は英単語を打てる。打てたら ${MTQ_TYPE_PT}点。${MTQ_TYPE_OPEN/1000}秒たつと4択になる</li><li>🎁の付いた問題に正解すると<b>アイテム</b>をもらえる。<b>Space</b> で使うと、次の問題に効く</li><li>答え合わせで、だれがどれを選んだか見えます</li><li>料理とお酒の効果はかかりません</li></ul>${mtqItemList()}`;
-  return `<ul class="mt-rules"><li>60秒でキーを多く外した人の勝ち。言葉は一人ひとり違い、長さだけそろっています</li><li>ミスなしで続けて打つと連鎖。${MT_CHAIN[mt.d].oj}連鎖ごとに上の人へ<b>おじゃまキー</b>、${MT_CHAIN[mt.d].fever}連鎖で<b>フィーバー</b></li><li>🎁つきの言葉を打つとアイテム。<b>Space</b> で使う ・ 金の言葉は3個</li><li>試合中に1回、全員イベント。残り10秒は<b>ラストスパート</b>で2倍</li><li>料理とお酒の効果はかかりません。ミスしてもキーは戻りません</li></ul>${mtItemList()}`;
+  return `<ul class="mt-rules"><li>60秒でキーを多く外した人の勝ち。言葉は一人ひとり違い、長さだけそろっています</li><li>ミスなしで続けて打つと連鎖。${MT_CHAIN[mt.d].oj}連鎖ごとに上の人へ<b>おじゃまキー</b>、${MT_CHAIN[mt.d].fever}連鎖で<b>フィーバー</b>。おじゃまの言葉は連鎖に数えず、ミスしても連鎖は切れない</li><li>🎁つきの言葉を打つとアイテム。<b>Space</b> で使う ・ 金の言葉は3個</li><li>試合中に1回、全員イベント。残り10秒は<b>ラストスパート</b>で2倍</li><li>料理とお酒の効果はかかりません。ミスしてもキーは戻りません</li></ul>${mtItemList()}`;
 }
 /* 待っているあいだに、ゴーストと遊ぶ(募集はやめる) */
 function mtGhostNow(){
@@ -6755,13 +6755,13 @@ function mtWordDone(){
     if(mt.boost>0) mt.boost--;
     if(w.box) mtGetItem();
   }
-  if(!mt.wordMiss){ mt.chain++; mt.maxChain=Math.max(mt.maxChain,mt.chain); mtSfx.chain(mt.chain);
+  if(!mt.wordMiss && !w.oj){ /* おじゃまの言葉は連鎖に数えない */ mt.chain++; mt.maxChain=Math.max(mt.maxChain,mt.chain); mtSfx.chain(mt.chain);
     if(mt.chain%mtCh().oj===0) mtAttack(mtFever()?2:1);
     if(mt.chain%mtCh().fever===0){ mt.feverUntil=Date.now()+8000; mtSfx.fever(); mtFeed("🔥 フィーバー! 8秒間2倍"); }
   }
   mtHud();
 }
-function mtMiss(){ mt.wordMiss=true; if(mt.chain>=3) mtFeed(`連鎖が切れた(${mt.chain})`); mt.chain=0; mtHud(); }
+function mtMiss(){ mt.wordMiss=true; if(currentWord && currentWord.oj) return; /* おじゃまの言葉のミスでは連鎖は切れない */ if(mt.chain>=3) mtFeed(`連鎖が切れた(${mt.chain})`); mt.chain=0; mtHud(); }
 /* 連鎖の攻撃: 自分にたまっていれば、先に相殺する */
 function mtAttack(n){
   if(mt.pend>0){ const c=Math.min(mt.pend,n); mt.pend-=c; n-=c; mtSfx.offset(); mtFeed(`💥 相殺! おじゃま -${c}`); }
