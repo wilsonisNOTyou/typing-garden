@@ -5268,7 +5268,7 @@ document.querySelectorAll(".diff-btn").forEach(b=>{
     if(b.dataset.diff==="garden") openGarden();
     else if(b.dataset.diff==="books") openBooks();
     else if(b.dataset.diff==="toeic") openToeic();
-    else startGame(b.dataset.diff);
+    else if(b.dataset.diff) startGame(b.dataset.diff);   // 農園の寄り合いのボタンには種類がない(チャットを開くだけ)
   });
 });
 $("retryBtn").addEventListener("click",()=>{ if(mtRes){ mtRematch(); return; } startGame(diff); });
