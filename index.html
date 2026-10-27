@@ -1425,6 +1425,7 @@ body.garden #app{width:min(960px,96vw); padding:1.2rem 0 2rem}
 #screen-garden .seedsel{display:flex; align-items:center; gap:.4rem; font-weight:700}
 #screen-garden .seedsel .arr{color:var(--ink-l); font-size:.85rem}
 #screen-garden .seedsel .cnt{color:var(--ink-l); font-size:.85rem}
+html:not(.mobile) #screen-garden #g-fertNm{display:inline-block; min-width:8em; white-space:nowrap}   /* いちばん長い名前(摩訶不思議な肥料)の幅にそろえる。← → で切りかえても道具の列が折り返さない */
 #screen-garden .fieldsel{
   margin-left:auto; display:flex; align-items:center; gap:.5rem; font-weight:800;
   background:rgba(251,247,238,.85); border-radius:10px; padding:.35rem .8rem;
@@ -5853,6 +5854,11 @@ const NEWS=[
   { d:"2026-10-27", t:"大木の調整", items:[
     "収穫してから次に実るまでの時間を、木ごとに変えました。十年梅は1年、三十年葡萄は3年、百年杉は10年です",
     "百年杉の収穫を、杉の葉5枚・木材3本にしました",
+    "工房で、御神木の葉から御神木の腐葉土を作れるようになりました。大木にまくと、育つ速さが3倍になります",
+    "工房で、銘木の梅から備長炭を作れるようになりました。料理に使うと、梅の炭よりずっと変異・超変異になりやすくなります。使う炭は工房で切りかえます",
+    "工房では、上位の品がふつうの品の代わりに使われなくなりました",
+    "腐葉土と梅の炭が、図鑑に載るようになりました",
+    "肥料を ← → で切りかえても、道具の並びがずれないようにしました",
   ]},
   { d:"2026-10-27", t:"みんなで話せる「農園の寄り合い」と、対戦", items:[
     "みんなとリアルタイムで話せる「農園の寄り合い」ができました。ランキングと同じ名前で書き込みます。タイトルの「農園の寄り合い」か C キー、農園では右下の「チャット」ボタンか Enter で開けます",
@@ -8087,7 +8093,7 @@ const BT_FOODS = [
 ].map(f=>Object.assign({ food:true, bt:true, art:BTF_ART[f.id] }, f));
 FOODS.push(...BT_FOODS);
 const FOOD = Object.fromEntries(FOODS.map(f=>[f.id,f]));
-const upOf = id => FOODS.find(f=>f.up===id) || null;   // その食材の上位種
+const upOf = id => FOODS.find(f=>f.up===id) || WORK_FOODS.find(f=>f.up===id) || null;   // その食材の上位種
 const GURS = [
   { id:"mfert", r:"GUR", gur:true, name:"摩訶不思議な肥料", icon:"✨", desc:"植わっている作物にまくと、その作物が必ず超変異になり、3個穫れます", lore:"袋を開けると、中で星がうずを巻いている。まいた区画の作物は、実るまで誰にも正体を明かさない。",
     art:`<svg viewBox="0 0 32 32"><circle cx="16" cy="17" r="14" fill="#c8a8ff" opacity=".35"/><path d="M9 10h14l2 16c.2 1.8-1.2 3.4-3 3.4H10c-1.8 0-3.2-1.6-3-3.4z" fill="#6a3ac8"/><path d="M8.6 7h14.8l-.6 3H9.2z" fill="#4a2490"/><path d="M12 15c2-2 6-2 8 0s0 6-4 6-4-3-2-4 4 0 3 1" stroke="#ffd84a" stroke-width="1.3" fill="none" stroke-linecap="round"/><path d="M5 4l0.56 1.44 1.44 0.56-1.44 0.56-0.56 1.44-0.56-1.44-1.44-0.56 1.44-0.56z" fill="#fff6c0" opacity="1"/><path d="M27 4.8l0.62 1.58 1.58 0.62-1.58 0.62-0.62 1.58-0.62-1.58-1.58-0.62 1.58-0.62z" fill="#fff6c0" opacity="1"/><path d="M26 25.2l0.50 1.30 1.30 0.50-1.30 0.50-0.50 1.30-0.50-1.30-1.30-0.50 1.30-0.50z" fill="#fff6c0" opacity="1"/><path d="M5 23.4l0.45 1.15 1.15 0.45-1.15 0.45-0.45 1.15-0.45-1.15-1.15-0.45 1.15-0.45z" fill="#fff6c0" opacity="1"/></svg>` },
@@ -8622,6 +8628,19 @@ const FUYO_ART = `<svg viewBox="0 0 32 32"><ellipse cx="16" cy="25" rx="13" ry="
 const FUYO = { id:"fuyo", name:"腐葉土", art:FUYO_ART };
 const SUMI_ART = `<svg viewBox="0 0 32 32"><path d="M5 22l5-9 8-2 9 6-3 8-12 1z" fill="#262024"/><path d="M10 13l8-2 9 6-9-1z" fill="#4a3e44"/><path d="M8 20l6-3M14 22l8-4M18 14l5 4" stroke="#5e5258" stroke-width="1.2"/><circle cx="21" cy="21" r="1.6" fill="#ff7a3a" opacity=".8"/></svg>`;
 const SUMI = { id:"sumi", name:"梅の炭", art:SUMI_ART };
+const FUYO2_ART = `<svg viewBox="0 0 32 32"><circle cx="16" cy="16" r="15" fill="#ffe27a" opacity=".42"/><ellipse cx="16" cy="25" rx="13" ry="4.5" fill="#3a2a1a"/><path d="M4 24c2-7 6-11 12-11s10 4 12 11z" fill="#5e4426"/><path d="M7 22c3-1 5 0 7-2M17 20c3 0 5 1 8 0" stroke="#d8b060" stroke-width="1.2" fill="none" opacity=".8"/><path d="M10 13c2-5 7-6 9-4-3 0-6 2-9 4z" fill="#ffd24a"/><path d="M17 12c3-4 8-3 9 0-3-1-6-1-9 0z" fill="#f0a830"/><path d="M13 16c1-3 4-4 6-3-2 1-4 2-6 3z" fill="#fff0a0"/><circle cx="9" cy="20" r=".9" fill="#fff6c8"/><circle cx="21.5" cy="18" r=".8" fill="#fff6c8"/><circle cx="15" cy="22" r=".7" fill="#fff6c8"/><path d="M25 3.5l.8 1.8 1.8.8-1.8.8-.8 1.8-.8-1.8-1.8-.8 1.8-.8z" fill="#fffbe6"/></svg>`;
+const BINCHO_ART = `<svg viewBox="0 0 32 32"><circle cx="16" cy="16" r="15" fill="#ffe27a" opacity=".42"/><g transform="rotate(-16 16 16)"><rect x="4" y="9" width="24" height="4.4" rx="2.2" fill="#626674"/><rect x="5" y="9.5" width="22" height="1.1" rx=".55" fill="#e4e8f0" opacity=".75"/><path d="M9 9.4v3.6M15 9.4v3.6M21 9.4v3.6" stroke="#9aa0ac" stroke-width=".6" opacity=".7"/><rect x="3" y="14.4" width="24" height="4.4" rx="2.2" fill="#545866"/><rect x="4" y="14.9" width="22" height="1.1" rx=".55" fill="#e4e8f0" opacity=".75"/><path d="M8 14.8v3.6M14 14.8v3.6M20 14.8v3.6" stroke="#9aa0ac" stroke-width=".6" opacity=".7"/><rect x="5" y="19.8" width="24" height="4.4" rx="2.2" fill="#6c7080"/><rect x="6" y="20.3" width="22" height="1.1" rx=".55" fill="#e4e8f0" opacity=".75"/><path d="M10 20.2v3.6M16 20.2v3.6M22 20.2v3.6" stroke="#9aa0ac" stroke-width=".6" opacity=".7"/><ellipse cx="27" cy="16.6" rx="1.1" ry="2.1" fill="#ff8a3a" opacity=".85"/></g><path d="M25 3.5l.8 1.8 1.8.8-1.8.8-.8 1.8-.8-1.8-1.8-.8 1.8-.8z" fill="#fffbe6"/></svg>`;
+const FUYO2 = { id:"fuyo2", name:"御神木の腐葉土", art:FUYO2_ART };
+const BINCHO = { id:"bincho", name:"備長炭", art:BINCHO_ART };
+/* 図鑑に載せる工房の品(食材の図鑑に、ふつう / 上位種 で並べる。数は S にそのまま持つ) */
+const WORK_FOODS = [
+  Object.assign(FUYO,   { food:true, bt:true, work:true, src:"工房", up:null, how:"工房で杉の葉から作る ・ お店で1日1つ買う", lore:"杉の葉を土の中でじっくり寝かせた、ふかふかの土。大木の根もとにまくと、木の育つ速さが2倍になる。" }),
+  Object.assign(FUYO2,  { food:true, bt:true, work:true, src:"工房", up:"fuyo", how:"工房で御神木の葉から作る", lore:"御神木の葉を寝かせた、ほのかに光る土。大木の根もとにまくと、木の育つ速さが3倍になる。" }),
+  Object.assign(SUMI,   { food:true, bt:true, work:true, src:"工房", up:null, how:"工房で梅の木材から作る", lore:"梅の木材を焼いて作った炭。料理に使うと、ときどき変異・超変異の料理になる。" }),
+  Object.assign(BINCHO, { food:true, bt:true, work:true, src:"工房", up:"sumi", how:"工房で銘木の梅から作る", lore:"銘木の梅を高い熱で焼きしめた、白く硬い炭。たたくと金属のような音がする。料理に使うと、変異・超変異の料理にとてもなりやすい。" }),
+];
+const WORK_KEEP = Object.fromEntries(WORK_FOODS.map(f=>[f.id,f]));   // 工房の品のうち、食材ではなく S に数を持つもの
+const workSeen = id => !!(S.workSeen && S.workSeen[id]) || (S[id]||0)>0;
 const BT_MUT = [0.03, 0.003];   // 実った瞬間に変異・超変異になる確率
 
 /* 育つ: ms は「水が効いていた時間 × 速さ」 */
@@ -8684,7 +8703,8 @@ function btCut(gi){
   hit(keys[4]); sfx.till();
   toast(`🪓 ${esc(btName(t))}を切りました。${msg}`,"good",5200,true);
 }
-const btFertMul = () => BT_FERT*(1+Math.max(0,effFert()-FERT_BOOST));   // 肥料の効きが上がる料理・貴重品のぶん上乗せ(最大2.8倍)
+const BT_FERT2 = 3;   // 御神木の腐葉土
+const btFertMul = (base=BT_FERT) => base*(1+Math.max(0,effFert()-FERT_BOOST));   // 肥料の効きが上がる料理・貴重品のぶん上乗せ(最大2.8倍)
 function btFert(k,t){
   const sel=S.fertSel;
   if(sel==="sfert"||sel==="mfert"){   // 不思議な肥料・摩訶不思議な肥料: 木そのものが変異・超変異になる
@@ -8695,13 +8715,13 @@ function btFert(k,t){
     toast(`${ico(GUR[sel])} ${esc(GUR[sel].name)}で、${esc(btName(t))}になりました`,"good mut"+(q===5?" sup":""),5200,true);
     return;
   }
-  if(sel!=="fuyo"){ nope(k,"ふつうの肥料は大木には効きません。腐葉土を使います"); return; }
-  if(!(S.fuyo>0)){ nope(k,"腐葉土がありません(工房で杉の葉から作るか、お店で1日1つ買えます)"); return; }
+  if(sel!=="fuyo" && sel!=="fuyo2"){ nope(k,"ふつうの肥料は大木には効きません。腐葉土を使います"); return; }
+  if(!(S[sel]>0)){ nope(k, sel==="fuyo2" ? "御神木の腐葉土がありません(工房で御神木の葉から作れます)" : "腐葉土がありません(工房で杉の葉から作るか、お店で1日1つ買えます)"); return; }
   const fmax=ev("K",3,Infinity,2);
   if((t.fert||0)>=fmax){ nope(k,`この木に腐葉土はもう${fmax}回使っています`); return; }
-  const m=btFertMul();
+  const m=btFertMul(sel==="fuyo2"?BT_FERT2:BT_FERT);
   t.fert=(t.fert||0)+1; t.mul=(t.mul||1)*m;
-  if(Math.random()<ev("η",.5,1,0)) floatAt(k,"🍂 減らなかった!"); else S.fuyo--;
+  if(Math.random()<ev("η",.5,1,0)) floatAt(k,"🍂 減らなかった!"); else S[sel]--;
   hit(k); sfx.fert(); floatAt(k,`🍂 成長速度×${+m.toFixed(2)} ${t.fert}/${fmax===Infinity?"∞":fmax}`);
 }
 let btCutAsk=null;   // 斧: 切る前に、もう一度押してもらう
@@ -9140,7 +9160,7 @@ function normalize(o){
   s.ateCount=s.ateCount||0; s.prepCount=s.prepCount||0;
   if(s.buff && !(s.buff.d && s.buff.until)) s.buff=null;
   s.food=s.food||{}; s.mfert=s.mfert||0; s.sfert=s.sfert||0; s.sgVil=s.sgVil||0; s.kit=s.kit||{}; s.hourglass=s.hourglass||0; s.bento=s.bento||0; s.autoCook=s.autoCook||[]; if(![0,1,10].includes(s.cookKeep)) s.cookKeep=10; s.fav=s.fav||{}; s.fav.s=s.fav.s||{}; s.fav.d=s.fav.d||{}; s.kamado=s.kamado||""; s.sgCrop=s.sgCrop||"carrot";
-  if(!["fert","sfert","mfert"].includes(s.fertSel)) s.fertSel="fert";
+  if(!["fert","sfert","mfert","fuyo","fuyo2"].includes(s.fertSel)) s.fertSel="fert";
   s.villagers=s.villagers||0; s.vLog=s.vLog||{}; s.vilLv=s.vilLv||0;
   if(!s.owner) s.owner=Math.random().toString(36).slice(2)+Date.now().toString(36);
   s.rankName=s.rankName||"";
@@ -10292,7 +10312,7 @@ function renderBar(){
   const fMany=ownedFerts().length>1;   // 肥料が1種類だけなら ◀ ▶ は出さない
   $("g-fertArrL").classList.toggle("none",!fMany); $("g-fertArrR").classList.toggle("none",!fMany);
   if(S.fertSel==="fert"){ $("g-fertIc").innerHTML=FERT.icon; $("g-fertNm").textContent="肥料"; $("g-fertCnt").textContent="×"+S.fert; }
-  else if(S.fertSel==="fuyo"){ $("g-fertIc").innerHTML=ico(FUYO); $("g-fertNm").textContent="腐葉土"; $("g-fertCnt").textContent="×"+S.fuyo; }
+  else if(WORK_KEEP[S.fertSel]){ const w=WORK_KEEP[S.fertSel]; $("g-fertIc").innerHTML=ico(w); $("g-fertNm").textContent=w.name; $("g-fertCnt").textContent="×"+S[S.fertSel]; }
   else{ const g=GUR[S.fertSel]; $("g-fertIc").innerHTML=ico(g); $("g-fertNm").textContent=g.name; $("g-fertCnt").textContent="×"+S[S.fertSel]; }
   // 設置物
   const oo=ownedObjs();
@@ -10473,6 +10493,7 @@ function act(k){
       break;
     }
     case 5: { // 肥料: 育成中の作物を一気に進める
+      if(S.fertSel==="fuyo"||S.fertSel==="fuyo2"){ nope(k,"腐葉土は大木にだけまけます"); break; }
       if(S.fertSel!=="fert"){ magicFert(k,p,S.fertSel); break; }
       if(S.fert<=0){ nope(k,kb("肥料がありません。Tab でお店へ","肥料がありません。お店で買えます")); break; }
       if(!p.crop){ nope(k,"作物が植わっていません"); break; }
@@ -10634,7 +10655,7 @@ function setTool(t){
 }
 /* ← →: 設置を持っているときは設置物、それ以外は種を切り替える */
 function axeSwap(){ S.axeOn=!S.axeOn; toast(S.axeOn?"🪓 斧に持ちかえました(大木を切ります)":`✋ ${sickleInfo().name}に持ちかえました`,"",2000); }
-const ownedFerts = () => ["fert", ...["sfert","mfert","fuyo"].filter(id=>S[id]>0)];
+const ownedFerts = () => ["fert", ...["sfert","mfert","fuyo","fuyo2"].filter(id=>S[id]>0)];
 function cycleSel(dir){
   if(S.tool===1){ if(S.axe){ axeSwap(); sfx.cursor(); save(); renderBar(); } return; }   // 素手と斧
   if(S.tool===5 && ownedFerts().length>1){
@@ -13590,9 +13611,10 @@ function cookRowsOf(){
       }
     }
   }else{   // 工房: 大木から取れた品を道具や材料にする
-    rows.push({ ic:ico(SUMI), nm:`梅の炭を料理に使う <b style="color:${S.sumiOn?"#2e7d32":"var(--ink-l)"}">${S.sumiOn?"オン":"オフ"}</b> <small class="dhave">持っている ×${S.sumi||0}</small>`,
-      ds:"オンにすると、料理を1つ作るたびに梅の炭を1つ使います。ふつうの料理は 変異 10%・超変異 1%、変異の料理は 超変異 10% になります",
-      keys:"<b>Enter</b> 切りかえ", enter:()=>{ S.sumiOn=!S.sumiOn; sfx.tab(); save(); renderCook(); }, shift:()=>{ S.sumiOn=!S.sumiOn; sfx.tab(); save(); renderCook(); } });
+    const fuelCycle=()=>{ if(!S.sumiOn){ S.sumiOn=true; S.sumiBin=false; } else if(!S.sumiBin) S.sumiBin=true; else { S.sumiOn=false; S.sumiBin=false; } sfx.tab(); save(); renderCook(); };
+    rows.push({ ic:ico(S.sumiOn&&S.sumiBin?BINCHO:SUMI), nm:`炭を料理に使う <b style="color:${S.sumiOn?"#2e7d32":"var(--ink-l)"}">${!S.sumiOn?"オフ":S.sumiBin?"備長炭":"梅の炭"}</b> <small class="dhave">梅の炭 ×${S.sumi||0} ・ 備長炭 ×${S.bincho||0}</small>`,
+      ds:`${kb("Enter で","押すたびに")} オフ → 梅の炭 → 備長炭 と切りかえます。料理を1つ作るたびに炭を1つ使います。梅の炭は、ふつうの料理が 変異 10%・超変異 1%、変異の料理が 超変異 10%。備長炭は、ふつうの料理が 変異 30%・超変異 3%、変異の料理が 超変異 30% になります`,
+      keys:"<b>Enter</b> 切りかえ", enter:fuelCycle, shift:fuelCycle });
     for(const w of WORKS){
       const it=workItem(w.out), ok=w.ing.every(([id,n])=>workHave(id)>=n);
       rows.push({ ic:ico(it), locked:!ok,
@@ -13606,17 +13628,19 @@ function cookRowsOf(){
 /* ---- 工房 ---- */
 const WORKS = [
   { id:"w_fuyo", out:"fuyo", n:1, ing:[["sugileaf",1]], ds:"大木にまく腐葉土。その木の成長速度が2倍になります(1本に2回まで)" },
+  { id:"w_fuyo2", out:"fuyo2", n:1, ing:[["sugileaf2",1]], ds:"腐葉土の上位種。大木にまくと、その木の成長速度が3倍になります(腐葉土と合わせて1本に2回まで)" },
   { id:"w_sumi", out:"sumi", n:5, ing:[["umewood",1]], ds:"料理に使う梅の炭。料理が変異・超変異になることがあります(消耗品)" },
+  { id:"w_bincho", out:"bincho", n:5, ing:[["umewood2",1]], ds:"梅の炭の上位種。料理が、梅の炭よりずっと変異・超変異になりやすくなります(消耗品)" },
   { id:"w_chip", out:"chip", n:5, ing:[["grapewood",1]], ds:"燻製のおつまみの材料" },
   { id:"w_chip2", out:"chip2", n:5, ing:[["grapewood2",1]], ds:"燻製チップの上位種。変異・超変異の燻製のおつまみの材料" },
   { id:"w_taru", out:"taru", n:1, ing:[["sugiwood",2]], ds:"日本酒と古酒の材料" },
   { id:"w_taru2", out:"taru2", n:1, ing:[["sugiwood2",2]], ds:"杉樽の上位種。変異・超変異の日本酒と古酒の材料" },
 ];
-const workItem = out => out==="fuyo" ? FUYO : out==="sumi" ? SUMI : FOOD[out];
-const workN = out => out==="fuyo" ? (S.fuyo||0) : out==="sumi" ? (S.sumi||0) : foodN(out);
-const workHave = id => foodN(id)+foodN(id+"2");   // 変異の木の品(上位の品)も使える。ふつうの品から使う
-function workTake(id,n){ const a=Math.min(n,foodN(id)); S.food[id]-=a; if(n>a) S.food[id+"2"]-=n-a; }
-function workGive(out,k){ if(out==="fuyo") S.fuyo=(S.fuyo||0)+k; else if(out==="sumi") S.sumi=(S.sumi||0)+k; else { S.food[out]=(S.food[out]||0)+k; S.got[out]=(S.got[out]||0)+k; } }
+const workItem = out => WORK_KEEP[out] || FOOD[out];
+const workN = out => WORK_KEEP[out] ? (S[out]||0) : foodN(out);
+const workHave = id => foodN(id);   // 上位の品は、上位種のレシピでだけ使う(ふつうのレシピの代わりにはしない)
+function workTake(id,n){ S.food[id]-=n; }
+function workGive(out,k){ if(WORK_KEEP[out]){ S[out]=(S[out]||0)+k; S.workSeen=S.workSeen||{}; S.workSeen[out]=1; } else { S.food[out]=(S.food[out]||0)+k; S.got[out]=(S.got[out]||0)+k; } }
 function workMake(wid,times){
   const w=WORKS.find(x=>x.id===wid); if(!w) return;
   let made=0, extra=0;
@@ -13704,12 +13728,13 @@ function cookMake(id,times){
   const d=DISH[id]; if(!d || !hasRecipe(d)) return;
   const g=cookGradeOf(d);
   let made=0, grade=null, extra=0, saved=0, isFirst=false, sumiUsed=0, sumiUp=0;
+  const fuel=S.sumiBin?"bincho":"sumi", fp=S.sumiBin?{ m:.3, s:.03, up:.3 }:{ m:.1, s:.01, up:.1 };   // 使う炭と、変異・超変異になる確率
   for(let i=0;i<times;i++){
     const plan=cookPlan(d.ing,g); if(!plan) break;
     if(Math.random()<ev("P2",.2,.5,0)) saved++; else consume(plan.take);   // 料理: 材料の節約
     grade=plan.grade;
-    if(S.sumiOn && S.sumi>0 && grade!==5 && !d.one){   // 梅の炭: ふつう → 変異 10%・超変異 1%、変異 → 超変異 10%
-      S.sumi--; sumiUsed++; const r=Math.random(), ng = grade===3 ? (r<.1?5:3) : (r<.01?5:r<.11?3:grade);
+    if(S.sumiOn && S[fuel]>0 && grade!==5 && !d.one){   // 梅の炭: ふつう → 変異 10%・超変異 1%、変異 → 超変異 10% / 備長炭: 30%・3%、30%
+      S[fuel]--; sumiUsed++; const r=Math.random(), ng = grade===3 ? (r<fp.up?5:3) : (r<fp.s?5:r<fp.s+fp.m?3:grade);
       if(ng!==grade){ grade=ng; sumiUp++; }
     }
     S.dishes[id]=S.dishes[id]||{}; S.dishes[id][grade]=(S.dishes[id][grade]||0)+1;
@@ -13722,7 +13747,7 @@ function cookMake(id,times){
   if(!made){ sfx.nope(); toast("材料が足りません","warn"); return; }
   if(!cookShow(d,grade,made+extra,isFirst)) sfx.buy();
   toast(`${dishIco(d,grade)} ${esc(dishName(d,grade))}(${gradeName(grade)})を ${made+extra}つ 作りました${extra?`(おかわり +${extra})`:""}${saved?`・材料が減らなかった ${saved}回`:""}`,isMutT(grade)?"good mut"+(grade===5?" sup":""):"good",3000,true);
-  if(sumiUsed) toast(`${ico(SUMI)} 梅の炭を ${sumiUsed}つ 使いました${sumiUp?`(${sumiUp}つが変異・超変異になりました!)`:""}`,sumiUp?"good mut":"",3600,true);
+  if(sumiUsed) toast(`${ico(WORK_KEEP[fuel])} ${WORK_KEEP[fuel].name}を ${sumiUsed}つ 使いました${sumiUp?`(${sumiUp}つが変異・超変異になりました!)`:""}`,sumiUp?"good mut":"",3600,true);
   save(); renderAll(); renderCook();
 }
 function cookEat(id,g){
@@ -14272,11 +14297,13 @@ function roseBookDetail(quick){
 const roseHarv = () => ROSE_ALL.reduce((a,r)=>a+(S.harvestBy[r.id]||0),0);
 const roseQGot = t => ROSES.some(r=>qCount(r.id,t)>0) ? 1 : 0;
 const roseSecGot = () => ROSE_SECRET.some(r=>qCount(r.id,0)>0) ? 1 : 0;
-const FOOD_BOOK = FOODS.filter(f=>!f.up && !f.bt).sort((a,b)=>a.price-b.price).concat(FOODS.filter(f=>!f.up && f.bt));   // 大木の食材は最後に、材料 → できたものの順
+const FOOD_BOOK = (()=>{ const bt=FOODS.filter(f=>!f.up && f.bt), i=bt.findIndex(f=>f.src==="工房");   // 大木の食材は最後に、材料 → できたものの順。腐葉土と梅の炭は工房の品の先頭に
+  bt.splice(i<0?bt.length:i, 0, ...WORK_FOODS.filter(f=>!f.up));
+  return FOODS.filter(f=>!f.up && !f.bt).sort((a,b)=>a.price-b.price).concat(bt); })();
 const BT_BOOK = Object.values(BTS).map(b=>({ id:b.id, name:b.name, bigtree:true, art:`<svg viewBox="30 14 220 220">${btArt(b.kind,5,0,200,200,140,226)}</svg>` }));
 let btBookT=0;   // 図鑑の大木: 0 ふつう / 1 変異 / 2 超変異
 const BOOK_CROPS = CROPS.filter(c=>!c.treasure).sort((a,b)=>a.price-b.price).concat([ROSE_BOOK], BT_BOOK, FOOD_BOOK, CROPS.filter(c=>c.treasure));
-const bookSeen = c => c.bigtree ? !!(S.btBook && S.btBook[c.id]) : c.rosebook ? ROSE_ALL.some(r=>(S.harvestBy[r.id]||0)>0 || [0,3,5].some(t=>roseSeen(r.id,t))) : c.food ? (S.got[c.id]||0)>0 : c.treasure ? tre(c.id)>0 : (isUnlocked(c)||S.harvestBy[c.id]>0);
+const bookSeen = c => c.bigtree ? !!(S.btBook && S.btBook[c.id]) : c.rosebook ? ROSE_ALL.some(r=>(S.harvestBy[r.id]||0)>0 || [0,3,5].some(t=>roseSeen(r.id,t))) : c.food ? (c.work ? workSeen(c.id) : (S.got[c.id]||0)>0) : c.treasure ? tre(c.id)>0 : (isUnlocked(c)||S.harvestBy[c.id]>0);
 let bookCur=0, bookTier=0, foodUp=false;   // foodUp: 食材の図鑑で上位種を見ているか
 /* 図鑑の印(絵にして、どの印も同じ高さにそろえる) */
 const QMI = { dot:`<svg class="qmi" viewBox="0 0 10 10"><circle cx="5" cy="5" r="1.7"/></svg>`,
@@ -14393,9 +14420,9 @@ function renderBook(){
       <div class="bic${f.up?" q2":""}">${ico(f)}</div>
       <div class="bnm">${esc(f.name)}</div>
       <dl>
-        <dt>持っている数</dt><dd>${fmtNum(foodN(f.id))}個</dd>
-        <dt>売値</dt><dd>${fmtNum(f.price)}キー</dd>
-        <dt>手に入れ方</dt><dd>${foodHow(f)}</dd>
+        <dt>持っている数</dt><dd>${fmtNum(f.work?(S[f.id]||0):foodN(f.id))}個</dd>
+        <dt>売値</dt><dd>${f.work?"売れません":fmtNum(f.price)+"キー"}</dd>
+        <dt>手に入れ方</dt><dd>${f.work?f.how:foodHow(f)}</dd>
       </dl>
       <div class="lore">${esc(f.lore)}</div>`
     : `<div class="bic">❔</div><div class="bnm">？？？</div>
