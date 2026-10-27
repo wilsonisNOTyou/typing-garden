@@ -1529,14 +1529,17 @@ body.garden.barag{background:radial-gradient(ellipse at 50% 120%, rgba(200,30,62
 #screen-garden .empty{color:var(--ink-l); font-size:.9rem}
 #screen-garden .help{margin-top:1rem; color:var(--ink-l); font-size:.82rem; line-height:1.8; text-align:center}
 #screen-garden .help b{color:var(--ink); background:rgba(255,255,255,.7); border-radius:4px; padding:0 .3em; font-weight:700}
-#screen-garden #g-toasts{position:fixed; top:14px; left:50%; transform:translateX(-50%); width:90vw; z-index:40; display:flex; flex-direction:column; gap:.4rem; align-items:center; pointer-events:none}
-html:not(.mobile) #screen-garden:has(.modal.open) #g-toasts{left:auto; right:10px; transform:none; width:min(15rem,calc((100vw - 760px)/2)); align-items:stretch}   /* ウィンドウを開いているあいだは右上の空いたところに小さく出して、見出しやタブを隠さない */
+#screen-garden #g-toasts{position:fixed; top:14px; left:8px; width:var(--toastW,15rem); z-index:40; display:flex; flex-direction:column; gap:.4rem; align-items:stretch; pointer-events:none}   /* PC: 左上の空いたところに小さく出して、道具や畑を隠さない */
+html:not(.mobile) #screen-garden .toast{text-align:left}
+html:not(.mobile) #screen-garden:has(.modal.open) #g-toasts{left:auto; right:10px; transform:none; top:14px; width:min(15rem,calc((100vw - 760px)/2)); align-items:stretch}   /* ウィンドウを開いているあいだは右上の空いたところに小さく出して、見出しやタブを隠さない */
 html:not(.mobile) #screen-garden:has(.modal.open) .toast{font-size:.78rem; padding:.35rem .6rem; line-height:1.45}
 #screen-garden .toast{
-  background:var(--paper); border:2px solid var(--wood-d); border-radius:10px; padding:.5rem 1rem;
-  font-weight:700; box-shadow:0 4px 0 var(--wood-d); max-width:90vw; text-align:center; line-height:1.55;
+  background:var(--paper); border:2px solid var(--wood-d); border-radius:10px; padding:.3rem .8rem;
+  font-weight:700; font-size:.85rem; box-shadow:0 3px 0 var(--wood-d); max-width:90vw; text-align:center; line-height:1.45;
   animation:g-toastin .25s ease-out;
 }
+#screen-garden .toast .tx{display:-webkit-box; -webkit-box-orient:vertical; -webkit-line-clamp:2; line-clamp:2; overflow:hidden}   /* 小さく、2行まで(畑を長くふさがない) */
+#screen-garden .toast.imp .tx{display:block; -webkit-line-clamp:unset; line-clamp:none}   /* 大事なお知らせは全部見せる */
 #screen-garden .toast.good{border-color:#5f8f32; box-shadow:0 4px 0 #5f8f32}
 #screen-garden .toast.warn{border-color:var(--alert); box-shadow:0 4px 0 var(--alert)}
 #screen-garden .toast.out{animation:g-toastout .3s ease-in forwards}
@@ -2546,10 +2549,9 @@ html.mobile #screen-garden .keyhint{margin-top:.5rem; padding-top:.5rem}
 html.mobile #screen-garden .keyhint:empty{display:none}
 html.mobile #screen-garden .keyhint:not(#g-shopHint):not(#g-gachaHint){display:none}
 /* お知らせは下に出して、上のボタンを隠さない */
-/* スマホ: お知らせは上に小さく(2行まで・2つまで)。畑や道具を隠さないように */
-html.mobile #screen-garden #g-toasts{top:max(6px, env(safe-area-inset-top)); bottom:auto; width:calc(100% - 16px); gap:.25rem}
-html.mobile #screen-garden .toast{font-size:.74rem; padding:.25rem .6rem; line-height:1.4; border-width:1.5px; opacity:.94;
-  display:-webkit-box; -webkit-box-orient:vertical; -webkit-line-clamp:2; line-clamp:2; overflow:hidden}
+/* スマホ: お知らせは下に小さく(2行まで・2つまで)。畑や道具を隠さないように */
+html.mobile #screen-garden #g-toasts{top:auto; bottom:max(8px, env(safe-area-inset-bottom)); left:50%; transform:translateX(-50%); align-items:center; flex-direction:column-reverse; width:calc(100% - 16px); gap:.25rem}
+html.mobile #screen-garden .toast{font-size:.74rem; padding:.25rem .6rem; line-height:1.4; border-width:1.5px; opacity:.94}
 html.mobile #screen-garden .gacts{justify-content:center}
 html.mobile #screen-garden .gacts{gap:.3rem}
 html.mobile #screen-garden .gacts .sbtn{flex:1 1 30%; max-width:none; padding:.4rem .3rem; font-size:.82rem; line-height:1.25}   /* 何連のボタンが多くても、ガチャの中身が見えるように小さく */
@@ -9972,15 +9974,25 @@ const esc=s=>String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;");
    同じ内容が出ているときは増やさず、その1つの表示時間を延ばすだけにする。
    多いときは古いものから消して、同時に出るのは4つまで。 */
 let liveToasts=[];
-const MAX_TOASTS=4;
+const MAX_TOASTS=2;
 function dropToast(o){
   clearTimeout(o.timer);
   liveToasts=liveToasts.filter(x=>x!==o);
   o.el.classList.add("out");
   setTimeout(()=>o.el.remove(),320);
 }
+/* 大事なお知らせ(注意・変異・何かを手に入れたときの説明): 2行で切らず、ほかのお知らせより後に消す */
+const toastImp=(text,kind)=>/warn|mut|sup/.test(kind) || /手に入れました|開けました/.test(text);
+let toastBatch=null;   // 庭に入ったときのお知らせを集めておく(ふつうのものは1つにまとめる)
+function flushToastBatch(){
+  const b=toastBatch; toastBatch=null;
+  if(!b || !b.length) return;
+  toast(b.map(x=>x.h).join(" ・ "), "good", Math.max(...b.map(x=>x.ms))+(b.length>1?1500:0), true);
+}
 function toast(text,kind="",ms=2600,html=false){
-  if(window.IS_MOBILE) ms=Math.min(ms,3200);   // スマホは短く(画面を長くふさがない)
+  const imp=toastImp(String(text),kind);
+  if(toastBatch && !imp){ toastBatch.push({ h:html?String(text):esc(String(text)), ms }); return; }
+  if(window.IS_MOBILE && !imp) ms=Math.min(ms,3200);   // スマホは短く(画面を長くふさがない)
   const key=String(text);
   const same=liveToasts.find(o=>o.key===key);
   if(same){                       // 同じダイアログは1つだけ
@@ -9988,14 +10000,20 @@ function toast(text,kind="",ms=2600,html=false){
     same.timer=setTimeout(()=>dropToast(same),ms);
     return;
   }
+  const tb=root.querySelector(".top"), tr=tb && tb.getBoundingClientRect();
+  if(tr){   // PC: 左の空いたところの幅に合わせる(狭いときは看板の幅まで)
+    const sg=root.querySelector(".sign"), sr=sg && sg.getBoundingClientRect();
+    $("g-toasts").style.setProperty("--toastW", Math.min(420, Math.max(Math.round(tr.left)-16, sr ? Math.round(sr.right)-8 : 208))+"px");
+  }
   const t=document.createElement("div");
-  t.className="toast "+kind;
-  if(html) t.innerHTML=text; else t.textContent=text;
+  t.className="toast "+kind+(imp?" imp":"");
+  const tx=document.createElement("span"); tx.className="tx"; t.appendChild(tx);
+  if(html) tx.innerHTML=text; else tx.textContent=text;
   $("g-toasts").appendChild(t);
-  const o={key, el:t, timer:null};
+  const o={key, el:t, timer:null, imp};
   liveToasts.push(o);
   o.timer=setTimeout(()=>dropToast(o),ms);
-  while(liveToasts.length>(window.IS_MOBILE?2:MAX_TOASTS)) dropToast(liveToasts[0]);   // スマホは2つまで
+  while(liveToasts.length>MAX_TOASTS) dropToast(liveToasts.find(x=>!x.imp && x!==o) || (o.imp ? liveToasts[0] : o));   // 2つまで(ふつうのものから古い順に消す。大事なものは、ふつうのものに押し出されない)
 }
 let quietFx=false;   // ほかの畑をまとめて触るときは、今の畑に演出を出さない
 function floatAt(k,text){
@@ -15046,6 +15064,10 @@ for(const id of Object.keys(BTS)) if(S.objs && S.objs[id]>0){ S.seeds[id]=(S.see
 tick(); checkUnlocks(); buildPlanter();
 function enter(){
   S.tool=1; S.axeOn=false;   // 開いたときは素手(すぐ収穫できるように)
+  toastBatch=[];   // 入ったときのお知らせは、ふつうのものを1つにまとめて出す
+  try{ enterIn(); } finally { flushToastBatch(); }
+}
+function enterIn(){
   tick(); checkUnlocks(); renderAll(); save();
   // 番付の名前をプレイヤー名にそろえる(前の名前で載っている分は移す)
   try{
@@ -15067,6 +15089,7 @@ function enter(){
   flushInboxReport();
   reportVillagers();
   crowVisit();
+  flushToastBatch();
   clearInterval(loopId); clearInterval(saveId);
   loopId=setInterval(()=>{ const q3=ev("Q3",30/60,3,0); /* 料理: 農園の時計(分) */ if(q3) applySkip(q3,"k"); showCookNotice(); showRoseNotice(); showBtNotice(); autoCookTick(); tick(); reportVillagers(); renderBar(); renderField(); renderInfo(); renderCounter(); renderBuff(); if(modal==="cook") $("g-cookNow").innerHTML=cookNowText(); },1000);
   saveId=setInterval(save,15000);
