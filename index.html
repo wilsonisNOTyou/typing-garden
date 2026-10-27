@@ -1701,6 +1701,18 @@ html:not(.mobile) #screen-garden:has(.modal.open) .toast{font-size:.78rem; paddi
 #screen-garden .planter{position:relative}
 #screen-garden .plot.big{background:radial-gradient(ellipse at 50% 60%, rgba(255,255,255,.06), transparent 70%), repeating-linear-gradient(180deg, rgba(0,0,0,.16) 0 3px, transparent 3px 11px), linear-gradient(180deg,#5f402a,#46301e); box-shadow:inset 0 -4px 0 rgba(0,0,0,.18), 0 2px 0 rgba(0,0,0,.22), inset 0 0 0 2px rgba(255,220,150,.3)}   /* 大木の区画 */
 #screen-garden .btov{position:absolute; pointer-events:none; z-index:1; overflow:visible}
+/* 斧で切る演出 */
+#screen-garden .btfall{position:absolute; pointer-events:none; z-index:3; overflow:visible}
+#screen-garden .btfall .sway{transform-box:fill-box; transform-origin:50% 100%; animation:btchop .54s linear, btfell 1.25s cubic-bezier(.5,0,.85,.4) .54s forwards}
+@keyframes btchop{0%,33%,66%,100%{transform:none} 8%{transform:rotate(calc(var(--dir)*-1.5deg))} 18%{transform:rotate(calc(var(--dir)*1deg))} 41%{transform:rotate(calc(var(--dir)*-2deg))} 51%{transform:rotate(calc(var(--dir)*1.4deg))} 74%{transform:rotate(calc(var(--dir)*-2.6deg))} 84%{transform:rotate(calc(var(--dir)*1.8deg))}}
+@keyframes btfell{0%{transform:rotate(0)} 12%{transform:rotate(calc(var(--dir)*4deg))} 48%{transform:rotate(calc(var(--dir)*76deg)) scale(.92)} 54%{transform:rotate(calc(var(--dir)*70deg)) scale(.92)} 60%{transform:rotate(calc(var(--dir)*76deg)) scale(.92); opacity:1} 100%{transform:rotate(calc(var(--dir)*76deg)) scale(.92); opacity:0}}
+#screen-garden .btchip{position:fixed; width:7px; height:4px; margin:-2px 0 0 -3px; border-radius:2px; background:#d6a46a; box-shadow:inset 0 -1px 0 #8a5a2a; z-index:60; pointer-events:none; animation:btchip .75s cubic-bezier(.2,.6,.4,1) forwards}
+@keyframes btchip{45%{transform:translate(calc(var(--dx)*.7),var(--dy)) rotate(calc(var(--r)*.6))} 100%{transform:translate(var(--dx),calc(var(--dy) + 46px)) rotate(var(--r)); opacity:0}}
+#screen-garden .btdust{position:fixed; width:26px; height:18px; margin:-9px 0 0 -13px; border-radius:50%; background:radial-gradient(closest-side,rgba(196,160,110,.75),rgba(196,160,110,0)); z-index:60; pointer-events:none; animation:btdust .9s ease-out forwards}
+@keyframes btdust{0%{transform:scale(.3); opacity:0} 25%{opacity:1} 100%{transform:translate(var(--dx),-14px) scale(calc(var(--s)*2.2)); opacity:0}}
+#screen-garden .btshake{animation:btshake .35s ease-out}
+@keyframes btshake{20%{transform:translateY(3px)} 45%{transform:translateY(-2px)} 70%{transform:translateY(1px)}}
+@media (prefers-reduced-motion:reduce){ #screen-garden .btfall, #screen-garden .btchip, #screen-garden .btdust{display:none} #screen-garden .btshake{animation:none} }
 #screen-garden .btmeter{height:5px; background:rgba(40,25,10,.35); border-radius:3px; z-index:2; overflow:hidden; box-shadow:0 0 0 1px rgba(255,255,255,.35)}
 #screen-garden .btmeter i{display:block; height:100%; background:#9bd96a; border-radius:3px; min-width:2px}
 #screen-garden .btmeter.dry i{background:#c8b48a}
@@ -8685,13 +8697,14 @@ function btHarvest(gi,k){
 }
 function btCut(gi){
   const f=field(), t=f.bt[gi], b=BTS[t.id], keys=BT_GROUPS[gi], now=Date.now();
+  btFellFx(gi);
   let msg="";
   if(t.ready){ const id=btItem(b.fruit,t.q), n=b.fN*(t.q===5?2:1); btGive(id,n); msg+=`${ico(FOOD[id])}${esc(FOOD[id].name)}×${n} `; }
   if(t.rip){ const id=btItem(b.wood,t.q), n=b.wN*(t.q===5?2:1); btGive(id,n); msg+=`${ico(FOOD[id])}${esc(FOOD[id].name)}×${n}`; S.btCut=(S.btCut||0)+1; }
   else msg="まだ若い木だったので、木材は取れませんでした";
   delete f.bt[gi];
   for(const x of keys){ const q=f[x]; q.bt=null; q.emptySince=now; }
-  hit(keys[4]); sfx.till();
+  hit(keys[4]);
   toast(`🪓 ${esc(btName(t))}を切りました。${msg}`,"good",5200,true);
 }
 const BT_FERT2 = 3;   // 御神木の腐葉土
@@ -8767,7 +8780,7 @@ function btRender(f){
     const pad=40, W=rs[2].right-rs[0].left, H=y1-y0, cen=r=>r.left+r.width/2-br.left-x0+pad;
     const cx=(cen(rs[3])+cen(rs[4])+cen(rs[5]))/3, base=pad+H-rs[7].height*.28;   // まん中の段の中心に幹を立てる
     const svg=document.createElementNS("http://www.w3.org/2000/svg","svg");
-    svg.setAttribute("class","btov"); svg.setAttribute("width",x1-x0+pad*2); svg.setAttribute("height",H+pad*2);
+    svg.setAttribute("class","btov"); svg.dataset.gi=gi; svg.setAttribute("width",x1-x0+pad*2); svg.setAttribute("height",H+pad*2);
     svg.style.left=(x0-pad)+"px"; svg.style.top=(y0-pad)+"px";
     // 9マスを囲う柵: 段ごとに右へずれる区画の並びに沿って、階段の形で囲う(となりの区画に入らない)
     const X=v=>v-br.left-x0+pad, Y=v=>v-br.top-y0+pad, ins=3;
@@ -8783,6 +8796,28 @@ function btRender(f){
     mt.style.left=(r7.left+r7.width/2-mw/2-br.left)+"px"; mt.style.top=(r7.bottom-br.top-9)+"px"; mt.style.width=mw+"px";
     pl.appendChild(mt);
   }
+}
+/* 斧で切る演出: コン・コン・コンと3回打ちこむと木くずが飛び、きしんでから倒れ、ドスンと土ぼこりが立つ */
+function btFellFx(gi){
+  const pl=$("g-planter"), keys=BT_GROUPS[gi], rs=keys.map(k=>plotEls[k] && plotEls[k].getBoundingClientRect());
+  const dir=Math.random()<.5?-1:1, chopT=[0,180,360], fallAt=540, thudAt=fallAt+600;
+  chopT.forEach(ms=>setTimeout(()=>{ beep(150,.08,"triangle",.12); beep(92,.1,"sine",.1); noise(.06,1500,1.5,.14); },ms));   // コン(刃が幹に入る)
+  setTimeout(()=>{ for(let i=0;i<7;i++) setTimeout(()=>beep(230-i*14,.07,"sawtooth",.022),i*55); noise(.6,4200,.6,.05,.15); },fallAt);   // ギギギ…(きしむ)・ザザッ(葉がこすれる)
+  setTimeout(()=>{ beep(55,.45,"sine",.2); beep(82,.3,"sine",.12); noise(.35,350,.8,.25); noise(.4,3000,.5,.04,.05); },thudAt);   // ドスン
+  if(!pl || rs.some(r=>!r) || matchMedia("(prefers-reduced-motion:reduce)").matches) return;
+  const old=pl.querySelector(`svg.btov[data-gi="${gi}"]`);
+  if(old){
+    const c=old.cloneNode(true); c.setAttribute("class","btfall"); c.style.setProperty("--dir",dir);
+    c.querySelectorAll('.btfence, ellipse[fill^="url("]').forEach(e=>e.remove());   // 柵と、地面の影・光は残さない(木と一緒に回らないように)
+    pl.appendChild(c); setTimeout(()=>c.remove(),thudAt+700);
+  }
+  // 幹の根もと(木の絵と同じ位置: まん中の段の中心・いちばん下の段の少し上)
+  const bx=(rs[3].left+rs[3].width/2+rs[4].left+rs[4].width/2+rs[5].left+rs[5].width/2)/3, by=rs[7].bottom-rs[7].height*.28;
+  const bit=(cls,x,y,vars,life)=>{ const e=document.createElement("div"); e.className=cls; e.style.left=x+"px"; e.style.top=y+"px"; for(const k in vars) e.style.setProperty(k,vars[k]); root.appendChild(e); setTimeout(()=>e.remove(),life); };
+  chopT.forEach(ms=>setTimeout(()=>{ for(let i=0;i<6;i++) bit("btchip", bx+dir*-6, by-18, { "--dx":(dir*-1*(12+Math.random()*34))+"px", "--dy":(-14-Math.random()*26)+"px", "--r":(Math.random()*540-270)+"deg" }, 800); },ms));
+  setTimeout(()=>{ pl.classList.remove("btshake"); void pl.offsetWidth; pl.classList.add("btshake"); setTimeout(()=>pl.classList.remove("btshake"),400);
+    const len=(rs[2].right-rs[0].left)*.9;
+    for(let i=0;i<9;i++) bit("btdust", bx+dir*len*(i/9)+(Math.random()*16-8), by-4-Math.random()*8, { "--dx":(Math.random()*30-15)+"px", "--s":(.8+Math.random()*.8).toFixed(2) }, 900); },thudAt);
 }
 /* 大木の育ち具合のメーター(毎回の描画で幅だけ変える) */
 function btMeters(f){
