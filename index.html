@@ -8644,7 +8644,7 @@ function btGrow(t,ms){
     if(!t.q){ const r=Math.random(); if(r<BT_MUT[1]) t.q=5; else if(r<BT_MUT[0]) t.q=3; }
     S.btRipe=(S.btRipe||0)+1; S.btRipeBy=S.btRipeBy||{}; S.btRipeBy[t.id]=(S.btRipeBy[t.id]||0)+1;
     btBookMark(t.id,t.q||0);
-    if(t.q){ S.btMut=(S.btMut||0)+1; if(t.q===5) S.btSup=(S.btSup||0)+1; }   // 実績: 変異・超変異の大木
+    if(t.q===3) S.btMut=(S.btMut||0)+1; if(t.q===5) S.btSup=(S.btSup||0)+1;   // 実績: 変異の大木 / 超変異の大木
     try{ toast(`${BTS[t.id].icon} ${esc(btName(t))}が実りました!${t.q===5?"(超変異)":t.q===3?"(変異)":""}`, t.q===5?"good mut sup":t.q===3?"good mut":"good", 7000, true); }catch(e){}
     return;   // あまりは次の実りに持ち越さない
   }
@@ -14676,7 +14676,7 @@ const GOALS = [
   { cat:"大木", id:"btume",  ic:"🌸", nm:"十年の梅",           ds:"十年梅を実らせる",                   need:1,  now:()=>(S.btRipeBy||{}).bt_ume||0, rw:500000, vis:btGoalVis },
   { cat:"大木", id:"btgrape",ic:"🍇", nm:"三十年の葡萄",       ds:"三十年葡萄を実らせる",               need:1,  now:()=>(S.btRipeBy||{}).bt_grape||0, rw:2000000, vis:btGoalVis },
   { cat:"大木", id:"btsugi", ic:"🌲", nm:"百年の杉",           ds:"百年杉を実らせる",                   need:1,  now:()=>(S.btRipeBy||{}).bt_sugi||0, rw:10000000, vis:btGoalVis },
-  { cat:"大木", id:"btmut",  ic:"✦", nm:"変わった大木",       ds:"変異か超変異の大木を実らせる",       need:1,  now:()=>S.btMut||0, rw:5000000, vis:btGoalVis },
+  { cat:"大木", id:"btmut",  ic:"✦", nm:"変わった大木",       ds:"変異の大木を実らせる",             need:1,  now:()=>S.btMut||0, rw:5000000, vis:btGoalVis },
   { cat:"大木", id:"btsup",  ic:"✧", nm:"まばゆい大木",       ds:"超変異の大木を実らせる",             need:1,  now:()=>S.btSup||0, rw:30000000, vis:btGoalVis },
   { cat:"大木", ser:"dbs", id:"dbs3",  ic:"🎁", nm:"苗木をもらう",   ds:"日替わりのご褒美で苗木を3本もらう",  need:3,  now:()=>S.dbSapGot||0, rw:100000 },
   { cat:"大木", ser:"dbs", id:"dbs30", ic:"🎁", nm:"苗木の目利き",   ds:"日替わりのご褒美で苗木を30本もらう", need:30, now:()=>S.dbSapGot||0, rw:3000000 },
