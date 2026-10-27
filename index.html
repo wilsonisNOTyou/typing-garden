@@ -6938,7 +6938,8 @@ async function mtRematch(){
   const ref=db.ref(MT_PATH).push(), id=ref.key, st=mtNow()+30000, me=mtMe(), prev=Object.keys(m.p).filter(u=>!m.p[u].q && m.p[u].g==null), d=m.d, mo=m.mo||"type", old=m.ref;
   try{
     await ref.set({ h:me, mo, d, st, t:mtNow(), prev, p:{ [me]:mtMyP() } });
-    await old.child("rm").set(id);
+    const tr=await old.child("rm").transaction(cur=>cur ? undefined : id), rm=tr.snapshot.val();   // 2人が同時に押したときは、先にできた方に入る
+    if(rm!==id){ ref.child("x").set(1).catch(()=>{}); if(rm){ mtResultClose(); show("title"); mtJoin(rm); } return; }
     db.ref(WC_PATH).push({ n:playerName.slice(0,10), t:Date.now(), o:myId(), x:`もう一回 対戦します(${mtLabel(mo,d)})`, mt:id, mo, md:d, ms:st }).catch(()=>{});
   }catch(e){ return; }
   mtResultClose(); show("title"); if(!wcOpen) openWorld(); mtEnter(id,d,mo);
@@ -10623,7 +10624,6 @@ function magicFert(k,p,id){
   toast(`${ico(g)} ${esc(c.rose?"薔薇":c.name)}にまきました。${id==="mfert"?"超変異で3個穫れます":"変異で3個穫れます"}`,"good mut"+(id==="mfert"?" sup":""),4200,true);
 }
 function setTool(t){
-  if(t===1 && S.tool===1 && S.axe) axeSwap();   // 斧を持っていれば、1 をもう一度押して持ちかえ
   S.tool=t; sfx.tool(); save(); renderBar();
 }
 /* ← →: 設置を持っているときは設置物、それ以外は種を切り替える */
