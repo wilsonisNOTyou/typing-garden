@@ -6669,7 +6669,7 @@ function mtLobby(){
 }
 /* 待合室の遊び方(種類ごと) */
 function mtRules(mo){
-  if(mo==="toeic") return `<ul class="mt-rules"><li>全員に同じ問題が${MTQ_N}問。3ラウンドで、${MTQ_ROUNDS.map((r,i)=>`第${i+1}は<b>${r.nm}</b>(${r.ds})`).join("、")}を${MTQ_PER}問ずつ</li><li>正解すると ${MTQ_ROUNDS.map(r=>`${r.nm} ${r.pt}点`).join("・")}。早く答えるほど、さらに最大でその半分。いちばん早く正解した人は +30点</li><li>全員パソコンなら、逆4択は英単語を打てる。打てたら ${MTQ_TYPE_PT}点。${MTQ_TYPE_OPEN/1000}秒たつと4択になる</li><li>🎁の付いた問題に正解すると<b>アイテム</b>をもらえる。<b>Space</b> で使うと、次の問題に効く</li><li>答え合わせで、だれがどれを選んだか見えます</li><li>料理とお酒の効果はかかりません</li></ul>${mtqItemList()}`;
+  if(mo==="toeic") return `<ul class="mt-rules"><li>全員に同じ問題が${MTQ_N}問。3ラウンドで、${MTQ_ROUNDS.map((r,i)=>`第${i+1}は<b>${r.nm}</b>(${r.ds})`).join("、")}を${MTQ_PER}問ずつ</li><li>正解すると ${MTQ_ROUNDS.map(r=>`${r.nm} ${r.pt}点`).join("・")}。早く答えるほど、さらに最大でその半分。いちばん早く正解した人は +30点</li><li>全員パソコンなら、逆4択は英単語を打てる。打てたら ${MTQ_TYPE_PT}点。${mtqTypeTime().open/1000}秒たつと4択になる</li><li>🎁の付いた問題に正解すると<b>アイテム</b>をもらえる。<b>Space</b> で使うと、次の問題に効く</li><li>答え合わせで、だれがどれを選んだか見えます</li><li>料理とお酒の効果はかかりません</li></ul>${mtqItemList()}`;
   return `<ul class="mt-rules"><li>60秒でキーを多く外した人の勝ち。言葉は一人ひとり違い、長さだけそろっています</li><li>ミスなしで続けて打つと連鎖。${MT_CHAIN[mt.d].oj}連鎖ごとに上の人へ<b>おじゃまキー</b>、${MT_CHAIN[mt.d].fever}連鎖で<b>フィーバー</b>。おじゃまの言葉は連鎖に数えず、ミスしても連鎖は切れない</li><li>🎁つきの言葉を打つとアイテム。<b>Space</b> で使う ・ 金の言葉は3個</li><li>試合中に1回、全員イベント。残り10秒は<b>ラストスパート</b>で2倍</li><li>料理とお酒の効果はかかりません。ミスしてもキーは戻りません</li></ul>${mtItemList()}`;
 }
 /* 待っているあいだに、ゴーストと遊ぶ(募集はやめる) */
@@ -6999,6 +6999,7 @@ const MTQ_ROUNDS=[
   { f:"fill",   nm:"穴埋め4択", ds:"例文の空所に入る語句を選ぶ", lim:12000, pt:200 },
 ];
 const MTQ_TYPE_LIM=12000, MTQ_TYPE_OPEN=6000, MTQ_TYPE_PT=200;   // 打てるとき: 制限時間・4択が出るまで・打てたときの点
+const mtqTypeTime = () => mt && mt.d==="idiom" ? { lim:16000, open:10000 } : { lim:MTQ_TYPE_LIM, open:MTQ_TYPE_OPEN };   // 熟語は長いので、打つ時間だけ長く(4択になってからの6秒は同じ)
 const MTQ_BOX=3;   // 🎁の問題の数(全員同じ問題に付く)。最後の3問には付けない(もらっても使う問題が残らないため)
 const MTQ_PER=4, MTQ_N=MTQ_ROUNDS.length*MTQ_PER, MTQ_REV=2600, MTQ_REV_FILL=4200, MTQ_GAP=3800;   // 穴埋めは例文と訳を読むので、答え合わせを長めに   // 答え合わせ(次のラウンドの前は少し長く)
 const MTQ_ITEMS={
@@ -7086,7 +7087,7 @@ function mtqInit(){
   const r=dbRand("tq-"+mt.id), lvs=(TQ_RANK_GROUPS.find(g=>g[0]===mt.d)||TQ_RANK_GROUPS[0])[2];
   const pool=mtShuf(TQ.filter(w=>lvs.includes(w.lv) && TQ_SENT[w.en]),r).slice(0,MTQ_N);
   mt.typeRev=Object.values(mt.p).every(p=>p.g!=null || p.pc);   // 全員パソコン
-  mt.qs=pool.map((w,i)=>{ const rd=Object.assign({},MTQ_ROUNDS[Math.floor(i/MTQ_PER)]); if(rd.f==="rev" && mt.typeRev) rd.lim=MTQ_TYPE_LIM;
+  mt.qs=pool.map((w,i)=>{ const rd=Object.assign({},MTQ_ROUNDS[Math.floor(i/MTQ_PER)]); if(rd.f==="rev" && mt.typeRev){ rd.lim=mtqTypeTime().lim; rd.open=mtqTypeTime().open; }
     return { w, rd, o:rd.f==="rev"?mtqRevChoices(w,r):rd.f==="fill"?mtqFillChoices(w,r):mtqChoices(w,r) }; });
   const rb=dbRand("tqbox-"+mt.id), bx=mtShuf([...Array(MTQ_N-3).keys()],rb).slice(0,MTQ_BOX); bx.forEach(i=>{ mt.qs[i].box=true; });   // 🎁の問題
   let at=0; mt.qs.forEach((q,i)=>{ q.ok=q.o.findIndex(o=>o.ok); q.at=at; q.end=at+q.rd.lim; at=q.end+((i+1)%MTQ_PER===0?MTQ_GAP:q.rd.f==="fill"?MTQ_REV_FILL:MTQ_REV); });
@@ -7154,7 +7155,7 @@ function mtqTick(){
     mt.ansSig=null; mtqRender();
   }
   if(ph==="q"){   // 時間で変わる表示: 打てるときの4択・出遅れ・時間どろぼう
-    if(!mt.revOpen && w>=MTQ_TYPE_OPEN){ mt.revOpen=true; mtqRender(); }
+    if(!mt.revOpen && w>=(q.rd.open||MTQ_TYPE_OPEN)){ mt.revOpen=true; mtqRender(); }
     if(!mt.lateShown && now-mt.qAt>=2000){ mt.lateShown=true; mtqRender(); }
     if(!mt.outShown && mtqOut()){ mt.outShown=true; mtqRender(); }
   }
@@ -7266,7 +7267,7 @@ function mtqRender(){
   const tags=[...(q.box?[`<span class="mtq-tag box">🎁 正解でアイテム</span>`]:[]),...Object.keys(ef).map(k=>`<span class="mtq-tag atk">${MTQ_ITEMS[k].ic} ${MTQ_ITEMS[k].nm}(${wcEsc(ef[k])})</span>`), ...["fifty","peek","dbl"].filter(k=>sf[k]).map(k=>`<span class="mtq-tag me">${MTQ_ITEMS[k].ic} ${MTQ_ITEMS[k].nm}</span>`)].join("");
   const ptTxt = q.rd.f==="rev" && mt.typeRev ? `打てたら ${MTQ_TYPE_PT}点 ・ 4択 ${q.rd.pt}点` : `正解 ${q.rd.pt}点`;
   let opts;
-  if(!rev && !mt.revOpen && !my) opts=`<div class="mtq-typed" id="mtqTyped"><span class="done">${tqEsc(mt.buf)}</span><span class="tq-caret">_</span></div><p class="mtq-hint">英単語を打つ(打てたら ${MTQ_TYPE_PT}点) ・ ${MTQ_TYPE_OPEN/1000}秒で4択が出ます(4択で正解は ${q.rd.pt}点)</p>`;
+  if(!rev && !mt.revOpen && !my) opts=`<div class="mtq-typed" id="mtqTyped"><span class="done">${tqEsc(mt.buf)}</span><span class="tq-caret">_</span></div><p class="mtq-hint">英単語を打つ(打てたら ${MTQ_TYPE_PT}点) ・ ${(q.rd.open||MTQ_TYPE_OPEN)/1000}秒で4択が出ます(4択で正解は ${q.rd.pt}点)</p>`;
   else if(!rev && !mt.lateShown && !my) opts=`<div class="mtq-wait">🐢 出遅れ… 選択肢はもうすぐ</div>`;
   else {
     const cuts=mtqCut(i), v=mtqView(i).filter(o=>!cuts.includes(o.j) || rev), peek=!rev && sf.peek;
@@ -7305,6 +7306,7 @@ function mtqFinish(){
   const me=mtMe(), sc=mtqScore(MTQ_N-1), s=sc.tot[me]||0, c=sc.cor[me]||0;
   let gs=0, gm=0; mt.qs.forEach((q,i)=>{ const a=(mt.p[me].a||{})[i]; if(a && a[0]===q.ok){ const x=(q.rd.f==="fill"||a[2])?2:1; gs+=TQ_GIFT_SC*x; gm+=TQ_GIFT_MIN*x; } });   // ふだんの TOEIC と同じ: 穴埋めと、打てた逆4択は倍
   mtqReview();
+  setTimeout(()=>recordStats(0,0),0);   // 総プレイ回数に数える(ふだんの TOEIC と同じ)
   mtFinishCommon({ s, unit:"点", cap:"得点", sub:`正解 ${c} / ${MTQ_N}問`, dt:`正解 ${c}/${MTQ_N}`, toGarden:gs, mins:gm,
     ghostFinal:()=>{ for(const u of Object.keys(mt.p)) if(mt.p[u].g!=null){ mt.p[u].s=sc.tot[u]||0; mt.p[u].dt=`正解 ${sc.cor[u]||0}/${MTQ_N}`; } } });
 }
