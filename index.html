@@ -13753,7 +13753,7 @@ function buyCut(k){
 function cookMake(id,times){
   const d=DISH[id]; if(!d || !hasRecipe(d)) return;
   const g=cookGradeOf(d);
-  let made=0, grade=null, extra=0, saved=0, isFirst=false, sumiUsed=0, sumiUp=0;
+  let made=0, grade=null, extra=0, saved=0, isFirst=false, sumiUsed=0, sumiUp=0, upFrom=0; const ups={};   // ups: 炭で変わった先の段階ごとの数
   const fuel=S.sumiBin?"bincho":"sumi", fp=S.sumiBin?{ m:.3, s:.03, up:.3 }:{ m:.1, s:.01, up:.1 };   // 使う炭と、変異・超変異になる確率
   for(let i=0;i<times;i++){
     const plan=cookPlan(d.ing,g); if(!plan) break;
@@ -13761,7 +13761,7 @@ function cookMake(id,times){
     grade=plan.grade;
     if(S.sumiOn && S[fuel]>0 && grade!==5 && !d.one){   // 梅の炭: ふつう → 変異 10%・超変異 1%、変異 → 超変異 10% / 備長炭: 30%・3%、30%
       S[fuel]--; sumiUsed++; const r=Math.random(), ng = grade===3 ? (r<fp.up?5:3) : (r<fp.s?5:r<fp.s+fp.m?3:grade);
-      if(ng!==grade){ grade=ng; sumiUp++; }
+      if(ng!==grade){ ups[ng]=(ups[ng]||0)+1; upFrom=grade; grade=ng; sumiUp++; }
     }
     S.dishes[id]=S.dishes[id]||{}; S.dishes[id][grade]=(S.dishes[id][grade]||0)+1;
     if(Math.random()<ev("P1",.2,1,0)+kitVal("pot")/100){ S.dishes[id][grade]++; extra++; }   // 料理・鉄の両手鍋: おかわり
@@ -13772,8 +13772,11 @@ function cookMake(id,times){
   }
   if(!made){ sfx.nope(); toast("材料が足りません","warn"); return; }
   if(!cookShow(d,grade,made+extra,isFirst)) sfx.buy();
-  toast(`${dishIco(d,grade)} ${esc(dishName(d,grade))}(${gradeName(grade)})を ${made+extra}つ 作りました${extra?`(おかわり +${extra})`:""}${saved?`・材料が減らなかった ${saved}回`:""}`,isMutT(grade)?"good mut"+(grade===5?" sup":""):"good",3000,true);
-  if(sumiUsed) toast(`${ico(WORK_KEEP[fuel])} ${WORK_KEEP[fuel].name}を ${sumiUsed}つ 使いました${sumiUp?`(${sumiUp}つが変異・超変異になりました!)`:""}`,sumiUp?"good mut":"",3600,true);
+  toast(`${dishIco(d,sumiUp?upFrom:grade)} ${sumiUp?esc(d.name):`${esc(dishName(d,grade))}(${gradeName(grade)})`}を ${made+extra}つ 作りました${extra?`(おかわり +${extra})`:""}${saved?`・材料が減らなかった ${saved}回`:""}`,isMutT(grade)?"good mut"+(grade===5?" sup":""):"good",3000,true);
+  if(sumiUp){   // 炭で段階が変わったことを、はっきり伝える(ふつうを作ったつもりで、図鑑には変異が載るため)
+    const to=[3,5].filter(q=>ups[q]).map(q=>`${gradeName(q)}${ups[q]>1?` ×${ups[q]}`:""}`).join("・");
+    toast(`${ico(WORK_KEEP[fuel])} ${WORK_KEEP[fuel].name}を ${sumiUsed}つ 使い、${gradeName(upFrom)}のつもりが ${to} になりました`,"good mut"+(ups[5]?" sup":""),6000,true);
+  }else if(sumiUsed) toast(`${ico(WORK_KEEP[fuel])} ${WORK_KEEP[fuel].name}を ${sumiUsed}つ 使いました`,"",3600,true);
   save(); renderAll(); renderCook();
 }
 function cookEat(id,g){
