@@ -15131,9 +15131,10 @@ function summary(){
   consumeInbox();   // タイトルに戻った時点で受け取り、畑の状態を最新にする
   tick(); save();
   const now=Date.now();
-  let ripe=0, dry=0;
+  let ripe=0, dry=0, trees=0;
   S.fields.forEach((f,fi)=>{
     const cov=covered(fi);
+    for(const [,t] of btTrees(f)) if(t.ready) trees++;   // 実がなっている大木
     for(const k of KEYS){
       const p=f[k];
       if(p.vil || !p.crop) continue;
@@ -15141,7 +15142,7 @@ function summary(){
       else if(!isWet(fi,k,now,cov)) dry++;
     }
   });
-  return { money:S.money, moneyTxt:xFmt(S.money,"money"), pending:0, ripe, dry, villagers:S.villagers };
+  return { money:S.money, moneyTxt:xFmt(S.money,"money"), pending:0, ripe, dry, trees, villagers:S.villagers };
 }
 function backToTitle(){ leave(); show("title"); }
 window.addEventListener("beforeunload",()=>{ tick(); save(); });
@@ -15949,8 +15950,9 @@ function refreshGardenStat(id="gardenStat"){
   if(s.pending) t+=`<small>(+${fmt(s.pending)} 受け取り待ち)</small>`;
   const todo=[];
   if(s.ripe) todo.push(`<span class="todoi">🧺 収穫できる作物 <b>${s.ripe}</b></span>`);
+  if(s.trees) todo.push(`<span class="todoi">🌳 実った大木 <b>${s.trees}</b></span>`);
   if(s.dry)  todo.push(`<span class="todoi">💧 水が切れた作物 <b>${s.dry}</b></span>`);
-  t += todo.length ? " ・ "+todo.join(" ・ ") : " ・ 庭は落ち着いています";
+  t += todo.length ? " ・ "+todo.join(" ・ ") : " ・ 農園は落ち着いています";
   t += ` <span class="kbdh">G</span>`;
   el.innerHTML=t;
   el.classList.toggle("todo", todo.length>0);
