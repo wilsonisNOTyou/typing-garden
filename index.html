@@ -6999,7 +6999,7 @@ const MTQ_ROUNDS=[
   { f:"fill",   nm:"穴埋め4択", ds:"例文の空所に入る語句を選ぶ", lim:12000, pt:200 },
 ];
 const MTQ_TYPE_LIM=12000, MTQ_TYPE_OPEN=6000, MTQ_TYPE_PT=200;   // 打てるとき: 制限時間・4択が出るまで・打てたときの点
-const mtqTypeTime = () => mt && mt.d==="idiom" ? { lim:20000, open:10000 } : { lim:MTQ_TYPE_LIM, open:MTQ_TYPE_OPEN };   // 熟語は長いので、打つ時間を長く
+const mtqTypeTime = () => mt && mt.d==="idiom" ? { lim:16000, open:10000 } : { lim:MTQ_TYPE_LIM, open:MTQ_TYPE_OPEN };   // 熟語は長いので、打つ時間だけ長く(4択になってからの6秒は同じ)
 const MTQ_BOX=3;   // 🎁の問題の数(全員同じ問題に付く)。最後の3問には付けない(もらっても使う問題が残らないため)
 const MTQ_PER=4, MTQ_N=MTQ_ROUNDS.length*MTQ_PER, MTQ_REV=2600, MTQ_REV_FILL=4200, MTQ_GAP=3800;   // 穴埋めは例文と訳を読むので、答え合わせを長めに   // 答え合わせ(次のラウンドの前は少し長く)
 const MTQ_ITEMS={
