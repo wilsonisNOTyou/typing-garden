@@ -81,7 +81,27 @@
           "t"
         ],
         "$m": {
-          ".write": true
+          ".write": "!data.exists() || (!newData.exists() && data.child('t').isNumber() && data.child('t').val() < now - 86400000)",
+          "st": {
+            ".write": "data.exists() && newData.isNumber() && newData.val() <= data.val()"
+          },
+          "rm": {
+            ".write": "!data.exists() && newData.isString() && newData.val().length <= 40"
+          },
+          "x": {
+            ".write": "!data.exists() && newData.val() === 1"
+          },
+          "p": {
+            "$u": {
+              ".write": "newData.exists() || now < data.parent().parent().child('st').val()",
+              ".validate": "!newData.exists() || newData.child('n').isString()"
+            }
+          },
+          "ev": {
+            "$e": {
+              ".write": "!data.exists() && newData.exists()"
+            }
+          }
         }
       }
     }

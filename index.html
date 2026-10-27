@@ -5858,6 +5858,7 @@ const NEWS=[
     "TOEIC 英単語の対戦は、4択・逆4択・穴埋め4択を4問ずつ、早く正しく答えた人の勝ちです。スマホでも遊べます",
     "🎁が付いた言葉や問題でアイテムがもらえます。Space キーで使うと、相手のじゃまをしたり、自分を助けたりできます。スマホではアイテムをタップして使います",
     "相手が来ないときは、ゴーストと遊べます。人と対戦すると、順位に応じたごほうびがもらえます",
+    "ノートパソコンなど縦の短い画面でも、タイトル・TOEIC 英単語・農園の画面が、スクロールしないで1画面に収まるようにしました",
   ]},
   { d:"2026-10-25", t:"大木と、日替わりのご褒美", items:[
     "大木を追加しました。畑の3×3の9マスを使って、何年もかけて育つ木です。十年梅・三十年葡萄・百年杉の3種類があり、苗木はタイピングの日替わりのご褒美でもらえます。実ったら素手や鎌で実を収穫でき、収穫したあとも1年たつとまた実ります。斧で木ごと切ると、木材が取れます",
@@ -6188,11 +6189,11 @@ function openWorld(){
 }
 function closeWorld(){ document.documentElement.classList.remove("wc-lock"); if(scene==="title") refreshBara(); wcOpen=false; $("wc").classList.remove("open"); clearInterval(openWorld.iv); const ae=document.activeElement; if(ae && ae.blur) ae.blur(); }
 const wcDeco = () => { try{ return Garden.nameDeco(); }catch(e){ return {}; } };   // 薔薇の紋章・薔薇色の名前
-async function wcPost(item){
+async function wcPost(item,noWait){   // noWait: 対戦の募集(書き込んだすぐあとでも出せる)
   if(!db){ $("wcNote").textContent="※Firebase未設定のため使えません"; return false; }
   if(!playerName){ $("wcNote").textContent="書き込むには名前を決めてください"; closeWorld(); openNameWin(); return false; }
   const wait=WC_WAIT-(Date.now()-wcLast);
-  if(wait>0){ $("wcNote").textContent=`続けて書き込むには、あと${Math.ceil(wait/1000)}秒待ってください`; return false; }
+  if(wait>0 && !noWait){ $("wcNote").textContent=`続けて書き込むには、あと${Math.ceil(wait/1000)}秒待ってください`; return false; }
   wcLast=Date.now();
   try{ wcStick=true; await db.ref(WC_PATH).push(Object.assign({ n:playerName.slice(0,10), t:Date.now(), o:myId() }, wcDeco(), item)); wcStick=true; wcRenderSoon(); return true; }
   catch(e){ $("wcNote").textContent=/permission/i.test(String(e&&(e.code||e.message)||"")) ? "※書き込めませんでした(Firebase のルールに typinggarden/world を追加してください)" : "※書き込めませんでした。通信環境を確認してください"; return false; }
@@ -6589,7 +6590,7 @@ async function mtCreate(d,mo="type"){
   const ref=db.ref(MT_PATH).push(), id=ref.key, st=mtNow()+MT_LOBBY, me=mtMe();
   try{
     await ref.set({ h:me, mo, d, st, t:mtNow(), p:{ [me]:mtMyP() } });
-    if(!(await wcPost({ x:`対戦相手を募集しています(${mtLabel(mo,d)})`, mt:id, mo, md:d, ms:st }))){ ref.remove().catch(()=>{}); return; }
+    if(!(await wcPost({ x:`対戦相手を募集しています(${mtLabel(mo,d)})`, mt:id, mo, md:d, ms:st },true))){ ref.child("x").set(1).catch(()=>{}); return; }   // 消せないので「締め切り」の印
   }catch(e){ $("wcNote").textContent=/permission/i.test(String(e&&(e.code||e.message)||"")) ? "※募集できませんでした(Firebase のルールに typinggarden/match を追加してください)" : "※募集できませんでした。通信環境を確認してください"; return; }
   db.ref(MT_PATH).orderByChild("t").endAt(mtNow()-86400000).limitToFirst(20).once("value").then(sn=>sn.forEach(c=>{ c.ref.remove().catch(()=>{}); })).catch(()=>{});   // 1日より前の対戦は消す
   if(!wcOpen) openWorld(); mtEnter(id,d,mo);   // 待合室の後ろはチャット(募集が出たのが見えるように)
@@ -6599,7 +6600,7 @@ async function mtJoin(id){
   if(!playerName){ $("wcNote").textContent="対戦するには名前を決めてください"; closeWorld(); openNameWin(); return; }
   try{
     const v=(await db.ref(`${MT_PATH}/${id}`).once("value")).val();
-    if(!v){ $("wcNote").textContent="この対戦はもうありません"; return; }
+    if(!v || v.x){ $("wcNote").textContent="この対戦はもうありません"; return; }
     if(window.IS_MOBILE && (v.mo||"type")==="type"){ $("wcNote").textContent="タイピングの対戦はパソコンで遊べます"; return; }
     const me=mtMe(), ps=v.p||{};
     if(!ps[me]){
@@ -6614,7 +6615,7 @@ function mtEnter(id,d,mo="type"){
   mtLeaveQuiet();
   mt={ id, d, mo, st:mtNow()+MT_LOBBY, h:"", p:{}, ghost:false, playing:false };
   mt.ref=db.ref(`${MT_PATH}/${id}`);
-  mt.on=mt.ref.on("value",sn=>{ const v=sn.val(); if(!mt || mt.id!==id) return; if(!v){ if(!mt.playing && !mt.over) mtCancel("募集した人が対戦をやめました"); return; }
+  mt.on=mt.ref.on("value",sn=>{ const v=sn.val(); if(!mt || mt.id!==id) return; if(!v || (v.x && !mt.playing && !mt.over && v.h!==mtMe())){ if(!mt.playing && !mt.over) mtCancel("募集した人が対戦をやめました"); return; }
     mt.h=v.h; mt.st=v.st; mt.d=v.d; mt.mo=v.mo||"type"; mt.prev=v.prev||null; if(v.rm!==mt.rm){ mt.rm=v.rm||null; if(mtRes && mtRes.m===mt) mtResultBtns(); }
     const me=mtMe(), mine=mt.p[me];
     mt.p=v.p||{}; if(mine && mt.p[me] && (mt.playing||mt.over)) mt.p[me]=Object.assign(mt.p[me],mine,{ q:mt.p[me].q });   // 自分の数字は手元のものを使う
@@ -6636,7 +6637,7 @@ function mtEnterLocal(d,mo){
 }
 /* だれも来なかった: ゴーストと遊ぶか、やめるかを選ぶ */
 function mtAlone(){
-  if(mt.ref){ if(mt.h===mtMe()) mt.ref.remove().catch(()=>{}); mt.ref.off("value",mt.on); }
+  if(mt.ref){ if(mt.h===mtMe()) mt.ref.child("x").set(1).catch(()=>{}); mt.ref.off("value",mt.on); }
   mt.alone=true; clearInterval(mtIv); mtLobby();
 }
 function mtLobbyTick(){
@@ -6674,7 +6675,7 @@ function mtRules(mo){
 /* 待っているあいだに、ゴーストと遊ぶ(募集はやめる) */
 function mtGhostNow(){
   if(!mt || mt.playing || Object.keys(mt.p).length>=2) return;
-  if(mt.ref && !mt.alone){ if(mt.h===mtMe()) mt.ref.remove().catch(()=>{}); mt.ref.off("value",mt.on); }
+  if(mt.ref && !mt.alone){ if(mt.h===mtMe()) mt.ref.child("x").set(1).catch(()=>{}); mt.ref.off("value",mt.on); }
   mt.alone=true; mtStartNow();
 }
 function mtStartNow(){ if(mt && mt.alone){ const d=mt.d, mo=mt.mo; mtLeaveQuiet(); mtCloseLobby(); mtGhost(d,mo); return; } if(mt && !mt.playing && mt.h===mtMe() && Object.keys(mt.p).length>=2) mt.ref.child("st").set(mtNow()+1500).catch(()=>{}); }
@@ -6685,7 +6686,7 @@ function mtLeaveQuiet(){
   mt=null;
 }
 function mtLeave(){
-  if(mt && mt.ref && !mt.alone && mt.h===mtMe() && Object.keys(mt.p).length<=1) mt.ref.remove().catch(()=>{});
+  if(mt && mt.ref && !mt.alone && mt.h===mtMe() && Object.keys(mt.p).length<=1) mt.ref.child("x").set(1).catch(()=>{});   // 募集を締め切る(対戦の記録は1日たつまで消せない)
   mtLeaveQuiet(); mtCloseLobby();
 }
 function mtCancel(msg){ mtLeaveQuiet(); mtCloseLobby(); wcPopup(`⚔️ ${wcEsc(msg)}`); }
@@ -6868,7 +6869,7 @@ function mtGhostStep(sec){
   }
   MT_GHOSTS.forEach((g,i)=>{
     const p=mt.p["ghost"+i]; if(!p) return;
-    const r=dbRand(mt.id+"-g"+i), wob=1+(r()-.5)*.2, eff=Math.max(0,sec-(p.debt||0)), keys=g.kps*wob*eff, c=mt.gcum;
+    const r=dbRand(mt.id+"-g"+i), wob=(1+(r()-.5)*.2)*(mt.d==="hard"?1.3:1),   /* ハードは少し速く(攻撃を受けても8〜9本くらい) */ eff=Math.max(0,sec-(p.debt||0)), keys=g.kps*wob*eff, c=mt.gcum;
     let w=0; while(w+1<c.length && c[w+1]<=keys) w++;
     let s=0; for(let j=0;j<w;j++){ const tj=c[j+1]/(g.kps*wob)+(p.debt||0)*(j/(w||1)), gold=dbRand(mt.id+"-gw"+i+"-"+j)()<.08; s+=(gold?3:1)*((tj>=GAME_SECONDS-10 || (mt.ev.k==="double" && tj>=mt.ev.at && tj<mt.ev.at+10))?2:1); }
     p.s=Math.max(0,s-(p.minus||0)); p.k=Math.floor(keys); p.c=+((keys-c[w])/((c[w+1]-c[w])||1)).toFixed(2); p.m=Math.floor(eff/12*(3-i)); p.mc=4+i*3;
@@ -6900,7 +6901,7 @@ function mtPop(t,cls){ const el=$("mtPop"); if(!el) return; el.textContent=t; el
 function mtFeed(html){ const el=$("mtFeed"); if(!el) return; const d=document.createElement("div"); d.innerHTML=html; el.prepend(d); while(el.children.length>4) el.lastChild.remove(); setTimeout(()=>d.classList.add("out"),2600); setTimeout(()=>d.remove(),3200); }
 function mtBanner(t,sub){ const el=$("mtBanner"); if(!el) return; el.innerHTML=`<b>${wcEsc(t)}</b><small>${wcEsc(sub||"")}</small>`; el.classList.remove("on"); void el.offsetWidth; el.classList.add("on"); }
 /* ---- 終わり ---- */
-function mtStopFx(){ mtBgmStop(); const ask=$("mtAsk"); if(ask) ask.hidden=true; if(mt){ clearInterval(mt.spinT); clearInterval(mt.vsT); mt.spin=null; } const bb=$("mtBgm"); if(bb) bb.hidden=true; const am=$("mtaMain"); if(am) am.classList.remove("mtq-fog","hit"); try{ Garden.applyTheme(); }catch(e){} document.body.classList.remove("mtb","mtb-fever","mtb-spurt","mtb-fog","mtb-double","mtb-goldrush"); const pn=$("wordPanel"); if(pn) pn.classList.remove("oj","gold","box","big","flip","hit"); for(const id of ["mtBoard","mtHud","mtVs"]){ const e=$(id); if(e) e.hidden=true; } const f=$("mtFeed"); if(f) f.innerHTML=""; }
+function mtStopFx(){ mtBgmStop(); const ask=$("mtAsk"); if(ask) ask.hidden=true; if(mt){ clearInterval(mt.spinT); clearInterval(mt.vsT); mt.spin=null; } const bb=$("mtBgm"); if(bb) bb.hidden=true; const am=$("mtaMain"); if(am) am.classList.remove("hit"); try{ Garden.applyTheme(); }catch(e){} document.body.classList.remove("mtb","mtb-fever","mtb-spurt","mtb-fog","mtb-double","mtb-goldrush"); const pn=$("wordPanel"); if(pn) pn.classList.remove("oj","gold","box","big","flip","hit"); for(const id of ["mtBoard","mtHud","mtVs"]){ const e=$(id); if(e) e.hidden=true; } const f=$("mtFeed"); if(f) f.innerHTML=""; }
 function mtFinish(toGarden){
   const me=mtMe(), m=mt; m.playing=false; m.over=true; clearInterval(mtIv); mtStopFx(); document.body.classList.add("mtb"); for(const c of [...document.body.classList]) if(/^dish/.test(c)) document.body.classList.remove(c);   // 結果も会場の見た目のまま
   if(m.evRef) m.evRef.off("child_added",m.evOn);
