@@ -789,8 +789,15 @@ body.mtb .mt-row{padding:.18rem .55rem}
   #screen-result.mtr .result-sub, #screen-result.mtr .subtitle{margin:.2rem 0}
   .mt-res li{padding:.3rem .7rem}
 }
-#screen-result.mtr p:empty{display:none}   /* 対戦の結果は、空いた行を詰める */
+#screen-result.mtr p:empty{display:none}
+#mtChatBtn.mt-chatb{color:#06222a; background:linear-gradient(180deg,#9ff0ff,#4ee6ff); border-color:#2bb5cc; box-shadow:0 4px 0 #1a7f90, 0 0 14px rgba(78,230,255,.45)}   /* 対戦のあとはチャットも見てほしいので目立たせる */
+#mtChatBtn.mt-chatb:hover,#mtChatBtn.mt-chatb:focus-visible{border-color:#fff}
+#screen-result.mtr .btn-row{gap:.6rem; flex-wrap:nowrap}
+#screen-result.mtr .btn-row .btn{padding:.65rem 1.1rem; white-space:nowrap}   /* 対戦の結果は、空いた行を詰める */
 #screen-result.mtr .mt-result{margin-top:.2rem}
+.mt-review{margin:1.4rem auto 0; max-width:620px}
+.mt-review h3{color:#ffd24a; letter-spacing:.15em; font-weight:400; text-align:center; margin:0}
+.mt-review .mtr-f{display:block; font-family:system-ui,sans-serif; font-size:.7rem; color:#8a7ab8}
 /* 待合室: ボタンはいつも見えるところに。遊び方は中でスクロール */
 .mt-panel{display:flex; flex-direction:column; max-height:calc(100vh - 1.5rem); overflow:hidden}
 .mt-panel #mtBody{flex:1 1 auto; min-height:0; overflow:auto}
@@ -3014,10 +3021,11 @@ html.mobile #screen-garden .grk-list{max-height:none; flex:1 1 auto; min-height:
     <p class="keynav" id="resultKeys"><b>N</b> 名前を入力 → <b>Enter</b> で登録 ・ 入力中の <b>Esc</b> で入力をやめる</p>
     <div class="btn-row">
       <button class="btn primary" id="retryBtn">もう一回 (Enter)</button>
+      <button class="btn mt-chatb" id="mtChatBtn" hidden>💬 チャットへ (C)</button>
       <button class="btn" id="titleBtn">タイトルへ (Esc)</button>
       <button class="btn" id="toGardenBtn">庭へ (G)</button>
-      <button class="btn" id="mtChatBtn" hidden>チャットへ (C)</button>
     </div>
+    <div class="mt-review" id="mtReview" hidden><h3>振り返り</h3><ol class="tq-res" id="mtReviewList"></ol><p class="hint pc-only">E 例文をまとめて開く・閉じる</p></div>
   </section>
 
   <!-- ランキング画面 -->
@@ -5135,6 +5143,7 @@ document.addEventListener("keydown",e=>{
     if(mtRes){   // 対戦の結果
       if(e.key==="Enter"){ e.preventDefault(); mtRematch(); }
       else if(e.key==="c"||e.key==="C"){ mtToChat(); }
+      else if((e.key==="e"||e.key==="E") && !$("mtReview").hidden){ e.preventDefault(); tqExAll($("mtReviewList")); }
       else if(e.key==="Escape"){ mtResultClose(); show("title"); }
       else if(e.key==="g"||e.key==="G"){ mtResultClose(); openGarden(); }
       else if(e.key==="m"||e.key==="M"){ mtBgmToggle(); }
@@ -6378,6 +6387,7 @@ $("mtaBgm").addEventListener("click",mtBgmToggle);
 $("mtStart").addEventListener("click",mtStartNow);
 $("mtLeave").addEventListener("click",mtLeave);
 $("mtChatBtn").addEventListener("click",mtToChat);
+$("mtReviewList").addEventListener("click",tqExToggle);
 $("mtGhostB").addEventListener("click",mtGhostNow);
 $("mtBgm").addEventListener("mousedown",e=>e.preventDefault());
 $("mtBgm").addEventListener("click",mtBgmToggle);
@@ -6412,7 +6422,7 @@ const MT_GHOSTS=[{ n:"ゴースト・ゆっくり", kps:3.2 },{ n:"ゴースト�
 /* 順位のごほうび(人と対戦したときだけ): 種類はくじ。1位は参加した人数ぶん、2位からは1つずつ減る。やめた人はなし
    まだ開いていないもの(腐葉土は大木、コインは薔薇ガチャ)が当たった人には、かわりに肥料 */
 const MT_GIFTS=["sfert","fuyo","coin"];
-const MT_OJ=["おじゃまします","きーきーきー","からまったきー","さびついたきー","かたいきーぼーど","じゃましにきた","ぐるぐるきーぼーど","きーがはずれない"].map(k=>({ t:k, k, oj:true }));
+const MT_OJ=["おじゃまします","きーきーきー","からまったきー","さびついたきー","ねじれたきー","じゃましにきた","ぐるぐるきーぼーど","きーがはずれない"].map(k=>({ t:k, k, oj:true }));
 /* アイテム: atk 相手へ(1位を狙う。自分が1位なら2位) / all ほかの全員へ / me 自分に */
 const MT_ITEMS={
   fog:    { ic:"🌫️", nm:"霧",           to:"atk", ds:"相手のよみがなとローマ字を6秒かくす" },
@@ -6936,7 +6946,7 @@ function mtQuitGame(){
   show("title");
 }   // 試合中に閉じた・読み直した: やめたことにする
 function mtEndAll(){ clearInterval(mtIv); mtStopFx(); if(mt && mt.ref){ mt.ref.off("value",mt.on); if(mt.evRef) mt.evRef.off("child_added",mt.evOn); } mt=null; }
-function mtResultClose(){ if(mtRes){ mtEndAll(); document.body.classList.remove("mtb"); mtRes=null; try{ Garden.applyTheme(); }catch(e){} mtRes=null; $("mtResult").hidden=true; $("mtChatBtn").hidden=true; $("registerBox").style.display=""; $("retryBtn").textContent="もう一回 (Enter)"; document.getElementById("screen-result").classList.remove("mtr"); $("resultKeys").innerHTML='<b>N</b> 名前を入力 → <b>Enter</b> で登録 ・ 入力中の <b>Esc</b> で入力をやめる'; } }
+function mtResultClose(){ if(mtRes){ mtEndAll(); document.body.classList.remove("mtb"); mtRes=null; try{ Garden.applyTheme(); }catch(e){} mtRes=null; $("mtResult").hidden=true; $("mtChatBtn").hidden=true; $("mtReview").hidden=true; $("registerBox").style.display=""; $("retryBtn").textContent="もう一回 (Enter)"; document.getElementById("screen-result").classList.remove("mtr"); $("resultKeys").innerHTML='<b>N</b> 名前を入力 → <b>Enter</b> で登録 ・ 入力中の <b>Esc</b> で入力をやめる'; } }
 /* ---- TOEIC の対戦: 会場の画面(screen-battle)で遊ぶ ----
    全員に同じ問題を同じ順番で出し、時間で次へ進む。答えたあと、だれがどれを選んだかを見せて答え合わせ
    3ラウンド(4択・逆4択・穴埋め4択を4問ずつ)。レベルはランキングと同じ区分け(基本・470〜990点・熟語)
@@ -6952,7 +6962,7 @@ const MTQ_ROUNDS=[
 ];
 const MTQ_TYPE_LIM=12000, MTQ_TYPE_OPEN=6000, MTQ_TYPE_PT=200;   // 打てるとき: 制限時間・4択が出るまで・打てたときの点
 const MTQ_BOX=3;   // 🎁の問題の数(全員同じ問題に付く)。最後の3問には付けない(もらっても使う問題が残らないため)
-const MTQ_PER=4, MTQ_N=MTQ_ROUNDS.length*MTQ_PER, MTQ_REV=2600, MTQ_GAP=3800;   // 答え合わせ(次のラウンドの前は少し長く)
+const MTQ_PER=4, MTQ_N=MTQ_ROUNDS.length*MTQ_PER, MTQ_REV=2600, MTQ_REV_FILL=4200, MTQ_GAP=3800;   // 穴埋めは例文と訳を読むので、答え合わせを長めに   // 答え合わせ(次のラウンドの前は少し長く)
 const MTQ_ITEMS={
   tshort:{ ic:"⏳", nm:"時間どろぼう",   to:"atk", ds:"相手の次の問題が3秒短くなる" },
   late:  { ic:"🐢", nm:"出遅れ",         to:"atk", ds:"相手の次の問題で、選択肢が2秒遅れて出る" },
@@ -7041,7 +7051,7 @@ function mtqInit(){
   mt.qs=pool.map((w,i)=>{ const rd=Object.assign({},MTQ_ROUNDS[Math.floor(i/MTQ_PER)]); if(rd.f==="rev" && mt.typeRev) rd.lim=MTQ_TYPE_LIM;
     return { w, rd, o:rd.f==="rev"?mtqRevChoices(w,r):rd.f==="fill"?mtqFillChoices(w,r):mtqChoices(w,r) }; });
   const rb=dbRand("tqbox-"+mt.id), bx=mtShuf([...Array(MTQ_N-3).keys()],rb).slice(0,MTQ_BOX); bx.forEach(i=>{ mt.qs[i].box=true; });   // 🎁の問題
-  let at=0; mt.qs.forEach((q,i)=>{ q.ok=q.o.findIndex(o=>o.ok); q.at=at; q.end=at+q.rd.lim; at=q.end+((i+1)%MTQ_PER===0?MTQ_GAP:MTQ_REV); });
+  let at=0; mt.qs.forEach((q,i)=>{ q.ok=q.o.findIndex(o=>o.ok); q.at=at; q.end=at+q.rd.lim; at=q.end+((i+1)%MTQ_PER===0?MTQ_GAP:q.rd.f==="fill"?MTQ_REV_FILL:MTQ_REV); });
   mt.qEnd=at; mt.qi=-1; mt.phase=""; mt.items=[]; mt.eff={}; mt.self={}; mt.steals=[]; mt.got={}; mt.view={}; mt.buf="";
   for(const u of Object.keys(mt.p)) mt.p[u].a=mt.p[u].a||{};
   mt.gq={};
@@ -7246,10 +7256,18 @@ function mtqItems(){
   const ready=mt.items.length && !(mt.spin && mt.spin.i===0);
   el.innerHTML=`<span class="mt-items${ready?" ready":""}">${it(mt.items[0],0)}${it(mt.items[1],1)}${ready?`<span class="mt-space" data-item="1">${window.IS_MOBILE?"タップで使う!":"Space で使う!"}</span>`:""}</span>`;
 }
+/* 終わったあとの振り返り(ふだんの TOEIC の結果と同じ並び) */
+function mtqReview(){
+  const me=mtMe(), box=$("mtReviewList"); if(!box) return;
+  box.innerHTML=mt.qs.map((q,i)=>{ const a=(mt.p[me].a||{})[i], ok=a && a[0]===q.ok;
+    return `<li><span class="mk">${ok?"○":a?"✕":"⏱"}</span><span class="w">${tqEsc(q.w.en)}<small class="mtr-f">${q.rd.nm}${ok&&a[2]?"・打てた":""}</small></span><span class="m">${tqEsc(q.w.means.map(m=>m.j).join("、"))}</span>${tqExBtn(q.w)}${tqExHtml(q.w)}</li>`; }).join("");
+  $("mtReview").hidden=false;
+}
 function mtqFinish(){
   if(mt.over2) return; mt.over2=true;
   const me=mtMe(), sc=mtqScore(MTQ_N-1), s=sc.tot[me]||0, c=sc.cor[me]||0;
   let gs=0, gm=0; mt.qs.forEach((q,i)=>{ const a=(mt.p[me].a||{})[i]; if(a && a[0]===q.ok){ const x=(q.rd.f==="fill"||a[2])?2:1; gs+=TQ_GIFT_SC*x; gm+=TQ_GIFT_MIN*x; } });   // ふだんの TOEIC と同じ: 穴埋めと、打てた逆4択は倍
+  mtqReview();
   mtFinishCommon({ s, unit:"点", cap:"得点", sub:`正解 ${c} / ${MTQ_N}問`, dt:`正解 ${c}/${MTQ_N}`, toGarden:gs, mins:gm,
     ghostFinal:()=>{ for(const u of Object.keys(mt.p)) if(mt.p[u].g!=null){ mt.p[u].s=sc.tot[u]||0; mt.p[u].dt=`正解 ${sc.cor[u]||0}/${MTQ_N}`; } } });
 }
