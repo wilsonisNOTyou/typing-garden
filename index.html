@@ -5850,6 +5850,10 @@ function endBookGame(){
 /* ---------- 更新情報 ----------
    新しいものを上に足していく。d は YYYY-MM-DD */
 const NEWS=[
+  { d:"2026-10-27", t:"大木の調整", items:[
+    "収穫してから次に実るまでの時間を、木ごとに変えました。十年梅は1年、三十年葡萄は3年、百年杉は10年です",
+    "百年杉の収穫を、杉の葉5枚・木材3本にしました",
+  ]},
   { d:"2026-10-27", t:"みんなで話せる「農園の寄り合い」と、対戦", items:[
     "みんなとリアルタイムで話せる「農園の寄り合い」ができました。ランキングと同じ名前で書き込みます。タイトルの「農園の寄り合い」か C キー、農園では右下の「チャット」ボタンか Enter で開けます",
     "作り置きの料理を投げられます。30分以内に「受け取る」を押した人に、食べたときと同じ効果が半分の時間かかります",
@@ -8587,12 +8591,12 @@ const BT_UNLOCK = { harvest:10000 };   // 苗木・斧・腐葉土・工房・�
 const BT_YEAR = 365*24*HOUR;
 const BTS = {
   bt_ume:  { id:"bt_ume", l0:"十年かけて根を張る梅の木。早春に白い花を咲かせ、そのあとは毎年、青い実をたっぷりつける。実は梅干しや梅酒に、古い幹は工房で炭になる。", l3:"花も実もほんのり紅い梅。香りが強く、梅酒にすると色まで美しく仕上がる。", l5:"枝の先まで金色に光る梅。実はひと粒ずつ蜜のように甘く、農園の守り木と呼ばれる。", mode:"イージー",   name:"十年梅",     n3:"紅梅",     n5:"金の梅",       icon:"🌸", kind:"ume",   yrs:10,  cost:1000000,  fruit:"ume",      wood:"umewood",   fN:5,  wN:3,  st:["芽","若木","成木","古木","実り"] },
-  bt_grape:{ id:"bt_grape", l0:"格子に絡みながら、三十年かけて太くなる葡萄の古木。毎年、房いっぱいに実をつけ、ワインや干し葡萄になる。古い株は燻製のチップにも。", l3:"翡翠のように透きとおる緑の葡萄。冷やすと香りが立ち、すっきりとしたお酒になる。", l5:"ひと粒ごとに色の違う、宝石のような葡萄。光にかざすと虹のようにきらめく。", mode:"ノーマル", name:"三十年葡萄", n3:"翡翠葡萄", n5:"宝石葡萄",     icon:"🍇", kind:"grape", yrs:30,  cost:3000000,  fruit:"vgrape",   wood:"grapewood", fN:5,  wN:3,  st:["芽","つる","格子","古株","実り"] },
-  bt_sugi: { id:"bt_sugi", l0:"百年かけて空へまっすぐ伸びる杉。毎年落ちる葉は腐葉土に、切り出した木は樽や工房の材料になる。", l3:"幹も葉も銀色に光る杉。月の夜には、畑全体が白く照らされる。", l5:"百年を越えて神様が宿った杉。金色の葉が風に鳴り、そばにいるだけで心が落ち着く。", mode:"ハード",  name:"百年杉",     n3:"銀杉",     n5:"黄金の御神木", icon:"🌲", kind:"sugi",  yrs:100, cost:10000000, fruit:"sugileaf", wood:"sugiwood",  fN:10, wN:10, st:["芽","若木","成木","古木","御神木"] },
+  bt_grape:{ id:"bt_grape", l0:"格子に絡みながら、三十年かけて太くなる葡萄の古木。三年ごとに房いっぱいに実をつけ、ワインや干し葡萄になる。古い株は燻製のチップにも。", l3:"翡翠のように透きとおる緑の葡萄。冷やすと香りが立ち、すっきりとしたお酒になる。", l5:"ひと粒ごとに色の違う、宝石のような葡萄。光にかざすと虹のようにきらめく。", mode:"ノーマル", name:"三十年葡萄", n3:"翡翠葡萄", n5:"宝石葡萄",     icon:"🍇", kind:"grape", yrs:30,  cost:3000000,  fruit:"vgrape",   wood:"grapewood", fN:5,  wN:3,  st:["芽","つる","格子","古株","実り"] },
+  bt_sugi: { id:"bt_sugi", l0:"百年かけて空へまっすぐ伸びる杉。落ちる葉は腐葉土に、切り出した木は樽や工房の材料になる。", l3:"幹も葉も銀色に光る杉。月の夜には、畑全体が白く照らされる。", l5:"百年を越えて神様が宿った杉。金色の葉が風に鳴り、そばにいるだけで心が落ち着く。", mode:"ハード",  name:"百年杉",     n3:"銀杉",     n5:"黄金の御神木", icon:"🌲", kind:"sugi",  yrs:100, cost:10000000, fruit:"sugileaf", wood:"sugiwood",  fN:5,  wN:3, st:["芽","若木","成木","古木","御神木"] },
 };
 for(const b of Object.values(BTS)){
   OBJS[b.id]={ id:b.id, name:b.name+"の苗木", icon:b.icon, area:null, cost:b.cost, unlock:BT_UNLOCK, tree:true,
-    what:`3×3の区画(Q W E / A S D / Z X C など)のどこかを押すと、9マスを使って植えます。${b.yrs}年かけて育ち、実を収穫したあとも1年たつとまた実ります。タイピングの${b.mode}で遊ぶと、この木だけ10倍早く育ちます` };
+    what:`3×3の区画(Q W E / A S D / Z X C など)のどこかを押すと、9マスを使って植えます。${b.yrs}年かけて育ち、実を収穫したあとも${b.yrs/10}年たつとまた実ります。タイピングの${b.mode}で遊ぶと、この木だけ10倍早く育ちます` };
 }
 /* 苗木は種のなかま: 4 の「苗木」で選んで植える。持っている数は S.seeds に入る */
 const SAPS = Object.values(BTS).map(b=>{ const c={ id:b.id, name:b.name, icon:b.icon, sap:true, price:b.cost }; CROP[b.id]=c; return c; });
@@ -8603,6 +8607,8 @@ function btBookMark(id,q){ S.btBook=S.btBook||{}; const b=S.btBook[id]=S.btBook[
 const btBookQ = (id,q) => !!(S.btBook && S.btBook[id] && S.btBook[id][q]);
 const btGroupOf = k => BT_GROUPS.findIndex(g=>g.includes(k));
 const btNeed = t => BTS[t.id].yrs*BT_YEAR;
+const btReYrs = id => BTS[id].yrs/10;   // 収穫してから次に実るまで(年): 育つまでの1割
+const btReNeed = t => btReYrs(t.id)*BT_YEAR;
 const btName = t => t.q===5 ? BTS[t.id].n5 : t.q===3 ? BTS[t.id].n3 : BTS[t.id].name;
 /* 段階(1 芽 〜 5 実り)。実ったあとは、実がなっていれば 5、取ったあとは 4(杉は御神木のまま) */
 const btStage = t => { if(!t.rip){ const r=t.g/btNeed(t); return r<.1?1:r<.35?2:r<.7?3:4; } return (t.ready || t.id==="bt_sugi") ? 5 : 4; };
@@ -8634,7 +8640,7 @@ function btGrow(t,ms){
   }
   if(t.ready) return;
   t.fr=(t.fr||0)+ms;
-  if(t.fr>=BT_YEAR){ t.fr=0; t.ready=true; }
+  if(t.fr>=btReNeed(t)){ t.fr=0; t.ready=true; }
 }
 let dbTree=null, dbMutAdd=0, dbSupAdd=0;   // 日替わり: いま届いているプレイの大木(10倍)・変異・超変異の上乗せ
 const btRate = t => effGrowth()*(t.mul||1)*(t.id===dbTree?10:1);
@@ -8665,7 +8671,7 @@ function btHarvest(gi,k){
   t.ready=false; t.fr=0;
   const first=btGive(id,n); S.btHarvest=(S.btHarvest||0)+n;
   floatAt(k,`+${ico(FOOD[id])}×${n}`); hit(k); sfx.harvest();
-  toast(`${ico(FOOD[id])} ${esc(FOOD[id].name)}を ${n}つ 収穫しました${first?"(図鑑に載りました)":""}。次は1年後に実ります`,"good",4200,true);
+  toast(`${ico(FOOD[id])} ${esc(FOOD[id].name)}を ${n}つ 収穫しました${first?"(図鑑に載りました)":""}。次は${btReYrs(t.id)}年後に実ります`,"good",4200,true);
 }
 function btCut(gi){
   const f=field(), t=f.bt[gi], b=BTS[t.id], keys=BT_GROUPS[gi], now=Date.now();
@@ -8713,7 +8719,7 @@ function btAct(k){
         btCutAsk=null; btCut(gi); return true;
       }
       if(!t.rip){ nope(k,`まだ育っています(実るまで 水が効いていれば あと ${fmtYears((btNeed(t)-t.g))})`); return true; }
-      if(!t.ready){ nope(k,`次に実るまで 水が効いていれば あと ${fmtYears((BT_YEAR-(t.fr||0)))}`); return true; }
+      if(!t.ready){ nope(k,`次に実るまで 水が効いていれば あと ${fmtYears((btReNeed(t)-(t.fr||0)))}`); return true; }
       btHarvest(gi,k); return true;
     }
     case 3: return false;   // 水やりはふつうどおり
@@ -8728,7 +8734,7 @@ function btInfo(k,p){
   const big=`${k} ・ ${b.icon} ${esc(btName(t))} ・ ${b.st[st-1]}${t.q===5?"(超変異)":t.q===3?"(変異)":""}`;
   if(!t.rip) sub.push(`育成 ${(t.g/btNeed(t)*100).toFixed(2)}% ・ 実るまで 水が効いていれば あと ${fmtYears((btNeed(t)-t.g))}`);
   else if(t.ready) sub.push(`実っています。${kb(sickleInfo().name+"(1)",sickleInfo().name)}で ${esc(FOOD[btItem(b.fruit,t.q)].name)}を収穫できます`);
-  else sub.push(`次に実るまで 水が効いていれば あと ${fmtYears((BT_YEAR-(t.fr||0)))}`);
+  else sub.push(`次に実るまで 水が効いていれば あと ${fmtYears((btReNeed(t)-(t.fr||0)))}`);
   sub.push(`タイピングの${b.mode}で遊ぶと、この木だけ10倍早く育ちます`);
   sub.push(`腐葉土 ${t.fert||0}回 ・ 貴重品などと合わせた成長速度 ×${+(effGrowth()*(t.mul||1)).toFixed(2)}`+(S.axe?` ・ ${kb("斧(1 で ← →)","斧")}で切ると木材が取れます`:""));
   sub.push(BT_GROUPS[p.bt].some(x=>isWet(S.cur,x,now)) ? "💧 水が効いています(9マスのどれか1つでよい)" : "水切れ — 9マスのどれか1つに水をやると育ちます");
@@ -8772,7 +8778,7 @@ function btMeters(f){
   const pl=$("g-planter"); if(!pl) return;
   for(const el of pl.querySelectorAll(".btmeter")){
     const t=f.bt && f.bt[el.dataset.gi]; if(!t) continue;
-    const r = !t.rip ? t.g/btNeed(t) : t.ready ? 1 : (t.fr||0)/BT_YEAR;
+    const r = !t.rip ? t.g/btNeed(t) : t.ready ? 1 : (t.fr||0)/btReNeed(t);
     el.firstChild.style.width=(Math.min(1,Math.max(0,r))*100).toFixed(3)+"%";
     el.classList.toggle("ripe",!!t.ready);
     el.classList.toggle("dry",!BT_GROUPS[el.dataset.gi].some(k=>isWet(S.cur,k,Date.now())));
@@ -14406,7 +14412,7 @@ function renderBook(){
       <div class="bnm">${seen||!btBookT ? esc(nm) : "？？？"}</div>
       <dl>
         <dt>実らせた数</dt><dd>${fmtNum((S.btRipeBy||{})[c.id]||0)}本</dd>
-        <dt>育つまで</dt><dd>${b.yrs}年 ・ 収穫したあとは、1年たつとまた実る</dd>
+        <dt>育つまで</dt><dd>${b.yrs}年 ・ 収穫したあとは、${b.yrs/10}年たつとまた実る</dd>
         <dt>手に入れ方</dt><dd>${how}</dd>
         <dt>早く育てる</dt><dd>${b.mode}で遊ぶと10倍早く育つ ・ 腐葉土でも早く育つ</dd>
         ${btBookT?`<dt>なり方</dt><dd>実った瞬間に${btBookT===1?"変異":"超変異"}することがあります</dd>`:""}
@@ -15028,7 +15034,7 @@ function showBtNotice(){
     <li>🌱 ${kb("<b>4</b> の種の中の「苗木」から選んで","種の中の「苗木」から選んで")}、空いている3×3の区画のどこかを押すと植わります。9マスとも空けておきましょう。</li>
     <li>⚡ 苗木がもらえる難易度で遊ぶと、その木だけ<b>10倍</b>早く育ちます。十年梅ならイージー、三十年葡萄ならノーマル、百年杉ならハードです。</li>
     <li>🍂 <b>腐葉土</b>を使うと、木の育つ速さが<b>倍</b>になります。肥料なので、ふつうは1本の木に<b>2回まで</b>です。お店で1日1つ買えるほか、工房で杉の葉から作れます。</li>
-    <li>🪓 実ったら${kb("素手や鎌(<b>1</b>)","素手や鎌")}で実を収穫できます。収穫したあとも、1年たつとまた実ります。お店の<b>斧</b>で木ごと切ると、木材が取れます。</li>
+    <li>🪓 実ったら${kb("素手や鎌(<b>1</b>)","素手や鎌")}で実を収穫できます。収穫したあとも、梅は1年・葡萄は3年・杉は10年たつとまた実ります。お店の<b>斧</b>で木ごと切ると、木材が取れます。</li>
     <li>🔨 料理の画面に<b>工房</b>が加わりました。大木の木材や葉から、腐葉土・梅の炭・燻製チップ・杉樽を作れます。梅の炭は、工房でオンにしておくと、料理が変異・超変異になりやすくなります。</li>
     <li>🍶 仕込みに米麹・梅干し・干し葡萄が加わり、お酒・おつまみ・梅干しおにぎり・レーズンパンのレシピがお店に並びます。お酒を飲むと、タイピングと TOEIC の画面がほろ酔いになります。</li>
   </ul>`;
