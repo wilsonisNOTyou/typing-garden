@@ -115,11 +115,34 @@ body.dishtheme.dishsplit4:not(.garden):not(.washi){
   background-attachment:scroll, fixed, fixed;
 }
 /* ---- TOEIC 英単語 ---- */
-.diff-btn.toeic{border-color:#3b5f8f}
-.diff-btn.toeic .name{color:#8fc2ff}
-.diff-btn.toeic:hover,.diff-btn.toeic:focus-visible{border-color:#8fc2ff}
-.diff-btn.world{border-color:#8a6a3a; width:min(220px,90vw)}
-.diff-btn.world .name{color:#ffd84a}
+/* TOEIC 英単語: 紺の単語カード(罫線のノート) */
+.diff-btn.toeic{
+  width:min(220px,90vw); font-family:Georgia,'Times New Roman','Hiragino Mincho ProN',serif;
+  background:
+    repeating-linear-gradient(180deg, transparent 0 14px, rgba(255,255,255,.07) 14px 15px),
+    linear-gradient(90deg, rgba(255,120,120,.35) 0 2px, transparent 2px) 14px 0/100% 100% no-repeat,
+    linear-gradient(180deg,#2f5fa8,#1f4282);
+  border:2px solid #16305f; box-shadow:0 4px 0 #0f2147;
+}
+.diff-btn.toeic .name{color:#fff; font-weight:700; letter-spacing:.04em; text-shadow:0 2px 0 rgba(10,20,50,.6)}
+.diff-btn.toeic .desc{color:#d6e4ff; font-family:system-ui,sans-serif}
+.diff-btn.toeic .kbd{color:#b8ceff}
+.diff-btn.toeic:hover,.diff-btn.toeic:focus-visible{border-color:#ffd84a}
+/* チャット: 掲示板のコルク */
+.diff-btn.world{
+  width:min(220px,90vw);
+  background:
+    radial-gradient(circle at 20% 30%, rgba(90,50,10,.25) 0 1.5px, transparent 2px) 0 0/9px 9px,
+    radial-gradient(circle at 70% 60%, rgba(255,240,200,.18) 0 1px, transparent 1.5px) 0 0/7px 7px,
+    linear-gradient(180deg,#c89558,#a8763c);
+  border:2px solid #6e4a1e; box-shadow:0 4px 0 #4e3312;
+}
+.diff-btn.world::after{content:""; position:absolute; top:6px; left:50%; width:10px; height:10px; margin-left:-5px; border-radius:50%; background:radial-gradient(circle at 35% 35%,#ff8a8a,#c02a2a); box-shadow:0 1px 2px rgba(0,0,0,.5)}
+.diff-btn.world{position:relative}
+.diff-btn.world .name{color:#fff8e0; font-weight:800; text-shadow:0 2px 0 rgba(70,40,10,.6)}
+.diff-btn.world .desc{color:#2a1604; font-weight:600}
+.diff-btn.world .name{white-space:nowrap}
+.diff-btn.world .kbd{color:#fbe8c8}
 .diff-btn.world:hover,.diff-btn.world:focus-visible{border-color:#ffd84a}
 #screen-toeic{max-width:880px; margin:0 auto}
 .tq-view{display:none}
@@ -6631,7 +6654,7 @@ function mtLobby(){
 }
 /* 待合室の遊び方(種類ごと) */
 function mtRules(mo){
-  if(mo==="toeic") return `<ul class="mt-rules"><li>全員に同じ問題が${MTQ_N}問。3ラウンドで、${MTQ_ROUNDS.map((r,i)=>`第${i+1}は<b>${r.nm}</b>(${r.ds})`).join("、")}を${MTQ_PER}問ずつ</li><li>正解すると ${MTQ_ROUNDS.map(r=>`${r.nm} ${r.pt}点`).join("・")}。早く答えるほど、さらに最大でその半分。いちばん早く正解した人は +30点</li><li>全員パソコンなら、逆4択は英単語を打てる。打てたら ${MTQ_TYPE_PT}点(Enter ですぐ4択にもできる)</li><li>🎁の付いた問題に正解すると<b>アイテム</b>をもらえる。<b>Space</b> で使うと、次の問題に効く</li><li>答え合わせで、だれがどれを選んだか見えます</li><li>料理とお酒の効果はかかりません</li></ul>${mtqItemList()}`;
+  if(mo==="toeic") return `<ul class="mt-rules"><li>全員に同じ問題が${MTQ_N}問。3ラウンドで、${MTQ_ROUNDS.map((r,i)=>`第${i+1}は<b>${r.nm}</b>(${r.ds})`).join("、")}を${MTQ_PER}問ずつ</li><li>正解すると ${MTQ_ROUNDS.map(r=>`${r.nm} ${r.pt}点`).join("・")}。早く答えるほど、さらに最大でその半分。いちばん早く正解した人は +30点</li><li>全員パソコンなら、逆4択は英単語を打てる。打てたら ${MTQ_TYPE_PT}点。${MTQ_TYPE_OPEN/1000}秒たつと4択になる</li><li>🎁の付いた問題に正解すると<b>アイテム</b>をもらえる。<b>Space</b> で使うと、次の問題に効く</li><li>答え合わせで、だれがどれを選んだか見えます</li><li>料理とお酒の効果はかかりません</li></ul>${mtqItemList()}`;
   return `<ul class="mt-rules"><li>60秒でキーを多く外した人の勝ち。言葉は一人ひとり違い、長さだけそろっています</li><li>ミスなしで続けて打つと連鎖。3連鎖ごとに上の人へ<b>おじゃまキー</b>、10連鎖で<b>フィーバー</b></li><li>🎁つきの言葉を打つとアイテム。<b>Space</b> で使う ・ 金の言葉は3個</li><li>試合中に1回、全員イベント。残り10秒は<b>ラストスパート</b>で2倍</li><li>料理とお酒の効果はかかりません。ミスしてもキーは戻りません</li></ul>${mtItemList()}`;
 }
 /* 待っているあいだに、ゴーストと遊ぶ(募集はやめる) */
@@ -7146,7 +7169,6 @@ function mtqPick(k){   // 番号キー・タップ: 画面に出ている順の 
 /* 逆4択で英単語を打つ: 合っている文字だけ進む。Enter で4択にする */
 function mtqTypeKey(k){
   const i=mt.qi, w=mt.qs[i].w;
-  if(k==="Enter"){ mt.revOpen=true; mtqRender(); return; }
   if(k.length!==1) return;
   const want=w.en[mt.buf.length];
   if(want!=null && k.toLowerCase()===want.toLowerCase()){ mt.buf+=want; gardenKeys++; mtSfx.type();
@@ -7229,7 +7251,7 @@ function mtqRender(){
   const tags=[...(q.box?[`<span class="mtq-tag box">🎁 正解でアイテム</span>`]:[]),...Object.keys(ef).map(k=>`<span class="mtq-tag atk">${MTQ_ITEMS[k].ic} ${MTQ_ITEMS[k].nm}(${wcEsc(ef[k])})</span>`), ...["fifty","peek","dbl"].filter(k=>sf[k]).map(k=>`<span class="mtq-tag me">${MTQ_ITEMS[k].ic} ${MTQ_ITEMS[k].nm}</span>`)].join("");
   const ptTxt = q.rd.f==="rev" && mt.typeRev ? `打てたら ${MTQ_TYPE_PT}点 ・ 4択 ${q.rd.pt}点` : `正解 ${q.rd.pt}点`;
   let opts;
-  if(!rev && !mt.revOpen && !my) opts=`<div class="mtq-typed" id="mtqTyped"><span class="done">${tqEsc(mt.buf)}</span><span class="tq-caret">_</span></div><p class="mtq-hint">英単語を打つ(打てたら ${MTQ_TYPE_PT}点) ・ <b>Enter</b> ですぐ4択(${q.rd.pt}点) ・ ${MTQ_TYPE_OPEN/1000}秒で4択が出ます</p>`;
+  if(!rev && !mt.revOpen && !my) opts=`<div class="mtq-typed" id="mtqTyped"><span class="done">${tqEsc(mt.buf)}</span><span class="tq-caret">_</span></div><p class="mtq-hint">英単語を打つ(打てたら ${MTQ_TYPE_PT}点) ・ ${MTQ_TYPE_OPEN/1000}秒で4択が出ます(4択で正解は ${q.rd.pt}点)</p>`;
   else if(!rev && !mt.lateShown && !my) opts=`<div class="mtq-wait">🐢 出遅れ… 選択肢はもうすぐ</div>`;
   else {
     const cuts=mtqCut(i), v=mtqView(i).filter(o=>!cuts.includes(o.j) || rev), peek=!rev && sf.peek;
