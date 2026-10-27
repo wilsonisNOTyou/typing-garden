@@ -1529,8 +1529,8 @@ body.garden.barag{background:radial-gradient(ellipse at 50% 120%, rgba(200,30,62
 #screen-garden .empty{color:var(--ink-l); font-size:.9rem}
 #screen-garden .help{margin-top:1rem; color:var(--ink-l); font-size:.82rem; line-height:1.8; text-align:center}
 #screen-garden .help b{color:var(--ink); background:rgba(255,255,255,.7); border-radius:4px; padding:0 .3em; font-weight:700}
-#screen-garden #g-toasts{position:fixed; top:14px; left:50%; transform:translateX(-50%); width:90vw; z-index:40; display:flex; flex-direction:column; gap:.4rem; align-items:center; pointer-events:none}
-html:not(.mobile) #screen-garden:has(.modal.open) #g-toasts{left:auto; right:10px; transform:none; width:min(15rem,calc((100vw - 760px)/2)); align-items:stretch}   /* ウィンドウを開いているあいだは右上の空いたところに小さく出して、見出しやタブを隠さない */
+#screen-garden #g-toasts{position:fixed; top:var(--toastTop,14px); left:50%; transform:translateX(-50%); width:90vw; z-index:40; display:flex; flex-direction:column; gap:.4rem; align-items:center; pointer-events:none}
+html:not(.mobile) #screen-garden:has(.modal.open) #g-toasts{left:auto; right:10px; transform:none; top:14px; width:min(15rem,calc((100vw - 760px)/2)); align-items:stretch}   /* ウィンドウを開いているあいだは右上の空いたところに小さく出して、見出しやタブを隠さない */
 html:not(.mobile) #screen-garden:has(.modal.open) .toast{font-size:.78rem; padding:.35rem .6rem; line-height:1.45}
 #screen-garden .toast{
   background:var(--paper); border:2px solid var(--wood-d); border-radius:10px; padding:.5rem 1rem;
@@ -2547,7 +2547,7 @@ html.mobile #screen-garden .keyhint:empty{display:none}
 html.mobile #screen-garden .keyhint:not(#g-shopHint):not(#g-gachaHint){display:none}
 /* お知らせは下に出して、上のボタンを隠さない */
 /* スマホ: お知らせは上に小さく(2行まで・2つまで)。畑や道具を隠さないように */
-html.mobile #screen-garden #g-toasts{top:max(6px, env(safe-area-inset-top)); bottom:auto; width:calc(100% - 16px); gap:.25rem}
+html.mobile #screen-garden #g-toasts{top:max(var(--toastTop,6px), env(safe-area-inset-top)); bottom:auto; width:calc(100% - 16px); gap:.25rem}
 html.mobile #screen-garden .toast{font-size:.74rem; padding:.25rem .6rem; line-height:1.4; border-width:1.5px; opacity:.94;
   display:-webkit-box; -webkit-box-orient:vertical; -webkit-line-clamp:2; line-clamp:2; overflow:hidden}
 html.mobile #screen-garden .gacts{justify-content:center}
@@ -9988,6 +9988,8 @@ function toast(text,kind="",ms=2600,html=false){
     same.timer=setTimeout(()=>dropToast(same),ms);
     return;
   }
+  const tb=root.querySelector(".top");   // お知らせは上の段(料理の残り時間・ボタン)の下に出して、隠さない
+  if(tb) $("g-toasts").style.setProperty("--toastTop", Math.max(6, Math.round(tb.getBoundingClientRect().bottom)+6)+"px");
   const t=document.createElement("div");
   t.className="toast "+kind;
   if(html) t.innerHTML=text; else t.textContent=text;
