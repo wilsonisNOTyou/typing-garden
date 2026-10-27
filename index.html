@@ -7411,23 +7411,24 @@ async function recordStats(screws, toGarden=screws, noMul=false){
     }catch(e){}
   }
 }
-async function refreshStatsLine(){
+async function refreshStatsLine(){   // この端末の記録と、みんなの記録の2行
   const el=$("statsLine");
   if(!el) return;
-  if(db){
-    try{
-      const snap=await db.ref("typinggarden/stats").once("value");
-      const v=snap.val()||{};
-      el.textContent=`みんなの記録 — 総プレイ ${v.plays||0}回 / 外されたキー 累計${v.screws||0}個`;
-      return;
-    }catch(e){}
-  }
+  let mineT="", allT="";
   try{
     const r=await store.get("stats");
     const s=r&&r.value?JSON.parse(r.value):{plays:0,screws:0};
-    el.textContent=`この端末の記録 — 総プレイ ${s.plays||0}回 / 外したキー 累計${s.screws||0}個`;
-  }catch(e){ el.textContent=""; }
+    mineT=`この端末の記録 — 総プレイ ${s.plays||0}回 / 外したキー 累計${s.screws||0}個`;
+  }catch(e){}
+  if(db){
+    try{
+      const v=(await db.ref("typinggarden/stats").once("value")).val()||{};
+      allT=`みんなの記録 — 総プレイ ${v.plays||0}回 / 外されたキー 累計${v.screws||0}個`;
+    }catch(e){}
+  }
+  el.innerHTML=[mineT,allT].filter(Boolean).map(esc0).join("<br>");
 }
+const esc0 = t => String(t).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
 
 /* =====================================================
    キーボード農園(同じページ内の一画面として動く)
