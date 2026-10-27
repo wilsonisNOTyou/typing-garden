@@ -137,10 +137,10 @@ body.dishtheme.dishsplit4:not(.garden):not(.washi){
     linear-gradient(180deg,#c89558,#a8763c);
   border:2px solid #6e4a1e; box-shadow:0 4px 0 #4e3312;
 }
-.diff-btn.world::after{content:""; position:absolute; top:6px; left:50%; width:10px; height:10px; margin-left:-5px; border-radius:50%; background:radial-gradient(circle at 35% 35%,#ff8a8a,#c02a2a); box-shadow:0 1px 2px rgba(0,0,0,.5)}
+.diff-btn.world::after{content:"💬"; position:absolute; top:-.7em; left:-.5em; font-size:1.5em; line-height:1; filter:drop-shadow(0 2px 2px rgba(0,0,0,.45)); transform:rotate(-8deg)}   /* チャットらしく吹き出し */
 .diff-btn.world{position:relative}
 .diff-btn.world .name{color:#fff8e0; font-weight:800; text-shadow:0 2px 0 rgba(70,40,10,.6)}
-.diff-btn.world .desc{color:#2a1604; font-weight:600}
+.diff-btn.world .desc{color:#241302; font-weight:500}
 .diff-btn.world .name{white-space:nowrap}
 .diff-btn.world .kbd{color:#fbe8c8}
 .diff-btn.world:hover,.diff-btn.world:focus-visible{border-color:#ffd84a}
@@ -2906,7 +2906,7 @@ html.mobile #screen-garden .grk-list{max-height:none; flex:1 1 auto; min-height:
         </button>
         <button class="diff-btn world" id="wcBtn">
           <div class="name">農園の寄り合い <span class="news-new" id="wcNew"></span><span class="kbd">C</span></div>
-          <div class="desc">みんなでひとこと書き合う<br>料理を投げて分け合う</div>
+          <div class="desc">書き込み・料理を分け合う<br>他のプレイヤーと対戦</div>
         </button>
       </div>
     </div>
@@ -3463,7 +3463,7 @@ html.mobile #screen-garden .grk-list{max-height:none; flex:1 1 auto; min-height:
 <div id="ptWarn"></div>
 <div id="wc" class="bk-modal">
   <div class="bk-panel wc-panel">
-    <div class="bk-head"><h2>🌾 農園の寄り合い</h2><button class="btn bk-x" id="wcClose">閉じる ✕ <span class="kbdh">Esc</span></button></div>
+    <div class="bk-head"><h2>💬 農園の寄り合い</h2><button class="btn bk-x" id="wcClose">閉じる ✕ <span class="kbdh">Esc</span></button></div>
     <div class="wc-goal" id="wcGoal" hidden></div>
     <div class="wc-list" id="wcList"></div>
     <div class="wc-dish wc-pane" id="wcDish" hidden></div>
@@ -6097,7 +6097,7 @@ function wcStart(){
       wcPopup(`🏅 <b>${wcEsc(v.n)}</b>さんが 自慢のカードを貼りました`);
     }
     else if(v.t>wcT0-2000 && v.o!==myId() && !wcOpen && v.x){   // ひとことや自動のお知らせも、少しのあいだだけ出す
-      const x=String(v.x); wcPopup(`🌾 <b>${wcEsc(v.n)}</b>${v.s?"さんが ":" "}${wcEsc(x.length>60?x.slice(0,60)+"…":x)}`);
+      const x=String(v.x); wcPopup(`💬 <b>${wcEsc(v.n)}</b>${v.s?"さんが ":" "}${wcEsc(x.length>60?x.slice(0,60)+"…":x)}`);
     }
     wcRenderSoon();
   }, e=>console.warn("[typinggarden world]",e));
