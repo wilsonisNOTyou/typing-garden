@@ -2859,7 +2859,7 @@ html.mobile #screen-garden .grk-list{max-height:none; flex:1 1 auto; min-height:
           <div class="desc">作物を育ててキーを増やす<br>ここで打つほど農園の時間が進む</div>
         </button>
         <button class="diff-btn books" data-diff="books">
-          <div class="name">タイピング単語帳<span class="kbd">8</span></div>
+          <div class="name">タイピング単語帳<span class="kbd">0</span></div>
           <div class="desc">自分で言葉とよみがなを登録して<br>その単語帳で練習する</div>
         </button>
         <button class="diff-btn toeic" data-diff="toeic">
@@ -2887,7 +2887,7 @@ html.mobile #screen-garden .grk-list{max-height:none; flex:1 1 auto; min-height:
       <button class="btn" id="newsBtn">更新情報 <span class="news-new" id="newsNew"></span><span class="kbdh">U</span></button>
     </div>
     <p class="pt-line"><span id="ptLineText"></span><button class="btn" id="ptBtn">タイマー <span class="kbdh">L</span></button></p>
-    <p class="hint">キー 1〜9 でモードを選んで開始 ・ G 庭 ・ R ランキング ・ D 図鑑 ・ K 別端末と同期 / ローマ字入力(shi・si どちらもOK)<br>8 単語帳 ・ N 名前 ・ F 要望・バグ報告 ・ H 遊び方ガイド ・ U 更新情報 ・ Esc でいつでもタイトルに戻る</p>
+    <p class="hint">キー 1〜9・0 でモードを選んで開始 ・ G 農園 ・ R ランキング ・ D 図鑑 ・ K 別端末と同期 / ローマ字入力(shi・si どちらもOK)<br>0 単語帳 ・ N 名前 ・ F 要望・バグ報告 ・ H 遊び方ガイド ・ U 更新情報 ・ Esc でいつでもタイトルに戻る</p>
     <div class="hazard" aria-hidden="true"><span class="k">Q</span><span class="s">🌱</span><span class="k">W</span><span class="k">E</span><span class="s">🥕</span><span class="k">R</span><span class="k">T</span><span class="s">🌿</span><span class="k">Y</span><span class="k">U</span><span class="s">🍅</span><span class="k">I</span><span class="k">O</span><span class="s">🌽</span><span class="k">P</span><span class="s">🍓</span></div>
   </section>
 
@@ -5095,7 +5095,7 @@ document.addEventListener("keydown",e=>{
     if(e.key==="r"||e.key==="R") openRanking(rankCur,playerName);
     if(e.key==="d"||e.key==="D") openDict(dictCur);
     if(e.key==="k"||e.key==="K") openBackup();
-    if(e.key==="8") openBooks();
+    if(e.key==="0") openBooks();
     if(e.key==="f"||e.key==="F") openFeedback();
     if(e.key==="c"||e.key==="C") openWorld();
     if(e.key==="u"||e.key==="U") openNews();
