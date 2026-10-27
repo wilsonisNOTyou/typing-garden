@@ -15444,6 +15444,8 @@ function syncInit(){
   syncDevice=lsGet("sync:device");
   if(!syncDevice){ syncDevice=Math.random().toString(36).slice(2)+Date.now().toString(36); lsSet("sync:device",syncDevice); }
   syncCode=lsGet("sync:code")||null;
+  // 同期しているブラウザは、記録をブラウザに消されにくくする(空きが少ないとき、サイトの記録がまるごと消されることがある)
+  if(syncCode && !/Firefox/i.test(navigator.userAgent||"")) try{ navigator.storage.persisted().then(ok=>{ if(!ok) navigator.storage.persist(); }).catch(()=>{}); }catch(e){}
   syncLastT=+(lsGet("sync:t")||0);
   // 開いたブラウザで遊ぶ(記録を取り込むための読み直しのときは、持ち主を取らない)
   let reloaded=false;
