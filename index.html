@@ -5854,11 +5854,6 @@ const NEWS=[
   { d:"2026-10-27", t:"大木の調整", items:[
     "収穫してから次に実るまでの時間を、木ごとに変えました。十年梅は1年、三十年葡萄は3年、百年杉は10年です",
     "百年杉の収穫を、杉の葉5枚・木材3本にしました",
-    "工房で、御神木の葉から御神木の腐葉土を作れるようになりました。大木にまくと、育つ速さが3倍になります",
-    "工房で、銘木の梅から備長炭を作れるようになりました。料理に使うと、梅の炭よりずっと変異・超変異になりやすくなります。使う炭は工房で切りかえます",
-    "工房では、上位の品がふつうの品の代わりに使われなくなりました",
-    "腐葉土と梅の炭が、図鑑に載るようになりました",
-    "肥料を ← → で切りかえても、道具の並びがずれないようにしました",
   ]},
   { d:"2026-10-27", t:"みんなで話せる「農園の寄り合い」と、対戦", items:[
     "みんなとリアルタイムで話せる「農園の寄り合い」ができました。ランキングと同じ名前で書き込みます。タイトルの「農園の寄り合い」か C キー、農園では右下の「チャット」ボタンか Enter で開けます",
@@ -15174,7 +15169,7 @@ function debugUnlock(){
   for(const d of DISHES){ S.recipes[d.id]=true; S.dishes[d.id]={0:1,3:1,5:1}; S.dishMade[d.id]={0:true,3:true,5:true}; S.dishEaten[d.id]={0:true,3:true,5:true}; }
   for(const r of ROSE_ALL){ S.harvestBy[r.id]=50; S.harvestQ[r.id]=r.secret?[5]:[20,0,0,3,0,1]; S.inv[r.id]=r.secret?[2]:[3,0,0,2,0,1]; }   // 薔薇
   S.roseTeaRecipe=true; S.baraSeen=true; S.rgNoticed=true;
-  S.seeds.bt_ume=3; S.seeds.bt_grape=3; S.seeds.bt_sugi=3; S.axe=true; S.fuyo=30; S.sumi=30; for(const id of Object.keys(BTS)) for(const q of [0,3,5]) btBookMark(id,q);   // 図鑑の大木も全部   // 大木: 苗木・斧・腐葉土・梅の炭
+  S.seeds.bt_ume=3; S.seeds.bt_grape=3; S.seeds.bt_sugi=3; S.axe=true; S.fuyo=30; S.sumi=30; S.fuyo2=30; S.bincho=30; for(const id of Object.keys(BTS)) for(const q of [0,3,5]) btBookMark(id,q);   // 図鑑の大木も全部   // 大木: 苗木・斧・腐葉土・梅の炭
   // 薔薇ガチャ: コイン・権利・花弁・GHR をすべて
   S.roseCoin=100000000; S.megaSet=true; S.layoutOwned=true; S.gachaPass.r1111=true; S.gachaPass.r11111=true; S.gachaPass.r111111=true; S.gachaPass.r1111111=true;
   for(const id in RG) S.got[id]=1;
