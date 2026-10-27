@@ -4561,7 +4561,7 @@ const dbNeji = lv => { try{ return Garden.dailyNeji(lv); }catch(e){ return 0; } 
 function dbLabel(b){
   const v=DB_VAL[b.kind], x=v?v[b.lv]:0;
   return b.kind==="sap" ? `${DB_TREEN[b.lv]}の苗木`
-    : b.kind==="neji" ? `キー ${fmtNum(dbNeji(b.lv))}`
+    : b.kind==="neji" ? `キー ${Math.floor(dbNeji(b.lv)).toLocaleString("ja-JP")}`
     : b.kind==="min" ? `1打の時短 +${x}分`
     : b.kind==="fuyo" ? `腐葉土 ${x}個`
     : b.kind==="rose" ? `薔薇の種 ${x}個`
