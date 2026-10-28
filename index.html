@@ -932,6 +932,8 @@ html.wc-lock, html.wc-lock body{overflow:hidden; overscroll-behavior:none}   /* 
 .wc-panel .bk-note:empty{display:none}
 html.mobile .wc-panel{height:calc(100vh - 1rem); height:calc(100dvh - 1rem)}
 html.mobile .wc-panel .keynav{display:none}
+html.mobile .wc-bottom{flex-wrap:wrap}   /* スマホ: 入力欄を1行目いっぱいに、ボタンはその下に並べる(送るボタンがはみ出さないように) */
+html.mobile .wc-bottom .wc-text{order:-1; flex:1 1 100%; min-width:0}
 html.mobile .wc-bottom .wc-sm .kbdh, html.mobile .wc-panel .kbdh{display:none}
 .wc-goal{border:1px solid rgba(138,208,255,.4); background:rgba(138,208,255,.08); border-radius:10px; padding:.4rem .6rem; font-size:.85rem; line-height:1.45; margin-top:.3rem}
 .wc-goal b{color:#8ad0ff}
@@ -2504,8 +2506,8 @@ html.mobile body{align-items:flex-start}
 
 /* タイトル: 庭と、ランキング・辞典・引き継ぎだけ */
 html.mobile #screen-title .mode-group:not(:has(.garden)){display:none}
-html.mobile #screen-title .mode-group .diff-btn:not(.garden):not(.books):not(.toeic){display:none}
-html.mobile #screen-title .diff-btn.garden, html.mobile #screen-title .diff-btn.books, html.mobile #screen-title .diff-btn.toeic{width:min(360px,100%); padding:1rem 1.2rem}
+html.mobile #screen-title .mode-group .diff-btn:not(.garden):not(.books):not(.toeic):not(.world){display:none}
+html.mobile #screen-title .diff-btn.garden, html.mobile #screen-title .diff-btn.books, html.mobile #screen-title .diff-btn.toeic, html.mobile #screen-title .diff-btn.world{width:min(360px,100%); padding:1rem 1.2rem}
 html.mobile #screen-title .diff-btn.garden .name{font-size:1.5rem}
 html.mobile #screen-title .diff-btn.garden .desc{font-size:.85rem}
 html.mobile .mnote{color:var(--steel); font-size:.8rem; line-height:1.6; margin:.2rem auto .8rem; max-width:360px}
@@ -3489,7 +3491,7 @@ html.mobile #screen-garden .grk-list{max-height:none; flex:1 1 auto; min-height:
       <button class="btn wc-sm" id="wcDishBtn" title="料理を投げる">🍳 料理 <span class="kbdh">F</span></button>
       <button class="btn wc-sm" id="wcCardBtn" title="自慢する">🏅 自慢 <span class="kbdh">J</span></button>
       <button class="btn wc-sm" id="wcMatchBtn" title="対戦">⚔️ 対戦 <span class="kbdh">V</span></button>
-      <input class="bk-codein wc-text" id="wcText" maxlength="200" placeholder="T か Enter で書く ・ 200文字まで" autocomplete="off">
+      <input class="bk-codein wc-text" id="wcText" maxlength="200" placeholder="T か Enter で書く ・ 200文字まで" autocomplete="off"><script>if(window.IS_MOBILE) document.getElementById("wcText").placeholder="ここに書く ・ 200文字まで";</script>
       <button class="btn primary wc-sm" id="wcSend">送る <span class="kbdh">Enter</span></button>
     </div>
     <p class="bk-note" id="wcNote"></p>
