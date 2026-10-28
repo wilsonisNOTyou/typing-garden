@@ -10396,7 +10396,7 @@ function harvestOne(k){
   if(!p.crop || !isRipe(p)) return;
   // 変異は実ったときに決まっている(この変更より前に実っていた作物だけ、収穫のときに決める)
   if(CROP[p.crop.id].half) return;   // 薔・薇は収穫できない(相方を待っている)
-  const c=CROP[p.crop.id], cropMut=!!p.crop.mut, cropSup=!!p.crop.sup, rolled=!!p.crop.rolled, mutN=p.crop.mutN||0;
+  const c=CROP[p.crop.id], cropMut=!!p.crop.mut, cropSup=!!p.crop.sup, rolled=!!p.crop.rolled, mutN=p.crop.mutN||0, byVil=!!p.vil;   // byVil: 村人が植えた畑
   p.crop=null; p.emptySince=Date.now();
   if(c.treasure){
     S.treas[c.id]=(S.treas[c.id]||0)+1; S.totalHarvest++;
