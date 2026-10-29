@@ -9413,10 +9413,10 @@ const sgCropId = () => { const ok=sgCrops(); return ok.some(c=>c.id===S.sgCrop) 
 /* 村人が育てる作物。元気の種を買うたびに、お店にいつも並ぶ作物の中で1段上がる */
 const VIL_LADDER = ["carrot","potato","tomato","corn","eggplant","strawberry","pumpkin","melon","keytree"];
 const VIL_UP_PRICES = [30000,60000,120000,250000,500000,1000000,2000000,4000000];
-/* 料理: 村人がガチャの作物を育てる(ふつう N・R / 強い SR〜UR) */
+/* 料理: 村人がガチャの作物を育てる(ふつう N・R / 強い SR〜UR)。お店にいつも並ぶ作物も、ガチャで出るので入れる(曜日の作物はレア度がないので入らない) */
 function vilGachaCrop(){
   const rs = eff("O")===2 ? ["SR","HR","UR"] : ["N","R"];
-  const pool=CROPS.filter(c=>c.gacha && !c.treasure && rs.includes(c.r));
+  const pool=CROPS.filter(c=>rs.includes(c.r) && !c.treasure && !c.rose && !c.half && !c.sap);
   return pool[Math.floor(Math.random()*pool.length)].id;
 }
 /* 村人の種代: ガチャの作物は種代がないので、お店の作物と同じくらい(売値の1/3)を払う */
