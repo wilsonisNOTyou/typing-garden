@@ -1684,6 +1684,10 @@ html:not(.mobile) #screen-garden:has(.modal.open) .toast{font-size:.78rem; paddi
 #screen-garden .layoutpanel{width:min(40rem,94vw)}
 #screen-garden #g-fsortList .ic{font-weight:900; color:#7a5230}
 #screen-garden #g-fsortList .fsmv{display:flex; gap:.3rem}
+#screen-garden #g-fsortList .fsmv .sbtn{padding:.25rem .55rem}
+#screen-garden #g-fsortList .fsmv .sbtn:disabled{opacity:.35}
+#screen-garden #g-fsortList .rowi.fsflash{animation:fsflash .9s ease-out}
+@keyframes fsflash{0%{background:#ffe9a8} 100%{background:inherit}}
 #screen-garden .lyhint{font-size:.85rem; color:#6b5233; line-height:1.55; margin-bottom:.6rem}
 #screen-garden .lylist{display:flex; flex-direction:column; gap:.45rem}
 #screen-garden .lyslot{display:flex; flex-wrap:wrap; align-items:center; gap:.4rem .6rem; padding:.5rem .7rem; border:2px solid #e2d3b4; border-radius:10px; background:#fffaf0; cursor:pointer}
@@ -8704,7 +8708,7 @@ function btGrow(t,ms){
     t.g+=ms; const n=btNeed(t);
     if(t.g<n) return;
     t.g=n; t.rip=true; t.ready=true; t.fr=0;
-    if(!t.q){ const r=Math.random(); if(r<BT_MUT[1]) t.q=5; else if(r<BT_MUT[0]) t.q=3; }
+    if(!t.q && !t.plain){ const r=Math.random(); if(r<BT_MUT[1]) t.q=5; else if(r<BT_MUT[0]) t.q=3; }   // 素朴な肥料をまいた木は変異しない
     S.btRipe=(S.btRipe||0)+1; S.btRipeBy=S.btRipeBy||{}; S.btRipeBy[t.id]=(S.btRipeBy[t.id]||0)+1;
     btBookMark(t.id,t.q||0);
     if(t.q===3) S.btMut=(S.btMut||0)+1; if(t.q===5) S.btSup=(S.btSup||0)+1;   // 実績: 変異の大木 / 超変異の大木
@@ -8766,8 +8770,16 @@ function btFert(k,t){
     const q=sel==="mfert"?5:3;
     if(t.q>=q){ nope(k,`もう${t.q===5?"超変異":"変異"}の木です`); return; }
     if(!(S[sel]>0)){ nope(k,"ありません"); return; }
-    S[sel]--; t.q=q; hit(k); floatAt(k,q===5?"✧ 超変異":"✦ 変異"); sfx.fert();
+    S[sel]--; t.q=q; t.plain=false; hit(k); floatAt(k,q===5?"✧ 超変異":"✦ 変異"); sfx.fert();
     toast(`${ico(GUR[sel])} ${esc(GUR[sel].name)}で、${esc(btName(t))}になりました`,"good mut"+(q===5?" sup":""),5200,true);
+    return;
+  }
+  if(sel==="plain"){   // 素朴な肥料: ふつうの木に戻す(腐葉土の回数と倍率はそのまま)
+    if(!(S.plain>0)){ nope(k,"素朴な肥料がありません"); return; }
+    if(!t.q && t.plain){ nope(k,"もうふつうの木です"); return; }
+    S.plain--; if(!(S.plain>0)) S.fertSel="fert";
+    t.q=0; t.plain=true; hit(k); floatAt(k,"🌾 ふつうの木"); sfx.fert();
+    toast(`${ico(PLAIN)} 素朴な肥料で、${esc(btName(t))}になりました。実っても変異しません`,"",3600,true);
     return;
   }
   if(sel!=="fuyo" && sel!=="fuyo2"){ nope(k,"ふつうの肥料は大木には効きません。腐葉土を使います"); return; }
@@ -9161,6 +9173,8 @@ function treeSVG(t,stage,v,W,H,cx,base){
 return treeSVG;
 })();
 const FERT = { name:"肥料", icon:"🍂", cost:60, unlock:{sales:200} };
+const PLAIN_COST=10000;   // 素朴な肥料
+const PLAIN = { id:"plain", name:"素朴な肥料", art:`<svg viewBox="0 0 32 32"><path d="M9 9h14l3 17c.3 2-1 3.5-3 3.5H9c-2 0-3.3-1.5-3-3.5z" fill="#d9c39a"/><path d="M9 9h14l-1.5 3h-11z" fill="#b89a68"/><path d="M11 5c1.5 2 3 3 5 4 2-1 3.5-2 5-4" stroke="#8a6a3a" stroke-width="1.6" fill="none" stroke-linecap="round"/><path d="M16 25c0-4 0-7 0-9" stroke="#5f8f32" stroke-width="1.6" stroke-linecap="round"/><path d="M16 18c-3-.5-4.5-2.5-4.5-4.5 3 0 4.5 2 4.5 4.5zM16 20c3-.5 4.5-2.5 4.5-4.5-3 0-4.5 2-4.5 4.5z" fill="#7aa848"/></svg>` };
 /* 畑の追加チケット(n枚目を買う値段)。最大10枚 */
 const FIELD_PRICES = [0, 500, 3000, 12000, 40000, 150000, 500000, 1500000, 4000000, 10000000];
 /* 11枚目から先は、土地の権利書(わくわくガチャの GUR)1枚につき1枚買える。値段は 2,000万キーから1枚ごとに1.25倍 */
@@ -9237,7 +9251,7 @@ function normalize(o){
   s.ateCount=s.ateCount||0; s.prepCount=s.prepCount||0;
   if(s.buff && !(s.buff.d && s.buff.until)) s.buff=null;
   s.food=s.food||{}; s.mfert=s.mfert||0; s.sfert=s.sfert||0; s.sgVil=s.sgVil||0; s.kit=s.kit||{}; s.hourglass=s.hourglass||0; s.bento=s.bento||0; s.autoCook=s.autoCook||[]; if(![0,1,10].includes(s.cookKeep)) s.cookKeep=10; s.fav=s.fav||{}; s.fav.s=s.fav.s||{}; s.fav.d=s.fav.d||{}; s.kamado=s.kamado||""; s.sgCrop=s.sgCrop||"carrot";
-  if(!["fert","sfert","mfert","fuyo","fuyo2"].includes(s.fertSel)) s.fertSel="fert";
+  if(!["fert","sfert","mfert","plain","fuyo","fuyo2"].includes(s.fertSel)) s.fertSel="fert";
   s.villagers=s.villagers||0; s.vLog=s.vLog||{}; s.vilLv=s.vilLv||0;
   if(!s.owner) s.owner=Math.random().toString(36).slice(2)+Date.now().toString(36);
   s.rankName=s.rankName||"";
@@ -9310,7 +9324,7 @@ function grow(p,add,base,src,rate){   // rate: 1ms で進む量(薔薇の案山�
     const when=base+(n-before)/(rate || (src==="t"?effGrowth():1));
     if(CROP[p.crop.id].half){ p.crop.rolled=true; halfRipen(p,when); return; }
     // 実った瞬間に変異かどうかが決まる(畑で変異の絵が見える)
-    const r = (p.crop.tut || p.crop.mut) ? 0 : rollMut(p.crop.id);   // 不思議な肥料でもう決まっている作物は抽選しない
+    const r = (p.crop.tut || p.crop.mut || p.crop.plain) ? 0 : rollMut(p.crop.id);   // 不思議な肥料・素朴な肥料でもう決まっている作物は抽選しない
     if(r){ p.crop.mut=true; if(r===5) p.crop.sup=true; }
     p.crop.rolled=true;
     if(CROP[p.crop.id].rose) roseSecret(p, src, when);
@@ -10393,7 +10407,7 @@ function renderBar(){
   const fMany=ownedFerts().length>1;   // 肥料が1種類だけなら ◀ ▶ は出さない
   $("g-fertArrL").classList.toggle("none",!fMany); $("g-fertArrR").classList.toggle("none",!fMany);
   if(S.fertSel==="fert"){ $("g-fertIc").innerHTML=FERT.icon; $("g-fertNm").textContent="肥料"; $("g-fertCnt").textContent="×"+S.fert; }
-  else if(WORK_KEEP[S.fertSel]){ const w=WORK_KEEP[S.fertSel]; $("g-fertIc").innerHTML=ico(w); $("g-fertNm").textContent=w.name; $("g-fertCnt").textContent="×"+S[S.fertSel]; }
+  else if(WORK_KEEP[S.fertSel] || S.fertSel==="plain"){ const w=WORK_KEEP[S.fertSel]||PLAIN; $("g-fertIc").innerHTML=ico(w); $("g-fertNm").textContent=w.name; $("g-fertCnt").textContent="×"+S[S.fertSel]; }
   else{ const g=GUR[S.fertSel]; $("g-fertIc").innerHTML=ico(g); $("g-fertNm").textContent=g.name; $("g-fertCnt").textContent="×"+S[S.fertSel]; }
   // 設置物
   const oo=ownedObjs();
@@ -10575,6 +10589,7 @@ function act(k){
     }
     case 5: { // 肥料: 育成中の作物を一気に進める
       if(S.fertSel==="fuyo"||S.fertSel==="fuyo2"){ nope(k,"腐葉土は大木にだけまけます"); break; }
+      if(S.fertSel==="plain"){ plainFert(k,p); break; }
       if(S.fertSel!=="fert"){ magicFert(k,p,S.fertSel); break; }
       if(S.fert<=0){ nope(k,kb("肥料がありません。Tab でお店へ","肥料がありません。お店で買えます")); break; }
       if(!p.crop){ nope(k,"作物が植わっていません"); break; }
@@ -10707,7 +10722,7 @@ function openLayout(){ if(S.layoutOwned && S.layoutOff) return;   // 使って�
   if(!S.layoutOwned){ sfx.nope(); toast(`配置セットは、お店の「効率化」で買えます`,"warn",3000); return; } openModal("layout"); }
 /* 畑の並べ替え */
 const FSORT_PRICE=1000000;
-let fsCur=0;
+let fsCur=0, fsFlash=null;   // fsFlash: 動かしたばかりの行(光らせる)
 function buyFsort(){
   if(S.fsortOwned) return;
   if(!spend(FSORT_PRICE)) return;
@@ -10731,8 +10746,9 @@ function renderFsort(){
   $("g-fsortList").innerHTML=F.map((f,i)=>`<div class="rowi ${i===fsCur?"cur":""}" data-i="${i}">
       <div class="ic">${i+1}</div>
       <div><div class="nm">畑 ${i+1}${i===S.cur?' <span style="color:var(--ink-l)">今いる畑</span>':""}</div><div class="ds">${fieldBrief(f)}</div></div>
-      <div class="keyk">${M ? `<div class="fsmv"><button class="sbtn" data-mv="-1">▲</button><button class="sbtn" data-mv="1">▼</button></div>` : (i===fsCur?"<b>Shift+↑ ↓</b> 動かす<br><b>Enter</b> この畑へ":"")}</div></div>`).join("");
-  $("g-fsortHint").innerHTML = M ? "▲ ▼ で順番を入れかえます" : "<b>↑ ↓</b> 選ぶ ・ <b>Shift+↑ ↓</b> 選んだ畑を上・下に動かす ・ <b>Enter</b> その畑へ行く ・ <b>Esc</b> お店に戻る";
+      <div class="keyk"><div class="fsmv"><button class="sbtn" data-mv="-1"${i===0?" disabled":""}>▲</button><button class="sbtn" data-mv="1"${i===F.length-1?" disabled":""}>▼</button><button class="sbtn" data-go="1">行く</button></div></div></div>`).join("");
+  $("g-fsortHint").innerHTML = M ? "▲ ▼ でその畑を上・下に動かします ・ 行く でその畑へ" : "<b>↑ ↓</b> 選ぶ ・ <b>Shift+↑ ↓</b> か ▲ ▼ で選んだ畑を上・下に動かす ・ <b>Enter</b> か 行く でその畑へ ・ <b>Esc</b> お店に戻る";
+  if(fsFlash!=null){ const el=$("g-fsortList").querySelector(`.rowi[data-i="${fsFlash}"]`); if(el){ el.classList.remove("fsflash"); void el.offsetWidth; el.classList.add("fsflash"); } fsFlash=null; }
   keepVisible($("g-fsortList"));
 }
 function fsMove(dir){
@@ -10741,18 +10757,21 @@ function fsMove(dir){
   [F[i],F[j]]=[F[j],F[i]];
   if(S.cur===i) S.cur=j; else if(S.cur===j) S.cur=i;   // 見ている畑はそのまま
   for(const L of (S.layouts||[])) if(L && L.f){ [L.f[i],L.f[j]]=[L.f[j],L.f[i]]; }   // 配置セットも畑と一緒に動かす
-  fsCur=j; sfx.tab(); save(); renderAll(); renderFsort();
+  fsCur=j; fsFlash=j; sfx.tab(); save(); renderAll(); renderFsort();
+  toast(`畑 ${i+1} と 畑 ${j+1} を入れかえました`,"",1800);
 }
+function fsGo(i){ if(realFields) return; S.cur=i; save(); closeModal(true); renderAll(); toast(`畑 ${i+1} へ移りました`,"",1800); }
 function fsKey(e){
   const k=e.key, n=S.fields.length;
   if(k==="Escape"){ e.preventDefault(); openModal("shop"); return; }
   if(k==="ArrowUp"||k==="ArrowDown"){ e.preventDefault(); const d=k==="ArrowDown"?1:-1; if(e.shiftKey) fsMove(d); else { fsCur=(fsCur+d+n)%n; sfx.cursor(); renderSoon(renderFsort); } return; }
-  if(k==="Enter"){ e.preventDefault(); if(realFields) return; S.cur=fsCur; save(); closeModal(true); renderAll(); }
+  if(k==="Enter"){ e.preventDefault(); fsGo(fsCur); }
 }
 $("g-fsortList").addEventListener("click",e=>{
   const row=e.target.closest && e.target.closest(".rowi"); if(!row) return;
   fsCur=+row.dataset.i;
   const b=e.target.closest("[data-mv]"); if(b){ fsMove(+b.dataset.mv); return; }
+  if(e.target.closest("[data-go]")){ fsGo(fsCur); return; }
   renderFsort();
 });
 function buyLayout(){
@@ -10770,6 +10789,7 @@ function magicFert(k,p,id){
   const c=CROP[p.crop.id];
   if(c.treasure || p.crop.tut || !(id==="mfert"?hasSup(c.id):hasMut(c.id))){ nope(k,"この作物には使えません"); return; }
   if(p.crop.sup){ nope(k,"もう超変異が実ります"); return; }
+  p.crop.plain=false;   // 素朴な肥料のあとに、不思議な肥料をまいたとき
   if(id==="mfert"){ p.crop.mut=true; p.crop.sup=true; p.crop.mutN=3; }
   else{
     if(p.crop.mutN>=3){ nope(k,"もう不思議な肥料を使っています"); return; }
@@ -10786,7 +10806,7 @@ function setTool(t){
 }
 /* ← →: 設置を持っているときは設置物、それ以外は種を切り替える */
 function axeSwap(){ S.axeOn=!S.axeOn; toast(S.axeOn?"🪓 斧に持ちかえました(大木を切ります)":`✋ ${sickleInfo().name}に持ちかえました`,"",2000); }
-const ownedFerts = () => ["fert", ...["sfert","mfert","fuyo","fuyo2"].filter(id=>S[id]>0)];
+const ownedFerts = () => ["fert", ...["sfert","mfert","plain","fuyo","fuyo2"].filter(id=>S[id]>0)];
 function cycleSel(dir){
   if(S.tool===1){ if(S.axe){ axeSwap(); sfx.cursor(); save(); renderBar(); } return; }   // 素手と斧
   if(S.tool===5 && ownedFerts().length>1){
@@ -10918,6 +10938,10 @@ function shopRows(){
       nm: fOk?`${FERT.name} <span style="color:var(--ink-l)">${FERT.cost}キー</span>`:"？？？",
       ds: fOk?`育成中の作物にまくと、必要な時間の${Math.round(effFert()*100)}%ぶん一気に育ちます(${kb("5 で持つ","道具の「肥料」で使う")})。1つの作物には2回まで ・ 手持ち ${S.fert}`:unlockText(FERT.unlock),
       keys: fOk?"<b>Enter</b> 1つ<br><b>Shift+Enter</b> 10個":"", enter:()=>fOk&&buyFert(1), shift:()=>fOk&&buyFert(10) });
+    if(fOk) rows.push({ ic:ico(PLAIN),
+      nm:`${PLAIN.name} <span style="color:var(--ink-l)">${fmtNum(PLAIN_COST)}キー</span>`,
+      ds:`作物にまくと、変異・超変異にならず、かならずふつうに実ります。不思議な肥料などの効果も消えます。大木にまくと、ふつうの木に戻ります(腐葉土の効果はそのまま) ・ 手持ち ${S.plain||0}`,
+      keys:"<b>Enter</b> 1つ<br><b>Shift+Enter</b> 10個", enter:()=>buyPlain(1), shift:()=>buyPlain(10) });
     rows.push({ locked:!aOk, ic: aOk?ico(FUYO):"❔",
       nm: aOk ? `腐葉土 <span style="color:var(--ink-l)">${fmtNum(FUYO_COST)}キー ・ 1日1つまで</span>` : "？？？",
       ds: aOk ? `大木にまくと、その木の成長速度が2倍になります(1本に2回まで・切るまで続く)。工房で杉の葉からも作れます ・ 手持ち ${S.fuyo||0}${fuyoToday()?" ・ 今日はもう買いました":""}` : unlockText(BT_UNLOCK),
@@ -11228,6 +11252,24 @@ function buyHoe(){
   S.hoeLv++;
   toast(`${next.name} を手に入れました。一度に ${next.what} を耕せます`,"good",3600);
   save(); renderAll();
+}
+function buyPlain(n){
+  if(!spend(PLAIN_COST*n)) return;
+  S.plain=(S.plain||0)+n;
+  toast(`${ico(PLAIN)} 素朴な肥料を ${n}つ 買いました(${kb("5 で持って","肥料で選んで")}まけます)`,"",3200,true);
+  save(); renderAll();
+}
+/* 素朴な肥料を作物にまく: これから実るものは、かならずふつう */
+function plainFert(k,p){
+  if(!(S.plain>0)){ nope(k,"素朴な肥料がありません"); return; }
+  if(!p.crop){ nope(k,"作物が植わっていません"); return; }
+  const c=CROP[p.crop.id];
+  if(c.treasure || c.half || p.crop.tut){ nope(k,"この作物には使えません"); return; }
+  if(p.crop.plain && !p.crop.mut){ nope(k,"もうふつうに実ります"); return; }
+  p.crop.mut=false; p.crop.sup=false; p.crop.mutN=0; p.crop.rolled=true; p.crop.plain=true;
+  S.plain--; if(!(S.plain>0)) S.fertSel="fert";
+  hit(k); floatAt(k,"🌾 ふつう"); sfx.fert();
+  toast(`${ico(PLAIN)} ${esc(c.rose?"薔薇":c.name)}にまきました。かならずふつうに実ります`,"",3200,true);
 }
 function buyFert(n){
   if(!meets(FERT.unlock)||!spend(FERT.cost*n)) return;
@@ -12669,7 +12711,7 @@ function kitSub(id){   // 台所の宝物の「今の状態」
   if(id==="fridge") return "";
   const sw = `<span class="kswap"><button class="sbtn" data-kd="-1">${kb("◀ Q","◀")}</button><button class="sbtn" data-kd="1">${kb("E ▶","▶")}</button></span>`;   // ボタンは名前より前(名前の長さで位置が動かないように)
   if(id==="cookvil") return n>0?`作り置き ${sw}<br><b>${cookKeepTxt()}</b> ・ 任せている料理 <b>${(S.autoCook||[]).length} / ${n}</b>(${kb("Enter","もう一度タップ")}で任せる料理を選ぶ)`:"";
-  if(id==="kamado") return n>0?`画面の色 ${sw}<br><b>${kamaLabel()}</b>`:"";
+  if(id==="kamado") return n>0?`画面の色 ${sw}<br><b>${kamaLabel()}</b>(${kb("Enter","もう一度タップ")}で一覧から選ぶ)`:"";
   if(id==="sgvil") return n>0?`育てる作物 ${sw}<br><b>${ico(CROP[sgCropId()])} ${esc(CROP[sgCropId()].name)}</b>(${kb("Enter","もう一度タップ")}で一覧から選ぶ) ・ 使っている区画 <b>${vilUsed("sg")} / ${(S.sgVil||0)*SG_SLOTS}</b>`:"";
   if(id==="sgk") return n>0?`${OBJ_HOW}畑の P に置くと、1打の時短 +2分・カラスよけ・自動の水やり`:"";
   if(id==="deed") return (S.got.deed||0)>0?`持っている ${n}枚 ・ 畑 ${FS().length} / ${FIELD_MAX}枚`:"";
@@ -12700,7 +12742,7 @@ function renderKit(){
 }
 /* 2列・3列に並んでいるので、↑↓ は画面で真下・真上の宝物へ */
 /* 永遠のかまど: 食べたことのある「画面の色」の料理だけ選べる */
-const kamadoDishes = () => DISHES.filter(d=>d.eff==="M" && Object.values(S.dishEaten[d.id]||{}).some(Boolean)).map(d=>d.id)
+const kamadoDishes = () => DISHES.filter(d=>d.eff==="M").flatMap(d=>{ const e=S.dishEaten[d.id]||{}; return Object.values(e).some(Boolean) ? [d.id, ...[3,5].filter(g=>e[g]).map(g=>d.id+"@"+g)] : []; })   // 変異・超変異を食べていれば、その色も
   .concat(ROSE_TEAS.flatMap(d=>gradesOf(d).filter(g=>(S.dishEaten[d.id]||{})[g]).map(g=>g?d.id+"@"+g:d.id)));   // ローズティーは段階ごとに色が違う
 function kitBelow(i,dir){
   const els=[...$("g-treasBody").querySelectorAll(".kitem")], me=els[i]; if(!me) return i;
@@ -12766,7 +12808,7 @@ function renderRoseTre(){
       </div></div>`;
   }).join("")+`</div>`+`<div class="ghead">GHR<span>${rgGhrGot()} / ${RG_GHR.length}</span></div><div class="tlist">`+RG_GHR.map(x=>{
     const seen=(S.got[x.id]||0)>0, n=x.n();
-    const sub = !seen ? "" : x.k==="rkam" ? `花びらの色 <span class="kswap"><button class="sbtn" data-rkd="-1">${kb("◀ Q","◀")}</button><button class="sbtn" data-rkd="1">${kb("E ▶","▶")}</button><button class="sbtn" data-rkd="0">${S.rkamOn?"オン":"オフ"}${kb(" (Enter)","")}</button></span><br><b>${S.rkamCol&&CROP[S.rkamCol]?ico(CROP[S.rkamCol])+" "+esc(CROP[S.rkamCol].name):"(まだ選べる色がありません)"}</b>`
+    const sub = !seen ? "" : x.k==="rkam" ? `花びらの色 <span class="kswap"><button class="sbtn" data-rkd="-1">${kb("◀ Q","◀")}</button><button class="sbtn" data-rkd="1">${kb("E ▶","▶")}</button></span><br><b>${!S.rkamOn?"使っていない":S.rkamCol&&CROP[S.rkamCol]?ico(CROP[S.rkamCol])+" "+esc(CROP[S.rkamCol].name):"(まだ選べる色がありません)"}</b>`
       : x.k==="rfv" ? `使っている区画 <b>${vilUsed("rf")} / ${(S.roseVil||0)*RF_SLOTS}</b>` : x.k==="rsk" ? `${OBJ_HOW}畑の P に置きます` : "";
     return `<div class="titem ${seen?"":"locked"}"${seen&&x.k==="rkam"?' data-act="rkam"':""}>
       <div class="tic">${seen?`<span class="cart">${x.art}</span>`:"✨"}</div>
@@ -12788,7 +12830,6 @@ function renderRoseTre(){
     return `<div class="titem ${seen?"":"locked"}"><div class="tic">${seen?`<span class="cart">${x.art}</span>`:"✨"}</div><div class="tbody">
       <div class="tnm">${seen?esc(x.name):"？？？"}${seen?`<span class="tn">×${fmtNum(n)}</span>`:""}</div>
       <div class="teff">${seen?esc(x.desc):"薔薇ガチャの GXR から出ます"}</div>
-      ${seen?`<div class="teff glore">${esc(x.lore)}</div>`:""}
       ${seen?`<div class="tsum">いまの効果 <b>+${rgGurPct(x.k)}%</b>${n>=RG_GUR_MAX?"(上限)":""}</div>`:""}</div></div>`; }).join("")+`</div>` : "");
   const pick = b => { const i=[...$("g-treasBody").querySelectorAll(".titem")].indexOf(b.closest(".titem")); if(i>=0) rtCur=i; };   // ボタンを押した項目を選んだことにする
   $("g-treasBody").querySelectorAll("[data-rkd]").forEach(b=>b.addEventListener("click",e=>{ e.stopPropagation(); pick(b); rkamAct(+b.dataset.rkd); }));
@@ -12807,7 +12848,7 @@ function renderTreas(){
   root.querySelectorAll("#g-treasTabs .tab").forEach(t=>t.hidden=!treasTabs().includes(+t.dataset.tt));
   root.querySelectorAll("#g-treasTabs .tab").forEach(t=>t.classList.toggle("on", +t.dataset.tt===treasTab));
   $("g-treasNote").textContent = treasTab===2 ? ROSE_TRE_NOTE : treasTab ? KIT_NOTE : TREAS_NOTE;
-  if(treasTab===2){ $("g-treasHint").innerHTML="<b>Tab</b> 次のタブへ ・ <b>↑ ↓ ← →</b> 選ぶ ・ <b>Enter</b> オン・オフ"+(S.rkam?" ・ <b>Q</b> / <b>E</b> 花びらの色":"")+(S.gx&&S.gx.plate?" ・ <b>N</b> プレートの名前":"")+" ・ <b>8</b> / <b>Esc</b> 閉じる"; renderRoseTre(); return; }
+  if(treasTab===2){ $("g-treasHint").innerHTML="<b>Tab</b> 次のタブへ ・ <b>↑ ↓ ← →</b> 選ぶ ・ <b>Enter</b> オン・オフ"+(S.rkam?" ・ 薔薇のかまどは <b>Enter</b> で色を一覧から選ぶ ・ <b>Q</b> / <b>E</b> 花びらの色":"")+(S.gx&&S.gx.plate?" ・ <b>N</b> プレートの名前":"")+" ・ <b>8</b> / <b>Esc</b> 閉じる"; renderRoseTre(); return; }
   $("g-treasHint").innerHTML = treasTab ? "<b>Tab</b> 貴重品へ ・ <b>↑ ↓ ← →</b> 選ぶ ・ <b>Enter</b> 使う ・ <b>Q</b> / <b>E</b> かまどの色・シゴデキ村人の作物を切り替え ・ <b>8</b> / <b>Esc</b> 閉じる" : (kitAny()?"<b>Tab</b> 台所の宝物へ ・ ":"")+"<b>↑ ↓</b> 見る ・ <b>8</b> / <b>Esc</b> 閉じる";
   if(treasTab){ renderKit(); return; }
   const got=TREASURES.filter(c=>tre(c.id)>0).length;
@@ -14415,7 +14456,7 @@ function applyTheme(){
     : `color-mix(in srgb, color-mix(in srgb, ${cols[0]} 50%, ${cols[1]}) 50%, color-mix(in srgb, ${cols[2]} 50%, ${cols[3]}))`;
   const a=colOf(b);
   document.body.classList.add("dishtheme");
-  if(ms.some(x=>isMutT(x.t))){   // 変異・超変異: 背景をはっきり料理の色に。作物が舞い、キーが料理に変わる
+  if(ms.concat(kd||[]).some(x=>isMutT(x.t))){   // かまどの変異・超変異の色も 変異・超変異: 背景をはっきり料理の色に。作物が舞い、キーが料理に変わる
     document.body.classList.add("dishfun");
     const mix=(p,base)=>`color-mix(in srgb, ${cf} ${p}%, ${base})`;   // 紫いもチップスのような暗い色は、明るい紫で
     de.style.setProperty("--dish",cf);
@@ -14426,7 +14467,7 @@ function applyTheme(){
     de.style.setProperty("--amber",`color-mix(in srgb, ${a} 35%, #ffffff)`);
     de.style.setProperty("--amber-dim",`color-mix(in srgb, ${a} 60%, #000)`);
     de.style.setProperty("--steel",`color-mix(in srgb, ${a} 20%, #f0f2f6)`);
-    { const f1=nb||gb||ob, f2=[ob,gb].find(x=>x && x!==f1); themeFloat(true,DISH[f1.d],f1.t,f2 && { d:DISH[f2.d], t:f2.t }); }
+    { const f1=nb||gb||ob||kd, f2=[ob,gb,kd].find(x=>x && x!==f1); themeFloat(true,DISH[f1.d],f1.t,f2 && { d:DISH[f2.d], t:f2.t }); }
     return;
   }
   // ふつう: 演出はなし。背景と板の色だけ、はっきり料理の色に(変異・超変異より少し落ち着いた色)
@@ -15390,7 +15431,7 @@ function debugUnlock(){
   for(const d of DISHES){ S.recipes[d.id]=true; S.dishes[d.id]={0:1,3:1,5:1}; S.dishMade[d.id]={0:true,3:true,5:true}; S.dishEaten[d.id]={0:true,3:true,5:true}; }
   for(const r of ROSE_ALL){ S.harvestBy[r.id]=50; S.harvestQ[r.id]=r.secret?[5]:[20,0,0,3,0,1]; S.inv[r.id]=r.secret?[2]:[3,0,0,2,0,1]; }   // 薔薇
   S.roseTeaRecipe=true; S.baraSeen=true; S.rgNoticed=true;
-  S.seeds.bt_ume=3; S.seeds.bt_grape=3; S.seeds.bt_sugi=3; S.axe=true; S.fuyo=30; S.sumi=30; S.fuyo2=30; S.bincho=30; for(const id of Object.keys(BTS)) for(const q of [0,3,5]) btBookMark(id,q);   // 図鑑の大木も全部   // 大木: 苗木・斧・腐葉土・梅の炭
+  S.seeds.bt_ume=3; S.seeds.bt_grape=3; S.seeds.bt_sugi=3; S.axe=true; S.fuyo=30; S.sumi=30; S.fuyo2=30; S.bincho=30; S.plain=30; for(const id of Object.keys(BTS)) for(const q of [0,3,5]) btBookMark(id,q);   // 図鑑の大木も全部   // 大木: 苗木・斧・腐葉土・梅の炭
   // 薔薇ガチャ: コイン・権利・花弁・GHR をすべて
   S.roseCoin=100000000; S.megaSet=true; S.layoutOwned=true; S.gachaPass.r1111=true; S.gachaPass.r11111=true; S.gachaPass.r111111=true; S.gachaPass.r1111111=true;
   for(const id in RG) S.got[id]=1;
