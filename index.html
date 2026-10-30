@@ -665,6 +665,11 @@ h1.logo .gd::after{content:'🌱'; position:absolute; right:-.55em; top:-.55em; 
 .mt-res li.quit{opacity:.45}
 .mt-res .mt-sc{text-align:right; font-variant-numeric:tabular-nums}
 .mt-res .mt-mi{color:var(--steel); font-size:.8rem; text-align:right}
+/* スマホ: 対戦の結果。名前を広く、くわしい数字は名前の下に。ボタンは折り返して並べる */
+html.mobile .mt-res li{grid-template-columns:2.6rem 1fr auto; row-gap:.1rem; padding:.35rem .6rem}
+html.mobile .mt-res .mt-mi{grid-column:2 / -1; text-align:left}
+html.mobile #screen-result .btn-row{flex-wrap:wrap; justify-content:center; gap:.5rem}
+html.mobile #screen-result .btn-row .btn{flex:1 1 40%; min-width:0}
 .wc-msg .mt-rsn{display:inline-block; margin:0 .5rem 0 .2rem; white-space:nowrap}
 .mt-bonus{text-align:center; color:#ffe08a; font-weight:bold; margin:.6rem 0 0}
 #screen-result.mtr .result-count{color:#4ee6ff; text-shadow:0 0 18px rgba(78,230,255,.7), 0 4px 0 #1a3b6a}
@@ -1235,7 +1240,10 @@ body.os4 .hud b#score{color:#ff7a3c; text-shadow:0 0 18px rgba(255,90,40,.65)}
 #tutActs{display:flex; gap:.4rem; justify-content:flex-end; margin-top:.55rem; flex-wrap:wrap}
 #tutActs .btn{padding:.35rem .9rem; font-size:.85rem; font-family:inherit}
 #tutActs .kbdh{background:rgba(0,0,0,.12); color:inherit; opacity:.8; border:none}
-#tutActs .btn.tut-skip{background:none; color:#8a7a60; border-color:#d9ccb0; box-shadow:none}
+#tutEnd{position:absolute; top:.35rem; right:.45rem; background:none; border:none; padding:.15rem .3rem; color:#8a7a60; font:inherit; font-size:.7rem; text-decoration:underline; cursor:pointer}
+#tutEnd .kbdh{background:rgba(0,0,0,.1); color:inherit; border:none; text-decoration:none}
+#tutEnd[hidden]{display:none}
+#tutBubble #tutStep{padding-right:8.5rem}   /* 右上の「ガイドを終える」と重ならないように */
 #tutBubble.mini{width:min(560px,calc(100vw - 16px)); padding:.4rem .75rem .45rem; opacity:.96}
 #tutBubble.mini #tutText{font-size:.85rem; line-height:1.5}
 #tutBubble.mini #tutStep{margin-bottom:.1rem}
@@ -1274,7 +1282,7 @@ html.mobile.gated body{overflow:hidden}
 .news-item ul{margin:0; padding-left:1.2rem; line-height:1.7; font-size:.92rem}
 .diff-btn.dbon{border-color:#ffcf4a; box-shadow:0 0 0 2px rgba(255,207,74,.35),0 0 18px rgba(255,200,60,.45),0 4px 0 #10131a; animation:dbGlow 2.2s ease-in-out infinite}
 @keyframes dbGlow{50%{box-shadow:0 0 0 2px rgba(255,207,74,.6),0 0 30px rgba(255,200,60,.75),0 4px 0 #10131a}}
-.dbtag{margin-top:.35rem; font-size:.75rem; line-height:1.35; color:#ffe08a; font-weight:bold}
+.dbtag{margin-top:.35rem; font-size:.75rem; line-height:1.35; color:#ffe08a; font-weight:bold; white-space:pre-line}
 .result-bonus{color:#ffe08a; font-size:.95rem; margin:.1rem 0 .4rem; font-weight:bold}
 @media (prefers-reduced-motion: reduce){ .diff-btn.dbon{animation:none} }
 .result-garden{color:#9fd36a; font-size:.95rem; margin:.1rem 0 .4rem; min-height:1.2em}
@@ -3072,7 +3080,7 @@ html.mobile #screen-garden .grk-list{max-height:none; flex:1 1 auto; min-height:
       <button class="btn primary" id="retryBtn">もう一回 (Enter)</button>
       <button class="btn mt-chatb" id="mtChatBtn" hidden>💬 チャットへ (C)</button>
       <button class="btn" id="titleBtn">タイトルへ (Esc)</button>
-      <button class="btn" id="toGardenBtn">庭へ (G)</button>
+      <button class="btn" id="toGardenBtn">農園へ (G)</button>
     </div>
     <div class="mt-review" id="mtReview" hidden><h3>振り返り</h3><ol class="tq-res" id="mtReviewList"></ol><p class="hint pc-only">E 例文をまとめて開く・閉じる</p></div>
   </section>
@@ -3458,7 +3466,7 @@ html.mobile #screen-garden .grk-list{max-height:none; flex:1 1 auto; min-height:
   </div>
 </div>
 <div id="tutRing"></div>
-<div id="tutBubble"><div id="tutStep"></div><div id="tutText"></div><div id="tutActs"></div></div>
+<div id="tutBubble"><button id="tutEnd" type="button" onclick="tutSkip()" hidden>ガイドを終える</button><div id="tutStep"></div><div id="tutText"></div><div id="tutActs"></div></div>
 <div id="stagePop"></div>
 <div id="countdown"></div>
 <div id="imeWarn">日本語入力がオンになっています。<b>半角英数</b>(「英数」キーや「半角/全角」キー)に切り替えてください</div>
@@ -4580,11 +4588,11 @@ function dbLabel(b){
   const v=DB_VAL[b.kind], x=v?v[b.lv]:0;
   return b.kind==="sap" ? `${DB_TREEN[b.lv]}の苗木`
     : b.kind==="neji" ? `キー ${Math.floor(dbNeji(b.lv)).toLocaleString("ja-JP")}`
-    : b.kind==="min" ? `1打の時短 +${x}分`
+    : b.kind==="min" ? `最後まで遊ぶと 1打の時間 +${x}分`
     : b.kind==="fuyo" ? `腐葉土 ${x}個`
     : b.kind==="rose" ? `薔薇の種 ${x}個`
-    : b.kind==="mut" ? `変異しやすさ +${x}%`
-    : b.kind==="sup" ? `超変異しやすさ +${x}%`
+    : b.kind==="mut" ? `最後まで遊ぶと 変異しやすさ +${x}%`
+    : b.kind==="sup" ? `最後まで遊ぶと 超変異しやすさ +${x}%`
     : `所持キーの ${x}%`;
 }
 /* タイトル: ご褒美の付いたモードを光らせて、中身を出す */
@@ -4600,7 +4608,8 @@ function refreshDaily(){
     let t=b.querySelector(".dbtag"); if(!x){ if(t) t.remove(); return; }
     if(!t){ t=document.createElement("div"); t.className="dbtag"; b.appendChild(t); }
     const left = x.kind==="sap" ? (()=>{ try{ return Garden.dailySapLeft(); }catch(e){ return 3; } })() : null;
-    t.textContent = `🎁 今日のご褒美 ${dbLabel(x)}` + (left!=null ? (left>0 ? ` ・ あと${left}本` : " ・ 今日はもらいました") : "");
+    const lb=dbLabel(x);
+    t.textContent = `🎁 今日のご褒美${/^最後まで/.test(lb)?"\n":" "}${lb}` + (left!=null ? (left>0 ? ` ・ あと${left}本` : " ・ 今日はもらいました") : "");
   });
 }
 /* 日替わりのご褒美が始まったお知らせ: 初めて付いたときに1回だけ(大木の解放のお知らせで話している人には出さない) */
@@ -6939,11 +6948,14 @@ function mtFinish(toGarden){
   clearInterval(mtIv); mtIv=setInterval(mtResult,500);
 }
 function mtToChat(){ mtResultClose(); show("title"); openWorld(); }   // 結果から、チャットへ戻る
+/* スマホではキーがないので、ボタンの (Enter) などを外す */
+const kbLbl = s => window.IS_MOBILE ? s.replace(/ \((Enter|Esc|[A-Z])\)$/,"") : s;
+if(window.IS_MOBILE) for(const id of ["retryBtn","mtChatBtn","titleBtn","toGardenBtn"]){ const b=document.getElementById(id); if(b) b.textContent=kbLbl(b.textContent); }
 function mtResultBtns(){
   const m=mtRes&&mtRes.m; if(!m) return;
   $("mtChatBtn").hidden=false;
   $("resultKeys").innerHTML = `<b>Enter</b> ${m.ghost?"もう一回募集する":m.rm?"もう一回に参加":"同じメンバーでもう一回"} ・ <b>C</b> 農園の寄り合いへ ・ <b>Esc</b> タイトルへ ・ <b>G</b> 農園へ ・ <b>M</b> BGM`;
-  $("retryBtn").textContent = m.ghost ? "もう一回募集する (Enter)" : m.rm ? "もう一回に参加 (Enter)" : "もう一回 (Enter)";
+  $("retryBtn").textContent = kbLbl(m.ghost ? "もう一回募集する (Enter)" : m.rm ? "もう一回に参加 (Enter)" : "もう一回 (Enter)");
 }
 /* もう一回: だれかが先に作っていれば参加、なければ作って、前のメンバーを30秒待つ(そろえばすぐ始まる) */
 async function mtRematch(){
@@ -10045,8 +10057,12 @@ function flushToastBatch(){
   if(!b || !b.length) return;
   toast(b.map(x=>x.h).join(" ・ "), "good", Math.max(...b.map(x=>x.ms))+(b.length>1?1500:0), true);
 }
+let toastHold=[];   // ガチャの演出中に届いたお知らせ(終わってから出す)
+setInterval(()=>{ if(toastHold.length && !(modal==="gacha" && gachaBusy())){ const h=toastHold; toastHold=[]; toastBatch=[]; for(const a of h) toast(...a); flushToastBatch(); } },400);
 function toast(text,kind="",ms=2600,html=false){
   const imp=toastImp(String(text),kind);
+  if(!imp && typeof tutStep==="function" && tutStep()) return;   // はじめてガイドの途中は、ふつうのお知らせを出さない(吹き出しの邪魔になる)
+  if(modal==="gacha" && gachaBusy()){ toastHold.push([text,kind,ms,html]); return; }   // ガチャの演出中は、終わってからまとめて出す
   if(toastBatch && !imp){ toastBatch.push({ h:html?String(text):esc(String(text)), ms }); return; }
   if(window.IS_MOBILE && !imp) ms=Math.min(ms,3200);   // スマホは短く(画面を長くふさがない)
   const key=String(text);
@@ -16243,7 +16259,7 @@ function tutRender(){
     const acts=$("tutActs"); acts.innerHTML="";
     const M=!!window.IS_MOBILE;
     for(const [label,fn,key] of (v.acts||[])){ const btn=document.createElement("button"); btn.className="btn primary"; btn.innerHTML=label+(key&&!M?` <span class="kbdh">${key}</span>`:""); btn.onclick=fn; acts.appendChild(btn); }
-    if(id!=="done"){ const sk=document.createElement("button"); sk.className="btn tut-skip"; sk.innerHTML="スキップ"+(M?"":' <span class="kbdh">Backspace</span>'); sk.onclick=tutSkip; acts.appendChild(sk); }
+    const sk=$("tutEnd"); sk.hidden = id==="done"; sk.innerHTML="ガイドを終える"+(M?"":' <span class="kbdh">Backspace</span>');   // 進むボタンから離して、右上に小さく(押しまちがえないように)
   }
   bub.style.display="block";
   const mini = scene==="game";
@@ -16261,8 +16277,13 @@ function tutRender(){
     const r=el.getBoundingClientRect();
     ring.style.display="block";
     Object.assign(ring.style,{ left:(r.left-6)+"px", top:(r.top-6)+"px", width:(r.width+12)+"px", height:(r.height+12)+"px" });
-    let top = r.bottom+14+bh < H ? r.bottom+14 : (r.top-14-bh >= 8 ? r.top-14-bh : H-bh-8);
-    let left = Math.min(Math.max(8, r.left+r.width/2-bw/2), W-bw-8);
+    if(bub.dataset.seen!==key && (r.bottom>H || r.top<0)){ bub.dataset.seen=key; el.scrollIntoView({ block:"center" }); return requestAnimationFrame(tutRender); }   // 押してほしい所が画面の外なら、見えるところまで動かす
+    // 押してほしい所に重ならないように: 下 → 上 → 横 → 遠いほうの端
+    let top, left = Math.min(Math.max(8, r.left+r.width/2-bw/2), W-bw-8);
+    if(r.bottom+14+bh < H) top=r.bottom+14;
+    else if(r.top-14-bh >= 8) top=r.top-14-bh;
+    else if(r.right+14+bw < W-8 || r.left-14-bw >= 8){ left = r.right+14+bw < W-8 ? r.right+14 : r.left-14-bw; top=Math.min(Math.max(8, r.top+r.height/2-bh/2), H-bh-8); }
+    else top = (r.top+r.bottom)/2 > H/2 ? 8 : H-bh-8;
     bub.style.left=left+"px"; bub.style.top=top+"px";
   }else{
     ring.style.display="none";
