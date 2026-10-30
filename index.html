@@ -819,8 +819,8 @@ body.mtb .mt-row{padding:.18rem .55rem}
   .mt-res li{padding:.3rem .7rem}
 }
 #screen-result.mtr p:empty{display:none}
-#mtChatBtn.mt-chatb{color:#06222a; background:linear-gradient(180deg,#9ff0ff,#4ee6ff); border-color:#2bb5cc; box-shadow:0 4px 0 #1a7f90, 0 0 14px rgba(78,230,255,.45)}   /* 対戦のあとはチャットも見てほしいので目立たせる */
-#mtChatBtn.mt-chatb:hover,#mtChatBtn.mt-chatb:focus-visible{border-color:#fff}
+.btn.mt-chatb{color:#06222a; background:linear-gradient(180deg,#9ff0ff,#4ee6ff); border-color:#2bb5cc; box-shadow:0 4px 0 #1a7f90, 0 0 14px rgba(78,230,255,.45)}   /* 対戦のあとはチャットも見てほしいので目立たせる */
+.btn.mt-chatb:hover,.btn.mt-chatb:focus-visible{border-color:#fff}
 #screen-result.mtr .btn-row{gap:.6rem; flex-wrap:nowrap}
 #screen-result.mtr .btn-row .btn{padding:.65rem 1.1rem; white-space:nowrap}   /* 対戦の結果は、空いた行を詰める */
 #screen-result.mtr .mt-result{margin-top:.2rem}
@@ -3016,7 +3016,7 @@ html.mobile #screen-garden .grk-list{max-height:none; flex:1 1 auto; min-height:
       <div class="btn-row">
         <button class="btn primary" id="tqAgain">もう1セット <span class="kbdh">Enter</span></button>
         <button class="btn" id="tqToMenu">メニューへ <span class="kbdh">Esc</span></button>
-        <button class="btn" id="tqRankBtnR">ランキング <span class="kbdh">R</span></button>
+        <button class="btn mt-chatb" id="tqChatBtnR">💬 チャットへ <span class="kbdh">C</span></button>
         <button class="btn tq-gardenBtn">農園へ <span class="kbdh">G</span></button>
       </div>
       <div class="gstat tq-gstat" id="tqGstatR"></div>
@@ -17604,6 +17604,7 @@ function tqKey(e){
     else if(k==="e"||k==="E"){ e.preventDefault(); tqExAll($("tqResList")); }
     else if((k==="n"||k==="N") && $("tqRegBtn")){ e.preventDefault(); tqRegName(); }
     else if(k==="r"||k==="R"){ e.preventDefault(); if($("tqRankView")) tqRankView(); else tqRankOpen(); }
+    else if(k==="c"||k==="C"){ e.preventDefault(); tqToChat(); }
     else if(k==="g"||k==="G") tqToGarden();
     return;
   }
@@ -17666,7 +17667,8 @@ $("tqLTabs").addEventListener("click",e=>{ const b=e.target.closest("[data-lv]")
 $("tqListBack").addEventListener("click",tqMenu);
 document.querySelectorAll(".tq-gardenBtn, #tqGstatM, #tqGstatR").forEach(b=>b.addEventListener("click",tqToGarden));
 $("tqRankBtn").addEventListener("click",tqRankOpen);
-$("tqRankBtnR").addEventListener("click",()=>{ if($("tqRankView")) tqRankView(); else tqRankOpen(); });
+$("tqChatBtnR").addEventListener("click",tqToChat);
+function tqToChat(){ show("title"); openWorld(); }   // 結果から、チャットへ(ランキングは結果の上の「ランキングを見る」から)
 $("g-toeicBtn").addEventListener("click",()=>{ try{ Garden.leave(); }catch(e){} openToeic(); });   // 農園からTOEICへ
 $("tqSecDn").addEventListener("click",()=>tqSetSec(-1));
 $("tqSecUp").addEventListener("click",()=>tqSetSec(1));
