@@ -2235,10 +2235,6 @@ html.mobile #g-cookShow .csnm{font-size:1.3rem}
 /* ---- 庭: ガチャ画面とアイテムリスト ---- */
 #screen-garden .tbtn.gacha{background:linear-gradient(180deg,#f3e0ff,#e0c2f5); border-color:#8a5ab8; box-shadow:0 3px 0 #8a5ab8}
 #screen-garden .gachapanel{width:min(820px,95vw)}
-/* 庭の窓: 窓の高さに合わせて、中の一覧だけをスクロールする(窓と一覧の二重のスクロールにしない) */
-#screen-garden .panel{display:flex; flex-direction:column}
-#screen-garden .panel > *{flex-shrink:0}
-#screen-garden .panel > .plist, #screen-garden .panel > .gbody-scroll{max-height:none; flex:1 1 auto; min-height:0}
 body:has(#screen-garden .modal.open){overflow:hidden}
 #screen-garden .gbody-scroll{max-height:62vh; overflow:auto; padding-right:.2rem}
 #screen-garden .glist{margin-top:1rem; border-top:1px solid #e3d7bd; padding-top:.7rem}
