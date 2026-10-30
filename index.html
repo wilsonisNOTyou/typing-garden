@@ -2371,7 +2371,8 @@ html.mobile #screen-garden .planter.gxhedge::after{inset:-12px; padding:10px; ba
 #screen-garden .dic .cart{width:1.35em; height:1.35em; vertical-align:-.3em}
 #screen-garden .dic.mut{filter:drop-shadow(0 0 4px rgba(178,124,232,.9))}
 #screen-garden .dic.sup{filter:drop-shadow(0 0 3px #fff) drop-shadow(0 0 6px rgba(255,200,80,.95)) drop-shadow(0 0 9px rgba(255,140,220,.7))}
-#screen-garden .dgrade{font-size:.8rem; padding:.05rem .45rem; border-radius:999px; background:#f1e8d4; color:#6b604e; cursor:pointer; white-space:nowrap}
+#screen-garden .dgrade{display:inline-flex; align-items:center; justify-content:space-between; gap:.3rem; min-width:9.5em; font-size:.8rem; padding:.1rem .5rem; border-radius:999px; background:#f1e8d4; color:#6b604e; cursor:pointer; white-space:nowrap; vertical-align:.08em}   /* 名前の前に、同じ幅で置く(段階で名前の長さが変わっても、押す場所が動かない) */
+#screen-garden .dgrade i{font-style:normal; opacity:.7}
 #screen-garden .dgrade.mut{background:#efe3ff; color:#7a3fc0}
 #screen-garden .dgrade.sup{background:linear-gradient(90deg,#fff1b8,#ffe0f2,#dff2ff); color:#a8701c}
 #screen-garden .dlack{color:#c0392b}
@@ -2565,9 +2566,12 @@ html.mobile #screen-garden .tbtn{padding:.5rem .7rem; font-size:.88rem}
 html.mobile #screen-garden .bar-row{gap:.4rem; margin-bottom:.6rem}
 html.mobile #screen-garden .slot{padding:.4rem .55rem; font-size:.88rem; gap:.3rem; min-height:2.8rem}
 html.mobile #screen-garden .seedsel .arr{
-  visibility:visible; font-size:1rem; padding:.35rem .5rem; margin:-.35rem 0;
+  visibility:visible; font-size:1.1rem; padding:.5rem .75rem; margin:-.45rem 0; min-width:2.4rem; text-align:center;
   border-radius:6px; background:rgba(0,0,0,.06); color:var(--ink);
 }
+html.mobile #screen-garden .seedsel{flex:1; min-width:0}   /* ◀ ▶ を左右の端に置き、名前の長さで押す場所が動かないように */
+html.mobile #screen-garden .seedsel .arr:first-child{margin-right:auto}
+html.mobile #screen-garden .seedsel .arr:last-child{margin-left:auto}
 html.mobile #screen-garden .fieldsel{gap:.35rem; padding:.3rem .5rem}
 html.mobile #screen-garden .fieldsel .fbtn{
   font-size:1rem; padding:.35rem .6rem; border-radius:6px; background:rgba(0,0,0,.08); color:var(--ink); cursor:pointer;
@@ -12987,7 +12991,7 @@ function cvRowsOf(){
     const on=ac.some(a=>a.id===d.id && a.g===g), others=ac.filter(a=>a.id===d.id && a.g!==g).map(a=>gradeName(a.g));
     const made=!!(S.dishMade[d.id]||{})[bookKeyOf(g)], seen=!isMutT(g)||made;
     return { d, g, on, ic:`<span class="dic${g===5?" sup":g===3?" mut":""}">${made?dishIco(d,g):"❔"}</span>`,
-      nm:`${seen?esc(dishName(d,g)):`？？？(${esc(d.name)}の${gradeName(g)})`} <span class="dgrade${g===3?" mut":g===5?" sup":""}">◀ ${gradeName(g)} ▶</span>${on?' <small class="dauto">🧑‍🍳 任せている</small>':""}`,
+      nm:`<span class="dgrade${g===3?" mut":g===5?" sup":""}"><i>◀</i>${gradeName(g)}<i>▶</i></span> ${seen?esc(dishName(d,g)):`？？？(${esc(d.name)}の${gradeName(g)})`}${on?' <small class="dauto">🧑‍🍳 任せている</small>':""}`,
       ds:`効果: ${effLine(d,g)} ・ 作り置き ×${fmtNum((S.dishes[d.id]||{})[g]||0)}${others.length?` ・ ${others.join("・")}も任せています`:""}`,
       keys:`<b>Enter</b> ${on?"任せるのをやめる":"任せる"}` };
   });
@@ -13839,7 +13843,7 @@ function cookRowsOf(){
       const made=!!(S.dishMade[d.id]||{})[bookKeyOf(g)];   // 絵は、その段階を一度作るまで伏せる
       const seen=!isMutT(g) || made;                        // 変異・超変異の料理は、名前も伏せる
       rows.push({ d, ic:`<span class="dic${g===5?" sup":g===3?" mut":""}">${made?dishIco(d,g):"❔"}</span>`,
-        nm:`${starHtml("d",d.id)}${seen?esc(dishName(d,g)):`？？？(${esc(d.name)}の${gradeName(g)})`} <span class="dgrade${g===3?" mut":g===5?" sup":""}">◀ ${gl}${instantEff(d.eff)?"":`(${fmtMin(min)})`} ▶</span>${ac?' <small class="dauto">🧑‍🍳 料理番</small>':""}`,
+        nm:`<span class="dgrade${g===3?" mut":g===5?" sup":""}"><i>◀</i>${gl}${instantEff(d.eff)?"":`(${fmtMin(min)})`}<i>▶</i></span> ${starHtml("d",d.id)}${seen?esc(dishName(d,g)):`？？？(${esc(d.name)}の${gradeName(g)})`}${ac?' <small class="dauto">🧑‍🍳 料理番</small>':""}`,
         ds:`効果: ${effLine(d,plan?plan.grade:g)} ・ 作り置き ×${fmtNum((S.dishes[d.id]||{})[plan?plan.grade:g]||0)}<br>材料(持っている/要る): ${ingHaveText(d.ing,g)}${plan?"":` <b class="dlack">(材料が足りません)</b>`}`,
         keys: [plan?"<b>Enter</b> 1つ作る<br><b>Shift+Enter</b> 作れるだけ":"", kitN("cookvil")>0?`<b>A</b> ${ac?"料理番をやめる":"料理番に任せる"}`:""].filter(Boolean).join("<br>"),
         locked:!plan, enter:()=>cookMake(d.id,1), shift:()=>cookMake(d.id,99), left:()=>cookStep(d.id,-1), right:()=>cookStep(d.id,1), auto:()=>toggleAutoCook(d.id,g) });
@@ -13852,7 +13856,7 @@ function cookRowsOf(){
       const g=eatGrade[d.id], n=st[g];
       const step=dir=>{ eatGrade[d.id]=gs[(gs.indexOf(g)+dir+gs.length)%gs.length]; sfx.tab(); renderCook(); };
       rows.push({ d, ic:`<span class="dic${g===5?" sup":g===3?" mut":""}">${dishIco(d,g)}</span>`,
-        nm:`${starHtml("d",d.id)}${esc(dishName(d,g))} <span class="dgrade${g===3?" mut":g===5?" sup":""}">◀ ${gradeName(g)} ×${fmtNum(n)} ▶</span>${gs.length>1?` <small class="dhave">ほかに ${gs.filter(x=>x!==g).map(x=>`${gradeName(x)}×${st[x]}`).join("・")}</small>`:""}`,
+        nm:`<span class="dgrade${g===3?" mut":g===5?" sup":""}"><i>◀</i>${gradeName(g)} ×${fmtNum(n)}<i>▶</i></span> ${starHtml("d",d.id)}${esc(dishName(d,g))}${gs.length>1?` <small class="dhave">ほかに ${gs.filter(x=>x!==g).map(x=>`${gradeName(x)}×${st[x]}`).join("・")}</small>`:""}`,
         ds: `${effLine(d,g)}${instantEff(d.eff)?"":`(${fmtMin(dishMinOf(d,g))})`}`,
         keys:"<b>Enter</b> 食べる", enter:()=>cookEat(d.id,g), shift:()=>cookEat(d.id,g), left:()=>step(-1), right:()=>step(1) });
     }
