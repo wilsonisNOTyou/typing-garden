@@ -1536,7 +1536,18 @@ body.garden.barag{background:radial-gradient(ellipse at 50% 120%, rgba(200,30,62
 #screen-garden .card h3{font-size:.85rem; color:var(--ink-l); font-weight:700; margin-bottom:.35rem}
 #screen-garden #g-info .big{font-weight:800; font-size:1.1rem}
 #screen-garden #g-info .sub{color:var(--ink-l); font-size:.9rem; margin-top:.2rem; line-height:1.6}
-#screen-garden #g-basket{display:flex; flex-wrap:wrap; gap:.4rem}
+#screen-garden #g-basket{display:flex; flex-wrap:wrap; gap:.4rem; align-items:flex-start}
+#screen-garden .bcard{display:inline-flex; flex-direction:column; gap:.15rem; background:#fff; border-radius:10px; padding:.25rem .55rem .3rem; font-weight:700; font-size:.88rem; box-shadow:inset 0 0 0 1.5px #e6d8bd}
+#screen-garden .bcard.q3{box-shadow:inset 0 0 0 2px #b27ce8}
+#screen-garden .bcard.q5{box-shadow:inset 0 0 0 2px #e0a020, 0 0 8px rgba(255,200,80,.6)}
+#screen-garden .bcard .bhd b{color:#7a5230; margin-left:.15rem}
+#screen-garden .bcard .bqs{display:flex; flex-wrap:wrap; gap:.2rem}
+#screen-garden .bcard .bq{font-style:normal; font-size:.7rem; font-weight:700; padding:0 .35rem; border-radius:999px; background:#f1e8d4; color:#6b604e; white-space:nowrap}
+#screen-garden .bcard .bq.q1, #screen-garden .bcard .bq.q2, #screen-garden .bcard .bq.q4{background:#fff3c8; color:#8a6a10}
+#screen-garden .bcard .bq.q3{background:#efe3ff; color:#7a3fc0}
+#screen-garden .bcard .bq.q5{background:linear-gradient(90deg,#fff1b8,#ffe0f2,#dff2ff); color:#a8701c}
+#screen-garden .bcard .bq .cart svg{width:1em; height:1em; vertical-align:-.15em}
+#screen-garden .bmore{align-self:center; font-size:.8rem; padding:.25rem .7rem}
 #screen-garden .chip{background:#fff; border-radius:999px; padding:.2rem .6rem; font-weight:700; font-size:.92rem}
 #screen-garden .empty{color:var(--ink-l); font-size:.9rem}
 #screen-garden .help{margin-top:1rem; color:var(--ink-l); font-size:.82rem; line-height:1.8; text-align:center}
@@ -2371,8 +2382,10 @@ html.mobile #screen-garden .planter.gxhedge::after{inset:-12px; padding:10px; ba
 #screen-garden .dic .cart{width:1.35em; height:1.35em; vertical-align:-.3em}
 #screen-garden .dic.mut{filter:drop-shadow(0 0 4px rgba(178,124,232,.9))}
 #screen-garden .dic.sup{filter:drop-shadow(0 0 3px #fff) drop-shadow(0 0 6px rgba(255,200,80,.95)) drop-shadow(0 0 9px rgba(255,140,220,.7))}
-#screen-garden .dgrade{display:inline-flex; align-items:center; justify-content:space-between; gap:.3rem; min-width:9.5em; font-size:.8rem; padding:.1rem .5rem; border-radius:999px; background:#f1e8d4; color:#6b604e; cursor:pointer; white-space:nowrap; vertical-align:.08em}   /* 名前の前に、同じ幅で置く(段階で名前の長さが変わっても、押す場所が動かない) */
+#screen-garden .dgrade{display:inline-flex; align-items:center; justify-content:space-between; gap:.3rem; min-width:9.5em; font-size:.8rem; padding:.1rem .5rem; border-radius:999px; background:#f1e8d4; color:#6b604e; cursor:pointer; white-space:nowrap; vertical-align:.08em}   /* 同じ幅で置く(段階で長さが変わっても、押す場所が動かない) */
 #screen-garden .dgrade i{font-style:normal; opacity:.7}
+#screen-garden .dnm{display:inline-block}
+html.mobile #screen-garden .dnm{min-width:0 !important; display:inline}   /* スマホは幅が足りないので、そろえない */
 #screen-garden .dgrade.mut{background:#efe3ff; color:#7a3fc0}
 #screen-garden .dgrade.sup{background:linear-gradient(90deg,#fff1b8,#ffe0f2,#dff2ff); color:#a8701c}
 #screen-garden .dlack{color:#c0392b}
@@ -10054,7 +10067,16 @@ const sfx={
 /* ---------- 表示用の小道具 ---------- */
 const $=id=>document.getElementById(id);
 const root=$("screen-garden");
-const fmtNum=n=>Math.floor(n).toLocaleString("ja-JP");
+const NUM_UNITS=["","万","億","兆","京","垓","𥝱","穣","溝","澗","正","載","極"];
+/* 1億以上の数を、万・億・兆…の単位で書く。mode 1: 全部(10兆0000億0000万0000) / 2: 上の2つ(10兆0000億) */
+function numJp(str,mode){
+  const neg=str.startsWith("-"), d=neg?str.slice(1):str; if(d.length<=8) return null;
+  const g=[]; for(let i=d.length;i>0;i-=4) g.unshift(d.slice(Math.max(0,i-4),i));
+  const parts=g.map((x,i)=>(i?x:String(+x))+NUM_UNITS[g.length-1-i]), out=mode===2?parts.slice(0,2):parts;
+  return (neg?"-":"")+out.join("");
+}
+const numStr = s => { const m=(typeof S!=="undefined"&&S&&S.numMode)||0; return (m && numJp(s,m)) || BigInt(s).toLocaleString("ja-JP"); };
+const fmtNum=n=>{ const v=Math.floor(n); if(!((typeof S!=="undefined")&&S&&S.numMode) || Math.abs(v)<1e8 || !isFinite(v)) return v.toLocaleString("ja-JP"); try{ return numStr(BigInt(v).toString()); }catch(e){ return v.toLocaleString("ja-JP"); } };
 /* 9000兆を超えても1の位まで数える(キー・薔薇ガチャコイン・種)。
    ふつうの数は9000兆を超えると細かい桁を持てず、小さい足し引きが丸めで消える。消えた分を S.xc[キー] に「端数」としてためておき、
    たまって本体の刻みを超えたら本体に移す。9000兆より小さいあいだは、端数はいつも 0(これまでと同じ) */
@@ -10077,7 +10099,7 @@ function xAdd(o,k,x,ck=k){
 function xFmt(v,ck){
   const c=(S.xc&&S.xc[ck])||0;
   if(Math.abs(v)<2**53) return fmtNum(v+c);
-  try{ return (BigInt(Math.floor(v))+BigInt(Math.round(c))).toLocaleString("ja-JP"); }catch(e){ return fmtNum(v+c); }
+  try{ return numStr((BigInt(Math.floor(v))+BigInt(Math.round(c))).toString()); }catch(e){ return fmtNum(v+c); }
 }
 const xBig = (v,ck) => BigInt(Math.floor(v||0))+BigInt(Math.round((S.xc&&S.xc[ck])||0));   // 端数まで入れた正確な数
 function xAddBig(o,k,b,ck=k){ const hi=Number(b); xAdd(o,k,hi,ck); xAdd(o,k,Number(b-BigInt(hi)),ck); }   // 正確な数を足す(本体に入るぶんと、その残り)
@@ -10345,22 +10367,33 @@ function renderInfo(){
   $("g-infoBig").innerHTML=big;
   $("g-infoSub").innerHTML=sub.join("<br>");
 }
+/* 料理名の欄の幅: その料理の段階ごとに出る名前(まだ作っていない段階は「？？？(〇〇の変異)」)のいちばん長いもの */
+const dnW = d => Math.max(12, ...gradesOf(d).map(g=>(!isMutT(g) || (S.dishMade[d.id]||{})[bookKeyOf(g)]) ? dishName(d,g).length : d.name.length+7));   // 12文字ぶんを基本に、長い名前の料理だけ広げる(段階を変えても、切りかえの位置が動かない)
 /* 収穫かご: S.inv[id] = [ふつう, ☆, ☆☆] */
 const invN = (id,t) => (S.inv[id]&&S.inv[id][t])||0;
 const invAdd = (id,t,n) => { S.inv[id]=S.inv[id]||[0,0,0]; S.inv[id][t]=(S.inv[id][t]||0)+n; };
 const invTotal = () => { let n=0,v=0; for(const c of CROPS.concat(ROSE_ALL)) for(const t of TIERS){ const m=invN(c.id,t); n+=m; v+=m*priceOf(c.id,t); } return {n,v}; };
+let basketOpen=false;   // 収穫かごを全部見せているか
+const BASKET_SHOW=12;    // たたんでいるときに見せる枚数
 function renderBasket(){
-  const out=[];
-  for(const c of CROPS.concat(ROSE_ALL)) for(const t of QORDER){   // ふつう → ☆ → ☆☆ → ☆☆☆ → 変異 → 超変異
-    const n=invN(c.id,t); if(n<=0) continue;
-    out.push(`<span class="chip${t?" q"+t:""}">${icoQ(c,t)} ${esc(qName(c.id,t))} ×${fmtNum(n)}</span>`);
+  const cards=[];
+  for(const c of CROPS.concat(ROSE_ALL)){   // 作物ごとに1枚: 合計と、ふつう → ☆ → ☆☆ → ☆☆☆ → 変異 → 超変異 の数
+    const qs=QORDER.map(t=>[t,invN(c.id,t)]).filter(([,n])=>n>0); if(!qs.length) continue;
+    const tot=qs.reduce((a,[,n])=>a+n,0), top=Math.max(...qs.map(([t])=>t===4?2.5:t));
+    const pills=qs.map(([t,n])=>`<i class="bq q${t}" title="${esc(qName(c.id,t))}">${t===3||t===5?icoQ(c,t):(QUALITY[t].mark||"ふつう")}${fmtNum(n)}</i>`).join("");
+    cards.push({ n:tot, h:`<span class="bcard${qs.some(([t])=>t===5)?" q5":qs.some(([t])=>t===3)?" q3":""}" data-b="${c.id}"><span class="bhd">${ico(c)} ${esc(c.rose?qName(c.id,0):c.name)} <b>${fmtNum(tot)}</b></span><span class="bqs">${pills}</span></span>` });
   }
-  for(const f of FOODS){
-    const n=foodN(f.id); if(n<=0) continue;
-    out.push(`<span class="chip food${f.up?" up":""}">${ico(f)} ${esc(f.name)} ×${fmtNum(n)}</span>`);
+  for(const f of FOODS){   // 食材: ふつうと上位種を1枚に
+    if(f.up) continue;
+    const u=upOf(f.id), n=foodN(f.id), un=u&&!u.work?foodN(u.id):0; if(n+un<=0) continue;
+    cards.push({ n:n+un, h:`<span class="bcard food${un?" q3":""}" data-b="${f.id}"><span class="bhd">${ico(f)} ${esc(f.name)} <b>${fmtNum(n+un)}</b></span>${un?`<span class="bqs"><i class="bq">ふつう${fmtNum(n)}</i><i class="bq q3">上位${fmtNum(un)}</i></span>`:""}</span>` });
   }
-  patchHTML($("g-basket"), out.length ? out.join("") : `<span class="empty">まだ何もありません。実った作物を${kb("素手(1)","素手")}で収穫しましょう</span>`);   // 変わった品だけ描き直す
+  cards.sort((a,b)=>b.n-a.n);   // 多い順
+  const more=cards.length-BASKET_SHOW, shown=basketOpen||more<=1 ? cards : cards.slice(0,BASKET_SHOW);
+  const html = shown.map(x=>x.h).join("") + (more>1 ? `<button class="sbtn bmore" data-bmore>${basketOpen?"たたむ ▲":`ほかに ${more}種類 ▼`}</button>` : "");
+  patchHTML($("g-basket"), cards.length ? html : `<span class="empty">まだ何もありません。実った作物を${kb("素手(1)","素手")}で収穫しましょう</span>`);   // 変わった品だけ描き直す
 }
+$("g-basket").addEventListener("click",e=>{ if(e.target.closest("[data-bmore]")){ basketOpen=!basketOpen; renderBasket(); } });
 /* 手持ちの種・設置物(1つ以上あるもの) */
 /* 種の並びは売値の安い順(貴重品の種は最後)。◀ ▶ もこの順に動く */
 const seedRank = id => { const c=CROP[id]; return !c ? 0 : (c.treasure ? Infinity : c.price); };
@@ -10727,6 +10760,15 @@ function openLayout(){ if(S.layoutOwned && S.layoutOff) return;   // 使って�
 /* 畑の並べ替え */
 const FSORT_PRICE=1000000;
 let fsCur=0, fsFlash=null;   // fsFlash: 動かしたばかりの行(光らせる)
+const SOROBAN_PRICE=10000000;
+function buySoroban(){
+  if(S.soroban) return;
+  if(!spend(SOROBAN_PRICE)) return;
+  S.soroban=true; S.numMode=1;
+  toast("🧮 そろばんを買いました。大きな数を、万・億・兆で区切って出します(お店の効率化で切りかえ)","good",4200);
+  save(); renderAll();
+}
+function numModeStep(d){ S.numMode=((S.numMode||0)+d+3)%3; sfx.tab(); save(); renderAll(); }
 function buyFsort(){
   if(S.fsortOwned) return;
   if(!spend(FSORT_PRICE)) return;
@@ -11088,6 +11130,16 @@ function shopRows(){
         keys:"<b>Enter</b> 買う", enter:buyLayout, shift:buyLayout });
       else rows.push({ ic:"🗂️", nm:`配置セット <span style="color:var(--ink-l)">${S.layoutOff?"使っていない":"使っている"}</span>`,
         ds:S.layoutOff?"使わないあいだは、上のボタンと / キーが出ません。保存したセットは消えません":"農園で / を押すか、上のボタンで開きます", keys:`<b>Enter</b> ${S.layoutOff?"使う":"使わない"}`, enter:()=>{ S.layoutOff=!S.layoutOff; sfx.tab(); save(); renderAll(); }, shift:()=>{} });
+    }
+    // そろばん: 大きな数の書き方を切りかえる
+    if(S.money>=1e8 || S.soroban){
+      const ex=["10,000,000,000,000","10兆0000億0000万0000","10兆0000億"];
+      if(!S.soroban) rows.push({ ic:"🧮", nm:`そろばん <span style="color:var(--ink-l)">${fmtNum(SOROBAN_PRICE)}キー</span>`,
+        ds:`大きな数の書き方を切りかえられるようになります。「${ex[1]}」のように万・億・兆で区切ったり、「${ex[2]}」のように短くしたりできます`,
+        keys:"<b>Enter</b> 買う", enter:buySoroban, shift:buySoroban });
+      else rows.push({ ic:"🧮", nm:`そろばん <span style="color:var(--ink-l)">${["そのまま","万・億・兆で区切る","短く"][S.numMode||0]}</span>`,
+        ds:`大きな数の書き方 ・ 今は「${ex[S.numMode||0]}」のように出します`,
+        keys:"<b>Enter</b> 書き方を切りかえ", enter:()=>numModeStep(1), shift:()=>numModeStep(-1) });
     }
     // 畑の並べ替え: 畑の順番を入れかえる(大木や薔薇の畑を好きな番号に)
     if(FS().length>=2){
@@ -12991,7 +13043,7 @@ function cvRowsOf(){
     const on=ac.some(a=>a.id===d.id && a.g===g), others=ac.filter(a=>a.id===d.id && a.g!==g).map(a=>gradeName(a.g));
     const made=!!(S.dishMade[d.id]||{})[bookKeyOf(g)], seen=!isMutT(g)||made;
     return { d, g, on, ic:`<span class="dic${g===5?" sup":g===3?" mut":""}">${made?dishIco(d,g):"❔"}</span>`,
-      nm:`<span class="dgrade${g===3?" mut":g===5?" sup":""}"><i>◀</i>${gradeName(g)}<i>▶</i></span> ${seen?esc(dishName(d,g)):`？？？(${esc(d.name)}の${gradeName(g)})`}${on?' <small class="dauto">🧑‍🍳 任せている</small>':""}`,
+      nm:`<span class="dnm" style="min-width:${dnW(d)}em">${seen?esc(dishName(d,g)):`？？？(${esc(d.name)}の${gradeName(g)})`}</span> <span class="dgrade${g===3?" mut":g===5?" sup":""}"><i>◀</i>${gradeName(g)}<i>▶</i></span>${on?' <small class="dauto">🧑‍🍳 任せている</small>':""}`,
       ds:`効果: ${effLine(d,g)} ・ 作り置き ×${fmtNum((S.dishes[d.id]||{})[g]||0)}${others.length?` ・ ${others.join("・")}も任せています`:""}`,
       keys:`<b>Enter</b> ${on?"任せるのをやめる":"任せる"}` };
   });
@@ -13843,7 +13895,7 @@ function cookRowsOf(){
       const made=!!(S.dishMade[d.id]||{})[bookKeyOf(g)];   // 絵は、その段階を一度作るまで伏せる
       const seen=!isMutT(g) || made;                        // 変異・超変異の料理は、名前も伏せる
       rows.push({ d, ic:`<span class="dic${g===5?" sup":g===3?" mut":""}">${made?dishIco(d,g):"❔"}</span>`,
-        nm:`<span class="dgrade${g===3?" mut":g===5?" sup":""}"><i>◀</i>${gl}${instantEff(d.eff)?"":`(${fmtMin(min)})`}<i>▶</i></span> ${starHtml("d",d.id)}${seen?esc(dishName(d,g)):`？？？(${esc(d.name)}の${gradeName(g)})`}${ac?' <small class="dauto">🧑‍🍳 料理番</small>':""}`,
+        nm:`${starHtml("d",d.id)}<span class="dnm" style="min-width:${dnW(d)}em">${seen?esc(dishName(d,g)):`？？？(${esc(d.name)}の${gradeName(g)})`}</span> <span class="dgrade${g===3?" mut":g===5?" sup":""}"><i>◀</i>${gl}${instantEff(d.eff)?"":`(${fmtMin(min)})`}<i>▶</i></span>${ac?' <small class="dauto">🧑‍🍳 料理番</small>':""}`,
         ds:`効果: ${effLine(d,plan?plan.grade:g)} ・ 作り置き ×${fmtNum((S.dishes[d.id]||{})[plan?plan.grade:g]||0)}<br>材料(持っている/要る): ${ingHaveText(d.ing,g)}${plan?"":` <b class="dlack">(材料が足りません)</b>`}`,
         keys: [plan?"<b>Enter</b> 1つ作る<br><b>Shift+Enter</b> 作れるだけ":"", kitN("cookvil")>0?`<b>A</b> ${ac?"料理番をやめる":"料理番に任せる"}`:""].filter(Boolean).join("<br>"),
         locked:!plan, enter:()=>cookMake(d.id,1), shift:()=>cookMake(d.id,99), left:()=>cookStep(d.id,-1), right:()=>cookStep(d.id,1), auto:()=>toggleAutoCook(d.id,g) });
@@ -13856,7 +13908,7 @@ function cookRowsOf(){
       const g=eatGrade[d.id], n=st[g];
       const step=dir=>{ eatGrade[d.id]=gs[(gs.indexOf(g)+dir+gs.length)%gs.length]; sfx.tab(); renderCook(); };
       rows.push({ d, ic:`<span class="dic${g===5?" sup":g===3?" mut":""}">${dishIco(d,g)}</span>`,
-        nm:`<span class="dgrade${g===3?" mut":g===5?" sup":""}"><i>◀</i>${gradeName(g)} ×${fmtNum(n)}<i>▶</i></span> ${starHtml("d",d.id)}${esc(dishName(d,g))}${gs.length>1?` <small class="dhave">ほかに ${gs.filter(x=>x!==g).map(x=>`${gradeName(x)}×${st[x]}`).join("・")}</small>`:""}`,
+        nm:`${starHtml("d",d.id)}<span class="dnm" style="min-width:${dnW(d)}em">${esc(dishName(d,g))}</span> <span class="dgrade${g===3?" mut":g===5?" sup":""}"><i>◀</i>${gradeName(g)} ×${fmtNum(n)}<i>▶</i></span>${gs.length>1?` <small class="dhave">ほかに ${gs.filter(x=>x!==g).map(x=>`${gradeName(x)}×${st[x]}`).join("・")}</small>`:""}`,
         ds: `${effLine(d,g)}${instantEff(d.eff)?"":`(${fmtMin(dishMinOf(d,g))})`}`,
         keys:"<b>Enter</b> 食べる", enter:()=>cookEat(d.id,g), shift:()=>cookEat(d.id,g), left:()=>step(-1), right:()=>step(1) });
     }
