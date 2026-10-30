@@ -1613,6 +1613,17 @@ html:not(.mobile) #screen-garden:has(.modal.open) .toast{font-size:.78rem; paddi
 #screen-garden .slot.on .seedsel .arr.none{visibility:hidden}
 #screen-garden .plist{max-height:52vh; overflow:auto; padding-right:.2rem}
 #screen-garden .rowi{border-radius:8px; border-bottom:1px dashed #d9ccb0}
+/* お店の自動売却: 作物を小さなマスで並べる */
+#screen-garden .acgrid{display:grid; grid-template-columns:repeat(auto-fill,minmax(9.5rem,1fr)); gap:.4rem; padding:.45rem 0}
+#screen-garden .rowi.acell{display:flex; flex-direction:column; align-items:flex-start; gap:.2rem; padding:.4rem .5rem; border:1px solid #e3d8bf; border-radius:8px; min-width:0}
+#screen-garden .acell .acth{display:flex; align-items:center; gap:.35rem; font-weight:700; min-width:0; max-width:100%}
+#screen-garden .acell .acth .ic{font-size:1.15rem; width:auto; flex:none}
+#screen-garden .acell .acnm{overflow:hidden; text-overflow:ellipsis; white-space:nowrap}
+#screen-garden .acell .acsub{font-size:.74rem; color:var(--ink-l)}
+#screen-garden .acell .acchips{display:flex; gap:.3rem; flex-wrap:wrap}
+#screen-garden .acell .acchip{font:inherit; font-size:.72rem; padding:.12rem .5rem; border-radius:999px; border:1px solid #c9b98f; background:#f4ecd8; color:var(--ink-l); cursor:pointer}
+#screen-garden .acell .acchip.on{background:#dff0d0; border-color:#5f8f32; color:#2e6b18; font-weight:700}
+#screen-garden .acell .acchip.buy{background:var(--sun); border-color:#a8801c; color:#3a2a08; font-weight:700}
 #screen-garden .rowi.cur{
   background:#fff; border-bottom-color:transparent;
   box-shadow:0 0 0 3px var(--sun), 0 3px 0 3px #a8801c;
@@ -2565,6 +2576,7 @@ html.mobile #screen-garden .phead h2{font-size:1.15rem}
 html.mobile #screen-garden .tabs{flex-wrap:wrap}
 html.mobile #screen-garden .tabs::before, html.mobile #screen-garden .tabs::after{display:none}
 html.mobile #screen-garden .tab{flex:1; padding:.55rem .4rem; font-size:.9rem}
+html.mobile #g-shopTabs .tab{flex:1 1 30%; padding:.45rem .3rem}   /* お店はタブが6つなので、3つずつ2段に */
 html.mobile #screen-garden .plist{max-height:none; flex:1; min-height:0}
 html.mobile #screen-garden .gbody-scroll{max-height:none; flex:1; min-height:0}
 html.mobile #screen-garden .rowi .keyk{white-space:normal}
@@ -3136,8 +3148,8 @@ html.mobile #screen-garden .grk-list{max-height:none; flex:1 1 auto; min-height:
     <div class="top">
       <div class="sign">キーボード農園</div>
       <div class="money"><span class="kicon"></span><span id="g-money">0</span><small>キー</small></div>
-      <div class="rate" id="g-rate"></div>
       <div class="buff" id="g-buff" hidden></div>
+      <div class="rate" id="g-rate"></div>
       <div class="wcmini" id="wcMini" hidden></div>
       <div class="sp"></div>
       <button class="tbtn shop" id="g-shopBtn">お店<span class="kb">Tab</span></button>
@@ -3211,6 +3223,7 @@ html.mobile #screen-garden .grk-list{max-height:none; flex:1 1 auto; min-height:
         <button class="tab" data-tab="0">種</button>
         <button class="tab" data-tab="1">道具・土地</button>
         <button class="tab" data-tab="2">効率化</button>
+        <button class="tab" data-tab="5">自動売却</button>
         <button class="tab" data-tab="4">レシピ</button>
         <button class="tab" data-tab="3">売る</button>
       </div>
@@ -10784,9 +10797,9 @@ function keepVisible(listEl){
 
 /* ---------- お店(キーボード操作) ----------
    ← → タブ / ↑ ↓ 品物 / Enter 1つ買う・1つ売る / Shift+Enter 10買う・全部売る / A すべて売る */
-const SHOP_TABS=["種","道具・土地","効率化","売る","レシピ"];
-const SHOP_ORDER=[0,1,2,4,3];   // 画面での並び: 種 / 道具・土地 / 効率化 / レシピ / 売る
-let shopTab=0, shopCur=[0,0,0,0,0];   // タブごとの選択位置(種・道具・効率化・売る・レシピ)
+const SHOP_TABS=["種","道具・土地","効率化","売る","レシピ","自動売却"];
+const SHOP_ORDER=[0,1,2,5,4,3];   // 画面での並び: 種 / 道具・土地 / 効率化 / 自動売却 / レシピ / 売る
+let shopTab=0, shopCur=[0,0,0,0,0,0];   // タブごとの選択位置(種・道具・効率化・売る・レシピ・自動売却)
 function shopRows(){
   const rows=[];
   const money=S.money;
@@ -10866,13 +10879,14 @@ function shopRows(){
         : (S.got.deed||0)>0 ? `土地の権利書があると、もう1枚買えます(今は ${nf}枚)`
         : `お店で買える畑はここまでです(今は ${nf}枚)`,   // 権利書はシークレット: 1枚も手に入れていなければ書かない
       keys: can?"<b>Enter</b> 買う":"", enter:()=>can&&buyField(), shift:()=>can&&buyField() });
-  }else if(shopTab===2){
-    // 効率化: 作物ごとの自動売却(自動売却の値段の安い順。同じ値段なら作物の売値の安い順)
+  }else if(shopTab===5){
+    autoSumRows(rows);   // まとめて買う・まとめて切りかえ
+    // 自動売却: 作物ごとに小さなマスで並べる(自動売却の値段の安い順。同じ値段なら作物の売値の安い順)
     for(const c of CROPS.filter(c=>!c.treasure).sort((a,b)=>autoCost(a.id)-autoCost(b.id) || a.price-b.price)){
       const a=autoOf(c.id);
       const seen=(S.harvestBy[c.id]||0)>0;   // 一度も収穫していない作物は名前を伏せる
       if(!seen){
-        rows.push({ locked:true, ic:"❔", nm:"？？？の自動売却",
+        rows.push({ cell:true, cnm:"？？？", sub:"一度収穫すると出ます", locked:true, ic:"❔", nm:"？？？の自動売却",
           ds:"この作物を一度収穫すると、ここに表示されます",
           keys:"", enter:()=>{}, shift:()=>{} });
         continue;
@@ -10880,7 +10894,11 @@ function shopRows(){
       const ready=tierOf(c.id)>=2;   // ☆☆ まで育てた作物だけが解禁される
       const left=Math.max(0, QUALITY[2].need-(S.harvestBy[c.id]||0));
       const on=v=>v?'<b style="color:#2e7d32">オン</b>':'<span style="color:var(--ink-l)">オフ</span>';
+      const chip=(w,nm)=>`<button class="acchip${a[w]?" on":""}" data-act="${w==="c"?"enter":"shift"}">${nm} ${a[w]?"オン":"オフ"}</button>`;
       rows.push({
+        cell:true, cnm:esc(c.name),
+        sub: a ? "" : ready ? `${fmtNum(autoCost(c.id))}キー` : `${QUALITY[2].mark} まで あと${fmtNum(left)}個`,
+        chips: a ? `<div class="acchips">${chip("c","収穫物")}${chip("s","種")}</div>` : ready ? `<div class="acchips"><button class="acchip buy" data-act="enter">買う</button></div>` : "",
         locked: !a && !ready,
         ic: ico(c),
         nm: a?`${c.name}の自動売却 <span style="color:var(--ink-l)">購入済み</span>`
@@ -10894,6 +10912,7 @@ function shopRows(){
         shift: ()=>a?toggleAuto(c.id,"s"):(ready&&buyAuto(c.id)),
       });
     }
+  }else if(shopTab===2){
     // 貴重品の種の自動売却(貴重品をはじめて手に入れてから並べる)と、仕分け帳
     if(treasSeen()){
       const st=S.treasSell||0;
@@ -11031,10 +11050,13 @@ function renderShop(){
   if(!rows.length){
     body.phtml=`<p class="empty" style="padding:1rem .4rem">売れるものがありません。実った作物を${kb("素手(1)","素手")}で収穫してから来てください(余った種もここで売れます)。</p>`;
   }else{
-    body.phtml=rows.map((r,i)=>`<div class="rowi ${r.locked?"locked":""} ${i===cur?"cur":""}" data-i="${i}">
+    const cells=rows.some(r=>r.cell);
+    body.phtml=rows.map((r,i)=>r.cell ? "" : `<div class="rowi ${r.locked?"locked":""} ${i===cur?"cur":""}" data-i="${i}">
       <div class="ic">${r.ic}</div>
       <div><div class="nm">${r.nm}</div><div class="ds">${r.ds}</div></div>
-      <div class="keyk">${window.IS_MOBILE ? (r.locked?"":shopActBtns(r.keys)) : (i===cur?r.keys:"")}</div></div>`).join("");
+      <div class="keyk">${window.IS_MOBILE ? (r.locked?"":shopActBtns(r.keys)) : (i===cur?r.keys:"")}</div></div>`).join("")
+      + (cells ? `<div class="acgrid">${rows.map((r,i)=>!r.cell ? "" : `<div class="rowi acell ${r.locked?"locked":""} ${i===cur?"cur":""}" data-i="${i}">
+      <div class="acth"><span class="ic">${r.ic}</span><span class="acnm">${r.cnm}</span></div>${r.sub?`<div class="acsub">${r.sub}</div>`:""}${r.chips||""}</div>`).join("")}</div>` : "");
   }
   const total=invTotal().v;
   if(window.IS_MOBILE){
@@ -11149,6 +11171,32 @@ function buyVilUp(){
   S.vilLv=(S.vilLv||0)+1;
   toast(`✨ 元気の種を使いました。村人は ${ico(CROP[next])}${esc(CROP[next].name)} を育てるようになります`,"good",4600,true);
   sfx.vil();
+  save(); renderAll();
+}
+/* 自動売却のタブの上: 解禁した分をまとめて買う / 収穫物・種をまとめてオンオフ */
+function autoSumRows(rows){
+  const seen=CROPS.filter(c=>!c.treasure && (S.harvestBy[c.id]||0)>0);
+  const canBuy=seen.filter(c=>!S.auto[c.id] && tierOf(c.id)>=2).sort((a,b)=>autoCost(a.id)-autoCost(b.id));
+  const sum=canBuy.reduce((a,c)=>a+autoCost(c.id),0), own=seen.filter(c=>S.auto[c.id]);
+  rows.push({ ic:"🛒", locked:!canBuy.length,
+    nm:`解禁した自動売却をまとめて買う <span style="color:var(--ink-l)">${canBuy.length?`${canBuy.length}種類 ・ ${fmtNum(sum)}キー`:"買えるものはありません"}</span>`,
+    ds:"安いものから、キーが足りるところまで買います。買ったものは、収穫物も種もオンになります",
+    keys: canBuy.length?"<b>Enter</b> まとめて買う":"", enter:()=>buyAutoAll(canBuy), shift:()=>buyAutoAll(canBuy) });
+  for(const [w,nm] of [["c","収穫物"],["s","ガチャで出た種"]]) rows.push({ ic:w==="c"?"🧺":"🌱", locked:!own.length,
+    nm:`${nm}の自動売却をまとめて切りかえ`,
+    ds:`買ってある${own.length}種類の、${nm}の自動売却をまとめてオンかオフにします`,
+    keys: own.length?"<b>Enter</b> 全部オン<br><b>Shift+Enter</b> 全部オフ":"", enter:()=>setAutoAll(w,true), shift:()=>setAutoAll(w,false) });
+}
+function buyAutoAll(list){
+  let n=0, cost=0;
+  for(const c of list){ const p=autoCost(c.id); if(S.money<p) break; xAdd(S,"money",-p); S.auto[c.id]={c:true,s:true}; n++; cost+=p; }
+  if(!n){ sfx.nope(); toast("キーが足りません","warn"); return; }
+  sfx.buy(); toast(`自動売却を ${n}種類 まとめて買いました(${fmtNum(cost)}キー)${n<list.length?` ・ キーが足りず、あと${list.length-n}種類`:""}`,"good",4200);
+  save(); renderAll();
+}
+function setAutoAll(w,on){
+  for(const id in S.auto) if(S.auto[id]) S.auto[id][w]=on;
+  sfx.tool(); toast(`${w==="c"?"収穫物":"種"}の自動売却を、すべて${on?"オン":"オフ"}にしました`,"",2600);
   save(); renderAll();
 }
 function buyAuto(id){
