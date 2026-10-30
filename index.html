@@ -1682,6 +1682,8 @@ html:not(.mobile) #screen-garden:has(.modal.open) .toast{font-size:.78rem; paddi
 #screen-garden .modal .panel{cursor:default}
 #screen-garden .noticepanel{max-width:40rem}
 #screen-garden .layoutpanel{width:min(40rem,94vw)}
+#screen-garden #g-fsortList .ic{font-weight:900; color:#7a5230}
+#screen-garden #g-fsortList .fsmv{display:flex; gap:.3rem}
 #screen-garden .lyhint{font-size:.85rem; color:#6b5233; line-height:1.55; margin-bottom:.6rem}
 #screen-garden .lylist{display:flex; flex-direction:column; gap:.45rem}
 #screen-garden .lyslot{display:flex; flex-wrap:wrap; align-items:center; gap:.4rem .6rem; padding:.5rem .7rem; border:2px solid #e2d3b4; border-radius:10px; background:#fffaf0; cursor:pointer}
@@ -2229,6 +2231,8 @@ html.mobile #g-cookShow .csnm{font-size:1.3rem}
 /* ---- 庭: ガチャ画面とアイテムリスト ---- */
 #screen-garden .tbtn.gacha{background:linear-gradient(180deg,#f3e0ff,#e0c2f5); border-color:#8a5ab8; box-shadow:0 3px 0 #8a5ab8}
 #screen-garden .gachapanel{width:min(820px,95vw)}
+#screen-garden .modal, #screen-garden .modal *{overscroll-behavior:contain}   /* 窓の中をスクロールしても、後ろの庭はスクロールしない */
+body:has(#screen-garden .modal.open){overflow:hidden}
 #screen-garden .gbody-scroll{max-height:62vh; overflow:auto; padding-right:.2rem}
 #screen-garden .glist{margin-top:1rem; border-top:1px solid #e3d7bd; padding-top:.7rem}
 #screen-garden .gsec{margin-bottom:.7rem}
@@ -3328,6 +3332,15 @@ html.mobile #screen-garden .grk-list{max-height:none; flex:1 1 auto; min-height:
       <p class="lyhint">すべての畑の、村人と設置物の並びを保存します。読み込むと、まだ育っている作物はそのまま、任された村人の速さで育ってから村人の作物に切り替わります</p>
       <div id="g-layoutList" class="lylist"></div>
       <div class="keyhint"><b>1〜3</b> 選ぶ ・ <b>N</b> 名前を付ける ・ <b>S</b> 今の配置を保存 ・ <b>Enter</b> 読み込む ・ <b>/</b> か <b>Esc</b> 閉じる</div>
+    </div>
+  </div>
+
+  <div class="modal" id="g-fsort">
+    <div class="panel layoutpanel">
+      <div class="phead"><h2>🔀 畑の並べ替え</h2><button class="sbtn xbtn" data-close>閉じる ✕</button></div>
+      <p class="lyhint">畑の順番を入れかえます。植わっている作物・大木・村人・設置物は、畑ごとそのまま動きます。</p>
+      <div id="g-fsortList" class="plist"></div>
+      <div class="keyhint" id="g-fsortHint"></div>
     </div>
   </div>
 
@@ -10692,6 +10705,56 @@ function layoutKey(e){
 }
 function openLayout(){ if(S.layoutOwned && S.layoutOff) return;   // 使っていないときは開かない(保存したセットは残る)
   if(!S.layoutOwned){ sfx.nope(); toast(`配置セットは、お店の「効率化」で買えます`,"warn",3000); return; } openModal("layout"); }
+/* 畑の並べ替え */
+const FSORT_PRICE=1000000;
+let fsCur=0;
+function buyFsort(){
+  if(S.fsortOwned) return;
+  if(!spend(FSORT_PRICE)) return;
+  S.fsortOwned=true;
+  toast("🔀 畑の並べ替えを買いました。お店の効率化から開けます","good",4200);
+  save(); renderAll();
+}
+/* 畑の中身を短く: 大木 → 多い作物3つ → 村人 */
+function fieldBrief(f){
+  const out=[], cnt={};
+  for(const [,t] of btTrees(f)) out.push(`${BTS[t.id].icon}${esc(btName(t))}`);
+  let vil=0;
+  for(const k of KEYS){ const p=f[k]; if(p.vil) vil++; if(p.crop && p.bt==null) cnt[p.crop.id]=(cnt[p.crop.id]||0)+1; }
+  for(const [id,n] of Object.entries(cnt).sort((a,b)=>b[1]-a[1]).slice(0,3)){ const c=CROP[id]; if(c) out.push(`${ico(c)}${esc(c.name)}×${n}`); }
+  if(vil) out.push(`🧑‍🌾村人×${vil}`);
+  return out.length ? out.join(" ・ ") : "何も植えていない";
+}
+function renderFsort(){
+  const F=S.fields; fsCur=Math.max(0,Math.min(fsCur,F.length-1));
+  const M=!!window.IS_MOBILE;
+  $("g-fsortList").innerHTML=F.map((f,i)=>`<div class="rowi ${i===fsCur?"cur":""}" data-i="${i}">
+      <div class="ic">${i+1}</div>
+      <div><div class="nm">畑 ${i+1}${i===S.cur?' <span style="color:var(--ink-l)">今いる畑</span>':""}</div><div class="ds">${fieldBrief(f)}</div></div>
+      <div class="keyk">${M ? `<div class="fsmv"><button class="sbtn" data-mv="-1">▲</button><button class="sbtn" data-mv="1">▼</button></div>` : (i===fsCur?"<b>Shift+↑ ↓</b> 動かす<br><b>Enter</b> この畑へ":"")}</div></div>`).join("");
+  $("g-fsortHint").innerHTML = M ? "▲ ▼ で順番を入れかえます" : "<b>↑ ↓</b> 選ぶ ・ <b>Shift+↑ ↓</b> 選んだ畑を上・下に動かす ・ <b>Enter</b> その畑へ行く ・ <b>Esc</b> お店に戻る";
+  keepVisible($("g-fsortList"));
+}
+function fsMove(dir){
+  if(realFields){ sfx.nope(); toast("はじめてガイドの練習中は並べ替えられません","warn"); return; }
+  const F=S.fields, i=fsCur, j=i+dir; if(j<0 || j>=F.length) return;
+  [F[i],F[j]]=[F[j],F[i]];
+  if(S.cur===i) S.cur=j; else if(S.cur===j) S.cur=i;   // 見ている畑はそのまま
+  for(const L of (S.layouts||[])) if(L && L.f){ [L.f[i],L.f[j]]=[L.f[j],L.f[i]]; }   // 配置セットも畑と一緒に動かす
+  fsCur=j; sfx.tab(); save(); renderAll(); renderFsort();
+}
+function fsKey(e){
+  const k=e.key, n=S.fields.length;
+  if(k==="Escape"){ e.preventDefault(); openModal("shop"); return; }
+  if(k==="ArrowUp"||k==="ArrowDown"){ e.preventDefault(); const d=k==="ArrowDown"?1:-1; if(e.shiftKey) fsMove(d); else { fsCur=(fsCur+d+n)%n; sfx.cursor(); renderSoon(renderFsort); } return; }
+  if(k==="Enter"){ e.preventDefault(); if(realFields) return; S.cur=fsCur; save(); closeModal(true); renderAll(); }
+}
+$("g-fsortList").addEventListener("click",e=>{
+  const row=e.target.closest && e.target.closest(".rowi"); if(!row) return;
+  fsCur=+row.dataset.i;
+  const b=e.target.closest("[data-mv]"); if(b){ fsMove(+b.dataset.mv); return; }
+  renderFsort();
+});
 function buyLayout(){
   if(S.layoutOwned) return;
   if(!spend(LAYOUT_PRICE)) return;
@@ -10767,6 +10830,7 @@ function openModal(name){
   if(name==="pick") renderPick();
   if(name==="cvpick") renderCvPick();
   if(name==="layout"){ lyAsk=null; renderLayout(); }
+  if(name==="fsort"){ fsCur=S.cur||0; renderFsort(); }
   if(SPACE_ALL.some(([m])=>m===name)) renderSpaceTabs();
 }
 function closeModal(silent){
@@ -10996,6 +11060,13 @@ function shopRows(){
         keys:"<b>Enter</b> 買う", enter:buyLayout, shift:buyLayout });
       else rows.push({ ic:"🗂️", nm:`配置セット <span style="color:var(--ink-l)">${S.layoutOff?"使っていない":"使っている"}</span>`,
         ds:S.layoutOff?"使わないあいだは、上のボタンと / キーが出ません。保存したセットは消えません":"農園で / を押すか、上のボタンで開きます", keys:`<b>Enter</b> ${S.layoutOff?"使う":"使わない"}`, enter:()=>{ S.layoutOff=!S.layoutOff; sfx.tab(); save(); renderAll(); }, shift:()=>{} });
+    }
+    // 畑の並べ替え: 畑の順番を入れかえる(大木や薔薇の畑を好きな番号に)
+    if(FS().length>=2){
+      if(!S.fsortOwned) rows.push({ ic:"🔀", nm:`畑の並べ替え <span style="color:var(--ink-l)">${fmtNum(FSORT_PRICE)}キー</span>`,
+        ds:"畑の順番を入れかえられるようになります。大木や薔薇の畑を、好きな番号に動かせます。一度買えばずっと使えます",
+        keys:"<b>Enter</b> 買う", enter:buyFsort, shift:buyFsort });
+      else rows.push({ ic:"🔀", nm:"畑の並べ替え", ds:"畑の順番を入れかえます", keys:"<b>Enter</b> 開く", enter:()=>openModal("fsort"), shift:()=>openModal("fsort") });
     }
     // 大連ガチャの演出セット: 1,111連以上で、いろいろな演出がランダムで出る(1つ買えば、どのガチャでも)
     if(["n","w","r"].some(m=>gachaPass(1111,m))){
@@ -12502,7 +12573,7 @@ const rgGhrGot = () => RG_GHR.filter(x=>(S.got[x.id]||0)>0).length;
 const rkamCols = () => ROSE_ALL.filter(r=>[0,3,5].some(t=>qCount(r.id,t)>0)).map(r=>r.id);
 function rkamAct(dir){
   if(!S.rkam){ sfx.nope(); return; }
-  if(!dir){ S.rkamOn=!S.rkamOn; sfx.tab(); }
+  if(!dir){ openPick("rkam"); return; }   // Enter: 色の一覧から選ぶ(使わない も選べる)
   else{
     const ids=rkamCols(); if(!ids.length){ sfx.nope(); return; }
     S.rkamCol=ids[(ids.indexOf(S.rkamCol)+dir+ids.length)%ids.length]; S.rkamOn=true; sfx.tab();
@@ -12652,6 +12723,8 @@ function kitAct(dir){   // Enter(dir=0)・Shift+Enter(dir=-1)・◀▶ のボタ
   }else if(dir===0 && id==="bento"){
     S.bento--; S.bentoUntil=Math.max(Date.now(),S.bentoUntil||0)+HOUR; sfx.vil();
     toast(`${ico(GUR.bento)} 二段重ねのお弁当箱を開けました。${fmtLeft(S.bentoUntil-Date.now())}のあいだ、料理の効果を2つまでかけられます(同じ効果は重なりません)`,"good mut sup",5200,true);
+  }else if(id==="kamado" && !dir){
+    openPick("kamado"); return;   // Enter: 色の一覧から選ぶ
   }else if(id==="kamado" && dir){
     const ids=["",...kamadoDishes()];
     if(ids.length<2){ sfx.nope(); toast("画面の色の料理を食べると、その色を選べるようになります","warn",3600); return; }
@@ -12758,6 +12831,14 @@ const PICK_RANKS=["お気に入り","N","R","SR","HR","UR","GSR","GHR","曜日�
 const pickGroup = id => pickKind==="seed" && isFavS(id) ? "お気に入り" : /^rose/.test(id) ? "薔薇" : isSap(id) ? "苗木" : CROP[id].day!=null ? "曜日限定" : (CROP[id].r||"N");   // お気に入りは一番上、曜日限定の作物はレア度と分けて並べる
 let pickKind="seed", pickCur=0, pickIds=[], lastFour=0;
 function openPick(kind){
+  if(kind==="kamado" || kind==="rkam"){   // かまどの色: 一覧から選ぶ(いちばん上は「使わない」)
+    const ids = kind==="kamado" ? kamadoDishes() : rkamCols();
+    if(!ids.length){ sfx.nope(); toast(kind==="kamado" ? "画面の色の料理を食べると、その色を選べるようになります" : "薔薇を咲かせると、その色を選べるようになります","warn",3600); return; }
+    pickKind=kind; pickIds=["",...ids];
+    const now = kind==="kamado" ? (S.kamado||"") : (S.rkamOn ? S.rkamCol||"" : "");
+    pickCur=Math.max(0, pickIds.indexOf(now));
+    openModal("pick"); return;
+  }
   pickKind=kind;
   pickIds = kind==="sg" ? sgCrops().map(c=>c.id) : ownedSeeds();
   if(!pickIds.length){ sfx.nope(); toast(kind==="sg" ? "まだ選べる作物がありません(一度収穫した作物から選べます)" : kb("種がありません。Tab でお店へ","種がありません。お店で買えます"),"warn"); return; }
@@ -12774,6 +12855,18 @@ function pickFav(i){
   toggleFav("s",id); pickSort(); pickCur=pickIds.indexOf(id); renderPick(); renderAll();
 }
 function renderPick(){
+  if(pickKind==="kamado" || pickKind==="rkam"){
+    const km=pickKind==="kamado", now = km ? (S.kamado||"") : (S.rkamOn ? S.rkamCol||"" : "");
+    $("g-pickTitle").textContent = km ? "永遠のかまどの色" : "薔薇のかまどの色";
+    $("g-pickNote").innerHTML = (km ? "食べたことのある、画面の色の料理から選べます。" : "咲かせたことのある薔薇の色から選べます。")+kb(" <b>矢印キー</b> で選んで <b>Enter</b> で決定 ・ <b>Esc</b> 戻る","");
+    $("g-pickBody").innerHTML = `<div class="pickgrp"><div class="pickgrid">${pickIds.map((id,j)=>{
+      let ic="⛔", nm="使わない";
+      if(id && km){ const k=kamaSplit(id), d=DISH[k.d]; if(d){ ic=dishIco(d,k.t); nm=esc(dishName(d,k.t)); } }
+      else if(id && CROP[id]){ ic=ico(CROP[id]); nm=esc(CROP[id].name); }
+      return `<button class="pitem${j===pickCur?" cur":""}${id===now?" sel":""}" data-i="${j}" tabindex="-1"><span class="pic">${ic}</span><span class="pnm">${nm}</span></button>`; }).join("")}</div></div>`;
+    const cur=$("g-pickBody").querySelector(".pitem.cur"); if(cur && cur.scrollIntoView) cur.scrollIntoView({block:"nearest"});
+    return;
+  }
   const sg=pickKind==="sg", now = sg ? sgCropId() : S.seedId;
   $("g-pickTitle").textContent = sg ? "シゴデキ村人が育てる作物" : "種を選ぶ";
   $("g-pickNote").innerHTML = (sg ? "図鑑に載っている作物から選べます。" : "持っている種です。☆でお気に入り(一番上に並びます)。")+kb("<b>矢印キー</b> で選んで <b>Enter</b> で決定"+(sg?"":" ・ <b>S</b> お気に入り")+" ・ <b>Esc</b> 閉じる","タップして選びます");
@@ -12787,6 +12880,12 @@ function renderPick(){
   const cur=$("g-pickBody").querySelector(".pitem.cur"); if(cur && cur.scrollIntoView) cur.scrollIntoView({block:"nearest"});
 }
 function pickChoose(i){
+  if(pickKind==="kamado" || pickKind==="rkam"){
+    const id=pickIds[i]; if(id==null) return;
+    if(pickKind==="kamado"){ S.kamado=id; applyTheme(); }
+    else{ if(id){ S.rkamCol=id; S.rkamOn=true; } else S.rkamOn=false; rosePetals(); }
+    sfx.tab(); save(); openModal("treas"); return;   // 貴重品に戻る
+  }
   const id=pickIds[i]; if(!id) return;
   if(pickKind==="sg"){
     S.sgCrop=id; sfx.tab(); save(); renderAll();
@@ -12810,7 +12909,7 @@ function pickMove(dir){
 function pickKey(e){
   const k=e.key;
   if(e.repeat && k==="4") return;   // 4 を長押しして開いたときの続き
-  if(k==="Escape"||k==="4"){ e.preventDefault(); if(pickKind==="sg") openModal("treas"); else closeModal(); return; }
+  if(k==="Escape"||k==="4"){ e.preventDefault(); if(pickKind!=="seed") openModal("treas"); else closeModal(); return; }
   const n=pickIds.length;
   if(k==="ArrowLeft"||k==="ArrowRight"){ e.preventDefault(); pickCur=(pickCur+(k==="ArrowRight"?1:-1)+n)%n; sfx.cursor(); renderSoon(renderPick); return; }
   if(k==="ArrowUp"||k==="ArrowDown"){ e.preventDefault(); pickMove(k==="ArrowDown"?1:-1); sfx.cursor(); renderSoon(renderPick); return; }
@@ -15091,6 +15190,7 @@ function onKeyMain(e){
   if(modal==="notice"){ e.preventDefault(); if(e.key==="Enter") closeModal(); return; }   // 料理の解放のお知らせは Enter でだけ閉じる
   if(modal==="cook"){ cookKey(e); return; }
   if(modal==="layout"){ layoutKey(e); return; }
+  if(modal==="fsort"){ fsKey(e); return; }
   if(modal==="rank"){
     if(e.key==="Escape"||e.key==="9"){ e.preventDefault(); closeModal(); }
     else if(e.key==="Enter"){ e.preventDefault(); submitRank(); }
