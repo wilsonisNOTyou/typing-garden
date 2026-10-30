@@ -5905,6 +5905,7 @@ function endBookGame(){
    新しいものを上に足していく。d は YYYY-MM-DD */
 const NEWS=[
   { d:"2026-10-31", t:"お店の自動売却タブと、斧の演出", items:[
+    "お店に「素朴な肥料」が並びました。作物にまくと、変異・超変異にならず、かならずふつうに実ります。大木にまくと、ふつうの木に戻ります",
     "お店に「自動売却」のタブができました。作物を小さなマスで並べ、まとめて買う・まとめてオンオフもできます",
     "斧で大木を切ると、木が倒れる演出と音が出るようになりました",
     "ひまわりの種クッキーで村人が育てる作物に、お店にいつも並ぶ作物も入るようになりました",
@@ -12616,8 +12617,10 @@ function rkamAct(dir){
   if(!S.rkam){ sfx.nope(); return; }
   if(!dir){ openPick("rkam"); return; }   // Enter: 色の一覧から選ぶ(使わない も選べる)
   else{
-    const ids=rkamCols(); if(!ids.length){ sfx.nope(); return; }
-    S.rkamCol=ids[(ids.indexOf(S.rkamCol)+dir+ids.length)%ids.length]; S.rkamOn=true; sfx.tab();
+    const ids=["",...rkamCols()]; if(ids.length<2){ sfx.nope(); return; }   // 永遠のかまどと同じく「なし(使わない)」も順番に入る
+    const now=S.rkamOn ? S.rkamCol||"" : "", nx=ids[(ids.indexOf(now)+dir+ids.length)%ids.length];
+    if(nx){ S.rkamCol=nx; S.rkamOn=true; } else S.rkamOn=false;
+    sfx.tab();
   }
   rosePetals(); save(); renderTreas();
 }
