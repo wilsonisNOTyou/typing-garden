@@ -2385,7 +2385,11 @@ html.mobile #screen-garden .planter.gxhedge::after{inset:-12px; padding:10px; ba
 #screen-garden .dgrade{display:inline-flex; align-items:center; justify-content:space-between; gap:.3rem; min-width:9.5em; font-size:.8rem; padding:.1rem .5rem; border-radius:999px; background:#f1e8d4; color:#6b604e; cursor:pointer; white-space:nowrap; vertical-align:.08em}   /* 同じ幅で置く(段階で長さが変わっても、押す場所が動かない) */
 #screen-garden .dgrade i{font-style:normal; opacity:.7}
 #screen-garden .dnm{display:inline-block}
-html.mobile #screen-garden .dnm{min-width:0 !important; display:inline}   /* スマホは幅が足りないので、そろえない */
+/* スマホ: 料理名と段階の切りかえを1行に。切りかえは行の右端に固定し、名前が長いときは名前のほうを「…」で省く(段階を変えても改行しない) */
+html.mobile #screen-garden .rowi .nm:has(.dgrade){display:flex; flex-wrap:wrap; align-items:center; column-gap:.3rem}
+html.mobile #screen-garden .dnm{flex:1 1 0; min-width:0 !important; overflow:hidden; text-overflow:ellipsis; white-space:nowrap}
+html.mobile #screen-garden .rowi .nm .dgrade{flex:none; margin-left:auto; min-width:10.5em}
+html.mobile #screen-garden .rowi .nm:has(.dgrade) > small{flex-basis:100%}
 #screen-garden .dgrade.mut{background:#efe3ff; color:#7a3fc0}
 #screen-garden .dgrade.sup{background:linear-gradient(90deg,#fff1b8,#ffe0f2,#dff2ff); color:#a8701c}
 #screen-garden .dlack{color:#c0392b}
@@ -10368,7 +10372,7 @@ function renderInfo(){
   $("g-infoSub").innerHTML=sub.join("<br>");
 }
 /* 料理名の欄の幅: その料理の段階ごとに出る名前(まだ作っていない段階は「？？？(〇〇の変異)」)のいちばん長いもの */
-const dnW = d => Math.max(12, ...gradesOf(d).map(g=>(!isMutT(g) || (S.dishMade[d.id]||{})[bookKeyOf(g)]) ? dishName(d,g).length : d.name.length+7));   // 12文字ぶんを基本に、長い名前の料理だけ広げる(段階を変えても、切りかえの位置が動かない)
+const dnW = d => Math.max(12, ...gradesOf(d).map(g=>(!isMutT(g) || (S.dishMade[d.id]||{})[bookKeyOf(g)]) ? dishName(d,g).length : `？？？(${d.name}の${gradeName(g)})`.length));   // 12文字ぶんを基本に、長い名前の料理だけ広げる(段階を変えても、切りかえの位置が動かない)
 /* 収穫かご: S.inv[id] = [ふつう, ☆, ☆☆] */
 const invN = (id,t) => (S.inv[id]&&S.inv[id][t])||0;
 const invAdd = (id,t,n) => { S.inv[id]=S.inv[id]||[0,0,0]; S.inv[id][t]=(S.inv[id][t]||0)+n; };
@@ -10388,7 +10392,6 @@ function renderBasket(){
     const u=upOf(f.id), n=foodN(f.id), un=u&&!u.work?foodN(u.id):0; if(n+un<=0) continue;
     cards.push({ n:n+un, h:`<span class="bcard food${un?" q3":""}" data-b="${f.id}"><span class="bhd">${ico(f)} ${esc(f.name)} <b>${fmtNum(n+un)}</b></span>${un?`<span class="bqs"><i class="bq">ふつう${fmtNum(n)}</i><i class="bq q3">上位${fmtNum(un)}</i></span>`:""}</span>` });
   }
-  cards.sort((a,b)=>b.n-a.n);   // 多い順
   const more=cards.length-BASKET_SHOW, shown=basketOpen||more<=1 ? cards : cards.slice(0,BASKET_SHOW);
   const html = shown.map(x=>x.h).join("") + (more>1 ? `<button class="sbtn bmore" data-bmore>${basketOpen?"たたむ ▲":`ほかに ${more}種類 ▼`}</button>` : "");
   patchHTML($("g-basket"), cards.length ? html : `<span class="empty">まだ何もありません。実った作物を${kb("素手(1)","素手")}で収穫しましょう</span>`);   // 変わった品だけ描き直す
