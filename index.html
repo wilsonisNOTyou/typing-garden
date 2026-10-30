@@ -5888,6 +5888,26 @@ function endBookGame(){
 /* ---------- 更新情報 ----------
    新しいものを上に足していく。d は YYYY-MM-DD */
 const NEWS=[
+  { d:"2026-10-31", t:"お店の自動売却タブと、大木・工房の調整", items:[
+    "お店に「自動売却」のタブができました。作物を小さなマスで並べ、まとめて買う・まとめてオンオフもできます",
+    "大木は、収穫してから次に実るまでが木ごとに変わりました。十年梅は1年、三十年葡萄は3年、百年杉は10年です。百年杉の収穫は杉の葉5枚・木材3本になりました",
+    "工房で、御神木の葉から御神木の腐葉土、銘木の梅から備長炭を作れるようになりました。御神木の腐葉土は大木の育つ速さが3倍、備長炭は梅の炭よりずっと料理が変異・超変異になりやすくなります",
+    "工房では、上位の品がふつうの品の代わりに使われなくなりました。腐葉土と梅の炭は図鑑にも載ります",
+    "斧で大木を切ると、木が倒れる演出と音が出るようになりました",
+    "炭で料理が変異・超変異になったときは、お知らせで分かるようにしました",
+    "ひまわりの種クッキーで村人が育てる作物に、お店にいつも並ぶ作物も入るようになりました",
+    "実績「変わった大木」は、変異の大木で達成するようにしました。超変異は「まばゆい大木」です",
+    "農園のお知らせを小さくして、左上に2つまで出すようにしました。大事なお知らせは長く残り、農園に入ったときのお知らせは1つにまとまります。ガチャの演出中のお知らせは、終わってから出ます",
+    "料理の残り時間を、所持キーのすぐ隣に出すようにしました。タイトルの農園のようすに、実った大木の数も出ます",
+    "素手と斧の持ちかえは ← → だけになりました。肥料を切りかえても、道具の並びがずれなくなりました",
+    "今日のご褒美の時間と変異しやすさは、最後まで遊ぶと付くことが分かるように書きました",
+    "はじめてガイドの「ガイドを終える」を右上に移し、吹き出しが押してほしい所に重ならないようにしました",
+    "TOEIC 英単語の結果画面のボタンを、ランキングからチャットへに変えました。ランキングは結果の上から見られます",
+    "スマホのタイトルに、農園の寄り合いのボタンが出ていなかったのを直しました",
+    "スマホで、対戦の結果画面と、チャットの送るボタンがはみ出していたのを直しました",
+    "対戦の「もう一回」を2人が同時に押すと、片方が取り残されることがあったのを直しました",
+    "変異・超変異を手で収穫したとき、みんなの目標に数えられていなかったのを直しました",
+  ]},
   { d:"2026-10-27", t:"みんなで話せる「農園の寄り合い」と、対戦", items:[
     "みんなとリアルタイムで話せる「農園の寄り合い」ができました。ランキングと同じ名前で書き込みます。タイトルの「農園の寄り合い」か C キー、農園では右下の「チャット」ボタンか Enter で開けます",
     "作り置きの料理を投げられます。30分以内に「受け取る」を押した人に、食べたときと同じ効果が半分の時間かかります",
@@ -11067,6 +11087,7 @@ function renderShop(){
   }
   $("g-shopHint").innerHTML =
     `<b>← →</b> ${SHOP_ORDER.map(i=>i===shopTab?`「${SHOP_TABS[i]}」`:SHOP_TABS[i]).join(" / ")} ・ <b>↑ ↓</b> 選ぶ ・ <b>Enter</b> / <b>Shift+Enter</b> 決定`+
+    (shopTab===5 ? " ・ 作物のマスでは <b>← → ↑ ↓</b> で選ぶ(タブの切りかえは上の3行で)" : "")+
     (shopTab===3 && total>0 ? ` ・ <b>A</b> 作物をすべて売る(${fmtNum(total)}キー・種・食材と変異・超変異は売りません)` : "")+
     ` ・ <b>Tab</b> / <b>Esc</b> 閉じる`;
   keepVisible(body);
@@ -11085,6 +11106,14 @@ function shopActBtns(keys){
 function shopKey(e){
   const k=e.key;
   if(k==="Escape"||k==="Tab"){ e.preventDefault(); closeModal(); return; }
+  if(shopTab===5 && /^Arrow/.test(k)){   // 自動売却のマス: ← → ↑ ↓ で並びのとおりに動く(上のまとめの行では、← → でタブを切りかえ)
+    const n=shopRowCache.length, i=shopCur[5], first=shopRowCache.findIndex(x=>x.cell);
+    if(first>=0 && i>=first){
+      const cells=[...$("g-shopBody").querySelectorAll(".acell")], top0=cells[0]?cells[0].offsetTop:0, cols=Math.max(1,cells.filter(c=>c.offsetTop===top0).length);
+      const j = k==="ArrowLeft" ? Math.max(first,i-1) : k==="ArrowRight" ? Math.min(n-1,i+1) : k==="ArrowDown" ? Math.min(n-1,i+cols) : (i-cols>=first ? i-cols : first-1);
+      e.preventDefault(); if(j!==i){ shopCur[5]=j; sfx.cursor(); renderSoon(renderShop); } return;
+    }
+  }
   if(k==="ArrowLeft"||k==="ArrowRight"){ e.preventDefault(); shopTab=SHOP_ORDER[(SHOP_ORDER.indexOf(shopTab)+(k==="ArrowRight"?1:-1)+SHOP_ORDER.length)%SHOP_ORDER.length]; sfx.tab(); renderShop(); return; }
   if(k==="ArrowUp"||k==="ArrowDown"){
     e.preventDefault();
@@ -16172,7 +16201,7 @@ function tutView(){
         : { sel:null, text:"タイトルに戻って、イージー(キー 1)を始めよう" };
     case "plate":
       return scene==="game"
-        ? { sel:"#plate", text:"正しく打つとキーが外れて芽が出ます。外したキーは農園のお金に! 60秒がんばろう(日本語入力はオフで)" }
+        ? { sel:null, text:"正しく打つとキーが外れて芽が出ます。外したキーは農園のお金に! 60秒がんばろう(日本語入力はオフで)" }
         : { sel:null, text:"タイピングを最後まで遊んでみよう" };
     case "name":
       if(scene==="result") return { sel:"#registerBox",
