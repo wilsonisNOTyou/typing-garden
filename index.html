@@ -990,7 +990,7 @@ html.mobile .wc-bottom .wc-sm .kbdh, html.mobile .wc-panel .kbdh{display:none}
 @keyframes wc-pop{0%{transform:translate(-50%,40px); opacity:0}100%{transform:translate(-50%,0); opacity:1}}
 #screen-garden .wcmini{position:fixed; right:.8rem; bottom:.8rem; z-index:6; display:flex; align-items:center; gap:.3rem; background:rgba(255,250,238,.94); border:2px solid #c8a06a; border-radius:999px; padding:.2rem .65rem; font-size:.78rem; font-weight:900; color:#5a3a12; cursor:pointer; box-shadow:0 3px 8px rgba(60,35,10,.2)}
 #screen-garden .wcmini .wck{font-size:.66rem; color:#8a6a3a; font-weight:700}
-html.mobile #screen-garden .wcmini{right:.5rem; bottom:.5rem}
+html.mobile #screen-garden .wcmini{position:static; order:99; flex:1 1 auto; justify-content:center; border-radius:10px; padding:.5rem .7rem; font-size:.88rem; box-shadow:0 3px 0 #c8a06a}   /* スマホ: 画面の下に固定すると隠れやすいので、上のボタンの並びの最後に置く */
 .bk-modal{position:fixed; inset:0; z-index:20; display:none; align-items:center; justify-content:center; background:rgba(8,10,14,.7); cursor:pointer}
 .bk-modal.open{display:flex}
 .bk-panel{
