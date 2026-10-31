@@ -7941,7 +7941,9 @@ const ROSE_HALF = [
   { id:"rose_hb", name:"薔", art:halfArt("薔","#c8203a") },
   { id:"rose_hr", name:"薇", art:halfArt("薇","#8a1028") },
 ].map(x=>Object.assign(x,{ half:true, gacha:true, icon:"🌱", cost:0, hours:6, price:1e9 }));
-const HALF_WAIT = 60000;   // 相方を待つのは1分
+const HALF_PAIR = 60000;   // 1分以内に植えた相方とだけ重なる
+const HALF_KEEP = 24*HOUR;   // 相方が実るのを待つのは24時間まで
+const newCrop = id => CROP[id] && CROP[id].half ? { id, grown:0, plantAt:Date.now() } : { id, grown:0 };   // 薔・薇は植えた時刻を持つ
 const ROSE_MUT={}, ROSE_SUP={};
 for(const r of ROSES){
   ROSE_MUT[r.id]={ name:r.m.name, art:roseSvg(r.m.c1,r.m.c2,{bg:r.m.c1,ln:r.ln}) };
@@ -9408,9 +9410,8 @@ function roseSecret(p,by,when){
 /* 薔・薇: 実った瞬間に、隣(上下左右)の相方を探す */
 function halfRipen(p,when){
   const f=S.fields.find(fx=>KEYS.some(k=>fx[k]===p)); if(!f) return;
-  const k=KEYS.find(x=>f[x]===p), want=p.crop.id==="rose_hb"?"rose_hr":"rose_hb";
-  const ns=around(k,"cross").filter(x=>f[x].crop && f[x].crop.id===want && !f[x].vil);
-  const mate=ns.find(x=>isRipe(f[x]) && f[x].crop.halfAt!=null && Math.abs(f[x].crop.halfAt-when)<=HALF_WAIT);
+  const ns=halfMates(f,KEYS.find(x=>f[x]===p));
+  const mate=ns.find(x=>isRipe(f[x]) && f[x].crop.halfAt!=null);
   if(mate){
     f[mate].crop=null; f[mate].emptySince=Date.now();
     p.crop={ id:"rose_barabara", grown:CROP.rose_barabara.hours*HOUR, ripeAt:when, rolled:true };
@@ -9419,7 +9420,12 @@ function halfRipen(p,when){
     return;
   }
   if(!ns.length){ halfGone(p); return; }   // 隣に相方がいない: 実った瞬間に消える
-  p.crop.halfAt=when;                      // 相方が実るのを1分だけ待つ
+  p.crop.halfAt=when;                      // 相方が実るのを待つ
+}
+/* 薔・薇の相方: 上下左右にいる反対の字で、1分以内に植えたもの(村人の区画は除く。植えた時刻がない前の版の種は誰とでも) */
+function halfMates(f,k){
+  const p=f[k], want=p.crop.id==="rose_hb"?"rose_hr":"rose_hb", a=p.crop.plantAt;
+  return around(k,"cross").filter(x=>{ const c=f[x].crop; return c && c.id===want && !f[x].vil && (a==null || c.plantAt==null || Math.abs(c.plantAt-a)<=HALF_PAIR); });
 }
 function halfGone(p){
   const nm=CROP[p.crop.id].name;
@@ -9477,7 +9483,7 @@ function tickFields(last,now){
           else if(now-p.emptySince>=REVERT_AFTER){ p.s="grass"; p.wet=0; p.emptySince=0; }
         }
       }
-      for(const k of KEYS){ const p=f[k]; if(p.crop && CROP[p.crop.id].half && isRipe(p) && p.crop.halfAt!=null && now-p.crop.halfAt>HALF_WAIT) halfGone(p); }   // 1分待っても相方が実らなかった
+      for(const k of KEYS){ const p=f[k]; if(p.crop && CROP[p.crop.id].half && isRipe(p) && p.crop.halfAt!=null && (now-p.crop.halfAt>HALF_KEEP || !halfMates(f,k).length)) halfGone(p); }   // 相方がいなくなった・24時間待っても実らなかった
       for(const [gi,t] of btTrees(f)) btGrow(t, btWetMs(fi,gi,last,now,cov)*btRate(t));   // 大木: 9マスのどれかに水が効いていた時間だけ
     });
   }
@@ -10614,14 +10620,14 @@ function act(k){
       if(p.crop){ nope(k,"もう植わっています"); break; }
       if(n<=0){ nope(k,kb("種がありません。Tab でお店へ","種がありません。お店で買えます")); break; }
       xAdd(S.seeds,S.seedId,-1,"seeds."+S.seedId);
-      p.crop={ id:plantId(S.seedId), grown:0 }; p.emptySince=0;
+      p.crop=newCrop(plantId(S.seedId)); p.emptySince=0;
       if(window.tutFastCrop && S.seedId==="carrot") p.crop.tut=true;   // ガイドの「植える」で植えたにんじん
       hit(k); floatAt(k,"🌱"); sfx.plant();
       if(eff("L") && !realFields){   // 料理: 一括植え
         let m=0;
         for(const fx of (eff("L")===2 ? S.fields : [f])) for(const x of KEYS){
           const q=fx[x]; if(!(S.seeds[S.seedId]>0)) break;
-          if(q.s==="soil" && !q.crop && !q.obj && !q.vil && q.bt==null){ q.crop={ id:plantId(S.seedId), grown:0 }; q.emptySince=0; xAdd(S.seeds,S.seedId,-1,"seeds."+S.seedId); m++; }
+          if(q.s==="soil" && !q.crop && !q.obj && !q.vil && q.bt==null){ q.crop=newCrop(plantId(S.seedId)); q.emptySince=0; xAdd(S.seeds,S.seedId,-1,"seeds."+S.seedId); m++; }
         }
         if(m) floatAt(k,`🌱×${m+1}`);
       }
