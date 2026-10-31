@@ -39,6 +39,12 @@
           }
         }
       },
+      "gifts": {
+        "$owner": {
+          ".read": true,
+          ".write": false
+        }
+      },
       "saves": {
         "$code": {
           ".read": true,

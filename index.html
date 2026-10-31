@@ -15406,6 +15406,37 @@ function showRoseNotice(){
   $("g-noticeOk").textContent=kb("わかった(Enter)","わかった");
   openModal("notice"); sfx.vil();
 }
+/* 運営からのプレゼント(不具合のお詫びなど)。Firebase の GIFT_PATH/<持ち主の印>/<番号> に
+   { s:{作物のid:数}, m:"ひとこと(なくてもよい)" } を書くと、その人だけが一度だけ受け取れる。持ち主の印は番付やチャットの o */
+const GIFT_PATH="typinggarden/gifts";
+let giftQ=[], giftAt=0;
+function giftFetch(){
+  if(typeof db==="undefined" || !db || !S.owner || realFields || Date.now()-giftAt<10*60000) return;   // 10分に1回だけ見に行く
+  giftAt=Date.now();
+  db.ref(`${GIFT_PATH}/${S.owner}`).once("value").then(snap=>{
+    const got=S.giftGot||{};
+    snap.forEach(c=>{ const v=c.val(); if(v && !got[c.key] && !giftQ.some(g=>g.id===c.key)) giftQ.push({ id:c.key, s:v.s||{}, m:typeof v.m==="string" ? v.m.slice(0,200) : "" }); });
+  }).catch(()=>{});
+}
+function showGiftNotice(){
+  giftFetch();
+  if(!giftQ.length || scene!=="garden" || modal || realFields) return;
+  const g=giftQ.shift(); S.giftGot=S.giftGot||{};
+  if(S.giftGot[g.id]) return;
+  S.giftGot[g.id]=Date.now();
+  const rows=[];
+  for(const [id,n] of Object.entries(g.s)){
+    const c=CROP[id], k=Math.floor(+n); if(!c || !(k>0) || k>1000) continue;
+    S.seeds[id]=(S.seeds[id]||0)+k;
+    rows.push(`<li>${ico(c)} <b>${esc(c.name)}の種</b> ×${k}</li>`);
+  }
+  save();
+  if(!rows.length) return;
+  $("g-noticeTitle").textContent="🎁 プレゼントが届きました";
+  $("g-noticeBody").innerHTML=`<p>${g.m ? esc(g.m) : "ご迷惑をおかけしたお詫びに、プレゼントをお届けします。"}</p><ul style="list-style:none; padding-left:0">${rows.join("")}</ul><p>持ち物の種に入りました。</p>`;
+  $("g-noticeOk").textContent=kb("ありがとう(Enter)","ありがとう");
+  openModal("notice"); sfx.vil();
+}
 function renderCookLock(){ const b=$("g-cookBtn"); if(!b) return; const ok=cookOpen(); b.classList.toggle("locked",!ok); b.title=ok?"":COOK_LOCK_MSG(); }
 // マウスでも閉じられるように: 閉じるボタンと、ウィンドウの外側のクリック
 root.querySelectorAll("[data-close]").forEach(b=>b.addEventListener("click",()=>closeModal()));
@@ -15448,7 +15479,7 @@ function enterIn(){
   crowVisit();
   flushToastBatch();
   clearInterval(loopId); clearInterval(saveId);
-  loopId=setInterval(()=>{ const q3=ev("Q3",30/60,3,0); /* 料理: 農園の時計(分) */ if(q3) applySkip(q3,"k"); showCookNotice(); showRoseNotice(); showBtNotice(); autoCookTick(); tick(); reportVillagers(); renderBar(); renderField(); renderInfo(); renderCounter(); renderBuff(); if(modal==="cook") $("g-cookNow").innerHTML=cookNowText(); },1000);
+  loopId=setInterval(()=>{ const q3=ev("Q3",30/60,3,0); /* 料理: 農園の時計(分) */ if(q3) applySkip(q3,"k"); showCookNotice(); showRoseNotice(); showBtNotice(); showGiftNotice(); autoCookTick(); tick(); reportVillagers(); renderBar(); renderField(); renderInfo(); renderCounter(); renderBuff(); if(modal==="cook") $("g-cookNow").innerHTML=cookNowText(); },1000);
   saveId=setInterval(save,15000);
 }
 function leave(){
