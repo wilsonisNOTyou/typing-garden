@@ -9897,7 +9897,7 @@ function applySkip(minutes,src="s"){   // src: s タイピングの時短 / k �
   return n;
 }
 function skipFields(minutes,now,src="s"){
-  const rate = src==="k" ? Infinity : undefined;   // 庭の時計: 実った時刻は「今」
+  const rate = Infinity;   // 時短・庭の時計: まとめて進むので、実った時刻は「今」
   let n=0;
   S.fields.forEach((f,fi)=>{
     const cov=covered(fi);
@@ -10638,7 +10638,7 @@ function act(k){
       if((p.crop.fert||0)>=fmax){ nope(k,`この作物に肥料はもう${fmax}回使っています`); break; }
       p.crop.fert=(p.crop.fert||0)+1;
       if(Math.random()<ev("η",.5,1,0)) floatAt(k,"🍂 減らなかった!"); else S.fert--;
-      grow(p, need(p.crop)*effFert(), Date.now(), "f");
+      grow(p, need(p.crop)*effFert(), Date.now(), "f", Infinity);   // 実った時刻は「今」
       if(!p.crop){ hit(k); sfx.fert(); break; }   // 薔・薇: 実って消えた
       if(isRipe(p)) p.crop.ripeAt=Date.now();
       hit(k); floatAt(k,`🍂 ${p.crop.fert}/${fmax===Infinity?"∞":fmax}`); sfx.fert();
@@ -15145,7 +15145,7 @@ function tutGive(n){ xAdd(S,"money",n); save(); if(document.body.classList.conta
 /* スマホはタイピングできないので、ガイドの間だけ植えた作物を実らせる */
 function tutGrow(){
   tick();
-  S.fields.forEach(f=>{ for(const k of KEYS){ const p=f[k]; if(p.crop && !p.vil && !isRipe(p)) grow(p, need(p.crop)-p.crop.grown, Date.now(), "x"); } });
+  S.fields.forEach(f=>{ for(const k of KEYS){ const p=f[k]; if(p.crop && !p.vil && !isRipe(p)) grow(p, need(p.crop)-p.crop.grown, Date.now(), "x", Infinity); } });
   save(); if(document.body.classList.contains("garden")) renderAll();
 }
 
