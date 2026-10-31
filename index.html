@@ -665,6 +665,11 @@ h1.logo .gd::after{content:'🌱'; position:absolute; right:-.55em; top:-.55em; 
 .mt-res li.quit{opacity:.45}
 .mt-res .mt-sc{text-align:right; font-variant-numeric:tabular-nums}
 .mt-res .mt-mi{color:var(--steel); font-size:.8rem; text-align:right}
+/* スマホ: 対戦の結果。名前を広く、くわしい数字は名前の下に。ボタンは折り返して並べる */
+html.mobile .mt-res li{grid-template-columns:2.6rem 1fr auto; row-gap:.1rem; padding:.35rem .6rem}
+html.mobile .mt-res .mt-mi{grid-column:2 / -1; text-align:left}
+html.mobile #screen-result .btn-row{flex-wrap:wrap; justify-content:center; gap:.5rem}
+html.mobile #screen-result .btn-row .btn{flex:1 1 40%; min-width:0}
 .wc-msg .mt-rsn{display:inline-block; margin:0 .5rem 0 .2rem; white-space:nowrap}
 .mt-bonus{text-align:center; color:#ffe08a; font-weight:bold; margin:.6rem 0 0}
 #screen-result.mtr .result-count{color:#4ee6ff; text-shadow:0 0 18px rgba(78,230,255,.7), 0 4px 0 #1a3b6a}
@@ -814,8 +819,8 @@ body.mtb .mt-row{padding:.18rem .55rem}
   .mt-res li{padding:.3rem .7rem}
 }
 #screen-result.mtr p:empty{display:none}
-#mtChatBtn.mt-chatb{color:#06222a; background:linear-gradient(180deg,#9ff0ff,#4ee6ff); border-color:#2bb5cc; box-shadow:0 4px 0 #1a7f90, 0 0 14px rgba(78,230,255,.45)}   /* 対戦のあとはチャットも見てほしいので目立たせる */
-#mtChatBtn.mt-chatb:hover,#mtChatBtn.mt-chatb:focus-visible{border-color:#fff}
+.btn.mt-chatb{color:#06222a; background:linear-gradient(180deg,#9ff0ff,#4ee6ff); border-color:#2bb5cc; box-shadow:0 4px 0 #1a7f90, 0 0 14px rgba(78,230,255,.45)}   /* 対戦のあとはチャットも見てほしいので目立たせる */
+.btn.mt-chatb:hover,.btn.mt-chatb:focus-visible{border-color:#fff}
 #screen-result.mtr .btn-row{gap:.6rem; flex-wrap:nowrap}
 #screen-result.mtr .btn-row .btn{padding:.65rem 1.1rem; white-space:nowrap}   /* 対戦の結果は、空いた行を詰める */
 #screen-result.mtr .mt-result{margin-top:.2rem}
@@ -985,7 +990,7 @@ html.mobile .wc-bottom .wc-sm .kbdh, html.mobile .wc-panel .kbdh{display:none}
 @keyframes wc-pop{0%{transform:translate(-50%,40px); opacity:0}100%{transform:translate(-50%,0); opacity:1}}
 #screen-garden .wcmini{position:fixed; right:.8rem; bottom:.8rem; z-index:6; display:flex; align-items:center; gap:.3rem; background:rgba(255,250,238,.94); border:2px solid #c8a06a; border-radius:999px; padding:.2rem .65rem; font-size:.78rem; font-weight:900; color:#5a3a12; cursor:pointer; box-shadow:0 3px 8px rgba(60,35,10,.2)}
 #screen-garden .wcmini .wck{font-size:.66rem; color:#8a6a3a; font-weight:700}
-html.mobile #screen-garden .wcmini{right:.5rem; bottom:.5rem}
+html.mobile #screen-garden .wcmini{right:.5rem; bottom:max(.5rem, env(safe-area-inset-bottom)); z-index:41; padding:.35rem .8rem; font-size:.85rem}   /* スマホ: 右下に固定。お知らせより手前に出し、少し押しやすく */
 .bk-modal{position:fixed; inset:0; z-index:20; display:none; align-items:center; justify-content:center; background:rgba(8,10,14,.7); cursor:pointer}
 .bk-modal.open{display:flex}
 .bk-panel{
@@ -1235,7 +1240,10 @@ body.os4 .hud b#score{color:#ff7a3c; text-shadow:0 0 18px rgba(255,90,40,.65)}
 #tutActs{display:flex; gap:.4rem; justify-content:flex-end; margin-top:.55rem; flex-wrap:wrap}
 #tutActs .btn{padding:.35rem .9rem; font-size:.85rem; font-family:inherit}
 #tutActs .kbdh{background:rgba(0,0,0,.12); color:inherit; opacity:.8; border:none}
-#tutActs .btn.tut-skip{background:none; color:#8a7a60; border-color:#d9ccb0; box-shadow:none}
+#tutEnd{position:absolute; top:.35rem; right:.45rem; background:none; border:none; padding:.15rem .3rem; color:#8a7a60; font:inherit; font-size:.7rem; text-decoration:underline; cursor:pointer}
+#tutEnd .kbdh{background:rgba(0,0,0,.1); color:inherit; border:none; text-decoration:none}
+#tutEnd[hidden]{display:none}
+#tutBubble #tutStep{padding-right:8.5rem}   /* 右上の「ガイドを終える」と重ならないように */
 #tutBubble.mini{width:min(560px,calc(100vw - 16px)); padding:.4rem .75rem .45rem; opacity:.96}
 #tutBubble.mini #tutText{font-size:.85rem; line-height:1.5}
 #tutBubble.mini #tutStep{margin-bottom:.1rem}
@@ -1274,7 +1282,7 @@ html.mobile.gated body{overflow:hidden}
 .news-item ul{margin:0; padding-left:1.2rem; line-height:1.7; font-size:.92rem}
 .diff-btn.dbon{border-color:#ffcf4a; box-shadow:0 0 0 2px rgba(255,207,74,.35),0 0 18px rgba(255,200,60,.45),0 4px 0 #10131a; animation:dbGlow 2.2s ease-in-out infinite}
 @keyframes dbGlow{50%{box-shadow:0 0 0 2px rgba(255,207,74,.6),0 0 30px rgba(255,200,60,.75),0 4px 0 #10131a}}
-.dbtag{margin-top:.35rem; font-size:.75rem; line-height:1.35; color:#ffe08a; font-weight:bold}
+.dbtag{margin-top:.35rem; font-size:.75rem; line-height:1.35; color:#ffe08a; font-weight:bold; white-space:pre-line}
 .result-bonus{color:#ffe08a; font-size:.95rem; margin:.1rem 0 .4rem; font-weight:bold}
 @media (prefers-reduced-motion: reduce){ .diff-btn.dbon{animation:none} }
 .result-garden{color:#9fd36a; font-size:.95rem; margin:.1rem 0 .4rem; min-height:1.2em}
@@ -1528,7 +1536,18 @@ body.garden.barag{background:radial-gradient(ellipse at 50% 120%, rgba(200,30,62
 #screen-garden .card h3{font-size:.85rem; color:var(--ink-l); font-weight:700; margin-bottom:.35rem}
 #screen-garden #g-info .big{font-weight:800; font-size:1.1rem}
 #screen-garden #g-info .sub{color:var(--ink-l); font-size:.9rem; margin-top:.2rem; line-height:1.6}
-#screen-garden #g-basket{display:flex; flex-wrap:wrap; gap:.4rem}
+#screen-garden #g-basket{display:flex; flex-wrap:wrap; gap:.4rem; align-items:flex-start}
+#screen-garden .bcard{display:inline-flex; flex-direction:column; gap:.15rem; background:#fff; border-radius:10px; padding:.25rem .55rem .3rem; font-weight:700; font-size:.88rem; box-shadow:inset 0 0 0 1.5px #e6d8bd}
+#screen-garden .bcard.q3{box-shadow:inset 0 0 0 2px #b27ce8}
+#screen-garden .bcard.q5{box-shadow:inset 0 0 0 2px #e0a020, 0 0 8px rgba(255,200,80,.6)}
+#screen-garden .bcard .bhd b{color:#7a5230; margin-left:.15rem}
+#screen-garden .bcard .bqs{display:flex; flex-wrap:wrap; gap:.2rem}
+#screen-garden .bcard .bq{font-style:normal; font-size:.7rem; font-weight:700; padding:0 .35rem; border-radius:999px; background:#f1e8d4; color:#6b604e; white-space:nowrap}
+#screen-garden .bcard .bq.q1, #screen-garden .bcard .bq.q2, #screen-garden .bcard .bq.q4{background:#fff3c8; color:#8a6a10}
+#screen-garden .bcard .bq.q3{background:#efe3ff; color:#7a3fc0}
+#screen-garden .bcard .bq.q5{background:linear-gradient(90deg,#fff1b8,#ffe0f2,#dff2ff); color:#a8701c}
+#screen-garden .bcard .bq .cart svg{width:1em; height:1em; vertical-align:-.15em}
+#screen-garden .bmore{align-self:center; font-size:.8rem; padding:.25rem .7rem}
 #screen-garden .chip{background:#fff; border-radius:999px; padding:.2rem .6rem; font-weight:700; font-size:.92rem}
 #screen-garden .empty{color:var(--ink-l); font-size:.9rem}
 #screen-garden .help{margin-top:1rem; color:var(--ink-l); font-size:.82rem; line-height:1.8; text-align:center}
@@ -1605,6 +1624,17 @@ html:not(.mobile) #screen-garden:has(.modal.open) .toast{font-size:.78rem; paddi
 #screen-garden .slot.on .seedsel .arr.none{visibility:hidden}
 #screen-garden .plist{max-height:52vh; overflow:auto; padding-right:.2rem}
 #screen-garden .rowi{border-radius:8px; border-bottom:1px dashed #d9ccb0}
+/* お店の自動売却: 作物を小さなマスで並べる */
+#screen-garden .acgrid{display:grid; grid-template-columns:repeat(auto-fill,minmax(9.5rem,1fr)); gap:.4rem; padding:.45rem 0}
+#screen-garden .rowi.acell{display:flex; flex-direction:column; align-items:flex-start; gap:.2rem; padding:.4rem .5rem; border:1px solid #e3d8bf; border-radius:8px; min-width:0}
+#screen-garden .acell .acth{display:flex; align-items:center; gap:.35rem; font-weight:700; min-width:0; max-width:100%}
+#screen-garden .acell .acth .ic{font-size:1.15rem; width:auto; flex:none}
+#screen-garden .acell .acnm{overflow:hidden; text-overflow:ellipsis; white-space:nowrap}
+#screen-garden .acell .acsub{font-size:.74rem; color:var(--ink-l)}
+#screen-garden .acell .acchips{display:flex; gap:.3rem; flex-wrap:wrap}
+#screen-garden .acell .acchip{font:inherit; font-size:.72rem; padding:.12rem .5rem; border-radius:999px; border:1px solid #c9b98f; background:#f4ecd8; color:var(--ink-l); cursor:pointer}
+#screen-garden .acell .acchip.on{background:#dff0d0; border-color:#5f8f32; color:#2e6b18; font-weight:700}
+#screen-garden .acell .acchip.buy{background:var(--sun); border-color:#a8801c; color:#3a2a08; font-weight:700}
 #screen-garden .rowi.cur{
   background:#fff; border-bottom-color:transparent;
   box-shadow:0 0 0 3px var(--sun), 0 3px 0 3px #a8801c;
@@ -1663,6 +1693,12 @@ html:not(.mobile) #screen-garden:has(.modal.open) .toast{font-size:.78rem; paddi
 #screen-garden .modal .panel{cursor:default}
 #screen-garden .noticepanel{max-width:40rem}
 #screen-garden .layoutpanel{width:min(40rem,94vw)}
+#screen-garden #g-fsortList .ic{font-weight:900; color:#7a5230}
+#screen-garden #g-fsortList .fsmv{display:flex; gap:.3rem}
+#screen-garden #g-fsortList .fsmv .sbtn{padding:.25rem .55rem}
+#screen-garden #g-fsortList .fsmv .sbtn:disabled{opacity:.35}
+#screen-garden #g-fsortList .rowi.fsflash{animation:fsflash .9s ease-out}
+@keyframes fsflash{0%{background:#ffe9a8} 100%{background:inherit}}
 #screen-garden .lyhint{font-size:.85rem; color:#6b5233; line-height:1.55; margin-bottom:.6rem}
 #screen-garden .lylist{display:flex; flex-direction:column; gap:.45rem}
 #screen-garden .lyslot{display:flex; flex-wrap:wrap; align-items:center; gap:.4rem .6rem; padding:.5rem .7rem; border:2px solid #e2d3b4; border-radius:10px; background:#fffaf0; cursor:pointer}
@@ -2210,6 +2246,7 @@ html.mobile #g-cookShow .csnm{font-size:1.3rem}
 /* ---- 庭: ガチャ画面とアイテムリスト ---- */
 #screen-garden .tbtn.gacha{background:linear-gradient(180deg,#f3e0ff,#e0c2f5); border-color:#8a5ab8; box-shadow:0 3px 0 #8a5ab8}
 #screen-garden .gachapanel{width:min(820px,95vw)}
+body:has(#screen-garden .modal.open){overflow:hidden}
 #screen-garden .gbody-scroll{max-height:62vh; overflow:auto; padding-right:.2rem}
 #screen-garden .glist{margin-top:1rem; border-top:1px solid #e3d7bd; padding-top:.7rem}
 #screen-garden .gsec{margin-bottom:.7rem}
@@ -2345,7 +2382,14 @@ html.mobile #screen-garden .planter.gxhedge::after{inset:-12px; padding:10px; ba
 #screen-garden .dic .cart{width:1.35em; height:1.35em; vertical-align:-.3em}
 #screen-garden .dic.mut{filter:drop-shadow(0 0 4px rgba(178,124,232,.9))}
 #screen-garden .dic.sup{filter:drop-shadow(0 0 3px #fff) drop-shadow(0 0 6px rgba(255,200,80,.95)) drop-shadow(0 0 9px rgba(255,140,220,.7))}
-#screen-garden .dgrade{font-size:.8rem; padding:.05rem .45rem; border-radius:999px; background:#f1e8d4; color:#6b604e; cursor:pointer; white-space:nowrap}
+#screen-garden .dgrade{display:inline-flex; align-items:center; justify-content:space-between; gap:.3rem; min-width:9.5em; font-size:.8rem; padding:.1rem .5rem; border-radius:999px; background:#f1e8d4; color:#6b604e; cursor:pointer; white-space:nowrap; vertical-align:.08em}   /* 同じ幅で置く(段階で長さが変わっても、押す場所が動かない) */
+#screen-garden .dgrade i{font-style:normal; opacity:.7}
+#screen-garden .dnm{display:inline-block}
+/* スマホ: 料理名と段階の切りかえを1行に。切りかえは行の右端に固定し、名前が長いときは名前のほうを「…」で省く(段階を変えても改行しない) */
+html.mobile #screen-garden .rowi .nm:has(.dgrade){display:flex; flex-wrap:wrap; align-items:center; column-gap:.3rem}
+html.mobile #screen-garden .dnm{flex:1 1 0; min-width:0 !important; overflow:hidden; text-overflow:ellipsis; white-space:nowrap}
+html.mobile #screen-garden .rowi .nm .dgrade{flex:none; margin-left:auto; min-width:10.5em}
+html.mobile #screen-garden .rowi .nm:has(.dgrade) > small{flex-basis:100%}
 #screen-garden .dgrade.mut{background:#efe3ff; color:#7a3fc0}
 #screen-garden .dgrade.sup{background:linear-gradient(90deg,#fff1b8,#ffe0f2,#dff2ff); color:#a8701c}
 #screen-garden .dlack{color:#c0392b}
@@ -2539,9 +2583,12 @@ html.mobile #screen-garden .tbtn{padding:.5rem .7rem; font-size:.88rem}
 html.mobile #screen-garden .bar-row{gap:.4rem; margin-bottom:.6rem}
 html.mobile #screen-garden .slot{padding:.4rem .55rem; font-size:.88rem; gap:.3rem; min-height:2.8rem}
 html.mobile #screen-garden .seedsel .arr{
-  visibility:visible; font-size:1rem; padding:.35rem .5rem; margin:-.35rem 0;
+  visibility:visible; font-size:1.1rem; padding:.5rem .75rem; margin:-.45rem 0; min-width:2.4rem; text-align:center;
   border-radius:6px; background:rgba(0,0,0,.06); color:var(--ink);
 }
+html.mobile #screen-garden .seedsel{flex:1; min-width:0}   /* ◀ ▶ を左右の端に置き、名前の長さで押す場所が動かないように */
+html.mobile #screen-garden .seedsel .arr:first-child{margin-right:auto}
+html.mobile #screen-garden .seedsel .arr:last-child{margin-left:auto}
 html.mobile #screen-garden .fieldsel{gap:.35rem; padding:.3rem .5rem}
 html.mobile #screen-garden .fieldsel .fbtn{
   font-size:1rem; padding:.35rem .6rem; border-radius:6px; background:rgba(0,0,0,.08); color:var(--ink); cursor:pointer;
@@ -2557,6 +2604,7 @@ html.mobile #screen-garden .phead h2{font-size:1.15rem}
 html.mobile #screen-garden .tabs{flex-wrap:wrap}
 html.mobile #screen-garden .tabs::before, html.mobile #screen-garden .tabs::after{display:none}
 html.mobile #screen-garden .tab{flex:1; padding:.55rem .4rem; font-size:.9rem}
+html.mobile #g-shopTabs .tab{flex:1 1 30%; padding:.45rem .3rem}   /* お店はタブが6つなので、3つずつ2段に */
 html.mobile #screen-garden .plist{max-height:none; flex:1; min-height:0}
 html.mobile #screen-garden .gbody-scroll{max-height:none; flex:1; min-height:0}
 html.mobile #screen-garden .rowi .keyk{white-space:normal}
@@ -2566,7 +2614,7 @@ html.mobile #screen-garden .keyhint:empty{display:none}
 html.mobile #screen-garden .keyhint:not(#g-shopHint):not(#g-gachaHint){display:none}
 /* お知らせは下に出して、上のボタンを隠さない */
 /* スマホ: お知らせは下に小さく(2行まで・2つまで)。畑や道具を隠さないように */
-html.mobile #screen-garden #g-toasts{top:auto; bottom:max(8px, env(safe-area-inset-bottom)); left:50%; transform:translateX(-50%); align-items:center; flex-direction:column-reverse; width:calc(100% - 16px); gap:.25rem}
+html.mobile #screen-garden #g-toasts{top:auto; bottom:calc(max(8px, env(safe-area-inset-bottom)) + 2.6rem); left:50%; transform:translateX(-50%); align-items:center; flex-direction:column-reverse; width:calc(100% - 16px); gap:.25rem}
 html.mobile #screen-garden .toast{font-size:.74rem; padding:.25rem .6rem; line-height:1.4; border-width:1.5px; opacity:.94}
 html.mobile #screen-garden .gacts{justify-content:center}
 html.mobile #screen-garden .gacts{gap:.3rem}
@@ -2996,7 +3044,7 @@ html.mobile #screen-garden .grk-list{max-height:none; flex:1 1 auto; min-height:
       <div class="btn-row">
         <button class="btn primary" id="tqAgain">もう1セット <span class="kbdh">Enter</span></button>
         <button class="btn" id="tqToMenu">メニューへ <span class="kbdh">Esc</span></button>
-        <button class="btn" id="tqRankBtnR">ランキング <span class="kbdh">R</span></button>
+        <button class="btn mt-chatb" id="tqChatBtnR">💬 チャットへ <span class="kbdh">C</span></button>
         <button class="btn tq-gardenBtn">農園へ <span class="kbdh">G</span></button>
       </div>
       <div class="gstat tq-gstat" id="tqGstatR"></div>
@@ -3072,7 +3120,7 @@ html.mobile #screen-garden .grk-list{max-height:none; flex:1 1 auto; min-height:
       <button class="btn primary" id="retryBtn">もう一回 (Enter)</button>
       <button class="btn mt-chatb" id="mtChatBtn" hidden>💬 チャットへ (C)</button>
       <button class="btn" id="titleBtn">タイトルへ (Esc)</button>
-      <button class="btn" id="toGardenBtn">庭へ (G)</button>
+      <button class="btn" id="toGardenBtn">農園へ (G)</button>
     </div>
     <div class="mt-review" id="mtReview" hidden><h3>振り返り</h3><ol class="tq-res" id="mtReviewList"></ol><p class="hint pc-only">E 例文をまとめて開く・閉じる</p></div>
   </section>
@@ -3128,8 +3176,8 @@ html.mobile #screen-garden .grk-list{max-height:none; flex:1 1 auto; min-height:
     <div class="top">
       <div class="sign">キーボード農園</div>
       <div class="money"><span class="kicon"></span><span id="g-money">0</span><small>キー</small></div>
-      <div class="rate" id="g-rate"></div>
       <div class="buff" id="g-buff" hidden></div>
+      <div class="rate" id="g-rate"></div>
       <div class="wcmini" id="wcMini" hidden></div>
       <div class="sp"></div>
       <button class="tbtn shop" id="g-shopBtn">お店<span class="kb">Tab</span></button>
@@ -3203,6 +3251,7 @@ html.mobile #screen-garden .grk-list{max-height:none; flex:1 1 auto; min-height:
         <button class="tab" data-tab="0">種</button>
         <button class="tab" data-tab="1">道具・土地</button>
         <button class="tab" data-tab="2">効率化</button>
+        <button class="tab" data-tab="5">自動売却</button>
         <button class="tab" data-tab="4">レシピ</button>
         <button class="tab" data-tab="3">売る</button>
       </div>
@@ -3307,6 +3356,15 @@ html.mobile #screen-garden .grk-list{max-height:none; flex:1 1 auto; min-height:
       <p class="lyhint">すべての畑の、村人と設置物の並びを保存します。読み込むと、まだ育っている作物はそのまま、任された村人の速さで育ってから村人の作物に切り替わります</p>
       <div id="g-layoutList" class="lylist"></div>
       <div class="keyhint"><b>1〜3</b> 選ぶ ・ <b>N</b> 名前を付ける ・ <b>S</b> 今の配置を保存 ・ <b>Enter</b> 読み込む ・ <b>/</b> か <b>Esc</b> 閉じる</div>
+    </div>
+  </div>
+
+  <div class="modal" id="g-fsort">
+    <div class="panel layoutpanel">
+      <div class="phead"><h2>🔀 畑の並べ替え</h2><button class="sbtn xbtn" data-close>閉じる ✕</button></div>
+      <p class="lyhint">畑の順番を入れかえます。植わっている作物・大木・村人・設置物は、畑ごとそのまま動きます。</p>
+      <div id="g-fsortList" class="plist"></div>
+      <div class="keyhint" id="g-fsortHint"></div>
     </div>
   </div>
 
@@ -3458,7 +3516,7 @@ html.mobile #screen-garden .grk-list{max-height:none; flex:1 1 auto; min-height:
   </div>
 </div>
 <div id="tutRing"></div>
-<div id="tutBubble"><div id="tutStep"></div><div id="tutText"></div><div id="tutActs"></div></div>
+<div id="tutBubble"><button id="tutEnd" type="button" onclick="tutSkip()" hidden>ガイドを終える</button><div id="tutStep"></div><div id="tutText"></div><div id="tutActs"></div></div>
 <div id="stagePop"></div>
 <div id="countdown"></div>
 <div id="imeWarn">日本語入力がオンになっています。<b>半角英数</b>(「英数」キーや「半角/全角」キー)に切り替えてください</div>
@@ -4580,11 +4638,11 @@ function dbLabel(b){
   const v=DB_VAL[b.kind], x=v?v[b.lv]:0;
   return b.kind==="sap" ? `${DB_TREEN[b.lv]}の苗木`
     : b.kind==="neji" ? `キー ${Math.floor(dbNeji(b.lv)).toLocaleString("ja-JP")}`
-    : b.kind==="min" ? `1打の時短 +${x}分`
+    : b.kind==="min" ? `最後まで遊ぶと 1打の時間 +${x}分`
     : b.kind==="fuyo" ? `腐葉土 ${x}個`
     : b.kind==="rose" ? `薔薇の種 ${x}個`
-    : b.kind==="mut" ? `変異しやすさ +${x}%`
-    : b.kind==="sup" ? `超変異しやすさ +${x}%`
+    : b.kind==="mut" ? `最後まで遊ぶと 変異しやすさ +${x}%`
+    : b.kind==="sup" ? `最後まで遊ぶと 超変異しやすさ +${x}%`
     : `所持キーの ${x}%`;
 }
 /* タイトル: ご褒美の付いたモードを光らせて、中身を出す */
@@ -4600,7 +4658,8 @@ function refreshDaily(){
     let t=b.querySelector(".dbtag"); if(!x){ if(t) t.remove(); return; }
     if(!t){ t=document.createElement("div"); t.className="dbtag"; b.appendChild(t); }
     const left = x.kind==="sap" ? (()=>{ try{ return Garden.dailySapLeft(); }catch(e){ return 3; } })() : null;
-    t.textContent = `🎁 今日のご褒美 ${dbLabel(x)}` + (left!=null ? (left>0 ? ` ・ あと${left}本` : " ・ 今日はもらいました") : "");
+    const lb=dbLabel(x);
+    t.textContent = `🎁 今日のご褒美${/^最後まで/.test(lb)?"\n":" "}${lb}` + (left!=null ? (left>0 ? ` ・ あと${left}本` : " ・ 今日はもらいました") : "");
   });
 }
 /* 日替わりのご褒美が始まったお知らせ: 初めて付いたときに1回だけ(大木の解放のお知らせで話している人には出さない) */
@@ -5866,6 +5925,17 @@ function endBookGame(){
 /* ---------- 更新情報 ----------
    新しいものを上に足していく。d は YYYY-MM-DD */
 const NEWS=[
+  { d:"2026-10-31", t:"お店の自動売却タブと、斧の演出", items:[
+    "お店に「素朴な肥料」が並びました。作物にまくと、変異・超変異にならず、かならずふつうに実ります。大木にまくと、ふつうの木に戻ります",
+    "お店に「自動売却」のタブができました。作物を小さなマスで並べ、まとめて買う・まとめてオンオフもできます",
+    "斧で大木を切ると、木が倒れる演出と音が出るようになりました",
+    "ひまわりの種クッキーで村人が育てる作物に、お店にいつも並ぶ作物も入るようになりました",
+    "今日のご褒美の「1打の時間」と「変異しやすさ」は、そのモードを最後まで遊んだときだけ付きます。タイトルのご褒美の表示にも、そう書くようにしました",
+    "スマホのタイトルに、農園の寄り合いのボタンが出ていなかったのを直しました",
+    "スマホで、対戦の結果画面と、チャットの送るボタンがはみ出していたのを直しました",
+    "対戦の「もう一回」を2人が同時に押すと、片方が取り残されることがあったのを直しました",
+    "変異・超変異を手で収穫したとき、みんなの目標に数えられていなかったのを直しました",
+  ]},
   { d:"2026-10-27", t:"みんなで話せる「農園の寄り合い」と、対戦", items:[
     "みんなとリアルタイムで話せる「農園の寄り合い」ができました。ランキングと同じ名前で書き込みます。タイトルの「農園の寄り合い」か C キー、農園では右下の「チャット」ボタンか Enter で開けます",
     "作り置きの料理を投げられます。30分以内に「受け取る」を押した人に、食べたときと同じ効果が半分の時間かかります",
@@ -6939,11 +7009,14 @@ function mtFinish(toGarden){
   clearInterval(mtIv); mtIv=setInterval(mtResult,500);
 }
 function mtToChat(){ mtResultClose(); show("title"); openWorld(); }   // 結果から、チャットへ戻る
+/* スマホではキーがないので、ボタンの (Enter) などを外す */
+const kbLbl = s => window.IS_MOBILE ? s.replace(/ \((Enter|Esc|[A-Z])\)$/,"") : s;
+if(window.IS_MOBILE) for(const id of ["retryBtn","mtChatBtn","titleBtn","toGardenBtn"]){ const b=document.getElementById(id); if(b) b.textContent=kbLbl(b.textContent); }
 function mtResultBtns(){
   const m=mtRes&&mtRes.m; if(!m) return;
   $("mtChatBtn").hidden=false;
   $("resultKeys").innerHTML = `<b>Enter</b> ${m.ghost?"もう一回募集する":m.rm?"もう一回に参加":"同じメンバーでもう一回"} ・ <b>C</b> 農園の寄り合いへ ・ <b>Esc</b> タイトルへ ・ <b>G</b> 農園へ ・ <b>M</b> BGM`;
-  $("retryBtn").textContent = m.ghost ? "もう一回募集する (Enter)" : m.rm ? "もう一回に参加 (Enter)" : "もう一回 (Enter)";
+  $("retryBtn").textContent = kbLbl(m.ghost ? "もう一回募集する (Enter)" : m.rm ? "もう一回に参加 (Enter)" : "もう一回 (Enter)");
 }
 /* もう一回: だれかが先に作っていれば参加、なければ作って、前のメンバーを30秒待つ(そろえばすぐ始まる) */
 async function mtRematch(){
@@ -8656,7 +8729,7 @@ function btGrow(t,ms){
     t.g+=ms; const n=btNeed(t);
     if(t.g<n) return;
     t.g=n; t.rip=true; t.ready=true; t.fr=0;
-    if(!t.q){ const r=Math.random(); if(r<BT_MUT[1]) t.q=5; else if(r<BT_MUT[0]) t.q=3; }
+    if(!t.q && !t.plain){ const r=Math.random(); if(r<BT_MUT[1]) t.q=5; else if(r<BT_MUT[0]) t.q=3; }   // 素朴な肥料をまいた木は変異しない
     S.btRipe=(S.btRipe||0)+1; S.btRipeBy=S.btRipeBy||{}; S.btRipeBy[t.id]=(S.btRipeBy[t.id]||0)+1;
     btBookMark(t.id,t.q||0);
     if(t.q===3) S.btMut=(S.btMut||0)+1; if(t.q===5) S.btSup=(S.btSup||0)+1;   // 実績: 変異の大木 / 超変異の大木
@@ -8718,8 +8791,16 @@ function btFert(k,t){
     const q=sel==="mfert"?5:3;
     if(t.q>=q){ nope(k,`もう${t.q===5?"超変異":"変異"}の木です`); return; }
     if(!(S[sel]>0)){ nope(k,"ありません"); return; }
-    S[sel]--; t.q=q; hit(k); floatAt(k,q===5?"✧ 超変異":"✦ 変異"); sfx.fert();
+    S[sel]--; t.q=q; t.plain=false; hit(k); floatAt(k,q===5?"✧ 超変異":"✦ 変異"); sfx.fert();
     toast(`${ico(GUR[sel])} ${esc(GUR[sel].name)}で、${esc(btName(t))}になりました`,"good mut"+(q===5?" sup":""),5200,true);
+    return;
+  }
+  if(sel==="plain"){   // 素朴な肥料: ふつうの木に戻す(腐葉土の回数と倍率はそのまま)
+    if(!(S.plain>0)){ nope(k,"素朴な肥料がありません"); return; }
+    if(!t.q && t.plain){ nope(k,"もうふつうの木です"); return; }
+    S.plain--; if(!(S.plain>0)) S.fertSel="fert";
+    t.q=0; t.plain=true; hit(k); floatAt(k,"🌾 ふつうの木"); sfx.fert();
+    toast(`${ico(PLAIN)} 素朴な肥料で、${esc(btName(t))}になりました。実っても変異しません`,"",3600,true);
     return;
   }
   if(sel!=="fuyo" && sel!=="fuyo2"){ nope(k,"ふつうの肥料は大木には効きません。腐葉土を使います"); return; }
@@ -9113,6 +9194,8 @@ function treeSVG(t,stage,v,W,H,cx,base){
 return treeSVG;
 })();
 const FERT = { name:"肥料", icon:"🍂", cost:60, unlock:{sales:200} };
+const PLAIN_COST=10000;   // 素朴な肥料
+const PLAIN = { id:"plain", name:"素朴な肥料", art:`<svg viewBox="0 0 32 32"><path d="M9 9h14l3 17c.3 2-1 3.5-3 3.5H9c-2 0-3.3-1.5-3-3.5z" fill="#d9c39a"/><path d="M9 9h14l-1.5 3h-11z" fill="#b89a68"/><path d="M11 5c1.5 2 3 3 5 4 2-1 3.5-2 5-4" stroke="#8a6a3a" stroke-width="1.6" fill="none" stroke-linecap="round"/><path d="M16 25c0-4 0-7 0-9" stroke="#5f8f32" stroke-width="1.6" stroke-linecap="round"/><path d="M16 18c-3-.5-4.5-2.5-4.5-4.5 3 0 4.5 2 4.5 4.5zM16 20c3-.5 4.5-2.5 4.5-4.5-3 0-4.5 2-4.5 4.5z" fill="#7aa848"/></svg>` };
 /* 畑の追加チケット(n枚目を買う値段)。最大10枚 */
 const FIELD_PRICES = [0, 500, 3000, 12000, 40000, 150000, 500000, 1500000, 4000000, 10000000];
 /* 11枚目から先は、土地の権利書(わくわくガチャの GUR)1枚につき1枚買える。値段は 2,000万キーから1枚ごとに1.25倍 */
@@ -9189,7 +9272,7 @@ function normalize(o){
   s.ateCount=s.ateCount||0; s.prepCount=s.prepCount||0;
   if(s.buff && !(s.buff.d && s.buff.until)) s.buff=null;
   s.food=s.food||{}; s.mfert=s.mfert||0; s.sfert=s.sfert||0; s.sgVil=s.sgVil||0; s.kit=s.kit||{}; s.hourglass=s.hourglass||0; s.bento=s.bento||0; s.autoCook=s.autoCook||[]; if(![0,1,10].includes(s.cookKeep)) s.cookKeep=10; s.fav=s.fav||{}; s.fav.s=s.fav.s||{}; s.fav.d=s.fav.d||{}; s.kamado=s.kamado||""; s.sgCrop=s.sgCrop||"carrot";
-  if(!["fert","sfert","mfert","fuyo","fuyo2"].includes(s.fertSel)) s.fertSel="fert";
+  if(!["fert","sfert","mfert","plain","fuyo","fuyo2"].includes(s.fertSel)) s.fertSel="fert";
   s.villagers=s.villagers||0; s.vLog=s.vLog||{}; s.vilLv=s.vilLv||0;
   if(!s.owner) s.owner=Math.random().toString(36).slice(2)+Date.now().toString(36);
   s.rankName=s.rankName||"";
@@ -9262,7 +9345,7 @@ function grow(p,add,base,src,rate){   // rate: 1ms で進む量(薔薇の案山�
     const when=base+(n-before)/(rate || (src==="t"?effGrowth():1));
     if(CROP[p.crop.id].half){ p.crop.rolled=true; halfRipen(p,when); return; }
     // 実った瞬間に変異かどうかが決まる(畑で変異の絵が見える)
-    const r = (p.crop.tut || p.crop.mut) ? 0 : rollMut(p.crop.id);   // 不思議な肥料でもう決まっている作物は抽選しない
+    const r = (p.crop.tut || p.crop.mut || p.crop.plain) ? 0 : rollMut(p.crop.id);   // 不思議な肥料・素朴な肥料でもう決まっている作物は抽選しない
     if(r){ p.crop.mut=true; if(r===5) p.crop.sup=true; }
     p.crop.rolled=true;
     if(CROP[p.crop.id].rose) roseSecret(p, src, when);
@@ -9814,7 +9897,7 @@ function applySkip(minutes,src="s"){   // src: s タイピングの時短 / k �
   return n;
 }
 function skipFields(minutes,now,src="s"){
-  const rate = src==="k" ? Infinity : undefined;   // 庭の時計: 実った時刻は「今」
+  const rate = Infinity;   // 時短・庭の時計: まとめて進むので、実った時刻は「今」
   let n=0;
   S.fields.forEach((f,fi)=>{
     const cov=covered(fi);
@@ -9988,7 +10071,16 @@ const sfx={
 /* ---------- 表示用の小道具 ---------- */
 const $=id=>document.getElementById(id);
 const root=$("screen-garden");
-const fmtNum=n=>Math.floor(n).toLocaleString("ja-JP");
+const NUM_UNITS=["","万","億","兆","京","垓","𥝱","穣","溝","澗","正","載","極"];
+/* 1億以上の数を、万・億・兆…の単位で書く。mode 1: 全部(10兆0000億0000万0000) / 2: 上の2つ(10兆0000億) */
+function numJp(str,mode){
+  const neg=str.startsWith("-"), d=neg?str.slice(1):str; if(d.length<=8) return null;
+  const g=[]; for(let i=d.length;i>0;i-=4) g.unshift(d.slice(Math.max(0,i-4),i));
+  const parts=g.map((x,i)=>(i?x:String(+x))+NUM_UNITS[g.length-1-i]), out=mode===2?parts.slice(0,2):parts;
+  return (neg?"-":"")+out.join("");
+}
+const numStr = s => { const m=(typeof S!=="undefined"&&S&&S.numMode)||0; return (m && numJp(s,m)) || BigInt(s).toLocaleString("ja-JP"); };
+const fmtNum=n=>{ const v=Math.floor(n); if(!((typeof S!=="undefined")&&S&&S.numMode) || Math.abs(v)<1e8 || !isFinite(v)) return v.toLocaleString("ja-JP"); try{ return numStr(BigInt(v).toString()); }catch(e){ return v.toLocaleString("ja-JP"); } };
 /* 9000兆を超えても1の位まで数える(キー・薔薇ガチャコイン・種)。
    ふつうの数は9000兆を超えると細かい桁を持てず、小さい足し引きが丸めで消える。消えた分を S.xc[キー] に「端数」としてためておき、
    たまって本体の刻みを超えたら本体に移す。9000兆より小さいあいだは、端数はいつも 0(これまでと同じ) */
@@ -10011,7 +10103,7 @@ function xAdd(o,k,x,ck=k){
 function xFmt(v,ck){
   const c=(S.xc&&S.xc[ck])||0;
   if(Math.abs(v)<2**53) return fmtNum(v+c);
-  try{ return (BigInt(Math.floor(v))+BigInt(Math.round(c))).toLocaleString("ja-JP"); }catch(e){ return fmtNum(v+c); }
+  try{ return numStr((BigInt(Math.floor(v))+BigInt(Math.round(c))).toString()); }catch(e){ return fmtNum(v+c); }
 }
 const xBig = (v,ck) => BigInt(Math.floor(v||0))+BigInt(Math.round((S.xc&&S.xc[ck])||0));   // 端数まで入れた正確な数
 function xAddBig(o,k,b,ck=k){ const hi=Number(b); xAdd(o,k,hi,ck); xAdd(o,k,Number(b-BigInt(hi)),ck); }   // 正確な数を足す(本体に入るぶんと、その残り)
@@ -10045,8 +10137,12 @@ function flushToastBatch(){
   if(!b || !b.length) return;
   toast(b.map(x=>x.h).join(" ・ "), "good", Math.max(...b.map(x=>x.ms))+(b.length>1?1500:0), true);
 }
+let toastHold=[];   // ガチャの演出中に届いたお知らせ(終わってから出す)
+setInterval(()=>{ if(toastHold.length && !(modal==="gacha" && gachaBusy())){ const h=toastHold; toastHold=[]; toastBatch=[]; for(const a of h) toast(...a); flushToastBatch(); } },400);
 function toast(text,kind="",ms=2600,html=false){
   const imp=toastImp(String(text),kind);
+  if(!imp && typeof tutStep==="function" && tutStep()) return;   // はじめてガイドの途中は、ふつうのお知らせを出さない(吹き出しの邪魔になる)
+  if(modal==="gacha" && gachaBusy()){ toastHold.push([text,kind,ms,html]); return; }   // ガチャの演出中は、終わってからまとめて出す
   if(toastBatch && !imp){ toastBatch.push({ h:html?String(text):esc(String(text)), ms }); return; }
   if(window.IS_MOBILE && !imp) ms=Math.min(ms,3200);   // スマホは短く(画面を長くふさがない)
   const key=String(text);
@@ -10275,22 +10371,32 @@ function renderInfo(){
   $("g-infoBig").innerHTML=big;
   $("g-infoSub").innerHTML=sub.join("<br>");
 }
+/* 料理名の欄の幅: その料理の段階ごとに出る名前(まだ作っていない段階は「？？？(〇〇の変異)」)のいちばん長いもの */
+const dnW = d => Math.max(12, ...gradesOf(d).map(g=>(!isMutT(g) || (S.dishMade[d.id]||{})[bookKeyOf(g)]) ? dishName(d,g).length : `？？？(${d.name}の${gradeName(g)})`.length));   // 12文字ぶんを基本に、長い名前の料理だけ広げる(段階を変えても、切りかえの位置が動かない)
 /* 収穫かご: S.inv[id] = [ふつう, ☆, ☆☆] */
 const invN = (id,t) => (S.inv[id]&&S.inv[id][t])||0;
 const invAdd = (id,t,n) => { S.inv[id]=S.inv[id]||[0,0,0]; S.inv[id][t]=(S.inv[id][t]||0)+n; };
 const invTotal = () => { let n=0,v=0; for(const c of CROPS.concat(ROSE_ALL)) for(const t of TIERS){ const m=invN(c.id,t); n+=m; v+=m*priceOf(c.id,t); } return {n,v}; };
+let basketOpen=false;   // 収穫かごを全部見せているか
+const BASKET_SHOW=12;    // たたんでいるときに見せる枚数
 function renderBasket(){
-  const out=[];
-  for(const c of CROPS.concat(ROSE_ALL)) for(const t of QORDER){   // ふつう → ☆ → ☆☆ → ☆☆☆ → 変異 → 超変異
-    const n=invN(c.id,t); if(n<=0) continue;
-    out.push(`<span class="chip${t?" q"+t:""}">${icoQ(c,t)} ${esc(qName(c.id,t))} ×${fmtNum(n)}</span>`);
+  const cards=[];
+  for(const c of CROPS.concat(ROSE_ALL)){   // 作物ごとに1枚: 合計と、ふつう → ☆ → ☆☆ → ☆☆☆ → 変異 → 超変異 の数
+    const qs=QORDER.map(t=>[t,invN(c.id,t)]).filter(([,n])=>n>0); if(!qs.length) continue;
+    const tot=qs.reduce((a,[,n])=>a+n,0), top=Math.max(...qs.map(([t])=>t===4?2.5:t));
+    const pills=qs.map(([t,n])=>`<i class="bq q${t}" title="${esc(qName(c.id,t))}">${t===3||t===5?icoQ(c,t):(QUALITY[t].mark||"ふつう")}${fmtNum(n)}</i>`).join("");
+    cards.push({ n:tot, h:`<span class="bcard${qs.some(([t])=>t===5)?" q5":qs.some(([t])=>t===3)?" q3":""}" data-b="${c.id}"><span class="bhd">${ico(c)} ${esc(c.rose?qName(c.id,0):c.name)} <b>${fmtNum(tot)}</b></span><span class="bqs">${pills}</span></span>` });
   }
-  for(const f of FOODS){
-    const n=foodN(f.id); if(n<=0) continue;
-    out.push(`<span class="chip food${f.up?" up":""}">${ico(f)} ${esc(f.name)} ×${fmtNum(n)}</span>`);
+  for(const f of FOODS){   // 食材: ふつうと上位種を1枚に
+    if(f.up) continue;
+    const u=upOf(f.id), n=foodN(f.id), un=u&&!u.work?foodN(u.id):0; if(n+un<=0) continue;
+    cards.push({ n:n+un, h:`<span class="bcard food${un?" q3":""}" data-b="${f.id}"><span class="bhd">${ico(f)} ${esc(f.name)} <b>${fmtNum(n+un)}</b></span>${un?`<span class="bqs"><i class="bq">ふつう${fmtNum(n)}</i><i class="bq q3">上位${fmtNum(un)}</i></span>`:""}</span>` });
   }
-  patchHTML($("g-basket"), out.length ? out.join("") : `<span class="empty">まだ何もありません。実った作物を${kb("素手(1)","素手")}で収穫しましょう</span>`);   // 変わった品だけ描き直す
+  const more=cards.length-BASKET_SHOW, shown=basketOpen||more<=1 ? cards : cards.slice(0,BASKET_SHOW);
+  const html = shown.map(x=>x.h).join("") + (more>1 ? `<button class="sbtn bmore" data-bmore>${basketOpen?"たたむ ▲":`ほかに ${more}種類 ▼`}</button>` : "");
+  patchHTML($("g-basket"), cards.length ? html : `<span class="empty">まだ何もありません。実った作物を${kb("素手(1)","素手")}で収穫しましょう</span>`);   // 変わった品だけ描き直す
 }
+$("g-basket").addEventListener("click",e=>{ if(e.target.closest("[data-bmore]")){ basketOpen=!basketOpen; renderBasket(); } });
 /* 手持ちの種・設置物(1つ以上あるもの) */
 /* 種の並びは売値の安い順(貴重品の種は最後)。◀ ▶ もこの順に動く */
 const seedRank = id => { const c=CROP[id]; return !c ? 0 : (c.treasure ? Infinity : c.price); };
@@ -10341,7 +10447,7 @@ function renderBar(){
   const fMany=ownedFerts().length>1;   // 肥料が1種類だけなら ◀ ▶ は出さない
   $("g-fertArrL").classList.toggle("none",!fMany); $("g-fertArrR").classList.toggle("none",!fMany);
   if(S.fertSel==="fert"){ $("g-fertIc").innerHTML=FERT.icon; $("g-fertNm").textContent="肥料"; $("g-fertCnt").textContent="×"+S.fert; }
-  else if(WORK_KEEP[S.fertSel]){ const w=WORK_KEEP[S.fertSel]; $("g-fertIc").innerHTML=ico(w); $("g-fertNm").textContent=w.name; $("g-fertCnt").textContent="×"+S[S.fertSel]; }
+  else if(WORK_KEEP[S.fertSel] || S.fertSel==="plain"){ const w=WORK_KEEP[S.fertSel]||PLAIN; $("g-fertIc").innerHTML=ico(w); $("g-fertNm").textContent=w.name; $("g-fertCnt").textContent="×"+S[S.fertSel]; }
   else{ const g=GUR[S.fertSel]; $("g-fertIc").innerHTML=ico(g); $("g-fertNm").textContent=g.name; $("g-fertCnt").textContent="×"+S[S.fertSel]; }
   // 設置物
   const oo=ownedObjs();
@@ -10523,6 +10629,7 @@ function act(k){
     }
     case 5: { // 肥料: 育成中の作物を一気に進める
       if(S.fertSel==="fuyo"||S.fertSel==="fuyo2"){ nope(k,"腐葉土は大木にだけまけます"); break; }
+      if(S.fertSel==="plain"){ plainFert(k,p); break; }
       if(S.fertSel!=="fert"){ magicFert(k,p,S.fertSel); break; }
       if(S.fert<=0){ nope(k,kb("肥料がありません。Tab でお店へ","肥料がありません。お店で買えます")); break; }
       if(!p.crop){ nope(k,"作物が植わっていません"); break; }
@@ -10531,7 +10638,7 @@ function act(k){
       if((p.crop.fert||0)>=fmax){ nope(k,`この作物に肥料はもう${fmax}回使っています`); break; }
       p.crop.fert=(p.crop.fert||0)+1;
       if(Math.random()<ev("η",.5,1,0)) floatAt(k,"🍂 減らなかった!"); else S.fert--;
-      grow(p, need(p.crop)*effFert(), Date.now(), "f");
+      grow(p, need(p.crop)*effFert(), Date.now(), "f", Infinity);   // 実った時刻は「今」
       if(!p.crop){ hit(k); sfx.fert(); break; }   // 薔・薇: 実って消えた
       if(isRipe(p)) p.crop.ripeAt=Date.now();
       hit(k); floatAt(k,`🍂 ${p.crop.fert}/${fmax===Infinity?"∞":fmax}`); sfx.fert();
@@ -10653,6 +10760,69 @@ function layoutKey(e){
 }
 function openLayout(){ if(S.layoutOwned && S.layoutOff) return;   // 使っていないときは開かない(保存したセットは残る)
   if(!S.layoutOwned){ sfx.nope(); toast(`配置セットは、お店の「効率化」で買えます`,"warn",3000); return; } openModal("layout"); }
+/* 畑の並べ替え */
+const FSORT_PRICE=1000000;
+let fsCur=0, fsFlash=null;   // fsFlash: 動かしたばかりの行(光らせる)
+const SOROBAN_PRICE=10000000;
+function buySoroban(){
+  if(S.soroban) return;
+  if(!spend(SOROBAN_PRICE)) return;
+  S.soroban=true; S.numMode=1;
+  toast("🧮 そろばんを買いました。大きな数を、万・億・兆で区切って出します(お店の効率化で切りかえ)","good",4200);
+  save(); renderAll();
+}
+function numModeStep(d){ S.numMode=((S.numMode||0)+d+3)%3; sfx.tab(); save(); renderAll(); }
+function buyFsort(){
+  if(S.fsortOwned) return;
+  if(!spend(FSORT_PRICE)) return;
+  S.fsortOwned=true;
+  toast("🔀 畑の並べ替えを買いました。お店の効率化から開けます","good",4200);
+  save(); renderAll();
+}
+/* 畑の中身を短く: 大木 → 多い作物3つ → 村人 */
+function fieldBrief(f){
+  const out=[], cnt={};
+  for(const [,t] of btTrees(f)) out.push(`${BTS[t.id].icon}${esc(btName(t))}`);
+  let vil=0;
+  for(const k of KEYS){ const p=f[k]; if(p.vil) vil++; if(p.crop && p.bt==null) cnt[p.crop.id]=(cnt[p.crop.id]||0)+1; }
+  for(const [id,n] of Object.entries(cnt).sort((a,b)=>b[1]-a[1]).slice(0,3)){ const c=CROP[id]; if(c) out.push(`${ico(c)}${esc(c.name)}×${n}`); }
+  if(vil) out.push(`🧑‍🌾村人×${vil}`);
+  return out.length ? out.join(" ・ ") : "何も植えていない";
+}
+function renderFsort(){
+  const F=S.fields; fsCur=Math.max(0,Math.min(fsCur,F.length-1));
+  const M=!!window.IS_MOBILE;
+  $("g-fsortList").innerHTML=F.map((f,i)=>`<div class="rowi ${i===fsCur?"cur":""}" data-i="${i}">
+      <div class="ic">${i+1}</div>
+      <div><div class="nm">畑 ${i+1}${i===S.cur?' <span style="color:var(--ink-l)">今いる畑</span>':""}</div><div class="ds">${fieldBrief(f)}</div></div>
+      <div class="keyk"><div class="fsmv"><button class="sbtn" data-mv="-1"${i===0?" disabled":""}>▲</button><button class="sbtn" data-mv="1"${i===F.length-1?" disabled":""}>▼</button><button class="sbtn" data-go="1">行く</button></div></div></div>`).join("");
+  $("g-fsortHint").innerHTML = M ? "▲ ▼ でその畑を上・下に動かします ・ 行く でその畑へ" : "<b>↑ ↓</b> 選ぶ ・ <b>Shift+↑ ↓</b> か ▲ ▼ で選んだ畑を上・下に動かす ・ <b>Enter</b> か 行く でその畑へ ・ <b>Esc</b> お店に戻る";
+  if(fsFlash!=null){ const el=$("g-fsortList").querySelector(`.rowi[data-i="${fsFlash}"]`); if(el){ el.classList.remove("fsflash"); void el.offsetWidth; el.classList.add("fsflash"); } fsFlash=null; }
+  keepVisible($("g-fsortList"));
+}
+function fsMove(dir){
+  if(realFields){ sfx.nope(); toast("はじめてガイドの練習中は並べ替えられません","warn"); return; }
+  const F=S.fields, i=fsCur, j=i+dir; if(j<0 || j>=F.length) return;
+  [F[i],F[j]]=[F[j],F[i]];
+  if(S.cur===i) S.cur=j; else if(S.cur===j) S.cur=i;   // 見ている畑はそのまま
+  for(const L of (S.layouts||[])) if(L && L.f){ [L.f[i],L.f[j]]=[L.f[j],L.f[i]]; }   // 配置セットも畑と一緒に動かす
+  fsCur=j; fsFlash=j; sfx.tab(); save(); renderAll(); renderFsort();
+  toast(`畑 ${i+1} と 畑 ${j+1} を入れかえました`,"",1800);
+}
+function fsGo(i){ if(realFields) return; S.cur=i; save(); closeModal(true); renderAll(); toast(`畑 ${i+1} へ移りました`,"",1800); }
+function fsKey(e){
+  const k=e.key, n=S.fields.length;
+  if(k==="Escape"){ e.preventDefault(); openModal("shop"); return; }
+  if(k==="ArrowUp"||k==="ArrowDown"){ e.preventDefault(); const d=k==="ArrowDown"?1:-1; if(e.shiftKey) fsMove(d); else { fsCur=(fsCur+d+n)%n; sfx.cursor(); renderSoon(renderFsort); } return; }
+  if(k==="Enter"){ e.preventDefault(); fsGo(fsCur); }
+}
+$("g-fsortList").addEventListener("click",e=>{
+  const row=e.target.closest && e.target.closest(".rowi"); if(!row) return;
+  fsCur=+row.dataset.i;
+  const b=e.target.closest("[data-mv]"); if(b){ fsMove(+b.dataset.mv); return; }
+  if(e.target.closest("[data-go]")){ fsGo(fsCur); return; }
+  renderFsort();
+});
 function buyLayout(){
   if(S.layoutOwned) return;
   if(!spend(LAYOUT_PRICE)) return;
@@ -10668,6 +10838,7 @@ function magicFert(k,p,id){
   const c=CROP[p.crop.id];
   if(c.treasure || p.crop.tut || !(id==="mfert"?hasSup(c.id):hasMut(c.id))){ nope(k,"この作物には使えません"); return; }
   if(p.crop.sup){ nope(k,"もう超変異が実ります"); return; }
+  p.crop.plain=false;   // 素朴な肥料のあとに、不思議な肥料をまいたとき
   if(id==="mfert"){ p.crop.mut=true; p.crop.sup=true; p.crop.mutN=3; }
   else{
     if(p.crop.mutN>=3){ nope(k,"もう不思議な肥料を使っています"); return; }
@@ -10684,7 +10855,7 @@ function setTool(t){
 }
 /* ← →: 設置を持っているときは設置物、それ以外は種を切り替える */
 function axeSwap(){ S.axeOn=!S.axeOn; toast(S.axeOn?"🪓 斧に持ちかえました(大木を切ります)":`✋ ${sickleInfo().name}に持ちかえました`,"",2000); }
-const ownedFerts = () => ["fert", ...["sfert","mfert","fuyo","fuyo2"].filter(id=>S[id]>0)];
+const ownedFerts = () => ["fert", ...["sfert","mfert","plain","fuyo","fuyo2"].filter(id=>S[id]>0)];
 function cycleSel(dir){
   if(S.tool===1){ if(S.axe){ axeSwap(); sfx.cursor(); save(); renderBar(); } return; }   // 素手と斧
   if(S.tool===5 && ownedFerts().length>1){
@@ -10719,7 +10890,7 @@ function openModal(name){
   $("g-"+name).classList.add("open");
   if(name==="shop") renderShop();
   if(name==="gacha"){ rgView="gacha"; renderGacha(); }   // 開いたときは、いつもガチャの画面から(コインに変換の画面を開いたままにしない)
-  if(name==="treas") renderTreas();
+  if(name==="treas"){ treasScrolled=""; renderTreas(); }
   if(name==="book"){ bookQ=""; $("g-bookQ").value=""; bookShowDetail("g-book",false); renderBook(); }
   if(name==="rank") prepareRank();
   if(name==="goal") renderGoals();
@@ -10728,6 +10899,7 @@ function openModal(name){
   if(name==="pick") renderPick();
   if(name==="cvpick") renderCvPick();
   if(name==="layout"){ lyAsk=null; renderLayout(); }
+  if(name==="fsort"){ fsCur=S.cur||0; renderFsort(); }
   if(SPACE_ALL.some(([m])=>m===name)) renderSpaceTabs();
 }
 function closeModal(silent){
@@ -10768,9 +10940,9 @@ function keepVisible(listEl){
 
 /* ---------- お店(キーボード操作) ----------
    ← → タブ / ↑ ↓ 品物 / Enter 1つ買う・1つ売る / Shift+Enter 10買う・全部売る / A すべて売る */
-const SHOP_TABS=["種","道具・土地","効率化","売る","レシピ"];
-const SHOP_ORDER=[0,1,2,4,3];   // 画面での並び: 種 / 道具・土地 / 効率化 / レシピ / 売る
-let shopTab=0, shopCur=[0,0,0,0,0];   // タブごとの選択位置(種・道具・効率化・売る・レシピ)
+const SHOP_TABS=["種","道具・土地","効率化","売る","レシピ","自動売却"];
+const SHOP_ORDER=[0,1,2,5,4,3];   // 画面での並び: 種 / 道具・土地 / 効率化 / 自動売却 / レシピ / 売る
+let shopTab=0, shopCur=[0,0,0,0,0,0];   // タブごとの選択位置(種・道具・効率化・売る・レシピ・自動売却)
 function shopRows(){
   const rows=[];
   const money=S.money;
@@ -10815,6 +10987,10 @@ function shopRows(){
       nm: fOk?`${FERT.name} <span style="color:var(--ink-l)">${FERT.cost}キー</span>`:"？？？",
       ds: fOk?`育成中の作物にまくと、必要な時間の${Math.round(effFert()*100)}%ぶん一気に育ちます(${kb("5 で持つ","道具の「肥料」で使う")})。1つの作物には2回まで ・ 手持ち ${S.fert}`:unlockText(FERT.unlock),
       keys: fOk?"<b>Enter</b> 1つ<br><b>Shift+Enter</b> 10個":"", enter:()=>fOk&&buyFert(1), shift:()=>fOk&&buyFert(10) });
+    if(fOk) rows.push({ ic:ico(PLAIN),
+      nm:`${PLAIN.name} <span style="color:var(--ink-l)">${fmtNum(PLAIN_COST)}キー</span>`,
+      ds:`作物にまくと、変異・超変異にならず、かならずふつうに実ります。大木にまくと、ふつうの木に戻ります ・ 手持ち ${S.plain||0}`,
+      keys:"<b>Enter</b> 1つ<br><b>Shift+Enter</b> 10個", enter:()=>buyPlain(1), shift:()=>buyPlain(10) });
     rows.push({ locked:!aOk, ic: aOk?ico(FUYO):"❔",
       nm: aOk ? `腐葉土 <span style="color:var(--ink-l)">${fmtNum(FUYO_COST)}キー ・ 1日1つまで</span>` : "？？？",
       ds: aOk ? `大木にまくと、その木の成長速度が2倍になります(1本に2回まで・切るまで続く)。工房で杉の葉からも作れます ・ 手持ち ${S.fuyo||0}${fuyoToday()?" ・ 今日はもう買いました":""}` : unlockText(BT_UNLOCK),
@@ -10850,13 +11026,14 @@ function shopRows(){
         : (S.got.deed||0)>0 ? `土地の権利書があると、もう1枚買えます(今は ${nf}枚)`
         : `お店で買える畑はここまでです(今は ${nf}枚)`,   // 権利書はシークレット: 1枚も手に入れていなければ書かない
       keys: can?"<b>Enter</b> 買う":"", enter:()=>can&&buyField(), shift:()=>can&&buyField() });
-  }else if(shopTab===2){
-    // 効率化: 作物ごとの自動売却(自動売却の値段の安い順。同じ値段なら作物の売値の安い順)
+  }else if(shopTab===5){
+    autoSumRows(rows);   // まとめて買う・まとめて切りかえ
+    // 自動売却: 作物ごとに小さなマスで並べる(自動売却の値段の安い順。同じ値段なら作物の売値の安い順)
     for(const c of CROPS.filter(c=>!c.treasure).sort((a,b)=>autoCost(a.id)-autoCost(b.id) || a.price-b.price)){
       const a=autoOf(c.id);
       const seen=(S.harvestBy[c.id]||0)>0;   // 一度も収穫していない作物は名前を伏せる
       if(!seen){
-        rows.push({ locked:true, ic:"❔", nm:"？？？の自動売却",
+        rows.push({ cell:true, cnm:"？？？", sub:"一度収穫すると出ます", locked:true, ic:"❔", nm:"？？？の自動売却",
           ds:"この作物を一度収穫すると、ここに表示されます",
           keys:"", enter:()=>{}, shift:()=>{} });
         continue;
@@ -10864,7 +11041,11 @@ function shopRows(){
       const ready=tierOf(c.id)>=2;   // ☆☆ まで育てた作物だけが解禁される
       const left=Math.max(0, QUALITY[2].need-(S.harvestBy[c.id]||0));
       const on=v=>v?'<b style="color:#2e7d32">オン</b>':'<span style="color:var(--ink-l)">オフ</span>';
+      const chip=(w,nm)=>`<button class="acchip${a[w]?" on":""}" data-act="${w==="c"?"enter":"shift"}">${nm} ${a[w]?"オン":"オフ"}</button>`;
       rows.push({
+        cell:true, cnm:esc(c.name),
+        sub: a ? "" : ready ? `${fmtNum(autoCost(c.id))}キー` : `${QUALITY[2].mark} まで あと${fmtNum(left)}個`,
+        chips: a ? `<div class="acchips">${chip("c","収穫物")}${chip("s","種")}</div>` : ready ? `<div class="acchips"><button class="acchip buy" data-act="enter">買う</button></div>` : "",
         locked: !a && !ready,
         ic: ico(c),
         nm: a?`${c.name}の自動売却 <span style="color:var(--ink-l)">購入済み</span>`
@@ -10878,6 +11059,7 @@ function shopRows(){
         shift: ()=>a?toggleAuto(c.id,"s"):(ready&&buyAuto(c.id)),
       });
     }
+  }else if(shopTab===2){
     // 貴重品の種の自動売却(貴重品をはじめて手に入れてから並べる)と、仕分け帳
     if(treasSeen()){
       const st=S.treasSell||0;
@@ -10952,6 +11134,23 @@ function shopRows(){
       else rows.push({ ic:"🗂️", nm:`配置セット <span style="color:var(--ink-l)">${S.layoutOff?"使っていない":"使っている"}</span>`,
         ds:S.layoutOff?"使わないあいだは、上のボタンと / キーが出ません。保存したセットは消えません":"農園で / を押すか、上のボタンで開きます", keys:`<b>Enter</b> ${S.layoutOff?"使う":"使わない"}`, enter:()=>{ S.layoutOff=!S.layoutOff; sfx.tab(); save(); renderAll(); }, shift:()=>{} });
     }
+    // そろばん: 大きな数の書き方を切りかえる
+    if(S.money>=1e8 || S.soroban){
+      const ex=["10,000,000,000,000","10兆0000億0000万0000","10兆0000億"];
+      if(!S.soroban) rows.push({ ic:"🧮", nm:`そろばん <span style="color:var(--ink-l)">${fmtNum(SOROBAN_PRICE)}キー</span>`,
+        ds:`大きな数の書き方を切りかえられるようになります。「${ex[1]}」のように万・億・兆で区切ったり、「${ex[2]}」のように短くしたりできます`,
+        keys:"<b>Enter</b> 買う", enter:buySoroban, shift:buySoroban });
+      else rows.push({ ic:"🧮", nm:`そろばん <span style="color:var(--ink-l)">${["そのまま","万・億・兆で区切る","短く"][S.numMode||0]}</span>`,
+        ds:`大きな数の書き方 ・ 今は「${ex[S.numMode||0]}」のように出します`,
+        keys:"<b>Enter</b> 書き方を切りかえ", enter:()=>numModeStep(1), shift:()=>numModeStep(-1) });
+    }
+    // 畑の並べ替え: 畑の順番を入れかえる(大木や薔薇の畑を好きな番号に)
+    if(FS().length>=2){
+      if(!S.fsortOwned) rows.push({ ic:"🔀", nm:`畑の並べ替え <span style="color:var(--ink-l)">${fmtNum(FSORT_PRICE)}キー</span>`,
+        ds:"畑の順番を入れかえられるようになります。大木や薔薇の畑を、好きな番号に動かせます。一度買えばずっと使えます",
+        keys:"<b>Enter</b> 買う", enter:buyFsort, shift:buyFsort });
+      else rows.push({ ic:"🔀", nm:"畑の並べ替え", ds:"畑の順番を入れかえます", keys:"<b>Enter</b> 開く", enter:()=>openModal("fsort"), shift:()=>openModal("fsort") });
+    }
     // 大連ガチャの演出セット: 1,111連以上で、いろいろな演出がランダムで出る(1つ買えば、どのガチャでも)
     if(["n","w","r"].some(m=>gachaPass(1111,m))){
       if(!S.megaSet) rows.push({ ic:"🎆", nm:`大連ガチャの演出セット <span style="color:var(--ink-l)">${fmtNum(MEGA_SET_PRICE)}キー</span>`,
@@ -11015,10 +11214,13 @@ function renderShop(){
   if(!rows.length){
     body.phtml=`<p class="empty" style="padding:1rem .4rem">売れるものがありません。実った作物を${kb("素手(1)","素手")}で収穫してから来てください(余った種もここで売れます)。</p>`;
   }else{
-    body.phtml=rows.map((r,i)=>`<div class="rowi ${r.locked?"locked":""} ${i===cur?"cur":""}" data-i="${i}">
+    const cells=rows.some(r=>r.cell);
+    body.phtml=rows.map((r,i)=>r.cell ? "" : `<div class="rowi ${r.locked?"locked":""} ${i===cur?"cur":""}" data-i="${i}">
       <div class="ic">${r.ic}</div>
       <div><div class="nm">${r.nm}</div><div class="ds">${r.ds}</div></div>
-      <div class="keyk">${window.IS_MOBILE ? (r.locked?"":shopActBtns(r.keys)) : (i===cur?r.keys:"")}</div></div>`).join("");
+      <div class="keyk">${window.IS_MOBILE ? (r.locked?"":shopActBtns(r.keys)) : (i===cur?r.keys:"")}</div></div>`).join("")
+      + (cells ? `<div class="acgrid">${rows.map((r,i)=>!r.cell ? "" : `<div class="rowi acell ${r.locked?"locked":""} ${i===cur?"cur":""}" data-i="${i}">
+      <div class="acth"><span class="ic">${r.ic}</span><span class="acnm">${r.cnm}</span></div>${r.sub?`<div class="acsub">${r.sub}</div>`:""}${r.chips||""}</div>`).join("")}</div>` : "");
   }
   const total=invTotal().v;
   if(window.IS_MOBILE){
@@ -11029,6 +11231,7 @@ function renderShop(){
   }
   $("g-shopHint").innerHTML =
     `<b>← →</b> ${SHOP_ORDER.map(i=>i===shopTab?`「${SHOP_TABS[i]}」`:SHOP_TABS[i]).join(" / ")} ・ <b>↑ ↓</b> 選ぶ ・ <b>Enter</b> / <b>Shift+Enter</b> 決定`+
+    (shopTab===5 ? " ・ 作物のマスでは <b>← → ↑ ↓</b> で選ぶ(タブの切りかえは上の3行で)" : "")+
     (shopTab===3 && total>0 ? ` ・ <b>A</b> 作物をすべて売る(${fmtNum(total)}キー・種・食材と変異・超変異は売りません)` : "")+
     ` ・ <b>Tab</b> / <b>Esc</b> 閉じる`;
   keepVisible(body);
@@ -11047,6 +11250,14 @@ function shopActBtns(keys){
 function shopKey(e){
   const k=e.key;
   if(k==="Escape"||k==="Tab"){ e.preventDefault(); closeModal(); return; }
+  if(shopTab===5 && /^Arrow/.test(k)){   // 自動売却のマス: ← → ↑ ↓ で並びのとおりに動く(上のまとめの行では、← → でタブを切りかえ)
+    const n=shopRowCache.length, i=shopCur[5], first=shopRowCache.findIndex(x=>x.cell);
+    if(first>=0 && i>=first){
+      const cells=[...$("g-shopBody").querySelectorAll(".acell")], top0=cells[0]?cells[0].offsetTop:0, cols=Math.max(1,cells.filter(c=>c.offsetTop===top0).length);
+      const j = k==="ArrowLeft" ? Math.max(first,i-1) : k==="ArrowRight" ? Math.min(n-1,i+1) : k==="ArrowDown" ? Math.min(n-1,i+cols) : (i-cols>=first ? i-cols : first-1);
+      e.preventDefault(); if(j!==i){ shopCur[5]=j; sfx.cursor(); renderSoon(renderShop); } return;
+    }
+  }
   if(k==="ArrowLeft"||k==="ArrowRight"){ e.preventDefault(); shopTab=SHOP_ORDER[(SHOP_ORDER.indexOf(shopTab)+(k==="ArrowRight"?1:-1)+SHOP_ORDER.length)%SHOP_ORDER.length]; sfx.tab(); renderShop(); return; }
   if(k==="ArrowUp"||k==="ArrowDown"){
     e.preventDefault();
@@ -11101,6 +11312,24 @@ function buyHoe(){
   toast(`${next.name} を手に入れました。一度に ${next.what} を耕せます`,"good",3600);
   save(); renderAll();
 }
+function buyPlain(n){
+  if(!spend(PLAIN_COST*n)) return;
+  S.plain=(S.plain||0)+n;
+  toast(`${ico(PLAIN)} 素朴な肥料を ${n}つ 買いました(${kb("5 で持って","肥料で選んで")}まけます)`,"",3200,true);
+  save(); renderAll();
+}
+/* 素朴な肥料を作物にまく: これから実るものは、かならずふつう */
+function plainFert(k,p){
+  if(!(S.plain>0)){ nope(k,"素朴な肥料がありません"); return; }
+  if(!p.crop){ nope(k,"作物が植わっていません"); return; }
+  const c=CROP[p.crop.id];
+  if(c.treasure || c.half || p.crop.tut){ nope(k,"この作物には使えません"); return; }
+  if(p.crop.plain && !p.crop.mut){ nope(k,"もうふつうに実ります"); return; }
+  p.crop.mut=false; p.crop.sup=false; p.crop.mutN=0; p.crop.rolled=true; p.crop.plain=true;
+  S.plain--; if(!(S.plain>0)) S.fertSel="fert";
+  hit(k); floatAt(k,"🌾 ふつう"); sfx.fert();
+  toast(`${ico(PLAIN)} ${esc(c.rose?"薔薇":c.name)}にまきました。かならずふつうに実ります`,"",3200,true);
+}
 function buyFert(n){
   if(!meets(FERT.unlock)||!spend(FERT.cost*n)) return;
   S.fert+=n;
@@ -11133,6 +11362,32 @@ function buyVilUp(){
   S.vilLv=(S.vilLv||0)+1;
   toast(`✨ 元気の種を使いました。村人は ${ico(CROP[next])}${esc(CROP[next].name)} を育てるようになります`,"good",4600,true);
   sfx.vil();
+  save(); renderAll();
+}
+/* 自動売却のタブの上: 解禁した分をまとめて買う / 収穫物・種をまとめてオンオフ */
+function autoSumRows(rows){
+  const seen=CROPS.filter(c=>!c.treasure && (S.harvestBy[c.id]||0)>0);
+  const canBuy=seen.filter(c=>!S.auto[c.id] && tierOf(c.id)>=2).sort((a,b)=>autoCost(a.id)-autoCost(b.id));
+  const sum=canBuy.reduce((a,c)=>a+autoCost(c.id),0), own=seen.filter(c=>S.auto[c.id]);
+  rows.push({ ic:"🛒", locked:!canBuy.length,
+    nm:`解禁した自動売却をまとめて買う <span style="color:var(--ink-l)">${canBuy.length?`${canBuy.length}種類 ・ ${fmtNum(sum)}キー`:"買えるものはありません"}</span>`,
+    ds:"安いものから、キーが足りるところまで買います。買ったものは、収穫物も種もオンになります",
+    keys: canBuy.length?"<b>Enter</b> まとめて買う":"", enter:()=>buyAutoAll(canBuy), shift:()=>buyAutoAll(canBuy) });
+  for(const [w,nm] of [["c","収穫物"],["s","ガチャで出た種"]]) rows.push({ ic:w==="c"?"🧺":"🌱", locked:!own.length,
+    nm:`${nm}の自動売却をまとめて切りかえ`,
+    ds:`買ってある${own.length}種類の、${nm}の自動売却をまとめてオンかオフにします`,
+    keys: own.length?"<b>Enter</b> 全部オン<br><b>Shift+Enter</b> 全部オフ":"", enter:()=>setAutoAll(w,true), shift:()=>setAutoAll(w,false) });
+}
+function buyAutoAll(list){
+  let n=0, cost=0;
+  for(const c of list){ const p=autoCost(c.id); if(S.money<p) break; xAdd(S,"money",-p); S.auto[c.id]={c:true,s:true}; n++; cost+=p; }
+  if(!n){ sfx.nope(); toast("キーが足りません","warn"); return; }
+  sfx.buy(); toast(`自動売却を ${n}種類 まとめて買いました(${fmtNum(cost)}キー)${n<list.length?` ・ キーが足りず、あと${list.length-n}種類`:""}`,"good",4200);
+  save(); renderAll();
+}
+function setAutoAll(w,on){
+  for(const id in S.auto) if(S.auto[id]) S.auto[id][w]=on;
+  sfx.tool(); toast(`${w==="c"?"収穫物":"種"}の自動売却を、すべて${on?"オン":"オフ"}にしました`,"",2600);
   save(); renderAll();
 }
 function buyAuto(id){
@@ -12235,15 +12490,15 @@ const RKAMA = { art:`<svg viewBox="0 0 32 32"><circle cx="16" cy="16" r="14" fil
   +`<path d="M11 29v-6a5 5 0 0 1 10 0v6z" fill="#3a1a1a"/><path d="M16 27.4c-2.4 0-3.4-1.8-2.4-3.6.6 1 1.4 1 1.6-.4.4-1.6 2-2.4 2.6-3.4.8 2 2.4 3.4 1.4 5.6-.6 1.2-1.8 1.8-3.2 1.8z" fill="#ff5a7a"/>`
   +`<ellipse cx="9" cy="6" rx="2.4" ry="1.4" fill="#e8384f" transform="rotate(-30 9 6)"/><ellipse cx="22" cy="4.6" rx="2.2" ry="1.3" fill="#ff8a9a" transform="rotate(24 22 4.6)"/></svg>` };
 const RG_GHR = [
-  { k:"hb", id:"rg:half_hb", name:"薔の種", art:CROP.rose_hb.art, desc:"ふたつに割れた種の、片方。ひとりきりで目を覚ますと、さびしさのあまり消えてしまうという。そばで同じときに目覚める相手がいれば……", n:()=>S.seeds.rose_hb||0,
+  { k:"hb", id:"rg:half_hb", lore:"割れ目をのぞくと、もう片方の名前が小さく刻まれているという。", name:"薔の種", art:CROP.rose_hb.art, desc:"ふたつに割れた種の、片方。ひとりきりで目を覚ますと、さびしさのあまり消えてしまうという。そばで同じときに目覚める相手がいれば……", n:()=>S.seeds.rose_hb||0,
     give:()=>{ S.seeds.rose_hb=(S.seeds.rose_hb||0)+1; return `${ico(CROP.rose_hb)} 薔の種を手に入れました。どこかに、この種の片割れがいるらしい……`; } },
-  { k:"hr", id:"rg:half_hr", name:"薇の種", art:CROP.rose_hr.art, desc:"ふたつに割れた種の、もう片方。ひとりでは咲けず、ひとりで実ると消えてしまう。息の合う片割れがすぐそばにいれば……", n:()=>S.seeds.rose_hr||0,
+  { k:"hr", id:"rg:half_hr", lore:"握っていると、遠くで誰かが同じ種を握っているような温かさがある。", name:"薇の種", art:CROP.rose_hr.art, desc:"ふたつに割れた種の、もう片方。ひとりでは咲けず、ひとりで実ると消えてしまう。息の合う片割れがすぐそばにいれば……", n:()=>S.seeds.rose_hr||0,
     give:()=>{ S.seeds.rose_hr=(S.seeds.rose_hr||0)+1; return `${ico(CROP.rose_hr)} 薇の種を手に入れました。どこかに、この種の片割れがいるらしい……`; } },
-  { k:"rsk", id:"rg:rsk", name:"薔薇でできた案山子", art:RSKA.art, desc:"P(案山子置き場)に置くと、農園を開いているあいだ、その畑の水が効いている薔薇が1分で咲きます。カラスも来ません", n:()=>(S.objs.rsk||0)+FS().filter(f=>f[POST].obj==="rsk").length,
+  { k:"rsk", id:"rg:rsk", lore:"薔薇の蔓で編んだ案山子。カラスより先に、蜂が寄ってくる。", name:"薔薇でできた案山子", art:RSKA.art, desc:"P(案山子置き場)に置くと、農園を開いているあいだ、その畑の水が効いている薔薇が1分で咲きます。カラスも来ません", n:()=>(S.objs.rsk||0)+FS().filter(f=>f[POST].obj==="rsk").length,
     give:()=>{ S.objs.rsk=(S.objs.rsk||0)+1; S.objSel="rsk"; return `${ico(RSKA)} 薔薇でできた案山子を手に入れました! ${kb("設置(6)","設置")}で畑の P に置くと、庭を開いているあいだ、その畑の薔薇が1分で咲きます`; } },
-  { k:"rfv", id:"rg:rfv", name:"薔薇農家", art:RFV.art, desc:"持ち物の薔薇の種を、1人につき3区画で植えて育て、咲いたら持ち物に入れてくれます(ふつうの畑と同じ速さ)", n:()=>S.roseVil||0,
+  { k:"rfv", id:"rg:rfv", lore:"毎朝、薔薇に名前で呼びかける。返事をした薔薇から咲くらしい。", name:"薔薇農家", art:RFV.art, desc:"持ち物の薔薇の種を、1人につき3区画で植えて育て、咲いたら持ち物に入れてくれます(ふつうの畑と同じ速さ)", n:()=>S.roseVil||0,
     give:()=>{ S.roseVil=(S.roseVil||0)+1; S.objSel="rfvil"; return `${ico(RFV)} 薔薇農家が来てくれました! ${kb("設置(6)","設置")}で区画を任せると、持ち物の薔薇の種を${RF_SLOTS}区画で育ててくれます`; } },
-  { k:"rkam", id:"rg:rkam", name:"薔薇のかまど", art:RKAMA.art, desc:'好きな色の薔薇の花びらを、ホーム画面・農園・タイピングに舞わせます(2つ目からは 100,000キー に替わります)', n:()=>S.rkam||0,
+  { k:"rkam", id:"rg:rkam", lore:"燃やしているのは薪ではなく、散った花びら。煙まで甘い。", name:"薔薇のかまど", art:RKAMA.art, desc:'好きな色の薔薇の花びらを、ホーム画面・農園・タイピングに舞わせます(2つ目からは 100,000キー に替わります)', n:()=>S.rkam||0,
     give:()=>{ if(S.rkam){ xAdd(S,"money",100000); S.totalSales+=100000; return ""; } S.rkam=1; S.rkamOn=true; S.rkamCol=S.rkamCol||rkamCols()[0]||"";   // 手に入れたらすぐオン(貴重品の「薔薇」で色を変えたり、オフにしたりできる)
       rosePetals(); return `${ico(RKAMA)} 薔薇のかまどを手に入れました! 薔薇の花びらが舞います(貴重品(8)の「薔薇」で色を変えたり、オフにしたりできます)`; } },
 ];
@@ -12284,11 +12539,11 @@ for(const x of RG_GUR){
 const rgGurGot = () => RG_GUR.filter(x=>(S.got[x.id]||0)>0).length;
 /* 薔薇ガチャの GUR: 名前と農園の見た目の飾り(2つ目からは 100,000キーに替わる) */
 const RG_GXR = [
-  { k:"emb", id:"rg:gxr_emb", name:"薔薇の紋章", desc:"番付で、名前の後ろに、最後に飲んだローズティーの薔薇の印が付きます", art:rgSvg("#c040ff",`<path d="M16 3l11 4v8c0 7-5 11-11 14C10 26 5 22 5 15V7z" fill="#fff4f8" stroke="#a8122e" stroke-width="1.4"/><circle cx="16" cy="14" r="5" fill="#e8384f"/><path d="M13.4 13c1.4-2 3.8-2 5.2 0M14 15.6c1.2 1 2.8 1 4 0" stroke="#8a1028" stroke-width=".9" fill="none"/><path d="M16 19v5M13 22l3-1.6 3 1.6" stroke="#3f7a3a" stroke-width="1.2" fill="none"/>`) },
-  { k:"col", id:"rg:gxr_col", name:"薔薇色の名前", desc:"番付で、名前の色が、最後に飲んだローズティーの薔薇の色になります", art:rgSvg("#ff5a8a",`<rect x="5" y="9" width="22" height="14" rx="3" fill="#fff" stroke="#c81e3e" stroke-width="1.2"/><path d="M9 19l3-7 3 7M10 17h4M18 12v7M18 12h3a2 2 0 0 1 0 4h-3" stroke="#e8384f" stroke-width="1.6" fill="none" stroke-linecap="round"/>`) },
-  { k:"plate", id:"rg:gxr_plate", name:"薔薇のプレート", desc:"畑の上に、好きな名前を付けた薔薇のプレートを飾れます。薔薇の紋章・薔薇色の名前も乗ります", art:rgSvg("#ff8aa0",`<rect x="4" y="10" width="24" height="12" rx="3" fill="#fff8ee" stroke="#b0405a" stroke-width="1.4"/><path d="M9 16h14" stroke="#6a2030" stroke-width="1.6" stroke-linecap="round"/><circle cx="5" cy="16" r="3" fill="#e8384f"/><circle cx="27" cy="16" r="3" fill="#e8384f"/><circle cx="5" cy="16" r="1.2" fill="#ffd0da"/><circle cx="27" cy="16" r="1.2" fill="#ffd0da"/>`) },
-  { k:"hedge", id:"rg:gxr_hedge", name:"薔薇の垣根", desc:"畑のまわりが、薔薇の咲く生け垣になります", art:rgSvg("#5aa04a",`<rect x="3" y="12" width="26" height="14" rx="5" fill="#3f7a3a"/><circle cx="8" cy="16" r="2.6" fill="#e8384f"/><circle cx="15" cy="20" r="2.6" fill="#ff8a9a"/><circle cx="22" cy="15" r="2.6" fill="#e8384f"/><circle cx="25" cy="22" r="2.2" fill="#ff8a9a"/><circle cx="10" cy="23" r="2.2" fill="#e8384f"/>`) },
-  { k:"crown", id:"rg:gxr_crown", name:"薔薇の冠の村人", desc:"村人たちが、薔薇の冠をかぶって世話をします", art:rgSvg("#ffd86a",`<circle cx="16" cy="21" r="7" fill="#f4d2b0"/><circle cx="13.6" cy="21" r=".9" fill="#3a2a1a"/><circle cx="18.4" cy="21" r=".9" fill="#3a2a1a"/><path d="M8 14q8 4 16 0" stroke="#3f7a3a" stroke-width="2" fill="none"/><circle cx="10" cy="12.6" r="2.6" fill="#e8384f"/><circle cx="16" cy="11" r="3" fill="#ff5a7a"/><circle cx="22" cy="12.6" r="2.6" fill="#e8384f"/>`) },
+  { k:"emb", id:"rg:gxr_emb", lore:"最後に飲んだ一杯の色を、名前のうしろにそっと残す。", name:"薔薇の紋章", desc:"番付で、名前の後ろに、最後に飲んだローズティーの薔薇の印が付きます", art:rgSvg("#c040ff",`<path d="M16 3l11 4v8c0 7-5 11-11 14C10 26 5 22 5 15V7z" fill="#fff4f8" stroke="#a8122e" stroke-width="1.4"/><circle cx="16" cy="14" r="5" fill="#e8384f"/><path d="M13.4 13c1.4-2 3.8-2 5.2 0M14 15.6c1.2 1 2.8 1 4 0" stroke="#8a1028" stroke-width=".9" fill="none"/><path d="M16 19v5M13 22l3-1.6 3 1.6" stroke="#3f7a3a" stroke-width="1.2" fill="none"/>`) },
+  { k:"col", id:"rg:gxr_col", lore:"名前を呼ばれるたび、ほのかに薔薇が香る。", name:"薔薇色の名前", desc:"番付で、名前の色が、最後に飲んだローズティーの薔薇の色になります", art:rgSvg("#ff5a8a",`<rect x="5" y="9" width="22" height="14" rx="3" fill="#fff" stroke="#c81e3e" stroke-width="1.2"/><path d="M9 19l3-7 3 7M10 17h4M18 12v7M18 12h3a2 2 0 0 1 0 4h-3" stroke="#e8384f" stroke-width="1.6" fill="none" stroke-linecap="round"/>`) },
+  { k:"plate", id:"rg:gxr_plate", lore:"朝露がつくと、刻んだ名前が少しだけ光る。", name:"薔薇のプレート", desc:"畑の上に、好きな名前を付けた薔薇のプレートを飾れます。薔薇の紋章・薔薇色の名前も乗ります", art:rgSvg("#ff8aa0",`<rect x="4" y="10" width="24" height="12" rx="3" fill="#fff8ee" stroke="#b0405a" stroke-width="1.4"/><path d="M9 16h14" stroke="#6a2030" stroke-width="1.6" stroke-linecap="round"/><circle cx="5" cy="16" r="3" fill="#e8384f"/><circle cx="27" cy="16" r="3" fill="#e8384f"/><circle cx="5" cy="16" r="1.2" fill="#ffd0da"/><circle cx="27" cy="16" r="1.2" fill="#ffd0da"/>`) },
+  { k:"hedge", id:"rg:gxr_hedge", lore:"通りがかった人が、つい足を止めてしまう生け垣。", name:"薔薇の垣根", desc:"畑のまわりが、薔薇の咲く生け垣になります", art:rgSvg("#5aa04a",`<rect x="3" y="12" width="26" height="14" rx="5" fill="#3f7a3a"/><circle cx="8" cy="16" r="2.6" fill="#e8384f"/><circle cx="15" cy="20" r="2.6" fill="#ff8a9a"/><circle cx="22" cy="15" r="2.6" fill="#e8384f"/><circle cx="25" cy="22" r="2.2" fill="#ff8a9a"/><circle cx="10" cy="23" r="2.2" fill="#e8384f"/>`) },
+  { k:"crown", id:"rg:gxr_crown", lore:"冠をかぶった日は、村人の背筋が少しのびる。", name:"薔薇の冠の村人", desc:"村人たちが、薔薇の冠をかぶって世話をします", art:rgSvg("#ffd86a",`<circle cx="16" cy="21" r="7" fill="#f4d2b0"/><circle cx="13.6" cy="21" r=".9" fill="#3a2a1a"/><circle cx="18.4" cy="21" r=".9" fill="#3a2a1a"/><path d="M8 14q8 4 16 0" stroke="#3f7a3a" stroke-width="2" fill="none"/><circle cx="10" cy="12.6" r="2.6" fill="#e8384f"/><circle cx="16" cy="11" r="3" fill="#ff5a7a"/><circle cx="22" cy="12.6" r="2.6" fill="#e8384f"/>`) },
 ];
 for(const x of RG_GXR) rgAdd("GUR",{ id:x.id, name:x.name, icon:"✨", art:x.art, give:()=>{
   S.gx=S.gx||{};
@@ -12419,10 +12674,12 @@ const rgGhrGot = () => RG_GHR.filter(x=>(S.got[x.id]||0)>0).length;
 const rkamCols = () => ROSE_ALL.filter(r=>[0,3,5].some(t=>qCount(r.id,t)>0)).map(r=>r.id);
 function rkamAct(dir){
   if(!S.rkam){ sfx.nope(); return; }
-  if(!dir){ S.rkamOn=!S.rkamOn; sfx.tab(); }
+  if(!dir){ openPick("rkam"); return; }   // Enter: 色の一覧から選ぶ(使わない も選べる)
   else{
-    const ids=rkamCols(); if(!ids.length){ sfx.nope(); return; }
-    S.rkamCol=ids[(ids.indexOf(S.rkamCol)+dir+ids.length)%ids.length]; S.rkamOn=true; sfx.tab();
+    const ids=["",...rkamCols()]; if(ids.length<2){ sfx.nope(); return; }   // 永遠のかまどと同じく「なし(使わない)」も順番に入る
+    const now=S.rkamOn ? S.rkamCol||"" : "", nx=ids[(ids.indexOf(now)+dir+ids.length)%ids.length];
+    if(nx){ S.rkamCol=nx; S.rkamOn=true; } else S.rkamOn=false;
+    sfx.tab();
   }
   rosePetals(); save(); renderTreas();
 }
@@ -12515,14 +12772,16 @@ function kitSub(id){   // 台所の宝物の「今の状態」
   if(id==="fridge") return "";
   const sw = `<span class="kswap"><button class="sbtn" data-kd="-1">${kb("◀ Q","◀")}</button><button class="sbtn" data-kd="1">${kb("E ▶","▶")}</button></span>`;   // ボタンは名前より前(名前の長さで位置が動かないように)
   if(id==="cookvil") return n>0?`作り置き ${sw}<br><b>${cookKeepTxt()}</b> ・ 任せている料理 <b>${(S.autoCook||[]).length} / ${n}</b>(${kb("Enter","もう一度タップ")}で任せる料理を選ぶ)`:"";
-  if(id==="kamado") return n>0?`画面の色 ${sw}<br><b>${kamaLabel()}</b>`:"";
+  if(id==="kamado") return n>0?`画面の色 ${sw}<br><b>${kamaLabel()}</b>(${kb("Enter","もう一度タップ")}で一覧から選ぶ)`:"";
   if(id==="sgvil") return n>0?`育てる作物 ${sw}<br><b>${ico(CROP[sgCropId()])} ${esc(CROP[sgCropId()].name)}</b>(${kb("Enter","もう一度タップ")}で一覧から選ぶ) ・ 使っている区画 <b>${vilUsed("sg")} / ${(S.sgVil||0)*SG_SLOTS}</b>`:"";
   if(id==="sgk") return n>0?`${OBJ_HOW}畑の P に置くと、1打の時短 +2分・カラスよけ・自動の水やり`:"";
   if(id==="deed") return (S.got.deed||0)>0?`持っている ${n}枚 ・ 畑 ${FS().length} / ${FIELD_MAX}枚`:"";
   if(id==="sfert"||id==="mfert") return n>0?kb("肥料(5)で持って、← → で選んでまく","道具の「肥料」を持って、◀ ▶ で選んでまく"):"";
   return "";
 }
+let treasScrolled="";   // 最後に見えるところまで動かした項目(同じ項目なら、描き直しても動かさない)
 function renderKit(){
+  const keepTop=$("g-treasBody").scrollTop;
   const got=KIT_ORDER.filter(id=>(S.got[id]||0)>0).length;
   $("g-treasRate").textContent=`集めた種類 ${got} / ${KIT_ORDER.length}`;
   kitCur=Math.max(0,Math.min(kitCur,KIT_ORDER.length-1));
@@ -12536,13 +12795,14 @@ function renderKit(){
       <div class="tbody">
         <div class="tnm">${seen?esc(g.name):"？？？"}${seen?`<span class="tn">×${fmtNum(n)}</span>`:""}</div>
         <div class="teff">${seen?esc(g.desc):`わくわくガチャの ${r} から出ます`}</div>
+        ${seen&&g.lore?`<div class="teff glore">${esc(g.lore)}</div>`:""}
         ${seen&&kitSub(id)?`<div class="tsum">${kitSub(id)}</div>`:""}
       </div></div>`;
     }
     html+="</div>";
   }
-  $("g-treasBody").innerHTML=html;
-  const cur=$("g-treasBody").querySelector(".kitem.cur"); if(cur && cur.scrollIntoView) cur.scrollIntoView({block:"nearest"});
+  $("g-treasBody").innerHTML=html; $("g-treasBody").scrollTop=keepTop;
+  const cur=$("g-treasBody").querySelector(".kitem.cur"); if(cur && cur.scrollIntoView && treasScrolled!=="k"+kitCur){ treasScrolled="k"+kitCur; cur.scrollIntoView({block:"nearest"}); }
 }
 /* 2列・3列に並んでいるので、↑↓ は画面で真下・真上の宝物へ */
 /* 永遠のかまど: 食べたことのある「画面の色」の料理だけ選べる */
@@ -12569,6 +12829,8 @@ function kitAct(dir){   // Enter(dir=0)・Shift+Enter(dir=-1)・◀▶ のボタ
   }else if(dir===0 && id==="bento"){
     S.bento--; S.bentoUntil=Math.max(Date.now(),S.bentoUntil||0)+HOUR; sfx.vil();
     toast(`${ico(GUR.bento)} 二段重ねのお弁当箱を開けました。${fmtLeft(S.bentoUntil-Date.now())}のあいだ、料理の効果を2つまでかけられます(同じ効果は重なりません)`,"good mut sup",5200,true);
+  }else if(id==="kamado" && !dir){
+    openPick("kamado"); return;   // Enter: 色の一覧から選ぶ
   }else if(id==="kamado" && dir){
     const ids=["",...kamadoDishes()];
     if(ids.length<2){ sfx.nope(); toast("画面の色の料理を食べると、その色を選べるようになります","warn",3600); return; }
@@ -12610,13 +12872,14 @@ function renderRoseTre(){
       </div></div>`;
   }).join("")+`</div>`+`<div class="ghead">GHR<span>${rgGhrGot()} / ${RG_GHR.length}</span></div><div class="tlist">`+RG_GHR.map(x=>{
     const seen=(S.got[x.id]||0)>0, n=x.n();
-    const sub = !seen ? "" : x.k==="rkam" ? `花びらの色 <span class="kswap"><button class="sbtn" data-rkd="-1">${kb("◀ Q","◀")}</button><button class="sbtn" data-rkd="1">${kb("E ▶","▶")}</button><button class="sbtn" data-rkd="0">${S.rkamOn?"オン":"オフ"}${kb(" (Enter)","")}</button></span><br><b>${S.rkamCol&&CROP[S.rkamCol]?ico(CROP[S.rkamCol])+" "+esc(CROP[S.rkamCol].name):"(まだ選べる色がありません)"}</b>`
+    const sub = !seen ? "" : x.k==="rkam" ? `花びらの色 <span class="kswap"><button class="sbtn" data-rkd="-1">${kb("◀ Q","◀")}</button><button class="sbtn" data-rkd="1">${kb("E ▶","▶")}</button></span><br><b>${!S.rkamOn?"使っていない":S.rkamCol&&CROP[S.rkamCol]?ico(CROP[S.rkamCol])+" "+esc(CROP[S.rkamCol].name):"(まだ選べる色がありません)"}</b>(${kb("Enter","もう一度タップ")}で一覧から選ぶ)`
       : x.k==="rfv" ? `使っている区画 <b>${vilUsed("rf")} / ${(S.roseVil||0)*RF_SLOTS}</b>` : x.k==="rsk" ? `${OBJ_HOW}畑の P に置きます` : "";
     return `<div class="titem ${seen?"":"locked"}"${seen&&x.k==="rkam"?' data-act="rkam"':""}>
       <div class="tic">${seen?`<span class="cart">${x.art}</span>`:"✨"}</div>
       <div class="tbody">
         <div class="tnm">${seen?esc(x.name):"？？？"}${seen?`<span class="tn">×${fmtNum(n)}</span>`:""}</div>
         <div class="teff">${seen?esc(x.desc):"薔薇ガチャの GHR から出ます"}</div>
+        ${seen&&x.lore?`<div class="teff glore">${esc(x.lore)}</div>`:""}
         ${sub?`<div class="tsum">${sub}</div>`:""}
       </div></div>`;
   }).join("")+`</div>`
@@ -12626,6 +12889,7 @@ function renderRoseTre(){
     return `<div class="titem ${seen?"":"locked"}"${seen?` data-act="gx:${x.k}"`:""}><div class="tic">${seen?`<span class="cart">${x.art}</span>`:"✨"}</div><div class="tbody">
       <div class="tnm">${seen?esc(x.name):"？？？"}</div>
       <div class="teff">${seen?esc(x.desc):"薔薇ガチャの GUR から出ます"}</div>
+      ${seen&&x.lore?`<div class="teff glore">${esc(x.lore)}</div>`:""}
       ${seen?`<div class="tsum"><button class="sbtn" data-gxo="${x.k}">${gxOn(x.k)?"オン":"オフ"}</button>${need}${x.k==="plate"?` <input id="g-plateName" class="gxname" maxlength="12" value="${esc(plateName())}" placeholder="プレートの名前"><button class="sbtn" data-gxname="1">名前を決める${kb(" (N)","")}</button>`:""}</div>`:""}</div></div>`; }).join("")+`</div>` : "")
   +(true ? `<div class="ghead">GXR<span>${rgGurGot()} / ${RG_GUR.length}</span></div><div class="tlist">`+RG_GUR.map(x=>{
     const seen=(S.got[x.id]||0)>0, n=rgGurN(x.k);
@@ -12642,7 +12906,7 @@ function renderRoseTre(){
   const its=[...$("g-treasBody").querySelectorAll(".titem")]; rtCur=Math.max(0,Math.min(rtCur,its.length-1));   // キーボードで選べるように
   its.forEach((el,i)=>{ el.classList.add("kitem"); el.dataset.k=i; el.classList.toggle("cur",i===rtCur); el.addEventListener("click",()=>{ if(rtCur!==i){ rtCur=i; its.forEach((x,j)=>x.classList.toggle("cur",j===i)); } }); });
   $("g-treasBody").scrollTop=keepTop;
-  const cur=its[rtCur]; if(cur && cur.scrollIntoView) cur.scrollIntoView({block:"nearest"});   // 選んでいる項目が見えていなければ、そこまでだけ動かす
+  const cur=its[rtCur]; if(cur && cur.scrollIntoView && treasScrolled!=="r"+rtCur){ treasScrolled="r"+rtCur; cur.scrollIntoView({block:"nearest"}); }   // 選んでいる項目が見えていなければ、そこまでだけ動かす
 }
 const ROSE_TRE_NOTE="薔薇ガチャの GSR・GHR・GUR・GXR から出る宝物です。花弁には、まだ誰も知らない色の薔薇の咲き方が書かれています(ほかの条件と重なると、別の色になることがあります)。";
 function renderTreas(){
@@ -12651,7 +12915,7 @@ function renderTreas(){
   root.querySelectorAll("#g-treasTabs .tab").forEach(t=>t.hidden=!treasTabs().includes(+t.dataset.tt));
   root.querySelectorAll("#g-treasTabs .tab").forEach(t=>t.classList.toggle("on", +t.dataset.tt===treasTab));
   $("g-treasNote").textContent = treasTab===2 ? ROSE_TRE_NOTE : treasTab ? KIT_NOTE : TREAS_NOTE;
-  if(treasTab===2){ $("g-treasHint").innerHTML="<b>Tab</b> 次のタブへ ・ <b>↑ ↓ ← →</b> 選ぶ ・ <b>Enter</b> オン・オフ"+(S.rkam?" ・ <b>Q</b> / <b>E</b> 花びらの色":"")+(S.gx&&S.gx.plate?" ・ <b>N</b> プレートの名前":"")+" ・ <b>8</b> / <b>Esc</b> 閉じる"; renderRoseTre(); return; }
+  if(treasTab===2){ $("g-treasHint").innerHTML="<b>Tab</b> 次のタブへ ・ <b>↑ ↓ ← →</b> 選ぶ ・ <b>Enter</b> オン・オフ"+(S.rkam?" ・ 薔薇のかまどは <b>Enter</b> で色を一覧から選ぶ ・ <b>Q</b> / <b>E</b> 花びらの色":"")+(S.gx&&S.gx.plate?" ・ <b>N</b> プレートの名前":"")+" ・ <b>8</b> / <b>Esc</b> 閉じる"; renderRoseTre(); return; }
   $("g-treasHint").innerHTML = treasTab ? "<b>Tab</b> 貴重品へ ・ <b>↑ ↓ ← →</b> 選ぶ ・ <b>Enter</b> 使う ・ <b>Q</b> / <b>E</b> かまどの色・シゴデキ村人の作物を切り替え ・ <b>8</b> / <b>Esc</b> 閉じる" : (kitAny()?"<b>Tab</b> 台所の宝物へ ・ ":"")+"<b>↑ ↓</b> 見る ・ <b>8</b> / <b>Esc</b> 閉じる";
   if(treasTab){ renderKit(); return; }
   const got=TREASURES.filter(c=>tre(c.id)>0).length;
@@ -12664,6 +12928,7 @@ function renderTreas(){
       <div class="tbody">
         <div class="tnm">${n>0?esc(c.name):"？？？"}${n>0?`<span class="tn">×${fmtNum(n)}</span>`:""}</div>
         <div class="teff">${n>0?esc(c.eff.text):"ガチャの GHR から出る種を育てると手に入ります"}</div>
+        ${n>0&&c.lore?`<div class="teff glore">${esc(c.lore)}</div>`:""}
         ${n>0?`<div class="tsum">今の合計 <b>${v}${c.eff.unit}</b>${capped?" (上限)":""}</div>`:""}
       </div></div>`;
   }).join("")+`</div>`;
@@ -12675,6 +12940,14 @@ const PICK_RANKS=["お気に入り","N","R","SR","HR","UR","GSR","GHR","曜日�
 const pickGroup = id => pickKind==="seed" && isFavS(id) ? "お気に入り" : /^rose/.test(id) ? "薔薇" : isSap(id) ? "苗木" : CROP[id].day!=null ? "曜日限定" : (CROP[id].r||"N");   // お気に入りは一番上、曜日限定の作物はレア度と分けて並べる
 let pickKind="seed", pickCur=0, pickIds=[], lastFour=0;
 function openPick(kind){
+  if(kind==="kamado" || kind==="rkam"){   // かまどの色: 一覧から選ぶ(いちばん上は「使わない」)
+    const ids = kind==="kamado" ? kamadoDishes() : rkamCols();
+    if(!ids.length){ sfx.nope(); toast(kind==="kamado" ? "画面の色の料理を食べると、その色を選べるようになります" : "薔薇を咲かせると、その色を選べるようになります","warn",3600); return; }
+    pickKind=kind; pickIds=["",...ids];
+    const now = kind==="kamado" ? (S.kamado||"") : (S.rkamOn ? S.rkamCol||"" : "");
+    pickCur=Math.max(0, pickIds.indexOf(now));
+    openModal("pick"); return;
+  }
   pickKind=kind;
   pickIds = kind==="sg" ? sgCrops().map(c=>c.id) : ownedSeeds();
   if(!pickIds.length){ sfx.nope(); toast(kind==="sg" ? "まだ選べる作物がありません(一度収穫した作物から選べます)" : kb("種がありません。Tab でお店へ","種がありません。お店で買えます"),"warn"); return; }
@@ -12691,6 +12964,18 @@ function pickFav(i){
   toggleFav("s",id); pickSort(); pickCur=pickIds.indexOf(id); renderPick(); renderAll();
 }
 function renderPick(){
+  if(pickKind==="kamado" || pickKind==="rkam"){
+    const km=pickKind==="kamado", now = km ? (S.kamado||"") : (S.rkamOn ? S.rkamCol||"" : "");
+    $("g-pickTitle").textContent = km ? "永遠のかまどの色" : "薔薇のかまどの色";
+    $("g-pickNote").innerHTML = (km ? "食べたことのある、画面の色の料理から選べます。" : "咲かせたことのある薔薇の色から選べます。")+kb(" <b>矢印キー</b> で選んで <b>Enter</b> で決定 ・ <b>Esc</b> 戻る","");
+    $("g-pickBody").innerHTML = `<div class="pickgrp"><div class="pickgrid">${pickIds.map((id,j)=>{
+      let ic="⛔", nm="使わない";
+      if(id && km){ const k=kamaSplit(id), d=DISH[k.d]; if(d){ ic=dishIco(d,k.t); nm=esc(dishName(d,k.t)); } }
+      else if(id && CROP[id]){ ic=ico(CROP[id]); nm=esc(CROP[id].name); }
+      return `<button class="pitem${j===pickCur?" cur":""}${id===now?" sel":""}" data-i="${j}" tabindex="-1"><span class="pic">${ic}</span><span class="pnm">${nm}</span></button>`; }).join("")}</div></div>`;
+    const cur=$("g-pickBody").querySelector(".pitem.cur"); if(cur && cur.scrollIntoView) cur.scrollIntoView({block:"nearest"});
+    return;
+  }
   const sg=pickKind==="sg", now = sg ? sgCropId() : S.seedId;
   $("g-pickTitle").textContent = sg ? "シゴデキ村人が育てる作物" : "種を選ぶ";
   $("g-pickNote").innerHTML = (sg ? "図鑑に載っている作物から選べます。" : "持っている種です。☆でお気に入り(一番上に並びます)。")+kb("<b>矢印キー</b> で選んで <b>Enter</b> で決定"+(sg?"":" ・ <b>S</b> お気に入り")+" ・ <b>Esc</b> 閉じる","タップして選びます");
@@ -12704,6 +12989,12 @@ function renderPick(){
   const cur=$("g-pickBody").querySelector(".pitem.cur"); if(cur && cur.scrollIntoView) cur.scrollIntoView({block:"nearest"});
 }
 function pickChoose(i){
+  if(pickKind==="kamado" || pickKind==="rkam"){
+    const id=pickIds[i]; if(id==null) return;
+    if(pickKind==="kamado"){ S.kamado=id; applyTheme(); }
+    else{ if(id){ S.rkamCol=id; S.rkamOn=true; } else S.rkamOn=false; rosePetals(); }
+    sfx.tab(); save(); openModal("treas"); return;   // 貴重品に戻る
+  }
   const id=pickIds[i]; if(!id) return;
   if(pickKind==="sg"){
     S.sgCrop=id; sfx.tab(); save(); renderAll();
@@ -12727,7 +13018,7 @@ function pickMove(dir){
 function pickKey(e){
   const k=e.key;
   if(e.repeat && k==="4") return;   // 4 を長押しして開いたときの続き
-  if(k==="Escape"||k==="4"){ e.preventDefault(); if(pickKind==="sg") openModal("treas"); else closeModal(); return; }
+  if(k==="Escape"||k==="4"){ e.preventDefault(); if(pickKind!=="seed") openModal("treas"); else closeModal(); return; }
   const n=pickIds.length;
   if(k==="ArrowLeft"||k==="ArrowRight"){ e.preventDefault(); pickCur=(pickCur+(k==="ArrowRight"?1:-1)+n)%n; sfx.cursor(); renderSoon(renderPick); return; }
   if(k==="ArrowUp"||k==="ArrowDown"){ e.preventDefault(); pickMove(k==="ArrowDown"?1:-1); sfx.cursor(); renderSoon(renderPick); return; }
@@ -12755,7 +13046,7 @@ function cvRowsOf(){
     const on=ac.some(a=>a.id===d.id && a.g===g), others=ac.filter(a=>a.id===d.id && a.g!==g).map(a=>gradeName(a.g));
     const made=!!(S.dishMade[d.id]||{})[bookKeyOf(g)], seen=!isMutT(g)||made;
     return { d, g, on, ic:`<span class="dic${g===5?" sup":g===3?" mut":""}">${made?dishIco(d,g):"❔"}</span>`,
-      nm:`${seen?esc(dishName(d,g)):`？？？(${esc(d.name)}の${gradeName(g)})`} <span class="dgrade${g===3?" mut":g===5?" sup":""}">◀ ${gradeName(g)} ▶</span>${on?' <small class="dauto">🧑‍🍳 任せている</small>':""}`,
+      nm:`<span class="dnm" style="min-width:${dnW(d)}em">${seen?esc(dishName(d,g)):`？？？(${esc(d.name)}の${gradeName(g)})`}</span> <span class="dgrade${g===3?" mut":g===5?" sup":""}"><i>◀</i>${gradeName(g)}<i>▶</i></span>${on?' <small class="dauto">🧑‍🍳 任せている</small>':""}`,
       ds:`効果: ${effLine(d,g)} ・ 作り置き ×${fmtNum((S.dishes[d.id]||{})[g]||0)}${others.length?` ・ ${others.join("・")}も任せています`:""}`,
       keys:`<b>Enter</b> ${on?"任せるのをやめる":"任せる"}` };
   });
@@ -13607,7 +13898,7 @@ function cookRowsOf(){
       const made=!!(S.dishMade[d.id]||{})[bookKeyOf(g)];   // 絵は、その段階を一度作るまで伏せる
       const seen=!isMutT(g) || made;                        // 変異・超変異の料理は、名前も伏せる
       rows.push({ d, ic:`<span class="dic${g===5?" sup":g===3?" mut":""}">${made?dishIco(d,g):"❔"}</span>`,
-        nm:`${starHtml("d",d.id)}${seen?esc(dishName(d,g)):`？？？(${esc(d.name)}の${gradeName(g)})`} <span class="dgrade${g===3?" mut":g===5?" sup":""}">◀ ${gl}${instantEff(d.eff)?"":`(${fmtMin(min)})`} ▶</span>${ac?' <small class="dauto">🧑‍🍳 料理番</small>':""}`,
+        nm:`${starHtml("d",d.id)}<span class="dnm" style="min-width:${dnW(d)}em">${seen?esc(dishName(d,g)):`？？？(${esc(d.name)}の${gradeName(g)})`}</span> <span class="dgrade${g===3?" mut":g===5?" sup":""}"><i>◀</i>${gl}${instantEff(d.eff)?"":`(${fmtMin(min)})`}<i>▶</i></span>${ac?' <small class="dauto">🧑‍🍳 料理番</small>':""}`,
         ds:`効果: ${effLine(d,plan?plan.grade:g)} ・ 作り置き ×${fmtNum((S.dishes[d.id]||{})[plan?plan.grade:g]||0)}<br>材料(持っている/要る): ${ingHaveText(d.ing,g)}${plan?"":` <b class="dlack">(材料が足りません)</b>`}`,
         keys: [plan?"<b>Enter</b> 1つ作る<br><b>Shift+Enter</b> 作れるだけ":"", kitN("cookvil")>0?`<b>A</b> ${ac?"料理番をやめる":"料理番に任せる"}`:""].filter(Boolean).join("<br>"),
         locked:!plan, enter:()=>cookMake(d.id,1), shift:()=>cookMake(d.id,99), left:()=>cookStep(d.id,-1), right:()=>cookStep(d.id,1), auto:()=>toggleAutoCook(d.id,g) });
@@ -13620,7 +13911,7 @@ function cookRowsOf(){
       const g=eatGrade[d.id], n=st[g];
       const step=dir=>{ eatGrade[d.id]=gs[(gs.indexOf(g)+dir+gs.length)%gs.length]; sfx.tab(); renderCook(); };
       rows.push({ d, ic:`<span class="dic${g===5?" sup":g===3?" mut":""}">${dishIco(d,g)}</span>`,
-        nm:`${starHtml("d",d.id)}${esc(dishName(d,g))} <span class="dgrade${g===3?" mut":g===5?" sup":""}">◀ ${gradeName(g)} ×${fmtNum(n)} ▶</span>${gs.length>1?` <small class="dhave">ほかに ${gs.filter(x=>x!==g).map(x=>`${gradeName(x)}×${st[x]}`).join("・")}</small>`:""}`,
+        nm:`${starHtml("d",d.id)}<span class="dnm" style="min-width:${dnW(d)}em">${esc(dishName(d,g))}</span> <span class="dgrade${g===3?" mut":g===5?" sup":""}"><i>◀</i>${gradeName(g)} ×${fmtNum(n)}<i>▶</i></span>${gs.length>1?` <small class="dhave">ほかに ${gs.filter(x=>x!==g).map(x=>`${gradeName(x)}×${st[x]}`).join("・")}</small>`:""}`,
         ds: `${effLine(d,g)}${instantEff(d.eff)?"":`(${fmtMin(dishMinOf(d,g))})`}`,
         keys:"<b>Enter</b> 食べる", enter:()=>cookEat(d.id,g), shift:()=>cookEat(d.id,g), left:()=>step(-1), right:()=>step(1) });
     }
@@ -14233,7 +14524,7 @@ function applyTheme(){
     : `color-mix(in srgb, color-mix(in srgb, ${cols[0]} 50%, ${cols[1]}) 50%, color-mix(in srgb, ${cols[2]} 50%, ${cols[3]}))`;
   const a=colOf(b);
   document.body.classList.add("dishtheme");
-  if(ms.some(x=>isMutT(x.t))){   // 変異・超変異: 背景をはっきり料理の色に。作物が舞い、キーが料理に変わる
+  if(ms.some(x=>isMutT(x.t))){   // かまどの変異・超変異の色も 変異・超変異: 背景をはっきり料理の色に。作物が舞い、キーが料理に変わる
     document.body.classList.add("dishfun");
     const mix=(p,base)=>`color-mix(in srgb, ${cf} ${p}%, ${base})`;   // 紫いもチップスのような暗い色は、明るい紫で
     de.style.setProperty("--dish",cf);
@@ -14854,7 +15145,7 @@ function tutGive(n){ xAdd(S,"money",n); save(); if(document.body.classList.conta
 /* スマホはタイピングできないので、ガイドの間だけ植えた作物を実らせる */
 function tutGrow(){
   tick();
-  S.fields.forEach(f=>{ for(const k of KEYS){ const p=f[k]; if(p.crop && !p.vil && !isRipe(p)) grow(p, need(p.crop)-p.crop.grown, Date.now(), "x"); } });
+  S.fields.forEach(f=>{ for(const k of KEYS){ const p=f[k]; if(p.crop && !p.vil && !isRipe(p)) grow(p, need(p.crop)-p.crop.grown, Date.now(), "x", Infinity); } });
   save(); if(document.body.classList.contains("garden")) renderAll();
 }
 
@@ -15008,6 +15299,7 @@ function onKeyMain(e){
   if(modal==="notice"){ e.preventDefault(); if(e.key==="Enter") closeModal(); return; }   // 料理の解放のお知らせは Enter でだけ閉じる
   if(modal==="cook"){ cookKey(e); return; }
   if(modal==="layout"){ layoutKey(e); return; }
+  if(modal==="fsort"){ fsKey(e); return; }
   if(modal==="rank"){
     if(e.key==="Escape"||e.key==="9"){ e.preventDefault(); closeModal(); }
     else if(e.key==="Enter"){ e.preventDefault(); submitRank(); }
@@ -15114,6 +15406,37 @@ function showRoseNotice(){
   $("g-noticeOk").textContent=kb("わかった(Enter)","わかった");
   openModal("notice"); sfx.vil();
 }
+/* 運営からのプレゼント(不具合のお詫びなど)。Firebase の GIFT_PATH/<持ち主の印>/<番号> に
+   { s:{作物のid:数}, m:"ひとこと(なくてもよい)" } を書くと、その人だけが一度だけ受け取れる。持ち主の印は番付やチャットの o */
+const GIFT_PATH="typinggarden/gifts";
+let giftQ=[], giftAt=0;
+function giftFetch(){
+  if(typeof db==="undefined" || !db || !S.owner || realFields || Date.now()-giftAt<10*60000) return;   // 10分に1回だけ見に行く
+  giftAt=Date.now();
+  db.ref(`${GIFT_PATH}/${S.owner}`).once("value").then(snap=>{
+    const got=S.giftGot||{};
+    snap.forEach(c=>{ const v=c.val(); if(v && !got[c.key] && !giftQ.some(g=>g.id===c.key)) giftQ.push({ id:c.key, s:v.s||{}, m:typeof v.m==="string" ? v.m.slice(0,200) : "" }); });
+  }).catch(()=>{});
+}
+function showGiftNotice(){
+  giftFetch();
+  if(!giftQ.length || scene!=="garden" || modal || realFields) return;
+  const g=giftQ.shift(); S.giftGot=S.giftGot||{};
+  if(S.giftGot[g.id]) return;
+  S.giftGot[g.id]=Date.now();
+  const rows=[];
+  for(const [id,n] of Object.entries(g.s)){
+    const c=CROP[id], k=Math.floor(+n); if(!c || !(k>0) || k>1000) continue;
+    S.seeds[id]=(S.seeds[id]||0)+k;
+    rows.push(`<li>${ico(c)} <b>${esc(c.name)}の種</b> ×${k}</li>`);
+  }
+  save();
+  if(!rows.length) return;
+  $("g-noticeTitle").textContent="🎁 プレゼントが届きました";
+  $("g-noticeBody").innerHTML=`<p>${g.m ? esc(g.m) : "ご迷惑をおかけしたお詫びに、プレゼントをお届けします。"}</p><ul style="list-style:none; padding-left:0">${rows.join("")}</ul><p>持ち物の種に入りました。</p>`;
+  $("g-noticeOk").textContent=kb("ありがとう(Enter)","ありがとう");
+  openModal("notice"); sfx.vil();
+}
 function renderCookLock(){ const b=$("g-cookBtn"); if(!b) return; const ok=cookOpen(); b.classList.toggle("locked",!ok); b.title=ok?"":COOK_LOCK_MSG(); }
 // マウスでも閉じられるように: 閉じるボタンと、ウィンドウの外側のクリック
 root.querySelectorAll("[data-close]").forEach(b=>b.addEventListener("click",()=>closeModal()));
@@ -15156,7 +15479,7 @@ function enterIn(){
   crowVisit();
   flushToastBatch();
   clearInterval(loopId); clearInterval(saveId);
-  loopId=setInterval(()=>{ const q3=ev("Q3",30/60,3,0); /* 料理: 農園の時計(分) */ if(q3) applySkip(q3,"k"); showCookNotice(); showRoseNotice(); showBtNotice(); autoCookTick(); tick(); reportVillagers(); renderBar(); renderField(); renderInfo(); renderCounter(); renderBuff(); if(modal==="cook") $("g-cookNow").innerHTML=cookNowText(); },1000);
+  loopId=setInterval(()=>{ const q3=ev("Q3",30/60,3,0); /* 料理: 農園の時計(分) */ if(q3) applySkip(q3,"k"); showCookNotice(); showRoseNotice(); showBtNotice(); showGiftNotice(); autoCookTick(); tick(); reportVillagers(); renderBar(); renderField(); renderInfo(); renderCounter(); renderBuff(); if(modal==="cook") $("g-cookNow").innerHTML=cookNowText(); },1000);
   saveId=setInterval(save,15000);
 }
 function leave(){
@@ -15207,7 +15530,7 @@ function debugUnlock(){
   for(const d of DISHES){ S.recipes[d.id]=true; S.dishes[d.id]={0:1,3:1,5:1}; S.dishMade[d.id]={0:true,3:true,5:true}; S.dishEaten[d.id]={0:true,3:true,5:true}; }
   for(const r of ROSE_ALL){ S.harvestBy[r.id]=50; S.harvestQ[r.id]=r.secret?[5]:[20,0,0,3,0,1]; S.inv[r.id]=r.secret?[2]:[3,0,0,2,0,1]; }   // 薔薇
   S.roseTeaRecipe=true; S.baraSeen=true; S.rgNoticed=true;
-  S.seeds.bt_ume=3; S.seeds.bt_grape=3; S.seeds.bt_sugi=3; S.axe=true; S.fuyo=30; S.sumi=30; S.fuyo2=30; S.bincho=30; for(const id of Object.keys(BTS)) for(const q of [0,3,5]) btBookMark(id,q);   // 図鑑の大木も全部   // 大木: 苗木・斧・腐葉土・梅の炭
+  S.seeds.bt_ume=3; S.seeds.bt_grape=3; S.seeds.bt_sugi=3; S.axe=true; S.fuyo=30; S.sumi=30; S.fuyo2=30; S.bincho=30; S.plain=30; for(const id of Object.keys(BTS)) for(const q of [0,3,5]) btBookMark(id,q);   // 図鑑の大木も全部   // 大木: 苗木・斧・腐葉土・梅の炭
   // 薔薇ガチャ: コイン・権利・花弁・GHR をすべて
   S.roseCoin=100000000; S.megaSet=true; S.layoutOwned=true; S.gachaPass.r1111=true; S.gachaPass.r11111=true; S.gachaPass.r111111=true; S.gachaPass.r1111111=true;
   for(const id in RG) S.got[id]=1;
@@ -16108,7 +16431,7 @@ function tutView(){
         : { sel:null, text:"タイトルに戻って、イージー(キー 1)を始めよう" };
     case "plate":
       return scene==="game"
-        ? { sel:"#plate", text:"正しく打つとキーが外れて芽が出ます。外したキーは農園のお金に! 60秒がんばろう(日本語入力はオフで)" }
+        ? { sel:null, text:"正しく打つとキーが外れて芽が出ます。外したキーは農園のお金に! 60秒がんばろう(日本語入力はオフで)" }
         : { sel:null, text:"タイピングを最後まで遊んでみよう" };
     case "name":
       if(scene==="result") return { sel:"#registerBox",
@@ -16243,7 +16566,7 @@ function tutRender(){
     const acts=$("tutActs"); acts.innerHTML="";
     const M=!!window.IS_MOBILE;
     for(const [label,fn,key] of (v.acts||[])){ const btn=document.createElement("button"); btn.className="btn primary"; btn.innerHTML=label+(key&&!M?` <span class="kbdh">${key}</span>`:""); btn.onclick=fn; acts.appendChild(btn); }
-    if(id!=="done"){ const sk=document.createElement("button"); sk.className="btn tut-skip"; sk.innerHTML="スキップ"+(M?"":' <span class="kbdh">Backspace</span>'); sk.onclick=tutSkip; acts.appendChild(sk); }
+    const sk=$("tutEnd"); sk.hidden = id==="done"; sk.innerHTML="ガイドを終える"+(M?"":' <span class="kbdh">Backspace</span>');   // 進むボタンから離して、右上に小さく(押しまちがえないように)
   }
   bub.style.display="block";
   const mini = scene==="game";
@@ -16261,8 +16584,13 @@ function tutRender(){
     const r=el.getBoundingClientRect();
     ring.style.display="block";
     Object.assign(ring.style,{ left:(r.left-6)+"px", top:(r.top-6)+"px", width:(r.width+12)+"px", height:(r.height+12)+"px" });
-    let top = r.bottom+14+bh < H ? r.bottom+14 : (r.top-14-bh >= 8 ? r.top-14-bh : H-bh-8);
-    let left = Math.min(Math.max(8, r.left+r.width/2-bw/2), W-bw-8);
+    if(bub.dataset.seen!==key && (r.bottom>H || r.top<0)){ bub.dataset.seen=key; el.scrollIntoView({ block:"center" }); return requestAnimationFrame(tutRender); }   // 押してほしい所が画面の外なら、見えるところまで動かす
+    // 押してほしい所に重ならないように: 下 → 上 → 横 → 遠いほうの端
+    let top, left = Math.min(Math.max(8, r.left+r.width/2-bw/2), W-bw-8);
+    if(r.bottom+14+bh < H) top=r.bottom+14;
+    else if(r.top-14-bh >= 8) top=r.top-14-bh;
+    else if(r.right+14+bw < W-8 || r.left-14-bw >= 8){ left = r.right+14+bw < W-8 ? r.right+14 : r.left-14-bw; top=Math.min(Math.max(8, r.top+r.height/2-bh/2), H-bh-8); }
+    else top = (r.top+r.bottom)/2 > H/2 ? 8 : H-bh-8;
     bub.style.left=left+"px"; bub.style.top=top+"px";
   }else{
     ring.style.display="none";
@@ -17535,6 +17863,7 @@ function tqKey(e){
     else if(k==="e"||k==="E"){ e.preventDefault(); tqExAll($("tqResList")); }
     else if((k==="n"||k==="N") && $("tqRegBtn")){ e.preventDefault(); tqRegName(); }
     else if(k==="r"||k==="R"){ e.preventDefault(); if($("tqRankView")) tqRankView(); else tqRankOpen(); }
+    else if(k==="c"||k==="C"){ e.preventDefault(); tqToChat(); }
     else if(k==="g"||k==="G") tqToGarden();
     return;
   }
@@ -17597,7 +17926,8 @@ $("tqLTabs").addEventListener("click",e=>{ const b=e.target.closest("[data-lv]")
 $("tqListBack").addEventListener("click",tqMenu);
 document.querySelectorAll(".tq-gardenBtn, #tqGstatM, #tqGstatR").forEach(b=>b.addEventListener("click",tqToGarden));
 $("tqRankBtn").addEventListener("click",tqRankOpen);
-$("tqRankBtnR").addEventListener("click",()=>{ if($("tqRankView")) tqRankView(); else tqRankOpen(); });
+$("tqChatBtnR").addEventListener("click",tqToChat);
+function tqToChat(){ show("title"); openWorld(); }   // 結果から、チャットへ(ランキングは結果の上の「ランキングを見る」から)
 $("g-toeicBtn").addEventListener("click",()=>{ try{ Garden.leave(); }catch(e){} openToeic(); });   // 農園からTOEICへ
 $("tqSecDn").addEventListener("click",()=>tqSetSec(-1));
 $("tqSecUp").addEventListener("click",()=>tqSetSec(1));
