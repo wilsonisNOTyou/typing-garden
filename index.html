@@ -281,6 +281,8 @@ html.mobile .tq-opt.tq-lo .tq-lk{display:none}
 .tq-opt-row{display:flex; flex-wrap:wrap; gap:.35rem .6rem; justify-content:center; align-items:center; margin:.3rem 0 .4rem; font-size:.85rem}
 .tq-opt-row .btn{font-size:.8rem; padding:.2rem .55rem}
 .tq-opt-row .btn.on{outline:2px solid var(--amber,#e0a020)}
+.tq-vsel{display:inline-flex; align-items:center; gap:.3rem; color:var(--steel)}
+.tq-vsel select{max-width:14rem; font:inherit; font-size:.8rem; padding:.15rem .3rem; border-radius:6px; background:var(--panel,#2a2f38); color:var(--ink); border:1px solid var(--line)}
 .tq-wg{display:inline-flex; flex-wrap:wrap; gap:.25rem; align-items:center}
 .tq-revja{font-size:.9em}
 .tq-lbody{max-height:60vh; overflow:auto; text-align:left; border:1px solid var(--line); border-radius:8px; padding:.3rem .6rem}
@@ -17249,9 +17251,10 @@ const tqLoad = () => {
   try{ tqStatF=JSON.parse(localStorage.getItem(TQ_KEY_F)||"{}")||{}; }catch(e){ tqStatF=tqStatF||{}; }
   try{ tqBest=JSON.parse(localStorage.getItem(TQ_BEST_KEY)||"{}")||{}; }catch(e){ tqBest=tqBest||{}; }
   try{ const o=JSON.parse(localStorage.getItem(TQ_OPEN_KEY)||"[]"); tqOpenLv=Array.isArray(o)?o:[]; }catch(e){}
-  try{ const o=JSON.parse(localStorage.getItem(TQ_OPT_KEY)||"{}")||{}; if(o.sec>=TQ_SEC_MIN && o.sec<=TQ_SEC_MAX) tqSec=o.sec|0; tqHideGood=!!o.hide; if(TQ_WG.some(x=>x[0]===o.wg)) tqWeakG=o.wg; }catch(e){}
+  try{ const o=JSON.parse(localStorage.getItem(TQ_OPT_KEY)||"{}")||{}; if(o.sec>=TQ_SEC_MIN && o.sec<=TQ_SEC_MAX) tqSec=o.sec|0; tqHideGood=!!o.hide; if(TQ_WG.some(x=>x[0]===o.wg)) tqWeakG=o.wg; if(o.voice) tqVPick={ q:o.voice.q||"", a:o.voice.a||"" }; }catch(e){}
 };
-const tqSaveOpt = () => { try{ localStorage.setItem(TQ_OPT_KEY,JSON.stringify({sec:tqSec, hide:tqHideGood, wg:tqWeakG})); }catch(e){} };
+const tqSaveOpt = () => { try{ localStorage.setItem(TQ_OPT_KEY,JSON.stringify({sec:tqSec, hide:tqHideGood, wg:tqWeakG, voice:tqVPick})); }catch(e){} };
+let tqVPick={ q:"", a:"" };   // リスニングで選んだ声の名前(空はおまかせ)
 let tqHideGood=false;   // 覚えた単語を出さない(出せる単語が覚えた単語だけになったら出す)
 /* 苦手は、レベルのまとまり(ランキングと同じ3つ)ごとに選べる */
 const TQ_WG=[["all","ぜんぶ"],["base","基本"],["score","470〜990点"],["idiom","熟語"]];
@@ -17352,7 +17355,7 @@ function tqMenu(){
     $("tqMenu").querySelectorAll("[data-f],[data-k],[data-lv]").forEach(b=>{ const d=b.dataset, key=d.f!=null?"f:"+d.f:d.k!=null?"k:"+d.k:"lv:"+d.lv; b.classList.toggle("bcrack",tqCracks.has(key)); });
   }
   $("tqSecRow").hidden = !(tqFmt==="type" || (tqFmt==="rev" && !window.IS_MOBILE));
-  $("tqOptRow").innerHTML = tqFmt==="listen" ? "" :
+  $("tqOptRow").innerHTML = tqFmt==="listen" ? tqVoiceRow() :
     `<button class="btn${tqHideGood?" on":""}" id="tqHideBtn">覚えた単語を出さない: <b>${tqHideGood?"オン":"オフ"}</b> <span class="kbdh">H</span></button>`
     +` <span class="tq-wg">苦手のまとまり <span class="kbdh">W</span> ${TQ_WG.map(([k,nm])=>`<button class="btn${k===tqWeakG?" on":""}" data-wg="${k}">${nm}</button>`).join("")}</span>`;
   $("tqSecV").textContent=tqSec;
@@ -17673,11 +17676,26 @@ function tqFillChoices(w){
    質問と3つの応答をまとめて予約する(1文ずつ待つと、話し始めるまでの間が毎回入るため)。質問と応答は別の声 */
 const tqSynth = window.speechSynthesis || null;
 let tqVQ=null, tqVA=null, tqSayTok=0, tqHeard=false, tqWarmed=false, tqSlow=false;
+/* 声の選び方: 自然に聞こえる声ほど上に。おもしろ声や簡易版の声は使わない */
+const TQ_VOICE_BAD=/espeak|compact|fred|albert|bad news|bahh|bells|boing|bubbles|cellos|good news|jester|organ|superstar|trinoids|whisper|wobble|zarvox|junior|kathy|ralph|grandma|grandpa|rocko|shelley|sandy|\bflo\b|\breed\b|\beddy\b|novelty/i;
+const tqVoiceScore = v => (/natural|neural|online/i.test(v.name)?60:0)+(/^google/i.test(v.name)?45:0)+(/enhanced|premium|siri/i.test(v.name)?35:0)
+  +(/samantha|alex|ava|allison|susan|zoe|evan|nathan|\btom\b|karen|daniel|serena|aria|jenny|\bguy\b|libby|sonia|ryan|emma|brian/i.test(v.name)?20:0)
+  +(/^en[-_]US/i.test(v.lang)?6:/^en[-_](GB|AU|CA|IE|NZ)/i.test(v.lang)?4:0)-(TQ_VOICE_BAD.test(v.name)?200:0);
+let tqVoiceList=[];
 function tqVoices(){
   if(!tqSynth) return;
-  const en=tqSynth.getVoices().filter(v=>/^en[-_]/i.test(v.lang)); if(!en.length) return;
-  const us=en.filter(v=>/US/i.test(v.lang)), gb=en.filter(v=>/GB|AU/i.test(v.lang));
-  tqVQ=us[0]||en[0]; tqVA=gb[0]||en.find(v=>v!==tqVQ)||tqVQ;
+  const en=tqSynth.getVoices().filter(v=>/^en[-_]/i.test(v.lang)).sort((a,b)=>tqVoiceScore(b)-tqVoiceScore(a)); tqVoiceList=en; if(!en.length) return;
+  const by = n => n ? en.find(v=>v.name===n) : null;
+  tqVQ=by(tqVPick.q)||en[0];
+  tqVA=by(tqVPick.a)||en.find(v=>v!==tqVQ && v.lang!==tqVQ.lang && tqVoiceScore(v)>=20)||en.find(v=>v!==tqVQ && tqVoiceScore(v)>=20)||tqVQ;   // 応答は、ちゃんとした声がほかにあれば質問と別の声(できれば別の国の英語)
+  if(tqPhase==="menu" && tqFmt==="listen") tqMenu();
+}
+const tqVoiceRow = () => !tqSynth ? "" : !tqVoiceList.length ? "英語の声が見つかりません" :
+  [["q","質問の声"],["a","応答の声"]].map(([k,nm])=>`<label class="tq-vsel">${nm} <select data-v="${k}"><option value="">おまかせ${(k==="q"?tqVQ:tqVA)&&!tqVPick[k]?`: ${tqEsc((k==="q"?tqVQ:tqVA).name)}`:""}</option>${tqVoiceList.map(v=>`<option value="${tqEsc(v.name)}"${tqVPick[k]===v.name?" selected":""}>${tqEsc(v.name)} (${tqEsc(v.lang)})</option>`).join("")}</select></label>`).join("")
+  +`<button class="btn" id="tqVTest">試しに聞く <span class="kbdh">V</span></button>`;
+function tqVTest(){
+  if(!tqSynth) return; tqHush();
+  [["This is the question voice.",tqVQ],["And this is the answer voice.",tqVA]].forEach(([t,v])=>{ const u=new SpeechSynthesisUtterance(t); if(v){ u.voice=v; u.lang=v.lang; } u.rate=.95; try{ tqSynth.speak(u); }catch(e){} });
 }
 if(tqSynth){ try{ tqVoices(); tqSynth.addEventListener("voiceschanged",tqVoices); }catch(e){} }
 function tqWarm(){ if(tqWarmed||!tqSynth) return; tqWarmed=true; try{ const u=new SpeechSynthesisUtterance(" "); u.volume=0; tqSynth.speak(u); }catch(e){} }   // 最初の1回の待ちを減らす
@@ -17697,18 +17715,25 @@ function tqListenPlay(){
   const utt = (text,voice,onstart) => { const u=new SpeechSynthesisUtterance(text); if(voice) u.voice=voice; u.lang=(voice&&voice.lang)||"en-US"; u.rate = !one && tqSlow ? .75 : .95; u.onstart=onstart; return u; };
   const num = tqKind==="one" ? tqAns+(tqPhase==="play"?1:0) : (tqPhase==="wait"?tqI:tqI+1);
   const lead=utt(`Question ${num}.`,tqVQ,mine(()=>{ if(tqPhase==="play") $("tqMean").textContent=`Question ${num}`; }));
-  const list=[utt(w.en,tqVQ,mine(()=>{ hl(-1); if(tqPhase==="play") $("tqMean").textContent="質問"; }))];
-  tqChoices.forEach((c,j)=>list.push(utt(`${"ABC"[j]}. ${c.txt}`,tqVA,mine(()=>{ hl(j); if(tqPhase==="play") $("tqMean").textContent=`(${"ABC"[j]})`; }))));
-  const last=list[list.length-1];
-  last.onend=last.onerror=mine(()=>{
+  // 1文ずつ読み、あいだに間を置く(記号の「A」と応答の文がつながらないように)。gap: その文を読む前の間(ミリ秒)
+  const seq=[{ u:utt(w.en,tqVQ,mine(()=>{ hl(-1); if(tqPhase==="play") $("tqMean").textContent="質問"; })), gap:500 }];
+  tqChoices.forEach((c,j)=>{ seq.push({ u:utt(`${"ABC"[j]}.`,tqVA,mine(()=>{ hl(j); if(tqPhase==="play") $("tqMean").textContent=`(${"ABC"[j]})`; })), gap:j?800:1000 }); seq.push({ u:utt(c.txt,tqVA,null), gap:350 }); });
+  const run = i => {   // 読み終わりの知らせが来ない端末のために、長めの見込み時間でも次へ進む
+    const st=seq[i]; let went=false;
+    const next = mine(() => { if(went) return; went=true; clearTimeout(fb); if(i+1<seq.length) setTimeout(mine(()=>run(i+1)), seq[i+1].gap); else done(); });
+    const fb=setTimeout(next, 3000+st.u.text.length*130/st.u.rate);
+    st.u.onend=st.u.onerror=next;
+    try{ tqSynth.speak(st.u); }catch(e){ next(); }
+  };
+  const done=mine(()=>{
     hl(-1);
     if(tqPhase!=="play"){ if(btn && !one) btn.disabled=false; return; }
     $("tqMean").textContent="どれが一番よい応答ですか?";
     if(one) tqClock(TQ_LIMIT.listen); else if(btn) btn.disabled=false;
   });
   if(tqPhase==="play") $("tqMean").textContent="まもなく流れます…";
-  // 「Question 3.」のあと、少し間をおいて本文をまとめて予約する(読み上げが温まっているので、出だしの待ちがそろう)
-  lead.onend=lead.onerror=mine(()=>setTimeout(mine(()=>{ try{ list.forEach(u=>tqSynth.speak(u)); }catch(e){} }),500));
+  // 「Question 3.」のあと、少し間をおいて本文を1文ずつ読む
+  lead.onend=lead.onerror=mine(()=>setTimeout(mine(()=>run(0)),seq[0].gap));
   try{ tqSynth.speak(lead); }catch(e){}
 }
 function tqSetSlow(v){ tqSlow=v; $("tqSlow").checked=v; }
@@ -17870,6 +17895,7 @@ function tqKey(e){
     if(k==="Escape"){ e.preventDefault(); show("title"); }
     else if(k==="Tab"){ e.preventDefault(); tqFmt=tqCycle(TQ_FMTS,tqFmt,e.shiftKey?-1:1); tqMenu(); }
     else if(k==="m"||k==="M"){ tqKind = tqKind==="set" ? "one" : "set"; tqMenu(); }
+    else if((k==="v"||k==="V") && tqFmt==="listen") tqVTest();
     else if(k==="h"||k==="H"){ if(tqFmt!=="listen"){ tqHideGood=!tqHideGood; tqSaveOpt(); tqMenu(); } }
     else if(k==="w"||k==="W"){ if(tqFmt!=="listen"){ tqWeakG=tqCycle(TQ_WG,tqWeakG,e.shiftKey?-1:1); tqSaveOpt(); tqMenu(); } }
     else if((k==="ArrowLeft"||k==="ArrowRight") && (tqFmt==="type"||tqFmt==="rev")){ e.preventDefault(); tqSetSec(k==="ArrowLeft"?-1:1); }
@@ -17938,7 +17964,8 @@ $("tqQuit").addEventListener("click",()=>document.body.dispatchEvent(new Keyboar
 $("gameQuit").addEventListener("mousedown",e=>e.preventDefault());
 $("gameQuit").addEventListener("click",()=>document.body.dispatchEvent(new KeyboardEvent("keydown",{ key:"Escape", bubbles:true })));
 $("tqLSum").addEventListener("click",e=>{ const m=e.target.closest("[data-lm]"); if(m){ tqListM=m.dataset.lm; tqListF="all"; tqList(); return; } const b=e.target.closest("[data-lf]"); if(b && !b.disabled){ tqListF=b.dataset.lf; tqList(); } });
-$("tqOptRow").addEventListener("click",e=>{ if(e.target.closest("#tqHideBtn")){ tqHideGood=!tqHideGood; tqSaveOpt(); tqMenu(); return; } const b=e.target.closest("[data-wg]"); if(b){ tqWeakG=b.dataset.wg; tqSaveOpt(); tqMenu(); } });
+$("tqOptRow").addEventListener("change",e=>{ const s=e.target.closest("select[data-v]"); if(!s) return; tqVPick[s.dataset.v]=s.value; tqSaveOpt(); tqVoices(); tqVTest(); s.blur(); });   // 声を変えたら、すぐ聞いて確かめる
+$("tqOptRow").addEventListener("click",e=>{ if(e.target.closest("#tqVTest")){ tqVTest(); return; } if(e.target.closest("#tqHideBtn")){ tqHideGood=!tqHideGood; tqSaveOpt(); tqMenu(); return; } const b=e.target.closest("[data-wg]"); if(b){ tqWeakG=b.dataset.wg; tqSaveOpt(); tqMenu(); } });
 $("tqKinds").addEventListener("click",e=>{ const b=e.target.closest("[data-k]"); if(b){ tqKind=b.dataset.k; tqMenu(); } });
 $("tqLevels").addEventListener("click",e=>{ const b=e.target.closest(".tq-lv"); if(b && !b.disabled) tqStart(b.dataset.lv); });
 $("tqOpts").addEventListener("click",e=>{ const b=e.target.closest(".tq-opt"); if(!b) return;
