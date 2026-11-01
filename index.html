@@ -306,6 +306,12 @@ html.mobile .tq-opts, html.mobile .tq-opts.three{grid-template-columns:1fr}
 html.mobile .tq-card.fill .tq-opts{grid-template-columns:1fr 1fr; gap:.45rem}   /* 穴埋めは語句が短いので2列(次へが画面に収まるように) */
 html.mobile .tq-card.fill .tq-opt{padding:.55rem .6rem; min-height:2.8rem; gap:.4rem}
 html.mobile .tq-card.fill .tq-osub{margin-left:0}
+/* スマホ: 4択・逆4択・リスニングも、答えたあと小さい画面に収まるよう詰める */
+html.mobile .tq-card:not(.fill) .tq-opt{padding:.5rem .8rem; min-height:2.8rem}
+html.mobile .tq-card:not(.fill) .tq-opts{gap:.45rem}
+html.mobile .tq-osub{margin-left:2rem; font-size:.76rem}
+html.mobile .tq-card .tq-typed:empty, html.mobile .tq-card .tq-ja:empty{min-height:0; margin:0}
+html.mobile .tq-card{min-height:0}
 html.mobile .tq-mode{min-width:0; flex:1 1 40%}
 html.mobile .tq-res li{grid-template-columns:1.6rem 7rem 1fr auto}
 html.mobile .tq-lrow{grid-template-columns:6rem 1fr auto auto auto}
@@ -17315,7 +17321,7 @@ const tqExBtn = (w,force) => force||tqHasSent(w) ? `<button class="btn tq-exb" t
 const tqExHtml = (w,q,ch) => { const x=q||TQ_SENT[w.en]; return x||ch ? `<div class="tq-ex" hidden>${x?`${tqEsc(x[0]).replace(/\[([^\]]*)\]/,"<b>$1</b>")}<small>${tqEsc(x[2])}</small>`:""}${ch?(q?tqFillExp(w,q,ch):tqChoiceExp(ch)):""}</div>` : ""; };   // 穴埋めで出した問題(q)と選択肢(ch)があれば、その解説も。4択は ch だけ
 /* 4択の解説: 選択肢の意味が、どの英単語の意味か */
 const tqChoiceExp = ch => `<div class="tq-fx"><div class="tq-fxl">${ch.map(o=>`<div class="tq-fxr${o.ok?" c":""}"><b>${tqEsc(o.en||o.txt)}</b><span>${tqEsc(o.en?o.txt:tqGloss(o.txt))}</span></div>`).join("")}</div></div>`;   // 4択は { txt:意味, en }、逆4択は { txt:英単語 }
-const tqOptSub = o => !o ? "" : o.en || tqGloss(o.txt);   // ボタンに添える字: 4択は英単語、逆4択は意味   // 穴埋めで出した問題(q)と選択肢(ch)があれば、その解説も
+const tqOptSub = o => !o ? "" : o.en || o.ja || tqGloss(o.txt);   // リスニングは応答の訳   // ボタンに添える字: 4択は英単語、逆4択は意味   // 穴埋めで出した問題(q)と選択肢(ch)があれば、その解説も
 /* 穴埋め4択の解説: 選択肢それぞれの意味と、本番寄りの問題には文法の一言 */
 const tqGloss = t => { const k=t.toLowerCase(), w=TQ_BY[k]||TQ_BY[t]; return TQ_GL[k] || (w ? w.means.slice(0,2).map(m=>m.j).join("、") : ""); };
 const tqFillNote = (w,q) => q===TQ_P5[w.en] && TQ_P5X[w.en] ? `<p class="tq-fxn tq-fxn1">💡 ${tqEsc(TQ_P5X[w.en])}</p>` : "";
@@ -17768,7 +17774,7 @@ function tqChoose(i){
   { const bar=$("tqBar"); bar.style.transform=getComputedStyle(bar).transform; bar.style.transition="none"; }   // 残り時間のバーを止める
   document.querySelectorAll("#tqOpts .tq-opt:not(.tq-idk)").forEach((b,j)=>{ if(tqChoices[j].ok) b.classList.add("ok"); else if(j===i) b.classList.add("ng"); });
   if(c.idk && !c.late) $("tqOpts").querySelector(".tq-idk").classList.add("ng");
-  if(tqFmt==="choice"||tqFmt==="rev"||tqFmt==="fill") document.querySelectorAll("#tqOpts .tq-opt:not(.tq-idk)").forEach((b,j)=>{ const t=tqOptSub(tqChoices[j]); if(t) b.insertAdjacentHTML("beforeend",`<small class="tq-osub">${tqEsc(t)}</small>`); });   // 答えたら、各ボタンにその英単語(4択)・意味(逆4択)
+  if(tqFmt==="choice"||tqFmt==="rev"||tqFmt==="fill"||tqFmt==="listen") document.querySelectorAll("#tqOpts .tq-opt:not(.tq-idk)").forEach((b,j)=>{ const t=tqOptSub(tqChoices[j]); if(t) b.insertAdjacentHTML("beforeend",`<small class="tq-osub">${tqEsc(t)}</small>`); });   // 答えたら、各ボタンにその英単語(4択)・意味(逆4択)
   const fq = tqFmt==="fill" ? tqSentCur||TQ_SENT[w.en] : null;   // 穴埋め: 出した問題(見直しで解説を出す)
   tqMarkFx(w.en,c.ok); tqLog.push({ w, ok:c.ok, idk:!!c.idk, late:!!c.late, q:fq, ch:fq||tqFmt==="choice"||tqFmt==="rev"||tqFmt==="listen"?tqChoices:null });
   if(tqFmt==="fill"){
@@ -17778,8 +17784,7 @@ function tqChoose(i){
     $("tqMean").innerHTML=`<b class="tq-hw">${tqEsc(w.en)}</b> ${tqMeanHtml(w)}`;
   }else if(tqFmt==="listen"){
     $("tqMean").className="tq-mean tq-lexp";
-    $("tqMean").innerHTML=`<div class="tq-lq">${tqEsc(w.en)}</div><div class="tq-lja">${tqEsc(w.ja)}</div><ul>`
-      +tqChoices.map((o,j)=>`<li class="${o.ok?"c":""}">(${"ABC"[j]}) ${tqEsc(o.txt)} — ${tqEsc(o.ja)}</li>`).join("")+"</ul>";
+    $("tqMean").innerHTML=`<div class="tq-lq">${tqEsc(w.en)}</div><div class="tq-lja">${tqEsc(w.ja)}</div>`;   // 応答の訳は各ボタンに
   }else if(tqFmt==="rev") $("tqMean").innerHTML=`<b class="tq-hw">${tqEsc(w.en)}</b> ${tqMeanHtml(w)}`;
   else $("tqMean").innerHTML=tqMeanHtml(w);
   if(c.ok){
@@ -17796,7 +17801,7 @@ function tqChoose(i){
   c.ok ? sndClear() : sndMiss();
   tqI++; tqPhase="wait";
   if(tqFmt==="fill"){ $("tqNextBtn").hidden=false; $("tqHint").textContent="例文と訳を確かめたら Enter・スペース・タップで次へ"; if(window.IS_MOBILE) try{ $("tqNextBtn").scrollIntoView({block:"nearest",behavior:"smooth"}); }catch(e){} }   // スマホ: 次へが画面の外なら見えるところまで
-  else if(tqFmt==="listen"){ $("tqNextBtn").hidden=false; $("tqHint").textContent = (tqKind==="set" ? "L もう一度聞く ・ " : "")+"英文と訳を確かめたら Enter・スペース・タップで次へ"; if(tqKind!=="set") $("tqListen").disabled=true; }   // 穴埋めは文が長いので、自分で次へ進む
+  else if(tqFmt==="listen"){ $("tqNextBtn").hidden=false; if(window.IS_MOBILE) try{ $("tqNextBtn").scrollIntoView({block:"nearest",behavior:"smooth"}); }catch(e){} $("tqHint").textContent = (tqKind==="set" ? "L もう一度聞く ・ " : "")+"英文と訳を確かめたら Enter・スペース・タップで次へ"; if(tqKind!=="set") $("tqListen").disabled=true; }   // 穴埋めは文が長いので、自分で次へ進む
   else tqTimer=setTimeout(tqNext, c.ok?900:3500);   // 不正解は、ボタンの英単語・意味を確かめられるように長め
 }
 /* ノーミス勝負で1問正解: そのレベルを全部正解したらクリアで終わり */
