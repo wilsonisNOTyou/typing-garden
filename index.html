@@ -7168,9 +7168,9 @@ function mtFinishCommon(o){
 /* ---- 問題: 乱数は対戦の id から(全員同じ問題・同じ選択肢の並び) ---- */
 function mtqChoices(w,r){   // 4択: 英単語 → 意味
   const txt = x => x.means.slice(0,2).map(m=>m.j).join("、"), used=new Set(w.means.map(m=>m.j)), overlap = x => x.means.some(m=>used.has(m.j));
-  const out=[{ txt:txt(w), ok:true }], add = t => { if(out.length<4 && !out.some(o=>o.txt===t)) out.push({ txt:t, ok:false }); };
-  for(const c of w.conf){ const x=TQ_BY[c]; if(x){ if(!overlap(x)) add(txt(x)); } else if(TQ_CONF[c] && !used.has(TQ_CONF[c])) add(TQ_CONF[c]); }
-  for(const pool of [TQ.filter(x=>x.pos===w.pos && x.lv===w.lv), TQ.filter(x=>x.pos===w.pos), TQ]) for(const x of mtShuf(pool.slice(),r)){ if(out.length>=4) break; if(x!==w && !overlap(x)) add(txt(x)); }
+  const out=[{ txt:txt(w), ok:true, en:w.en }], add = (t,en) => { if(out.length<4 && !out.some(o=>o.txt===t)) out.push({ txt:t, ok:false, en }); };
+  for(const c of w.conf){ const x=TQ_BY[c]; if(x){ if(!overlap(x)) add(txt(x),x.en); } else if(TQ_CONF[c] && !used.has(TQ_CONF[c])) add(TQ_CONF[c],c); }
+  for(const pool of [TQ.filter(x=>x.pos===w.pos && x.lv===w.lv), TQ.filter(x=>x.pos===w.pos), TQ]) for(const x of mtShuf(pool.slice(),r)){ if(out.length>=4) break; if(x!==w && !overlap(x)) add(txt(x),x.en); }
   return mtShuf(out,r);
 }
 function mtqRevChoices(w,r){   // 逆4択: 意味 → 英単語
@@ -7400,7 +7400,7 @@ function mtqItems(){
 function mtqReview(){
   const me=mtMe(), box=$("mtReviewList"); if(!box) return;
   box.innerHTML=mt.qs.map((q,i)=>{ const a=(mt.p[me].a||{})[i], ok=a && a[0]===q.ok;
-    return `<li><span class="mk">${ok?"○":a?"✕":"⏱"}</span><span class="w">${tqEsc(q.w.en)}<small class="mtr-f">${q.rd.nm}${ok&&a[2]?"・打てた":""}</small></span><span class="m">${tqEsc(q.w.means.map(m=>m.j).join("、"))}</span>${tqExBtn(q.w)}${q.rd.f==="fill"?tqExHtml(q.w,q.x||TQ_SENT[q.w.en],q.o):tqExHtml(q.w)}</li>`; }).join("");
+    return `<li><span class="mk">${ok?"○":a?"✕":"⏱"}</span><span class="w">${tqEsc(q.w.en)}<small class="mtr-f">${q.rd.nm}${ok&&a[2]?"・打てた":""}</small></span><span class="m">${tqEsc(q.w.means.map(m=>m.j).join("、"))}</span>${tqExBtn(q.w)}${q.rd.f==="fill"?tqExHtml(q.w,q.x||TQ_SENT[q.w.en],q.o):q.rd.f==="choice"?tqExHtml(q.w,null,q.o):tqExHtml(q.w)}</li>`; }).join("");
   $("mtReview").hidden=false;
 }
 function mtqFinish(){
@@ -17296,7 +17296,9 @@ const tqSentPick = (w,r=Math.random) => (typeof TQ_P5!=="undefined" && TQ_P5[w.e
 let tqSentCur=null;   // いま出している穴埋めの問題
 /* 単語リストと結果画面: 単語ごとの例文ボタンと、開くと出る例文 */
 const tqExBtn = w => tqHasSent(w) ? `<button class="btn tq-exb" type="button" tabindex="-1">例文</button>` : `<span></span>`;
-const tqExHtml = (w,q,ch) => { const x=q||TQ_SENT[w.en]; return x ? `<div class="tq-ex" hidden>${tqEsc(x[0]).replace(/\[([^\]]*)\]/,"<b>$1</b>")}<small>${tqEsc(x[2])}</small>${q&&ch?tqFillExp(w,q,ch):""}</div>` : ""; };   // 穴埋めで出した問題(q)と選択肢(ch)があれば、その解説も
+const tqExHtml = (w,q,ch) => { const x=q||TQ_SENT[w.en]; return x||ch ? `<div class="tq-ex" hidden>${x?`${tqEsc(x[0]).replace(/\[([^\]]*)\]/,"<b>$1</b>")}<small>${tqEsc(x[2])}</small>`:""}${ch?(q?tqFillExp(w,q,ch):tqChoiceExp(ch)):""}</div>` : ""; };   // 穴埋めで出した問題(q)と選択肢(ch)があれば、その解説も。4択は ch だけ
+/* 4択の解説: 選択肢の意味が、どの英単語の意味か */
+const tqChoiceExp = ch => `<div class="tq-fx"><div class="tq-fxl">${ch.filter(o=>o.en).map(o=>`<div class="tq-fxr${o.ok?" c":""}"><b>${tqEsc(o.en)}</b><span>${tqEsc(o.txt)}</span></div>`).join("")}</div></div>`;   // 穴埋めで出した問題(q)と選択肢(ch)があれば、その解説も
 /* 穴埋め4択の解説: 選択肢それぞれの意味と、本番寄りの問題には文法の一言 */
 const tqGloss = t => { const k=t.toLowerCase(), w=TQ_BY[k]||TQ_BY[t]; return TQ_GL[k] || (w ? w.means.slice(0,2).map(m=>m.j).join("、") : ""); };
 function tqFillExp(w,q,ch){
@@ -17605,11 +17607,11 @@ function tqMakeChoices(w){
   const txt = x => x.means.slice(0,2).map(m=>m.j).join("、");
   const used=new Set(w.means.map(m=>m.j));
   const overlap = x => x.means.some(m=>used.has(m.j));
-  const out=[{ txt:txt(w), ok:true }];
-  const add = t => { if(out.length<4 && !out.some(o=>o.txt===t)) out.push({ txt:t, ok:false }); };
-  for(const c of w.conf){ const x=TQ_BY[c]; if(x){ if(!overlap(x)) add(txt(x)); } else if(TQ_CONF[c] && !used.has(TQ_CONF[c])) add(TQ_CONF[c]); }
+  const out=[{ txt:txt(w), ok:true, en:w.en }];   // en: その意味の英単語(答えたあとに出す)
+  const add = (t,en) => { if(out.length<4 && !out.some(o=>o.txt===t)) out.push({ txt:t, ok:false, en }); };
+  for(const c of w.conf){ const x=TQ_BY[c]; if(x){ if(!overlap(x)) add(txt(x),x.en); } else if(TQ_CONF[c] && !used.has(TQ_CONF[c])) add(TQ_CONF[c],c); }
   for(const pool of [TQ.filter(x=>x.pos===w.pos && x.lv===w.lv), TQ.filter(x=>x.pos===w.pos), TQ])
-    for(const x of tqShuffle(pool.slice())){ if(out.length>=4) break; if(x!==w && !overlap(x)) add(txt(x)); }
+    for(const x of tqShuffle(pool.slice())){ if(out.length>=4) break; if(x!==w && !overlap(x)) add(txt(x),x.en); }
   return tqShuffle(out);
 }
 /* ---- 逆4択: 日本語 → 英単語 ---- */
@@ -17720,7 +17722,7 @@ function tqChoose(i){
   document.querySelectorAll("#tqOpts .tq-opt:not(.tq-idk)").forEach((b,j)=>{ if(tqChoices[j].ok) b.classList.add("ok"); else if(j===i) b.classList.add("ng"); });
   if(c.idk && !c.late) $("tqOpts").querySelector(".tq-idk").classList.add("ng");
   const fq = tqFmt==="fill" ? tqSentCur||TQ_SENT[w.en] : null;   // 穴埋め: 出した問題(見直しで解説を出す)
-  tqMarkFx(w.en,c.ok); tqLog.push({ w, ok:c.ok, idk:!!c.idk, late:!!c.late, q:fq, ch:fq?tqChoices:null });
+  tqMarkFx(w.en,c.ok); tqLog.push({ w, ok:c.ok, idk:!!c.idk, late:!!c.late, q:fq, ch:fq||tqFmt==="choice"?tqChoices:null });
   if(tqFmt==="fill"){
     const [s,,ja]=fq;
     $("tqWord").innerHTML=tqEsc(s).replace(/\[([^\]]*)\]/,'<span class="tq-fillin">$1</span>');
@@ -17731,7 +17733,7 @@ function tqChoose(i){
     $("tqMean").innerHTML=`<div class="tq-lq">${tqEsc(w.en)}</div><div class="tq-lja">${tqEsc(w.ja)}</div><ul>`
       +tqChoices.map((o,j)=>`<li class="${o.ok?"c":""}">(${"ABC"[j]}) ${tqEsc(o.txt)} — ${tqEsc(o.ja)}</li>`).join("")+"</ul>";
   }else if(tqFmt==="rev") $("tqMean").innerHTML=`<b class="tq-hw">${tqEsc(w.en)}</b> ${tqMeanHtml(w)}`;
-  else $("tqMean").innerHTML=tqMeanHtml(w);
+  else $("tqMean").innerHTML=tqMeanHtml(w)+(tqFmt==="choice"?tqChoiceExp(tqChoices):"");   // 4択: 選択肢それぞれの英単語
   if(c.ok){
     window.tqOkN=(window.tqOkN||0)+1;   // はじめてガイド(スマホ)で数える
     const g=tqGift(); tqPts+=g.sc; tqMin+=g.min;
