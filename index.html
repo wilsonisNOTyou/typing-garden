@@ -204,6 +204,10 @@ html.mobile .tq-lv small{font-size:.68rem}
 .tq-fxr.c b{color:#7fdc8a; font-weight:bold}
 .tq-fxr.c span{color:#cfe9d2}
 .tq-fxn{margin:0 0 .3rem; color:#ffe08a}
+.tq-opt{flex-wrap:wrap}
+.tq-osub{flex-basis:100%; margin-left:2.2rem; font-family:system-ui,sans-serif; font-size:.8rem; color:var(--steel); line-height:1.3}
+.tq-opt.ok .tq-osub{color:#cfe9d2}
+.mtq-opt .tq-osub{margin-left:0; color:#cbbbe8}
 .tq-ex .tq-lq{display:block; color:#fff}
 .tq-fxl.ls .tq-fxr{display:block}
 .tq-fxl.ls .tq-fxr span{display:block; font-size:.82rem; margin-left:1.6em}
@@ -7382,7 +7386,8 @@ function mtqRender(){
     opts=`<div class="mtq-opts${v.length>4?" six":""}">${v.map((o,k)=>{ const who=(rev||peek)?us.filter(u=>u!==me || rev).filter(u=>{ const a=(mt.p[u].a||{})[i]; return a && a[0]===o.j; }):[];
       const cut=rev && cuts.includes(o.j);
       const cls=rev?(o.j===q.ok?" ok":(my&&my[0]===o.j?" ng":" dim")):(my?(my[0]===o.j?" pick":" dim"):"");
-      return `<button class="btn mtq-opt${en?" en":""}${cls}${cut?" cut":""}" data-k="${k}"><span class="no">${k+1}</span><span class="tx">${tqEsc(o.txt)}</span>${who.length?`<span class="mtq-who">${who.map(u=>`<i class="${u===me?"me":""}">${wcEsc(mt.p[u].n)}${rev&&sc.per[u][i]?` ${sc.per[u][i]>0?"+":""}${sc.per[u][i]}`:""}</i>`).join("")}</span>`:""}</button>`; }).join("")}</div>`;
+      const sub = rev && (q.rd.f==="choice"||q.rd.f==="rev") ? tqOptSub(q.o[o.j]) : "";   // 答え合わせ: 4択は英単語、逆4択は意味
+      return `<button class="btn mtq-opt${en?" en":""}${cls}${cut?" cut":""}" data-k="${k}"><span class="no">${k+1}</span><span class="tx">${tqEsc(o.txt)}</span>${sub?`<small class="tq-osub">${tqEsc(sub)}</small>`:""}${who.length?`<span class="mtq-who">${who.map(u=>`<i class="${u===me?"me":""}">${wcEsc(mt.p[u].n)}${rev&&sc.per[u][i]?` ${sc.per[u][i]>0?"+":""}${sc.per[u][i]}`:""}</i>`).join("")}</span>`:""}</button>`; }).join("")}</div>`;
   }
   const fb = rev ? (my ? (my[0]===q.ok ? `⭕ ${my[2]?"打てた! ":""}正解! ${sc.per[me][i]>=0?"+":""}${sc.per[me][i]}` : `❌ ざんねん${sc.per[me][i]<0?` ${sc.per[me][i]}`:sc.per[me][i]>0?` ・ 🧲 点数どろぼうで +${sc.per[me][i]}`:""}`) : "⏱ 時間切れ")
     : out ? "⏳ 時間切れ(時間どろぼう)" : my ? (my[2]?"打てた! みんなを待っています":"答えました。みんなを待っています") : (!mt.revOpen ? "" : window.IS_MOBILE ? "答えをタップ" : `1〜${mtqView(i).length} で答える(クリックでも)`);
@@ -7406,7 +7411,7 @@ function mtqItems(){
 function mtqReview(){
   const me=mtMe(), box=$("mtReviewList"); if(!box) return;
   box.innerHTML=mt.qs.map((q,i)=>{ const a=(mt.p[me].a||{})[i], ok=a && a[0]===q.ok;
-    return `<li><span class="mk">${ok?"○":a?"✕":"⏱"}</span><span class="w">${tqEsc(q.w.en)}<small class="mtr-f">${q.rd.nm}${ok&&a[2]?"・打てた":""}</small></span><span class="m">${tqEsc(q.w.means.map(m=>m.j).join("、"))}</span>${tqExBtn(q.w)}${q.rd.f==="fill"?tqExHtml(q.w,q.x||TQ_SENT[q.w.en],q.o):q.rd.f==="choice"?tqExHtml(q.w,null,q.o):tqExHtml(q.w)}</li>`; }).join("");
+    return `<li><span class="mk">${ok?"○":a?"✕":"⏱"}</span><span class="w">${tqEsc(q.w.en)}<small class="mtr-f">${q.rd.nm}${ok&&a[2]?"・打てた":""}</small></span><span class="m">${tqEsc(q.w.means.map(m=>m.j).join("、"))}</span>${tqExBtn(q.w)}${q.rd.f==="fill"?tqExHtml(q.w,q.x||TQ_SENT[q.w.en],q.o):q.rd.f==="choice"||q.rd.f==="rev"?tqExHtml(q.w,null,q.o):tqExHtml(q.w)}</li>`; }).join("");
   $("mtReview").hidden=false;
 }
 function mtqFinish(){
@@ -17305,7 +17310,8 @@ let tqSentCur=null;   // いま出している穴埋めの問題
 const tqExBtn = (w,force) => force||tqHasSent(w) ? `<button class="btn tq-exb" type="button" tabindex="-1">例文</button>` : `<span></span>`;
 const tqExHtml = (w,q,ch) => { const x=q||TQ_SENT[w.en]; return x||ch ? `<div class="tq-ex" hidden>${x?`${tqEsc(x[0]).replace(/\[([^\]]*)\]/,"<b>$1</b>")}<small>${tqEsc(x[2])}</small>`:""}${ch?(q?tqFillExp(w,q,ch):tqChoiceExp(ch)):""}</div>` : ""; };   // 穴埋めで出した問題(q)と選択肢(ch)があれば、その解説も。4択は ch だけ
 /* 4択の解説: 選択肢の意味が、どの英単語の意味か */
-const tqChoiceExp = ch => `<div class="tq-fx"><div class="tq-fxl">${ch.filter(o=>o.en).map(o=>`<div class="tq-fxr${o.ok?" c":""}"><b>${tqEsc(o.en)}</b><span>${tqEsc(o.txt)}</span></div>`).join("")}</div></div>`;   // 穴埋めで出した問題(q)と選択肢(ch)があれば、その解説も
+const tqChoiceExp = ch => `<div class="tq-fx"><div class="tq-fxl">${ch.map(o=>`<div class="tq-fxr${o.ok?" c":""}"><b>${tqEsc(o.en||o.txt)}</b><span>${tqEsc(o.en?o.txt:tqGloss(o.txt))}</span></div>`).join("")}</div></div>`;   // 4択は { txt:意味, en }、逆4択は { txt:英単語 }
+const tqOptSub = o => !o ? "" : o.en || tqGloss(o.txt);   // ボタンに添える字: 4択は英単語、逆4択は意味   // 穴埋めで出した問題(q)と選択肢(ch)があれば、その解説も
 /* 穴埋め4択の解説: 選択肢それぞれの意味と、本番寄りの問題には文法の一言 */
 const tqGloss = t => { const k=t.toLowerCase(), w=TQ_BY[k]||TQ_BY[t]; return TQ_GL[k] || (w ? w.means.slice(0,2).map(m=>m.j).join("、") : ""); };
 function tqFillExp(w,q,ch){
@@ -17757,8 +17763,9 @@ function tqChoose(i){
   { const bar=$("tqBar"); bar.style.transform=getComputedStyle(bar).transform; bar.style.transition="none"; }   // 残り時間のバーを止める
   document.querySelectorAll("#tqOpts .tq-opt:not(.tq-idk)").forEach((b,j)=>{ if(tqChoices[j].ok) b.classList.add("ok"); else if(j===i) b.classList.add("ng"); });
   if(c.idk && !c.late) $("tqOpts").querySelector(".tq-idk").classList.add("ng");
+  if(tqFmt==="choice"||tqFmt==="rev") document.querySelectorAll("#tqOpts .tq-opt:not(.tq-idk)").forEach((b,j)=>{ const t=tqOptSub(tqChoices[j]); if(t) b.insertAdjacentHTML("beforeend",`<small class="tq-osub">${tqEsc(t)}</small>`); });   // 答えたら、各ボタンにその英単語(4択)・意味(逆4択)
   const fq = tqFmt==="fill" ? tqSentCur||TQ_SENT[w.en] : null;   // 穴埋め: 出した問題(見直しで解説を出す)
-  tqMarkFx(w.en,c.ok); tqLog.push({ w, ok:c.ok, idk:!!c.idk, late:!!c.late, q:fq, ch:fq||tqFmt==="choice"||tqFmt==="listen"?tqChoices:null });
+  tqMarkFx(w.en,c.ok); tqLog.push({ w, ok:c.ok, idk:!!c.idk, late:!!c.late, q:fq, ch:fq||tqFmt==="choice"||tqFmt==="rev"||tqFmt==="listen"?tqChoices:null });
   if(tqFmt==="fill"){
     const [s,,ja]=fq;
     $("tqWord").innerHTML=tqEsc(s).replace(/\[([^\]]*)\]/,'<span class="tq-fillin">$1</span>');
@@ -17769,7 +17776,7 @@ function tqChoose(i){
     $("tqMean").innerHTML=`<div class="tq-lq">${tqEsc(w.en)}</div><div class="tq-lja">${tqEsc(w.ja)}</div><ul>`
       +tqChoices.map((o,j)=>`<li class="${o.ok?"c":""}">(${"ABC"[j]}) ${tqEsc(o.txt)} — ${tqEsc(o.ja)}</li>`).join("")+"</ul>";
   }else if(tqFmt==="rev") $("tqMean").innerHTML=`<b class="tq-hw">${tqEsc(w.en)}</b> ${tqMeanHtml(w)}`;
-  else $("tqMean").innerHTML=tqMeanHtml(w)+(tqFmt==="choice"?tqChoiceExp(tqChoices):"");   // 4択: 選択肢それぞれの英単語
+  else $("tqMean").innerHTML=tqMeanHtml(w);
   if(c.ok){
     window.tqOkN=(window.tqOkN||0)+1;   // はじめてガイド(スマホ)で数える
     const g=tqGift(); tqPts+=g.sc; tqMin+=g.min;
@@ -17785,7 +17792,7 @@ function tqChoose(i){
   tqI++; tqPhase="wait";
   if(tqFmt==="fill"){ $("tqNextBtn").hidden=false; $("tqHint").textContent="例文と訳を確かめたら Enter・スペース・タップで次へ"; }
   else if(tqFmt==="listen"){ $("tqNextBtn").hidden=false; $("tqHint").textContent = (tqKind==="set" ? "L もう一度聞く ・ " : "")+"英文と訳を確かめたら Enter・スペース・タップで次へ"; if(tqKind!=="set") $("tqListen").disabled=true; }   // 穴埋めは文が長いので、自分で次へ進む
-  else tqTimer=setTimeout(tqNext, c.ok?900:2400);
+  else tqTimer=setTimeout(tqNext, c.ok?900:3500);   // 不正解は、ボタンの英単語・意味を確かめられるように長め
 }
 /* ノーミス勝負で1問正解: そのレベルを全部正解したらクリアで終わり */
 let tqClear=false, tqCkptDue=false;
