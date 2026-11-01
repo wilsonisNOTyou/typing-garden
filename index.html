@@ -204,6 +204,10 @@ html.mobile .tq-lv small{font-size:.68rem}
 .tq-fxr.c b{color:#7fdc8a; font-weight:bold}
 .tq-fxr.c span{color:#cfe9d2}
 .tq-fxn{margin:0 0 .3rem; color:#ffe08a}
+.tq-ex .tq-lq{display:block; color:#fff}
+.tq-fxl.ls .tq-fxr{display:block}
+.tq-fxl.ls .tq-fxr span{display:block; font-size:.82rem; margin-left:1.6em}
+.btn.tq-lrep{font-size:.8rem; padding:.2rem .7rem; min-height:0; margin-top:.4rem; font-family:system-ui,sans-serif}
 .tq-ex small{display:block; font-family:inherit; color:var(--steel); font-size:.82rem}
 .tq-res .tq-ex small,.tq-lrow .tq-ex small{font-family:system-ui,sans-serif}
 .tq-card{position:relative; background:linear-gradient(180deg,var(--panel-hi,#3a414d),var(--panel,#2a2f38)); border:2px solid var(--line); border-radius:12px; padding:1.4rem 1rem 1.2rem; min-height:16rem}
@@ -17298,7 +17302,7 @@ const TQ_P5_RATE=.5;
 const tqSentPick = (w,r=Math.random) => (typeof TQ_P5!=="undefined" && TQ_P5[w.en] && r()<TQ_P5_RATE) ? TQ_P5[w.en] : TQ_SENT[w.en];
 let tqSentCur=null;   // いま出している穴埋めの問題
 /* 単語リストと結果画面: 単語ごとの例文ボタンと、開くと出る例文 */
-const tqExBtn = w => tqHasSent(w) ? `<button class="btn tq-exb" type="button" tabindex="-1">例文</button>` : `<span></span>`;
+const tqExBtn = (w,force) => force||tqHasSent(w) ? `<button class="btn tq-exb" type="button" tabindex="-1">例文</button>` : `<span></span>`;
 const tqExHtml = (w,q,ch) => { const x=q||TQ_SENT[w.en]; return x||ch ? `<div class="tq-ex" hidden>${x?`${tqEsc(x[0]).replace(/\[([^\]]*)\]/,"<b>$1</b>")}<small>${tqEsc(x[2])}</small>`:""}${ch?(q?tqFillExp(w,q,ch):tqChoiceExp(ch)):""}</div>` : ""; };   // 穴埋めで出した問題(q)と選択肢(ch)があれば、その解説も。4択は ch だけ
 /* 4択の解説: 選択肢の意味が、どの英単語の意味か */
 const tqChoiceExp = ch => `<div class="tq-fx"><div class="tq-fxl">${ch.filter(o=>o.en).map(o=>`<div class="tq-fxr${o.ok?" c":""}"><b>${tqEsc(o.en)}</b><span>${tqEsc(o.txt)}</span></div>`).join("")}</div></div>`;   // 穴埋めで出した問題(q)と選択肢(ch)があれば、その解説も
@@ -17458,13 +17462,14 @@ function tqNext(){
   }
   if(tqFmt==="listen"){
     $("tqTyped").innerHTML=""; $("tqBarW").style.display="none";
-    $("tqMean").className="tq-mean wait"; $("tqMean").textContent = tqKind==="one" ? "▶ を押すと、質問と3つの応答が読まれます(ふつうの速さで1回だけ)" : "▶ を押すと、質問と3つの応答が読まれます";
+    $("tqMean").className="tq-mean wait"; $("tqMean").textContent = tqKind==="one" ? "質問と3つの応答が読まれます(ふつうの速さで1回だけ)" : "質問と3つの応答が読まれます";
     $("tqWord").innerHTML=`<button class="btn tq-listen" id="tqListen">▶ 聞く <span class="kbdh">L</span></button>`;
     tqChoices=tqShuffle(w.a.map(([txt,ja,ok])=>({ txt, ja, ok:!!ok })));
     tqHeard=false; tqLOpts(false);
     $("tqHint").textContent = tqKind==="one"
-      ? `L 聞く(1回だけ) ・ A / B / C で選ぶ ・ 5 分からない ・ 読み終わってから${TQ_LIMIT.listen}秒で時間切れ ・ 間違えたら終わり ・ Esc やめる(そこまでの記録が残ります)`
-      : "L 聞く(何度でも) ・ S ゆっくり ・ A / B / C で選ぶ ・ 5 分からない ・ Esc やめる";
+      ? `自動で1回だけ読まれます ・ A / B / C で選ぶ ・ 5 分からない ・ 読み終わってから${TQ_LIMIT.listen}秒で時間切れ ・ 間違えたら終わり ・ Esc やめる(そこまでの記録が残ります)`
+      : "L もう一度聞く ・ S ゆっくり ・ A / B / C で選ぶ ・ 5 分からない ・ Esc やめる";
+    tqListenPlay();   // 問題が出たら自動で読み始める
     return;
   }
   if(tqFmt==="rev"){   // 逆4択: 日本語を見て英単語を打つ(パソコン)。出てこなければ4択
@@ -17704,38 +17709,44 @@ function tqLOpts(show){   // 選択肢: 答えるまでは英文を出さない
   $("tqOpts").innerHTML=tqChoices.map((c,i)=>`<button class="btn tq-opt tq-lo" data-i="${i}"><span class="no">${"ABC"[i]}</span><span class="tx">${show?tqEsc(c.txt):""}</span><small class="tq-lk">${i+1} キーでも選べます</small></button>`).join("")
     +`<button class="btn tq-opt tq-idk" data-i="-1"><span class="no">5</span><span>分からない</span></button>`;
 }
+/* 読み上げ: 文を1つずつ、間を置いて読む。items: [{ t:文, v:声, gap:読む前の間(ミリ秒), on:読み始め }]、done: 読み終わり */
+function tqSaySeq(items,rate,done){
+  tqHush(); const tok=tqSayTok, mine = f => () => { if(tok===tqSayTok) f(); };
+  const run = i => {   // 読み終わりの知らせが来ない端末のために、長めの見込み時間でも次へ進む
+    const it=items[i], u=new SpeechSynthesisUtterance(it.t); u.lang=it.v ? it.v.lang : "en-US"; if(it.v) u.voice=it.v; u.rate=rate;
+    let went=false;
+    const next = mine(() => { if(went) return; went=true; clearTimeout(fb); if(i+1<items.length) setTimeout(mine(()=>run(i+1)), items[i+1].gap||0); else if(done) done(); });
+    const fb=setTimeout(next, 3000+it.t.length*130/rate);
+    u.onstart=mine(()=>{ if(it.on) it.on(); }); u.onend=u.onerror=next;
+    try{ tqSynth.speak(u); }catch(e){ next(); }
+  };
+  if(items.length) setTimeout(mine(()=>run(0)), items[0].gap||0);
+}
+/* 質問と3つの応答の読み上げ(記号の「A」と応答の文がつながらないように、あいだに間を置く) */
+const tqLItems = (en,ch,hl) => [{ t:en, v:tqVQ, on:()=>hl&&hl(-1) }].concat(...ch.map((c,j)=>[{ t:`${"ABC"[j]}.`, v:tqVA, gap:j?800:1000, on:()=>hl&&hl(j) }, { t:c.txt, v:tqVA, gap:350 }]));
 function tqListenPlay(){
   if(tqFmt!=="listen" || !tqSynth) return;
   const one=tqKind==="one";
   if(tqPhase==="play" ? (one && tqHeard) : !(tqPhase==="wait" && !one)) return;   // 一本勝負は1回だけ
-  tqWarm(); tqHush(); const tok=tqSayTok, w=tqWords[tqPhase==="wait"?tqI-1:tqI]; tqHeard=true;
+  const again = tqHeard || tqPhase==="wait";   // 聞き直しは「Question 3.」を読まない
+  tqWarm(); const w=tqWords[tqPhase==="wait"?tqI-1:tqI]; tqHeard=true;
   const btn=$("tqListen"); if(btn) btn.disabled=true;
-  const mine = f => () => { if(tok===tqSayTok) f(); };
-  const hl = j => document.querySelectorAll("#tqOpts .tq-lo").forEach((b,k)=>b.classList.toggle("hl",k===j));
-  const utt = (text,voice,onstart) => { const u=new SpeechSynthesisUtterance(text); if(voice) u.voice=voice; u.lang=(voice&&voice.lang)||"en-US"; u.rate = !one && tqSlow ? .75 : .95; u.onstart=onstart; return u; };
+  const say = t => { if(tqPhase==="play") $("tqMean").textContent=t; };
+  const hl = j => { document.querySelectorAll("#tqOpts .tq-lo").forEach((b,k)=>b.classList.toggle("hl",k===j)); say(j<0?"質問":`(${"ABC"[j]})`); };
   const num = tqKind==="one" ? tqAns+(tqPhase==="play"?1:0) : (tqPhase==="wait"?tqI:tqI+1);
-  const lead=utt(`Question ${num}.`,tqVQ,mine(()=>{ if(tqPhase==="play") $("tqMean").textContent=`Question ${num}`; }));
-  // 1文ずつ読み、あいだに間を置く(記号の「A」と応答の文がつながらないように)。gap: その文を読む前の間(ミリ秒)
-  const seq=[{ u:utt(w.en,tqVQ,mine(()=>{ hl(-1); if(tqPhase==="play") $("tqMean").textContent="質問"; })), gap:500 }];
-  tqChoices.forEach((c,j)=>{ seq.push({ u:utt(`${"ABC"[j]}.`,tqVA,mine(()=>{ hl(j); if(tqPhase==="play") $("tqMean").textContent=`(${"ABC"[j]})`; })), gap:j?800:1000 }); seq.push({ u:utt(c.txt,tqVA,null), gap:350 }); });
-  const run = i => {   // 読み終わりの知らせが来ない端末のために、長めの見込み時間でも次へ進む
-    const st=seq[i]; let went=false;
-    const next = mine(() => { if(went) return; went=true; clearTimeout(fb); if(i+1<seq.length) setTimeout(mine(()=>run(i+1)), seq[i+1].gap); else done(); });
-    const fb=setTimeout(next, 3000+st.u.text.length*130/st.u.rate);
-    st.u.onend=st.u.onerror=next;
-    try{ tqSynth.speak(st.u); }catch(e){ next(); }
-  };
-  const done=mine(()=>{
-    hl(-1);
+  const items=tqLItems(w.en,tqChoices,hl);
+  if(!again){ items[0].gap=500; items.unshift({ t:`Question ${num}.`, v:tqVQ, on:()=>say(`Question ${num}`) }); }
+  say("まもなく流れます…");
+  tqSaySeq(items, !one && tqSlow ? .75 : .95, () => {
+    document.querySelectorAll("#tqOpts .tq-lo").forEach(b=>b.classList.remove("hl"));
     if(tqPhase!=="play"){ if(btn && !one) btn.disabled=false; return; }
     $("tqMean").textContent="どれが一番よい応答ですか?";
     if(one) tqClock(TQ_LIMIT.listen); else if(btn) btn.disabled=false;
   });
-  if(tqPhase==="play") $("tqMean").textContent="まもなく流れます…";
-  // 「Question 3.」のあと、少し間をおいて本文を1文ずつ読む
-  lead.onend=lead.onerror=mine(()=>setTimeout(mine(()=>run(0)),seq[0].gap));
-  try{ tqSynth.speak(lead); }catch(e){}
 }
+/* 結果画面: その問題をもう一度聞く */
+function tqReplayLog(i){ const x=tqLog[i]; if(!x || !x.ch || !tqSynth) return; tqWarm(); tqSaySeq(tqLItems(x.w.en,x.ch,null), tqSlow ? .75 : .95, null); }
+const tqListenEx = (w,ch,i) => `<div class="tq-ex" hidden><span class="tq-lq">${tqEsc(w.en)}</span><small>${tqEsc(w.means[0].j)}</small>${ch?`<div class="tq-fx"><div class="tq-fxl ls">${ch.map((o,j)=>`<div class="tq-fxr${o.ok?" c":""}"><b>(${"ABC"[j]}) ${tqEsc(o.txt)}</b><span>${tqEsc(o.ja||"")}</span></div>`).join("")}</div></div>${tqSynth?`<button class="btn tq-lrep" type="button" data-li="${i}">▶ もう一度聞く</button>`:""}`:""}</div>`;
 function tqSetSlow(v){ tqSlow=v; $("tqSlow").checked=v; }
 function tqChoose(i){
   if(tqPhase!=="play" || tqFmt==="type" || tqFmt==="word") return;
@@ -17747,7 +17758,7 @@ function tqChoose(i){
   document.querySelectorAll("#tqOpts .tq-opt:not(.tq-idk)").forEach((b,j)=>{ if(tqChoices[j].ok) b.classList.add("ok"); else if(j===i) b.classList.add("ng"); });
   if(c.idk && !c.late) $("tqOpts").querySelector(".tq-idk").classList.add("ng");
   const fq = tqFmt==="fill" ? tqSentCur||TQ_SENT[w.en] : null;   // 穴埋め: 出した問題(見直しで解説を出す)
-  tqMarkFx(w.en,c.ok); tqLog.push({ w, ok:c.ok, idk:!!c.idk, late:!!c.late, q:fq, ch:fq||tqFmt==="choice"?tqChoices:null });
+  tqMarkFx(w.en,c.ok); tqLog.push({ w, ok:c.ok, idk:!!c.idk, late:!!c.late, q:fq, ch:fq||tqFmt==="choice"||tqFmt==="listen"?tqChoices:null });
   if(tqFmt==="fill"){
     const [s,,ja]=fq;
     $("tqWord").innerHTML=tqEsc(s).replace(/\[([^\]]*)\]/,'<span class="tq-fillin">$1</span>');
@@ -17828,7 +17839,7 @@ function tqFinish(){
     $("tqResSum").innerHTML=`${tqLvName(tqLv)} ・ ${tqFmtName(tqFmt)} ・ 正解 <b>${ok}</b> / ${tqLog.length}${tqUnit()}`+openMsg+sent+roseMsg;
   }
   $("tqAgain").innerHTML=(tqKind==="one"?"もう一回":"もう1セット")+' <span class="kbdh">Enter</span>';
-  $("tqResList").innerHTML=tqLog.map(x=>`<li><span class="mk">${x.ok?"○":x.half?"△":x.late?"⏱":x.idk?"？":"✕"}</span><span class="w">${tqEsc(x.w.en)}</span><span class="m">${tqEsc(x.w.means.map(m=>m.j).join("、"))}</span>${x.w.means&&!x.w.word?tqExBtn(x.w):"<span></span>"}${x.w.word?"":tqExHtml(x.w,x.q,x.ch)}</li>`).join("");
+  $("tqResList").innerHTML=tqLog.map((x,i)=>`<li><span class="mk">${x.ok?"○":x.half?"△":x.late?"⏱":x.idk?"？":"✕"}</span><span class="w">${tqEsc(x.w.en)}</span><span class="m">${tqEsc(x.w.means.map(m=>m.j).join("、"))}</span>${x.w.listen?tqExBtn(x.w,true)+tqListenEx(x.w,x.ch,i):`${x.w.means&&!x.w.word?tqExBtn(x.w):"<span></span>"}${x.w.word?"":tqExHtml(x.w,x.q,x.ch)}`}</li>`).join("");
   tqFarm(); tqView("tqResult");
 }
 /* ノーミス勝負の記録をみんなのランキングに載せる(名前が決まっていれば自動) */
@@ -17959,6 +17970,7 @@ function tqKey(e){
 $("tqFmts").addEventListener("click",e=>{ const b=e.target.closest("[data-f]"); if(b){ tqFmt=b.dataset.f; tqMenu(); } });
 $("tqLBody").addEventListener("click",tqExToggle);
 $("tqResList").addEventListener("click",tqExToggle);
+$("tqResList").addEventListener("click",e=>{ const b=e.target.closest(".tq-lrep"); if(b) tqReplayLog(+b.dataset.li); });
 $("tqQuit").addEventListener("mousedown",e=>e.preventDefault());
 $("tqQuit").addEventListener("click",()=>document.body.dispatchEvent(new KeyboardEvent("keydown",{ key:"Escape", bubbles:true })));   // Esc と同じ
 $("gameQuit").addEventListener("mousedown",e=>e.preventDefault());
