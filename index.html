@@ -250,12 +250,13 @@ body.dishtheme.dishsplit4:not(.garden):not(.washi){
   -webkit-mask-image:linear-gradient(180deg,transparent 0,#000 14%,#000 86%,transparent 100%); mask-image:linear-gradient(180deg,transparent 0,#000 14%,#000 86%,transparent 100%)}
 #kyoEnd.roll .kyroll{opacity:1; transition:opacity 1.5s}
 #kyoEnd .kyinner{position:absolute; left:0; right:0; top:100%; padding:0 16px; display:flex; flex-direction:column; align-items:center; gap:.55rem}
-#kyoEnd.roll .kyinner{animation:kyup 38.4s linear forwards}
+#kyoEnd.roll .kyinner{animation:kyup var(--kydur,38.4s) linear forwards}
 #kyoEnd.jump .kyinner{animation:none; transform:translateY(var(--kyto))}
 @keyframes kyup{from{transform:translateY(0)}to{transform:translateY(var(--kyto))}}
 #kyoEnd .kyh1{font-size:clamp(2rem,8vw,3.4rem); font-weight:900; color:#ffd860; text-shadow:0 0 18px rgba(255,216,74,.6)}
 #kyoEnd .kysec{font-size:1.2rem; letter-spacing:.5em; color:#f6e6c0; margin-bottom:2.2rem}
 #kyoEnd .kyhd{margin-top:2.6rem; font-size:.95rem; letter-spacing:.3em; color:#d8b060}
+#kyoEnd .kyr small{font-weight:400; color:#d8c08a; font-size:.8em; margin-left:.3em}
 #kyoEnd .kyr{display:flex; justify-content:space-between; gap:1.4rem; width:min(26rem,100%); font-size:1.02rem; border-bottom:1px dotted rgba(244,197,66,.35); padding:.15rem 0}
 #kyoEnd .kyr b{color:#ffe08a; font-variant-numeric:tabular-nums; word-break:break-all; text-align:right}
 #kyoEnd .kyn{font-size:1.15rem; font-weight:700}
@@ -15776,9 +15777,9 @@ function renderKcTre(){
       </div></div></div>`;
 }
 /* ---------- 京の頂: エンディング(特別な演出のあとにエンドロール。終わったあとも遊び続けられる) ---------- */
-let kyoKey=null, kyoTimers=[], kyoStop=null;
+let kyoKey=null, kyoTimers=[], kyoStop=null, kyoBusy=false;
 /* エンディングの曲: 主旋律・和音の分散・ベース・鐘。音は前もって時刻を決めて鳴らす(ずれない)。stop で止める */
-function kyoMusic(delay){
+function kyoMusic(delay,loops=1){
   let ctx; try{ audioCtx=audioCtx||new (window.AudioContext||window.webkitAudioContext)(); ctx=audioCtx; if(ctx.state==="suspended") ctx.resume(); }catch(e){ return ()=>{}; }
   const nodes=[], out=ctx.createGain(); out.gain.value=.9; out.connect(ctx.destination);
   const hz = n => 440*Math.pow(2,(n-69)/12);   // MIDI の番号 → 周波数
@@ -15801,18 +15802,20 @@ function kyoMusic(delay){
     [[0,76,.5],[.5,77,.5],[1,79,1],[2,84,1],[3,88,1]], [[0,86,1],[1,84,1],[2,81,2]], [[0,84,1],[1,81,1],[2,77,1],[3,81,1]], [[0,79,3]],
     [[0,81,1],[1,79,1],[2,77,1],[3,76,1]], [[0,79,1],[1,77,1],[2,76,1],[3,74,1]], [[0,72,1],[1,74,1],[2,77,1],[3,81,1]], [[0,79,2],[2,83,1],[3,86,1]],
     [[0,84,4]] ];
-  C.forEach(([root,tri],bar)=>{
-    const b=bar*4, last=bar===C.length-1;
+  const play=(bar,b)=>{
+    const [root,tri]=C[bar], last=bar===C.length-1;
     note(b,root,last?4:2,"sine",.13,"pad"); if(!last) note(b+2,root+(bar%2?7:12),2,"sine",.1,"pad");   // ベース
     if(last){ for(const n of tri.concat([72])) note(b,n,4,"triangle",.05,"bell"); }
     else for(let i=0;i<8;i++) note(b+i*.5, tri[[0,1,2,1,0,1,2,1][i]]+(i>=4?12:0), .5, "triangle", .028, "pluck");   // 和音の分散(8分音符)
     for(const [at,n,len] of M[bar]) note(b+at,n,len,"square",.032,"lead");                                          // 主旋律
     if(bar%4===0 || last) note(b, last?96:91, 1, "sine", .03, "bell");                                               // 4小節ごとの鐘
-  });
+  };
+  for(let L=0;L<loops;L++) for(let bar=0;bar<16;bar++) play(bar,(L*16+bar)*4);
+  play(16,loops*64);
   return ()=>{ try{ const now=ctx.currentTime; out.gain.setValueAtTime(out.gain.value,now); out.gain.linearRampToValueAtTime(0.0001,now+.4); setTimeout(()=>{ for(const o of nodes){ try{ o.stop(); }catch(e){} } try{ out.disconnect(); }catch(e){} },500); }catch(e){} };
 }
-function kyoEnding(){
-  if(document.getElementById("kyoEnd")) return;
+async function kyoEnding(){
+  if(document.getElementById("kyoEnd") || kyoBusy) return; kyoBusy=true;
   try{ closeModal(true); }catch(e){}
   const U="キー", NIWA="農園";
   const nm=(()=>{ try{ return (typeof playerName!=="undefined" && playerName) || S.rankName || ""; }catch(e){ return S.rankName||""; } })();
@@ -15821,23 +15824,37 @@ function kyoEnding(){
   let book=""; try{ book=bookProgress().got+"項目"; }catch(e){}
   const sum=t=>Object.values(S.harvestQ||{}).reduce((a,q)=>a+((q&&q[t])||0),0);
   const days=m=>{ const d=m/1440; return d>=365 ? `${fmtNum(Math.floor(d/365))}年${Math.floor(d%365)}日分` : `${fmtNum(Math.floor(d))}日分`; };
+  const N=(v,u)=>fmtNum(v||0)+u, has=v=>(v||0)>0;
   let tqw=null; try{ tqw=typeof tqLearnCounts==="function" ? tqLearnCounts() : null; }catch(e){}
+  let tqTop=null; try{ for(const [k,v] of Object.entries(typeof tqBest!=="undefined"?tqBest:{})) if(v>0 && (!tqTop || v>tqTop.v)){ const [f,lv]=k.split("-"); tqTop={ v, f, lv }; } }catch(e){}
   let roses=0, dbook=0; try{ roses=roseGot(); }catch(e){} try{ dbook=dishBookGot(); }catch(e){}
+  // タイピングの自己ベスト(タイトルと同じ記録)
+  const tb={}; let poems=[];
+  try{ const ds=["easy","normal","hard","oneshot","ta-easy","ta-normal","ta-hard"]; const vs=await Promise.all(ds.map(d=>loadBest(d))); ds.forEach((d,i)=>tb[d]=vs[i]); }catch(e){}
+  try{ if(typeof POEMS!=="undefined") poems=(await Promise.all(POEMS.map(p=>loadBest(POEM_KEY(p))))).map((v,i)=>[POEMS[i].title,v]); }catch(e){}
+  const tm=v=>Number(v).toFixed(2)+"秒";
   const sec=(h,rows)=>{ const r=rows.filter(Boolean).join(""); return r?`<div class="kyhd">${h}</div>${r}`:""; };
   const stats=[
-    sec(NIWA, [row("持っている"+U, xFmt(S.money,"money")), row("累計獲得"+U, fmtNum(earnedTotal())), row("畑", FS().length+"枚"), row("累計収穫", fmtNum(S.totalHarvest||0)+"個"),
-      row("変異の収穫", fmtNum(sum(3))+"個"), row("超変異の収穫", fmtNum(sum(5))+"個"), (S.btRipe||0)>0 && row("実らせた大木", fmtNum(S.btRipe)+"本")]),
-    sec("ガチャ", [row("引いた回数", fmtNum(S.gachaCount||0)+"回"), (S.roseGachaCount||0)>0 && row("薔薇ガチャ", fmtNum(S.roseGachaCount)+"回"), row("千両箱ガチャ", fmtNum(S.yzCount||0)+"回"),
-      row("千両箱の新しい品", `${YZ_NEW.filter(x=>(S.got[x.id]||0)>0).length} / ${YZ_NEW.length}種類`), (S.yzPressed||0)>0 && row(U+"ボタンを押した回数", fmtNum(S.yzPressed)+"回"), (S.yzKozuchiUsed||0)>0 && row("小槌を振った回数", fmtNum(S.yzKozuchiUsed)+"回")]),
-    sec("料理", [row("作った料理", fmtNum(S.cookCount||0)+"皿"), row("食べた料理", fmtNum(S.ateCount||0)+"皿"), (S.prepCount||0)>0 && row("仕込み", fmtNum(S.prepCount)+"回"), (S.workCount||0)>0 && row("工房で作った品", fmtNum(S.workCount)+"個")]),
-    sec("タイピングと TOEIC", [row("タイピングから届いた"+U, fmtNum(S.fromTypingScrews||0)), row("打って進めた"+NIWA+"の時間", days(S.fromTypingMin||0)), tqw && row("TOEIC で覚えた単語", fmtNum(tqw.w)+"語")]),
-    sec("図鑑と実績", [book && row("図鑑", book), dbook>0 && row("料理図鑑", dbook+"項目"), roses>0 && row("薔薇の色", roses+"色"), row("受け取った実績", `${GOALS.filter(goalClaimed).length} / ${GOALS.length}`),
+    sec(NIWA, [row("持っている"+U, xFmt(S.money,"money")), row("累計獲得"+U, fmtNum(earnedTotal())), row("畑", FS().length+"枚"), row("累計収穫", N(S.totalHarvest,"個")),
+      row("変異の収穫", N(sum(3),"個")), row("超変異の収穫", N(sum(5),"個")), has(S.dbGot) && row("日替わりのご褒美", N(S.dbGot,"回"))]),
+    has(S.btPlanted) && sec("大木", [row("植えた大木", N(S.btPlanted,"本")), has(S.btRipe) && row("実らせた大木", N(S.btRipe,"本")), has(S.btHarvest) && row("大木の実", N(S.btHarvest,"個")),
+      has(S.btCut) && row("切った大木", N(S.btCut,"本")), has(S.btMut) && row("変異の大木", N(S.btMut,"本")), has(S.btSup) && row("超変異の大木", N(S.btSup,"本"))]),
+    sec("ガチャ", [row("引いた回数", N(S.gachaCount,"回")), has(S.roseGachaCount) && row("薔薇ガチャ", N(S.roseGachaCount,"回")), has(S.roseCoinTotal) && row("集めた薔薇ガチャコイン", N(S.roseCoinTotal,"枚")),
+      row("千両箱ガチャ", N(S.yzCount,"回")), row("千両箱の新しい品", `${YZ_NEW.filter(x=>(S.got[x.id]||0)>0).length} / ${YZ_NEW.length}種類`),
+      has(S.yzPressed) && row(U+"ボタンを押した回数", N(S.yzPressed,"回")), has(S.yzEarn) && row(U+"ボタンで得た"+U, fmtNum(S.yzEarn)), has(S.yzKozuchiUsed) && row("小槌を振った回数", N(S.yzKozuchiUsed,"回"))]),
+    sec("料理", [row("作った料理", N(S.cookCount,"皿")), row("食べた料理", N(S.ateCount,"皿")), has(S.prepCount) && row("仕込み", N(S.prepCount,"回")), has(S.workCount) && row("工房で作った品", N(S.workCount,"個")), dbook>0 && row("料理図鑑", dbook+"項目")]),
+    sec("タイピング", [tb.easy!=null && row("スコアアタック イージー", N(tb.easy,"本")), tb.normal!=null && row("スコアアタック ノーマル", N(tb.normal,"本")), tb.hard!=null && row("スコアアタック ハード", N(tb.hard,"本")),
+      tb["ta-easy"]!=null && row("タイムアタック イージー", tm(tb["ta-easy"])), tb["ta-normal"]!=null && row("タイムアタック ノーマル", tm(tb["ta-normal"])), tb["ta-hard"]!=null && row("タイムアタック ハード", tm(tb["ta-hard"])),
+      tb.oneshot!=null && row("一本勝負", N(tb.oneshot,"本")), ...poems.filter(x=>x[1]!=null).map(([t,v])=>row(`詩「${t}」`, tm(v))),
+      row("タイピングから届いた"+U, fmtNum(S.fromTypingScrews||0)), row("打って進めた"+NIWA+"の時間", days(S.fromTypingMin||0))]),
+    (tqw || tqTop) && sec("TOEIC 英単語", [tqw && row("覚えた単語", N(tqw.w,"語")), tqw && has(tqw.f) && row("覚えた穴埋め", N(tqw.f,"語")), tqw && has(tqw.l) && row("覚えたリスニング", N(tqw.l,"問")),
+      tqTop && row("一本勝負の最高", `${N(tqTop.v,"問")} <small>${esc(tqFmtName(tqTop.f))}・${esc(tqLvName(tqTop.lv))}</small>`)]),
+    sec("図鑑と実績", [book && row("図鑑", book), roses>0 && row("薔薇の色", roses+"色"), row("受け取った実績", `${GOALS.filter(goalClaimed).length} / ${GOALS.length}`),
       S.goals && S.goals.kei && row("クリアした日", new Date(S.goals.kei).toLocaleDateString("ja-JP"))]),
-  ].join("");
+  ].filter(Boolean).join("");
   const mates=[["村人",S.villagers||0],["シゴデキ村人",S.sgVil||0],["薔薇農家",S.roseVil||0],["料理番の村人",kitN("cookvil")||0],
     ["工房職人の村人",yzN("kobo")],["仕込み番の村人",yzN("prep")],["木守りの村人",yzN("kimori")],["気まぐれ村人",yzN("kimagure")],["名人村人",yzN("meijin")]]
     .filter(x=>x[1]>0).map(x=>`<div class="kyn">${esc(x[0])}<small>${fmtNum(x[1])}人</small></div>`).join("");
-  const machines=MACHINE_ORDER.filter(m=>machineOpen(m)).map(m=>`<div class="kyn">${esc(MACHINES[m].name)}</div>`).join("");
   const el=document.createElement("div"); el.id="kyoEnd"; el.setAttribute("role","dialog"); el.setAttribute("aria-label","エンディング");
   el.innerHTML=`<div class="kyrays"></div><div class="kysky"></div>
     <div class="kyhero"><div class="kycrown">${KC_SVG}</div><div class="kytitle">京の頂</div><div class="kysub">持っている${U}が 1京 をこえました</div><div class="kynum">${xFmt(S.money,"money")}${U}</div><div class="kyprize"><span class="kcrown">${KC_SVG}</span> ごほうび「京の王冠」 名前の先頭に王冠が付きます</div></div>
@@ -15845,19 +15862,20 @@ function kyoEnding(){
       <div class="kyh1">${esc(title)}</div><div class="kysec">ゲームクリア</div>
       <div class="kyhd kyhd0">あなたの記録</div>${stats}
       ${mates?`<div class="kyhd">${NIWA}で働いてくれた仲間</div>${mates}`:""}
-      <div class="kyhd">回したガチャ</div>${machines}
       <div class="kyhd">制作</div><div class="kyn kybig">ういるそん</div>
       <div class="kyhd">スペシャルサンクス</div>${nm?`<div class="kyn kybig">${esc(nm)}さん</div>`:""}<div class="kyn kythx">ここまで遊んでくれて、ありがとう</div>
       <div class="kyfin"><div class="kyend">THE END</div>
       <div class="kyend2">ゲームクリア! ${NIWA}は、これからも続きます</div></div>
     </div></div>
     <button class="kyskip" type="button">とばす(Esc)</button><div class="kybtns"><button class="kyback" type="button" hidden>${NIWA}にもどる(Enter)</button></div>`;
-  document.body.appendChild(el);
+  document.body.appendChild(el); kyoBusy=false;
   const T=(ms,fn)=>kyoTimers.push(setTimeout(fn,ms));
   const finish=()=>{ el.classList.add("done"); el.querySelector(".kyskip").hidden=true; const b=el.querySelector(".kyback"); b.hidden=false; b.focus(); };
   const inner=el.querySelector(".kyinner"), fin=el.querySelector(".kyfin");
   const endAt=()=>{ const H=el.clientHeight; inner.style.setProperty("--kyto", (-(H/2 + fin.offsetTop + fin.offsetHeight/2))+"px"); };   // THE END が画面のまんなかで止まる位置
-  const roll=()=>{ endAt(); el.classList.add("roll"); T(39200, finish); };
+  const H0=el.clientHeight, dist=H0/2+fin.offsetTop+fin.offsetHeight/2, loops=Math.max(1,Math.ceil(dist/(40*38.4))), dur=loops*38.4;   // 曲1回ぶん 38.4秒
+  inner.style.setProperty("--kydur", dur+"s");
+  const roll=()=>{ endAt(); el.classList.add("roll"); T(dur*1000+800, finish); };
   const close=()=>{ kyoTimers.forEach(clearTimeout); kyoTimers=[]; if(kyoStop){ kyoStop(); kyoStop=null; } el.remove(); window.removeEventListener("keydown",kyoKey,true); kyoKey=null; try{ renderAll(); }catch(e){} };
   el.querySelector(".kyskip").addEventListener("click",()=>{ kyoTimers.forEach(clearTimeout); kyoTimers=[]; endAt(); el.classList.add("roll","jump"); finish(); });
   el.querySelector(".kyback").addEventListener("click",close);
@@ -15868,7 +15886,7 @@ function kyoEnding(){
   // 演出: 光・小判・ファンファーレ。少ししてからエンドロール
   try{ yzCoinRain(160); T(1400,()=>yzCoinRain(120)); T(2800,()=>yzCoinRain(80)); }catch(e){}
   try{ seq([523,659,784,1047],110,"square",.06,.18); T(520,()=>seq([784,1047,1319,1568,2093],90,"triangle",.07,.35)); T(1100,()=>{ beep(523,1.8,"sine",.06); beep(659,1.8,"sine",.05); beep(784,1.8,"sine",.05); beep(1047,2,"triangle",.04); });
-    kyoStop=kyoMusic(4.8);   // エンドロールの曲(17小節・約41秒)
+    kyoStop=kyoMusic(4.8,loops);   // エンドロールの曲(16小節を loops 回 + 最後の和音)
   }catch(e){}
   T(4800, roll);
 }
