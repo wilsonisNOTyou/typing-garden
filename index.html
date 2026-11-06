@@ -224,7 +224,17 @@ body.dishtheme.dishsplit4:not(.garden):not(.washi){
   background:radial-gradient(ellipse at 50% 40%, #3a2410 0%, #160c06 60%, #050302 100%); animation:kyin .9s ease-out}
 @keyframes kyin{from{opacity:0}to{opacity:1}}
 #kyoEnd .kyrays{position:absolute; inset:-50%; background:repeating-conic-gradient(from 0deg at 50% 50%, rgba(255,216,74,.22) 0 8deg, transparent 8deg 16deg); animation:kyspin 24s linear infinite; pointer-events:none}
-#kyoEnd.roll .kyrays{opacity:.35; transition:opacity 2s}
+#kyoEnd.roll .kyrays{opacity:0; transition:opacity 2s}
+#kyoEnd .kysky{position:absolute; inset:0; opacity:0; pointer-events:none; transition:opacity 2.4s;
+  background:radial-gradient(1.4px 1.4px at 12% 18%,#fff8d8 60%,transparent 100%),radial-gradient(1px 1px at 28% 72%,#fff 60%,transparent 100%),radial-gradient(1.6px 1.6px at 47% 33%,#ffe8a0 60%,transparent 100%),
+    radial-gradient(1px 1px at 63% 81%,#fff 60%,transparent 100%),radial-gradient(1.3px 1.3px at 79% 22%,#fff8d8 60%,transparent 100%),radial-gradient(1px 1px at 91% 58%,#fff 60%,transparent 100%),
+    radial-gradient(1.2px 1.2px at 6% 64%,#ffe8a0 60%,transparent 100%),radial-gradient(1px 1px at 36% 9%,#fff 60%,transparent 100%),radial-gradient(1.5px 1.5px at 71% 47%,#fff8d8 60%,transparent 100%),
+    radial-gradient(ellipse at 50% 120%,rgba(120,80,20,.45),transparent 60%),linear-gradient(180deg,#070a1e 0%,#10112a 55%,#1c1226 100%);
+  background-size:420px 420px,420px 420px,420px 420px,420px 420px,420px 420px,420px 420px,420px 420px,420px 420px,420px 420px,100% 100%,100% 100%;
+  animation:kytw 6s ease-in-out infinite alternate}
+#kyoEnd.roll .kysky{opacity:1}
+@keyframes kytw{from{filter:brightness(.85)}to{filter:brightness(1.15)}}
+#kyoEnd .kythx{font-size:1rem; font-weight:400; color:#f6e6c0}
 @keyframes kyspin{to{transform:rotate(360deg)}}
 #kyoEnd .kyhero{position:absolute; left:0; right:0; top:50%; transform:translateY(-50%); padding:0 16px; transition:opacity 1.2s, transform 1.2s}
 #kyoEnd.roll .kyhero{opacity:0; transform:translateY(-80%)}
@@ -15763,7 +15773,41 @@ function renderKcTre(){
       </div></div></div>`;
 }
 /* ---------- 京の頂: エンディング(特別な演出のあとにエンドロール。終わったあとも遊び続けられる) ---------- */
-let kyoKey=null, kyoTimers=[];
+let kyoKey=null, kyoTimers=[], kyoStop=null;
+/* エンディングの曲: 主旋律・和音の分散・ベース・鐘。音は前もって時刻を決めて鳴らす(ずれない)。stop で止める */
+function kyoMusic(delay){
+  let ctx; try{ audioCtx=audioCtx||new (window.AudioContext||window.webkitAudioContext)(); ctx=audioCtx; if(ctx.state==="suspended") ctx.resume(); }catch(e){ return ()=>{}; }
+  const nodes=[], out=ctx.createGain(); out.gain.value=.9; out.connect(ctx.destination);
+  const hz = n => 440*Math.pow(2,(n-69)/12);   // MIDI の番号 → 周波数
+  const t0=ctx.currentTime+delay, B=.6;          // 1拍 0.6秒(テンポ100)
+  const note=(at,n,len,type,vol,kind)=>{
+    const o=ctx.createOscillator(), g=ctx.createGain(), s=t0+at*B, d=len*B;
+    o.type=type; o.frequency.value=hz(n);
+    if(kind==="lead"){ o.detune.setValueAtTime(0,s); o.detune.linearRampToValueAtTime(8,s+d*.6); }   // 主旋律は少しだけ揺らす
+    g.gain.setValueAtTime(0.0001,s); g.gain.exponentialRampToValueAtTime(vol,s+(kind==="pad"?.12:.02));
+    g.gain.setValueAtTime(vol,s+d*(kind==="pluck"?.05:.7)); g.gain.exponentialRampToValueAtTime(0.0001,s+d+(kind==="bell"?1.6:.25));
+    o.connect(g); g.connect(out); o.start(s); o.stop(s+d+1.8); nodes.push(o);
+  };
+  // 和音(1小節ずつ): 根音と、分散させる3音
+  const C=[[48,[60,64,67]],[47,[59,62,67]],[45,[57,60,64]],[40,[55,59,64]],[41,[57,60,65]],[40,[55,60,64]],[38,[57,60,65]],[43,[55,59,65]],
+           [48,[60,64,67]],[45,[57,60,64]],[41,[57,60,65]],[43,[55,59,62]],[41,[57,60,65]],[40,[55,59,64]],[38,[57,60,65]],[43,[59,62,65]],[48,[60,64,67]]];
+  // 主旋律: [小節の中の拍, 音, 長さ]
+  const M=[
+    [[0,76,1],[1,79,1],[2,84,1.5],[3.5,83,.5]], [[0,81,1],[1,79,1],[2,74,2]], [[0,72,1],[1,76,1],[2,81,1.5],[3.5,79,.5]], [[0,79,1],[1,76,1],[2,71,2]],
+    [[0,69,1],[1,72,1],[2,77,1.5],[3.5,76,.5]], [[0,76,1],[1,74,1],[2,72,2]], [[0,74,1],[1,77,1],[2,81,1],[3,84,1]], [[0,83,2],[2,79,1.5]],
+    [[0,76,.5],[.5,77,.5],[1,79,1],[2,84,1],[3,88,1]], [[0,86,1],[1,84,1],[2,81,2]], [[0,84,1],[1,81,1],[2,77,1],[3,81,1]], [[0,79,3]],
+    [[0,81,1],[1,79,1],[2,77,1],[3,76,1]], [[0,79,1],[1,77,1],[2,76,1],[3,74,1]], [[0,72,1],[1,74,1],[2,77,1],[3,81,1]], [[0,79,2],[2,83,1],[3,86,1]],
+    [[0,84,4]] ];
+  C.forEach(([root,tri],bar)=>{
+    const b=bar*4, last=bar===C.length-1;
+    note(b,root,last?4:2,"sine",.13,"pad"); if(!last) note(b+2,root+(bar%2?7:12),2,"sine",.1,"pad");   // ベース
+    if(last){ for(const n of tri.concat([72])) note(b,n,4,"triangle",.05,"bell"); }
+    else for(let i=0;i<8;i++) note(b+i*.5, tri[[0,1,2,1,0,1,2,1][i]]+(i>=4?12:0), .5, "triangle", .028, "pluck");   // 和音の分散(8分音符)
+    for(const [at,n,len] of M[bar]) note(b+at,n,len,"square",.032,"lead");                                          // 主旋律
+    if(bar%4===0 || last) note(b, last?96:91, 1, "sine", .03, "bell");                                               // 4小節ごとの鐘
+  });
+  return ()=>{ try{ const now=ctx.currentTime; out.gain.setValueAtTime(out.gain.value,now); out.gain.linearRampToValueAtTime(0.0001,now+.4); setTimeout(()=>{ for(const o of nodes){ try{ o.stop(); }catch(e){} } try{ out.disconnect(); }catch(e){} },500); }catch(e){} };
+}
 function kyoEnding(){
   if(document.getElementById("kyoEnd")) return;
   try{ closeModal(true); }catch(e){}
@@ -15780,14 +15824,15 @@ function kyoEnding(){
     .filter(x=>x[1]>0).map(x=>`<div class="kyn">${esc(x[0])}<small>${fmtNum(x[1])}人</small></div>`).join("");
   const machines=MACHINE_ORDER.filter(m=>machineOpen(m)).map(m=>`<div class="kyn">${esc(MACHINES[m].name)}</div>`).join("");
   const el=document.createElement("div"); el.id="kyoEnd"; el.setAttribute("role","dialog"); el.setAttribute("aria-label","エンディング");
-  el.innerHTML=`<div class="kyrays"></div>
+  el.innerHTML=`<div class="kyrays"></div><div class="kysky"></div>
     <div class="kyhero"><div class="kycrown">${KC_SVG}</div><div class="kytitle">京の頂</div><div class="kysub">持っている${U}が 1京 をこえました</div><div class="kynum">${xFmt(S.money,"money")}${U}</div><div class="kyprize"><span class="kcrown">${KC_SVG}</span> ごほうび「京の王冠」 名前の先頭に王冠が付きます</div></div>
     <div class="kyroll"><div class="kyinner">
       <div class="kyh1">${esc(title)}</div><div class="kysec">ゲームクリア</div>
       <div class="kyhd">あなたの記録</div>${stats}
       ${mates?`<div class="kyhd">${NIWA}で働いてくれた仲間</div>${mates}`:""}
       <div class="kyhd">回したガチャ</div>${machines}
-      <div class="kyhd">そして</div><div class="kyn kybig">遊んでくれた ${nm?esc(nm)+"さん":"あなた"}</div>
+      <div class="kyhd">制作</div><div class="kyn kybig">ういるそん</div>
+      <div class="kyhd">スペシャルサンクス</div>${nm?`<div class="kyn kybig">${esc(nm)}さん</div>`:""}<div class="kyn kythx">ここまで遊んでくれて、ありがとう</div>
       <div class="kyend">THE END</div>
       <div class="kyend2">ゲームクリア! ${NIWA}は、これからも続きます</div>
     </div></div>
@@ -15796,7 +15841,7 @@ function kyoEnding(){
   const T=(ms,fn)=>kyoTimers.push(setTimeout(fn,ms));
   const finish=()=>{ el.classList.add("done"); el.querySelector(".kyskip").hidden=true; const b=el.querySelector(".kyback"); b.hidden=false; b.focus(); };
   const roll=()=>{ el.classList.add("roll"); T(46000, finish); };
-  const close=()=>{ kyoTimers.forEach(clearTimeout); kyoTimers=[]; el.remove(); window.removeEventListener("keydown",kyoKey,true); kyoKey=null; try{ renderAll(); }catch(e){} };
+  const close=()=>{ kyoTimers.forEach(clearTimeout); kyoTimers=[]; if(kyoStop){ kyoStop(); kyoStop=null; } el.remove(); window.removeEventListener("keydown",kyoKey,true); kyoKey=null; try{ renderAll(); }catch(e){} };
   el.querySelector(".kyskip").addEventListener("click",()=>{ kyoTimers.forEach(clearTimeout); kyoTimers=[]; el.classList.add("roll"); finish(); });
   el.querySelector(".kyback").addEventListener("click",close);
   kyoKey=e=>{ e.stopPropagation(); e.preventDefault();
@@ -15806,9 +15851,7 @@ function kyoEnding(){
   // 演出: 光・小判・ファンファーレ。少ししてからエンドロール
   try{ yzCoinRain(160); T(1400,()=>yzCoinRain(120)); T(2800,()=>yzCoinRain(80)); }catch(e){}
   try{ seq([523,659,784,1047],110,"square",.06,.18); T(520,()=>seq([784,1047,1319,1568,2093],90,"triangle",.07,.35)); T(1100,()=>{ beep(523,1.8,"sine",.06); beep(659,1.8,"sine",.05); beep(784,1.8,"sine",.05); beep(1047,2,"triangle",.04); });
-    // エンドロールのあいだ、ゆっくりした旋律を何度か
-    const mel=[[784,880,988,1047],[880,784,659,784],[698,784,880,1047],[988,880,784,659]];
-    for(let i=0;i<10;i++) T(5200+i*4200,()=>{ seq(mel[i%4],380,"sine",.04,.6); beep([262,220,175,196][i%4],1.6,"triangle",.035); });
+    kyoStop=kyoMusic(4.8);   // エンドロールの曲(17小節・約41秒)
   }catch(e){}
   T(4800, roll);
 }
