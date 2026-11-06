@@ -12866,7 +12866,7 @@ const YZ_NEW = [
   { k:"kimagure", r:"GHR", name:"気まぐれ村人", vil:true, desc:"図鑑に載っている作物から、植えるたびにランダムで選んで育てます(1人で3区画)", lore:"今日は何を植えようか、と毎朝くじを引く村人。たまに、誰も見たことのない組み合わせの畑ができる。" },
   { k:"meijin", r:"GHR", name:"名人村人", vil:true, desc:"選んだ作物を3区画で育てます。品質はかならず ☆☆☆ になり、変異・超変異が2倍出やすくなります", lore:"赤いはちまきの名人。土をひと握りするだけで、その年の出来がわかるという。" },
   { k:"karakuri", r:"GHR", name:"からくり時計", desc:"農園を開いているあいだ、時間が +5% 速く進みます(1つごと。最大 +1000%)", lore:"歯車が見える古い時計。いくつも並べると、互いの歯車がかみ合って、時がどんどん速く回りだす。" },
-  { k:"button", r:"GUR", name:"キーボタン", desc:"ホーム画面にキーボタンが出ます。押すと 100万キー(1つごとに +100万キー。最大 1億キー・1秒に1回)", lore:"押すとキーが出てくる、出どころのわからない赤いボタン。誰が作ったのかは、千両箱の番頭も知らない。" },
+  { k:"button", r:"GUR", name:"キーボタン", desc:"ホーム画面にキーボタンが出ます。押すと 100万キー(1つごとに +100万キー。最大 1億キー。連打できます)", lore:"押すとキーが出てくる、出どころのわからない赤いボタン。誰が作ったのかは、千両箱の番頭も知らない。" },
   { k:"flag", r:"GXR", name:"村の旗", desc:"村人の区画の育つ速さ +1%(1本ごと。最大 +100%)", lore:"村の真ん中に立つ旗。風にはためく音が聞こえるあいだ、村人たちは手を止めない。" },
   { k:"gneji", r:"GXR", name:"金のキー", desc:"キーボタン1押しのキー +10%(1本ごと。最大 +400%)", lore:"純金で作られたキー。どの文字も打てないが、キーボタンのそばに置くと、ボタンが少し誇らしげに光る。" },
   { k:"taiko", r:"GXR", name:"豊作の太鼓", desc:"2個穫れる確率 +1%(1つごと。最大 +50%)", lore:"収穫祭で打ち鳴らされる大太鼓。響きが届く畑では、実がもうひとつ顔を出す。" },
@@ -12916,16 +12916,17 @@ const yzIsNew = c => !!(c && YZ[c.id] && YZ[c.id].nw);
 /* ---- 効果 ---- */
 function yzSellMul(){ return 1+yzv("zou")/100; }
 function yzFieldMax(){ return FIELD_MAX+yzv("map"); }
-/* キーボタン: 1秒に1回まで。キーの泉は自動で押す */
-let yzBtnAt=0;
+/* キーボタン: 手で押すときは連打できる(押しっぱなしの連続入力だけ1秒10回まで)。キーの泉は自動で押す */
+let yzBtnAt=0, yzSaveT=0;
+const YZ_BTN_GAP=100;   // 手で押すときの間かく(ミリ秒)。人の手の連打はそのまま通し、押しっぱなしの連続入力だけを1秒10回までにする
 const yzBtnGain = () => Math.round(yzv("button")*(1+yzv("gneji")/100));
 function yzPress(auto){
   if(!yzHas("button")) return 0;
-  const now=Date.now(); if(!auto && now-yzBtnAt<1000) return 0;
+  const now=Date.now(); if(!auto && now-yzBtnAt<YZ_BTN_GAP) return 0;
   if(!auto) yzBtnAt=now;
   try{ if(typeof syncReadOnly!=="undefined" && syncReadOnly) return 0; }catch(e){}
   const a=yzBtnGain(); xAdd(S,"money",a); S.yzPressed=(S.yzPressed||0)+1; S.yzEarn=(S.yzEarn||0)+a;
-  if(!auto) save();
+  if(!auto && !yzSaveT) yzSaveT=setTimeout(()=>{ yzSaveT=0; save(); },1000);   // 連打のたびに保存しないよう、まとめて1秒後に
   return a;
 }
 let yzSpringT=0, yzSpringSave=0;
@@ -17239,7 +17240,7 @@ function refreshGardenStat(id="gardenStat"){
   el.classList.toggle("todo", todo.length>0);
   if(id==="gardenStat") yzBtnRefresh();
 }
-/* キーボタン(千両箱ガチャの GUR): 押すとキーがもらえる。1秒に1回まで */
+/* キーボタン(千両箱ガチャの GUR): 押すとキーがもらえる。連打できる */
 const yzJp = n => n>=1e8 ? (n/1e8).toLocaleString("ja-JP",{maximumFractionDigits:2})+"億" : n>=1e4 ? (n/1e4).toLocaleString("ja-JP",{maximumFractionDigits:1})+"万" : Math.floor(n).toLocaleString("ja-JP");
 function yzBtnRefresh(){
   const row=$("yzBtnRow"); if(!row) return;
