@@ -128,7 +128,7 @@ body.dishtheme.dishsplit4:not(.garden):not(.washi){
   background-attachment:scroll, fixed, fixed;
 }
 
-/* ---- よろず屋ガチャ: 黒漆と朱と金の台、のれん、金の玉。札は桐箱から出るように。光は金、小判が降る ---- */
+/* ---- 千両箱ガチャ: 黒漆と朱と金の台、のれん、金の玉。札は桐箱から出るように。光は金、小判が降る ---- */
 #screen-garden .gmtab.y{border-color:#b8860b; background:linear-gradient(180deg,#2a1a12,#120a08); color:#f4d27a}
 #screen-garden .gmtab.y.on{background:linear-gradient(90deg,#b8860b,#ffe08a 45%,#d4a020 60%,#8a5a00); border-color:#5a3a00; color:#2a1800; box-shadow:0 0 12px rgba(244,197,66,.75)}
 #screen-garden .gacha.y{border-radius:14px; padding:.6rem .7rem .4rem; background:
@@ -140,14 +140,14 @@ body.dishtheme.dishsplit4:not(.garden):not(.washi){
 #screen-garden .gacha.y .gcost b{color:#ffd860}
 #screen-garden .gacha.y .gempty{color:#d8c08a; border-color:rgba(244,197,66,.45)}
 #screen-garden .gacha.y .gmachine{position:relative; padding-top:22px}
-#screen-garden .gacha.y .gmachine::before{content:"よろず屋"; position:absolute; left:-12px; right:-12px; top:0; height:30px; z-index:2; display:flex; align-items:center; justify-content:center;
+#screen-garden .gacha.y .gmachine::before{content:"千両箱"; position:absolute; left:-12px; right:-12px; top:0; height:30px; z-index:2; display:flex; align-items:center; justify-content:center;
   font-weight:900; font-size:.82rem; letter-spacing:.35em; color:#fff6dc; text-shadow:0 1px 0 #5a0a10;
   background:repeating-linear-gradient(90deg,#9a1420 0 26px,#7a0c18 26px 28px); border-radius:4px 4px 2px 2px; box-shadow:inset 0 -3px 0 rgba(0,0,0,.25), 0 2px 0 #b8860b;
   clip-path:polygon(0 0,100% 0,100% 100%,92% 82%,84% 100%,76% 82%,68% 100%,60% 82%,52% 100%,44% 82%,36% 100%,28% 82%,20% 100%,12% 82%,4% 100%,0 82%)}
 #screen-garden .gacha.y .gdome{background:radial-gradient(ellipse at 30% 25%, rgba(255,255,255,.9), rgba(255,255,255,0) 38%), linear-gradient(160deg, rgba(255,248,224,.9), rgba(255,224,150,.55) 50%, rgba(160,100,10,.35)); border-color:#d9a520; box-shadow:inset -8px -6px 14px rgba(120,70,0,.25), inset 6px 6px 12px rgba(255,255,255,.85), 0 3px 0 #6a4200}
 #screen-garden .gacha.y .gneck{background:linear-gradient(180deg,#ffe08a,#a87808)}
 #screen-garden .gacha.y .gbody{background:radial-gradient(ellipse at 50% 0%, rgba(255,255,255,.18), transparent 60%), linear-gradient(180deg,#1e1210,#0a0504); box-shadow:inset 0 3px 0 rgba(255,230,160,.25), inset 0 0 0 2px #d9a520, 0 4px 0 #3a2000}
-#screen-garden .gacha.y .gbody::before{content:"萬"; position:absolute; left:50%; top:9px; transform:translateX(-50%); width:24px; height:24px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:.8rem; font-weight:900; color:#2a1800; background:radial-gradient(circle at 35% 30%,#fff3b0,#e8b830 55%,#a87808); box-shadow:0 0 8px rgba(244,197,66,.8)}
+#screen-garden .gacha.y .gbody::before{content:"千"; position:absolute; left:50%; top:9px; transform:translateX(-50%); width:24px; height:24px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:.8rem; font-weight:900; color:#2a1800; background:radial-gradient(circle at 35% 30%,#fff3b0,#e8b830 55%,#a87808); box-shadow:0 0 8px rgba(244,197,66,.8)}
 #screen-garden .gacha.y .gknob{background:radial-gradient(circle at 35% 30%,#fff3b0,#d9a520 60%,#8a5a00)}
 #screen-garden .gacha.y .gb{box-shadow:inset -3px -4px 6px rgba(80,40,0,.35), inset 3px 3px 5px rgba(255,255,255,.85), 0 0 6px rgba(255,210,90,.6)}
 #screen-garden .gacha.y .gb.b1, #screen-garden .gacha.y .gb.b4{background:radial-gradient(circle at 35% 30%,#fff3b0,#e8b830 55%,#a87808)}
@@ -184,7 +184,7 @@ body.dishtheme.dishsplit4:not(.garden):not(.washi){
 .yzcoin{position:fixed; top:-16px; width:14px; height:14px; border-radius:50%; z-index:9998; pointer-events:none; background:radial-gradient(circle at 35% 30%,#fff6c0,#f4c542 50%,#a87808); box-shadow:0 0 6px rgba(255,210,90,.9); animation:g-wconf 2s ease-in forwards}
 .yzcoin.oval{width:12px; height:20px; border-radius:50%/40%; background:radial-gradient(ellipse at 35% 30%,#fff6c0,#e8b830 55%,#8a5a00)}
 @media (prefers-reduced-motion:reduce){ .yzcoin{display:none} #g-gachaFlash.yz.on, #g-gachaFlash.yz.big, #g-gachaFlash.yz.gzr{animation:none} }
-/* 貴重品の「よろず屋」タブ */
+/* 貴重品の「千両箱」タブ */
 #screen-garden .tabs .tab.yztab.on{background:linear-gradient(90deg,#b8860b,#ffe08a,#d4a020); color:#2a1800}
 #screen-garden .ghead.yzhead.GSR{color:#e2589b!important} #screen-garden .ghead.yzhead.GHR{color:#ff8a3d!important} #screen-garden .ghead.yzhead.GUR{color:#2fb8c9!important} #screen-garden .ghead.yzhead.GXR{color:#c040ff!important}
 #screen-garden .ghead.yzhead.GZR{background:linear-gradient(90deg,#ff3cac,#ffb84a,#5ad87a,#4aa8ff,#c040ff); -webkit-background-clip:text; background-clip:text; color:transparent!important}
@@ -3443,7 +3443,7 @@ html.mobile #screen-garden .grk-list{max-height:none; flex:1 1 auto; min-height:
         <div class="money" id="g-treasRate"></div>
         <button class="sbtn xbtn" data-close>閉じる ✕</button>
       </div>
-      <div class="tabs ttabs" id="g-treasTabs"><button class="tab on" data-tt="0" tabindex="-1">貴重品</button><button class="tab" data-tt="1" tabindex="-1">台所の宝物</button><button class="tab" data-tt="2" tabindex="-1">薔薇</button><button class="tab yztab" data-tt="3" tabindex="-1">よろず屋</button><span class="sphint">Tab で切り替え</span></div>
+      <div class="tabs ttabs" id="g-treasTabs"><button class="tab on" data-tt="0" tabindex="-1">貴重品</button><button class="tab" data-tt="1" tabindex="-1">台所の宝物</button><button class="tab" data-tt="2" tabindex="-1">薔薇</button><button class="tab yztab" data-tt="3" tabindex="-1">千両箱</button><span class="sphint">Tab で切り替え</span></div>
       <p class="tnote" id="g-treasNote">ガチャの GHR から出る種を育てると手に入ります。売ることはできませんが、持っているだけで農園にずっと効きます(同じものを重ねるほど強くなります)。</p>
       <div id="g-treasBody" class="gbody-scroll"></div>
       <div class="keyhint" id="g-treasHint"><b>↑ ↓</b> 見る ・ <b>8</b> / <b>Esc</b> 閉じる</div>
@@ -11292,7 +11292,7 @@ function shopRows(){
     }
     // 大連ガチャの権利(一度買えばずっと使える。ガチャ代は別)。種ガチャとわくわくガチャは別々に買う
     // 並べるのは、まだ持っていない中でいちばん少ない連だけ(1,111連 → 11,111連 → 111,111連の順に買う)
-    for(const m of ["n","w","r"]){
+    for(const m of ["n","w","r","y"]){
       if(!machineOpen(m)) continue;   // わくわくガチャ・薔薇ガチャが解放されてから並べる
       const n=GACHA_BIG.find(n=>!gachaPass(n,m));
       if(!n) continue;
@@ -11666,8 +11666,8 @@ const RARITY={
   GSR:{ label:"GSR", rate:0.27, color:"#e2589b" },
   GHR:{ label:"GHR", rate:0.03, color:"#ff8a3d" },
   GUR:{ label:"GUR", rate:0.005, color:"#2fb8c9" },
-  GXR:{ label:"GXR", rate:0.0001, color:"#c040ff" },   // 薔薇ガチャ・よろず屋ガチャ
-  GZR:{ label:"GZR", rate:0.0002, color:"#ff3cac" },   // よろず屋ガチャだけのいちばん上
+  GXR:{ label:"GXR", rate:0.0001, color:"#c040ff" },   // 薔薇ガチャ・千両箱ガチャ
+  GZR:{ label:"GZR", rate:0.0002, color:"#ff3cac" },   // 千両箱ガチャだけのいちばん上
 };
 const RARITY_ORDER=["N","R","SR","HR","UR","GSR","GHR","GUR","GXR","GZR"];
 /* ガチャの台: n 種ガチャ / w わくわくガチャ(値段は10倍。確率は WAKU_RATES。GHR・GUR はわくわくガチャだけの中身) */
@@ -11676,14 +11676,14 @@ const MACHINES={
   n:{ name:"種ガチャ",       mult:1, order:RARITY_ORDER.slice(0,7) },
   w:{ name:"わくわくガチャ", mult:10, order:RARITY_ORDER.slice(0,8) },   // 1回 1,000キー
   r:{ name:"薔薇ガチャ", mult:.1, order:RARITY_ORDER.slice(0,9), coin:true },
-  y:{ name:"よろず屋ガチャ", mult:10000, order:RARITY_ORDER },   // 1回 100万キー   // 1回 10コイン(薔薇ガチャコインで引く)
+  y:{ name:"千両箱ガチャ", mult:10000, order:RARITY_ORDER },   // 1回 100万キー   // 1回 10コイン(薔薇ガチャコインで引く)
 };
 let gachaM="n";
 const ROSE_RATES = { N:50.4989, R:28.2, SR:17.19, HR:3, UR:1, GSR:0.1, GHR:0.01, GUR:0.001, GXR:0.0001 };   // 貴重品上限+料理2つでも、引き続けるとコインが少しずつ減る   // 薔薇ガチャ
 const MACHINE_ORDER = ["n","w","r","y"];   // ← → で切り替える順
 const roseGachaOpen = () => roseGot()>=10;   // 薔薇を10色集めると解放(図鑑の色の数。変異・超変異も1色)
 const machineOpen = m => m==="w" ? cookOpen() : m==="r" ? roseGachaOpen() : m==="y" ? yzOpen() : true;
-const machineLockMsg = m => m==="y" ? `よろず屋ガチャは、累計獲得キーが ${fmtNum(YZ_OPEN)} を超えると解放されます(今 ${fmtNum(earnedTotal())})` : m==="w" ? COOK_LOCK_MSG() : "薔薇ガチャは、薔薇を10色集める(図鑑の薔薇のページ)と解放されます";
+const machineLockMsg = m => m==="y" ? `千両箱ガチャは、累計獲得キーが ${fmtNum(YZ_OPEN)} を超えると解放されます(今 ${fmtNum(earnedTotal())})` : m==="w" ? COOK_LOCK_MSG() : "薔薇ガチャは、薔薇を10色集める(図鑑の薔薇のページ)と解放されます";
 const rateBase = (r,m=gachaM) => m==="w" ? WAKU_RATES[r] : m==="r" ? ROSE_RATES[r] : m==="y" ? YZ_RATES[r] : RARITY[r].rate;
 /* 料理で確率が変わる(SR以上・GUR・GHR・GSR)。表示は合計100%になるよう割り直す */
 function rateRaw(r,m=gachaM){
@@ -11692,7 +11692,7 @@ function rateRaw(r,m=gachaM){
   if(r==="GUR") x*=ev("ε",1.5,3,1);
   if(r==="GHR") x*=ev("μ",1.5,3,1);
   if(r==="GSR") x*=ev("ν",1.5,3,1);
-  if(m==="y" && RARITY_ORDER.indexOf(r)>=5) x*=1+yzv("kanban")/100;   // よろず屋の看板
+  if(m==="y" && RARITY_ORDER.indexOf(r)>=5) x*=1+yzv("kanban")/100;   // 大入りの看板
   return x;
 }
 const orderOf = m => MACHINES[m].order.filter(r=>poolOf(r,m).length>0);   // 中身のあるレア度だけ
@@ -11743,7 +11743,7 @@ const GACHA_MEGA=1111111;   // 1111111連: 引く計算を少しずつ進めな�
 const GACHA_PASS_PRICE={ 1111:100000, 11111:1000000, 111111:10000000, 1111111:1000000000 };          // 種ガチャ
 const WAKU_PASS_PRICE ={ 1111:1000000, 11111:10000000, 111111:100000000, 1111111:10000000000 };      // わくわくガチャ(種ガチャとは別に買う)
 const ROSE_PASS_PRICE ={ 1111:1000000, 11111:10000000, 111111:100000000, 1111111:10000000000 };      // 薔薇ガチャ(権利はキーで買う)
-const YZ_PASS_PRICE  ={ 1111:1e10, 11111:1e11, 111111:1e12, 1111111:1e14 };   // よろず屋ガチャ
+const YZ_PASS_PRICE  ={ 1111:1e10, 11111:1e11, 111111:1e12, 1111111:1e14 };   // 千両箱ガチャ
 const passKey   = (n,m) => m==="w" ? "w"+n : m==="r" ? "r"+n : m==="y" ? "y"+n : String(n);
 const passPrice = (n,m) => (m==="w" ? WAKU_PASS_PRICE : m==="r" ? ROSE_PASS_PRICE : m==="y" ? YZ_PASS_PRICE : GACHA_PASS_PRICE)[n];
 const gachaPass = (n,m=gachaM) => !!(S.gachaPass && S.gachaPass[passKey(n,m)]);
@@ -12267,7 +12267,7 @@ function gachaApply(x,C){
     }
     if(!(S.got[x.id]>0)) x.isNew=true;
     S.got[x.id]=(S.got[x.id]||0)+1;
-    if(YZ[x.id]){   // よろず屋ガチャ: まとめた品・新しい品
+    if(YZ[x.id]){   // 千両箱ガチャ: まとめた品・新しい品
       const o=YZ[x.id];
       if(o.nw){ const g=yzGainNew(YZ_NEWK[o.k]); if(g.swap) gachaNote.push({ id:x.id, swap:true, amt:g.amt }); else if(S.got[x.id]===1) gachaNote.push({ id:x.id, m:g.m }); }
       else{ const m=o.give(x); if(m && S.got[x.id]===1) gachaNote.push({ id:x.id, m }); }
@@ -12330,7 +12330,7 @@ function revealNext(){
   if(gachaShown>=gachaRes.length){ renderGacha(); renderBar(); flushGachaNote(); save(); return; }
   gachaShown++;
   sfxGacha(gachaRes[gachaShown-1].r);
-  if(gachaM==="w"||gachaM==="r"||gachaM==="y"){   // わくわくガチャ・薔薇ガチャ・よろず屋ガチャ: 1回引きは HR 以上、まとめて引くときは GSR 以上で光らせる
+  if(gachaM==="w"||gachaM==="r"||gachaM==="y"){   // わくわくガチャ・薔薇ガチャ・千両箱ガチャ: 1回引きは HR 以上、まとめて引くときは GSR 以上で光らせる
     const ri=RARITY_ORDER.indexOf(gachaRes[gachaShown-1].r);
     if(ri>=(gachaRes.length>1?5:3)) gachaFlash(gachaRes[gachaShown-1].r, false);
   }
@@ -12450,7 +12450,7 @@ function gachaFlash(r,big){
   const ri=RARITY_ORDER.indexOf(r);
   if(gachaM==="w") big = ri>=6;   // わくわくガチャの大きな虹の光は GHR・GUR だけ
   if(gachaM==="r") big = ri>=6;   // 薔薇ガチャの大きな光は GHR だけ
-  if(gachaM==="y") big = ri>=5;   // よろず屋ガチャ: GSR 以上
+  if(gachaM==="y") big = ri>=5;   // 千両箱ガチャ: GSR 以上
   f.className=""; void f.offsetWidth; f.className="on"+(big?" big":"")+(gachaM==="w"?" waku":gachaM==="r"?" rose":gachaM==="y"?" yz"+(ri>=9?" gzr":""):"");
   if(gachaM==="y") yzCoinRain(ri>=9 ? 140 : ri>=8 ? 90 : ri>=6 ? 50 : ri>=5 ? 30 : ri>=4 ? 12 : 0);   // 小判の雨
   if(gachaM==="r") rosePetalStorm(ri>=6 ? 60 : ri>=5 ? 28 : ri>=4 ? 14 : 0);   // UR は少し・GSR は多め・GHR は嵐
@@ -12523,7 +12523,7 @@ function gachaListHTML(){
     if(!MACHINES[gachaM].order.includes(r)) return "";
     const pool=poolOf(r);
     if(!pool.length) return "";
-    const shopKnown = c => (gachaM==="y" && !yzIsNew(c)) || (!!CROP[c.id] && !c.gacha && (isUnlocked(c) || S.harvestBy[c.id]>0));   // よろず屋ガチャの今までの品は、いつも名前が見える
+    const shopKnown = c => (gachaM==="y" && !yzIsNew(c)) || (!!CROP[c.id] && !c.gacha && (isUnlocked(c) || S.harvestBy[c.id]>0));   // 千両箱ガチャの今までの品は、いつも名前が見える
     const got=pool.filter(c=>S.got[c.id]>0 || shopKnown(c)).length;
     return `<div class="gsec" style="--rc:${RARITY[r].color}">
       <div class="gsechead"><b>${RARITY[r].label}</b><span>${rateOf(r)}%</span><small>${got} / ${pool.length}</small></div>
@@ -12726,7 +12726,7 @@ for(const x of RG_GUR){
     return `${ico(x)} ${x.name}を手に入れました! ${x.desc}`; } });
 }
 const rgGurGot = () => RG_GUR.filter(x=>(S.got[x.id]||0)>0).length;
-/* ---------- よろず屋ガチャ: 村人・道具・宝物が出る、累計獲得キー1兆からの台(1回 100万キー) ----------
+/* ---------- 千両箱ガチャ: 村人・道具・宝物が出る、累計獲得キー1兆からの台(1回 100万キー) ----------
    N〜UR は今までの品(名前はいつも見える)。GSR〜GZR は新しい品(手に入れるまで ？？？) */
 const YZ={}, YZ_POOL={};
 const YZ_OPEN = 1e12;   // 解放: 累計獲得キー
@@ -12762,7 +12762,7 @@ const YZA = {
   gneji: yzRich("#fffbe0","#f4c542",`<rect x="6.4" y="8.6" width="19.2" height="15.6" rx="3" fill="#a87808"/><rect x="7.6" y="7.6" width="16.8" height="13.6" rx="2.6" fill="#f4c542" stroke="#a87808" stroke-width=".7"/><rect x="9.6" y="9.4" width="12.8" height="9.6" rx="1.8" fill="#ffe08a"/><text x="16" y="17.4" font-size="7.4" text-anchor="middle" fill="#8a5a00" font-weight="900">K</text><circle cx="11" cy="10.6" r="1" fill="#fff8d0"/>`),
   taiko: yzRich("#fff4ea","#e89a60",`<ellipse cx="16" cy="11.6" rx="9.4" ry="3.6" fill="#f4e4c8" stroke="#6a3a1a" stroke-width=".8"/><path d="M6.6 11.6v9.6c0 2 4.2 3.6 9.4 3.6s9.4-1.6 9.4-3.6v-9.6c0 2-4.2 3.6-9.4 3.6s-9.4-1.6-9.4-3.6z" fill="#b8281e"/><g fill="#f4c542"><circle cx="9" cy="17.4" r=".8"/><circle cx="12.4" cy="18.6" r=".8"/><circle cx="16" cy="19" r=".8"/><circle cx="19.6" cy="18.6" r=".8"/><circle cx="23" cy="17.4" r=".8"/></g><path d="M11.6 11.4c1.6-1.2 3-.4 3.4.8M16.6 11.4c1.6-1.2 3-.4 3.4.8" stroke="#3a2a1a" stroke-width=".7" fill="none"/><path d="M22 3.4l-4.4 7M26.4 5.6l-6 5.6" stroke="#8a5a2a" stroke-width="1.4" stroke-linecap="round"/>`),
   fuuki: yzRich("#f0fbff","#88c8e8",`<path d="M16 29V13" stroke="#5a5a6a" stroke-width="1.4"/><path d="M9 26h14M11 23.4l10 0" stroke="#5a5a6a" stroke-width=".9"/><text x="7.2" y="27.8" font-size="3" fill="#3a3a4a">W</text><text x="22.8" y="27.8" font-size="3" fill="#3a3a4a">E</text><path d="M9.6 12.4c0-3.4 2.6-5.6 5.4-5.6 1.4-2.2 3.6-2.6 4.4-1.4-.6.4-1 1-1 1.8 1.6.4 2.6 1.6 2.6 3.2l3.4-2.6c.4 3.6-1.6 6.4-5 6.8H12.4c-1.6 0-2.8-1-2.8-2.2z" fill="#3a3a4a"/><path d="M17.6 6.6c.4-1.4 1.4-2.4 2.6-2.4-.2.8 0 1.4.4 1.8" fill="#e8384f"/><circle cx="18.2" cy="8.4" r=".6" fill="#fff"/>`),
-  kanban: yzRich("#fff6e6","#d8a060",`<path d="M7 7.4h18" stroke="#3a2a1a" stroke-width="1.2"/><path d="M10 7.4V4.6M22 7.4V4.6" stroke="#3a2a1a" stroke-width="1"/><rect x="5.4" y="8.4" width="21.2" height="15.4" rx="1.2" fill="#3a1a10" stroke="#f4c542" stroke-width="1.2"/><text x="16" y="15.6" font-size="5.4" text-anchor="middle" fill="#f4c542" font-weight="900">よろず</text><text x="16" y="21.6" font-size="4.6" text-anchor="middle" fill="#ffe8a0" font-weight="700">屋</text><path d="M9 27.6l2-3.8M23 27.6l-2-3.8" stroke="#6a4a2a" stroke-width="1.2"/>`),
+  kanban: yzRich("#fff6e6","#d8a060",`<path d="M7 7.4h18" stroke="#3a2a1a" stroke-width="1.2"/><path d="M10 7.4V4.6M22 7.4V4.6" stroke="#3a2a1a" stroke-width="1"/><rect x="5.4" y="8.4" width="21.2" height="15.4" rx="1.2" fill="#3a1a10" stroke="#f4c542" stroke-width="1.2"/><text x="16" y="18.8" font-size="8" text-anchor="middle" fill="#f4c542" font-weight="900">大入</text><path d="M9 27.6l2-3.8M23 27.6l-2-3.8" stroke="#6a4a2a" stroke-width="1.2"/>`),
   kozuchi: yzRich("#fff8d8","#f0b830",`<path d="M19.6 16.4l7.4 9" stroke="#8a2a1a" stroke-width="2.6" stroke-linecap="round"/><rect x="4.4" y="6" width="16" height="11" rx="5.4" fill="#d8a020" stroke="#8a5a00" stroke-width=".8" transform="rotate(-30 12.4 11.5)"/><path d="M8.2 6.4l6.8 11.8" stroke="#e8384f" stroke-width="1.4" transform="rotate(-0 0 0)"/><g fill="#fff3b0"><circle cx="10" cy="10" r="1.1"/><circle cx="13.6" cy="13.4" r=".8"/></g><text x="11.6" y="13.4" font-size="4" text-anchor="middle" fill="#7a3a00" font-weight="900" transform="rotate(-30 11.6 12)">宝</text><circle cx="24.8" cy="7" r="1.6" fill="#f4c542"/><circle cx="27" cy="11.6" r="1.1" fill="#f4c542"/>`),
   zou: yzRich("#fffbe0","#e8b820",`<rect x="7.6" y="24" width="16.8" height="4.6" rx=".8" fill="#8a6420"/><path d="M11 24c0-5 1.4-8.6 5-8.6s5 3.6 5 8.6z" fill="#f4c542" stroke="#b8860b" stroke-width=".6"/><circle cx="16" cy="11.6" r="4.2" fill="#f4c542" stroke="#b8860b" stroke-width=".6"/><path d="M11.6 9.4c1.4-4 7.4-4 8.8 0" stroke="#b8860b" stroke-width="1" fill="none"/><path d="M8.6 17.4c2-1.2 3.4-.6 4 1M23.4 17.4c-2-1.2-3.4-.6-4 1" stroke="#f4c542" stroke-width="2" stroke-linecap="round"/><path d="M6.6 14.2l2.4 3.4M25.4 14.2L23 17.6" stroke="#5aa83a" stroke-width="1.6" stroke-linecap="round"/><circle cx="14.6" cy="11.4" r=".5" fill="#7a5200"/><circle cx="17.4" cy="11.4" r=".5" fill="#7a5200"/>`),
   map: yzRich("#fff6dc","#d8b060",`<path d="M5 8.4l7-2.4 8 2.4 7-2.4v18l-7 2.4-8-2.4-7 2.4z" fill="#f4e0b0" stroke="#a8803a" stroke-width=".8"/><path d="M12 6v18M20 8.4v18" stroke="#c8a060" stroke-width=".6"/><path d="M7.4 20c2.4-4 5-1 7.6-4.4s5.2-.4 7.6-4" stroke="#c84a3a" stroke-width="1" stroke-dasharray="1.4 1" fill="none"/><path d="M20.6 9.4l3 3M23.6 9.4l-3 3" stroke="#e8384f" stroke-width="1.2"/><path d="M8 11.6l1.6-2.4 1.6 2.4z" fill="#f4c542"/><circle cx="22" cy="20" r="2" fill="#f4c542" stroke="#b8860b" stroke-width=".5"/>`),
@@ -12774,17 +12774,17 @@ var YZ_TRE = {
   karakuri:{ per:5,   cap:1000, unit:"%", what:"農園を開いているあいだに進む時間" },
   button:  { per:1e6, cap:1e8,  unit:"キー", what:"キーボタン1押しのキー" },
   flag:    { per:1,   cap:100,  unit:"%", what:"村人の区画の育つ速さ" },
-  gneji:   { per:10,  cap:900,  unit:"%", what:"キーボタン1押しのキー" },
+  gneji:   { per:10,  cap:400,  unit:"%", what:"キーボタン1押しのキー" },
   taiko:   { per:1,   cap:50,   unit:"%", what:"2個穫れる確率" },
   fuuki:   { per:1,   cap:100,  unit:"%", what:"カラスが作物を持っていく確率を下げ、超変異しやすさを上げる" },
-  kanban:  { per:1,   cap:30,   unit:"%", what:"よろず屋ガチャの GSR 以上が出る確率" },
+  kanban:  { per:1,   cap:30,   unit:"%", what:"千両箱ガチャの GSR 以上が出る確率" },
   zou:     { per:100, cap:900,  unit:"%", what:"作物の売値" },
   map:     { per:1,   cap:50,   unit:"枚", what:"畑の上限" },
-  izumi:   { per:1,   cap:10,   unit:"個", what:"キーボタンを自動で押す(1つで10秒に1回)" },
+  izumi:   { per:1,   cap:10,   unit:"個", what:"キーボタンを自動で押す(1つで60秒に1回)" },
 };
 function yzv(k){ const t=YZ_TRE && YZ_TRE[k]; return t ? Math.min(t.cap, t.per*yzN(k)) : 0; }
 const yzFull = k => { const t=YZ_TRE[k]; return !!t && t.per*yzN(k)>=t.cap; };
-/* 新しい品の一覧(貴重品の「よろず屋」タブの並び) */
+/* 新しい品の一覧(貴重品の「千両箱」タブの並び) */
 const YZ_NEW = [
   { k:"kobo", r:"GSR", name:"工房職人の村人", vil:true, desc:"決めた工房の品を、材料があるかぎり自動で作り置きします(1人で1種類)", lore:"木くずの匂いのする前掛けの職人。道具の手入れを欠かさず、頼まれる前に次の品を作り始めている。" },
   { k:"prep", r:"GSR", name:"仕込み番の村人", vil:true, desc:"決めた仕込みを、材料があるかぎり自動で作り置きします(1人で1種類)", lore:"白いはちまきの仕込み番。樽のふたを開ける音だけで、中の熟れ具合がわかるという。" },
@@ -12795,16 +12795,16 @@ const YZ_NEW = [
   { k:"kimagure", r:"GHR", name:"気まぐれ村人", vil:true, desc:"図鑑に載っている作物から、植えるたびにランダムで選んで育てます(1人で3区画)", lore:"今日は何を植えようか、と毎朝くじを引く村人。たまに、誰も見たことのない組み合わせの畑ができる。" },
   { k:"meijin", r:"GHR", name:"名人村人", vil:true, desc:"選んだ作物を3区画で育てます。品質はかならず ☆☆☆ になり、変異・超変異が2倍出やすくなります", lore:"赤いはちまきの名人。土をひと握りするだけで、その年の出来がわかるという。" },
   { k:"karakuri", r:"GHR", name:"からくり時計", desc:"農園を開いているあいだ、時間が +5% 速く進みます(1つごと。最大 +1000%)", lore:"歯車が見える古い時計。いくつも並べると、互いの歯車がかみ合って、時がどんどん速く回りだす。" },
-  { k:"button", r:"GUR", name:"キーボタン", desc:"ホーム画面にキーボタンが出ます。押すと 100万キー(1つごとに +100万キー。最大 1億キー・1秒に1回)", lore:"押すとキーが出てくる、出どころのわからない赤いボタン。誰が作ったのかは、よろず屋の主人も知らない。" },
+  { k:"button", r:"GUR", name:"キーボタン", desc:"ホーム画面にキーボタンが出ます。押すと 100万キー(1つごとに +100万キー。最大 1億キー・1秒に1回)", lore:"押すとキーが出てくる、出どころのわからない赤いボタン。誰が作ったのかは、千両箱の番頭も知らない。" },
   { k:"flag", r:"GXR", name:"村の旗", desc:"村人の区画の育つ速さ +1%(1本ごと。最大 +100%)", lore:"村の真ん中に立つ旗。風にはためく音が聞こえるあいだ、村人たちは手を止めない。" },
-  { k:"gneji", r:"GXR", name:"金のキー", desc:"キーボタン1押しのキー +10%(1本ごと。最大 +900%)", lore:"純金で作られたキー。どの文字も打てないが、キーボタンのそばに置くと、ボタンが少し誇らしげに光る。" },
+  { k:"gneji", r:"GXR", name:"金のキー", desc:"キーボタン1押しのキー +10%(1本ごと。最大 +400%)", lore:"純金で作られたキー。どの文字も打てないが、キーボタンのそばに置くと、ボタンが少し誇らしげに光る。" },
   { k:"taiko", r:"GXR", name:"豊作の太鼓", desc:"2個穫れる確率 +1%(1つごと。最大 +50%)", lore:"収穫祭で打ち鳴らされる大太鼓。響きが届く畑では、実がもうひとつ顔を出す。" },
   { k:"fuuki", r:"GXR", name:"風見鶏", desc:"カラスが作物を持っていく確率 −1%・超変異しやすさ +0.01%(1羽ごと。最大100羽で、カラスは作物を持っていかなくなり、超変異しやすさ +1%)", lore:"屋根の上でくるくる回る鉄の鶏。カラスはこれを本物の大きな鶏だと思っている。" },
-  { k:"kanban", r:"GXR", name:"よろず屋の看板", desc:"よろず屋ガチャの GSR 以上が出る確率 +1%(1枚ごと。最大 +30%)", lore:"金文字の看板。掛ける場所を変えるたびに、よろず屋の主人が奥からいい品を出してくる。" },
-  { k:"kozuchi", r:"GZR", name:"打ち出の小槌", use:true, desc:"振ると、持っているキーが2倍になります(使うとなくなります。持てるのは1つまで)", lore:"ひと振りで願いが出てくるという小槌。よろず屋に流れてきたものは、なぜかキーばかり出てくる。" },
+  { k:"kanban", r:"GXR", name:"大入りの看板", desc:"千両箱ガチャの GSR 以上が出る確率 +1%(1枚ごと。最大 +30%)", lore:"金文字で「大入」と書かれた看板。掛ける場所を変えるたびに、千両箱の底からいい品が出てくる。" },
+  { k:"kozuchi", r:"GZR", name:"打ち出の小槌", use:true, desc:"振ると、持っているキーが2倍になります(1回で増えるのは最大100兆まで。振れるのは10日に1回。使うとなくなります。持てるのは1つまで)", lore:"ひと振りで願いが出てくるという小槌。千両箱に納められていたものは、なぜかキーばかり出てくる。" },
   { k:"zou", r:"GZR", name:"豊穣の像", desc:"作物の売値 +100%(1体ごと。最大 +900%、つまり10倍)", lore:"実りの神をかたどった金の像。畑の見える場所に置くと、作物が自分の値打ちに気づいて胸を張る。" },
   { k:"map", r:"GZR", name:"黄金郷の地図", desc:"畑の上限 +1枚(1枚ごと。最大 +50枚。畑を増やすには土地の権利書が要ります)", lore:"地図にない国の、地図にない畑までが描かれた地図。眺めているうちに、その土地の権利がこちらに移る。" },
-  { k:"izumi", r:"GZR", name:"キーの泉", desc:"キーボタンを自動で押します(1つで10秒に1回。最大10個で1秒に1回)", lore:"底からキーが湧き出る泉。キーボタンのそばに掘ると、水の勢いでボタンが押され続ける。" },
+  { k:"izumi", r:"GZR", name:"キーの泉", desc:"キーボタンを自動で押します(1つで60秒に1回。最大10個で6秒に1回)", lore:"底からキーが湧き出る泉。キーボタンのそばに掘ると、水の勢いでボタンが押され続ける。" },
 ];
 const YZ_NEWK = Object.fromEntries(YZ_NEW.map(x=>[x.k,x]));
 for(const x of YZ_NEW){ x.id="yz:"+x.k; x.art=YZA[x.k]; x.icon="✨"; }
@@ -12817,7 +12817,7 @@ function yzGainNew(x){
   yzSet(k,yzN(k)+1);
   if(k==="meijin"||k==="kimagure") S.objSel=k==="meijin"?"mjvil":"kgvil";
   if(k==="map") S.yzMapSeen=1;
-  return { m:`${I} ${x.name}を手に入れました! ${x.desc}${x.vil||x.use||k==="meijin"?`。${kb("貴重品(8)の「よろず屋」で使えます","貴重品の「よろず屋」で使えます")}`:""}` };
+  return { m:`${I} ${x.name}を手に入れました! ${x.desc}${x.vil||x.use||k==="meijin"?`。${kb("貴重品(8)の「千両箱」で使えます","貴重品の「千両箱」で使えます")}`:""}` };
 }
 /* N〜UR: 今までの品をまとめて(1枚の札で中身がわかるように、種や料理は1種類だけ) */
 const YZ_ROSE_LV = ["b1","b2","b3","470","630","730","860","990","i1","i2","ls","lt"];
@@ -12862,20 +12862,24 @@ setInterval(()=>{
   try{
     const n=yzv("izumi"); if(!n || !yzHas("button") || window.nejiReplacing) return;
     if(typeof syncReadOnly!=="undefined" && syncReadOnly) return;
-    yzSpringT+=n;   // 1つで10秒に1回
-    let k=0; while(yzSpringT>=10){ yzSpringT-=10; yzPress(true); k++; }
+    yzSpringT+=n;   // 1つで60秒に1回
+    let k=0; while(yzSpringT>=60){ yzSpringT-=60; yzPress(true); k++; }
     if(k && Date.now()-yzSpringSave>15000){ yzSpringSave=Date.now(); save(); }
     if(k) yzBtnPaint();
   }catch(e){}
 },1000);
 function yzBtnPaint(){ try{ if(window.yzBtnRepaint) window.yzBtnRepaint(); }catch(e){} }
 /* 打ち出の小槌: 持っているキーが2倍 */
+const KOZ_CAP=1e14, KOZ_CD=10*24*HOUR;   // 打ち出の小槌: 1回で増えるのは最大100兆・10日に1回
+const kozLeft = () => Math.max(0,(S.yzKozAt||0)+KOZ_CD-Date.now());
 function yzKozuchi(){
   if(yzN("kozuchi")<1){ sfx.nope(); return; }
-  if(!confirm(`打ち出の小槌を振りますか? 持っているキー ${xFmt(S.money,"money")} が2倍になります。小槌はなくなります`)) return;
+  if(kozLeft()>0){ sfx.nope(); toast(`打ち出の小槌は、あと ${fmtLeftD(kozLeft())} で振れます(10日に1回)`,"warn",3600); return; }
+  const add=xBig(S.money,"money")<BigInt(KOZ_CAP) ? xBig(S.money,"money") : BigInt(KOZ_CAP);
+  if(!confirm(`打ち出の小槌を振りますか? 持っているキー ${xFmt(S.money,"money")} に ${numStr(add.toString())}キー 足されます(2倍・最大100兆)。小槌はなくなり、次に振れるのは10日後です`)) return;
   yzSet("kozuchi",yzN("kozuchi")-1);
   const before=xFmt(S.money,"money");
-  xAddBig(S,"money",xBig(S.money,"money"));
+  xAddBig(S,"money",add); S.yzKozAt=Date.now();
   S.yzKozuchiUsed=(S.yzKozuchiUsed||0)+1;
   sfx.vil(); toast(`${ico(YZ_NEWK.kozuchi)} 打ち出の小槌を振りました! ${before} → ${xFmt(S.money,"money")}キー`,"good mut sup",7000,true);
   yzCoinRain(80);
@@ -12923,6 +12927,7 @@ function yzKimoriTick(force){
   const ks=Object.keys(got);
   if(ks.length){ toast(`${ico(YZ_NEWK.kimori)} 木守りの村人が ${ks.map(id=>`${ico(FOOD[id])} ${esc(FOOD[id].name)}×${fmtNum(got[id])}`).join(" ・ ")} を収穫しました`,"good",4200,true); save(); }
 }
+const fmtLeftD = ms => { const h=Math.ceil(ms/HOUR); return h>=24 ? `${Math.floor(h/24)}日${h%24?`${h%24}時間`:""}` : `${h}時間`; };
 const yzTreeN = () => S.fields.reduce((a,f)=>a+Object.keys(f.bt||{}).length,0);
 /* 気まぐれ村人・名人村人 */
 const KG_SLOTS=3, MJ_SLOTS=3;
@@ -12969,7 +12974,7 @@ function yzAutoMakeTick(){
   }
   if(made.length){ toast(`${ico(YZ_NEWK.kobo)} 村人が ${made.join(" ・ ")} を作り置きしました`,"good",4200,true); save(); }
 }
-/* 小判の雨(よろず屋ガチャの演出) */
+/* 小判の雨(千両箱ガチャの演出) */
 function yzCoinRain(n){
   n=Math.min(n, 160-document.querySelectorAll(".yzcoin").length);   // 降っている小判は160枚まで(重くならないように)
   for(let i=0;i<n;i++){
@@ -12995,10 +13000,10 @@ function sfxYz(i){
   }
 }
 
-/* ---- 貴重品の「よろず屋」タブ ---- */
+/* ---- 貴重品の「千両箱」タブ ---- */
 let yzCur=0;
 const yzTreAny = () => YZ_NEW.some(x=>(S.got[x.id]||0)>0);
-const YZ_TRE_NOTE = "よろず屋ガチャの GSR〜GZR から出る品です。集めるほど効く宝物には上限があり、上限をこえた分はキーに替わります。";
+const YZ_TRE_NOTE = "千両箱ガチャの GSR〜GZR から出る品です。集めるほど効く宝物には上限があり、上限をこえた分はキーに替わります。";
 const yzInfoUse = k => k==="kuwa"||k==="jubako"||k==="kozuchi";
 function yzSub(x){
   const k=x.k, n=yzN(k), t=YZ_TRE[k];
@@ -13006,7 +13011,7 @@ function yzSub(x){
   if(t) return `今の合計 <b>${t.unit==="キー"?fmtNum(yzv(k))+"キー":"+"+fmtNum(yzv(k))+t.unit}</b>${yzFull(k)?" (上限)":""}`+(k==="button"?` ・ 1押し <b>${fmtNum(yzBtnGain())}キー</b> ・ これまで ${fmtNum(S.yzPressed||0)}回`:"");
   if(k==="kuwa") return n>0?`${kb("<b>Enter</b> で、いま見ている畑(畑"+(S.cur+1)+")に使う","もう一度タップで、いま見ている畑に使う")}`:"";
   if(k==="jubako") return n>0?`${kb("<b>Enter</b> で使う","もう一度タップで使う")}${jubakoOn()?` ・ 使っています(残り ${fmtLeft(S.jubakoUntil-Date.now())})`:""}`:"";
-  if(k==="kozuchi") return n>0?kb("<b>Enter</b> で振る","もう一度タップで振る"):"";
+  if(k==="kozuchi") return n>0?(kozLeft()>0?`次に振れるまで あと <b>${fmtLeftD(kozLeft())}</b>`:kb("<b>Enter</b> で振る","もう一度タップで振る")):(kozLeft()>0?`次に振れるまで あと ${fmtLeftD(kozLeft())}`:"");
   if(k==="kobo") return n>0?`作り置き <b>${cookKeepTxt()}</b>(料理番の村人と同じ) ・ 任せている品 <b>${(S.autoWork||[]).length} / ${n}</b>(${kb("Enter","もう一度タップ")}で選ぶ)`:"";
   if(k==="prep") return n>0?`作り置き <b>${cookKeepTxt()}</b>(料理番の村人と同じ) ・ 任せている仕込み <b>${(S.autoPrep||[]).length} / ${n}</b>(${kb("Enter","もう一度タップ")}で選ぶ)`:"";
   if(k==="kimori") return n>0?`世話をしている大木 <b>${Math.min(n,yzTreeN())} / ${yzTreeN()}本</b>(畑の順に、${n}本まで)`:"";
@@ -13030,7 +13035,7 @@ function renderYzTre(){
       <div class="tic">${seen?ico(x):"❔"}</div>
       <div class="tbody">
         <div class="tnm">${seen?esc(x.name):"？？？"}${seen?`<span class="tn">×${fmtNum(n)}</span>`:""}</div>
-        <div class="teff">${seen?esc(x.desc):`よろず屋ガチャの ${r} から出ます`}</div>
+        <div class="teff">${seen?esc(x.desc):`千両箱ガチャの ${r} から出ます`}</div>
         ${seen?`<div class="teff glore">${esc(x.lore)}</div>`:""}
         ${sub?`<div class="tsum">${sub}</div>`:""}
       </div></div>`;
@@ -13715,7 +13720,7 @@ function treasKey(e){
 }
 root.querySelectorAll("#g-treasTabs .tab").forEach(t=>t.addEventListener("click",()=>{ const v=+t.dataset.tt; if(!treasTabs().includes(v)) return; treasTab=v; renderTreas(); }));
 $("g-treasBody").addEventListener("click",e=>{
-  if(treasTab===3){   // よろず屋
+  if(treasTab===3){   // 千両箱
     const it=e.target.closest && e.target.closest(".yitem"); if(!it) return;
     const i=+it.dataset.y, sw=e.target.closest("[data-yd]");
     if(sw){ yzCur=i; yzAct(+sw.dataset.yd); return; }
@@ -16950,7 +16955,7 @@ function refreshGardenStat(id="gardenStat"){
   el.classList.toggle("todo", todo.length>0);
   if(id==="gardenStat") yzBtnRefresh();
 }
-/* キーボタン(よろず屋ガチャの GUR): 押すとキーがもらえる。1秒に1回まで */
+/* キーボタン(千両箱ガチャの GUR): 押すとキーがもらえる。1秒に1回まで */
 const yzJp = n => n>=1e8 ? (n/1e8).toLocaleString("ja-JP",{maximumFractionDigits:2})+"億" : n>=1e4 ? (n/1e4).toLocaleString("ja-JP",{maximumFractionDigits:1})+"万" : Math.floor(n).toLocaleString("ja-JP");
 function yzBtnRefresh(){
   const row=$("yzBtnRow"); if(!row) return;
