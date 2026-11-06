@@ -12734,7 +12734,7 @@ const YZ={}, YZ_POOL={};
 const YZ_OPEN = 1e12;   // 解放: 累計獲得キー
 const yzOpen = () => earnedTotal()>=YZ_OPEN;
 const YZ_RATES = { N:50, R:33, SR:12, HR:3.5, UR:1.2, GSR:0.25, GHR:0.04, GUR:0.008, GXR:0.0015, GZR:0.0002 };
-const YZ_SWAP = { GSR:1e7, GHR:1e8, GUR:1e9, GXR:1e10, GZR:1e11 };   // 上限まで持っている品のかわりに受け取るキー
+const YZ_SWAP = { GSR:1e5, GHR:1e5, GUR:1e5, GXR:1e5, GZR:1e5 };   // 上限まで持っている品のかわりに受け取る(ほかの台と同じく一律10万)。キー
 function yzN(k){ return (S.yz && S.yz[k]) || 0; }
 const yzSet = (k,v) => { S.yz=S.yz||{}; S.yz[k]=Math.max(0,v); };
 function yzAdd(r,o){ YZ[o.id]=Object.assign({ r, yz:true },o); (YZ_POOL[r]=YZ_POOL[r]||[]).push(YZ[o.id]); }
