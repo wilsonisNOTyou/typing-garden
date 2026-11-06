@@ -3179,6 +3179,12 @@ html.mobile #screen-garden .grk-list{max-height:none; flex:1 1 auto; min-height:
       <button class="btn" id="tab-toeic-listen">リスニング</button>
     </div>
     <div class="rank-tabs tq-ranklv" id="tqRankLvs" hidden></div>
+    <p class="tab-group-label">TOEIC 覚えた数(3回続けて正解)</p>
+    <div class="rank-tabs">
+      <button class="btn" id="tab-g-tqw">単語</button>
+      <button class="btn" id="tab-g-tqf">穴埋め</button>
+      <button class="btn" id="tab-g-tql">リスニング</button>
+    </div>
     <p class="tab-group-label">キーボード農園</p>
     <div class="rank-tabs">
       <button class="btn gtab" id="tab-g-money">所持キー</button>
@@ -4347,10 +4353,10 @@ const DIFF_LABEL = {
 const MISS_PENALTY = { easy: 10, normal: 7, hard: 5, barabara: 7 }; // このミス数ごとにキー-1本
 const DICT_TABS = ["easy","normal","hard"];            // 辞典に並べる難易度
 /* ランキングのタブ: スコアアタック → タイムアタック → ノーミス勝負 の順 */
-const RANK_TABS = ["easy","normal","hard","barabara","ta-easy","ta-normal","ta-hard","oneshot", "toeic-choice","toeic-fill","toeic-rev","toeic-listen", "g-money","g-earn","g-harvest","g-book","g-dbook","g-rose","g-goal"];
+const RANK_TABS = ["easy","normal","hard","barabara","ta-easy","ta-normal","ta-hard","oneshot", "toeic-choice","toeic-fill","toeic-rev","toeic-listen", "g-tqw","g-tqf","g-tql", "g-money","g-earn","g-harvest","g-book","g-dbook","g-rose","g-goal"];
 DIFF_LABEL["toeic-type"]="TOEIC ノーミス勝負 入力"; DIFF_LABEL["toeic-choice"]="TOEIC ノーミス勝負 4択"; DIFF_LABEL["toeic-fill"]="TOEIC ノーミス勝負 穴埋め4択"; DIFF_LABEL["toeic-rev"]="TOEIC ノーミス勝負 逆4択"; DIFF_LABEL["toeic-listen"]="TOEIC ノーミス勝負 リスニング";
-const isGardenRank = d => d==="g-money" || d==="g-harvest" || d==="g-book" || d==="g-earn" || d==="g-dbook" || d==="g-rose" || d==="g-goal";
-const gRankUnit = d => (d==="g-money"||d==="g-earn") ? "キー" : (d==="g-book"||d==="g-dbook" ? "項目" : d==="g-rose" ? "色" : "個");
+const isGardenRank = d => d==="g-money" || d==="g-harvest" || d==="g-book" || d==="g-earn" || d==="g-dbook" || d==="g-rose" || d==="g-goal" || d==="g-tqw" || d==="g-tqf" || d==="g-tql";
+const gRankUnit = d => d==="g-tqw"||d==="g-tqf" ? "語" : d==="g-tql" ? "問" : (d==="g-money"||d==="g-earn") ? "キー" : (d==="g-book"||d==="g-dbook" ? "項目" : d==="g-rose" ? "色" : "個");
 DIFF_LABEL["g-money"]="キーボード農園 所持キー"; DIFF_LABEL["g-harvest"]="キーボード農園 累計収穫"; DIFF_LABEL["g-book"]="キーボード農園 図鑑"; DIFF_LABEL["g-dbook"]="キーボード農園 料理図鑑"; DIFF_LABEL["g-rose"]="キーボード農園 薔薇"; DIFF_LABEL["g-goal"]="キーボード農園 実績"; DIFF_LABEL["g-earn"]="キーボード農園 累計獲得キー";
 
 /* タイムアタック: モードごとの出題元と規定本数 */
@@ -15207,6 +15213,7 @@ async function pushRank(name){
   const key=rankKey(name);
   const refM=db.ref(`${RANK_PATH}/money/${key}`), refH=db.ref(`${RANK_PATH}/harvest/${key}`), refB=db.ref(`${RANK_PATH}/book/${key}`), refE=db.ref(`${RANK_PATH}/earn/${key}`),
         refD=db.ref(`${RANK_PATH}/dbook/${key}`), refG=db.ref(`${RANK_PATH}/goal/${key}`), refR=db.ref(`${RANK_PATH}/rose/${key}`);
+  const tqc=tqLearnCounts();   // TOEIC 英単語の覚えた数(単語・穴埋め・リスニング)
   const old=(await refM.once("value")).val();
   if(old && old.o && old.o!==S.owner) return {ok:false, msg:"その名前は別の庭が使っています。別の名前にしてください"};
   const t=(old&&old.t)||Date.now(), rkd=nameDeco();   // rkd: 薔薇の紋章・薔薇色の名前
@@ -15218,6 +15225,9 @@ async function pushRank(name){
     refD.set({ n:name, s:dishBookGot(), o:S.owner, t, ...rkd }).catch(e=>console.warn("[typinggarden rank] 料理図鑑の番付に書き込めませんでした",e)),
     refR.set({ n:name, s:roseGot(), o:S.owner, t, ...rkd }).catch(e=>console.warn("[typinggarden rank] 薔薇の番付に書き込めませんでした",e)),   // 見つけた薔薇の色の数
     refG.set({ n:name, s:GOALS.filter(goalClaimed).length, o:S.owner, t, ...rkd }).catch(e=>console.warn("[typinggarden rank] 実績の番付に書き込めませんでした",e)),
+    ...(tqc ? [db.ref(`${RANK_PATH}/tqw/${key}`).set({ n:name, s:tqc.w, o:S.owner, t, ...rkd }).catch(e=>console.warn("[typinggarden rank] TOEIC の覚えた数の番付に書き込めませんでした",e))] : []),
+    ...(tqc ? [db.ref(`${RANK_PATH}/tqf/${key}`).set({ n:name, s:tqc.f, o:S.owner, t, ...rkd }).catch(e=>console.warn("[typinggarden rank] TOEIC の覚えた数の番付に書き込めませんでした",e))] : []),
+    ...(tqc ? [db.ref(`${RANK_PATH}/tql/${key}`).set({ n:name, s:tqc.l, o:S.owner, t, ...rkd }).catch(e=>console.warn("[typinggarden rank] TOEIC の覚えた数の番付に書き込めませんでした",e))] : []),
     refB.set({ n:name, s:bookProgress().got, o:S.owner, t, ...rkd }).then(()=>{ rankBookErr=""; })
       .catch(e=>{ rankBookErr=String(e&&(e.code||e.message)||e); console.warn("[typinggarden rank] 図鑑の番付に書き込めませんでした",e); }),
   ]);
@@ -15227,7 +15237,7 @@ async function pushRank(name){
 }
 /* 同じ庭(同じ持ち主の印)が別の名前でも載っていたら消す。1つの庭は番付に1つの名前だけ。
    名前を変えたあと、同期した別の端末が古い名前で載せ直してしまったときの掃除 */
-const RANK_METRICS=["money","harvest","book","earn","dbook","rose","goal"];
+const RANK_METRICS=["money","harvest","book","earn","dbook","rose","goal","tqw","tqf","tql"];
 async function dropOtherNames(key){
   await Promise.all(RANK_METRICS.map(async m=>{
     try{
@@ -17323,6 +17333,16 @@ function tqMarkFx(en,ok){
 }
 function tqMark(en,ok){ const st=tqStore(tqFmt), t=Object.assign({c:0,w:0,s:0},st[en]); if(ok){ t.c++; t.s++; wcGoalAdd("toeic",1); }else{ t.w++; t.s=0; } t.t=Date.now(); st[en]=t; tqSaveStat(); }
 const tqHasSent = w => !!TQ_SENT[w.en];
+/* 覚えた数(ランキング用): 単語は4択・逆4択の記録、穴埋めとリスニングはそれぞれの記録。全レベルの合計。
+   まだ TOEIC を開いていなければ null(番付に載せない) */
+function tqLearnCounts(){
+  try{
+    tqLoad();
+    const w=TQ.filter(x=>tqGood(x.en,"choice")).length, f=TQ.filter(x=>tqHasSent(x) && tqGood(x.en,"fill")).length, l=TQL.filter(x=>tqGood(x.en,"listen")).length;
+    if(!Object.keys(tqStat).length && !Object.keys(tqStatF).length) return null;
+    return { w:Math.min(w,TQ.length), f:Math.min(f,TQ.length), l:Math.min(l,TQL.length) };
+  }catch(e){ return null; }
+}
 /* 穴埋め4択: 本番寄りの問題(TQ_P5 長めの例文で、意味の近い語や同じ語の形から選ぶ)がある単語は、半分の確率でそちらを出す */
 const TQ_P5_RATE=.5;
 const tqSentPick = (w,r=Math.random) => (typeof TQ_P5!=="undefined" && TQ_P5[w.en] && r()<TQ_P5_RATE) ? TQ_P5[w.en] : TQ_SENT[w.en];
@@ -17844,6 +17864,7 @@ function tqOneOk(){
 }
 /* ---- 結果 ---- */
 function tqFinish(){
+  setTimeout(()=>{ try{ if(!tqBara) Garden.refreshRank(); }catch(e){} },0);   // TOEIC の覚えた数の番付を更新する
   clearTimeout(tqTimer); tqHush(); tqPhase="result";
   if(tqBaseFmt){ tqFmt=tqBaseFmt; tqBaseFmt=null; }   // バラバラ: 選んだ出題形式に戻す
   const ok=tqLog.filter(x=>x.ok).length;
