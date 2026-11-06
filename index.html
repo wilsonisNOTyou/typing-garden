@@ -4637,7 +4637,7 @@ const DB_LVS = { easy:0, normal:1, hard:2, "ta-easy":0, "ta-normal":1, "ta-hard"
 const DB_TREE = ["bt_ume","bt_grape","bt_sugi"];   // 難易度ごとの大木(そのモードで届いた時間は、この木だけ10倍で育つ)
 const DB_TREEN = ["十年梅","三十年葡萄","百年杉"];
 const DB_KINDS = [["neji",25],["min",20],["fuyo",15],["rose",15],["mut",12],["sup",8],["own",5]];   // くじの重み(%)
-const DB_VAL = { min:[10,20,40], fuyo:[1,2,3], rose:[3,6,12], mut:[3,6,12], sup:[.3,.6,1.2], own:[.5,1,2], neji:[10,20,40] };
+const DB_VAL = { min:[10,20,40], fuyo:[1,2,3], rose:[3,6,12], mut:[6,12,24], sup:[.6,1.2,2.4], own:[.5,1,2], neji:[10,20,40] };
 const dbDay = () => new Date(Date.now()+9*3600000).toISOString().slice(0,10);
 function dbRand(seed){ let h=2166136261; for(const c of seed){ h^=c.charCodeAt(0); h=Math.imul(h,16777619); } return ()=>{ h=(h+0x6D2B79F5)|0; let t=h; t=Math.imul(t^(t>>>15),t|1); t^=t+Math.imul(t^(t>>>7),t|61); return ((t^(t>>>14))>>>0)/4294967296; }; }
 function dailyBonus(day=dbDay()){
@@ -10002,8 +10002,8 @@ function dailyGive(kind,lv){
   else if(kind==="fuyo"){ const a=[1,2,3][lv]; S.fuyo=(S.fuyo||0)+a; msg=`🍂 腐葉土 ${a}個を受け取りました`; }
   else if(kind==="rose"){ const a=[3,6,12][lv], c={}; for(let i=0;i<a;i++){ const l=DBG_ROSE[Math.random()*DBG_ROSE.length|0]; c[l]=(c[l]||0)+1; } for(const l in c) roseGive(l,c[l]); msg=`🌹 薔薇の種 ${a}個を受け取りました`; }
   else if(kind==="min") msg=`このプレイは1打の時短 +${[10,20,40][lv]}分で農園に届きます`;
-  else if(kind==="mut") msg=`このプレイで実る作物は、変異しやすさ +${[3,6,12][lv]}%`;
-  else if(kind==="sup") msg=`このプレイで実る作物は、超変異しやすさ +${[.3,.6,1.2][lv]}%`;
+  else if(kind==="mut") msg=`このプレイで実る作物は、変異しやすさ +${[6,12,24][lv]}%`;
+  else if(kind==="sup") msg=`このプレイで実る作物は、超変異しやすさ +${[.6,1.2,2.4][lv]}%`;
   S.dbGot=(S.dbGot||0)+1;   // 実績: 日替わりのご褒美を受け取った回数
   save(); return msg;
 }
@@ -10027,7 +10027,7 @@ function consumeInbox(){
   for(const pk of pks){   // プレイごとに: そのプレイの大木だけ10倍・時短の上乗せ・変異の上乗せ
     const k=Math.max(0,Math.floor(Number(pk.k)||0)), a=Math.max(0,Number(pk.a)||0);
     const mm=Math.round(k*(minPerKey()+a)*otsuMul("Z3"));
-    dbTree=BTS[pk.t] ? pk.t : null; dbMutAdd=Math.min(.2,Math.max(0,Number(pk.m)||0)); dbSupAdd=Math.min(.02,Math.max(0,Number(pk.s)||0));
+    dbTree=BTS[pk.t] ? pk.t : null; dbMutAdd=Math.min(.24,Math.max(0,Number(pk.m)||0)); dbSupAdd=Math.min(.024,Math.max(0,Number(pk.s)||0));
     try{ if(mm>0) n=Math.max(n,applySkip(mm)); }finally{ dbTree=null; dbMutAdd=0; dbSupAdd=0; }
     minutes+=mm; pkKeys+=k;
   }
