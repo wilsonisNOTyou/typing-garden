@@ -3100,6 +3100,16 @@ html #screen-garden .gacha.wide .gcards{min-height:6rem; justify-content:center}
 html #screen-garden .gacha.wide .rgconvbtn{width:auto; flex:0 0 auto; margin:0}
 html.mobile #screen-garden .gacha.wide .gcrows{grid-template-columns:repeat(2, auto auto)}
 html.mobile #screen-garden .gacha.wide .gmachine{zoom:.42}
+/* ゲームの中の確認の窓 */
+.gask{position:fixed; inset:0; z-index:30000; display:flex; align-items:center; justify-content:center; padding:16px; background:rgba(30,20,10,.55); animation:gask-in .15s ease-out}
+.gask-box{width:min(460px,100%); background:#fffaf0; color:#3a2a1a; border:3px solid #7a5230; border-radius:16px; box-shadow:0 6px 0 #7a5230, 0 18px 40px rgba(0,0,0,.35); padding:1.1rem 1.2rem .9rem; font-weight:700; line-height:1.65}
+.gask-box p{margin:0 0 .9rem; font-size:.95rem}
+.gask-acts{display:flex; gap:.6rem; justify-content:flex-end; flex-wrap:wrap}
+.gask-acts button{font:inherit; font-size:.95rem; padding:.45rem 1.1rem; border-radius:999px; cursor:pointer; border:2px solid #7a5230; background:#fff; color:#3a2a1a; box-shadow:0 3px 0 #7a5230}
+.gask-acts .gask-ok{background:#d8402e; border-color:#8a1e12; color:#fff; box-shadow:0 3px 0 #8a1e12}
+.gask-acts button:focus-visible, .gask-acts button:focus{outline:3px solid #f4c542; outline-offset:2px}
+.gask-box small{display:block; margin-top:.6rem; text-align:right; font-size:.72rem; font-weight:400; color:#8a7058}
+@keyframes gask-in{from{opacity:0}to{opacity:1}}
 </style>
 </head>
 <body>
@@ -10393,7 +10403,7 @@ let toastHold=[];   // ガチャの演出中に届いたお知らせ(終わっ�
 setInterval(()=>{ if(toastHold.length && !(modal==="gacha" && gachaBusy())){ const h=toastHold; toastHold=[]; toastBatch=[]; for(const a of h) toast(...a); flushToastBatch(); } },400);
 function toast(text,kind="",ms=2600,html=false){
   const imp=toastImp(String(text),kind);
-  if(!imp && typeof tutStep==="function" && tutStep()) return;   // はじめてガイドの途中は、ふつうのお知らせを出さない(吹き出しの邪魔になる)
+  if(!imp){ let inTut=null; try{ inTut=tutStep(); }catch(e){} if(inTut) return; }   // はじめてガイドの途中は、ふつうのお知らせを出さない(吹き出しの邪魔になる)。読み込みの途中で呼ばれたとき(ガイドの仕組みがまだ準備前)は、ガイド中ではないとみなす
   if(modal==="gacha" && gachaBusy()){ toastHold.push([text,kind,ms,html]); return; }   // ガチャの演出中は、終わってからまとめて出す
   if(toastBatch && !imp){ toastBatch.push({ h:html?String(text):esc(String(text)), ms }); return; }
   if(window.IS_MOBILE && !imp) ms=Math.min(ms,3200);   // スマホは短く(画面を長くふさがない)
@@ -12539,6 +12549,11 @@ function gachaFlash(r,big){
   if(gachaM==="r") rosePetalStorm(ri>=6 ? 60 : ri>=5 ? 28 : ri>=4 ? 14 : 0);   // UR は少し・GSR は多め・GHR は嵐
   if(gachaM==="w") wakuConfetti(ri>=6 ? 40 : ri>=5 ? 18 : ri>=4 ? 10 : 0);   // UR は少しだけ、HR は紙ふぶきなし
 }
+/* 大連のまとめで、いま出た段の上の端を、見えている範囲の上のほう(ひとつ前の段の終わりが少し見える位置)にそろえる。上には戻さない */
+function gachaFollowTop(box,el){
+  const d=el.getBoundingClientRect().top - box.getBoundingClientRect().top - 36;
+  if(d>0) box.scrollBy({top:d, behavior:"smooth"});
+}
 /* 出てきた札が見えるところまでスクロールする。
    札は縮んだ状態から飛び出すので、見た目の大きさではなく本来の大きさで測る */
 function gachaFollow(box,el,behavior){
@@ -12560,7 +12575,7 @@ function renderGacha(){
   const cur=top || body.querySelector(".gsumsec.pop, .gspot");
   if(mg) body.scrollTop += mg.getBoundingClientRect().top - body.getBoundingClientRect().top - 6;   // 1111111連: 演出の全体が見えるように
   else if(top) body.scrollTop += top.getBoundingClientRect().top - body.getBoundingClientRect().top - (top.classList.contains("gmtopc")?60:6);   // 結果: 最高レアに合わせる
-  else if(cur) gachaFollow(body,cur,"smooth");
+  else if(cur) gachaFollowTop(body,cur);   // 大連のまとめ: いま出た段を上のほうに置き、その下に続く高いレア度の段が見えるようにする
   // 11連・111連も、めくったカードが見えるようについていく(速くめくるときはすぐ動かす)
   else if(gachaRes.length>1){
     const card=body.querySelector(".gcard.pop");
@@ -12874,7 +12889,6 @@ const YZ_NEW = [
   { k:"prep", r:"GSR", name:"仕込み番の村人", vil:true, desc:"決めた仕込みを、材料があるかぎり自動で作り置きします(1人で1種類)", lore:"白いはちまきの仕込み番。樽のふたを開ける音だけで、中の熟れ具合がわかるという。" },
   { k:"kuwa", r:"GSR", name:"まっさらの鍬", use:true, desc:"使うと、いま見ている畑を1枚まるごとまっさらにします(作物・大木はなくなり、設置物と村人は手元に戻ります)。使う前に確かめます", lore:"ひと振りで、畑が初めて耕した日の土に戻る。戻らないのは、そこで過ごした時間の思い出だけ。" },
   { k:"neko", r:"GSR", name:"招き猫", desc:"タイピング・TOEIC から届くキー +5%(1匹ごと。最大 +900%、つまり10倍)", lore:"小判を抱えて、右手で福を招く白い猫。並べるほど、遠くの福まで届くようになる。" },
-  { k:"jubako", r:"GSR", name:"宴の三段重", use:true, desc:"使うと1時間、料理の効果を3つまで同時にかけられます。同じ効果を重ねても、強い方だけが効きます", lore:"黒と朱の漆塗りに、金の波。お祝いの日にだけ蔵から出される重箱で、三段ぜんぶ埋まると宴が始まる。" },
   { k:"kimori", r:"GHR", name:"木守りの村人", vil:true, desc:"大木の実を、実ったら自動で収穫します(1人で大木1本)", lore:"緑の頭巾の木守り。大木と同じ速さで歳をとり、実が熟す日の朝には、もう籠を持って待っている。" },
   { k:"kimagure", r:"GHR", name:"気まぐれ村人", vil:true, desc:"図鑑に載っている作物から、植えるたびにランダムで選んで育てます(1人で3区画)", lore:"今日は何を植えようか、と毎朝くじを引く村人。たまに、誰も見たことのない組み合わせの畑ができる。" },
   { k:"meijin", r:"GHR", name:"名人村人", vil:true, desc:"選んだ作物を3区画で育てます。品質はかならず ☆☆☆ になり、変異・超変異が2倍出やすくなります", lore:"赤いはちまきの名人。土をひと握りするだけで、その年の出来がわかるという。" },
@@ -12885,6 +12899,7 @@ const YZ_NEW = [
   { k:"taiko", r:"GXR", name:"豊作の太鼓", desc:"2個穫れる確率 +1%(1つごと。最大 +50%)", lore:"収穫祭で打ち鳴らされる大太鼓。響きが届く畑では、実がもうひとつ顔を出す。" },
   { k:"fuuki", r:"GXR", name:"風見鶏", desc:"カラスが作物を持っていく確率 −1%・超変異しやすさ +0.01%(1羽ごと。最大100羽で、カラスは作物を持っていかなくなり、超変異しやすさ +1%)", lore:"屋根の上でくるくる回る鉄の鶏。カラスはこれを本物の大きな鶏だと思っている。" },
   { k:"kanban", r:"GXR", name:"大入りの看板", desc:"千両箱ガチャの GSR 以上が出る確率 +1%(1枚ごと。最大 +30%)", lore:"金文字で「大入」と書かれた看板。掛ける場所を変えるたびに、千両箱の底からいい品が出てくる。" },
+  { k:"jubako", r:"GXR", name:"宴の三段重", use:true, desc:"使うと1時間、料理の効果を3つまで同時にかけられます。同じ効果を重ねても、強い方だけが効きます", lore:"黒と朱の漆塗りに、金の波。お祝いの日にだけ蔵から出される重箱で、三段ぜんぶ埋まると宴が始まる。" },
   { k:"kozuchi", r:"GZR", name:"打ち出の小槌", use:true, desc:"振ると、持っているキーが2倍になります(1回で増えるのは最大1京。振れるのは10日に1回。使うとなくなります。持てるのは1つまで)", lore:"ひと振りで願いが出てくるという小槌。千両箱に納められていたものは、なぜかキーばかり出てくる。" },
   { k:"zou", r:"GZR", name:"豊穣の像", desc:"作物の売値 +100%(1体ごと。最大 +900%、つまり10倍)", lore:"実りの神をかたどった金の像。畑の見える場所に置くと、作物が自分の値打ちに気づいて胸を張る。" },
   { k:"map", r:"GZR", name:"黄金郷の地図", desc:"畑の上限 +1枚(1枚ごと。最大 +50枚。畑を増やすには土地の権利書が要ります)", lore:"地図にない国の、地図にない畑までが描かれた地図。眺めているうちに、その土地の権利がこちらに移る。" },
@@ -12954,14 +12969,35 @@ setInterval(()=>{
   }catch(e){}
 },1000);
 function yzBtnPaint(){ try{ if(window.yzBtnRepaint) window.yzBtnRepaint(); }catch(e){} }
+/* ゲームの中の確認の窓(ブラウザの確認の窓は使わない)。はい → true、やめる → false。
+   はじめは「やめる」を選んでおき、Y / Enter(選んでいるほう)/ N / Esc / ← → で操作できる。開いているあいだ、ほかのキーは庭に届かない */
+function gAsk(msg, okLabel){
+  return new Promise(res=>{
+    const t0=Date.now(), w=document.createElement("div"); w.className="gask";
+    w.innerHTML=`<div class="gask-box" role="dialog" aria-modal="true"><p>${esc(msg).replace(/\n/g,"<br>")}</p><div class="gask-acts"><button type="button" class="gask-no">やめる</button><button type="button" class="gask-ok">${esc(okLabel)}</button></div>${MOB?"":'<small>Y で決める ・ N / Esc でやめる</small>'}</div>`;
+    document.body.appendChild(w);
+    const no=w.querySelector(".gask-no"), ok=w.querySelector(".gask-ok");
+    const done=v=>{ if(Date.now()-t0<250) return; window.removeEventListener("keydown",key,true); w.remove(); res(v); };
+    const key=e=>{ e.stopImmediatePropagation(); const k=e.key;
+      if(k==="Escape"||k==="n"||k==="N"){ e.preventDefault(); done(false); }
+      else if(k==="y"||k==="Y"){ e.preventDefault(); done(true); }
+      else if(k==="ArrowLeft"||k==="ArrowRight"||k==="Tab"){ e.preventDefault(); (document.activeElement===ok?no:ok).focus(); }
+      else if(k==="Enter"){ e.preventDefault(); if(!e.repeat) done(document.activeElement===ok); }
+      else e.preventDefault(); };
+    window.addEventListener("keydown",key,true);
+    no.addEventListener("click",()=>done(false)); ok.addEventListener("click",()=>done(true));
+    w.addEventListener("click",e=>{ if(e.target===w) done(false); });
+    no.focus();
+  });
+}
 /* 打ち出の小槌: 持っているキーが2倍 */
 const KOZ_CAP=1e16, KOZ_CD=10*24*HOUR;   // 打ち出の小槌: 1回で増えるのは最大1京・振れるのは10日に1回
 const kozLeft = () => Math.max(0,(S.yzKozAt||0)+KOZ_CD-Date.now());
-function yzKozuchi(){
+function yzKozuchi(ok){
   if(yzN("kozuchi")<1){ sfx.nope(); return; }
   if(kozLeft()>0){ sfx.nope(); toast(`打ち出の小槌は、あと ${fmtLeftD(kozLeft())} で振れます(10日に1回)`,"warn",3600); return; }
   const add=xBig(S.money,"money")<BigInt(KOZ_CAP) ? xBig(S.money,"money") : BigInt(KOZ_CAP);
-  if(!confirm(`打ち出の小槌を振りますか? 持っているキー ${xFmt(S.money,"money")} が2倍になります(1回で増えるのは最大1京)。小槌はなくなり、次に振れるのは10日後です`)) return;
+  if(ok!==true){ gAsk(`打ち出の小槌を振りますか? 持っているキー ${xFmt(S.money,"money")} が2倍になります(1回で増えるのは最大1京)。小槌はなくなり、次に振れるのは10日後です`,"振る").then(y=>{ if(y) yzKozuchi(true); }); return; }
   yzSet("kozuchi",yzN("kozuchi")-1);
   const before=xFmt(S.money,"money");
   xAddBig(S,"money",add); S.yzKozAt=Date.now();
@@ -12971,13 +13007,13 @@ function yzKozuchi(){
   save(); renderAll(); renderTreas();
 }
 /* まっさらの鍬: いま見ている畑をまっさらに(作物・大木はなくなり、設置物と村人は手元に戻る) */
-function yzKuwa(){
+function yzKuwa(ok){
   if(yzN("kuwa")<1){ sfx.nope(); return; }
   if(realFields){ sfx.nope(); toast("いまは使えません","warn"); return; }
   const f=field(), fi=S.cur;
   let crops=0, objs=0, vils=0, trees=Object.keys(f.bt||{}).length;
   for(const k of KEYS){ const p=f[k]; if(p.crop) crops++; if(p.obj) objs++; if(p.vil) vils++; }
-  if(!confirm(`まっさらの鍬で、畑${fi+1}をまっさらにしますか?\n\n作物 ${crops}区画${trees?`・大木 ${trees}本`:""} はなくなります(戻せません)。\n設置物 ${objs}個・村人の区画 ${vils}区画 は手元に戻ります。\n鍬はなくなります。`)) return;
+  if(ok!==true){ gAsk(`まっさらの鍬で、畑${fi+1}をまっさらにしますか?\n\n作物 ${crops}区画${trees?`・大木 ${trees}本`:""} はなくなります(戻せません)。\n設置物 ${objs}個・村人の区画 ${vils}区画 は手元に戻ります。\n鍬はなくなります。`,"まっさらにする").then(y=>{ if(y) yzKuwa(true); }); return; }
   yzSet("kuwa",yzN("kuwa")-1);
   const now=Date.now();
   for(const k of KEYS){
