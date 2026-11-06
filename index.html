@@ -3284,6 +3284,7 @@ html.mobile #screen-garden .grk-list{max-height:none; flex:1 1 auto; min-height:
       <button class="btn gtab" id="tab-g-money">所持キー</button>
       <button class="btn gtab" id="tab-g-earn">累計獲得キー</button>
       <button class="btn gtab" id="tab-g-harvest">累計収穫</button>
+      <button class="btn gtab" id="tab-g-field">畑</button>
       <button class="btn gtab" id="tab-g-book">図鑑</button>
       <button class="btn gtab" id="tab-g-dbook">料理図鑑</button>
       <button class="btn gtab" id="tab-g-rose">薔薇</button>
@@ -3566,6 +3567,7 @@ html.mobile #screen-garden .grk-list{max-height:none; flex:1 1 auto; min-height:
         <button class="tab" data-rk="g-money">所持キー</button>
         <button class="tab" data-rk="g-earn">累計獲得</button>
         <button class="tab" data-rk="g-harvest">累計収穫</button>
+        <button class="tab" data-rk="g-field">畑</button>
         <button class="tab" data-rk="g-book">図鑑</button>
         <button class="tab" data-rk="g-dbook">料理図鑑</button>
         <button class="tab" data-rk="g-rose">薔薇</button>
@@ -4459,10 +4461,10 @@ const DIFF_LABEL = {
 const MISS_PENALTY = { easy: 10, normal: 7, hard: 5, barabara: 7 }; // このミス数ごとにキー-1本
 const DICT_TABS = ["easy","normal","hard"];            // 辞典に並べる難易度
 /* ランキングのタブ: スコアアタック → タイムアタック → ノーミス勝負 の順 */
-const RANK_TABS = ["easy","normal","hard","barabara","ta-easy","ta-normal","ta-hard","oneshot", "toeic-choice","toeic-fill","toeic-rev","toeic-listen", "g-tqw","g-tqf","g-tql", "g-money","g-earn","g-harvest","g-book","g-dbook","g-rose","g-goal"];
+const RANK_TABS = ["easy","normal","hard","barabara","ta-easy","ta-normal","ta-hard","oneshot", "toeic-choice","toeic-fill","toeic-rev","toeic-listen", "g-tqw","g-tqf","g-tql", "g-money","g-earn","g-harvest","g-field","g-book","g-dbook","g-rose","g-goal"];
 DIFF_LABEL["toeic-type"]="TOEIC ノーミス勝負 入力"; DIFF_LABEL["toeic-choice"]="TOEIC ノーミス勝負 4択"; DIFF_LABEL["toeic-fill"]="TOEIC ノーミス勝負 穴埋め4択"; DIFF_LABEL["toeic-rev"]="TOEIC ノーミス勝負 逆4択"; DIFF_LABEL["toeic-listen"]="TOEIC ノーミス勝負 リスニング";
-const isGardenRank = d => d==="g-money" || d==="g-harvest" || d==="g-book" || d==="g-earn" || d==="g-dbook" || d==="g-rose" || d==="g-goal" || d==="g-tqw" || d==="g-tqf" || d==="g-tql";
-const gRankUnit = d => d==="g-tqw"||d==="g-tqf" ? "語" : d==="g-tql" ? "問" : (d==="g-money"||d==="g-earn") ? "キー" : (d==="g-book"||d==="g-dbook" ? "項目" : d==="g-rose" ? "色" : "個");
+const isGardenRank = d => d==="g-money" || d==="g-harvest" || d==="g-book" || d==="g-earn" || d==="g-dbook" || d==="g-rose" || d==="g-goal" || d==="g-field" || d==="g-tqw" || d==="g-tqf" || d==="g-tql";
+const gRankUnit = d => d==="g-tqw"||d==="g-tqf" ? "語" : d==="g-tql" ? "問" : d==="g-field" ? "枚" : (d==="g-money"||d==="g-earn") ? "キー" : (d==="g-book"||d==="g-dbook" ? "項目" : d==="g-rose" ? "色" : "個");
 DIFF_LABEL["g-money"]="キーボード農園 所持キー"; DIFF_LABEL["g-harvest"]="キーボード農園 累計収穫"; DIFF_LABEL["g-book"]="キーボード農園 図鑑"; DIFF_LABEL["g-dbook"]="キーボード農園 料理図鑑"; DIFF_LABEL["g-rose"]="キーボード農園 薔薇"; DIFF_LABEL["g-goal"]="キーボード農園 実績"; DIFF_LABEL["g-earn"]="キーボード農園 累計獲得キー";
 
 /* タイムアタック: モードごとの出題元と規定本数 */
@@ -12770,7 +12772,7 @@ const YZA = {
 };
 /* 集めるほど効く新しい宝物: per(1つごと)・cap(上限) */
 var YZ_TRE = {
-  neko:    { per:5,   cap:1000, unit:"%", what:"タイピング・TOEIC から届くキー" },
+  neko:    { per:5,   cap:900,  unit:"%", what:"タイピング・TOEIC から届くキー" },
   karakuri:{ per:5,   cap:1000, unit:"%", what:"農園を開いているあいだに進む時間" },
   button:  { per:1e6, cap:1e8,  unit:"キー", what:"キーボタン1押しのキー" },
   flag:    { per:1,   cap:100,  unit:"%", what:"村人の区画の育つ速さ" },
@@ -12789,7 +12791,7 @@ const YZ_NEW = [
   { k:"kobo", r:"GSR", name:"工房職人の村人", vil:true, desc:"決めた工房の品を、材料があるかぎり自動で作り置きします(1人で1種類)", lore:"木くずの匂いのする前掛けの職人。道具の手入れを欠かさず、頼まれる前に次の品を作り始めている。" },
   { k:"prep", r:"GSR", name:"仕込み番の村人", vil:true, desc:"決めた仕込みを、材料があるかぎり自動で作り置きします(1人で1種類)", lore:"白いはちまきの仕込み番。樽のふたを開ける音だけで、中の熟れ具合がわかるという。" },
   { k:"kuwa", r:"GSR", name:"まっさらの鍬", use:true, desc:"使うと、いま見ている畑を1枚まるごとまっさらにします(作物・大木はなくなり、設置物と村人は手元に戻ります)。使う前に確かめます", lore:"ひと振りで、畑が初めて耕した日の土に戻る。戻らないのは、そこで過ごした時間の思い出だけ。" },
-  { k:"neko", r:"GSR", name:"招き猫", desc:"タイピング・TOEIC から届くキー +5%(1匹ごと。最大 +1000%)", lore:"小判を抱えて、右手で福を招く白い猫。並べるほど、遠くの福まで届くようになる。" },
+  { k:"neko", r:"GSR", name:"招き猫", desc:"タイピング・TOEIC から届くキー +5%(1匹ごと。最大 +900%、つまり10倍)", lore:"小判を抱えて、右手で福を招く白い猫。並べるほど、遠くの福まで届くようになる。" },
   { k:"jubako", r:"GSR", name:"宴の三段重", use:true, desc:"使うと1時間、料理の効果を3つまで同時にかけられます。同じ効果を重ねても、強い方だけが効きます", lore:"黒と朱の漆塗りに、金の波。お祝いの日にだけ蔵から出される重箱で、三段ぜんぶ埋まると宴が始まる。" },
   { k:"kimori", r:"GHR", name:"木守りの村人", vil:true, desc:"大木の実を、実ったら自動で収穫します(1人で大木1本)", lore:"緑の頭巾の木守り。大木と同じ速さで歳をとり、実が熟す日の朝には、もう籠を持って待っている。" },
   { k:"kimagure", r:"GHR", name:"気まぐれ村人", vil:true, desc:"図鑑に載っている作物から、植えるたびにランダムで選んで育てます(1人で3区画)", lore:"今日は何を植えようか、と毎朝くじを引く村人。たまに、誰も見たことのない組み合わせの畑ができる。" },
@@ -15787,7 +15789,8 @@ async function pushRank(name){
   const key=rankKey(name);
   const refM=db.ref(`${RANK_PATH}/money/${key}`), refH=db.ref(`${RANK_PATH}/harvest/${key}`), refB=db.ref(`${RANK_PATH}/book/${key}`), refE=db.ref(`${RANK_PATH}/earn/${key}`),
         refD=db.ref(`${RANK_PATH}/dbook/${key}`), refG=db.ref(`${RANK_PATH}/goal/${key}`), refR=db.ref(`${RANK_PATH}/rose/${key}`);
-  const tqc=tqLearnCounts();   // TOEIC 英単語の覚えた数(単語・穴埋め・リスニング)
+  const tqc=tqLearnCounts();
+  const refF=db.ref(`${RANK_PATH}/field/${key}`);   // 畑の枚数   // TOEIC 英単語の覚えた数(単語・穴埋め・リスニング)
   const old=(await refM.once("value")).val();
   if(old && old.o && old.o!==S.owner) return {ok:false, msg:"その名前は別の庭が使っています。別の名前にしてください"};
   const t=(old&&old.t)||Date.now(), rkd=nameDeco();   // rkd: 薔薇の紋章・薔薇色の名前
@@ -15798,6 +15801,7 @@ async function pushRank(name){
     refE.set({ n:name, s:Math.floor(earnedTotal()), o:S.owner, t, ...rkd }).catch(e=>console.warn("[typinggarden rank] 累計獲得キーの番付に書き込めませんでした",e)),
     refD.set({ n:name, s:dishBookGot(), o:S.owner, t, ...rkd }).catch(e=>console.warn("[typinggarden rank] 料理図鑑の番付に書き込めませんでした",e)),
     refR.set({ n:name, s:roseGot(), o:S.owner, t, ...rkd }).catch(e=>console.warn("[typinggarden rank] 薔薇の番付に書き込めませんでした",e)),   // 見つけた薔薇の色の数
+    refF.set({ n:name, s:FS().length, o:S.owner, t, ...rkd }).catch(e=>console.warn("[typinggarden rank] 畑の番付に書き込めませんでした",e)),
     refG.set({ n:name, s:GOALS.filter(goalClaimed).length, o:S.owner, t, ...rkd }).catch(e=>console.warn("[typinggarden rank] 実績の番付に書き込めませんでした",e)),
     ...(tqc ? [db.ref(`${RANK_PATH}/tqw/${key}`).set({ n:name, s:tqc.w, o:S.owner, t, ...rkd }).catch(e=>console.warn("[typinggarden rank] TOEIC の覚えた数の番付に書き込めませんでした",e))] : []),
     ...(tqc ? [db.ref(`${RANK_PATH}/tqf/${key}`).set({ n:name, s:tqc.f, o:S.owner, t, ...rkd }).catch(e=>console.warn("[typinggarden rank] TOEIC の覚えた数の番付に書き込めませんでした",e))] : []),
@@ -15811,7 +15815,7 @@ async function pushRank(name){
 }
 /* 同じ庭(同じ持ち主の印)が別の名前でも載っていたら消す。1つの庭は番付に1つの名前だけ。
    名前を変えたあと、同期した別の端末が古い名前で載せ直してしまったときの掃除 */
-const RANK_METRICS=["money","harvest","book","earn","dbook","rose","goal","tqw","tqf","tql"];
+const RANK_METRICS=["money","harvest","book","earn","dbook","rose","goal","field","tqw","tqf","tql"];
 async function dropOtherNames(key){
   await Promise.all(RANK_METRICS.map(async m=>{
     try{
@@ -15865,7 +15869,7 @@ async function renderGardenRank(){
     }).join("");
   }catch(e){ if(req===gRankReq) note.textContent="読み込めませんでした。通信環境を確認してください"; }
 }
-const G_RANK_TABS=["g-money","g-earn","g-harvest","g-book","g-dbook","g-rose","g-goal"];
+const G_RANK_TABS=["g-money","g-earn","g-harvest","g-field","g-book","g-dbook","g-rose","g-goal"];
 function switchGardenRank(dir){
   const i=G_RANK_TABS.indexOf(gRankTab), n=G_RANK_TABS.length;
   gRankTab = G_RANK_TABS[(i+(dir<0?-1:1)+n)%n];
