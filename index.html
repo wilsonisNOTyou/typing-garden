@@ -207,7 +207,19 @@ body.dishtheme.dishsplit4:not(.garden):not(.washi){
 .yzbtn.cool{opacity:.75}
 .yzfloat{position:fixed; z-index:9999; pointer-events:none; font-weight:900; color:#ffd860; text-shadow:0 2px 0 #5a3a00, 0 0 8px rgba(255,210,90,.9); animation:g-yzfloat 1s ease-out forwards}
 @keyframes g-yzfloat{0%{transform:translate(-50%,0) scale(.8); opacity:0}15%{transform:translate(-50%,-8px) scale(1.15); opacity:1}100%{transform:translate(-50%,-56px) scale(1); opacity:0}}
-/* ---- 1京ちゃん: エンディング ---- */
+/* ---- クリアの証: 名前の先頭の王冠 ---- */
+.kcrown{display:inline-block; width:1.35em; height:1.02em; vertical-align:-.12em; margin-right:.18em; filter:drop-shadow(0 0 3px rgba(255,210,80,.85)) drop-shadow(0 1px 1px rgba(0,0,0,.35))}
+.kcrown svg{width:100%; height:100%; display:block}
+#screen-garden .tabs .tab.kctab.on{background:linear-gradient(90deg,#fff3b0,#ffcf3a,#b57a06); color:#2a1800}
+#screen-garden .kcitem .kcbig{width:4.4rem; height:3.4rem}
+#screen-garden .kcitem .kcbig svg{width:100%; height:100%}
+#screen-garden .kcitem{grid-column:1/-1; background:linear-gradient(135deg,#fffbe6,#fff0c8); border-color:#d9a520; box-shadow:0 0 14px rgba(244,197,66,.45)}
+#screen-garden .kcprev{font-weight:800}
+#screen-garden .ghead.kchead{color:#b8860b!important}
+#kyoEnd .kycrown svg{width:clamp(6rem,24vw,11rem); height:auto; display:inline-block}
+#kyoEnd .kyprize{margin-top:1rem; font-size:clamp(.9rem,3.2vw,1.1rem); color:#fff3b0; animation:kyin 1s 1.8s both}
+#kyoEnd .kyprize .kcrown{width:2em; height:1.5em}
+/* ---- 京の頂: エンディング ---- */
 #kyoEnd{position:fixed; inset:0; z-index:10050; overflow:hidden; color:#fff6dc; font-family:inherit; text-align:center;
   background:radial-gradient(ellipse at 50% 40%, #3a2410 0%, #160c06 60%, #050302 100%); animation:kyin .9s ease-out}
 @keyframes kyin{from{opacity:0}to{opacity:1}}
@@ -3484,7 +3496,7 @@ html.mobile #screen-garden .grk-list{max-height:none; flex:1 1 auto; min-height:
         <div class="money" id="g-treasRate"></div>
         <button class="sbtn xbtn" data-close>閉じる ✕</button>
       </div>
-      <div class="tabs ttabs" id="g-treasTabs"><button class="tab on" data-tt="0" tabindex="-1">貴重品</button><button class="tab" data-tt="1" tabindex="-1">台所の宝物</button><button class="tab" data-tt="2" tabindex="-1">薔薇</button><button class="tab yztab" data-tt="3" tabindex="-1">千両箱</button><span class="sphint">Tab で切り替え</span></div>
+      <div class="tabs ttabs" id="g-treasTabs"><button class="tab on" data-tt="0" tabindex="-1">貴重品</button><button class="tab" data-tt="1" tabindex="-1">台所の宝物</button><button class="tab" data-tt="2" tabindex="-1">薔薇</button><button class="tab yztab" data-tt="3" tabindex="-1">千両箱</button><button class="tab kctab" data-tt="4" tabindex="-1">京</button><span class="sphint">Tab で切り替え</span></div>
       <p class="tnote" id="g-treasNote">ガチャの GHR から出る種を育てると手に入ります。売ることはできませんが、持っているだけで農園にずっと効きます(同じものを重ねるほど強くなります)。</p>
       <div id="g-treasBody" class="gbody-scroll"></div>
       <div class="keyhint" id="g-treasHint"><b>↑ ↓</b> 見る ・ <b>8</b> / <b>Esc</b> 閉じる</div>
@@ -5603,8 +5615,8 @@ async function submitScore(name,d,extra){
 const rankDeco = () => { try{ return Garden.nameDeco(); }catch(e){ return {}; } };   // 薔薇の紋章・薔薇色の名前
 /* 記録は更新しなくても、いまの薔薇の紋章・薔薇色の名前に付け替える(記録は書きかえられないので、消して同じ記録を載せ直す) */
 async function rankRedeco(ref,x){
-  const dk=rankDeco(), v=x&&x.v; if(!v || (v.rk||"")===(dk.rk||"") && (v.rc||"")===(dk.rc||"")) return;
-  const nv=Object.assign({},v); delete nv.rk; delete nv.rc; Object.assign(nv,dk);
+  const dk=rankDeco(), v=x&&x.v; if(!v || (v.rk||"")===(dk.rk||"") && (v.rc||"")===(dk.rc||"") && !!v.kc===!!dk.kc) return;
+  const nv=Object.assign({},v); delete nv.rk; delete nv.rc; delete nv.kc; Object.assign(nv,dk);
   await ref.child(x.key).remove(); await ref.push(nv); rankCache={};
 }
 /* 飾りが変わったら(ローズティーを飲んだ・貴重品を切り替えた・起動時)、ランキングにある自分の記録をまとめて付け替える */
@@ -5612,7 +5624,7 @@ const RK_DECO_KEY="typinggarden:rkdeco";
 let rkDecoBusy=false;
 async function rankRedecoAll(){
   if(!db || !playerName || rkDecoBusy) return;
-  const dk=rankDeco(), sig=(dk.rk||"")+"|"+(dk.rc||""), me=myId();
+  const dk=rankDeco(), sig=(dk.rk||"")+"|"+(dk.rc||"")+"|"+(dk.kc?1:0), me=myId();
   try{ if(localStorage.getItem(RK_DECO_KEY)===playerName+"|"+sig) return; }catch(e){}
   rkDecoBusy=true;
   try{
@@ -5715,7 +5727,7 @@ async function openRanking(d,highlight){
       }
       li.innerHTML=`<span class="pos">${i+1}位</span><span class="pname"></span><span class="pscore">${scoreText}</span>`;
       li.querySelector(".pname").textContent = d==="barabara" ? baraName(r.n) : r.n;
-      if(r.rk||r.rc) try{ li.querySelector(".pname").innerHTML=Garden.roseNamePlate(d==="barabara"?baraName(r.n):r.n,r); const rs=Garden.roseRowStyle(r); if(rs){ li.className+=" "+Garden.roseRowCls(r); li.style.cssText=rs; } }catch(e){}   // 薔薇の紋章・薔薇色の名前
+      if(r.rk||r.rc||r.kc) try{ li.querySelector(".pname").innerHTML=Garden.roseNamePlate(d==="barabara"?baraName(r.n):r.n,r); const rs=Garden.roseRowStyle(r); if(rs){ li.className+=" "+Garden.roseRowCls(r); li.style.cssText=rs; } }catch(e){}   // 薔薇の紋章・薔薇色の名前
       // XSS対策でtextContent(バラバラは名前の文字がときどき入れ替わる)
       list.appendChild(li);
     });
@@ -6434,7 +6446,7 @@ function wcCardHTML(c){
   return `<div class="wc-card ${g.cls||""}"><span class="ci">${g.ic}</span><span><span class="cn">${g.nm}</span><br><span class="cs">${g.sub}</span></span></div>`;
 }
 function wcMsgHTML(m){
-  const me=m.o===myId(), head=`<span class="wc-t">${wcTime(m.t)}</span><span class="wc-n">${m.rk||m.rc ? (()=>{ try{ return Garden.roseName(m.n,m); }catch(e){ return wcEsc(m.n); } })() : wcEsc(m.n)}</span>`;
+  const me=m.o===myId(), head=`<span class="wc-t">${wcTime(m.t)}</span><span class="wc-n">${m.rk||m.rc||m.kc ? (()=>{ try{ return Garden.roseName(m.n,m); }catch(e){ return wcEsc(m.n); } })() : wcEsc(m.n)}</span>`;
   if(m.c){ const ch=wcCardHTML(m.c); if(ch) return `<div class="wc-msg card${me?" me":""}">${head}🏅 自慢のカード${wcRxHTML(m)}${ch}${m.x?`<span class="wc-who">${wcEsc(m.x)}</span>`:""}</div>`; }
   if(m.mr && Array.isArray(m.rs)) return `<div class="wc-msg dish mtm">${head}⚔️ 対戦の結果(${wcEsc(mtLabel(m.mo||"type",m.md))}) ${m.rs.map((x,i)=>`<span class="mt-rsn">${["🥇","🥈","🥉","4位"][i]||""} ${wcEsc(x.n)} ${x.s<0?"やめました":wcEsc(x.s)+mtUnit(m.mo||"type",m.md)}</span>`).join("")}${wcRxHTML(m)}</div>`;   // 対戦の結果
   if(m.mt) return wcMatchHTML(m,head);   // 対戦の募集
@@ -13215,7 +13227,7 @@ function roseCodeOk(code){ const m=/^(rose_[a-z0-9]+)@([035])$/.exec(String(code
 function roseCodeArt(code){ const x=roseCodeOk(code); if(!x) return ""; const q = x.g===3 ? ROSE_MUT[x.id] : x.g===5 ? ROSE_SUP[x.id] : null; return (q||CROP[x.id]).art||""; }
 function roseCodeColor(code){ const x=roseCodeOk(code); if(!x) return ""; const c=CROP[x.id], v = x.g===3 && c.m ? c.m.c1 : x.g===5 && c.s ? c.s.c1 : c.c1; return /^#[0-9a-fA-F]{3,8}$/.test(v||"") ? v : ""; }
 function roseCodePal(code){ const x=roseCodeOk(code); return x && x.g===0 && ROSE_PAL[x.id.slice(5)] ? ROSE_PAL[x.id.slice(5)] : null; }   // 何色もある薔薇の色
-const nameDeco = () => { const o={}, tc=teaCode(); if(tc){ if(gxOn("emb")) o.rk=tc; if(gxOn("col")) o.rc=tc; } return o; };
+const nameDeco = () => { const o={}, tc=teaCode(); if(tc){ if(gxOn("emb")) o.rk=tc; if(gxOn("col")) o.rc=tc; } if(S.kc && !S.kcOff) o.kc=1; return o; };   // kc: クリアの証(王冠)
 /* 庭の見た目(アーチ・垣根・冠) */
 function gxApply(){
   root.classList.toggle("gxcrown", gxOn("crown"));
@@ -13297,7 +13309,17 @@ function roseCrest(code,inRow){
   }
   return `<span class="rmark rbadge" style="background:radial-gradient(circle,${bg} 58%,${rMix(bg,ring,.35)});box-shadow:0 0 0 1.5px ${ring},0 1px 3px rgba(0,0,0,.3)">${art}</span>`;
 }
-function roseNamePlate(name,m){
+const KC_SVG=`<svg viewBox="0 0 40 30" aria-hidden="true"><defs><linearGradient id="kcg" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#fff6b8"/><stop offset=".45" stop-color="#ffcf3a"/><stop offset="1" stop-color="#b57a06"/></linearGradient><linearGradient id="kcb" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#a86a00"/><stop offset=".5" stop-color="#ffe27a"/><stop offset="1" stop-color="#a86a00"/></linearGradient></defs>`
+  +`<path d="M4 23 L2.6 8.6 L11 15.4 L15 4.6 L20 13 L25 4.6 L29 15.4 L37.4 8.6 L36 23 Z" fill="url(#kcg)" stroke="#7a4a00" stroke-width="1" stroke-linejoin="round"/>`
+  +`<path d="M6.4 20.6 L5.4 12.6 L11.4 17.6 L15.2 8.8 L20 16 L24.8 8.8 L28.6 17.6 L34.6 12.6 L33.6 20.6 Z" fill="#fff6c8" opacity=".35"/>`
+  +`<rect x="3.4" y="22" width="33.2" height="5.4" rx="1.6" fill="url(#kcb)" stroke="#7a4a00" stroke-width="1"/>`
+  +`<circle cx="2.6" cy="8" r="2" fill="#fff8e8" stroke="#b8860b" stroke-width=".7"/><circle cx="15" cy="4" r="2" fill="#fff8e8" stroke="#b8860b" stroke-width=".7"/><circle cx="25" cy="4" r="2" fill="#fff8e8" stroke="#b8860b" stroke-width=".7"/><circle cx="37.4" cy="8" r="2" fill="#fff8e8" stroke="#b8860b" stroke-width=".7"/>`
+  +`<circle cx="20" cy="12.4" r="2.4" fill="#ff3c64" stroke="#8a0a24" stroke-width=".6"/><circle cx="19.2" cy="11.6" r=".7" fill="#fff" opacity=".8"/>`
+  +`<ellipse cx="11" cy="24.7" rx="2" ry="1.6" fill="#2f9bff" stroke="#0a3a7a" stroke-width=".5"/><ellipse cx="20" cy="24.7" rx="2.4" ry="1.8" fill="#28c878" stroke="#0a5a30" stroke-width=".5"/><ellipse cx="29" cy="24.7" rx="2" ry="1.6" fill="#2f9bff" stroke="#0a3a7a" stroke-width=".5"/>`
+  +`<path d="M31.6 2.6l.7 1.7 1.7.7-1.7.7-.7 1.7-.7-1.7-1.7-.7 1.7-.7z" fill="#fffbe0"/><path d="M7 1.8l.5 1.2 1.2.5-1.2.5-.5 1.2-.5-1.2-1.2-.5 1.2-.5z" fill="#fffbe0"/></svg>`;
+const kcPre = m => m && m.kc ? `<span class="kcrown" title="京の王冠">${KC_SVG}</span>` : "";   // クリアの証: 名前の先頭の王冠
+function roseNamePlate(name,m){ return kcPre(m)+roseNamePlate0(name,m); }
+function roseNamePlate0(name,m){
   const nm=String(name==null?"":name).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
   const art=m&&m.rk ? roseCodeArt(m.rk) : "";
   return nm+(art ? roseCrest(m.rk, !!(m.rc && roseRowSpec(m.rc))) : "");
@@ -13307,7 +13329,8 @@ function roseRowStyle(m){
   return `background:${sp.bg}; border-color:${sp.bd}; box-shadow:${sp.sh}`+(sp.fg ? `; color:${sp.fg}; text-shadow:${sp.ts}` : "");
 }
 const roseRowCls = m => { const sp=m&&m.rc ? roseRowSpec(m.rc) : null; return sp ? "rrow"+(sp.cls?" "+sp.cls:"") : ""; };
-function roseNameHTML(name,m){
+function roseNameHTML(name,m){ return kcPre(m)+roseNameHTML0(name,m); }
+function roseNameHTML0(name,m){
   const nm=String(name==null?"":name).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
   const col=m&&m.rc ? roseCodeColor(m.rc) : "", art=m&&m.rk ? roseCodeArt(m.rk) : "", pal=m&&m.rc ? roseCodePal(m.rc) : null;
   if(pal){   // 虹色・三原色・白黒: 1文字ずつ色を変える
@@ -13507,7 +13530,7 @@ function rtName(){   // N: 薔薇のプレートの名前を入れる
   const el=$("g-treasBody").querySelectorAll(".titem")[rtCur], ip=$("g-plateName");
   if(el && el.dataset.act==="gx:plate" && ip){ ip.focus(); ip.select(); } else sfx.nope();
 }
-const treasTabs = () => [0].concat(kitAny()?[1]:[], roseTreAny()?[2]:[], yzTreAny()?[3]:[]);   // 出ているタブ
+const treasTabs = () => [0].concat(kitAny()?[1]:[], roseTreAny()?[2]:[], yzTreAny()?[3]:[], S.kc?[4]:[]);   // 出ているタブ
 function renderRoseTre(){
   const keepTop=$("g-treasBody").scrollTop;   // 描き直しても、見ていた場所のまま
   const got=PETALS.filter(x=>petalN(x.k)>0).length;
@@ -13565,6 +13588,7 @@ function renderTreas(){
   root.querySelectorAll("#g-treasTabs .tab").forEach(t=>t.hidden=!treasTabs().includes(+t.dataset.tt));
   root.querySelectorAll("#g-treasTabs .tab").forEach(t=>t.classList.toggle("on", +t.dataset.tt===treasTab));
   $("g-treasNote").textContent = treasTab===3 ? YZ_TRE_NOTE : treasTab===2 ? ROSE_TRE_NOTE : treasTab ? KIT_NOTE : TREAS_NOTE;
+  if(treasTab===4){ $("g-treasNote").textContent="持っているキーが1京をこえた人だけが手にする、クリアの証です。"; $("g-treasHint").innerHTML="<b>Tab</b> 次のタブへ ・ <b>Enter</b> 王冠を付ける / 外す ・ <b>8</b> / <b>Esc</b> 閉じる"; renderKcTre(); return; }
   if(treasTab===3){ $("g-treasHint").innerHTML="<b>Tab</b> 次のタブへ ・ <b>↑ ↓ ← →</b> 選ぶ ・ <b>Enter</b> 使う・任せる品を選ぶ ・ <b>Q</b> / <b>E</b> 名人村人の作物を切り替え ・ <b>8</b> / <b>Esc</b> 閉じる"; renderYzTre(); return; }
   if(treasTab===2){ $("g-treasHint").innerHTML="<b>Tab</b> 次のタブへ ・ <b>↑ ↓ ← →</b> 選ぶ ・ <b>Enter</b> オン・オフ"+(S.rkam?" ・ 薔薇のかまどは <b>Enter</b> で色を一覧から選ぶ ・ <b>Q</b> / <b>E</b> 花びらの色":"")+(S.gx&&S.gx.plate?" ・ <b>N</b> プレートの名前":"")+" ・ <b>8</b> / <b>Esc</b> 閉じる"; renderRoseTre(); return; }
   $("g-treasHint").innerHTML = treasTab ? "<b>Tab</b> 貴重品へ ・ <b>↑ ↓ ← →</b> 選ぶ ・ <b>Enter</b> 使う ・ <b>Q</b> / <b>E</b> かまどの色・シゴデキ村人の作物を切り替え ・ <b>8</b> / <b>Esc</b> 閉じる" : (kitAny()?"<b>Tab</b> 台所の宝物へ ・ ":"")+"<b>↑ ↓</b> 見る ・ <b>8</b> / <b>Esc</b> 閉じる";
@@ -13743,6 +13767,7 @@ function treasKey(e){
   const k=e.key;
   if(k==="Escape"||k==="8"){ e.preventDefault(); closeModal(); return; }
   if(k==="Tab"){ e.preventDefault(); const ts=treasTabs(); if(ts.length<2) return; treasTab=ts[(ts.indexOf(treasTab)+(e.shiftKey?-1:1)+ts.length)%ts.length]; sfx.tab(); renderTreas(); return; }
+  if(treasTab===4){ if(e.key==="Enter"){ e.preventDefault(); kcToggle(); } return; }
   if(treasTab===3){ yzTreKey(e); return; }
   if(treasTab===2){
     const n=$("g-treasBody").querySelectorAll(".titem").length;
@@ -13764,6 +13789,7 @@ function treasKey(e){
 }
 root.querySelectorAll("#g-treasTabs .tab").forEach(t=>t.addEventListener("click",()=>{ const v=+t.dataset.tt; if(!treasTabs().includes(v)) return; treasTab=v; renderTreas(); }));
 $("g-treasBody").addEventListener("click",e=>{
+  if(treasTab===4){ if(e.target.closest && e.target.closest(".kcitem")) kcToggle(); return; }
   if(treasTab===3){   // 千両箱
     const it=e.target.closest && e.target.closest(".yitem"); if(!it) return;
     const i=+it.dataset.y, sw=e.target.closest("[data-yd]");
@@ -15708,11 +15734,35 @@ const GOALS = [
   { cat:"千両箱", ser:"yzfd", id:"yzfd60", ic:"🗺️", nm:"地図の先へ",         ds:"畑を60枚にする",                        need:60,  now:()=>FS().length, rw:1e11, vis:yzGoalVis },
   { cat:"千両箱", ser:"yzfd", id:"yzfd75", ic:"🗺️", nm:"黄金郷の入口",       ds:"畑を75枚にする",                        need:75,  now:()=>FS().length, rw:1e12, vis:yzGoalVis },
   { cat:"千両箱", ser:"yzfd", id:"yzfd100",ic:"🗺️", nm:"黄金郷",             ds:"畑を100枚にする",                       need:100, now:()=>FS().length, rw:1e13, vis:yzGoalVis },
-  /* いちばん下: 1京ちゃん。受け取ると、エンディングが流れる */
-  { cat:"ゲームクリア", id:"kei", ic:"👑", nm:"1京ちゃん",         ds:"持っているキーが1京をこえる",            need:1e16, now:()=>S.money, rw:1e15, vis:yzGoalVis },
+  /* いちばん下: 京の頂。受け取ると、エンディングが流れる */
+  { cat:"ゲームクリア", id:"kei", ic:"👑", nm:"京の頂", ds:"持っているキーが1京をこえる", need:1e16, now:()=>S.money, rw:0, prize:"京の王冠", vis:yzGoalVis },
 ];
 function yzGoalVis(){ return yzOpen() || (S.yzCount||0)>0; }   // 千両箱ガチャが開くまで出さない
-/* ---------- 1京ちゃん: エンディング(特別な演出のあとにエンドロール。終わったあとも遊び続けられる) ---------- */
+
+/* ---- クリアの証(王冠): 名前の先頭に付き、番付・ランキング・チャットにも出る ---- */
+function kcGive(){
+  S.kc=1; S.kcOff=false; S.got["kc:crown"]=(S.got["kc:crown"]||0)+1; save();
+  setTimeout(()=>{ try{ rankRedecoAll(); }catch(e){} try{ refreshRank(); }catch(e){} },800);
+}
+function kcToggle(){
+  if(!S.kc){ sfx.nope(); return; }
+  S.kcOff=!S.kcOff; sfx.tab(); save(); renderAll(); renderTreas();
+  setTimeout(()=>{ try{ rankRedecoAll(); }catch(e){} try{ refreshRank(); }catch(e){} },500);
+}
+function renderKcTre(){
+  $("g-treasRate").textContent=S.kc?"クリアの証":"";
+  const nm=(()=>{ try{ return (typeof playerName!=="undefined" && playerName) || S.rankName || "あなた"; }catch(e){ return S.rankName||"あなた"; } })();
+  $("g-treasBody").innerHTML=`<div class="ghead kchead">京<span>${S.kc?1:0} / 1</span></div><div class="tlist">
+    <div class="titem kitem kcitem cur">
+      <div class="tic kcbig">${KC_SVG}</div>
+      <div class="tbody">
+        <div class="tnm">京の王冠<span class="tn">${S.kcOff?"外しています":"付けています"}</span></div>
+        <div class="teff">名前の先頭に王冠が付きます。番付・ランキング・チャットにも、王冠の付いた名前で載ります</div>
+        <div class="teff glore">持っているキーが1京をこえた人だけが手にする王冠。数えきれないほどの打鍵と収穫の果てに、ようやく頭に乗る。</div>
+        <div class="tsum">見え方: <span class="kcprev">${S.kcOff?"":`<span class="kcrown">${KC_SVG}</span>`}${esc(nm)}</span> ・ ${kb("<b>Enter</b> で","タップで")}${S.kcOff?"付ける":"外す"}</div>
+      </div></div></div>`;
+}
+/* ---------- 京の頂: エンディング(特別な演出のあとにエンドロール。終わったあとも遊び続けられる) ---------- */
 let kyoKey=null, kyoTimers=[];
 function kyoEnding(){
   if(document.getElementById("kyoEnd")) return;
@@ -15731,7 +15781,7 @@ function kyoEnding(){
   const machines=MACHINE_ORDER.filter(m=>machineOpen(m)).map(m=>`<div class="kyn">${esc(MACHINES[m].name)}</div>`).join("");
   const el=document.createElement("div"); el.id="kyoEnd"; el.setAttribute("role","dialog"); el.setAttribute("aria-label","エンディング");
   el.innerHTML=`<div class="kyrays"></div>
-    <div class="kyhero"><div class="kycrown">👑</div><div class="kytitle">1京ちゃん</div><div class="kysub">持っている${U}が 1京 をこえました</div><div class="kynum">${xFmt(S.money,"money")}${U}</div></div>
+    <div class="kyhero"><div class="kycrown">${KC_SVG}</div><div class="kytitle">京の頂</div><div class="kysub">持っている${U}が 1京 をこえました</div><div class="kynum">${xFmt(S.money,"money")}${U}</div><div class="kyprize"><span class="kcrown">${KC_SVG}</span> ごほうび「京の王冠」 名前の先頭に王冠が付きます</div></div>
     <div class="kyroll"><div class="kyinner">
       <div class="kyh1">${esc(title)}</div><div class="kysec">ゲームクリア</div>
       <div class="kyhd">あなたの記録</div>${stats}
@@ -15795,8 +15845,8 @@ function renderGoals(){
     const cat=vis.filter(x=>x.cat===g.cat), head = ri===0 || rows[ri-1].cat!==r.cat
       ? `<div class="ghead">${esc(g.cat)}<span>${cat.filter(goalClaimed).length} / ${cat.length}</span></div>` : "";
     const right = got && g.id==="kei" ? '<button class="sbtn main" data-ending="1">エンディングを見る</button>' : got ? '<span class="goalok">すべて受け取り済み</span>'
-      : ok ? `<button class="sbtn main" data-claim="${r.gi}">受け取る +${fmtNum(g.rw)}</button>`
-      : `<span>ごほうび ${fmtNum(g.rw)}キー</span>`;
+      : ok ? `<button class="sbtn main" data-claim="${r.gi}">受け取る ${g.prize?esc(g.prize):"+"+fmtNum(g.rw)}</button>`
+      : `<span>ごほうび ${g.prize?esc(g.prize):fmtNum(g.rw)+"キー"}</span>`;
     const steps = r.tiers.length>1 ? `<span class="gsteps">${r.tiers.map(i=>`<i class="${goalClaimed(GOALS[i])?"on":goalDone(GOALS[i])?"ready":""}"></i>`).join("")}<small>${r.all?r.tiers.length:r.step+1} / ${r.tiers.length}</small></span>` : "";
     return head+`<div class="rowi ${ri===goalCur?"cur":""} ${got?"claimed":""}" data-i="${ri}">
       <div class="ic">${g.ic}</div>
@@ -15814,10 +15864,10 @@ function claimGoal(i){   // i: GOALS の番号
   if(!g || goalClaimed(g) || !goalVisible(g)) return;
   if(!goalDone(g)){ sfx.nope(); toast("まだ解除していません","warn"); return; }
   const ri=goalRows().findIndex(r=>r.tiers.includes(i)); if(ri>=0) goalCur=ri;   // 受け取った行を選んだままにする(一番上に戻らないように)
-  S.goals=S.goals||{}; S.goals[g.id]=Date.now();
+  S.goals=S.goals||{}; S.goals[g.id]=Date.now(); if(g.prize) kcGive();
   const rw=Math.round(g.rw*ev("Y",1.5,2,1)), bonus=rw-g.rw;   // 料理: ごほうび 1.5倍・2倍
   xAdd(S,"money",rw); if(bonus) S.goalBonus=(S.goalBonus||0)+bonus; sfx.buy();
-  toast(`実績「${esc(g.nm)}」解除! ごほうび +${fmtNum(rw)}キー${bonus?`(料理で +${fmtNum(bonus)})`:""}`,"good",3600,true);
+  toast(`実績「${esc(g.nm)}」解除! ごほうび ${g.prize?`「${esc(g.prize)}」`:`+${fmtNum(rw)}キー`}${bonus?`(料理で +${fmtNum(bonus)})`:""}`,"good",3600,true);
   save(); renderAll();
   if(modal==="goal") renderGoals();
   if(g.id==="kei") kyoEnding();
@@ -15831,7 +15881,7 @@ function claimAllGoals(){
     const ids=goalReady(); if(!ids.length) break;
     for(const i of ids){
       const g=GOALS[i]; if(goalClaimed(g)) continue;
-      S.goals=S.goals||{}; S.goals[g.id]=Date.now();
+      S.goals=S.goals||{}; S.goals[g.id]=Date.now(); if(g.prize) kcGive();
       const rw=Math.round(g.rw*ev("Y",1.5,2,1)), b=rw-g.rw;   // 料理: ごほうび 1.5倍・2倍
       xAdd(S,"money",rw); if(b) S.goalBonus=(S.goalBonus||0)+b;
       n++; sum+=rw; bonus+=b;
@@ -15839,7 +15889,7 @@ function claimAllGoals(){
   }
   if(!n){ sfx.nope(); toast("受け取れる実績がありません","warn"); return; }
   sfx.buy();
-  if(goalClaimed(GOALS.find(x=>x.id==="kei")) && S.goals.kei>=Date.now()-5000) setTimeout(kyoEnding,600);   // 1京ちゃんを受け取った
+  if(goalClaimed(GOALS.find(x=>x.id==="kei")) && S.goals.kei>=Date.now()-5000) setTimeout(kyoEnding,600);   // 京の頂を受け取った
   toast(`実績を ${fmtNum(n)}個 受け取りました! ごほうび +${fmtNum(sum)}キー${bonus?`(料理で +${fmtNum(bonus)})`:""}`,"good",4200,true);
   save(); renderAll();
   if(modal==="goal") renderGoals();
