@@ -15778,42 +15778,64 @@ function renderKcTre(){
 }
 /* ---------- 京の頂: エンディング(特別な演出のあとにエンドロール。終わったあとも遊び続けられる) ---------- */
 let kyoKey=null, kyoTimers=[], kyoStop=null, kyoBusy=false;
-/* エンディングの曲: 主旋律・和音の分散・ベース・鐘。音は前もって時刻を決めて鳴らす(ずれない)。stop で止める */
+/* エンディングの曲: 前奏2小節 → A(8小節) → B(サビ8小節) を loops 回 → 最後の和音。
+   2回目からは、主旋律に3度下のハモり・軽い打楽器・高い音の重ねが入る。残響と山びこをかけて、時刻を前もって決めて鳴らす。stop で止める */
 function kyoMusic(delay,loops=1){
   let ctx; try{ audioCtx=audioCtx||new (window.AudioContext||window.webkitAudioContext)(); ctx=audioCtx; if(ctx.state==="suspended") ctx.resume(); }catch(e){ return ()=>{}; }
-  const nodes=[], out=ctx.createGain(); out.gain.value=.9; out.connect(ctx.destination);
-  const hz = n => 440*Math.pow(2,(n-69)/12);   // MIDI の番号 → 周波数
-  const t0=ctx.currentTime+delay, B=.6;          // 1拍 0.6秒(テンポ100)
-  const note=(at,n,len,type,vol,kind)=>{
-    const o=ctx.createOscillator(), g=ctx.createGain(), s=t0+at*B, d=len*B;
-    o.type=type; o.frequency.value=hz(n);
-    if(kind==="lead"){ o.detune.setValueAtTime(0,s); o.detune.linearRampToValueAtTime(8,s+d*.6); }   // 主旋律は少しだけ揺らす
-    g.gain.setValueAtTime(0.0001,s); g.gain.exponentialRampToValueAtTime(vol,s+(kind==="pad"?.12:.02));
-    g.gain.setValueAtTime(vol,s+d*(kind==="pluck"?.05:.7)); g.gain.exponentialRampToValueAtTime(0.0001,s+d+(kind==="bell"?1.6:.25));
-    o.connect(g); g.connect(out); o.start(s); o.stop(s+d+1.8); nodes.push(o);
+  const nodes=[], B=.6;   // 1拍 0.6秒(テンポ100)
+  const out=ctx.createGain(); out.gain.value=.85; out.connect(ctx.destination);
+  // 残響(ノイズから作る)と、主旋律の山びこ
+  const rv=ctx.createConvolver(), ir=ctx.createBuffer(2,ctx.sampleRate*2.6,ctx.sampleRate);
+  for(let c=0;c<2;c++){ const d=ir.getChannelData(c); for(let i=0;i<d.length;i++) d[i]=(Math.random()*2-1)*Math.pow(1-i/d.length,2.6); }
+  rv.buffer=ir; const wet=ctx.createGain(); wet.gain.value=.32; rv.connect(wet); wet.connect(out);
+  const dl=ctx.createDelay(1); dl.delayTime.value=B*.75; const fb=ctx.createGain(); fb.gain.value=.28; const dw=ctx.createGain(); dw.gain.value=.22;
+  dl.connect(fb); fb.connect(dl); dl.connect(dw); dw.connect(out); dw.connect(rv);
+  const noise=ctx.createBuffer(1,ctx.sampleRate*.3,ctx.sampleRate); { const d=noise.getChannelData(0); for(let i=0;i<d.length;i++) d[i]=Math.random()*2-1; }
+  const hz = n => 440*Math.pow(2,(n-69)/12);
+  const t0=ctx.currentTime+delay, at=x=>t0+x*B;
+  const env=(g,s,d,a,v,r)=>{ g.gain.setValueAtTime(0.0001,s); g.gain.exponentialRampToValueAtTime(v,s+a); g.gain.setValueAtTime(v,Math.max(s+a,s+d-.02)); g.gain.exponentialRampToValueAtTime(0.0001,s+d+r); };
+  const send=(g,rvAmt,echo)=>{ g.connect(out); if(rvAmt){ const s=ctx.createGain(); s.gain.value=rvAmt; g.connect(s); s.connect(rv); } if(echo) g.connect(dl); };
+  // 楽器
+  const lead=(x,n,len,v,hi)=>{ const s=at(x), d=len*B, o=ctx.createOscillator(), o2=ctx.createOscillator(), f=ctx.createBiquadFilter(), g=ctx.createGain(), lfo=ctx.createOscillator(), lg=ctx.createGain();
+    o.type="sawtooth"; o2.type="triangle"; o.frequency.value=o2.frequency.value=hz(n+(hi?12:0)); o2.detune.value=4;
+    lfo.frequency.value=5.2; lg.gain.value=0; lg.gain.setValueAtTime(0,s); lg.gain.linearRampToValueAtTime(9,s+Math.min(d,.9)); lfo.connect(lg); lg.connect(o.detune); lg.connect(o2.detune);   // のびる音にだけ、あとからビブラート
+    f.type="lowpass"; f.frequency.value=2600; f.Q.value=.8; o.connect(f); o2.connect(f); f.connect(g); env(g,s,d,.03,v,.35); send(g,.5,true);
+    for(const z of [o,o2,lfo]){ z.start(s); z.stop(s+d+.8); nodes.push(z); } };
+  const pad=(x,ns,len,v)=>{ const s=at(x), d=len*B, f=ctx.createBiquadFilter(), g=ctx.createGain(); f.type="lowpass"; f.frequency.value=1100; f.connect(g); env(g,s,d,.35,v,1.2); send(g,.7);
+    for(const n of ns) for(const dt of [-7,7]){ const o=ctx.createOscillator(); o.type="sawtooth"; o.frequency.value=hz(n); o.detune.value=dt; o.connect(f); o.start(s); o.stop(s+d+1.5); nodes.push(o); } };
+  const tone=(x,n,len,type,v,a,r,rvAmt)=>{ const s=at(x), d=len*B, o=ctx.createOscillator(), g=ctx.createGain(); o.type=type; o.frequency.value=hz(n); o.connect(g); env(g,s,d,a,v,r); send(g,rvAmt); o.start(s); o.stop(s+d+r+.1); nodes.push(o); };
+  const kick=x=>{ const s=at(x), o=ctx.createOscillator(), g=ctx.createGain(); o.type="sine"; o.frequency.setValueAtTime(110,s); o.frequency.exponentialRampToValueAtTime(42,s+.18); o.connect(g); g.gain.setValueAtTime(.0001,s); g.gain.exponentialRampToValueAtTime(.22,s+.005); g.gain.exponentialRampToValueAtTime(.0001,s+.3); g.connect(out); o.start(s); o.stop(s+.35); nodes.push(o); };
+  const hat=(x,v)=>{ const s=at(x), n=ctx.createBufferSource(), f=ctx.createBiquadFilter(), g=ctx.createGain(); n.buffer=noise; f.type="highpass"; f.frequency.value=7000; n.connect(f); f.connect(g); g.gain.setValueAtTime(v,s); g.gain.exponentialRampToValueAtTime(.0001,s+.06); g.connect(out); n.start(s); n.stop(s+.08); nodes.push(n); };
+  // ハ長調で3度下(ハモり)
+  const SC=[0,2,4,5,7,9,11]; const third=n=>{ const o=Math.floor(n/12), p=n%12; let i=SC.indexOf(p); if(i<0) return n-3; i-=2; return (i<0? (o-1)*12+SC[i+7] : o*12+SC[i]); };
+  // 和音(根音・和音)
+  const CA=[[48,[60,64,67]],[47,[59,62,67]],[45,[57,60,64]],[40,[55,59,64]],[41,[57,60,65]],[40,[55,60,64]],[38,[57,60,65]],[43,[55,59,65]]];
+  const CB=[[41,[57,60,65]],[43,[55,59,62]],[40,[55,59,64]],[45,[57,60,64]],[38,[57,62,65]],[43,[59,62,65]],[48,[60,64,67]],[43,[55,59,65]]];
+  const MA=[[[0,76,1],[1,79,1],[2,84,1.5],[3.5,83,.5]], [[0,81,1],[1,79,1],[2,74,2]], [[0,72,1],[1,76,1],[2,81,1.5],[3.5,79,.5]], [[0,79,1],[1,76,1],[2,71,2]],
+            [[0,69,1],[1,72,1],[2,77,1.5],[3.5,76,.5]], [[0,76,1],[1,74,1],[2,72,2]], [[0,74,1],[1,77,1],[2,81,1],[3,84,1]], [[0,83,2],[2,79,1],[3,81,.5],[3.5,83,.5]]];
+  const MB=[[[0,81,1],[1,84,1],[2,89,1.5],[3.5,88,.5]], [[0,86,1],[1,83,1],[2,79,2]], [[0,88,1],[1,86,.5],[1.5,84,.5],[2,83,1],[3,79,1]], [[0,84,1],[1,83,.5],[1.5,81,.5],[2,76,2]],
+            [[0,77,1],[1,81,1],[2,86,1],[3,84,1]], [[0,83,1],[1,86,1],[2,91,1.5],[3.5,89,.5]], [[0,88,2],[2,86,1],[3,84,1]], [[0,86,2],[2,83,1],[3,79,1]]];
+  const bar=(b,[root,tri],mel,round,isB)=>{
+    const x=b*4, full=round>0;
+    pad(x,tri,4,isB?.03:.022);
+    // ベース: 1拍目に根音、2拍目の裏に5度、3拍目にオクターブ、4拍目の裏に5度
+    tone(x,root,1.4,"triangle",.16,.01,.2,.1); tone(x+1.5,root+7,.5,"triangle",.1,.01,.15,.1); tone(x+2,root+12,1,"triangle",.12,.01,.2,.1); tone(x+3.5,root+7,.5,"triangle",.09,.01,.15,.1);
+    // 分散和音(8分音符)
+    for(let i=0;i<8;i++) tone(x+i*.5, tri[[0,1,2,1,0,1,2,1][i]]+(i>=4?12:0), .5, "triangle", isB?.024:.02, .005, .35, .25);
+    for(const [a,n,len] of mel){ lead(x+a,n,len,.05,false); if(full) tone(x+a,third(n),len,"sine",.028,.03,.3,.4); if(full && isB) lead(x+a,n,len,.018,true); }
+    if(full||isB){ kick(x); kick(x+2); for(let i=0;i<8;i++) hat(x+i*.5, i%2?.025:.04); }
+    if(b%8===0) tone(x, 96, 1, "sine", .03, .005, 1.8, .6);   // 段落の頭の鐘
   };
-  // 和音(1小節ずつ): 根音と、分散させる3音
-  const C=[[48,[60,64,67]],[47,[59,62,67]],[45,[57,60,64]],[40,[55,59,64]],[41,[57,60,65]],[40,[55,60,64]],[38,[57,60,65]],[43,[55,59,65]],
-           [48,[60,64,67]],[45,[57,60,64]],[41,[57,60,65]],[43,[55,59,62]],[41,[57,60,65]],[40,[55,59,64]],[38,[57,60,65]],[43,[59,62,65]],[48,[60,64,67]]];
-  // 主旋律: [小節の中の拍, 音, 長さ]
-  const M=[
-    [[0,76,1],[1,79,1],[2,84,1.5],[3.5,83,.5]], [[0,81,1],[1,79,1],[2,74,2]], [[0,72,1],[1,76,1],[2,81,1.5],[3.5,79,.5]], [[0,79,1],[1,76,1],[2,71,2]],
-    [[0,69,1],[1,72,1],[2,77,1.5],[3.5,76,.5]], [[0,76,1],[1,74,1],[2,72,2]], [[0,74,1],[1,77,1],[2,81,1],[3,84,1]], [[0,83,2],[2,79,1.5]],
-    [[0,76,.5],[.5,77,.5],[1,79,1],[2,84,1],[3,88,1]], [[0,86,1],[1,84,1],[2,81,2]], [[0,84,1],[1,81,1],[2,77,1],[3,81,1]], [[0,79,3]],
-    [[0,81,1],[1,79,1],[2,77,1],[3,76,1]], [[0,79,1],[1,77,1],[2,76,1],[3,74,1]], [[0,72,1],[1,74,1],[2,77,1],[3,81,1]], [[0,79,2],[2,83,1],[3,86,1]],
-    [[0,84,4]] ];
-  const play=(bar,b)=>{
-    const [root,tri]=C[bar], last=bar===C.length-1;
-    note(b,root,last?4:2,"sine",.13,"pad"); if(!last) note(b+2,root+(bar%2?7:12),2,"sine",.1,"pad");   // ベース
-    if(last){ for(const n of tri.concat([72])) note(b,n,4,"triangle",.05,"bell"); }
-    else for(let i=0;i<8;i++) note(b+i*.5, tri[[0,1,2,1,0,1,2,1][i]]+(i>=4?12:0), .5, "triangle", .028, "pluck");   // 和音の分散(8分音符)
-    for(const [at,n,len] of M[bar]) note(b+at,n,len,"square",.032,"lead");                                          // 主旋律
-    if(bar%4===0 || last) note(b, last?96:91, 1, "sine", .03, "bell");                                               // 4小節ごとの鐘
-  };
-  for(let L=0;L<loops;L++) for(let bar=0;bar<16;bar++) play(bar,(L*16+bar)*4);
-  play(16,loops*64);
-  return ()=>{ try{ const now=ctx.currentTime; out.gain.setValueAtTime(out.gain.value,now); out.gain.linearRampToValueAtTime(0.0001,now+.4); setTimeout(()=>{ for(const o of nodes){ try{ o.stop(); }catch(e){} } try{ out.disconnect(); }catch(e){} },500); }catch(e){} };
+  // 前奏2小節: 和音だけ、ゆっくり
+  pad(0,[60,64,67],4,.02); pad(4,[57,60,65],4,.02); tone(0,84,2,"sine",.025,.2,1.2,.7); tone(4,81,2,"sine",.025,.2,1.2,.7); tone(6,83,2,"sine",.025,.2,1.2,.7);
+  let b=2;
+  for(let L=0;L<loops;L++){ for(let i=0;i<8;i++) bar(b++,CA[i],MA[i],L,false); for(let i=0;i<8;i++) bar(b++,CB[i],MB[i],L,true); }
+  // 最後: 主和音をのばし、きらめく分散
+  const x=b*4; pad(x,[60,64,67,72],6,.035); tone(x,36,6,"triangle",.16,.01,1.5,.3); lead(x,84,4,.05,false); tone(x,79,4,"sine",.03,.05,1.5,.5);
+  [72,76,79,84,88,91,96].forEach((n,i)=>tone(x+i*.25,n,1.5,"sine",.03,.005,1.6,.6));
+  return ()=>{ try{ const now=ctx.currentTime; out.gain.cancelScheduledValues(now); out.gain.setValueAtTime(out.gain.value,now); out.gain.linearRampToValueAtTime(0.0001,now+.5); setTimeout(()=>{ for(const o of nodes){ try{ o.stop(); }catch(e){} } try{ out.disconnect(); }catch(e){} },650); }catch(e){} };
 }
+const KYO_SONG = loops => (2+loops*16)*4*.6;   // 曲が最後の和音に着くまでの秒数
 async function kyoEnding(){
   if(document.getElementById("kyoEnd") || kyoBusy) return; kyoBusy=true;
   try{ closeModal(true); }catch(e){}
@@ -15839,9 +15861,12 @@ async function kyoEnding(){
       row("変異の収穫", N(sum(3),"個")), row("超変異の収穫", N(sum(5),"個")), has(S.dbGot) && row("日替わりのご褒美", N(S.dbGot,"回"))]),
     has(S.btPlanted) && sec("大木", [row("植えた大木", N(S.btPlanted,"本")), has(S.btRipe) && row("実らせた大木", N(S.btRipe,"本")), has(S.btHarvest) && row("大木の実", N(S.btHarvest,"個")),
       has(S.btCut) && row("切った大木", N(S.btCut,"本")), has(S.btMut) && row("変異の大木", N(S.btMut,"本")), has(S.btSup) && row("超変異の大木", N(S.btSup,"本"))]),
-    sec("ガチャ", [row("引いた回数", N(S.gachaCount,"回")), has(S.roseGachaCount) && row("薔薇ガチャ", N(S.roseGachaCount,"回")), has(S.roseCoinTotal) && row("集めた薔薇ガチャコイン", N(S.roseCoinTotal,"枚")),
-      row("千両箱ガチャ", N(S.yzCount,"回")), row("千両箱の新しい品", `${YZ_NEW.filter(x=>(S.got[x.id]||0)>0).length} / ${YZ_NEW.length}種類`),
-      has(S.yzPressed) && row(U+"ボタンを押した回数", N(S.yzPressed,"回")), has(S.yzEarn) && row(U+"ボタンで得た"+U, fmtNum(S.yzEarn)), has(S.yzKozuchiUsed) && row("小槌を振った回数", N(S.yzKozuchiUsed,"回"))]),
+    sec("ガチャ", [row("引いた回数", N(S.gachaCount,"回")), row("千両箱ガチャ", N(S.yzCount,"回")), has(S.yzPressed) && row(U+"ボタンを押した回数", N(S.yzPressed,"回")),
+      has(S.yzEarn) && row(U+"ボタンで得た"+U, fmtNum(S.yzEarn)), has(S.yzKozuchiUsed) && row("小槌を振った回数", N(S.yzKozuchiUsed,"回"))]),
+    sec("種ガチャの貴重品", TREASURES.filter(c=>tre(c.id)>0).map(c=>row(c.name, "×"+fmtNum(tre(c.id))))),
+    sec("台所の宝物", KIT_ORDER.filter(id=>(S.got[id]||0)>0 && GUR[id]).map(id=>row(GUR[id].name, "×"+fmtNum(kitN(id)||0)))),
+    sec("薔薇ガチャの宝物", RG_GHR.concat(RG_GXR).filter(x=>(S.got[x.id]||0)>0).map(x=>row(x.name, "")).concat(RG_GUR.filter(x=>rgGurN(x.k)>0).map(x=>row(x.name, "×"+fmtNum(rgGurN(x.k)))))),
+    sec("千両箱の宝物", YZ_NEW.filter(x=>(S.got[x.id]||0)>0).map(x=>row(x.name, "×"+fmtNum(yzN(x.k))))),
     sec("料理", [row("作った料理", N(S.cookCount,"皿")), row("食べた料理", N(S.ateCount,"皿")), has(S.prepCount) && row("仕込み", N(S.prepCount,"回")), has(S.workCount) && row("工房で作った品", N(S.workCount,"個")), dbook>0 && row("料理図鑑", dbook+"項目")]),
     sec("タイピング", [tb.easy!=null && row("スコアアタック イージー", N(tb.easy,"本")), tb.normal!=null && row("スコアアタック ノーマル", N(tb.normal,"本")), tb.hard!=null && row("スコアアタック ハード", N(tb.hard,"本")),
       tb["ta-easy"]!=null && row("タイムアタック イージー", tm(tb["ta-easy"])), tb["ta-normal"]!=null && row("タイムアタック ノーマル", tm(tb["ta-normal"])), tb["ta-hard"]!=null && row("タイムアタック ハード", tm(tb["ta-hard"])),
@@ -15849,7 +15874,10 @@ async function kyoEnding(){
       row("タイピングから届いた"+U, fmtNum(S.fromTypingScrews||0)), row("打って進めた"+NIWA+"の時間", days(S.fromTypingMin||0))]),
     (tqw || tqTop) && sec("TOEIC 英単語", [tqw && row("覚えた単語", N(tqw.w,"語")), tqw && has(tqw.f) && row("覚えた穴埋め", N(tqw.f,"語")), tqw && has(tqw.l) && row("覚えたリスニング", N(tqw.l,"問")),
       tqTop && row("一本勝負の最高", `${N(tqTop.v,"問")} <small>${esc(tqFmtName(tqTop.f))}・${esc(tqLvName(tqTop.lv))}</small>`)]),
-    sec("図鑑と実績", [book && row("図鑑", book), roses>0 && row("薔薇の色", roses+"色"), row("受け取った実績", `${GOALS.filter(goalClaimed).length} / ${GOALS.length}`),
+    roses>0 && sec("薔薇", [row("見つけた薔薇の色", `${roses} / ${roseCells().length}色`), row("咲かせた薔薇", N(ROSE_ALL.reduce((a,r)=>a+(S.harvestBy[r.id]||0),0),"輪")),
+      row("シークレットの薔薇", `${ROSE_SECRET.filter(r=>roseSeen(r.id,0)).length} / ${ROSE_SECRET.length}`), PETALS.some(x=>petalN(x.k)>0) && row("集めた花弁", `${PETALS.filter(x=>petalN(x.k)>0).length} / ${PETALS.length}`),
+      has(S.roseGachaCount) && row("薔薇ガチャ", N(S.roseGachaCount,"回")), has(S.roseCoinTotal) && row("集めた薔薇ガチャコイン", N(S.roseCoinTotal,"枚"))]),
+    sec("図鑑と実績", [book && row("図鑑", book), row("受け取った実績", `${GOALS.filter(goalClaimed).length} / ${GOALS.length}`),
       S.goals && S.goals.kei && row("クリアした日", new Date(S.goals.kei).toLocaleDateString("ja-JP"))]),
   ].filter(Boolean).join("");
   const mates=[["村人",S.villagers||0],["シゴデキ村人",S.sgVil||0],["薔薇農家",S.roseVil||0],["料理番の村人",kitN("cookvil")||0],
@@ -15873,7 +15901,7 @@ async function kyoEnding(){
   const finish=()=>{ el.classList.add("done"); el.querySelector(".kyskip").hidden=true; const b=el.querySelector(".kyback"); b.hidden=false; b.focus(); };
   const inner=el.querySelector(".kyinner"), fin=el.querySelector(".kyfin");
   const endAt=()=>{ const H=el.clientHeight; inner.style.setProperty("--kyto", (-(H/2 + fin.offsetTop + fin.offsetHeight/2))+"px"); };   // THE END が画面のまんなかで止まる位置
-  const H0=el.clientHeight, dist=H0/2+fin.offsetTop+fin.offsetHeight/2, loops=Math.max(1,Math.ceil(dist/(40*38.4))), dur=loops*38.4;   // 曲1回ぶん 38.4秒
+  const H0=el.clientHeight, dist=H0/2+fin.offsetTop+fin.offsetHeight/2, loops=Math.max(1,Math.round((dist/55-4.8)/38.4)), dur=KYO_SONG(loops);   // 1秒55pxくらい。曲が最後の和音に着くときに止まる
   inner.style.setProperty("--kydur", dur+"s");
   const roll=()=>{ endAt(); el.classList.add("roll"); T(dur*1000+800, finish); };
   const close=()=>{ kyoTimers.forEach(clearTimeout); kyoTimers=[]; if(kyoStop){ kyoStop(); kyoStop=null; } el.remove(); window.removeEventListener("keydown",kyoKey,true); kyoKey=null; try{ renderAll(); }catch(e){} };
