@@ -3088,6 +3088,18 @@ html.mobile #screen-garden .grk-list{max-height:none; flex:1 1 auto; min-height:
   #tqMenu .tq-lv b{font-size:clamp(1rem,2.75vh,1.5rem)}
   body:has(#screen-toeic.active #tqMenu.on) #app{width:min(clamp(1010px,160vh,1300px),96vw)}
 }
+/* ガチャの結果を出しているあいだ: 台と値段を上の横長の帯にまとめ、結果をウィンドウの幅いっぱいに使う */
+html #screen-garden .gacha.wide{grid-template-columns:1fr; gap:.5rem}
+html #screen-garden .gacha.wide .gleft{width:auto; min-width:0; display:flex; flex-wrap:wrap; align-items:center; justify-content:center; column-gap:1.4rem; row-gap:.3rem}
+html #screen-garden .gacha.wide .gmachine{zoom:.5; transform:none; margin:0}   /* 揺れる動きが transform を使うので、縮めるのは zoom で */
+html #screen-garden .gacha.wide .gcost{margin-top:0; font-size:.8rem; line-height:1.45}
+html #screen-garden .gacha.wide .gcost b{font-size:.92rem}
+html #screen-garden .gacha.wide .gcrows{grid-template-columns:repeat(4, auto auto); column-gap:.4rem}
+html #screen-garden .gacha.wide .gtotal{margin-top:0}
+html #screen-garden .gacha.wide .gcards{min-height:6rem; justify-content:center}
+html #screen-garden .gacha.wide .rgconvbtn{width:auto; flex:0 0 auto; margin:0}
+html.mobile #screen-garden .gacha.wide .gcrows{grid-template-columns:repeat(2, auto auto)}
+html.mobile #screen-garden .gacha.wide .gmachine{zoom:.42}
 </style>
 </head>
 <body>
@@ -12682,7 +12694,8 @@ function gachaHTML(){
   if(gachaM==="r" && rgView==="conv") return tabs+rgConvHTML();
   const spinning = gachaBusy();
   const cards=gachaRes.slice(0,gachaShown).map(gachaCardHTML).join("");
-  return tabs+`<div class="gacha ${gachaM}">
+  const wide = !!(gachaMega || gachaBig || gachaRes.length);   // 引いた結果があるときは、台を上の帯にまとめて、結果をウィンドウの幅いっぱいに並べる
+  return tabs+`<div class="gacha ${gachaM}${wide?" wide":""}">
     <div class="gleft">
       ${gachaM==="r"?`<button class="sbtn rgconvbtn" data-rgv="conv">🌹 コインに変換${MOB?"":' <span class="kb">Tab</span>'}</button>`:""}
       <div class="gmachine${spinning?" shake":""}">
