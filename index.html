@@ -1947,6 +1947,8 @@ html:not(.mobile) #screen-garden:has(.modal.open) .toast{font-size:.78rem; paddi
 #screen-garden .btmeter i{display:block; height:100%; background:#9bd96a; border-radius:3px; min-width:2px}
 #screen-garden .btmeter.dry i{background:#c8b48a}
 #screen-garden .btmeter.ripe i{background:#f4c542}
+#screen-garden .btkm{width:24px; height:24px; z-index:3; border-radius:50%; background:#fffaf0; box-shadow:0 0 0 2px #3f8a3a, 0 2px 4px rgba(0,0,0,.3); display:flex; align-items:center; justify-content:center}
+#screen-garden .btkm svg{width:22px; height:22px}
 @keyframes btsw{0%,100%{transform:rotate(-1.2deg)} 50%{transform:rotate(1.2deg)}}
 @keyframes bttw{0%,100%{opacity:.15; transform:scale(.5)} 50%{opacity:1; transform:scale(1)}}
 #screen-garden .btov .sway{animation:btsw 5s ease-in-out infinite; transform-box:fill-box; transform-origin:50% 100%}
@@ -9089,7 +9091,13 @@ function btAct(k){
     case 3: return false;   // 水やりはふつうどおり
     case 5: btFert(k,t); return true;
     case 4: nope(k, isSap(S.seedId) ? "この区画には、もう大木が植わっています" : "大木の区画には植えられません"); return true;
-    case 6: nope(k,"大木の区画には置けません"); return true;
+    case 6: {   // 木守りの村人: 6 で持って大木のマスを押すと、その木を任せる(もう一度押すと外す)
+      if(S.objSel!=="kmvil"){ nope(k,"大木の区画には置けません"); return true; }
+      if(yzN("kimori")<=0){ nope(k,"木守りの村人がいません"); return true; }
+      if(t.km){ t.km=0; floatAt(k,"木守り 外した"); hit(k); sfx.pick(); return true; }
+      if(kmFree()<=0){ nope(k,"木守りの村人の手が空いていません(1人で大木1本)"); return true; }
+      t.km=1; floatAt(k,"🧑‍🌾 おまかせ"); hit(k); sfx.vil(); yzKimoriTick(true); return true;
+    }
     default: nope(k,"大木の区画です"); return true;
   }
 }
@@ -9102,13 +9110,15 @@ function btInfo(k,p){
   sub.push(`タイピングの${b.mode}で遊ぶと、この木だけ10倍早く育ちます`);
   sub.push(`腐葉土 ${t.fert||0}回 ・ 貴重品などと合わせた成長速度 ×${+(effGrowth()*(t.mul||1)).toFixed(2)}`+(S.axe?` ・ ${kb("斧(1 で ← →)","斧")}で切ると木材が取れます`:""));
   sub.push(BT_GROUPS[p.bt].some(x=>isWet(S.cur,x,now)) ? "💧 水が効いています(9マスのどれか1つでよい)" : "水切れ — 9マスのどれか1つに水をやると育ちます");
+  if(t.km) sub.push(`${ico(YZ_NEWK.kimori)} 木守りの村人が世話をしています。実ったら自動で収穫します`);
+  else if(yzN("kimori")>0) sub.push(`${OBJ_HOW.replace(/で持って$/,"で")}木守りの村人を持って押すと、この木を任せられます(あと${kmFree()}人)`);
   return { big, sub };
 }
 /* 畑の上に大木の絵を重ねる(段階・変異・実が変わったときと、畑の大きさが変わったときだけ描き直す) */
 function btRender(f){
   const pl=$("g-planter"); if(!pl) return;
   const trees=planterBara ? [] : btTrees(f);
-  const sig=trees.map(([gi,t])=>gi+":"+t.id+":"+btStage(t)+":"+t.q+":"+(t.ready?1:0)).join("|")+"|"+pl.offsetWidth+"x"+pl.offsetHeight;
+  const sig=trees.map(([gi,t])=>gi+":"+t.id+":"+btStage(t)+":"+t.q+":"+(t.ready?1:0)+":"+(t.km?1:0)).join("|")+"|"+pl.offsetWidth+"x"+pl.offsetHeight;
   if(pl.dataset.btsig===sig) return;
   pl.dataset.btsig=sig;
   pl.querySelectorAll(".btov").forEach(e=>e.remove());
@@ -9135,6 +9145,9 @@ function btRender(f){
     mt.className="btov btmeter"; mt.dataset.gi=gi; mt.innerHTML="<i></i>";
     mt.style.left=(r7.left+r7.width/2-mw/2-br.left)+"px"; mt.style.top=(r7.bottom-br.top-9)+"px"; mt.style.width=mw+"px";
     pl.appendChild(mt);
+    if(t.km){ const r0=rs[0], km=document.createElement("div");   // 木守りの村人に任せている木: 左上に村人の印
+      km.className="btov btkm"; km.innerHTML=ico(YZ_NEWK.kimori); km.title="木守りの村人";
+      km.style.left=(r0.left-br.left+2)+"px"; km.style.top=(r0.top-br.top+2)+"px"; pl.appendChild(km); }
   }
 }
 /* 斧で切る演出: コン・コン・コンと3回打ちこむと木くずが飛び、きしんでから倒れ、ドスンと土ぼこりが立つ */
@@ -9519,7 +9532,7 @@ function normalize(o){
   // 旧「高性能スプリンクラー」はスプリンクラーにまとめる
   if(s.objs.spr2){ s.objs.spr=(s.objs.spr||0)+s.objs.spr2; delete s.objs.spr2; }
   for(const f of s.fields) for(const k of KEYS){ if(f[k].obj==="spr2") f[k].obj="spr"; }
-  if(!["vil","sgvil","rfvil","kgvil","mjvil",...OBJ_ALL].includes(s.objSel)) s.objSel="spr";
+  if(!["vil","sgvil","rfvil","kgvil","mjvil","kmvil",...OBJ_ALL].includes(s.objSel)) s.objSel="spr";
   for(const key of ["recipes","dishes","dishMade","dishEaten"]) s[key]=s[key]||{};
   for(const st of Object.values(s.dishes)){ if(!st) continue; for(const q of [1,2,4]) if(st[q]){ st[0]=(st[0]||0)+st[q]; delete st[q]; } }
   if(Array.isArray(s.autoCook)) s.autoCook=s.autoCook.map(a=>({ id:a.id, g:[3,5].includes(a.g)?a.g:0 })).filter((a,i,arr)=>arr.findIndex(b=>b.id===a.id&&b.g===a.g)===i);
@@ -10693,7 +10706,7 @@ function nextSeed(fromId){
 }
 const placedOn = id => S.fields.some(f=>f[POST].obj===id);
 const crowPlaced =()=>placedOn("crow");
-const ownedObjs =()=>OBJ_ALL.filter(id=>(S.objs[id]||0)>0 || (isScare(id)&&placedOn(id))).concat(S.villagers>0?["vil"]:[], (S.sgVil||0)>0?["sgvil"]:[], (S.roseVil||0)>0?["rfvil"]:[], yzN("kimagure")>0?["kgvil"]:[], yzN("meijin")>0?["mjvil"]:[]);
+const ownedObjs =()=>OBJ_ALL.filter(id=>(S.objs[id]||0)>0 || (isScare(id)&&placedOn(id))).concat(S.villagers>0?["vil"]:[], (S.sgVil||0)>0?["sgvil"]:[], (S.roseVil||0)>0?["rfvil"]:[], yzN("kimagure")>0?["kgvil"]:[], yzN("meijin")>0?["mjvil"]:[], yzN("kimori")>0?["kmvil"]:[]);
 function renderBar(){
   renderCookLock();
   root.querySelectorAll(".slot").forEach(s=>s.classList.toggle("on", +s.dataset.tool===S.tool));
@@ -10723,6 +10736,7 @@ function renderBar(){
   if(S.objSel==="vil" && S.villagers>0){ $("g-objIc").innerHTML="👩‍🌾"; $("g-objNm").textContent="村人"; $("g-objCnt").textContent=`あと${vilFree()}区画`; }
   else if(S.objSel==="rfvil" && S.roseVil>0){ $("g-objIc").innerHTML=ico(RFV); $("g-objNm").textContent="薔薇農家"; $("g-objCnt").textContent=`あと${rfFree()}区画`; }
   else if(S.objSel==="kgvil" && yzN("kimagure")>0){ $("g-objIc").innerHTML=ico(YZ_NEWK.kimagure); $("g-objNm").textContent="気まぐれ村人"; $("g-objCnt").textContent=`あと${kgFree()}区画`; }
+  else if(S.objSel==="kmvil" && yzN("kimori")>0){ $("g-objIc").innerHTML=ico(YZ_NEWK.kimori); $("g-objNm").textContent="木守りの村人"; $("g-objCnt").textContent=`あと${kmFree()}本`; }
   else if(S.objSel==="mjvil" && yzN("meijin")>0){ $("g-objIc").innerHTML=ico(YZ_NEWK.meijin); $("g-objNm").textContent=`名人村人(${CROP[mjCropId()].name})`; $("g-objCnt").textContent=`あと${mjFree()}区画`; }
   else if(S.objSel==="sgvil" && S.sgVil>0){ $("g-objIc").innerHTML=ico(GUR.sgvil); $("g-objNm").textContent=`シゴデキ村人(${CROP[sgCropId()].name})`; $("g-objCnt").textContent=`あと${sgFree()}区画`; }
   else if(on>0 || (isScare(S.objSel)&&placedOn(S.objSel))){ const o=OBJS[S.objSel]; $("g-objIc").innerHTML=objIco(S.objSel); $("g-objNm").textContent=o.name; $("g-objCnt").textContent=on>0?("×"+on):"(回収できます)"; }
@@ -10915,6 +10929,7 @@ function act(k){
     }
     case 6: { // 設置: スプリンクラーや案山子を置く / 村人に区画をまかせる
       const id=S.objSel;
+      if(id==="kmvil"){ nope(k,"木守りの村人は、大木のマスを押して任せます(1人で大木1本)"); break; }
       if(id==="vil"||id==="sgvil"||id==="rfvil"||id==="kgvil"||id==="mjvil"){
         const sg=id==="sgvil", rf=id==="rfvil", kind=rf?"rf":sg?"sg":id==="kgvil"?"kg":id==="mjvil"?"mj":true, who=vilWho(kind);
         if((rf?(S.roseVil||0):sg?(S.sgVil||0):kind==="kg"?yzN("kimagure"):kind==="mj"?yzN("meijin"):S.villagers)<=0){ nope(k,`${who}がいません`); break; }
@@ -12900,7 +12915,7 @@ const YZ_NEW = [
   { k:"prep", r:"GSR", name:"仕込み番の村人", vil:true, desc:"決めた仕込みを、材料があるかぎり自動で作り置きします(1人で1種類)", lore:"白いはちまきの仕込み番。樽のふたを開ける音だけで、中の熟れ具合がわかるという。" },
   { k:"kuwa", r:"GSR", name:"まっさらの鍬", use:true, desc:"使うと、いま見ている畑を1枚まるごとまっさらにします(作物・大木はなくなり、設置物と村人は手元に戻ります)。使う前に確かめます", lore:"ひと振りで、畑が初めて耕した日の土に戻る。戻らないのは、そこで過ごした時間の思い出だけ。" },
   { k:"neko", r:"GSR", name:"招き猫", desc:"タイピング・TOEIC から届くキー +5%(1匹ごと。最大 +900%、つまり10倍)", lore:"小判を抱えて、右手で福を招く白い猫。並べるほど、遠くの福まで届くようになる。" },
-  { k:"kimori", r:"GHR", name:"木守りの村人", vil:true, desc:"大木の実を、実ったら自動で収穫します(1人で大木1本)", lore:"緑の頭巾の木守り。大木と同じ速さで歳をとり、実が熟す日の朝には、もう籠を持って待っている。" },
+  { k:"kimori", r:"GHR", name:"木守りの村人", vil:true, desc:"大木の実を、実ったら自動で収穫します(1人で大木1本)。"+kb("6 で持って","設置の道具(6番目)で選んで")+"大木のマスを押して任せます", lore:"緑の頭巾の木守り。大木と同じ速さで歳をとり、実が熟す日の朝には、もう籠を持って待っている。" },
   { k:"kimagure", r:"GHR", name:"気まぐれ村人", vil:true, desc:"図鑑に載っている作物から、植えるたびにランダムで選んで育てます(1人で3区画)", lore:"今日は何を植えようか、と毎朝くじを引く村人。たまに、誰も見たことのない組み合わせの畑ができる。" },
   { k:"meijin", r:"GHR", name:"名人村人", vil:true, desc:"選んだ作物を3区画で育てます。品質はかならず ☆☆☆ になり、変異・超変異が2倍出やすくなります", lore:"赤いはちまきの名人。土をひと握りするだけで、その年の出来がわかるという。" },
   { k:"karakuri", r:"GHR", name:"からくり時計", desc:"農園を開いているあいだ、時間が +5% 速く進みます(1つごと。最大 +1000%)", lore:"歯車が見える古い時計。いくつも並べると、互いの歯車がかみ合って、時がどんどん速く回りだす。" },
@@ -12925,9 +12940,9 @@ function yzGainNew(x){
   if(YZ_TRE[k] && yzFull(k)){ const a=yzSwapGet(x.r); return { swap:true, amt:a, m:`${I} ${x.name}! もう効果の上限まで持っているので、かわりに ${fmtNum(a)}キー を受け取りました` }; }
   if(k==="kozuchi" && yzN(k)>=1){ const a=yzSwapGet(x.r); return { swap:true, amt:a, m:`${I} 打ち出の小槌! 持てるのは1つまでなので、かわりに ${fmtNum(a)}キー を受け取りました` }; }
   yzSet(k,yzN(k)+1);
-  if(k==="meijin"||k==="kimagure") S.objSel=k==="meijin"?"mjvil":"kgvil";
+  if(k==="meijin"||k==="kimagure"||k==="kimori") S.objSel=k==="meijin"?"mjvil":k==="kimori"?"kmvil":"kgvil";
   if(k==="map") S.yzMapSeen=1;
-  return { m:`${I} ${x.name}を手に入れました! ${x.desc}${x.vil||x.use||k==="meijin"?`。${kb("貴重品(8)の「千両箱」で使えます","貴重品の「千両箱」で使えます")}`:""}` };
+  return { m:`${I} ${x.name}を手に入れました! ${x.desc}${k==="kimori"?"":x.vil||x.use||k==="meijin"?`。${kb("貴重品(8)の「千両箱」で使えます","貴重品の「千両箱」で使えます")}`:""}` };
 }
 /* N〜UR: 今までの品をまとめて(1枚の札で中身がわかるように、種や料理は1種類だけ) */
 const YZ_ROSE_LV = ["b1","b2","b3","470","630","730","860","990","i1","i2","ls","lt"];
@@ -13046,21 +13061,21 @@ function yzJubako(){
   toast(`${ico(YZ_NEWK.jubako)} 宴の三段重を開けました。${fmtLeft(S.jubakoUntil-Date.now())}のあいだ、料理の効果を3つまでかけられます(同じ効果は重なりません)`,"good mut sup",5200,true);
   save(); renderAll(); renderTreas();
 }
-/* 木守りの村人: 1人で大木1本。実った大木の実を自動で収穫する(畑の順に、木守りの人数ぶんの木) */
+/* 木守りの村人: 1人で大木1本。6 で持って大木のマスを押して任せた木(t.km)の実を、実ったら自動で収穫する */
+const kmUsed = () => S.fields.reduce((a,f)=>a+btTrees(f).filter(([,t])=>t.km).length,0);
+const kmFree = () => Math.max(0, yzN("kimori")-kmUsed());
 let yzKimoriAt=0;
 function yzKimoriTick(force){
   const n=yzN("kimori"); if(!n || realFields) return;
   if(!force && Date.now()-yzKimoriAt<5000) return; yzKimoriAt=Date.now();
-  const got={}; let i=0;
-  S.fields.forEach(f=>{ for(const gi of Object.keys(f.bt||{})){ const t=f.bt[gi]; if(!t || i>=n) continue; i++;
-    if(!t.ready) continue;
+  const got={};
+  S.fields.forEach(f=>{ for(const gi of Object.keys(f.bt||{})){ const t=f.bt[gi]; if(!t || !t.km || !t.ready) continue;
     const b=BTS[t.id], id=btItem(b.fruit,t.q), m=b.fN*(t.q===5?2:1);
     t.ready=false; t.fr=0; btGive(id,m); S.btHarvest=(S.btHarvest||0)+m; got[id]=(got[id]||0)+m; } });
   const ks=Object.keys(got);
   if(ks.length){ toast(`${ico(YZ_NEWK.kimori)} 木守りの村人が ${ks.map(id=>`${ico(FOOD[id])} ${esc(FOOD[id].name)}×${fmtNum(got[id])}`).join(" ・ ")} を収穫しました`,"good",4200,true); save(); }
 }
 const fmtLeftD = ms => { const h=Math.ceil(ms/HOUR); return h>=24 ? `${Math.floor(h/24)}日${h%24?`${h%24}時間`:""}` : `${h}時間`; };
-const yzTreeN = () => S.fields.reduce((a,f)=>a+Object.keys(f.bt||{}).length,0);
 /* 気まぐれ村人・名人村人 */
 const KG_SLOTS=3, MJ_SLOTS=3;
 const kgFree = () => yzN("kimagure")*KG_SLOTS - vilUsed("kg");
@@ -13146,7 +13161,7 @@ function yzSub(x){
   if(k==="kozuchi") return n>0?(kozLeft()>0?`次に振れるまで あと <b>${fmtLeftD(kozLeft())}</b>`:kb("<b>Enter</b> で振る","もう一度タップで振る")):(kozLeft()>0?`次に振れるまで あと ${fmtLeftD(kozLeft())}`:"");
   if(k==="kobo") return n>0?`作り置き <b>${cookKeepTxt()}</b>(料理番の村人と同じ) ・ 任せている品 <b>${(S.autoWork||[]).length} / ${n}</b>(${kb("Enter","もう一度タップ")}で選ぶ)`:"";
   if(k==="prep") return n>0?`作り置き <b>${cookKeepTxt()}</b>(料理番の村人と同じ) ・ 任せている仕込み <b>${(S.autoPrep||[]).length} / ${n}</b>(${kb("Enter","もう一度タップ")}で選ぶ)`:"";
-  if(k==="kimori") return n>0?`世話をしている大木 <b>${Math.min(n,yzTreeN())} / ${yzTreeN()}本</b>(畑の順に、${n}本まで)`:"";
+  if(k==="kimori") return n>0?`${OBJ_HOW}大木のマスを押して任せます ・ 任せている大木 <b>${kmUsed()} / ${n}本</b>`:"";
   if(k==="kimagure") return n>0?`${OBJ_HOW}使っている区画 <b>${vilUsed("kg")} / ${n*KG_SLOTS}</b>`:"";
   if(k==="meijin") return n>0?`育てる作物 ${sw}<br><b>${ico(CROP[mjCropId()])} ${esc(CROP[mjCropId()].name)}</b>(${kb("Enter","もう一度タップ")}で一覧から選ぶ) ・ 使っている区画 <b>${vilUsed("mj")} / ${n*MJ_SLOTS}</b>`:"";
   return "";
