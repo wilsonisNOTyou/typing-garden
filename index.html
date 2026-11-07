@@ -1742,6 +1742,11 @@ body.garden.barag{background:radial-gradient(ellipse at 50% 120%, rgba(200,30,62
 html:not(.mobile) #screen-garden .toast{text-align:left}
 html:not(.mobile) #screen-garden:has(.modal.open) #g-toasts{left:auto; right:10px; transform:none; top:14px; width:min(15rem,calc((100vw - 760px)/2)); align-items:stretch}   /* ウィンドウを開いているあいだは右上の空いたところに小さく出して、見出しやタブを隠さない */
 html:not(.mobile) #screen-garden:has(.modal.open) .toast{font-size:.78rem; padding:.35rem .6rem; line-height:1.45}
+/* 右上に十分な空きがない幅(お知らせが細くなりすぎる)では、ウィンドウの下の真ん中に横長で出す */
+@media (max-width:1240px){
+  html:not(.mobile) #screen-garden:has(.modal.open) #g-toasts{left:50%; right:auto; top:auto; bottom:12px; transform:translateX(-50%); width:min(30rem, calc(100vw - 32px)); flex-direction:column-reverse; align-items:center; gap:.3rem}
+  html:not(.mobile) #screen-garden:has(.modal.open) .toast{text-align:center; box-shadow:0 4px 14px rgba(0,0,0,.25)}
+}
 #screen-garden .toast{
   background:var(--paper); border:2px solid var(--wood-d); border-radius:10px; padding:.3rem .8rem;
   font-weight:700; font-size:.85rem; box-shadow:0 3px 0 var(--wood-d); max-width:90vw; text-align:center; line-height:1.45;
@@ -12549,10 +12554,16 @@ function gachaFlash(r,big){
   if(gachaM==="r") rosePetalStorm(ri>=6 ? 60 : ri>=5 ? 28 : ri>=4 ? 14 : 0);   // UR は少し・GSR は多め・GHR は嵐
   if(gachaM==="w") wakuConfetti(ri>=6 ? 40 : ri>=5 ? 18 : ri>=4 ? 10 : 0);   // UR は少しだけ、HR は紙ふぶきなし
 }
-/* 大連のまとめで、いま出た段の上の端を、見えている範囲の上のほう(ひとつ前の段の終わりが少し見える位置)にそろえる。上には戻さない */
-function gachaFollowTop(box,el){
-  const d=el.getBoundingClientRect().top - box.getBoundingClientRect().top - 36;
-  if(d>0) box.scrollBy({top:d, behavior:"smooth"});
+/* 大連のまとめで、いま出た段の下の端まで見えるようにする(それまでの段はなるべく残す)。
+   段は縮んだ状態から飛び出すので本来の大きさで測り、次の段が出る前に描き直されても止まらないよう、すぐに動かす。
+   最後の段では下のキーの案内が2行に増えて見える範囲が縮むので、描き終えてから測る */
+function gachaFollowSec(box,el){
+  requestAnimationFrame(()=>{
+    if(!el.isConnected) return;
+    const r=el.getBoundingClientRect(), br=box.getBoundingClientRect();
+    const bottom=(r.top+r.bottom)/2 + el.offsetHeight/2 + 14;
+    if(bottom>br.bottom) box.scrollTop += bottom-br.bottom;
+  });
 }
 /* 出てきた札が見えるところまでスクロールする。
    札は縮んだ状態から飛び出すので、見た目の大きさではなく本来の大きさで測る */
@@ -12575,7 +12586,7 @@ function renderGacha(){
   const cur=top || body.querySelector(".gsumsec.pop, .gspot");
   if(mg) body.scrollTop += mg.getBoundingClientRect().top - body.getBoundingClientRect().top - 6;   // 1111111連: 演出の全体が見えるように
   else if(top) body.scrollTop += top.getBoundingClientRect().top - body.getBoundingClientRect().top - (top.classList.contains("gmtopc")?60:6);   // 結果: 最高レアに合わせる
-  else if(cur) gachaFollowTop(body,cur);   // 大連のまとめ: いま出た段を上のほうに置き、その下に続く高いレア度の段が見えるようにする
+  else if(cur) gachaFollowSec(body,cur);   // 大連のまとめ: いま出た段が下で見切れないようにする
   // 11連・111連も、めくったカードが見えるようについていく(速くめくるときはすぐ動かす)
   else if(gachaRes.length>1){
     const card=body.querySelector(".gcard.pop");
