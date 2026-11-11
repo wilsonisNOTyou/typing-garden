@@ -3124,6 +3124,7 @@ html.mobile #screen-garden .gacha.wide .gmachine{zoom:.42}
 /* これまでのお知らせ: 鈴のボタンと一覧 */
 #screen-garden .glogbtn{font:inherit; font-weight:700; font-size:.85rem; display:inline-flex; align-items:center; gap:.3rem; padding:.25rem .6rem; border-radius:999px; cursor:pointer; background:rgba(255,255,255,.75); border:2px solid var(--wood-d); color:var(--ink); white-space:nowrap}
 #screen-garden .glogbtn[hidden]{display:none}
+#screen-garden .glogbtn .kb, #screen-garden .bmore .kb{color:var(--ink-l); font-size:.72rem; font-weight:400; margin-left:.15rem}
 /* PC: お知らせが出る左上に置く(上の段のボタンの並びを変えない)。お知らせは、その下から並ぶ */
 html:not(.mobile) #screen-garden .glogbtn{position:fixed; left:8px; top:10px; z-index:34; padding:.15rem .55rem; font-size:.8rem; box-shadow:0 2px 0 var(--wood-d)}
 html:not(.mobile) #screen-garden.haslog #g-toasts{top:46px}
@@ -5471,6 +5472,7 @@ document.addEventListener("keydown",e=>{
     return;
   }
   if(scene==="title"){
+    if((e.key==="b"||e.key==="B") && !e.repeat && !e.ctrlKey && !e.metaKey && !e.altKey && !$("yzBtnRow").hidden){ e.preventDefault(); $("yzBtn").click(); return; }   // 千両箱ガチャのボタンを押す
     if(START_KEYS[e.key]) startGame(START_KEYS[e.key]);
     if(e.key==="r"||e.key==="R") openRanking(rankCur,playerName);
     if(e.key==="d"||e.key==="D") openDict(dictCur);
@@ -5491,7 +5493,7 @@ document.addEventListener("keydown",e=>{
   if(scene==="books"){ booksKey(e); return; }
   if(scene==="ranking"){
     if(e.key==="Escape") rankBack();
-    else if(e.key==="Tab" && !$("tqRankLvs").hidden){ e.preventDefault(); tqRankGroupStep(e.shiftKey?-1:1); }   // TOEIC: 基本・470〜990点・熟語 を切り替える
+    else if(e.key==="Tab" && !$("tqRankLvs").hidden){ e.preventDefault(); tqRankGroupStep(e.shiftKey?-1:1); }   // TOEIC: レベル(基本1〜熟語2)を切り替える
     else if(e.key==="ArrowLeft"||e.key==="ArrowRight"){
       e.preventDefault();
       const tabs=rankTabsNow(), i=tabs.indexOf(rankCur), n=tabs.length;
@@ -10451,7 +10453,7 @@ function toastNext(){ while(toastWait.length && liveToasts.filter(o=>o.imp && !o
 function toastBtn(){
   const b=$("g-logBtn"); if(!b) return;
   b.hidden=!toastLog.length; root.classList.toggle("haslog",!!toastLog.length);
-  b.innerHTML=`🔔${toastUnread?`<b>${toastUnread>99?"99+":toastUnread}</b>`:""}${toastWait.length?`<small>あと${toastWait.length}件</small>`:""}`;
+  b.innerHTML=`🔔${toastUnread?`<b>${toastUnread>99?"99+":toastUnread}</b>`:""}${toastWait.length?`<small>あと${toastWait.length}件</small>`:""}${MOB?"":'<span class="kb">;</span>'}`;
   b.title="これまでのお知らせ";
 }
 /* これまでのお知らせの一覧(見逃した分を読み返す) */
@@ -10748,7 +10750,7 @@ function renderBasket(){
     cards.push({ n:n+un, h:`<span class="bcard food${un?" q3":""}" data-b="${f.id}"><span class="bhd">${ico(f)} ${esc(f.name)} <b>${fmtNum(n+un)}</b></span>${un?`<span class="bqs"><i class="bq">ふつう${fmtNum(n)}</i><i class="bq q3">上位${fmtNum(un)}</i></span>`:""}</span>` });
   }
   const more=cards.length-BASKET_SHOW, shown=basketOpen||more<=1 ? cards : cards.slice(0,BASKET_SHOW);
-  const html = shown.map(x=>x.h).join("") + (more>1 ? `<button class="sbtn bmore" data-bmore>${basketOpen?"たたむ ▲":`ほかに ${more}種類 ▼`}</button>` : "");
+  const html = shown.map(x=>x.h).join("") + (more>1 ? `<button class="sbtn bmore" data-bmore>${basketOpen?"たたむ ▲":`ほかに ${more}種類 ▼`}${MOB?"":' <span class="kb">[</span>'}</button>` : "");
   patchHTML($("g-basket"), cards.length ? html : `<span class="empty">まだ何もありません。実った作物を${kb("素手(1)","素手")}で収穫しましょう</span>`);   // 変わった品だけ描き直す
 }
 $("g-basket").addEventListener("click",e=>{ if(e.target.closest("[data-bmore]")){ basketOpen=!basketOpen; renderBasket(); } });
@@ -16388,6 +16390,8 @@ function onKeyMain(e){
   if(k==="Escape"){ backToTitle(); return; }
   if(k==="-"){ e.preventDefault(); leave(); openToeic(); return; }   // TOEIC 英単語へ
   if(k==="/"){ e.preventDefault(); openLayout(); return; }   // 配置セット
+  if(k===";"){ e.preventDefault(); if(toastLog.length) toastLogOpen(); return; }   // これまでのお知らせ
+  if(k==="["){ const b=$("g-basket").querySelector("[data-bmore]"); if(b){ e.preventDefault(); b.click(); } return; }   // 収穫かごをひらく・たたむ
   if(k==="Enter"){ e.preventDefault(); openWorld(); return; }   // 農園の寄り合い
   if(k==="4" && e.repeat){ openPick("seed"); return; }   // 4 を長押し: 種の一覧
   if(k==="4"){ const now=Date.now(); if(now-lastFour<350){ lastFour=0; openPick("seed"); return; } lastFour=now; }   // 4 をすばやく2回: 種の一覧
@@ -17396,7 +17400,7 @@ function yzBtnRefresh(){
   const row=$("yzBtnRow"); if(!row) return;
   let x=null; try{ x=Garden.yzBtn(); }catch(e){}
   row.hidden=!(x && x.on); if(row.hidden) return;
-  $("yzBtnT").innerHTML=`キーボタン<small>1押し ${yzJp(x.gain)}キー${x.auto?` ・ キーの泉 ${x.auto}個`:""}</small>`;
+  $("yzBtnT").innerHTML=`キーボタン${window.IS_MOBILE?"":' <span class="kbdh">B</span>'}<small>1押し ${yzJp(x.gain)}キー${x.auto?` ・ キーの泉 ${x.auto}個`:""}</small>`;
 }
 window.yzBtnRepaint=()=>{ try{ if($("screen-title").classList.contains("active")) refreshGardenStat(); }catch(e){} };
 $("yzBtn").addEventListener("click",e=>{
@@ -18944,17 +18948,19 @@ function tqRankView(){ window.tqFromRank=true; tqRankLv=tqRankGroupOf(tqLadder[0
 /* みんなのランキング: 出題形式のタブ(toeic-type など)は、下のレベルのボタンで選んだレベルの記録を出す */
 /* レベルは3つのまとまりで1つのランキングにする(記録はこれまでどおりレベルごとに保存し、見るときに集める) */
 const TQ_RANK_GROUPS=[["base","基本",["b1","b2","b3"]],["score","470〜990点",["470","630","730","860","990"]],["idiom","熟語",["i1","i2"]]];
-const tqRankGroupOf = lv => (TQ_RANK_GROUPS.find(g=>g[2].includes(lv))||TQ_RANK_GROUPS[0])[0];
+/* ランキングは、レベルごとに分ける(基本1〜熟語2 の10個)。対戦や苦手のまとまりは、これまでどおり上の3つ */
+const TQ_RANK_LVS=TQ_LEVELS.filter(([k])=>k!=="weak");
+const tqRankGroupOf = lv => (TQ_RANK_LVS.find(([k])=>k===lv)||TQ_RANK_LVS[0])[0];
 const tqLvHard = lv => TQ_LEVELS.findIndex(([k])=>k===lv);   // 同じ問題数なら、難しい(後ろの)レベルが上
-let tqRankLv="base";
+let tqRankLv="b1";
 window.tqRankKey = d => d==="toeic-listen" ? "toeic-listen-ls" : d;
-window.tqRankMulti = d => { if(!/^toeic-(type|choice|fill|rev)$/.test(d)) return null; const g=TQ_RANK_GROUPS.find(x=>x[0]===tqRankLv)||TQ_RANK_GROUPS[0]; return g[2].map(lv=>[d+"-"+lv,lv]); };
+window.tqRankMulti = d => { if(!/^toeic-(type|choice|fill|rev)$/.test(d)) return null; const lv=tqRankGroupOf(tqRankLv); return [[d+"-"+lv,lv]]; };
 window.tqRankSync = d => {
   const box=$("tqRankLvs"), on=/^toeic-/.test(d) && d!=="toeic-listen";   // リスニングはレベルがない
   box.hidden=!on; if(!on) return;
-  box.innerHTML=TQ_RANK_GROUPS.map(([k,nm])=>`<button class="btn${k===tqRankLv?" active":""}" data-lv="${k}">${nm}</button>`).join("")+`<small class="tq-rktab"><span class="kbdh">Tab</span> で切り替え</small>`;
+  box.innerHTML=TQ_RANK_LVS.map(([k,nm])=>`<button class="btn${k===tqRankLv?" active":""}" data-lv="${k}">${nm}</button>`).join("")+`<small class="tq-rktab"><span class="kbdh">Tab</span> で切り替え</small>`;
 };
-function tqRankGroupStep(dir){ const n=TQ_RANK_GROUPS.length, i=TQ_RANK_GROUPS.findIndex(g=>g[0]===tqRankLv); tqRankLv=TQ_RANK_GROUPS[(i+dir+n)%n][0]; openRanking(rankCur, playerName); }
+function tqRankGroupStep(dir){ const n=TQ_RANK_LVS.length, i=Math.max(0,TQ_RANK_LVS.findIndex(g=>g[0]===tqRankLv)); tqRankLv=TQ_RANK_LVS[(i+dir+n)%n][0]; openRanking(rankCur, playerName); }
 $("tqRankLvs").addEventListener("click",e=>{ const b=e.target.closest("[data-lv]"); if(!b) return; tqRankLv=b.dataset.lv; openRanking(rankCur, playerName); });
 setInterval(()=>{ if(tqRegWait && !nmOpen){ tqRegWait=false; if(playerName && tqPhase==="result" && scene==="toeic") tqRegister(); } },400);
 /* ---- 単語リスト ---- */
