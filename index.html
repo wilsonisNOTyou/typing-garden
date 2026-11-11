@@ -3117,6 +3117,33 @@ html.mobile #screen-garden .gacha.wide .gmachine{zoom:.42}
 .gask-acts button:focus-visible, .gask-acts button:focus{outline:3px solid #f4c542; outline-offset:2px}
 .gask-box small{display:block; margin-top:.6rem; text-align:right; font-size:.72rem; font-weight:400; color:#8a7058}
 @keyframes gask-in{from{opacity:0}to{opacity:1}}
+/* 大事なお知らせは、目に入るように少し強く */
+#screen-garden .toast.keep{border-width:2.5px; box-shadow:0 4px 0 var(--wood-d), 0 0 0 3px rgba(244,197,66,.35), 0 8px 20px rgba(60,40,10,.28); animation:g-toastkeep .45s cubic-bezier(.2,.9,.3,1.3)}
+@keyframes g-toastkeep{0%{opacity:0; transform:translateX(-24px) scale(.94)}60%{opacity:1; transform:translateX(4px) scale(1.02)}100%{transform:none}}
+@media (prefers-reduced-motion:reduce){ #screen-garden .toast.keep{animation:none} }
+/* これまでのお知らせ: 鈴のボタンと一覧 */
+#screen-garden .glogbtn{font:inherit; font-weight:700; font-size:.85rem; display:inline-flex; align-items:center; gap:.3rem; padding:.25rem .6rem; border-radius:999px; cursor:pointer; background:rgba(255,255,255,.75); border:2px solid var(--wood-d); color:var(--ink); white-space:nowrap}
+#screen-garden .glogbtn[hidden]{display:none}
+/* PC: お知らせが出る左上に置く(上の段のボタンの並びを変えない)。お知らせは、その下から並ぶ */
+html:not(.mobile) #screen-garden .glogbtn{position:fixed; left:8px; top:10px; z-index:34; padding:.15rem .55rem; font-size:.8rem; box-shadow:0 2px 0 var(--wood-d)}
+html:not(.mobile) #screen-garden.haslog #g-toasts{top:46px}
+html:not(.mobile) #screen-garden.haslog:has(.modal.open) #g-toasts{top:14px}
+@media (max-width:1240px){ html:not(.mobile) #screen-garden.haslog:has(.modal.open) #g-toasts{top:auto} }
+#screen-garden .glogbtn b{background:var(--alert); color:#fff; border-radius:999px; padding:0 .4rem; font-size:.72rem; line-height:1.5}
+#screen-garden .glogbtn small{font-size:.72rem; color:var(--ink-l); font-weight:400}
+.glog{position:fixed; inset:0; z-index:30000; display:flex; align-items:center; justify-content:center; padding:16px; background:rgba(30,20,10,.55)}
+.glog-box{width:min(560px,100%); max-height:min(84vh,640px); display:flex; flex-direction:column; background:#fffaf0; color:#3a2a1a; border:3px solid #7a5230; border-radius:16px; box-shadow:0 6px 0 #7a5230, 0 18px 40px rgba(0,0,0,.35); padding:1rem 1.1rem .8rem; font-weight:700}
+.glog-head{display:flex; align-items:center; justify-content:space-between; gap:.8rem; margin-bottom:.6rem; font-size:1.05rem}
+.glog-x{font:inherit; font-size:.85rem; padding:.3rem .9rem; border-radius:999px; cursor:pointer; border:2px solid #7a5230; background:#fff; color:#3a2a1a}
+.glog-list{overflow:auto; min-height:0; display:flex; flex-direction:column; gap:.35rem; padding-right:.2rem}
+.glog-it{display:flex; gap:.6rem; align-items:baseline; font-size:.85rem; line-height:1.55; font-weight:400; padding:.35rem .6rem; border-radius:8px; background:rgba(122,82,48,.07); border-left:4px solid transparent}
+.glog-it.imp{font-weight:700; background:rgba(244,197,66,.2); border-left-color:#e0a020}
+.glog-it.warn{color:#8a5a4a}
+.glog-it time{flex:0 0 auto; font-size:.72rem; color:#8a7058; font-variant-numeric:tabular-nums}
+.glog-it span{min-width:0; overflow-wrap:anywhere}
+.glog-it svg{width:1.2em; height:1.2em; vertical-align:-.2em}
+.glog-none{font-weight:400; color:#8a7058; margin:.6rem 0}
+.glog-note{margin-top:.5rem; font-size:.72rem; font-weight:400; color:#8a7058}
 </style>
 </head>
 <body>
@@ -3402,6 +3429,7 @@ html.mobile #screen-garden .gacha.wide .gmachine{zoom:.42}
       <div class="buff" id="g-buff" hidden></div>
       <div class="rate" id="g-rate"></div>
       <div class="wcmini" id="wcMini" hidden></div>
+      <button class="glogbtn" id="g-logBtn" type="button" tabindex="-1" hidden>🔔</button>
       <div class="sp"></div>
       <button class="tbtn shop" id="g-shopBtn">お店<span class="kb">Tab</span></button>
       <button class="tbtn gacha" id="g-gachaBtn">ガチャ<span class="kb">7</span></button>
@@ -10408,9 +10436,40 @@ function dropToast(o){
   liveToasts=liveToasts.filter(x=>x!==o);
   o.el.classList.add("out");
   setTimeout(()=>o.el.remove(),320);
+  if(o.imp && !o.warn) setTimeout(toastNext,180);   // 空いたら、順番待ちの次を出す
 }
-/* 大事なお知らせ(注意・変異・何かを手に入れたときの説明): 2行で切らず、ほかのお知らせより後に消す */
+/* お知らせは3種類。
+   大事(変異・何かを手に入れたときの説明): 2行で切らず、長さに合わせて長く出す。同時に出すのは IMP_MAX 個までで、あふれた分は順番待ちにして消さない
+   注意(できない操作の理由): すぐ出す。同時に1つだけで、新しいものに置き換える。大事なお知らせを押し出さない
+   ふつう: 2行まで・2つまで。古いものから消える */
 const toastImp=(text,kind)=>/warn|mut|sup/.test(kind) || /手に入れました|開けました/.test(text);
+const toastWarn=kind=>/warn/.test(kind) && !/mut|sup/.test(kind);
+const IMP_MAX=2;
+let toastWait=[], toastLog=[], toastUnread=0;   // 順番待ち / これまでのお知らせ(新しい順・60件まで。記録には残さない) / まだ一覧で見ていない大事なお知らせの数
+const toastTxt=(text,html)=>{ if(!html) return String(text); const d=document.createElement("div"); d.innerHTML=text; return d.textContent||""; };
+function toastNext(){ while(toastWait.length && liveToasts.filter(o=>o.imp && !o.warn).length<IMP_MAX) toastShow(...toastWait.shift()); toastBtn(); }
+function toastBtn(){
+  const b=$("g-logBtn"); if(!b) return;
+  b.hidden=!toastLog.length; root.classList.toggle("haslog",!!toastLog.length);
+  b.innerHTML=`🔔${toastUnread?`<b>${toastUnread>99?"99+":toastUnread}</b>`:""}${toastWait.length?`<small>あと${toastWait.length}件</small>`:""}`;
+  b.title="これまでのお知らせ";
+}
+/* これまでのお知らせの一覧(見逃した分を読み返す) */
+function toastLogOpen(){
+  if(document.querySelector(".glog")) return;
+  toastUnread=0; toastBtn();
+  const w=document.createElement("div"); w.className="glog";
+  const hm=t=>{ const d=new Date(t); return `${d.getHours()}:${String(d.getMinutes()).padStart(2,"0")}`; };
+  w.innerHTML=`<div class="glog-box" role="dialog" aria-modal="true" aria-label="これまでのお知らせ"><div class="glog-head"><b>🔔 これまでのお知らせ</b><button type="button" class="glog-x">閉じる${MOB?"":" (Esc)"}</button></div>
+    <div class="glog-list">${toastLog.map(x=>`<div class="glog-it${x.imp?" imp":""}${x.warn?" warn":""}"><time>${hm(x.at)}</time><span>${x.h}</span></div>`).join("")||'<p class="glog-none">まだお知らせはありません</p>'}</div>
+    <small class="glog-note">新しい順に60件まで。ページを開き直すと消えます${MOB?"":" ・ ↑ ↓ で送る"}</small></div>`;
+  document.body.appendChild(w);
+  const list=w.querySelector(".glog-list");
+  const close=()=>{ window.removeEventListener("keydown",key,true); w.remove(); };
+  const key=e=>{ e.stopImmediatePropagation(); e.preventDefault(); if(e.key==="Escape"||e.key==="Enter") close(); else if(e.key==="ArrowDown"||e.key==="ArrowUp") list.scrollBy(0,e.key==="ArrowDown"?80:-80); };
+  window.addEventListener("keydown",key,true);
+  w.addEventListener("click",e=>{ if(e.target===w || e.target.closest(".glog-x")) close(); });
+}
 let toastBatch=null;   // 庭に入ったときのお知らせを集めておく(ふつうのものは1つにまとめる)
 function flushToastBatch(){
   const b=toastBatch; toastBatch=null;
@@ -10420,7 +10479,7 @@ function flushToastBatch(){
 let toastHold=[];   // ガチャの演出中に届いたお知らせ(終わってから出す)
 setInterval(()=>{ if(toastHold.length && !(modal==="gacha" && gachaBusy())){ const h=toastHold; toastHold=[]; toastBatch=[]; for(const a of h) toast(...a); flushToastBatch(); } },400);
 function toast(text,kind="",ms=2600,html=false){
-  const imp=toastImp(String(text),kind);
+  const imp=toastImp(String(text),kind), warn=toastWarn(kind);
   if(!imp){ let inTut=null; try{ inTut=tutStep(); }catch(e){} if(inTut) return; }   // はじめてガイドの途中は、ふつうのお知らせを出さない(吹き出しの邪魔になる)。読み込みの途中で呼ばれたとき(ガイドの仕組みがまだ準備前)は、ガイド中ではないとみなす
   if(modal==="gacha" && gachaBusy()){ toastHold.push([text,kind,ms,html]); return; }   // ガチャの演出中は、終わってからまとめて出す
   if(toastBatch && !imp){ toastBatch.push({ h:html?String(text):esc(String(text)), ms }); return; }
@@ -10429,24 +10488,40 @@ function toast(text,kind="",ms=2600,html=false){
   const same=liveToasts.find(o=>o.key===key);
   if(same){                       // 同じダイアログは1つだけ
     clearTimeout(same.timer);
-    same.timer=setTimeout(()=>dropToast(same),ms);
+    same.timer=setTimeout(()=>dropToast(same),same.ms||ms);
     return;
   }
+  if(toastWait.some(a=>String(a[0])===key)) return;
+  // 一覧に残す(注意は、同じものが続けて並ばないように)
+  const h=html?String(text):esc(String(text));
+  if(!(toastLog[0] && toastLog[0].h===h)){ toastLog.unshift({ h, imp:imp&&!warn, warn, at:Date.now() }); if(toastLog.length>60) toastLog.length=60; if(imp && !warn) toastUnread++; }
+  if(imp && !warn){
+    ms=Math.min(12000, Math.max(ms, 2600+toastTxt(text,html).length*75));   // 読み切れる長さだけ出す
+    if(liveToasts.filter(o=>o.imp && !o.warn).length>=IMP_MAX){ toastWait.push([text,kind,ms,html]); if(toastWait.length>8) toastWait.shift(); toastBtn(); return; }   // あふれた分は順番待ち。待ちが8件をこえたら古い順にあきらめる(一覧には残る)
+  }
+  toastShow(text,kind,ms,html);
+  toastBtn();
+}
+function toastShow(text,kind,ms,html){
+  const imp=toastImp(String(text),kind), warn=toastWarn(kind), key=String(text);
+  if(imp && !warn && toastWait.length>=3) ms=Math.max(3200,Math.round(ms*.6));   // たまっているときは、少し早めに次へ
   const tb=root.querySelector(".top"), tr=tb && tb.getBoundingClientRect();
   if(tr){   // PC: 左の空いたところの幅に合わせる(狭いときは看板の幅まで)
     const sg=root.querySelector(".sign"), sr=sg && sg.getBoundingClientRect();
     $("g-toasts").style.setProperty("--toastW", Math.min(420, Math.max(Math.round(tr.left)-16, sr ? Math.round(sr.right)-8 : 208))+"px");
   }
   const t=document.createElement("div");
-  t.className="toast "+kind+(imp?" imp":"");
+  t.className="toast "+kind+(imp?" imp":"")+(imp&&!warn?" keep":"");
   const tx=document.createElement("span"); tx.className="tx"; t.appendChild(tx);
   if(html) tx.innerHTML=text; else tx.textContent=text;
   $("g-toasts").appendChild(t);
-  const o={key, el:t, timer:null, imp};
+  const o={key, el:t, timer:null, imp, warn, ms};
+  if(warn) for(const x of liveToasts.filter(x=>x.warn)) dropToast(x);   // 注意は1つだけ(新しいものに置き換える)
   liveToasts.push(o);
   o.timer=setTimeout(()=>dropToast(o),ms);
-  while(liveToasts.length>MAX_TOASTS) dropToast(liveToasts.find(x=>!x.imp && x!==o) || (o.imp ? liveToasts[0] : o));   // 2つまで(ふつうのものから古い順に消す。大事なものは、ふつうのものに押し出されない)
+  for(let x; liveToasts.filter(y=>!y.imp).length>MAX_TOASTS && (x=liveToasts.find(y=>!y.imp && y!==o)); ) dropToast(x);   // ふつうのお知らせは2つまで(古い順に消す。大事なものは押し出さない)
 }
+$("g-logBtn").addEventListener("click",toastLogOpen);
 let quietFx=false;   // ほかの畑をまとめて触るときは、今の畑に演出を出さない
 function floatAt(k,text){
   if(quietFx) return;
