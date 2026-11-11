@@ -13781,8 +13781,23 @@ function renderTreas(){
    レア度ごとに並べ、矢印キーで選んで Enter で決める */
 const PICK_RANKS=["お気に入り","N","R","SR","HR","UR","GSR","GHR","曜日限定","薔薇","苗木"];
 const pickGroup = id => pickKind==="seed" && isFavS(id) ? "お気に入り" : /^rose/.test(id) ? "薔薇" : isSap(id) ? "苗木" : CROP[id].day!=null ? "曜日限定" : (CROP[id].r||"N");   // お気に入りは一番上、曜日限定の作物はレア度と分けて並べる
-let pickKind="seed", pickCur=0, pickIds=[], lastFour=0;
+let pickKind="seed", pickCur=0, pickIds=[], pickInfo=[], lastFour=0, lastNumKey="";
+/* 肥料(5)・設置物と村人(6)の一覧に出す絵・名前・数: 道具の欄と同じ表示を借りる */
+function pickBarInfo(kind,id){
+  const key=kind==="fert"?"fertSel":"objSel", keep=S[key], pre=kind==="fert"?"g-fert":"g-obj";
+  S[key]=id; renderBar();
+  const r={ ic:$(pre+"Ic").innerHTML, nm:$(pre+"Nm").textContent, ct:$(pre+"Cnt").textContent };
+  S[key]=keep; renderBar();
+  return r;
+}
 function openPick(kind){
+  if(kind==="fert" || kind==="obj"){   // 肥料・設置物と村人: 持っているものを一覧から選ぶ
+    const ids = kind==="fert" ? ownedFerts() : ownedObjs();
+    if(ids.length<2){ setTool(kind==="fert"?5:6); return; }
+    pickKind=kind; pickIds=ids.slice(); pickInfo=ids.map(id=>pickBarInfo(kind,id));
+    pickCur=Math.max(0, pickIds.indexOf(kind==="fert" ? S.fertSel : S.objSel));
+    openModal("pick"); return;
+  }
   if(kind==="kamado" || kind==="rkam"){   // かまどの色: 一覧から選ぶ(いちばん上は「使わない」)
     const ids = kind==="kamado" ? kamadoDishes() : rkamCols();
     if(!ids.length){ sfx.nope(); toast(kind==="kamado" ? "画面の色の料理を食べると、その色を選べるようになります" : "薔薇を咲かせると、その色を選べるようになります","warn",3600); return; }
@@ -13807,6 +13822,15 @@ function pickFav(i){
   toggleFav("s",id); pickSort(); pickCur=pickIds.indexOf(id); renderPick(); renderAll();
 }
 function renderPick(){
+  if(pickKind==="fert" || pickKind==="obj"){
+    const ft=pickKind==="fert", now = ft ? S.fertSel : S.objSel, num=ft?5:6;
+    $("g-pickTitle").textContent = ft ? "肥料を選ぶ" : "置くもの・村人を選ぶ";
+    $("g-pickNote").innerHTML = "持っているものです。"+kb(`<b>矢印キー</b> で選んで <b>Enter</b> で決定 ・ <b>Esc</b> / <b>${num}</b> 閉じる`,"タップして選びます");
+    $("g-pickBody").innerHTML = `<div class="pickgrp"><div class="pickgrid">${pickIds.map((id,j)=>{ const x=pickInfo[j]||{};
+      return `<button class="pitem${j===pickCur?" cur":""}${id===now?" sel":""}" data-i="${j}" tabindex="-1"><span class="pic">${x.ic||""}</span><span class="pnm">${esc(x.nm||"")}</span><span class="pct">${esc(x.ct||"")}</span></button>`; }).join("")}</div></div>`;
+    const cur=$("g-pickBody").querySelector(".pitem.cur"); if(cur && cur.scrollIntoView) cur.scrollIntoView({block:"nearest"});
+    return;
+  }
   if(pickKind==="kamado" || pickKind==="rkam"){
     const km=pickKind==="kamado", now = km ? (S.kamado||"") : (S.rkamOn ? S.rkamCol||"" : "");
     $("g-pickTitle").textContent = km ? "永遠のかまどの色" : "薔薇のかまどの色";
@@ -13832,6 +13856,11 @@ function renderPick(){
   const cur=$("g-pickBody").querySelector(".pitem.cur"); if(cur && cur.scrollIntoView) cur.scrollIntoView({block:"nearest"});
 }
 function pickChoose(i){
+  if(pickKind==="fert" || pickKind==="obj"){
+    const id=pickIds[i]; if(id==null) return;
+    if(pickKind==="fert"){ S.fertSel=id; S.tool=5; } else { S.objSel=id; S.tool=6; }
+    sfx.tool(); save(); renderAll(); closeModal(true); return;
+  }
   if(pickKind==="kamado" || pickKind==="rkam"){
     const id=pickIds[i]; if(id==null) return;
     if(pickKind==="kamado"){ S.kamado=id; applyTheme(); }
@@ -13860,7 +13889,8 @@ function pickMove(dir){
 }
 function pickKey(e){
   const k=e.key;
-  if(e.repeat && k==="4") return;   // 4 を長押しして開いたときの続き
+  if(e.repeat && /^[456]$/.test(k)) return;   // 4・5・6 を長押しして開いたときの続き
+  if((pickKind==="fert"||pickKind==="obj") && (k==="Escape"||k===(pickKind==="fert"?"5":"6"))){ e.preventDefault(); closeModal(); return; }
   if(k==="Escape"||k==="4"){ e.preventDefault(); if(pickKind!=="seed") openModal("treas"); else closeModal(); return; }
   const n=pickIds.length;
   if(k==="ArrowLeft"||k==="ArrowRight"){ e.preventDefault(); pickCur=(pickCur+(k==="ArrowRight"?1:-1)+n)%n; sfx.cursor(); renderSoon(renderPick); return; }
@@ -13871,13 +13901,16 @@ function pickKey(e){
 $("g-pickBody").addEventListener("click",e=>{ const it=e.target.closest && e.target.closest(".pitem"); if(!it) return; if(e.target.closest("[data-star]")){ pickFav(+it.dataset.i); return; } pickChoose(+it.dataset.i); });
 // スマホ・マウス: 種の欄を長押しすると一覧
 {
-  const slot=root.querySelector('.slot[data-tool="4"]'); let t=null, fired=false;
-  const stop=()=>{ clearTimeout(t); t=null; };
-  slot.addEventListener("pointerdown",e=>{ if(e.target.closest(".arr")) return; fired=false; stop(); t=setTimeout(()=>{ fired=true; openPick("seed"); },450); });
-  for(const ev of ["pointerup","pointerleave","pointercancel"]) slot.addEventListener(ev,stop);
-  slot.addEventListener("contextmenu",e=>e.preventDefault());
-  slot.addEventListener("dblclick",e=>{ if(!e.target.closest(".arr")) openPick("seed"); });
-  slot.addEventListener("click",e=>{ if(fired){ fired=false; e.stopImmediatePropagation(); } },true);
+  for(const [num,kind] of [[4,"seed"],[5,"fert"],[6,"obj"]]){   // 種・肥料・設置物の欄: 長押しかダブルクリックで一覧
+    const slot=root.querySelector(`.slot[data-tool="${num}"]`); let t=null, fired=false;
+    const can=()=>kind==="seed" || (kind==="fert"?ownedFerts():ownedObjs()).length>1;
+    const stop=()=>{ clearTimeout(t); t=null; };
+    slot.addEventListener("pointerdown",e=>{ if(e.target.closest(".arr")) return; fired=false; stop(); t=setTimeout(()=>{ if(!can()) return; fired=true; openPick(kind); },450); });
+    for(const ev of ["pointerup","pointerleave","pointercancel"]) slot.addEventListener(ev,stop);
+    slot.addEventListener("contextmenu",e=>e.preventDefault());
+    slot.addEventListener("dblclick",e=>{ if(!e.target.closest(".arr") && can()) openPick(kind); });
+    slot.addEventListener("click",e=>{ if(fired){ fired=false; e.stopImmediatePropagation(); } },true);
+  }
 }
 /* 料理番の村人に任せる料理: レシピを持っている料理を並べ、段階を選んで任せる / やめる */
 let cvCur=0, cvRows=[];
@@ -16394,7 +16427,13 @@ function onKeyMain(e){
   if(k==="["){ const b=$("g-basket").querySelector("[data-bmore]"); if(b){ e.preventDefault(); b.click(); } return; }   // 収穫かごをひらく・たたむ
   if(k==="Enter"){ e.preventDefault(); openWorld(); return; }   // 農園の寄り合い
   if(k==="4" && e.repeat){ openPick("seed"); return; }   // 4 を長押し: 種の一覧
-  if(k==="4"){ const now=Date.now(); if(now-lastFour<350){ lastFour=0; openPick("seed"); return; } lastFour=now; }   // 4 をすばやく2回: 種の一覧
+  if(k==="4"){ const now=Date.now(); if(now-lastFour<350 && lastNumKey==="4"){ lastFour=0; openPick("seed"); return; } lastFour=now; lastNumKey="4"; }   // 4 をすばやく2回: 種の一覧
+  if(k==="5"||k==="6"){   // 5・6 を長押し、またはすばやく2回: 肥料・設置物と村人の一覧(2種類以上持っているとき)
+    const kind=k==="5"?"fert":"obj", many=(k==="5"?ownedFerts():ownedObjs()).length>1, now=Date.now();
+    if(many && (e.repeat || (now-lastFour<350 && lastNumKey===k))){ lastFour=0; openPick(kind); return; }
+    if(e.repeat) return;
+    lastFour=now; lastNumKey=k;
+  }
   if(/^[1-6]$/.test(k)){ setTool(+k); return; }
   if(k==="ArrowLeft"){ e.preventDefault(); cycleSel(-1); return; }
   if(k==="ArrowRight"){ e.preventDefault(); cycleSel(1); return; }
