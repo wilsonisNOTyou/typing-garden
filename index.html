@@ -6188,19 +6188,17 @@ const NEWS=[
   { d:"2026-11-11", t:"千両箱ガチャ", items:[
     "農園のガチャに、4台目の「千両箱ガチャ」を追加しました。累計獲得キーが1兆を超えると開きます",
     "いちばん上の新しいレア度 GZR と、新しい貴重品が19種類出ます。貴重品の「千両箱」タブで、効果を確かめたり使ったりできます",
-    "新しい村人が増えました。工房や仕込みの作り置きを任せる村人、大木の実を収穫する村人、品質と変異に強い村人などです",
-    "ホームにキーボタンを出す宝物、料理の効果を3つ重ねる品、畑1枚をまっさらにする道具、畑の上限を上げる地図などもあります",
     "番付とランキングに、畑の枚数を追加しました",
+    "農園の肥料(5)と設置物・村人(6)も、種(4)と同じように、長押しかすばやく2回押すと一覧から選べます",
   ]},
   { d:"2026-11-11", t:"ゲームクリアとエンディング", items:[
     "実績のいちばん下に、持っているキーが1京を超える実績を追加しました。受け取るとエンディングが流れて、ゲームクリアになります",
-    "ごほうびは、名前の先頭に付く王冠です。番付・ランキング・チャットにも、王冠付きの名前で載ります",
-    "クリアしたあとも、そのまま遊び続けられます。エンディングは、実績の画面からもう一度見られます",
+    "クリアしたあとも、そのまま遊び続けられます",
   ]},
   { d:"2026-11-11", t:"音と演出を新しくしました", items:[
     "画面ごとに BGM が流れるようになりました。ホーム・タイピング・ノーミス勝負・農園・ガチャ・TOEIC・対戦に、それぞれの曲があります",
     "効果音を作り直し、打ったときの火花、農園の作業で飛ぶ粒、ガチャの光などの演出を足しました",
-    "ホームの「音と演出」(V キー)で、BGM と効果音の音量を変えられます。全曲を聴ける一覧もあります",
+    "ホームの「音と演出」(V キー)で、BGM と効果音の音量を変えられます。ゲームの中で流れた曲を、あとから聴ける一覧もあります",
     "新しい音と演出はオフにできます。オフにすると、これまでの音と見た目に戻ります",
   ]},
   { d:"2026-11-06", t:"TOEIC 英単語の覚えた数ランキング", items:[
@@ -13796,8 +13794,23 @@ function renderTreas(){
    レア度ごとに並べ、矢印キーで選んで Enter で決める */
 const PICK_RANKS=["お気に入り","N","R","SR","HR","UR","GSR","GHR","曜日限定","薔薇","苗木"];
 const pickGroup = id => pickKind==="seed" && isFavS(id) ? "お気に入り" : /^rose/.test(id) ? "薔薇" : isSap(id) ? "苗木" : CROP[id].day!=null ? "曜日限定" : (CROP[id].r||"N");   // お気に入りは一番上、曜日限定の作物はレア度と分けて並べる
-let pickKind="seed", pickCur=0, pickIds=[], lastFour=0;
+let pickKind="seed", pickCur=0, pickIds=[], pickInfo=[], lastFour=0, lastNumKey="";
+/* 肥料(5)・設置物と村人(6)の一覧に出す絵・名前・数: 道具の欄と同じ表示を借りる */
+function pickBarInfo(kind,id){
+  const key=kind==="fert"?"fertSel":"objSel", keep=S[key], pre=kind==="fert"?"g-fert":"g-obj";
+  S[key]=id; renderBar();
+  const r={ ic:$(pre+"Ic").innerHTML, nm:$(pre+"Nm").textContent, ct:$(pre+"Cnt").textContent };
+  S[key]=keep; renderBar();
+  return r;
+}
 function openPick(kind){
+  if(kind==="fert" || kind==="obj"){   // 肥料・設置物と村人: 持っているものを一覧から選ぶ
+    const ids = kind==="fert" ? ownedFerts() : ownedObjs();
+    if(ids.length<2){ setTool(kind==="fert"?5:6); return; }
+    pickKind=kind; pickIds=ids.slice(); pickInfo=ids.map(id=>pickBarInfo(kind,id));
+    pickCur=Math.max(0, pickIds.indexOf(kind==="fert" ? S.fertSel : S.objSel));
+    openModal("pick"); return;
+  }
   if(kind==="kamado" || kind==="rkam"){   // かまどの色: 一覧から選ぶ(いちばん上は「使わない」)
     const ids = kind==="kamado" ? kamadoDishes() : rkamCols();
     if(!ids.length){ sfx.nope(); toast(kind==="kamado" ? "画面の色の料理を食べると、その色を選べるようになります" : "薔薇を咲かせると、その色を選べるようになります","warn",3600); return; }
@@ -13822,6 +13835,15 @@ function pickFav(i){
   toggleFav("s",id); pickSort(); pickCur=pickIds.indexOf(id); renderPick(); renderAll();
 }
 function renderPick(){
+  if(pickKind==="fert" || pickKind==="obj"){
+    const ft=pickKind==="fert", now = ft ? S.fertSel : S.objSel, num=ft?5:6;
+    $("g-pickTitle").textContent = ft ? "肥料を選ぶ" : "置くもの・村人を選ぶ";
+    $("g-pickNote").innerHTML = "持っているものです。"+kb(`<b>矢印キー</b> で選んで <b>Enter</b> で決定 ・ <b>Esc</b> / <b>${num}</b> 閉じる`,"タップして選びます");
+    $("g-pickBody").innerHTML = `<div class="pickgrp"><div class="pickgrid">${pickIds.map((id,j)=>{ const x=pickInfo[j]||{};
+      return `<button class="pitem${j===pickCur?" cur":""}${id===now?" sel":""}" data-i="${j}" tabindex="-1"><span class="pic">${x.ic||""}</span><span class="pnm">${esc(x.nm||"")}</span><span class="pct">${esc(x.ct||"")}</span></button>`; }).join("")}</div></div>`;
+    const cur=$("g-pickBody").querySelector(".pitem.cur"); if(cur && cur.scrollIntoView) cur.scrollIntoView({block:"nearest"});
+    return;
+  }
   if(pickKind==="kamado" || pickKind==="rkam"){
     const km=pickKind==="kamado", now = km ? (S.kamado||"") : (S.rkamOn ? S.rkamCol||"" : "");
     $("g-pickTitle").textContent = km ? "永遠のかまどの色" : "薔薇のかまどの色";
@@ -13847,6 +13869,11 @@ function renderPick(){
   const cur=$("g-pickBody").querySelector(".pitem.cur"); if(cur && cur.scrollIntoView) cur.scrollIntoView({block:"nearest"});
 }
 function pickChoose(i){
+  if(pickKind==="fert" || pickKind==="obj"){
+    const id=pickIds[i]; if(id==null) return;
+    if(pickKind==="fert"){ S.fertSel=id; S.tool=5; } else { S.objSel=id; S.tool=6; }
+    sfx.tool(); save(); renderAll(); closeModal(true); return;
+  }
   if(pickKind==="kamado" || pickKind==="rkam"){
     const id=pickIds[i]; if(id==null) return;
     if(pickKind==="kamado"){ S.kamado=id; applyTheme(); }
@@ -13875,7 +13902,8 @@ function pickMove(dir){
 }
 function pickKey(e){
   const k=e.key;
-  if(e.repeat && k==="4") return;   // 4 を長押しして開いたときの続き
+  if(e.repeat && /^[456]$/.test(k)) return;   // 4・5・6 を長押しして開いたときの続き
+  if((pickKind==="fert"||pickKind==="obj") && (k==="Escape"||k===(pickKind==="fert"?"5":"6"))){ e.preventDefault(); closeModal(); return; }
   if(k==="Escape"||k==="4"){ e.preventDefault(); if(pickKind!=="seed") openModal("treas"); else closeModal(); return; }
   const n=pickIds.length;
   if(k==="ArrowLeft"||k==="ArrowRight"){ e.preventDefault(); pickCur=(pickCur+(k==="ArrowRight"?1:-1)+n)%n; sfx.cursor(); renderSoon(renderPick); return; }
@@ -13886,13 +13914,16 @@ function pickKey(e){
 $("g-pickBody").addEventListener("click",e=>{ const it=e.target.closest && e.target.closest(".pitem"); if(!it) return; if(e.target.closest("[data-star]")){ pickFav(+it.dataset.i); return; } pickChoose(+it.dataset.i); });
 // スマホ・マウス: 種の欄を長押しすると一覧
 {
-  const slot=root.querySelector('.slot[data-tool="4"]'); let t=null, fired=false;
-  const stop=()=>{ clearTimeout(t); t=null; };
-  slot.addEventListener("pointerdown",e=>{ if(e.target.closest(".arr")) return; fired=false; stop(); t=setTimeout(()=>{ fired=true; openPick("seed"); },450); });
-  for(const ev of ["pointerup","pointerleave","pointercancel"]) slot.addEventListener(ev,stop);
-  slot.addEventListener("contextmenu",e=>e.preventDefault());
-  slot.addEventListener("dblclick",e=>{ if(!e.target.closest(".arr")) openPick("seed"); });
-  slot.addEventListener("click",e=>{ if(fired){ fired=false; e.stopImmediatePropagation(); } },true);
+  for(const [num,kind] of [[4,"seed"],[5,"fert"],[6,"obj"]]){   // 種・肥料・設置物の欄: 長押しかダブルクリックで一覧
+    const slot=root.querySelector(`.slot[data-tool="${num}"]`); let t=null, fired=false;
+    const can=()=>kind==="seed" || (kind==="fert"?ownedFerts():ownedObjs()).length>1;
+    const stop=()=>{ clearTimeout(t); t=null; };
+    slot.addEventListener("pointerdown",e=>{ if(e.target.closest(".arr")) return; fired=false; stop(); t=setTimeout(()=>{ if(!can()) return; fired=true; openPick(kind); },450); });
+    for(const ev of ["pointerup","pointerleave","pointercancel"]) slot.addEventListener(ev,stop);
+    slot.addEventListener("contextmenu",e=>e.preventDefault());
+    slot.addEventListener("dblclick",e=>{ if(!e.target.closest(".arr") && can()) openPick(kind); });
+    slot.addEventListener("click",e=>{ if(fired){ fired=false; e.stopImmediatePropagation(); } },true);
+  }
 }
 /* 料理番の村人に任せる料理: レシピを持っている料理を並べ、段階を選んで任せる / やめる */
 let cvCur=0, cvRows=[];
@@ -16481,7 +16512,13 @@ function onKeyMain(e){
   if(k==="["){ const b=$("g-basket").querySelector("[data-bmore]"); if(b){ e.preventDefault(); b.click(); } return; }   // 収穫かごをひらく・たたむ
   if(k==="Enter"){ e.preventDefault(); openWorld(); return; }   // 農園の寄り合い
   if(k==="4" && e.repeat){ openPick("seed"); return; }   // 4 を長押し: 種の一覧
-  if(k==="4"){ const now=Date.now(); if(now-lastFour<350){ lastFour=0; openPick("seed"); return; } lastFour=now; }   // 4 をすばやく2回: 種の一覧
+  if(k==="4"){ const now=Date.now(); if(now-lastFour<350 && lastNumKey==="4"){ lastFour=0; openPick("seed"); return; } lastFour=now; lastNumKey="4"; }   // 4 をすばやく2回: 種の一覧
+  if(k==="5"||k==="6"){   // 5・6 を長押し、またはすばやく2回: 肥料・設置物と村人の一覧(2種類以上持っているとき)
+    const kind=k==="5"?"fert":"obj", many=(k==="5"?ownedFerts():ownedObjs()).length>1, now=Date.now();
+    if(many && (e.repeat || (now-lastFour<350 && lastNumKey===k))){ lastFour=0; openPick(kind); return; }
+    if(e.repeat) return;
+    lastFour=now; lastNumKey=k;
+  }
   if(/^[1-6]$/.test(k)){ setTool(+k); return; }
   if(k==="ArrowLeft"){ e.preventDefault(); cycleSel(-1); return; }
   if(k==="ArrowRight"){ e.preventDefault(); cycleSel(1); return; }
@@ -19325,6 +19362,7 @@ html.fx.fx-bara #romaji .done{color:#ff8aa6; text-shadow:0 0 10px rgba(255,90,13
 html.fx #screen-battle.fx-shake{animation:fx-shake .36s cubic-bezier(.3,.7,.3,1)}
 html.fx .word-panel.hit{box-shadow:0 0 0 3px rgba(190,120,255,.8), 0 0 34px rgba(190,120,255,.6)}
 /* fx-shake2 */
+.fxp-more{margin:.6rem .5rem 0; font-size:.75rem; color:#97a1af}
 </style>
 <script id="fxScript">
 const FX_TG=true;
@@ -19360,18 +19398,18 @@ function impulse(c,sec,decay){
 }
 function bus(c){
   if(B && B.c===c) return B;
-  const out=c.createGain(), comp=c.createDynamicsCompressor(), sfx=c.createGain(), bgm=c.createGain(), jk=c.createGain(), rev=c.createConvolver(), wet=c.createGain(), send=c.createGain();
+  const out=c.createGain(), comp=c.createDynamicsCompressor(), sfx=c.createGain(), bgm=c.createGain(), jk=c.createGain(), rev=c.createConvolver(), wet=c.createGain(), send=c.createGain(), sfxRv=c.createGain();
   comp.threshold.value=-15; comp.knee.value=14; comp.ratio.value=3.5; comp.attack.value=.004; comp.release.value=.2;
   rev.buffer=impulse(c,2.4,2.6); wet.gain.value=.9; send.gain.value=.14;
   const noise=c.createBuffer(1,c.sampleRate*2,c.sampleRate); { const d=noise.getChannelData(0); for(let i=0;i<d.length;i++) d[i]=R()*2-1; }
   rawConnect.call(sfx,out); rawConnect.call(sfx,send); rawConnect.call(send,rev); rawConnect.call(rev,wet); rawConnect.call(wet,out);
-  rawConnect.call(bgm,out); rawConnect.call(jk,out); rawConnect.call(out,comp); rawConnect.call(comp,c.destination);
-  B={ c, sfx, bgm, jk, rev, out, noise, o:{ g:sfx, rv:rev } };
+  rawConnect.call(sfxRv,rev); rawConnect.call(bgm,out); rawConnect.call(jk,out); rawConnect.call(out,comp); rawConnect.call(comp,c.destination);
+  B={ c, sfx, bgm, jk, rev, out, noise, sfxRv, o:{ g:sfx, rv:sfxRv } };   // 効果音が残響に送る分も、効果音の音量を通す(音量0なら残響も消える)
   applyVol();
   return B;
 }
 const jkVol=()=>cfg.bv>0 ? cfg.bv : .5;
-function applyVol(){ if(!B) return; B.sfx.gain.value=cfg.sv*1.25; B.bgm.gain.value=cfg.bgm ? cfg.bv : 0; B.jk.gain.value=jkVol(); if(cur) cur.rv.gain.value=cur.forced ? jkVol() : cfg.bgm ? cfg.bv : 0; }
+function applyVol(){ if(!B) return; B.sfx.gain.value=cfg.sv*1.25; B.sfxRv.gain.value=cfg.sv*1.25; B.bgm.gain.value=cfg.bgm ? cfg.bv : 0; B.jk.gain.value=jkVol(); if(cur) cur.rv.gain.value=cur.forced ? jkVol() : cfg.bgm ? cfg.bv : 0; }
 /* もとの音は「出口」につないでいる。その行き先を、ここのミキサーに付け替える */
 AudioNode.prototype.connect=function(dst,...a){
   try{ if(cfg.on && dst instanceof AudioDestinationNode){ const b=bus(dst.context); return rawConnect.call(this,b.sfx,...a); } }catch(e){}
@@ -19471,6 +19509,7 @@ const S={
   "mt:spurt"(o,t){ for(let k=0;k<3;k++){ T(o,t+k*.17,83,.12,{ type:"square", lp:3600, v:.055, r:.06, rv:.3 }); } T(o,t+.51,88,.3,{ type:"square", lp:3600, v:.06, r:.4, rv:.5 }); N(o,t,.6,{ ft:"highpass", f:1500, to:9000, v:.03 }); },
   "mt:win"(o,t){ [72,76,79,84,79,84].forEach((m,k)=>T(o,t+k*.13,m,k===5?.5:.13,{ type:"square", lp:3600, v:.055, r:k===5?.8:.1, rv:.4 })); for(const m of [60,64,67,72,76]) T(o,t+.65,m,.9,{ type:"sawtooth", lp:2400, v:.014, a:.01, r:1, hold:1, rv:.6 }); T(o,t+.65,36,.5,{ type:"triangle", v:.12, r:.6 }); N(o,t+.65,.9,{ ft:"highpass", f:6000, v:.02, rv:.5 }); },
   "mt:lose"(o,t){ [67,65,64,60].forEach((m,k)=>T(o,t+k*.2,m,.24,{ type:"triangle", v:.06, r:.2, rv:.5 })); T(o,t+.6,36,.9,{ v:.08, r:.8 }); for(const m of [48,55,60,63]) T(o,t+.6,m,1,{ type:"sawtooth", lp:900, v:.01, a:.05, r:1, hold:1, rv:.6 }); },
+  vol(o,t){ T(o,t,84,.05,{ type:"triangle", v:.07, r:.04 }); T(o,t+.07,91,.07,{ type:"triangle", v:.07, r:.05 }); },   // 音量の確かめ用(残響なし)
   /* 庭 */
   "g:till"(o,t){ N(o,t,.05,{ f:2400, q:1.4, v:.13 }); N(o,t+.03,.09,{ f:1100, q:1, v:.09 }); T(o,t,47,.05,{ v:.06, bend:5, r:.04 }); },
   "g:water"(o,t){ N(o,t,.22,{ f:5200, q:.7, v:.025 }); for(let i=0;i<5;i++) T(o,t+rnd(0,.18),rnd(84,95),.05,{ v:.03, bend:-6, bt:.04, r:.05, rv:.2 }); },
@@ -19734,6 +19773,7 @@ function bgmTick(){
   let guard=0;
   while(cur.next<c.currentTime+.6 && guard++<48){
     const sp=60/tr.bpm()/4; let t=cur.next; if(tr.swing && (cur.step&1)) t+=sp*tr.swing;
+    if(!(cur.f && cur.f.jk) && !(cfg.heard && cfg.heard[cur.name])){ cfg.heard=cfg.heard||{}; cfg.heard[cur.name]=1; saveCfg(); }   // 聴いたことのある曲として覚える
     try{ tr.step(cur.step,t,cur,cur.loop,sp); dbg.steps++; }catch(e){ dbg.errs.push(String(e&&e.stack||e).slice(0,300)); }
     cur.next+=sp;
     if(++cur.step>=tr.len){ cur.step=0; cur.loop++;
@@ -19876,7 +19916,7 @@ function vis(name,arg){
 
 /* ---------------------------------------------------------------- 設定の窓(キーボードでも操作できる)と、曲の一覧 */
 const SONGS=[["title","ホーム"],["game",TG?"タイピング":"ネジ打ち"],["oneshot",TG?"ノーミス勝負":"一本勝負"],["garden",TG?"農園":"庭"],["toeic","TOEIC 英単語"],["poem","ネジの詩"],["gacha","ガチャ"],["gachaY","千両箱ガチャ"],["battle","対戦"],["bara","バラバラ"],["ending","エンディング"]].filter(s=>s[0]!=="poem" || $("screen-poem"));
-const songOk=k=>{ let f={}; try{ f=Garden.fxInfo()||{}; }catch(e){} return k==="bara" ? !!f.bara : k==="ending" ? !!f.kyo : true; };
+const songOk=k=>k==="title" || !!(cfg.heard && cfg.heard[k]);   // ゲームの中で一度流れた曲だけ
 function setOpt(k,v){
   cfg[k]=v; saveCfg(); applyVol();
   document.documentElement.classList.toggle("fx",cfg.on); document.documentElement.classList.toggle("fx-rm",RM);
@@ -19897,14 +19937,14 @@ function paintPanel(){
   rows.forEach((r,i)=>r.classList.toggle("sel",i===pSel));
 }
 function songToggle(k){
-  if(force && force.jk && force.name===k) force=null; else force={ name:k, jk:1 };
+  force = (force && force.jk && force.name===k) ? { name:null, jk:1 } : { name:k, jk:1 };   // 止めたら無音(窓を閉じると、その画面の曲に戻る)
   if(ac()){ bgmRun(); bgmTick(); } paintPanel();
 }
 function rowAct(r,dir){   // dir: 0=決める -1/+1=左右
   if(!r) return;
   const k=r.dataset.row;
   if(k==="on"||k==="bgm"){ setOpt(k,!cfg[k]); if(cfg.on) snd("g:tab"); }
-  else if(k==="bv"||k==="sv"){ if(!dir) return; setOpt(k,Math.max(0,Math.min(1,Math.round((cfg[k]+dir*.05)*20)/20))); if(k==="sv") snd("g:buy")||(typeof beep==="function" && beep(1320,.06,"square",.035)); }
+  else if(k==="bv"||k==="sv"){ if(!dir) return; setOpt(k,Math.max(0,Math.min(1,Math.round((cfg[k]+dir*.05)*20)/20))); if(k==="sv") snd("vol")||(typeof beep==="function" && beep(1320,.06,"square",.035)); }
   else if(k==="song"){ if(!dir) songToggle(r.dataset.song); }
   else if(k==="close"){ if(!dir) closePanel(); }
 }
@@ -19919,6 +19959,7 @@ function openPanel(){
     <label class="fxp-row" data-row="sv"><span>効果音の音量 <b data-val="sv"></b></span><input type="range" min="0" max="100" step="5" data-fx="sv" tabindex="-1"></label>
     <div class="fxp-hd">曲を聴く</div>
     ${SONGS.filter(s=>songOk(s[0])).map(([k,nm])=>`<button type="button" class="fxp-row fxp-song" data-row="song" data-song="${k}" tabindex="-1"><span>♪ ${nm}</span><i></i></button>`).join("")}
+    ${SONGS.some(s=>!songOk(s[0]))?`<p class="fxp-more">ゲームの中で流れた曲が、ここに増えていきます(あと ${SONGS.filter(s=>!songOk(s[0])).length}曲)</p>`:""}
     </div><div class="fxp-foot">${MOB?"":'<small><b>↑ ↓</b> 選ぶ ・ <b>← →</b> 変える ・ <b>Enter</b> 決める ・ <b>Esc</b> 閉じる</small>'}<button type="button" class="fxp-close" data-row="close" tabindex="-1">閉じる</button></div></div>`;
   document.body.appendChild(w); pSel=0; paintPanel();
   panelKey=e=>{ e.stopImmediatePropagation(); const k=e.key, rows=pRows();
@@ -19930,7 +19971,7 @@ function openPanel(){
   window.addEventListener("keydown",panelKey,true);
   w.addEventListener("click",e=>{ if(e.target===w){ closePanel(); return; } const r=e.target.closest("[data-row]"); if(!r) return; const rows=pRows(); pSel=Math.max(0,rows.indexOf(r)); paintPanel();
     if(e.target.closest("input")) return; if(r.dataset.row==="bv"||r.dataset.row==="sv") return; rowAct(r,0); });
-  w.addEventListener("input",e=>{ const t=e.target.closest("input[data-fx]"); if(!t) return; setOpt(t.dataset.fx,(+t.value)/100); if(t.dataset.fx==="sv" && cfg.on) snd("g:buy"); });
+  w.addEventListener("input",e=>{ const t=e.target.closest("input[data-fx]"); if(!t) return; setOpt(t.dataset.fx,(+t.value)/100); if(t.dataset.fx==="sv" && cfg.on) snd("vol"); });
 }
 
 /* ---------------------------------------------------------------- ガチャ・バラバラの演出 */
