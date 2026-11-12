@@ -6186,7 +6186,7 @@ function endBookGame(){
    新しいものを上に足していく。d は YYYY-MM-DD */
 const NEWS=[
   { d:"2026-11-11", t:"千両箱ガチャ", items:[
-    "農園のガチャに、4台目の「千両箱ガチャ」を追加しました。累計獲得キーが1兆を超えると開きます",
+    "農園のガチャに、4台目の「千両箱ガチャ」を追加しました。累計獲得キーが100億を超えると開きます",
     "いちばん上の新しいレア度 GZR と、新しい貴重品が19種類出ます。貴重品の「千両箱」タブで、効果を確かめたり使ったりできます",
     "番付とランキングに、畑の枚数を追加しました",
     "農園の肥料(5)と設置物・村人(6)も、種(4)と同じように、長押しかすばやく2回押すと一覧から選べます",
@@ -12944,7 +12944,7 @@ const rgGurGot = () => RG_GUR.filter(x=>(S.got[x.id]||0)>0).length;
 /* ---------- 千両箱ガチャ: 村人・道具・宝物が出る、累計獲得キー1兆からの台(1回 100万キー) ----------
    N〜UR は今までの品(名前はいつも見える)。GSR〜GZR は新しい品(手に入れるまで ？？？) */
 const YZ={}, YZ_POOL={};
-const YZ_OPEN = 1e12;   // 解放: 累計獲得キー
+const YZ_OPEN = 1e10;   // 解放: 累計獲得キー
 const yzOpen = () => earnedTotal()>=YZ_OPEN;
 const YZ_RATES = { N:50, R:33, SR:12, HR:3.5, UR:1.2, GSR:0.25, GHR:0.04, GUR:0.008, GXR:0.0015, GZR:0.0002 };
 const YZ_SWAP = { GSR:1e5, GHR:1e5, GUR:1e5, GXR:1e5, GZR:1e5 };   // 上限まで持っている品のかわりに受け取る(ほかの台と同じく一律10万)。キー
@@ -15926,7 +15926,7 @@ const GOALS = [
   { cat:"大木", ser:"dbs", id:"dbs30", ic:"🎁", nm:"苗木の目利き",   ds:"日替わりのご褒美で苗木を30本もらう", need:30, now:()=>S.dbSapGot||0, rw:3000000 },
   { cat:"大木", ser:"dbg", id:"dbg10", ic:"🎁", nm:"日替わりの常連", ds:"日替わりのご褒美を10回受け取る",     need:10, now:()=>S.dbGot||0, rw:100000 },
   { cat:"大木", ser:"dbg", id:"dbg100",ic:"🎁", nm:"毎日の楽しみ",   ds:"日替わりのご褒美を100回受け取る",    need:100,now:()=>S.dbGot||0, rw:3000000 },
-  /* 千両箱ガチャ(累計獲得1兆で開く) */
+  /* 千両箱ガチャ(累計獲得100億で開く) */
   { cat:"千両箱", ser:"yzc", id:"yzc1",   ic:"🪙", nm:"千両箱を開ける",     ds:"千両箱ガチャを1回引く",                 need:1,    now:()=>S.yzCount||0, rw:1e8, vis:yzGoalVis },
   { cat:"千両箱", ser:"yzc", id:"yzc1k",  ic:"🪙", nm:"千両箱の常連",       ds:"千両箱ガチャを1,000回引く",             need:1e3,  now:()=>S.yzCount||0, rw:1e9, vis:yzGoalVis },
   { cat:"千両箱", ser:"yzc", id:"yzc1m",  ic:"🪙", nm:"蔵いっぱいの千両箱", ds:"千両箱ガチャを100万回引く",             need:1e6,  now:()=>S.yzCount||0, rw:1e11, vis:yzGoalVis },
@@ -19431,13 +19431,14 @@ function T(o,t,n,d,p){
   if(p.det) os.detune.value=p.det;
   let src=os;
   if(p.lp){ const fl=c.createBiquadFilter(); fl.type="lowpass"; fl.frequency.value=p.lp; fl.Q.value=p.q||.7; rawConnect.call(os,fl); src=fl; }
-  if(p.vib){ const l=c.createOscillator(), lg=c.createGain(); l.frequency.value=p.vr||5.2; lg.gain.setValueAtTime(0,t); lg.gain.linearRampToValueAtTime(p.vib,t+Math.min(d,.5)); rawConnect.call(l,lg); rawConnect.call(lg,os.detune); l.start(t); l.stop(t+d+r+.1); }
+  if(p.vib){ const l=c.createOscillator(), lg=c.createGain(); l.frequency.value=p.vr||5.2; lg.gain.value=0; lg.gain.setValueAtTime(0,t); lg.gain.linearRampToValueAtTime(p.vib,t+Math.min(d,.5)); rawConnect.call(l,lg); rawConnect.call(lg,os.detune); l.start(t); l.stop(t+d+r+.1); }
+  g.gain.value=0;   // 音量のはじめの値は 1 なので、0 にしておく。そのままだと、鳴りはじめの1サンプルだけ全開で出て「プツッ」と鳴ることがある
   g.gain.setValueAtTime(.0001,t); g.gain.exponentialRampToValueAtTime(v,t+a);
   if(p.hold) g.gain.setValueAtTime(v,Math.max(t+a,t+d-.01)); else g.gain.exponentialRampToValueAtTime(Math.max(.0002,v*(p.sus==null?.35:p.sus)),t+Math.max(a+.005,d));
   g.gain.exponentialRampToValueAtTime(.0001,t+d+Math.max(r,n<58?.06:.03)); g.gain.setValueAtTime(0,t+d+Math.max(r,n<58?.06:.03)+.005);
   rawConnect.call(src,g); rawConnect.call(g,o.g);
   if(p.rv && o.rv){ const s=c.createGain(); s.gain.value=p.rv; rawConnect.call(g,s); rawConnect.call(s,o.rv); }
-  os.start(t); os.stop(t+d+Math.max(r,.06)+.05);
+  os.start(t+.0005); os.stop(t+d+Math.max(r,.06)+.05);
 }
 /* 雑音(ひとつ): ft=絞り方 f=高さ(Hz) to=動かす先 */
 function N(o,t,d,p){
@@ -19446,10 +19447,10 @@ function N(o,t,d,p){
   const s=c.createBufferSource(), fl=c.createBiquadFilter(), g=c.createGain(), v=p.v||.03;
   s.buffer=B.noise; s.loop=true;
   fl.type=p.ft||"bandpass"; fl.frequency.setValueAtTime(p.f||2000,t); if(p.to) fl.frequency.exponentialRampToValueAtTime(p.to,t+d); fl.Q.value=p.q||1;
-  g.gain.setValueAtTime(.0001,t); g.gain.exponentialRampToValueAtTime(v,t+(p.a||.003)); g.gain.exponentialRampToValueAtTime(.0001,t+d); g.gain.setValueAtTime(0,t+d+.004);
+  g.gain.value=0; g.gain.setValueAtTime(.0001,t); g.gain.exponentialRampToValueAtTime(v,t+(p.a||.003)); g.gain.exponentialRampToValueAtTime(.0001,t+d); g.gain.setValueAtTime(0,t+d+.004);
   rawConnect.call(s,fl); rawConnect.call(fl,g); rawConnect.call(g,o.g);
   if(p.rv && o.rv){ const sd=c.createGain(); sd.gain.value=p.rv; rawConnect.call(g,sd); rawConnect.call(sd,o.rv); }
-  s.start(t,R()*1.5); s.stop(t+d+.03);
+  s.start(t+.0005,R()*1.5); s.stop(t+d+.03);
 }
 /* もとの beep: 角の立った音をやわらげ、プチッという雑音が出ないよう立ち上がりを付ける */
 const beep0=window.beep;
@@ -19459,7 +19460,7 @@ if(typeof beep0==="function") window.beep=function(freq,dur,type,gain){
   try{ const c=b.c, t=c.currentTime, os=c.createOscillator(), g=c.createGain(); let src=os;
     os.type=type; os.frequency.value=freq;
     if(type==="square"||type==="sawtooth"){ const fl=c.createBiquadFilter(); fl.type="lowpass"; fl.frequency.value=Math.min(9000,freq*3+700); rawConnect.call(os,fl); src=fl; gain*=1.2; }
-    g.gain.setValueAtTime(.0001,t); g.gain.exponentialRampToValueAtTime(Math.max(.0002,gain),t+.004); g.gain.exponentialRampToValueAtTime(.0001,t+dur+.03);
+    g.gain.value=0; g.gain.setValueAtTime(.0001,t); g.gain.exponentialRampToValueAtTime(Math.max(.0002,gain),t+.004); g.gain.exponentialRampToValueAtTime(.0001,t+dur+.03);
     rawConnect.call(src,g); rawConnect.call(g,b.sfx); os.start(t); os.stop(t+dur+.06);
   }catch(e){}
 };
