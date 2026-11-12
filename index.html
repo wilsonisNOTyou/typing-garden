@@ -15913,7 +15913,7 @@ const GOALS = [
   { cat:"大木", ser:"dbs", id:"dbs30", ic:"🎁", nm:"苗木の目利き",   ds:"日替わりのご褒美で苗木を30本もらう", need:30, now:()=>S.dbSapGot||0, rw:3000000 },
   { cat:"大木", ser:"dbg", id:"dbg10", ic:"🎁", nm:"日替わりの常連", ds:"日替わりのご褒美を10回受け取る",     need:10, now:()=>S.dbGot||0, rw:100000 },
   { cat:"大木", ser:"dbg", id:"dbg100",ic:"🎁", nm:"毎日の楽しみ",   ds:"日替わりのご褒美を100回受け取る",    need:100,now:()=>S.dbGot||0, rw:3000000 },
-  /* 千両箱ガチャ(累計獲得1兆で開く) */
+  /* 千両箱ガチャ(累計獲得100億で開く) */
   { cat:"千両箱", ser:"yzc", id:"yzc1",   ic:"🪙", nm:"千両箱を開ける",     ds:"千両箱ガチャを1回引く",                 need:1,    now:()=>S.yzCount||0, rw:1e8, vis:yzGoalVis },
   { cat:"千両箱", ser:"yzc", id:"yzc1k",  ic:"🪙", nm:"千両箱の常連",       ds:"千両箱ガチャを1,000回引く",             need:1e3,  now:()=>S.yzCount||0, rw:1e9, vis:yzGoalVis },
   { cat:"千両箱", ser:"yzc", id:"yzc1m",  ic:"🪙", nm:"蔵いっぱいの千両箱", ds:"千両箱ガチャを100万回引く",             need:1e6,  now:()=>S.yzCount||0, rw:1e11, vis:yzGoalVis },
