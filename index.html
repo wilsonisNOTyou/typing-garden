@@ -14972,7 +14972,7 @@ function cookMake(id,times){
     made++; S.cookCount=(S.cookCount||0)+1; wcGoalAdd("cook",1);
   }
   if(!made){ sfx.nope(); toast("材料が足りません","warn"); return; }
-  if(!cookShow(d,grade,made+extra,isFirst)) sfx.buy();
+  if(!cookShow(d,grade,made+extra,isFirst)){ if(!FXS("g:cook")) sfx.buy(); } else FXS("g:cook");
   toast(`${dishIco(d,sumiUp?upFrom:grade)} ${sumiUp?esc(d.name):`${esc(dishName(d,grade))}(${gradeName(grade)})`}を ${made+extra}つ 作りました${extra?`(おかわり +${extra})`:""}${saved?`・材料が減らなかった ${saved}回`:""}`,isMutT(grade)?"good mut"+(grade===5?" sup":""):"good",3000,true);
   if(sumiUp){   // 炭で段階が変わったことを、はっきり伝える(ふつうを作ったつもりで、図鑑には変異が載るため)
     const to=[3,5].filter(q=>ups[q]).map(q=>`${gradeName(q)}${ups[q]>1?` ×${ups[q]}`:""}`).join("・");
@@ -14985,7 +14985,7 @@ function cookEat(id,g){
   if(id==="rt_barabara") S.baraSeen=true;
   if(d.eff==="P8" && !buffList().length){ sfx.nope(); toast("今かかっている料理の効果がないので、延ばせません","warn",3200); return; }
   if(/^Z[1-4]$/.test(d.eff) && !drinkList().length){ sfx.nope(); toast(d.eff==="Z4"?"今はお酒の効果がかかっていません":"お酒の効果がかかっていないので、おつまみは食べられません","warn",3200); return; }
-  st[g]--; S.ateCount=(S.ateCount||0)+1;
+  st[g]--; S.ateCount=(S.ateCount||0)+1; FXS("g:eat",{ c:(d.colors && d.colors[g])||d.accent||d.tint||d.color||"" });
   const bk=bookKeyOf(g); S.dishEaten[id]=S.dishEaten[id]||{}; S.dishEaten[id][bk]=true;
   let what="";   // 演出に出す、食べて起きたこと
   if(d.eff==="β"){   // 時間を進める: その場で効く(今の効果は消えない)
@@ -19363,6 +19363,23 @@ html.fx #screen-battle.fx-shake{animation:fx-shake .36s cubic-bezier(.3,.7,.3,1)
 html.fx .word-panel.hit{box-shadow:0 0 0 3px rgba(190,120,255,.8), 0 0 34px rgba(190,120,255,.6)}
 /* fx-shake2 */
 .fxp-more{margin:.6rem .5rem 0; font-size:.75rem; color:#97a1af}
+/* ---- 庭の時間帯 ---- */
+#fxSky{position:fixed; inset:0; pointer-events:none; z-index:48; mix-blend-mode:multiply; transition:background 1.5s linear}
+html:not(.fx) #fxSky{display:none}
+/* ---- 料理: 食べると、色がにじんで広がる ---- */
+.fx-wash{position:fixed; inset:0; pointer-events:none; z-index:49; background:radial-gradient(circle at 50% 55%, var(--c) 0, var(--c) 30%, transparent 70%); animation:fx-wash 1.4s cubic-bezier(.2,.7,.2,1) forwards}
+@keyframes fx-wash{0%{opacity:.75; transform:scale(.05); filter:blur(6px)}45%{opacity:.5}100%{opacity:0; transform:scale(3.2); filter:blur(30px)}}
+/* ---- 自己ベスト ---- */
+html.fx .fx-best{animation:fx-best 1.2s cubic-bezier(.2,.9,.3,1.3) .5s backwards, fx-bestglow 1.6s ease-in-out 1.7s infinite alternate}
+@keyframes fx-best{0%{opacity:0; transform:scale(2.4); letter-spacing:.6em}60%{opacity:1; transform:scale(.95)}100%{transform:none}}
+@keyframes fx-bestglow{from{text-shadow:0 0 6px rgba(255,214,110,.4)}to{text-shadow:0 0 22px rgba(255,214,110,1), 0 0 44px rgba(255,170,60,.6)}}
+/* ---- ネジの詩: 打ち終えた行が、墨で書かれるように現れる。読み終えると巻物が閉じる ---- */
+html.fx #screen-poem:not(.bara) .pline.past{opacity:.5}
+html.fx #screen-poem:not(.bara) .pline.past .pt{animation:fx-ink .7s cubic-bezier(.3,.6,.3,1) both}
+html.fx #screen-poem:not(.bara) .pline.past .pk, html.fx #screen-poem:not(.bara) .pline.past .pr{opacity:.35}
+@keyframes fx-ink{0%{clip-path:inset(-20% 100% -20% 0); text-shadow:0 0 14px rgba(20,14,10,.9); filter:blur(1.2px)}70%{text-shadow:0 0 8px rgba(20,14,10,.6); filter:blur(.4px)}100%{clip-path:inset(-20% 0 -20% 0); text-shadow:0 0 0 rgba(20,14,10,0); filter:none}}
+html.fx .paper.fx-close{height:0 !important; transition:height 1s cubic-bezier(.5,0,.3,1)}
+@media (prefers-reduced-motion:reduce){ html.fx #screen-poem .pline.past .pt, html.fx .fx-best, .fx-wash{animation:none !important} }
 </style>
 <script id="fxScript">
 const FX_TG=true;
@@ -19492,6 +19509,15 @@ const S={
     if(ri>=7) for(const m of [60,67,72,76,79]) T(o,t+.1,m,1.2,{ type:"sawtooth", lp:2000, v:.01, a:.05, r:1, hold:1, rv:.6 }); },
   "g:machine"(o,t){ for(let k=0;k<6;k++){ N(o,t+k*.05,.03,{ f:1800+k*260, q:2, v:.03 }); T(o,t+k*.05,72+k*2,.03,{ type:"square", lp:2600, v:.012, r:.03 }); } N(o,t,.35,{ f:500, to:2600, q:1, v:.025 }); },
   glitch(o,t){ for(let k=0;k<5;k++){ N(o,t+k*.03,.02,{ f:rnd(900,6000), q:4, v:.03 }); T(o,t+k*.03,rnd(60,96),.02,{ type:"square", lp:3000, v:.012, r:.01 }); } T(o,t,70,.25,{ type:"sawtooth", lp:1500, v:.02, to:46, r:.05, rv:.4 }); },
+  lvup(o,t,b){ const base=72+(b||1)*4; [0,4,7].forEach((x,k)=>T(o,t+k*.05,base+x,.1,{ type:"triangle", v:.04, r:.3, rv:.5 })); N(o,t,.25,{ ft:"highpass", f:4000, to:9000, v:.015 }); },
+  best(o,t){ const t1=t+.55; [76,79,84,88,91].forEach((m,k)=>T(o,t1+k*.07,m,.12,{ type:"triangle", v:.06, r:.3, rv:.5 })); for(const m of [64,72,76,79,84,88,96]) T(o,t1+.4,m,1.1,{ v:.03, a:.01, r:1.4, rv:.7 });
+    for(const m of [60,67,72]) for(const det of [-7,7]) T(o,t1+.4,m,1.2,{ type:"sawtooth", lp:2200, v:.01, a:.02, r:1.2, det, hold:1, rv:.6 }); T(o,t1+.4,36,.4,{ v:.2, a:.004, bend:12, bt:.12, r:.4 }); N(o,t1+.4,1.4,{ ft:"highpass", f:6000, v:.025, rv:.6 });
+    for(let k=0;k<8;k++) T(o,t1+.5+k*.09,96+[0,4,7,12,7,4,0,12][k],.08,{ v:.016, r:.4, rv:.8 }); },
+  "g:cook"(o,t){ N(o,t,.9,{ f:5200, q:.6, v:.035, a:.05 }); N(o,t+.1,.7,{ ft:"highpass", f:7000, v:.012, a:.1 }); for(let k=0;k<7;k++) T(o,t+rnd(.05,.8),rnd(55,64),.05,{ v:.03, bend:-5, bt:.04, r:.05 });
+    T(o,t+.85,88,.05,{ v:.03, r:.5, rv:.5 }); T(o,t+.85,95.3,.04,{ v:.015, r:.4, rv:.5 }); },
+  "g:eat"(o,t){ T(o,t,60,.06,{ v:.05, bend:-4, r:.05 }); T(o,t+.12,62,.06,{ v:.05, bend:-4, r:.05 }); [72,76,79,84].forEach((m,k)=>T(o,t+.3+k*.06,m,.3,{ v:.035, a:.01, r:.9, rv:.7 })); for(const m of [60,64,67]) T(o,t+.3,m,1,{ type:"sawtooth", lp:1200, v:.008, a:.2, r:1, hold:1, rv:.6 }); },
+  "poem:line"(o,t){ N(o,t,.34,{ ft:"lowpass", f:1800, to:500, q:.6, v:.05, a:.04 }); N(o,t,.3,{ f:3000, to:1200, q:1.2, v:.012, a:.05 }); T(o,t+.3,62,.08,{ type:"triangle", v:.03, bend:.4, bt:.03, r:1, sus:.5, rv:.6 }); },
+  "poem:close"(o,t){ N(o,t,.8,{ ft:"lowpass", f:900, to:400, v:.04, a:.2 }); for(const dt of [.85,.93]){ T(o,t+dt,74,.03,{ type:"square", lp:2400, v:.05, r:.08, rv:.5 }); N(o,t+dt,.03,{ f:1800, q:2, v:.05, rv:.4 }); } T(o,t+1.1,50,1.6,{ v:.05, a:.01, r:1.6, rv:.7 }); },
   /* 対戦 */
   "mt:go"(o,t){ T(o,t,43,1.2,{ type:"triangle", v:.16, r:.8, rv:.5 }); T(o,t,55,1,{ v:.08, r:.8, rv:.5 }); T(o,t,62,.8,{ v:.05, r:.8, rv:.6 }); N(o,t,.5,{ ft:"highpass", f:2500, v:.05, rv:.5 }); T(o,t,33,.3,{ v:.22, a:.004, bend:14, bt:.12, r:.3 });
     [69,76,81].forEach((m,k)=>T(o,t+.05+k*.05,m,.3,{ type:"square", lp:3000, v:.03, r:.5, rv:.5 })); },
@@ -19572,7 +19598,9 @@ const END_BM=[[[0,83,4],[4,81,2],[6,79,2],[8,83,6],[14,81,2]], [[0,81,6],[6,76,2
 const kick=(o,t,v)=>T(o,t,45,.16,{ v, a:.006, bend:16, bt:.09, r:.09, sus:.2 });
 const hat=(o,t,v,d)=>N(o,t,d||.04,{ ft:"highpass", f:7500, v });
 const snare=(o,t,v)=>{ N(o,t,.12,{ f:1900, q:.7, v }); T(o,t,55,.06,{ v:v*.8, bend:5, r:.04 }); };
-const night=()=>{ const h=new Date().getHours(); return h>=19 || h<5; };
+let hourFix=null;   // 試すとき用: 時刻を決め打ちにする
+const hourNow=()=>{ if(hourFix!=null) return hourFix; const d=new Date(); return d.getHours()+d.getMinutes()/60; };
+const night=()=>{ const h=hourNow(); return h>=19 || h<5; };
 const TR={
   /* ホーム・ランキングなど: 夜の工場。あたたかい和音に、鉄琴のような分散和音と、ネジを締めるような金属の拍 */
   title:{ bpm:()=>92, len:128, step(s,t,o,L,sp){
@@ -19596,11 +19624,13 @@ const TR={
     if(i===4||i===12) snare(o,t,.045);
     if(rush && b%2===1 && i>=12) snare(o,t,.02+(i-12)*.008);
     if(i%4===2) hat(o,t,.022,.06);
-    if((L>=1||rush) && i%2===1) hat(o,t,rush?.014:.008,.025);
+    const lv=o.forced ? Math.min(3,L) : streakLv();   // ミスなしで続けて打つほど、楽器が増える(一覧で聴くときは、くり返すごとに増える)
+    if((lv>=1||rush) && i%2===1) hat(o,t,rush?.014:.008,.025);
     if(i===0) for(const n of tri) T(o,t,n,sp*15,{ type:"sawtooth", lp:880, v:.0075, a:.2, r:.6, hold:1, rv:.3 });
     if(i%2===0) T(o,t,root+[0,0,12,0,0,0,7,12][i>>1],sp*1.6,{ type:"sawtooth", lp:520, q:2, v:.075, r:.05 });
-    if(L>=1) T(o,t,tri[[0,1,2,1,2,1,0,1,2,1,0,1,2,0,1,2][i]]+12,sp*.9,{ type:"square", lp:1700, v:.0125, r:.06, rv:.2 });
-    if(L>=2){ const m=[[0,tri[2]+12,2],[3,tri[1]+12,2],[6,tri[2]+12,2],[8,tri[0]+24,4]]; for(const [a,n,len] of m) if(a===i && (b%2===0 || a<8)) T(o,t,n,len*sp,{ type:"square", lp:2300, v:.02, a:.006, r:.15, rv:.35 }); }
+    if(lv>=1) T(o,t,tri[[0,1,2,1,2,1,0,1,2,1,0,1,2,0,1,2][i]]+12,sp*.9,{ type:"square", lp:1700, v:.0125, r:.06, rv:.2 });
+    if(lv>=3){ if(i%4===0) T(o,t,tri[(i>>2)%3]+36,.12,{ v:.012, r:.3, rv:.6 }); if(i===4||i===12) N(o,t,.05,{ ft:"highpass", f:6000, v:.02 }); if(i===0) for(const n of tri) T(o,t,n+12,sp*15,{ type:"sawtooth", lp:1500, v:.005, a:.2, r:.6, det:8, hold:1, rv:.4 }); }
+    if(lv>=2){ const m=[[0,tri[2]+12,2],[3,tri[1]+12,2],[6,tri[2]+12,2],[8,tri[0]+24,4]]; for(const [a,n,len] of m) if(a===i && (b%2===0 || a<8)) T(o,t,n,len*sp,{ type:"square", lp:2300, v:.02, a:.006, r:.15, rv:.35 }); }
     if(rush && i===0) N(o,t,sp*14,{ ft:"highpass", f:2500, to:9000, v:.012 });
   }},
   /* 一本勝負: 心臓の音と、低いうなり。段階が上がるほど速くなる */
@@ -19826,7 +19856,45 @@ function gear(g,x,y,r,teeth,rot,alpha){
   g.closePath(); g.moveTo(r*.42,0); g.arc(0,0,r*.42,0,Math.PI*2,true);
   g.fillStyle=`rgba(255,196,84,${alpha})`; g.fill("evenodd"); g.lineWidth=1.2; g.strokeStyle=`rgba(255,214,130,${alpha*2.2})`; g.stroke(); g.restore();
 }
-let gearA=0, gearAl=0;
+let gearA=0, gearAl=0, leafAl=0, leafT=0;
+/* タイピングガーデンのホーム: 左下と右上の隅から、大きな葉とつるがのぞく。風でゆっくり揺れ、たまに葉が舞う */
+function leafShape(g,len,wid){ g.beginPath(); g.moveTo(0,0); g.bezierCurveTo(len*.25,-wid,len*.75,-wid*.8,len,0); g.bezierCurveTo(len*.75,wid*.8,len*.25,wid,0,0); g.closePath(); }
+function vine(g,x0,y0,ang,len,n,t,al,seed){
+  g.save(); g.translate(x0,y0); g.rotate(ang+(RM?0:Math.sin(t*.35+seed)*.02));
+  const pts=[]; for(let k=0;k<=24;k++){ const u=k/24; pts.push([u*len, Math.sin(u*3.1+seed)*len*.09*u]); }
+  g.strokeStyle=`rgba(150,215,125,${.2*al})`; g.lineWidth=3; g.lineCap="round"; g.beginPath(); pts.forEach((q,k)=>k?g.lineTo(q[0],q[1]):g.moveTo(q[0],q[1])); g.stroke();
+  for(let k=0;k<n;k++){ const u=(k+.6)/(n+.4), q=pts[Math.min(24,Math.round(u*24))], side=k%2?1:-1, L=len*(.2+.11*Math.sin(k*2.3+seed))*(1-u*.35), sway=RM?0:Math.sin(t*.7+k*1.7+seed)*.07;
+    g.save(); g.translate(q[0],q[1]); g.rotate(side*(.85+.25*Math.sin(k+seed))+sway); leafShape(g,L,L*.32);
+    g.fillStyle=`rgba(${k%3===0?"150,220,120":"110,190,100"},${(.085+.03*(k%2))*al})`; g.fill(); g.strokeStyle=`rgba(170,230,140,${.2*al})`; g.lineWidth=1.2; g.stroke();
+    g.beginPath(); g.moveTo(0,0); g.lineTo(L*.92,0); for(let v=1;v<4;v++){ g.moveTo(L*v*.22,0); g.lineTo(L*(v*.22+.12),-L*.11); g.moveTo(L*v*.22,0); g.lineTo(L*(v*.22+.12),L*.11); } g.strokeStyle=`rgba(190,240,160,${.13*al})`; g.lineWidth=1; g.stroke(); g.restore(); }
+  for(let k=0;k<3;k++){ const q=pts[8+k*6]; g.strokeStyle=`rgba(170,230,140,${.16*al})`; g.lineWidth=1.3; g.beginPath(); for(let a=0;a<9;a++){ const r=len*.012*a/3, th=a*.8+k; g.lineTo(q[0]+Math.cos(th)*r+len*.03, q[1]+(k%2?1:-1)*(len*.05)+Math.sin(th)*r); } g.stroke(); }   // 巻きひげ
+  g.restore();
+}
+function vines(g,t,al){
+  const u=Math.min(W,H);
+  vine(g,-u*.04,H+u*.03,-.72,u*.95,7,t,al,1.3); vine(g,-u*.05,H*.6,-.25,u*.5,4,t,al,4.1);
+  vine(g,W+u*.04,-u*.03,Math.PI-.7,u*.85,6,t,al,2.6); vine(g,W+u*.05,H*.42,Math.PI+.2,u*.42,4,t,al,5.5);
+  if(!RM && t-leafT>5){ leafT=t+rnd(0,4); const left=R()<.5; add({ k:"leaf", x:left?rnd(0,W*.25):rnd(W*.75,W), y:left?H*.55:-10, vx:left?rnd(20,50):rnd(-50,-20), vy:rnd(18,40), g:6, dr:.05, life:rnd(7,11), age:0, sz:rnd(3,5), col:pick(["110,190,100","150,220,120"]), rot:R()*6.28, vr:rnd(-1.5,1.5), amb:1 }); }
+}
+/* 庭の時間帯: 朝・昼・夕方・夜で、空の色みと光の向きが変わる */
+const SKY=[[0,[38,52,120,.30]],[4.5,[38,52,120,.30]],[5.5,[255,170,150,.20]],[7,[255,225,180,.09]],[9.5,[255,255,255,0]],[15.5,[255,255,255,0]],[17,[255,170,90,.17]],[18.3,[240,120,110,.22]],[19.3,[90,80,150,.27]],[20.5,[38,52,120,.30]],[24,[38,52,120,.30]]];
+function skyCol(h){ let a=SKY[0], b=SKY[SKY.length-1]; for(let i=0;i<SKY.length-1;i++) if(h>=SKY[i][0] && h<=SKY[i+1][0]){ a=SKY[i]; b=SKY[i+1]; break; } const u=(h-a[0])/((b[0]-a[0])||1); return a[1].map((v,i)=>v+(b[1][i]-v)*u); }
+let skyKey="";
+function skyTint(sc){
+  const el=$("fxSky"); if(!el) return;
+  const on=sc==="garden" && !$("kyoEnd") && !baraNow(), c=on?skyCol(hourNow()):[0,0,0,0], key=on?c.map(v=>v.toFixed(2)).join():"";
+  if(key===skyKey) return; skyKey=key; el.style.background=on?`rgba(${c[0]|0},${c[1]|0},${c[2]|0},${c[3].toFixed(3)})`:"transparent";
+}
+const STARS=Array.from({length:70},(_,i)=>[(i*.6180339)%1,(i*.3819660*1.7)%1,.5+((i*7)%10)/9]);
+function skyDraw(gb,gt,t){
+  const h=hourNow(), day=h>=5 && h<19, u=day ? (h-5)/14 : ((h>=19?h-19:h+5)/10), x=W*(.06+.88*u), y=H*(.52-Math.sin(Math.PI*u)*.44), s=Math.min(W,H);
+  if(!day){ for(const [sx,sy,sz] of STARS){ const a=.35+.3*Math.sin(t*1.3+sx*40); gb.fillStyle=`rgba(255,250,230,${a})`; gb.beginPath(); gb.arc(sx*W,sy*H*.7,sz,0,6.283); gb.fill(); } }
+  const edge=day ? Math.min(1,Math.min(u,1-u)*5) : 1, warm=day ? (u<.18||u>.82 ? "255,170,90" : "255,244,200") : "200,215,255";
+  const R1=s*(day?.9:.6), gr=gt.createRadialGradient(x,y,0,x,y,R1); gr.addColorStop(0,`rgba(${warm},${(day?.22:.13)*edge})`); gr.addColorStop(.35,`rgba(${warm},${(day?.08:.05)*edge})`); gr.addColorStop(1,`rgba(${warm},0)`);
+  gt.globalCompositeOperation="source-over"; gt.fillStyle=gr; gt.fillRect(0,0,W,H);
+  gb.fillStyle=day?`rgba(255,246,210,${.85*edge})`:"rgba(245,240,215,.9)"; gb.beginPath(); gb.arc(x,y,s*(day?.035:.028),0,6.283); gb.fill();
+  if(!day){ gb.globalCompositeOperation="destination-out"; gb.beginPath(); gb.arc(x-s*.012,y-s*.004,s*.025,0,6.283); gb.fill(); gb.globalCompositeOperation="source-over"; }
+}
 function frame(ts){
   raf=requestAnimationFrame(frame);
   const dt=Math.min(.05,(ts-last)/1000||0); last=ts;
@@ -19837,6 +19905,8 @@ function frame(ts){
   gb.setTransform(DPR,0,0,DPR,0,0); gt.setTransform(DPR,0,0,DPR,0,0); gb.clearRect(0,0,W,H); gt.clearRect(0,0,W,H);
   /* 歯車(暗い画面のホームだけ。ほかの画面では、すっと消える) */
   gearAl+=((sc==="title"&&!RM&&!TG?1:0)-gearAl)*Math.min(1,dt*3); gearA+=dt*.06;
+  leafAl+=((sc==="title"&&TG?1:0)-leafAl)*Math.min(1,dt*3); if(leafAl>.01) vines(gb,ts/1000,leafAl);
+  if(sc==="garden" && !$("kyoEnd")) skyDraw(gb,gt,ts/1000); skyTint(sc);
   if(gearAl>.01){ const u=Math.min(W,H); gear(gb,W*.06,H*.84,u*.3,14,gearA,.045*gearAl); gear(gb,W*.06+u*.44,H*.84+u*.2,u*.19,9,-gearA*14/9+.2,.04*gearAl); gear(gb,W*.95,H*.14,u*.24,12,-gearA*.8,.042*gearAl); gear(gb,W*.95-u*.33,H*.14-u*.13,u*.13,7,gearA*.8*12/7+.3,.036*gearAl); }
   for(let i=P.length-1;i>=0;i--){ const p=P[i]; p.age+=dt; if(p.age>=p.life){ P.splice(i,1); continue; }
     const g=p.top?gt:gb, u=p.age/p.life;
@@ -19848,6 +19918,7 @@ function frame(ts){
       g.lineCap="round"; g.lineWidth=p.sz*(1-u*.5); g.strokeStyle=`rgba(${p.col},${a})`; g.beginPath(); g.moveTo(p.x,p.y); g.lineTo(p.x-nx/m*len,p.y-ny/m*len); g.stroke(); }
     else if(p.k==="fly"){ const a=Math.max(0,Math.sin(p.age*2.2+p.ph))*Math.min(1,u*6)*Math.min(1,(1-u)*4); p.vx+=rnd(-20,20)*dt; p.vy+=rnd(-20,20)*dt;
       const gr=g.createRadialGradient(p.x,p.y,0,p.x,p.y,p.sz*5); gr.addColorStop(0,`rgba(${p.col},${a*.9})`); gr.addColorStop(1,`rgba(${p.col},0)`); g.fillStyle=gr; g.beginPath(); g.arc(p.x,p.y,p.sz*5,0,6.283); g.fill(); }
+    else if(p.k==="steam"){ const a=Math.sin(Math.PI*u)*.34, r=p.sz*(1+u*2.6); const sg=g.createRadialGradient(p.x,p.y,0,p.x,p.y,r); sg.addColorStop(0,`rgba(255,255,255,${a})`); sg.addColorStop(1,"rgba(255,255,255,0)"); g.fillStyle=sg; g.beginPath(); g.arc(p.x,p.y,r,0,6.283); g.fill(); p.vx+=rnd(-30,30)*dt; }
     else if(p.k==="shard"){ p.rot+=p.vr*dt; g.save(); g.translate(p.x,p.y); g.rotate(p.rot); g.fillStyle=`rgba(${p.col},${(1-u*u)*.8})`; g.beginPath(); g.moveTo(-p.sz*1.6,p.sz); g.lineTo(p.sz*1.8,p.sz*.3); g.lineTo(0,-p.sz*1.7); g.closePath(); g.fill(); g.restore(); }
     else if(p.k==="leaf"){ p.rot+=p.vr*dt; g.save(); g.translate(p.x,p.y); g.rotate(p.rot); g.fillStyle=`rgba(${p.col},${1-u*u})`; g.beginPath(); g.ellipse(0,0,p.sz*2.2,p.sz,0,0,6.283); g.fill(); g.restore(); }
     else if(p.k==="coin"){ p.rot+=p.vr*dt; const w=Math.abs(Math.cos(p.rot))*p.sz*1.6+.6; g.fillStyle=`rgba(${p.col},${1-u*u})`; g.beginPath(); g.ellipse(p.x,p.y,w,p.sz*1.6,0,0,6.283); g.fill(); g.fillStyle=`rgba(255,255,255,${(1-u)*.55})`; g.beginPath(); g.ellipse(p.x-w*.3,p.y-p.sz*.5,w*.3,p.sz*.4,0,0,6.283); g.fill(); }
@@ -19860,6 +19931,8 @@ const center=el=>{ const r=el.getBoundingClientRect(); return r.width||r.height 
 const flash=cls=>{ const v=$("fxVig"); if(!v||RM) return; v.className=""; void v.offsetWidth; v.className=cls; };
 const kickAnim=(el,cls)=>{ if(!el||RM) return; el.classList.remove(cls); void el.offsetWidth; el.classList.add(cls); clearTimeout(el["__"+cls]); el["__"+cls]=setTimeout(()=>el.classList.remove(cls),700); };
 let streak=0, heatT=0;
+const streakLv=()=>streak>=90?3 : streak>=45?2 : streak>=15?1 : 0;
+function streakUp(){ const a=streakLv(); streak++; const b=streakLv(); if(b>a && sceneNow()==="game" && !inBattle()){ snd("lvup",b); const p=$("wordPanel"), c=p&&center(p); if(c){ ring(c[0],c[1],"120,255,170",c[2].width*.5); burst(c[0],c[2].top,10+b*6,{ ang:-Math.PI/2, spread:1.3, v0:120, v1:320, g:400, col:GREEN, l0:.4, l1:.9 }); } } }
 function heat(){ const p=$("wordPanel"); if(p) p.style.setProperty("--fxheat",Math.min(1,streak/60).toFixed(3)); }
 const GOLD=["255,214,110","255,176,58","255,240,190"], GREEN=["120,255,170","190,255,210","255,240,170"];
 /* 音が鳴るのと同じきっかけで、絵も動かす */
@@ -19868,7 +19941,7 @@ function vis(name,arg){
   const sc=sceneNow();
   if(name==="type"){
     if(sc!=="game") return;
-    streak++; requestAnimationFrame(()=>{ const d=document.querySelector("#romaji .done"); if(!d) return; const r=d.getBoundingClientRect(); if(!r.width) return;
+    streakUp(); requestAnimationFrame(()=>{ const d=document.querySelector("#romaji .done"); if(!d) return; const r=d.getBoundingClientRect(); if(!r.width) return;
       burst(r.right,r.top+r.height*.55,streak>40?5:3,{ ang:-Math.PI/2, spread:1.1, v0:60, v1:190, g:520, col:baraNow()?["255,90,120","255,180,200","214,40,70"]:GREEN, l0:.2, l1:.45, s0:1, s1:2 });
       if(streak%25===0){ ring(r.right,r.top+r.height/2,"120,255,170",40); kickAnim($("wordPanel"),"fx-pulse"); }
       heat(); });
@@ -19910,6 +19983,9 @@ function vis(name,arg){
     else if(k==="plant") each(c=>{ burst(c[0],c[1],6,{ v0:30, v1:110, g:-40, col:["140,210,110","190,235,150"], k:"dot", l0:.35, l1:.7, s0:1.4, s1:2.6 }); });
     else if(k==="fert") each(c=>burst(c[0],c[1]-10,9,{ ang:Math.PI/2, spread:.9, v0:20, v1:90, g:240, col:["230,170,80","250,214,120","200,130,60"], k:"dot", l0:.4, l1:.8, s0:1.2, s1:2.2 }));
     else if(k==="place"||k==="vil") each(c=>ring(c[0],c[1],"255,255,255",c[2].width*.8));
+    else if(k==="cook"){ const pn=document.querySelector("#g-cook .panel"), c=pn&&center(pn); if(c) for(let q=0;q<26;q++) setTimeout(()=>add({ k:"steam", x:c[0]+rnd(-c[2].width*.25,c[2].width*.25), y:c[1]+rnd(-10,60), vx:rnd(-12,12), vy:rnd(-110,-50), g:-20, dr:.4, life:rnd(1.1,2), age:0, sz:rnd(10,22), col:"255,255,255", top:1 }),q*32); }
+    else if(k==="eat"){ const w=document.createElement("div"); w.className="fx-wash"; w.style.setProperty("--c",(arg&&arg.c)||"#ffd98a"); document.body.appendChild(w); setTimeout(()=>w.remove(),1500);
+      const pn=document.querySelector("#g-cook .panel"), c=(pn&&center(pn))||[W/2,H/2]; burst(c[0],c[1],MOB?12:22,{ k:"dot", v0:60, v1:260, g:60, col:["255,236,170","255,255,255","255,200,140"], l0:.5, l1:1.1, s0:1.4, s1:3 }); }
     else if(k==="sell"||k==="buy"){ const m=$("g-money"), c=m&&center(m); if(c && sc==="garden"){ burst(c[0],c[1],k==="sell"?14:8,{ ang:-Math.PI/2, spread:1.4, v0:80, v1:240, g:620, col:["255,208,84","255,232,150","232,170,40"], k:"coin", l0:.5, l1:.9, s0:2, s1:3 }); kickAnim(m.parentElement,"fx-bump"); } }
     return;
   }
@@ -20014,6 +20090,12 @@ function boot(){
   document.documentElement.classList.toggle("fx",cfg.on); document.documentElement.classList.toggle("fx-rm",RM);
   back=mkCanvas("fxBack",1); top=mkCanvas("fxTop",50); resize(); addEventListener("resize",resize);
   const v=document.createElement("div"); v.id="fxVig"; v.setAttribute("aria-hidden","true"); document.body.appendChild(v);
+  const sky=document.createElement("div"); sky.id="fxSky"; sky.setAttribute("aria-hidden","true"); document.body.appendChild(sky);
+  /* ネジの詩: 打ち終えた行に、墨の音としぶき */
+  const pls=$("poemLines");
+  if(pls && window.MutationObserver) new MutationObserver(ms=>{ if(!cfg.on) return;
+    for(const m of ms){ const el=m.target; if(!el.classList || !el.classList.contains("pline")) continue; const was=/\bpast\b/.test(m.oldValue||""), now=el.classList.contains("past");
+      if(now && !was && sceneNow()==="poem"){ snd("poem:line"); const pt=el.querySelector(".pt"); if(pt && !RM){ const r=pt.getBoundingClientRect(); if(r.width) for(let q=0;q<3;q++) setTimeout(()=>burst(r.left+r.width*(.2+q*.35),r.top+r.height*.6,5,{ k:"dot", v0:20, v1:110, g:260, col:["28,20,16","60,44,34"], l0:.3, l1:.7, s0:1, s1:2.6 }),q*130); } break; } } }).observe(pls,{ attributes:true, attributeFilter:["class"], attributeOldValue:true, subtree:true });
   const row=document.querySelector("#screen-title .btn-row");
   if(row && !$("fxBtn")){ const b=document.createElement("button"); b.className="btn"; b.id="fxBtn"; b.type="button"; b.innerHTML='🎧 音と演出'+(MOB?"":' <span class="kbdh">V</span>'); b.addEventListener("click",openPanel); row.appendChild(b); }
   raf=requestAnimationFrame(frame);
@@ -20027,13 +20109,22 @@ function boot(){
       const els=nd.matches && nd.matches(".gcard.pop, .gsumsec.pop") ? [nd] : nd.querySelectorAll ? [...nd.querySelectorAll(".gcard.pop, .gsumsec.pop")] : [];
       for(const el of els){ if(n++<6) gachaPop(el); } } }).observe(gb,{ childList:true, subtree:true });
   /* 画面が変わったとき */
-  let prev=sceneNow();
+  let prev=sceneNow(), bestSeen="", poemShown=false, poemT=0;
+  const celebrate=()=>{ snd("best"); if(RM) return; flash("up");
+    for(let i=0;i<60;i++) setTimeout(()=>add({ k:"coin", x:rnd(0,W), y:-12, vx:rnd(-30,30), vy:rnd(120,300), g:160, dr:.2, life:rnd(2.2,3.6), age:0, sz:rnd(2,3.4), col:pick(["255,208,84","255,232,150","232,170,40"]), rot:R()*6.28, vr:rnd(-9,9), top:1 }),500+i*28);
+    for(let i=0;i<4;i++) setTimeout(()=>{ const x=rnd(W*.2,W*.8), y=rnd(H*.15,H*.4); burst(x,y,MOB?16:30,{ v0:120, v1:400, g:260, col:GOLD.concat(["255,255,255"]), l0:.6, l1:1.4, s0:1.2, s1:3 }); ring(x,y,"255,214,110",110); },900+i*200); };
   setInterval(()=>{ document.documentElement.classList.toggle("fx-bara",cfg.on && baraNow());
+    /* 自己ベストを更新したとき(結果の画面・詩) */
+    { const sc0=sceneNow(), el=sc0==="result" ? $("resultNew") : sc0==="poem" ? $("poemResNew") : null, tx=el ? el.textContent.trim() : "", key=tx ? sc0+":"+tx : "";
+      if(key!==bestSeen){ bestSeen=key; if(key && /更新/.test(tx) && cfg.on && !inBattle()){ celebrate(); el.classList.remove("fx-best"); void el.offsetWidth; el.classList.add("fx-best"); } } }
+    /* 詩を読み終えたら、少し見せてから巻物を閉じる */
+    { const pr=$("poemResult"), pp=$("poemPaper"), on=!!(pr && pr.classList.contains("show") && sceneNow()==="poem");
+      if(on!==poemShown){ poemShown=on; clearTimeout(poemT); if(pp){ if(on && cfg.on) poemT=setTimeout(()=>{ if(poemShown){ pp.classList.add("fx-close"); snd("poem:close"); } },2200); else pp.classList.remove("fx-close"); } } }
     const sc=sceneNow(); if(sc===prev) return; const from=prev; prev=sc; streak=0; heat();
     if(sc==="result" && from==="game" && cfg.on && !inBattle()){ snd("fanfare"); if(!RM) for(let i=0;i<5;i++) setTimeout(()=>burst(rnd(W*.25,W*.75),rnd(H*.2,H*.45),MOB?10:18,{ v0:80, v1:320, g:300, col:GOLD.concat(["120,220,255","255,150,170"]), l0:.6, l1:1.3, s0:1.2, s1:2.8 }),i*130); }
   },120);
 }
-window.FX={ snd, cfg, set:setOpt, open:openPanel, burst, ring, dbg, track:()=>cur&&cur.name, parts:()=>P.length, bus:()=>B, ending, endingLen:n=>n*END_SEC, wake:()=>{ if(ac()) bgmRun(); } };
+window.FX={ setHour:h=>{ hourFix=h; }, hour:hourNow, snd, cfg, set:setOpt, open:openPanel, burst, ring, dbg, track:()=>cur&&cur.name, parts:()=>P.length, bus:()=>B, ending, endingLen:n=>n*END_SEC, wake:()=>{ if(ac()) bgmRun(); } };
 if(document.readyState==="loading") document.addEventListener("DOMContentLoaded",boot); else boot();
 })();
 </script>
