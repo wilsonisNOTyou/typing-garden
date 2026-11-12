@@ -19398,6 +19398,8 @@ const cfg=Object.assign({ on:true, bgm:true, bv:.5, sv:.8 }, (()=>{ try{ return 
 const saveCfg=()=>{ try{ localStorage.setItem(KEY,JSON.stringify(cfg)); }catch(e){} };
 const RM=(()=>{ try{ return matchMedia("(prefers-reduced-motion:reduce)").matches; }catch(e){ return false; } })();
 const MOB=!!window.IS_MOBILE;
+const LITE=MOB;   // スマホ: 音の合成を軽くする(残響を簡単なものに・重ねる音を減らす・同時に鳴る数に上限)。音がブツブツ途切れるのを防ぐ
+let voices=0;
 const $=id=>document.getElementById(id);
 const R=Math.random, rnd=(a,b)=>a+R()*(b-a), pick=a=>a[(R()*a.length)|0];
 const sceneNow=()=>{ try{ return scene; }catch(e){ return "title"; } };
@@ -19415,11 +19417,16 @@ function impulse(c,sec,decay){
 }
 function bus(c){
   if(B && B.c===c) return B;
-  const out=c.createGain(), comp=c.createDynamicsCompressor(), sfx=c.createGain(), bgm=c.createGain(), jk=c.createGain(), rev=c.createConvolver(), wet=c.createGain(), send=c.createGain(), sfxRv=c.createGain();
+  const out=c.createGain(), comp=c.createDynamicsCompressor(), sfx=c.createGain(), bgm=c.createGain(), jk=c.createGain(), rev=LITE ? c.createGain() : c.createConvolver(), wet=c.createGain(), send=c.createGain(), sfxRv=c.createGain();
   comp.threshold.value=-15; comp.knee.value=14; comp.ratio.value=3.5; comp.attack.value=.004; comp.release.value=.2;
-  rev.buffer=impulse(c,2.4,2.6); wet.gain.value=.9; send.gain.value=.14;
+  if(!LITE) rev.buffer=impulse(c,2.4,2.6); wet.gain.value=.9; send.gain.value=.14;
   const noise=c.createBuffer(1,c.sampleRate*2,c.sampleRate); { const d=noise.getChannelData(0); for(let i=0;i<d.length;i++) d[i]=R()*2-1; }
-  rawConnect.call(sfx,out); rawConnect.call(sfx,send); rawConnect.call(send,rev); rawConnect.call(rev,wet); rawConnect.call(wet,out);
+  rawConnect.call(sfx,out); rawConnect.call(sfx,send); rawConnect.call(send,rev); rawConnect.call(wet,out);
+  if(!LITE) rawConnect.call(rev,wet);
+  else{   // 軽い残響: 2本の遅れを回すだけ
+    const d1=c.createDelay(.5), d2=c.createDelay(.5), lp=c.createBiquadFilter(), fb=c.createGain(); d1.delayTime.value=.097; d2.delayTime.value=.163; lp.type="lowpass"; lp.frequency.value=2600; fb.gain.value=.42; wet.gain.value=.5;
+    rawConnect.call(rev,d1); rawConnect.call(d1,lp); rawConnect.call(lp,wet); rawConnect.call(lp,fb); rawConnect.call(fb,d2); rawConnect.call(d2,lp);
+  }
   rawConnect.call(sfxRv,rev); rawConnect.call(bgm,out); rawConnect.call(jk,out); rawConnect.call(out,comp); rawConnect.call(comp,c.destination);
   B={ c, sfx, bgm, jk, rev, out, noise, sfxRv, o:{ g:sfx, rv:sfxRv } };   // 効果音が残響に送る分も、効果音の音量を通す(音量0なら残響も消える)
   applyVol();
@@ -19433,14 +19440,17 @@ AudioNode.prototype.connect=function(dst,...a){
   return rawConnect.call(this,dst,...a);
 };
 function ac(){
-  try{ audioCtx=audioCtx||new AC(); if(audioCtx.state==="suspended") audioCtx.resume(); return bus(audioCtx); }catch(e){ return null; }
+  try{ if(!audioCtx){ if(LITE){ try{ audioCtx=new AC({ latencyHint:"playback", sampleRate:32000 }); }catch(e){ try{ audioCtx=new AC({ latencyHint:"playback" }); }catch(e2){} } } audioCtx=audioCtx||new AC(); }   // スマホ: 余裕を持って処理できる設定にする
+    if(audioCtx.state==="suspended") audioCtx.resume(); return bus(audioCtx); }catch(e){ return null; }
 }
 const hz=n=>440*Math.pow(2,(n-69)/12);
 /* 音(ひとつ): o={g:つなぎ先, rv:残響の入り口} / n は音の高さ(ピアノの鍵盤の番号) */
 function T(o,t,n,d,p){
   const c=B.c; p=p||{};
   t=Math.max(t,c.currentTime+.006);   // 過去の時刻に予約すると、音がいきなり立ち上がってプツッと鳴る
-  const os=c.createOscillator(), g=c.createGain(), v=p.v||.05, r=p.r==null?.08:p.r, f=hz(n);
+  if(LITE){ if(p.det<0) return; if((p.v||.05)<.009 && !p.hold) return; if(voices>=(o===B.o?40:30) && (p.v||.05)<.05) return; }   // スマホ: 重ねる音・ごく小さい音を省き、同時に鳴る数を抑える
+  const os=c.createOscillator(), g=c.createGain(), v=(p.v||.05)*(LITE && p.det>0 ? 1.6 : 1), r=LITE ? Math.min(p.r==null?.08:p.r,.5) : (p.r==null?.08:p.r), f=hz(n);
+  voices++; os.onended=()=>{ voices--; };
   const a=Math.max(p.a||.004, (n<58 && !p.bend) ? .016 : n<70 ? .006 : .003);   // 低い音ほど、ゆっくり立ち上げる
   os.type=p.type||"sine";
   if(p.bend){ os.frequency.setValueAtTime(hz(n+p.bend),t); os.frequency.exponentialRampToValueAtTime(f,t+(p.bt||.04)); } else os.frequency.setValueAtTime(f,t);
@@ -19448,7 +19458,7 @@ function T(o,t,n,d,p){
   if(p.det) os.detune.value=p.det;
   let src=os;
   if(p.lp){ const fl=c.createBiquadFilter(); fl.type="lowpass"; fl.frequency.value=p.lp; fl.Q.value=p.q||.7; rawConnect.call(os,fl); src=fl; }
-  if(p.vib){ const l=c.createOscillator(), lg=c.createGain(); l.frequency.value=p.vr||5.2; lg.gain.value=0; lg.gain.setValueAtTime(0,t); lg.gain.linearRampToValueAtTime(p.vib,t+Math.min(d,.5)); rawConnect.call(l,lg); rawConnect.call(lg,os.detune); l.start(t); l.stop(t+d+r+.1); }
+  if(p.vib && !LITE){ const l=c.createOscillator(), lg=c.createGain(); l.frequency.value=p.vr||5.2; lg.gain.value=0; lg.gain.setValueAtTime(0,t); lg.gain.linearRampToValueAtTime(p.vib,t+Math.min(d,.5)); rawConnect.call(l,lg); rawConnect.call(lg,os.detune); l.start(t); l.stop(t+d+r+.1); }
   g.gain.value=0;   // 音量のはじめの値は 1 なので、0 にしておく。そのままだと、鳴りはじめの1サンプルだけ全開で出て「プツッ」と鳴ることがある
   g.gain.setValueAtTime(.0001,t); g.gain.exponentialRampToValueAtTime(v,t+a);
   if(p.hold) g.gain.setValueAtTime(v,Math.max(t+a,t+d-.01)); else g.gain.exponentialRampToValueAtTime(Math.max(.0002,v*(p.sus==null?.35:p.sus)),t+Math.max(a+.005,d));
@@ -19461,6 +19471,7 @@ function T(o,t,n,d,p){
 function N(o,t,d,p){
   const c=B.c; p=p||{};
   t=Math.max(t,c.currentTime+.006);
+  if(LITE && (p.v||.03)<.008) return;
   const s=c.createBufferSource(), fl=c.createBiquadFilter(), g=c.createGain(), v=p.v||.03;
   s.buffer=B.noise; s.loop=true;
   fl.type=p.ft||"bandpass"; fl.frequency.setValueAtTime(p.f||2000,t); if(p.to) fl.frequency.exponentialRampToValueAtTime(p.to,t+d); fl.Q.value=p.q||1;
@@ -19802,7 +19813,7 @@ function bgmTick(){
   if(c.state!=="running") return;
   if(cur.next<c.currentTime+.03) cur.next=c.currentTime+.12;   // 画面が重くて遅れたときは、少し先から続ける
   let guard=0;
-  while(cur.next<c.currentTime+.6 && guard++<48){
+  while(cur.next<c.currentTime+(LITE?1.1:.6) && guard++<64){
     const sp=60/tr.bpm()/4; let t=cur.next; if(tr.swing && (cur.step&1)) t+=sp*tr.swing;
     if(!(cur.f && cur.f.jk) && !(cfg.heard && cfg.heard[cur.name])){ cfg.heard=cfg.heard||{}; cfg.heard[cur.name]=1; saveCfg(); }   // 聴いたことのある曲として覚える
     try{ tr.step(cur.step,t,cur,cur.loop,sp); dbg.steps++; }catch(e){ dbg.errs.push(String(e&&e.stack||e).slice(0,300)); }
@@ -19822,9 +19833,9 @@ function bgmRun(){ if(!bgmTimer) bgmTimer=setInterval(bgmTick,60); }
 /* ---------------------------------------------------------------- 絵: 火花・粒 */
 let back=null, top=null, W=0, H=0, DPR=1, raf=0, last=0, amb=0;
 const P=[];   // 粒
-const MAXP=MOB?140:320;
+const MAXP=MOB?70:320;
 function mkCanvas(id,z){ const c=document.createElement("canvas"); c.id=id; c.setAttribute("aria-hidden","true"); c.style.cssText=`position:fixed;inset:0;width:100%;height:100%;pointer-events:none;z-index:${z}`; document.body.appendChild(c); return c; }
-function resize(){ DPR=Math.min(MOB?1.25:1.5,window.devicePixelRatio||1); W=innerWidth; H=innerHeight; for(const c of [back,top]) if(c){ c.width=Math.round(W*DPR); c.height=Math.round(H*DPR); } }
+function resize(){ DPR=Math.min(MOB?1:1.5,window.devicePixelRatio||1); W=innerWidth; H=innerHeight; for(const c of [back,top]) if(c){ c.width=Math.round(W*DPR); c.height=Math.round(H*DPR); } }
 function add(p){ if(P.length>=MAXP){ if(p.amb) return; P.shift(); } P.push(p); }
 /* 粒をまとめて出す: kind = spark(火花) dot(光の粒) ring(輪) leaf(葉) drop(しずく) crumb(土) coin(金の粒) */
 function burst(x,y,n,o){
@@ -19897,6 +19908,7 @@ function skyDraw(gb,gt,t){
 }
 function frame(ts){
   raf=requestAnimationFrame(frame);
+  if(MOB && ts-last<30) return;   // スマホ: 絵は1秒30回まで
   const dt=Math.min(.05,(ts-last)/1000||0); last=ts;
   if(!cfg.on || document.hidden){ return; }
   const sc=sceneNow(), light=(sc==="garden"||sc==="poem");
@@ -19906,7 +19918,7 @@ function frame(ts){
   /* 歯車(暗い画面のホームだけ。ほかの画面では、すっと消える) */
   gearAl+=((sc==="title"&&!RM&&!TG?1:0)-gearAl)*Math.min(1,dt*3); gearA+=dt*.06;
   leafAl+=((sc==="title"&&TG?1:0)-leafAl)*Math.min(1,dt*3); if(leafAl>.01) vines(gb,ts/1000,leafAl);
-  if(sc==="garden" && !$("kyoEnd")) skyDraw(gb,gt,ts/1000); skyTint(sc);
+  if(sc==="garden" && !$("kyoEnd") && !MOB) skyDraw(gb,gt,ts/1000); skyTint(sc);
   if(gearAl>.01){ const u=Math.min(W,H); gear(gb,W*.06,H*.84,u*.3,14,gearA,.045*gearAl); gear(gb,W*.06+u*.44,H*.84+u*.2,u*.19,9,-gearA*14/9+.2,.04*gearAl); gear(gb,W*.95,H*.14,u*.24,12,-gearA*.8,.042*gearAl); gear(gb,W*.95-u*.33,H*.14-u*.13,u*.13,7,gearA*.8*12/7+.3,.036*gearAl); }
   for(let i=P.length-1;i>=0;i--){ const p=P[i]; p.age+=dt; if(p.age>=p.life){ P.splice(i,1); continue; }
     const g=p.top?gt:gb, u=p.age/p.life;
@@ -20124,7 +20136,7 @@ function boot(){
     if(sc==="result" && from==="game" && cfg.on && !inBattle()){ snd("fanfare"); if(!RM) for(let i=0;i<5;i++) setTimeout(()=>burst(rnd(W*.25,W*.75),rnd(H*.2,H*.45),MOB?10:18,{ v0:80, v1:320, g:300, col:GOLD.concat(["120,220,255","255,150,170"]), l0:.6, l1:1.3, s0:1.2, s1:2.8 }),i*130); }
   },120);
 }
-window.FX={ setHour:h=>{ hourFix=h; }, hour:hourNow, snd, cfg, set:setOpt, open:openPanel, burst, ring, dbg, track:()=>cur&&cur.name, parts:()=>P.length, bus:()=>B, ending, endingLen:n=>n*END_SEC, wake:()=>{ if(ac()) bgmRun(); } };
+window.FX={ voices:()=>voices, setHour:h=>{ hourFix=h; }, hour:hourNow, snd, cfg, set:setOpt, open:openPanel, burst, ring, dbg, track:()=>cur&&cur.name, parts:()=>P.length, bus:()=>B, ending, endingLen:n=>n*END_SEC, wake:()=>{ if(ac()) bgmRun(); } };
 if(document.readyState==="loading") document.addEventListener("DOMContentLoaded",boot); else boot();
 })();
 </script>
