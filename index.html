@@ -19398,7 +19398,11 @@ const cfg=Object.assign({ on:true, bgm:true, bv:.5, sv:.8 }, (()=>{ try{ return 
 const saveCfg=()=>{ try{ localStorage.setItem(KEY,JSON.stringify(cfg)); }catch(e){} };
 const RM=(()=>{ try{ return matchMedia("(prefers-reduced-motion:reduce)").matches; }catch(e){ return false; } })();
 const MOB=!!window.IS_MOBILE;
-const LITE=MOB;   // スマホ: 音の合成を軽くする(残響を簡単なものに・重ねる音を減らす・同時に鳴る数に上限)。音がブツブツ途切れるのを防ぐ
+/* 軽い音: 残響を簡単なものにし、重ねる音を減らし、同時に鳴る数に上限を付ける。音がブツブツ途切れるときのため。
+   cfg.lite = true(いつも)/ false(使わない)/ なし(自動: ふつうに始めて、途切れを見つけたら切り替えて覚える。CPU の少ないパソコンは最初から) */
+const lowCpu=(()=>{ try{ return !MOB && navigator.hardwareConcurrency>0 && navigator.hardwareConcurrency<=2; }catch(e){ return false; } })();
+const wantLite=()=>cfg.lite===true || (cfg.lite!==false && !!(cfg.autoLite || lowCpu));
+let LITE=wantLite(), strikes=0, wd=null;
 let voices=0;
 const $=id=>document.getElementById(id);
 const R=Math.random, rnd=(a,b)=>a+R()*(b-a), pick=a=>a[(R()*a.length)|0];
@@ -19428,11 +19432,23 @@ function bus(c){
     rawConnect.call(rev,d1); rawConnect.call(d1,lp); rawConnect.call(lp,wet); rawConnect.call(lp,fb); rawConnect.call(fb,d2); rawConnect.call(d2,lp);
   }
   rawConnect.call(sfxRv,rev); rawConnect.call(bgm,out); rawConnect.call(jk,out); rawConnect.call(out,comp); rawConnect.call(comp,c.destination);
+  try{ if(c.renderCapacity && !c.__fxCap){ c.__fxCap=1; c.renderCapacity.addEventListener("update",e=>{ if(wd && (e.underrunRatio>.03 || e.averageLoad>.92)) wd.under=1; }); c.renderCapacity.start({ updateInterval:1 }); } }catch(e){}
   B={ c, sfx, bgm, jk, rev, out, noise, sfxRv, o:{ g:sfx, rv:sfxRv } };   // 効果音が残響に送る分も、効果音の音量を通す(音量0なら残響も消える)
   applyVol();
   return B;
 }
 const jkVol=()=>cfg.bv>0 ? cfg.bv : .5;
+/* 軽い音とふつうの音を切り替える: 音の土台を作り直す(BGM は一度止まって、その曲の頭から流れ直す) */
+function setLite(){ const w=wantLite(); if(w===LITE) return; LITE=w; strikes=0; wd=null; if(!B) return; const c=B.c; try{ if(cur) switchTo(null); B.out.disconnect(); }catch(e){} B=null; bus(c); }
+/* 途切れの見張り: 音の時計が実際の時間より遅れる・予約が何度も遅れる、が続いたら軽い音にする */
+function watch(c){
+  if(LITE || cfg.lite!=null || document.hidden || c.state!=="running"){ wd=null; return; }
+  const now=performance.now(); if(!wd || now-wd.w>6000){ wd={ w:now, a:c.currentTime, late:0 }; return; }
+  if(now-wd.w<3000) return;
+  const ratio=(c.currentTime-wd.a)*1000/(now-wd.w), bad=ratio<.965 || wd.late>=3 || wd.under; wd={ w:now, a:c.currentTime, late:0 };
+  strikes=bad ? strikes+1 : Math.max(0,strikes-.25);
+  if(strikes>=2){ cfg.autoLite=1; saveCfg(); setLite(); paintPanel(); }
+}
 function applyVol(){ if(!B) return; B.sfx.gain.value=cfg.sv*1.25; B.sfxRv.gain.value=cfg.sv*1.25; B.bgm.gain.value=cfg.bgm ? cfg.bv : 0; B.jk.gain.value=jkVol(); if(cur) cur.rv.gain.value=cur.forced ? jkVol() : cfg.bgm ? cfg.bv : 0; }
 /* もとの音は「出口」につないでいる。その行き先を、ここのミキサーに付け替える */
 AudioNode.prototype.connect=function(dst,...a){
@@ -19811,7 +19827,8 @@ function bgmTick(){
   const c=B.c, tr=TR[cur.name], dk=duck();
   if(dk!==cur.dk){ cur.dk=dk; cur.g.gain.cancelScheduledValues(c.currentTime); cur.g.gain.setTargetAtTime(dk||.0001,c.currentTime,.2); }
   if(c.state!=="running") return;
-  if(cur.next<c.currentTime+.03) cur.next=c.currentTime+.12;   // 画面が重くて遅れたときは、少し先から続ける
+  watch(c); if(!B || !cur) return;   // 軽い音に切り替えた直後は、次の回から続ける
+  if(cur.next<c.currentTime+.03){ cur.next=c.currentTime+.12; if(wd && cur.step+cur.loop>0) wd.late++; }   // 画面が重くて遅れたときは、少し先から続ける
   let guard=0;
   while(cur.next<c.currentTime+(LITE?1.1:.6) && guard++<64){
     const sp=60/tr.bpm()/4; let t=cur.next; if(tr.swing && (cur.step&1)) t+=sp*tr.swing;
@@ -20019,6 +20036,7 @@ function paintPanel(){
   const q=s=>w.querySelector(s);
   q("[data-fx=on]").textContent=cfg.on?"オン":"オフ"; q("[data-fx=on]").classList.toggle("on",cfg.on);
   q("[data-fx=bgm]").textContent=cfg.bgm?"オン":"オフ"; q("[data-fx=bgm]").classList.toggle("on",cfg.bgm);
+  { const b=q("[data-fx=lite]"); b.textContent=cfg.lite===true?"オン":cfg.lite===false?"オフ":LITE?"自動(軽い音)":"自動"; b.classList.toggle("on",LITE); }
   q("[data-fx=bv]").value=Math.round(cfg.bv*100); q("[data-fx=sv]").value=Math.round(cfg.sv*100);
   q("[data-val=bv]").textContent=Math.round(cfg.bv*100); q("[data-val=sv]").textContent=Math.round(cfg.sv*100);
   for(const b of w.querySelectorAll("[data-song]")){ const on=!!(force && force.jk && force.name===b.dataset.song); b.classList.toggle("on",on); b.querySelector("i").textContent=on?"■ 止める":"▶ 聴く"; }
@@ -20033,6 +20051,7 @@ function rowAct(r,dir){   // dir: 0=決める -1/+1=左右
   if(!r) return;
   const k=r.dataset.row;
   if(k==="on"||k==="bgm"){ setOpt(k,!cfg[k]); if(cfg.on) snd("g:tab"); }
+  else if(k==="lite"){ if(dir) return; if(cfg.lite==null){ cfg.lite=true; } else if(cfg.lite===true){ cfg.lite=false; } else { delete cfg.lite; delete cfg.autoLite; } saveCfg(); setLite(); paintPanel(); if(ac()) bgmTick(); if(cfg.on) snd("g:tab"); }
   else if(k==="bv"||k==="sv"){ if(!dir) return; setOpt(k,Math.max(0,Math.min(1,Math.round((cfg[k]+dir*.05)*20)/20))); if(k==="sv") snd("vol")||(typeof beep==="function" && beep(1320,.06,"square",.035)); }
   else if(k==="song"){ if(!dir) songToggle(r.dataset.song); }
   else if(k==="close"){ if(!dir) closePanel(); }
@@ -20044,6 +20063,7 @@ function openPanel(){
   w.innerHTML=`<div class="fxp-box" role="dialog" aria-modal="true" aria-label="音と演出"><h3>音と演出</h3><div class="fxp-scroll">
     <div class="fxp-row" data-row="on"><span>新しい音と演出<small>オフにすると、これまでの音と見た目に戻ります</small></span><button type="button" data-fx="on" tabindex="-1"></button></div>
     <div class="fxp-row" data-row="bgm"><span>BGM</span><button type="button" data-fx="bgm" tabindex="-1"></button></div>
+    <div class="fxp-row" data-row="lite"><span>軽い音<small>音が途切れるときに。自動では、途切れを見つけると切り替わります</small></span><button type="button" data-fx="lite" tabindex="-1"></button></div>
     <label class="fxp-row" data-row="bv"><span>BGM の音量 <b data-val="bv"></b></span><input type="range" min="0" max="100" step="5" data-fx="bv" tabindex="-1"></label>
     <label class="fxp-row" data-row="sv"><span>効果音の音量 <b data-val="sv"></b></span><input type="range" min="0" max="100" step="5" data-fx="sv" tabindex="-1"></label>
     <div class="fxp-hd">曲を聴く</div>
@@ -20136,7 +20156,7 @@ function boot(){
     if(sc==="result" && from==="game" && cfg.on && !inBattle()){ snd("fanfare"); if(!RM) for(let i=0;i<5;i++) setTimeout(()=>burst(rnd(W*.25,W*.75),rnd(H*.2,H*.45),MOB?10:18,{ v0:80, v1:320, g:300, col:GOLD.concat(["120,220,255","255,150,170"]), l0:.6, l1:1.3, s0:1.2, s1:2.8 }),i*130); }
   },120);
 }
-window.FX={ voices:()=>voices, setHour:h=>{ hourFix=h; }, hour:hourNow, snd, cfg, set:setOpt, open:openPanel, burst, ring, dbg, track:()=>cur&&cur.name, parts:()=>P.length, bus:()=>B, ending, endingLen:n=>n*END_SEC, wake:()=>{ if(ac()) bgmRun(); } };
+window.FX={ lite:()=>LITE, strike:()=>{ strikes=5; if(wd) wd.w-=4000; }, voices:()=>voices, setHour:h=>{ hourFix=h; }, hour:hourNow, snd, cfg, set:setOpt, open:openPanel, burst, ring, dbg, track:()=>cur&&cur.name, parts:()=>P.length, bus:()=>B, ending, endingLen:n=>n*END_SEC, wake:()=>{ if(ac()) bgmRun(); } };
 if(document.readyState==="loading") document.addEventListener("DOMContentLoaded",boot); else boot();
 })();
 </script>
