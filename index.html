@@ -19432,23 +19432,44 @@ function bus(c){
     rawConnect.call(rev,d1); rawConnect.call(d1,lp); rawConnect.call(lp,wet); rawConnect.call(lp,fb); rawConnect.call(fb,d2); rawConnect.call(d2,lp);
   }
   rawConnect.call(sfxRv,rev); rawConnect.call(bgm,out); rawConnect.call(jk,out); rawConnect.call(out,comp); rawConnect.call(comp,c.destination);
-  try{ if(c.renderCapacity && !c.__fxCap){ c.__fxCap=1; c.renderCapacity.addEventListener("update",e=>{ if(wd && (e.underrunRatio>.03 || e.averageLoad>.92)) wd.under=1; }); c.renderCapacity.start({ updateInterval:1 }); } }catch(e){}
+  try{ if(c.renderCapacity && !c.__fxCap){ c.__fxCap=1; c.renderCapacity.addEventListener("update",e=>{ if(wd && (e.underrunRatio>.02 || e.averageLoad>.9)) wd.under=(wd.under||0)+(e.underrunRatio>.1?2:1); }); c.renderCapacity.start({ updateInterval:.5 }); } }catch(e){}
   B={ c, sfx, bgm, jk, rev, out, noise, sfxRv, o:{ g:sfx, rv:sfxRv } };   // 効果音が残響に送る分も、効果音の音量を通す(音量0なら残響も消える)
   applyVol();
   return B;
 }
 const jkVol=()=>cfg.bv>0 ? cfg.bv : .5;
-/* 軽い音とふつうの音を切り替える: 音の土台を作り直す(BGM は一度止まって、その曲の頭から流れ直す) */
-function setLite(){ const w=wantLite(); if(w===LITE) return; LITE=w; strikes=0; wd=null; if(!B) return; const c=B.c; try{ if(cur) switchTo(null); B.out.disconnect(); }catch(e){} B=null; bus(c); }
-/* 途切れの見張り: 音の時計が実際の時間より遅れる・予約が何度も遅れる、が続いたら軽い音にする */
+/* 軽い音とふつうの音を切り替える: 音の土台を作り直す。流れている曲は、いまの位置からそのまま続ける(古いほうを短く消しながら入れ替える) */
+function setLite(){
+  const w=wantLite(); if(w===LITE) return; LITE=w; strikes=0; wd=null; if(!B) return;
+  const c=B.c, old=B, keep=cur, now=c.currentTime;
+  try{ old.out.gain.cancelScheduledValues(now); old.out.gain.setValueAtTime(old.out.gain.value,now); old.out.gain.linearRampToValueAtTime(0,now+.22); }catch(e){}
+  setTimeout(()=>{ try{ old.out.disconnect(); }catch(e){} },700);
+  cur=null; B=null; bus(c);
+  if(keep && !keep.done){ const tr=TR[keep.name], sp=60/tr.bpm()/4, back=Math.max(0,Math.floor((keep.next-(now+.16))/sp));   // 先に予約してあった分だけ巻き戻して、同じところから鳴らし直す
+    switchTo(keep.name); if(cur){ let st=keep.step-back, lp=keep.loop; while(st<0){ st+=tr.len; lp=Math.max(0,lp-1); } cur.step=st; cur.loop=lp; cur.next=now+.16; cur.g.gain.cancelScheduledValues(now); cur.g.gain.setValueAtTime(.0001,now); cur.g.gain.linearRampToValueAtTime(1,now+.2); } }
+}
+/* 途切れの見張り: 1秒ごとに、音の時計が実際の時間より遅れていないか・予約が遅れていないかを見る。はっきり遅れていたらすぐ、少しなら2回続いたら、軽い音にする */
 function watch(c){
   if(LITE || cfg.lite!=null || document.hidden || c.state!=="running"){ wd=null; return; }
-  const now=performance.now(); if(!wd || now-wd.w>6000){ wd={ w:now, a:c.currentTime, late:0 }; return; }
-  if(now-wd.w<3000) return;
-  const ratio=(c.currentTime-wd.a)*1000/(now-wd.w), bad=ratio<.965 || wd.late>=3 || wd.under; wd={ w:now, a:c.currentTime, late:0 };
-  strikes=bad ? strikes+1 : Math.max(0,strikes-.25);
+  const now=performance.now(); if(!wd || now-wd.w>4000){ wd={ w:now, a:c.currentTime, late:0 }; return; }
+  if(now-wd.w<1000) return;
+  const ratio=(c.currentTime-wd.a)*1000/(now-wd.w), hard=ratio<.88 || wd.under>1, bad=hard || ratio<.955 || wd.late>=2 || wd.under; wd={ w:now, a:c.currentTime, late:0 };
+  strikes=hard ? 2 : bad ? strikes+1 : Math.max(0,strikes-.34);
   if(strikes>=2){ cfg.autoLite=1; saveCfg(); setLite(); paintPanel(); }
 }
+/* はじめて開いたとき、音を出す前に、この端末の速さを測る(音の合成を1秒ぶん、鳴らさずに計算してみる)。遅ければ、最初から軽い音にする */
+async function bench(){
+  if(cfg.bench!=null || cfg.lite!=null) return;
+  try{ const OC=window.OfflineAudioContext||window.webkitOfflineAudioContext; if(!OC) return;
+    let ms=1e9;
+    for(let k=0;k<2;k++){   // 2回測って、速いほうを取る(読み込み中の重さに引きずられないように)
+    const oc=new OC(2,44100,44100), cv=oc.createConvolver(); cv.buffer=impulse(oc,2.4,2.6); cv.connect(oc.destination);
+    for(let i=0;i<36;i++){ const o=oc.createOscillator(), f=oc.createBiquadFilter(), g=oc.createGain(); o.type="sawtooth"; o.frequency.value=110+i*37; f.type="lowpass"; f.frequency.value=1200; g.gain.value=.01; o.connect(f); f.connect(g); g.connect(oc.destination); g.connect(cv); o.start(0); }
+    const t0=performance.now(); await oc.startRendering(); ms=Math.min(ms,Math.round(performance.now()-t0)); }
+    cfg.bench=ms; if(ms>BENCH_SLOW) cfg.autoLite=1; saveCfg(); setLite(); paintPanel();
+  }catch(e){}
+}
+const BENCH_SLOW=220;   // 1秒ぶんの計算に、これより長くかかる端末は軽い音で始める(ミリ秒)
 function applyVol(){ if(!B) return; B.sfx.gain.value=cfg.sv*1.25; B.sfxRv.gain.value=cfg.sv*1.25; B.bgm.gain.value=cfg.bgm ? cfg.bv : 0; B.jk.gain.value=jkVol(); if(cur) cur.rv.gain.value=cur.forced ? jkVol() : cfg.bgm ? cfg.bv : 0; }
 /* もとの音は「出口」につないでいる。その行き先を、ここのミキサーに付け替える */
 AudioNode.prototype.connect=function(dst,...a){
@@ -19784,7 +19805,7 @@ const TR={
     T(o,t,86,4,{ type:"triangle", lp:3400, v:.05, a:.004, r:2.5, sus:.4, rv:.6 });
   }},
 };
-let cur=null, force=null, bgmTimer=0, mtLive=false;   // force: 聴くだけの曲 { name, n(区切りの数。なければ、ずっとくり返す) }
+let cur=null, force=null, bgmTimer=0, mtLive=false, firstSong=true;   // force: 聴くだけの曲 { name, n(区切りの数。なければ、ずっとくり返す) }
 const END_SEC=24;   // エンディングの曲の、ひと区切り(8小節)の秒数
 const gachaOpen=()=>{ const m=$("g-gacha"); return !!(m && m.classList.contains("open")); };
 const baraNow=()=>{ try{ return !!baraOn(); }catch(e){ return false; } };
@@ -19815,7 +19836,7 @@ function switchTo(name){
   const c=B.c, now=c.currentTime;
   if(cur){ const g=cur.g, r=cur.rv; for(const x of [g,r]){ x.gain.cancelScheduledValues(now); x.gain.setTargetAtTime(.0001,now,.18); } setTimeout(()=>{ try{ g.disconnect(); r.disconnect(); }catch(e){} },2500); cur=null; }
   if(!name) return;
-  const forced=!!force, g=c.createGain(), rv=c.createGain(); g.gain.value=.0001; g.gain.setTargetAtTime(1,now+.05,.25); rv.gain.value=forced ? jkVol() : cfg.bgm ? cfg.bv : 0;
+  const forced=!!force, g=c.createGain(), rv=c.createGain(); g.gain.value=.0001; g.gain.setTargetAtTime(1,now+.05,firstSong?.7:.25); firstSong=false;   // いちばん最初の曲だけ、ゆっくり入る rv.gain.value=forced ? jkVol() : cfg.bgm ? cfg.bv : 0;
   rawConnect.call(g,forced ? B.jk : B.bgm); rawConnect.call(rv,B.rev);   // 残響に送る分にも、BGM の音量をかける
   cur={ name, g, rv, step:0, loop:0, next:now+.14, dk:1, forced, f:force, n:force ? force.n : 0 };
 }
@@ -20036,6 +20057,7 @@ function paintPanel(){
   const q=s=>w.querySelector(s);
   q("[data-fx=on]").textContent=cfg.on?"オン":"オフ"; q("[data-fx=on]").classList.toggle("on",cfg.on);
   q("[data-fx=bgm]").textContent=cfg.bgm?"オン":"オフ"; q("[data-fx=bgm]").classList.toggle("on",cfg.bgm);
+  q("[data-val=bench]").textContent=cfg.bench!=null?` (この端末の測定 ${cfg.bench})`:"";
   { const b=q("[data-fx=lite]"); b.textContent=cfg.lite===true?"オン":cfg.lite===false?"オフ":LITE?"自動(軽い音)":"自動"; b.classList.toggle("on",LITE); }
   q("[data-fx=bv]").value=Math.round(cfg.bv*100); q("[data-fx=sv]").value=Math.round(cfg.sv*100);
   q("[data-val=bv]").textContent=Math.round(cfg.bv*100); q("[data-val=sv]").textContent=Math.round(cfg.sv*100);
@@ -20051,7 +20073,7 @@ function rowAct(r,dir){   // dir: 0=決める -1/+1=左右
   if(!r) return;
   const k=r.dataset.row;
   if(k==="on"||k==="bgm"){ setOpt(k,!cfg[k]); if(cfg.on) snd("g:tab"); }
-  else if(k==="lite"){ if(dir) return; if(cfg.lite==null){ cfg.lite=true; } else if(cfg.lite===true){ cfg.lite=false; } else { delete cfg.lite; delete cfg.autoLite; } saveCfg(); setLite(); paintPanel(); if(ac()) bgmTick(); if(cfg.on) snd("g:tab"); }
+  else if(k==="lite"){ if(dir) return; if(cfg.lite==null){ cfg.lite=true; } else if(cfg.lite===true){ cfg.lite=false; } else { delete cfg.lite; delete cfg.autoLite; if(cfg.bench>BENCH_SLOW) cfg.autoLite=1; } saveCfg(); setLite(); paintPanel(); if(ac()) bgmTick(); if(cfg.on) snd("g:tab"); }
   else if(k==="bv"||k==="sv"){ if(!dir) return; setOpt(k,Math.max(0,Math.min(1,Math.round((cfg[k]+dir*.05)*20)/20))); if(k==="sv") snd("vol")||(typeof beep==="function" && beep(1320,.06,"square",.035)); }
   else if(k==="song"){ if(!dir) songToggle(r.dataset.song); }
   else if(k==="close"){ if(!dir) closePanel(); }
@@ -20063,7 +20085,7 @@ function openPanel(){
   w.innerHTML=`<div class="fxp-box" role="dialog" aria-modal="true" aria-label="音と演出"><h3>音と演出</h3><div class="fxp-scroll">
     <div class="fxp-row" data-row="on"><span>新しい音と演出<small>オフにすると、これまでの音と見た目に戻ります</small></span><button type="button" data-fx="on" tabindex="-1"></button></div>
     <div class="fxp-row" data-row="bgm"><span>BGM</span><button type="button" data-fx="bgm" tabindex="-1"></button></div>
-    <div class="fxp-row" data-row="lite"><span>軽い音<small>音が途切れるときに。自動では、途切れを見つけると切り替わります</small></span><button type="button" data-fx="lite" tabindex="-1"></button></div>
+    <div class="fxp-row" data-row="lite"><span>軽い音<small>音が途切れるときに。自動では、途切れを見つけると切り替わります<i data-val="bench"></i></small></span><button type="button" data-fx="lite" tabindex="-1"></button></div>
     <label class="fxp-row" data-row="bv"><span>BGM の音量 <b data-val="bv"></b></span><input type="range" min="0" max="100" step="5" data-fx="bv" tabindex="-1"></label>
     <label class="fxp-row" data-row="sv"><span>効果音の音量 <b data-val="sv"></b></span><input type="range" min="0" max="100" step="5" data-fx="sv" tabindex="-1"></label>
     <div class="fxp-hd">曲を聴く</div>
@@ -20131,6 +20153,7 @@ function boot(){
   const row=document.querySelector("#screen-title .btn-row");
   if(row && !$("fxBtn")){ const b=document.createElement("button"); b.className="btn"; b.id="fxBtn"; b.type="button"; b.innerHTML='🎧 音と演出'+(MOB?"":' <span class="kbdh">V</span>'); b.addEventListener("click",openPanel); row.appendChild(b); }
   raf=requestAnimationFrame(frame);
+  setTimeout(bench,1200);   // 読み込みが落ち着いてから測る
   /* 音は、はじめて操作されたときに用意する(ブラウザの決まり) */
   const wake=()=>{ if(!cfg.on && !force) return; if(ac()) bgmRun(); };
   for(const ev of ["pointerdown","keydown","touchstart"]) window.addEventListener(ev,wake,{ capture:true, passive:true });
@@ -20156,7 +20179,7 @@ function boot(){
     if(sc==="result" && from==="game" && cfg.on && !inBattle()){ snd("fanfare"); if(!RM) for(let i=0;i<5;i++) setTimeout(()=>burst(rnd(W*.25,W*.75),rnd(H*.2,H*.45),MOB?10:18,{ v0:80, v1:320, g:300, col:GOLD.concat(["120,220,255","255,150,170"]), l0:.6, l1:1.3, s0:1.2, s1:2.8 }),i*130); }
   },120);
 }
-window.FX={ lite:()=>LITE, strike:()=>{ strikes=5; if(wd) wd.w-=4000; }, voices:()=>voices, setHour:h=>{ hourFix=h; }, hour:hourNow, snd, cfg, set:setOpt, open:openPanel, burst, ring, dbg, track:()=>cur&&cur.name, parts:()=>P.length, bus:()=>B, ending, endingLen:n=>n*END_SEC, wake:()=>{ if(ac()) bgmRun(); } };
+window.FX={ pos:()=>cur&&[cur.name,cur.loop,cur.step], lite:()=>LITE, strike:()=>{ strikes=5; if(wd) wd.w-=1500; }, voices:()=>voices, setHour:h=>{ hourFix=h; }, hour:hourNow, snd, cfg, set:setOpt, open:openPanel, burst, ring, dbg, track:()=>cur&&cur.name, parts:()=>P.length, bus:()=>B, ending, endingLen:n=>n*END_SEC, wake:()=>{ if(ac()) bgmRun(); } };
 if(document.readyState==="loading") document.addEventListener("DOMContentLoaded",boot); else boot();
 })();
 </script>
