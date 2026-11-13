@@ -16024,7 +16024,7 @@ const GOALS = [
   { cat:"千両箱", ser:"yzfd", id:"yzfd100",ic:"🗺️", nm:"黄金郷",             ds:"畑を100枚にする",                       need:100, now:()=>FS().length, rw:1e13, vis:yzGoalVis },
   { cat:"千両箱", ser:"yzfd", id:"yzfd111",ic:"🗺️", nm:"黄金郷の果て",       ds:"畑を111枚にする",                       need:111, now:()=>FS().length, rw:1e14, vis:yzGoalVis },
   /* いちばん下: 京の頂。受け取ると、エンディングが流れる */
-  { cat:"ゲームクリア", id:"kei", ic:"👑", nm:"京の頂", ds:"持っているキーが1京をこえる", need:1e16, now:()=>S.money, rw:0, prize:"京の王冠", vis:yzGoalVis },
+  { cat:"ゲームクリア", id:"kei", ic:"👑", nm:"京の頂", ds:"持っているキーが1京をこえる", need:1e16, now:()=>S.money, rw:0, prize:"京の王冠" },
 ];
 function yzGoalVis(){ return yzOpen() || (S.yzCount||0)>0; }   // 千両箱ガチャが開くまで出さない
 
