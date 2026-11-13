@@ -34,8 +34,8 @@
             "o"
           ],
           "$name": {
-            ".write": "$metric === 'money' || $metric === 'harvest' || $metric === 'book' || $metric === 'earn' || $metric === 'dbook' || $metric === 'goal' || $metric === 'rose' || $metric === 'tqw' || $metric === 'tqf' || $metric === 'tql'",
-            ".validate": "newData.hasChildren(['n', 's', 'o', 't']) && newData.child('n').isString() && newData.child('n').val().length >= 1 && newData.child('n').val().length <= 10 && newData.child('s').isNumber() && newData.child('s').val() >= 0 && (($metric !== 'tqw' && $metric !== 'tqf') || newData.child('s').val() <= 5000) && ($metric !== 'tql' || newData.child('s').val() <= 1000) && newData.child('o').isString() && newData.child('t').isNumber() && (!data.exists() || data.child('o').val() === newData.child('o').val())"
+            ".write": "$metric === 'money' || $metric === 'harvest' || $metric === 'book' || $metric === 'earn' || $metric === 'dbook' || $metric === 'goal' || $metric === 'rose' || $metric === 'field' || $metric === 'tqw' || $metric === 'tqf' || $metric === 'tql'",
+            ".validate": "newData.hasChildren(['n', 's', 'o', 't']) && newData.child('n').isString() && newData.child('n').val().length >= 1 && newData.child('n').val().length <= 10 && newData.child('s').isNumber() && newData.child('s').val() >= 0 && (($metric !== 'tqw' && $metric !== 'tqf') || newData.child('s').val() <= 5000) && ($metric !== 'tql' || newData.child('s').val() <= 1000) && ($metric !== 'field' || newData.child('s').val() <= 1000) && newData.child('o').isString() && newData.child('t').isNumber() && (!data.exists() || data.child('o').val() === newData.child('o').val())"
           }
         }
       },
