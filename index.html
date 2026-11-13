@@ -1173,7 +1173,7 @@ html.mobile #screen-garden .wcmini{right:.5rem; bottom:max(.5rem, env(safe-area-
 /* 小窓を開いているあいだは、うしろの画面をスクロールさせない。中の一覧の端まで来ても、うしろへ回さない(二重スクロールにしない) */
 html:has(.bk-modal.open), html:has(#screen-garden .modal.open){overflow:hidden}
 html:has(.bk-modal.open) body, html:has(#screen-garden .modal.open) body{overflow:hidden}
-.bk-modal, .bk-modal *, #screen-garden .modal, #screen-garden .modal *{overscroll-behavior:contain}
+.bk-modal, #screen-garden .modal{overscroll-behavior:contain}   /* 中の要素には付けない(はみ出しを隠す箱の上でスクロールが止まり、外の一覧が動かなくなる) */
 .bk-panel{
   width:min(680px,94vw); max-height:90vh; overflow:auto; cursor:default; text-align:left;
   background:linear-gradient(180deg,#2e343e,#23282f); border:2px solid var(--line); border-radius:10px;
@@ -19429,7 +19429,7 @@ html.fx #screen-garden .money.fx-bump{animation:fx-bump .35s cubic-bezier(.2,.9,
 
 /* 音と演出の窓を開いているあいだは、うしろの画面をスクロールさせない */
 html:has(#fxPanel), html:has(#fxPanel) body{overflow:hidden}
-#fxPanel, #fxPanel *{overscroll-behavior:contain}
+#fxPanel{overscroll-behavior:contain}
 /* ---- 音と演出の窓(キーボードの選択・曲の一覧) ---- */
 .fxp-box{display:flex; flex-direction:column; max-height:min(92vh,720px)}
 .fxp-scroll{overflow:auto; min-height:0; margin:0 -.4rem; padding:0 .4rem}
@@ -19586,7 +19586,12 @@ const hz=n=>440*Math.pow(2,(n-69)/12);
 function T(o,t,n,d,p){
   const c=B.c; p=p||{};
   t=Math.max(t,c.currentTime+.006);   // 過去の時刻に予約すると、音がいきなり立ち上がってプツッと鳴る
-  if(LITE){ if(p.det<0) return; if((p.v||.05)<.009 && !p.hold) return; if(voices>=(o===B.o?40:30) && (p.v||.05)<.05) return; }   // スマホ: 重ねる音・ごく小さい音を省き、同時に鳴る数を抑える
+  if(LITE){   // 軽い音: 省くのは、重ねた音(ずらした2本目)と、長くのばす小さな音(和音の下地)だけ。刻み・打楽器・旋律の短い音はリズムの芯なので、小さくても省かない
+    const long = p.hold || d>.45;
+    if(p.det<0) return;
+    if(long && (p.v||.05)<.012) return;
+    if(long && voices>=(o===B.o?40:30)) return;   // 同時に鳴る数が多いときも、省くのは長い音だけ
+  }
   const os=c.createOscillator(), g=c.createGain(), v=(p.v||.05)*(LITE && p.det>0 ? 1.6 : 1), r=LITE ? Math.min(p.r==null?.08:p.r,.5) : (p.r==null?.08:p.r), f=hz(n);
   voices++; os.onended=()=>{ voices--; };
   const a=Math.max(p.a||.004, (n<58 && !p.bend) ? .016 : n<70 ? .006 : .003);   // 低い音ほど、ゆっくり立ち上げる
@@ -19609,7 +19614,7 @@ function T(o,t,n,d,p){
 function N(o,t,d,p){
   const c=B.c; p=p||{};
   t=Math.max(t,c.currentTime+.006);
-  if(LITE && (p.v||.03)<.008) return;
+  if(LITE && d>.45 && (p.v||.03)<.008) return;   // 軽い音: 長くのばす小さな雑音(風・ざわめき)だけ省く。ハイハットなどの刻みは残す
   const s=c.createBufferSource(), fl=c.createBiquadFilter(), g=c.createGain(), v=p.v||.03;
   s.buffer=B.noise; s.loop=true;
   fl.type=p.ft||"bandpass"; fl.frequency.setValueAtTime(p.f||2000,t); if(p.to) fl.frequency.exponentialRampToValueAtTime(p.to,t+d); fl.Q.value=p.q||1;
