@@ -19777,7 +19777,7 @@ const TR={
     if(calm ? (i===4||i===12) : (i===3||i===11||i===14)) N(o,t,.035,{ f:950, q:2.2, v:calm?.03:.05 });
     if(b===11 && i>=8) N(o,t,.03,{ f:950, q:2.2, v:.02+(i-8)*.005 });
     if(b===15 && i>=8 && i%2===0) T(o,t,38+(i>=12?3:0),.1,{ v:.1+(i-8)*.012, a:.004, bend:9, bt:.06, r:.1 });
-    if(calm ? i===8 : (i===4||i===12)){ T(o,t,93,.25,{ v:calm?.012:.018, r:.5, rv:.5 }); T(o,t,100.4,.2,{ v:.009, r:.4, rv:.5 }); }
+    if(sec===3 ? (i===4||i===12) : sec===1 ? i===12 : sec===0 ? (i===12&&(k&1)) : false){ T(o,t,84,.2,{ type:"triangle", lp:2400, v:.014, r:.35, rv:.4 }); T(o,t,91.4,.15,{ v:.004, r:.25, rv:.4 }); }   // 鉦: 低めの丸い音で、場面ごとに数を変える(中休みでは鳴らさない)
     for(const [a,n] of (calm?SHAMI_B:sec===3?SHAMI_C:SHAMI)[k]) if(a===i){ T(o,t,n,.07,{ type:"sawtooth", lp:2300, q:2, v:calm?.04:.05, a:.002, bend:.3, bt:.02, r:calm?.4:.22, sus:.4, rv:calm?.35:.2 }); N(o,t,.012,{ f:2400, q:1.5, v:.02 }); }
     const fue=sec===0 ? (L%2===1?FUE:null) : sec===1 ? FUE_A2 : calm ? (k>=2?FUE_B:null) : FUE_C;   // 笛は1オクターブ下げて、休む小節もつくる(高い音が鳴りっぱなしだと耳が疲れるので)
     if(fue) for(const [a,n,len] of fue[k]) if(a===i){ const m=n-12; T(o,t,m,len*sp*.92,{ v:calm?.04:.036, a:calm?.08:.04, r:.12, vib:14, hold:1, bend:-.6, bt:.07, rv:.5 }); T(o,t,m,len*sp*.92,{ type:"triangle", lp:1800, v:.012, a:.05, r:.12, hold:1 }); N(o,t,Math.min(.2,len*sp),{ f:hz(m)*2, q:3, v:.005 }); }
