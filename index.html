@@ -16778,7 +16778,7 @@ function enterIn(){
   saveId=setInterval(save,15000);
 }
 function leave(){
-  document.body.classList.remove("barag"); planterBara=false; root.classList.remove("bara");   // 庭を出たら、次に開いたときに並べ直す
+  document.body.classList.remove("barag"); planterBara=null; root.classList.remove("bara");   // 庭を出たら、次に開いたときに必ず並べ直す(null: 並びがどうなっているかわからない。false にすると、ばらばらの並びのまま大木を描いてしまう)
   clearInterval(loopId); clearInterval(saveId); loopId=saveId=null;
   closeModal(true);
   tick(); save();
