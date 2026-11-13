@@ -12826,7 +12826,7 @@ function gachaHTML(){
     </div>
     <div class="gright">
       <div class="grates">${rates}</div>
-      ${gachaMega ? megaHTML() : gachaBig ? gachaBigHTML() : `<div class="gcards">${cards||`<div class="gempty">${gachaM==="w"?"ここに引いた種や食材が出ます":gachaM==="r"?"ここに引いた薔薇や種が出ます":gachaM==="y"?"いらっしゃい。ここに引いた品が並びます":"ここに引いた種が出ます"}</div>`}</div>`}
+      ${gachaMega ? megaHTML() : gachaBig ? gachaBigHTML() : `<div class="gcards">${cards||`<div class="gempty">${gachaM==="w"?"ここに引いた種や食材が出ます":gachaM==="r"?"ここに引いた薔薇や種が出ます":gachaM==="y"?"ようこそお越しくださいました。お引きになった品は、こちらへお並べいたします":"ここに引いた種が出ます"}</div>`}</div>`}
     </div>
   </div>`;
 }
@@ -13161,12 +13161,18 @@ const mjCropId = () => { const ok=sgCrops(); return ok.some(c=>c.id===S.mjCrop) 
 const kgCropId = () => { const ok=sgCrops(); return (ok.length ? yzPick(ok) : CROP.carrot).id; };
 /* 工房職人の村人・仕込み番の村人: 料理番の村人と同じく、決めた品を作り置き(1分ごと) */
 let yzAutoAt=0;
+/* 工房職人・仕込み番の作り置きの数: 料理番とは別に、それぞれ選ぶ(1個まで・10個まで・作れるだけ) */
+const yzKeepKey = k => k==="kobo" ? "keepWork" : "keepPrep";
+const yzKeep = k => [0,1,10].includes(S[yzKeepKey(k)]) ? S[yzKeepKey(k)] : 10;
+const yzKeepTxt = k => yzKeep(k)===0 ? "作れるだけ" : `${yzKeep(k)}個まで`;
+function yzKeepStep(k,dir){ S[yzKeepKey(k)]=COOK_KEEPS[(COOK_KEEPS.indexOf(yzKeep(k))+dir+COOK_KEEPS.length)%COOK_KEEPS.length]; yzAutoAt=0; sfx.tab(); save(); }
 function yzAutoMakeTick(){
   if(Date.now()-yzAutoAt<60000) return;
   const aw=(S.autoWork||[]).slice(0,yzN("kobo")), ap=(S.autoPrep||[]).slice(0,yzN("prep"));
   if(!aw.length && !ap.length) return;
   yzAutoAt=Date.now();
-  const cap=S.cookKeep===0 ? Infinity : (S.cookKeep||10), made=[];
+  const capOf=k=>yzKeep(k)===0 ? Infinity : yzKeep(k), made=[];
+  let cap=capOf("kobo");
   for(const a of aw){
     const w=WORKS.find(x=>x.id===a.id); if(!w) continue;
     const have=()=> WORK_KEEP[w.out] ? (S[w.out]||0) : foodN(w.out);
@@ -13181,6 +13187,7 @@ function yzAutoMakeTick(){
     }
     if(k){ const it=workItem(w.out); made.push(`${ico(it)} ${esc(it.name)}×${fmtNum(k)}`); }
   }
+  cap=capOf("prep");
   for(const a of ap){
     const p=PREPS.find(x=>x.id===a.id); if(!p) continue;
     const out=a.up?p.upOut:p.out, ing=a.up?p.upIng:p.ing;
@@ -13236,8 +13243,8 @@ function yzSub(x){
   if(k==="kuwa") return n>0?`${kb("<b>Enter</b> で、いま見ている畑(畑"+(S.cur+1)+")に使う","もう一度タップで、いま見ている畑に使う")}`:"";
   if(k==="jubako") return n>0?`${kb("<b>Enter</b> で使う","もう一度タップで使う")}${jubakoOn()?` ・ 使っています(残り ${fmtLeft(S.jubakoUntil-Date.now())})`:""}`:"";
   if(k==="kozuchi") return n>0?(kozLeft()>0?`次に振れるまで あと <b>${fmtLeftD(kozLeft())}</b>`:kb("<b>Enter</b> で振る","もう一度タップで振る")):(kozLeft()>0?`次に振れるまで あと ${fmtLeftD(kozLeft())}`:"");
-  if(k==="kobo") return n>0?`作り置き <b>${cookKeepTxt()}</b>(料理番の村人と同じ) ・ 任せている品 <b>${(S.autoWork||[]).length} / ${n}</b>(${kb("Enter","もう一度タップ")}で選ぶ)`:"";
-  if(k==="prep") return n>0?`作り置き <b>${cookKeepTxt()}</b>(料理番の村人と同じ) ・ 任せている仕込み <b>${(S.autoPrep||[]).length} / ${n}</b>(${kb("Enter","もう一度タップ")}で選ぶ)`:"";
+  if(k==="kobo") return n>0?`作り置き ${sw}<br><b>${yzKeepTxt("kobo")}</b> ・ 任せている品 <b>${(S.autoWork||[]).length} / ${n}</b>(${kb("Enter","もう一度タップ")}で選ぶ)`:"";
+  if(k==="prep") return n>0?`作り置き ${sw}<br><b>${yzKeepTxt("prep")}</b> ・ 任せている仕込み <b>${(S.autoPrep||[]).length} / ${n}</b>(${kb("Enter","もう一度タップ")}で選ぶ)`:"";
   if(k==="kimori") return n>0?`${OBJ_HOW}大木のマスを押して任せます ・ 任せている大木 <b>${kmUsed()} / ${n}本</b>`:"";
   if(k==="kimagure") return n>0?`${OBJ_HOW}使っている区画 <b>${vilUsed("kg")} / ${n*KG_SLOTS}</b>`:"";
   if(k==="meijin") return n>0?`育てる作物 ${sw}<br><b>${ico(CROP[mjCropId()])} ${esc(CROP[mjCropId()].name)}</b>(${kb("Enter","もう一度タップ")}で一覧から選ぶ) ・ 使っている区画 <b>${vilUsed("mj")} / ${n*MJ_SLOTS}</b>`:"";
@@ -13293,6 +13300,7 @@ function yzAct(dir){
     if(k==="meijin"){ openPick("mj"); return; }
     sfx.nope(); return;
   }
+  if(k==="kobo"||k==="prep"){ yzKeepStep(k,dir); renderTreas(); return; }
   if(k==="meijin"){ const ok=sgCrops().map(c=>c.id); if(!ok.length){ sfx.nope(); return; } S.mjCrop=ok[(ok.indexOf(mjCropId())+dir+ok.length)%ok.length]; sfx.tab(); save(); renderAll(); renderTreas(); return; }
   sfx.nope();
 }
@@ -13329,14 +13337,14 @@ function renderYzPick(){
   ypRows=ypRowsOf(); ypCur=Math.max(0,Math.min(ypCur,ypRows.length-1));
   $("g-ypTitle").textContent = kb2 ? "工房職人の村人に任せる品" : "仕込み番の村人に任せる仕込み";
   $("g-ypRate").textContent=`あと ${Math.max(0,n-list.length)} 個任せられます`;
-  $("g-ypNote").textContent=`${kb2?"工房職人":"仕込み番"}の村人 ${n}人(1人で1種類)・作り置き ${cookKeepTxt()}(料理番の村人と同じ設定)。材料を見たことのある品から選べます。`;
+  $("g-ypNote").textContent=`${kb2?"工房職人":"仕込み番"}の村人 ${n}人(1人で1種類)・作り置き ${yzKeepTxt(yzPickKind)}${kb("(Q / E で変える)","")}。材料を見たことのある品から選べます。`;
   const body=$("g-ypBody");
   body.innerHTML = ypRows.length ? ypRows.map((r,i)=>`<div class="rowi ${i===ypCur?"cur":""}" data-i="${i}">
       <div class="ic">${r.ic}</div>
       <div><div class="nm">${r.nm}</div><div class="ds">${r.ds}</div></div>
       <div class="keyk">${window.IS_MOBILE ? shopActBtns(r.keys) : (i===ypCur?r.keys:"")}</div></div>`).join("")
     : `<p class="empty" style="padding:1rem .4rem">選べる品がまだありません。</p>`;
-  $("g-ypHint").innerHTML = window.IS_MOBILE ? "" : "<b>↑ ↓</b> 選ぶ"+(kb2?"":" ・ <b>← →</b> ふつう / 上位種")+" ・ <b>Enter</b> 任せる / やめる ・ <b>Esc</b> 貴重品に戻る";
+  $("g-ypHint").innerHTML = window.IS_MOBILE ? "" : "<b>↑ ↓</b> 選ぶ"+(kb2?"":" ・ <b>← →</b> ふつう / 上位種")+" ・ <b>Enter</b> 任せる / やめる ・ <b>Q</b> / <b>E</b> 作り置きの数 ・ <b>Esc</b> 貴重品に戻る";
   keepVisible(body);
 }
 function ypToggle(){
@@ -13358,6 +13366,7 @@ function ypKey(e){
   if((k==="ArrowUp"||k==="ArrowDown") && n){ e.preventDefault(); ypCur=(ypCur+(k==="ArrowDown"?1:-1)+n)%n; sfx.cursor(); renderSoon(renderYzPick); return; }
   if((k==="ArrowLeft"||k==="ArrowRight") && yzPickKind==="prep"){ e.preventDefault(); const r=ypRows[ypCur]; if(r){ ypUp[r.id]=!r.up; sfx.tab(); renderYzPick(); } return; }
   if(k==="Enter"){ e.preventDefault(); ypToggle(); }
+  if(k==="q"||k==="Q"||k==="e"||k==="E"){ e.preventDefault(); yzKeepStep(yzPickKind,(k==="e"||k==="E")?1:-1); renderYzPick(); }
 }
 $("g-ypBody").addEventListener("click",e=>{
   const row=e.target.closest && e.target.closest(".rowi"); if(!row) return;
@@ -13757,7 +13766,7 @@ function renderTreas(){
   root.querySelectorAll("#g-treasTabs .tab").forEach(t=>t.classList.toggle("on", +t.dataset.tt===treasTab));
   $("g-treasNote").textContent = treasTab===3 ? YZ_TRE_NOTE : treasTab===2 ? ROSE_TRE_NOTE : treasTab ? KIT_NOTE : TREAS_NOTE;
   if(treasTab===4){ $("g-treasNote").textContent="持っているキーが1京をこえた人だけが手にする、クリアの証です。"; $("g-treasHint").innerHTML="<b>Tab</b> 次のタブへ ・ <b>Enter</b> 王冠を付ける / 外す ・ <b>8</b> / <b>Esc</b> 閉じる"; renderKcTre(); return; }
-  if(treasTab===3){ $("g-treasHint").innerHTML="<b>Tab</b> 次のタブへ ・ <b>↑ ↓ ← →</b> 選ぶ ・ <b>Enter</b> 使う・任せる品を選ぶ ・ <b>Q</b> / <b>E</b> 名人村人の作物を切り替え ・ <b>8</b> / <b>Esc</b> 閉じる"; renderYzTre(); return; }
+  if(treasTab===3){ $("g-treasHint").innerHTML="<b>Tab</b> 次のタブへ ・ <b>↑ ↓ ← →</b> 選ぶ ・ <b>Enter</b> 使う・任せる品を選ぶ ・ <b>Q</b> / <b>E</b> 作り置きの数・名人村人の作物を切り替え ・ <b>8</b> / <b>Esc</b> 閉じる"; renderYzTre(); return; }
   if(treasTab===2){ $("g-treasHint").innerHTML="<b>Tab</b> 次のタブへ ・ <b>↑ ↓ ← →</b> 選ぶ ・ <b>Enter</b> オン・オフ"+(S.rkam?" ・ 薔薇のかまどは <b>Enter</b> で色を一覧から選ぶ ・ <b>Q</b> / <b>E</b> 花びらの色":"")+(S.gx&&S.gx.plate?" ・ <b>N</b> プレートの名前":"")+" ・ <b>8</b> / <b>Esc</b> 閉じる"; renderRoseTre(); return; }
   $("g-treasHint").innerHTML = treasTab ? "<b>Tab</b> 貴重品へ ・ <b>↑ ↓ ← →</b> 選ぶ ・ <b>Enter</b> 使う ・ <b>Q</b> / <b>E</b> かまどの色・シゴデキ村人の作物を切り替え ・ <b>8</b> / <b>Esc</b> 閉じる" : (kitAny()?"<b>Tab</b> 台所の宝物へ ・ ":"")+"<b>↑ ↓</b> 見る ・ <b>8</b> / <b>Esc</b> 閉じる";
   if(treasTab){ renderKit(); return; }
@@ -16550,7 +16559,7 @@ function showGiftNotice(){
 }
 function renderCookLock(){ const b=$("g-cookBtn"); if(!b) return; const ok=cookOpen(); b.classList.toggle("locked",!ok); b.title=ok?"":COOK_LOCK_MSG(); }
 // マウスでも閉じられるように: 閉じるボタンと、ウィンドウの外側のクリック
-root.querySelectorAll("[data-close]").forEach(b=>b.addEventListener("click",()=>closeModal()));
+root.querySelectorAll("[data-close]").forEach(b=>b.addEventListener("click",()=>{ if(modal==="yzpick" || modal==="cvpick" || (modal==="pick" && pickKind!=="seed" && pickKind!=="fert" && pickKind!=="obj")) openModal("treas"); else closeModal(); }));   // 貴重品から開いた「選ぶ画面」は、閉じると貴重品に戻る
 root.querySelectorAll(".modal").forEach(m=>m.addEventListener("click",e=>{ if(e.target===m && m.id!=="g-notice") closeModal(); }));   // お知らせは、まわりを押しても閉じない
 $("g-noticeOk").addEventListener("click",()=>closeModal());
 // ボタンにフォーカスが残って Enter/Space が二重に効かないようにする
