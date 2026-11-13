@@ -19344,6 +19344,7 @@ html.fx #screen-garden .tbtn{transition:transform .1s, box-shadow .12s, filter .
 html.fx:not(.mobile) #screen-garden .tbtn:hover{transform:translateY(-2px); filter:brightness(1.05)}
 html.fx #screen-garden .modal.open{animation:fx-fade .16s ease-out}
 html.fx #screen-garden .modal.open > .panel{animation:fx-panel .22s cubic-bezier(.2,.9,.3,1.15)}
+html.fx #screen-garden .modal.open.fx-still, html.fx #screen-garden .modal.open.fx-still > .panel{animation:none}
 @keyframes fx-panel{from{opacity:0; transform:translateY(14px) scale(.97)}to{opacity:1; transform:none}}
 html.fx #screen-garden .money.fx-bump{animation:fx-bump .35s cubic-bezier(.2,.9,.3,1.5)}
 @keyframes fx-bump{0%{transform:scale(1)}40%{transform:scale(1.07)}100%{transform:scale(1)}}
@@ -19778,8 +19779,8 @@ const TR={
     if(b===15 && i>=8 && i%2===0) T(o,t,38+(i>=12?3:0),.1,{ v:.1+(i-8)*.012, a:.004, bend:9, bt:.06, r:.1 });
     if(calm ? i===8 : (i===4||i===12)){ T(o,t,93,.25,{ v:calm?.012:.018, r:.5, rv:.5 }); T(o,t,100.4,.2,{ v:.009, r:.4, rv:.5 }); }
     for(const [a,n] of (calm?SHAMI_B:sec===3?SHAMI_C:SHAMI)[k]) if(a===i){ T(o,t,n,.07,{ type:"sawtooth", lp:2300, q:2, v:calm?.04:.05, a:.002, bend:.3, bt:.02, r:calm?.4:.22, sus:.4, rv:calm?.35:.2 }); N(o,t,.012,{ f:2400, q:1.5, v:.02 }); }
-    const fue=sec===0 ? (L>=1?FUE:null) : sec===1 ? FUE_A2 : calm ? FUE_B : FUE_C;
-    if(fue) for(const [a,n,len] of fue[k]) if(a===i){ T(o,t,n,len*sp*.92,{ v:calm?.032:.04, a:calm?.08:.04, r:.12, vib:14, hold:1, bend:-.6, bt:.07, rv:.5 }); N(o,t,Math.min(.2,len*sp),{ f:hz(n)*2, q:3, v:.006 }); }
+    const fue=sec===0 ? (L%2===1?FUE:null) : sec===1 ? FUE_A2 : calm ? (k>=2?FUE_B:null) : FUE_C;   // 笛は1オクターブ下げて、休む小節もつくる(高い音が鳴りっぱなしだと耳が疲れるので)
+    if(fue) for(const [a,n,len] of fue[k]) if(a===i){ const m=n-12; T(o,t,m,len*sp*.92,{ v:calm?.04:.036, a:calm?.08:.04, r:.12, vib:14, hold:1, bend:-.6, bt:.07, rv:.5 }); T(o,t,m,len*sp*.92,{ type:"triangle", lp:1800, v:.012, a:.05, r:.12, hold:1 }); N(o,t,Math.min(.2,len*sp),{ f:hz(m)*2, q:3, v:.005 }); }
   }},
   /* バラバラ: 8分の7拍子の、こわれたオルゴール。音がずれたり、欠けたり、つまずいたりする */
   bara:{ bpm:()=>138, len:56, step(s,t,o,L,sp){
@@ -20185,6 +20186,13 @@ function boot(){
 }
 window.FX={ pos:()=>cur&&[cur.name,cur.loop,cur.step], lite:()=>LITE, strike:()=>{ strikes=5; if(wd) wd.w-=1500; }, voices:()=>voices, snd, cfg, set:setOpt, open:openPanel, burst, ring, dbg, track:()=>cur&&cur.name, parts:()=>P.length, bus:()=>B, ending, endingLen:n=>n*END_SEC, wake:()=>{ if(ac()) bgmRun(); } };
 if(document.readyState==="loading") document.addEventListener("DOMContentLoaded",boot); else boot();
+/* 図鑑・料理図鑑・実績のあいだを移るときは、開くときの演出(いったん消えて出直す)を出さない */
+try{ const ms=["g-book","g-dbook","g-goal"].map($).filter(Boolean), was=new Map(ms.map(m=>[m,m.classList.contains("open")]));
+  new MutationObserver(()=>{ let closed=false; const opened=[];
+    for(const m of ms){ const o=m.classList.contains("open"); if(o!==was.get(m)){ was.set(m,o); if(o) opened.push(m); else{ closed=true; m.classList.remove("fx-still"); } } }
+    for(const m of opened) m.classList.toggle("fx-still",closed);
+  }).observe($("screen-garden")||document.body,{ subtree:true, attributes:true, attributeFilter:["class"] });
+}catch(e){}
 })();
 </script>
 </body>
