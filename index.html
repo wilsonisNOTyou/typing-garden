@@ -8791,7 +8791,11 @@ Object.assign(MUTANT,ROSE_MUT); Object.assign(SUPER,ROSE_SUP);   // 薔薇の変
 const hasMut = id => !!MUTANT[id];
 const hasSup = id => !!SUPER[id];
 /* 実ったときの抽選: 先に超変異、外れたら変異。5=超変異 3=変異 0=なし */
-const rollMut = id => { const k=roseMutK(id); return hasSup(id) && Math.random()<effSup()*k ? 5 : (hasMut(id) && Math.random()<effMut()*k ? 3 : 0); };
+/* 変異・超変異の確率。重ねがけしても、変異は80%・超変異は20%で頭打ち(100%を超えて、ふつうの作物が穫れなくならないように) */
+const MUT_MAX=.8, SUP_MAX=.2;
+const mutK = id => roseMutK(id)*(1+yzv("fuuki")/100);   // 薔薇騎士の手甲(薔薇だけ)・風見鶏
+const pMut = k => Math.min(MUT_MAX, effMut()*k), pSup = k => Math.min(SUP_MAX, effSup()*k);
+const rollMut = id => { const k=mutK(id); return hasSup(id) && Math.random()<pSup(k) ? 5 : (hasMut(id) && Math.random()<pMut(k) ? 3 : 0); };
 const cropQ = p => p.crop.sup ? 5 : 3;          // 実っている変異の作物の品質
 /* 品質 t の絵(変異は専用の絵) */
 const icoQ = (c,t) => t===5 && SUPER[c.id] ? `<span class="cart mut sup">${SUPER[c.id].art}</span>` : (t===3 && MUTANT[c.id] ? `<span class="cart mut">${MUTANT[c.id].art}</span>` : ico(c));
@@ -8828,7 +8832,7 @@ const effGrowth  = () => (1 + effVal("redflash")/100) * ev("D",1.5,3,1);        
 const effVilGrow = () => effGrowth() * (1 + effVal("yellowghost")/100) * ev("G",2,4,1) * (1+yzv("flag")/100);  // 村人の区画はさらに速い
 const effWater   = () => effVal("whitewizard")*HOUR;        // 水やりの持続(ミリ秒)
 const effMut     = () => MUT_RATE + effVal("pinkprincess")/100 + ev("F",.05,.2,0) + dbMutAdd;  // 変異の確率(1% + 貴重品)
-const effSup     = () => SUP_RATE + effVal("pinkprincess")/1000 + ev("F",.005,.02,0) + dbSupAdd + yzv("fuuki")*0.0001; // 超変異の確率(0.1% + 貴重品1個につき0.02%)
+const effSup     = () => SUP_RATE + effVal("pinkprincess")/1000 + ev("F",.005,.02,0) + dbSupAdd; // 超変異の確率(0.1% + 貴重品1個につき0.02%)
 const effSeed    = () => 1 - effVal("greennecklace")/100;   // 種の値段の倍率
 const effGacha   = () => (1 - effVal("silverstar")/100) * ev("I",.9,.5,1);      // ガチャの値段の倍率
 const effFert    = () => FERT_BOOST + effVal("blueamaryllis")/100 + ev("J",.1,.2,0);  // 肥料の効き(1つで最大45%、2つで最大90%)
@@ -9844,7 +9848,7 @@ const sgCropId = () => { const ok=sgCrops(); return ok.some(c=>c.id===S.sgCrop) 
 const vilCropOf = (p,O) => p.vil==="sg" ? sgCropId() : p.vil==="mj" ? mjCropId() : p.vil==="kg" ? kgCropId() : (O ? vilGachaCrop() : vilCropId());
 const VIL_WHO = { true:"村人", sg:"シゴデキ村人", rf:"薔薇農家", kg:"気まぐれ村人", mj:"超シゴデキ村人" };
 const vilWho = v => VIL_WHO[v===true?"true":v] || "村人";
-function rollMut2(id){ const k=2*roseMutK(id); return hasSup(id) && Math.random()<Math.min(1,effSup()*k) ? 5 : (hasMut(id) && Math.random()<Math.min(1,effMut()*k) ? 3 : 0); }   // 超シゴデキ村人: 変異・超変異が2倍
+function rollMut2(id){ const k=2*mutK(id); return hasSup(id) && Math.random()<pSup(k) ? 5 : (hasMut(id) && Math.random()<pMut(k) ? 3 : 0); }   // 超シゴデキ村人: 変異・超変異が2倍
 /* 村人が育てる作物。元気の種を買うたびに、お店にいつも並ぶ作物の中で1段上がる */
 const VIL_LADDER = ["carrot","potato","tomato","corn","eggplant","strawberry","pumpkin","melon","keytree"];
 const VIL_UP_PRICES = [30000,60000,120000,250000,500000,1000000,2000000,4000000];
@@ -9889,7 +9893,7 @@ function roseBulk(p,t){
   const ids=Object.keys(cnt);
   ids.forEach((id,i)=>{ const x=Math.min(cnt[id], i===ids.length-1 ? sl : binom(sl, cnt[id]/tot)); tot-=cnt[id]; cnt[id]-=x; sl-=x; });
   const put=(id,q,x)=>{ if(x>0){ invAdd(id,q,x); recordHarvestN(id,q,x); } };
-  for(const [id,x] of Object.entries(cnt)){ const nS=binom(x, hasSup(id)?effSup()*roseMutK(id):0), nM=binom(x-nS, hasMut(id)?effMut()*roseMutK(id):0); put(id,5,nS); put(id,3,nM); put(id,0,x-nS-nM); }
+  for(const [id,x] of Object.entries(cnt)){ const nS=binom(x, hasSup(id)?pSup(mutK(id)):0), nM=binom(x-nS, hasMut(id)?pMut(mutK(id)):0); put(id,5,nS); put(id,3,nM); put(id,0,x-nS-nM); }
   for(const [id,x] of Object.entries(sec)) put(id,0,x);
   S.vLog.rose=(S.vLog.rose||0)+k;
   p.vWait=false;
@@ -9961,7 +9965,7 @@ function vilBulk(p,t,g3){
   let pay=k-own; if(cost>0 && pay>0) pay=Math.min(pay, Math.floor(S.money/cost));   // 種代が足りないぶんは、あとで1周ずつ(待つ)
   const m=own+pay; if(m<=0) return 0;
   if(cost>0 && pay>0){ xAdd(S,"money",-(cost*pay)); S.vLog.spent=(S.vLog.spent||0)+cost*pay; }
-  const mk=mj?2:1, nS=binom(m, hasSup(c.id)?Math.min(1,effSup()*mk):0), nM=binom(m-nS, hasMut(c.id)?Math.min(1,effMut()*mk):0), nN=m-nS-nM, d=effDouble();
+  const mk=(mj?2:1)*mutK(c.id), nS=binom(m, hasSup(c.id)?pSup(mk):0), nM=binom(m-nS, hasMut(c.id)?pMut(mk):0), nN=m-nS-nM, d=effDouble();
   const iN=g3?nN*3:nN+binom(nN,d), iM=g3?nM*3:nM+binom(nM,d), iS=g3?nS*3:nS+binom(nS,d), q=mj?4:qualUp(tierOf(c.id));
   recordHarvestN(c.id,q,iN); recordHarvestN(c.id,3,iM); recordHarvestN(c.id,5,iS);
   if(S.vilOrder2 && !S.vilSellN){ if(iN){ invAdd(c.id,q,iN); S.vLog.k=S.vLog.k||{}; S.vLog.k[c.id]=(S.vLog.k[c.id]||0)+iN; } }
@@ -10368,7 +10372,7 @@ function crowVisit(){
     const targets=KEYS.filter(k=>{ const p=f[k]; return p.crop && isRipe(p) && p.crop.ripeAt && now-p.crop.ripeAt>=CROW_AFTER; });
     if(!targets.length) return;
     S.lastCrow[fi]=now;
-    if(Math.random()<CROW_CHANCE*Math.max(0,1-yzv("fuuki")/100)){   // 風見鶏
+    if(Math.random()<CROW_CHANCE){
       const k=targets[Math.floor(Math.random()*targets.length)];
       const c=CROP[f[k].crop.id];
       f[k].crop=null; f[k].emptySince=now;
@@ -12994,7 +12998,7 @@ function yzRich(c1,c2,body){
     +body+spk(5.6,6.4,2.2)+spk(26.6,24.8,1.8)+`</svg>`;
 }
 const YZA = {
-  okite: yzRich("#fff4f0","#e07060",`<rect x="6" y="5" width="20" height="22" rx="1.2" fill="#fffaf0" stroke="#a88a6a" stroke-width=".8"/><path d="M9.6 9h12.8M9.6 12h12.8M9.6 15h8" stroke="#8a7a6a" stroke-width=".9"/><text x="10" y="23.4" font-size="5.4" fill="#3a2a1a" font-weight="900">上限</text><circle cx="19.6" cy="19.4" r="6" fill="none" stroke="#d81e1e" stroke-width="1.6" opacity=".92"/><text x="19.6" y="21.4" font-size="5.2" text-anchor="middle" fill="#d81e1e" font-weight="900" opacity=".92">破</text><path d="M7.4 26l17-20" stroke="#d81e1e" stroke-width=".9" opacity=".5"/>`),
+  okite: yzRich("#5a0e1a","#14040a",`<g transform="rotate(-9 16 13)"><rect x="6.4" y="4.2" width="19.2" height="1.8" rx=".9" fill="#7a4a22"/><rect x="6.4" y="19.4" width="19.2" height="1.8" rx=".9" fill="#7a4a22"/><path d="M7.6 6h16.8v13.4H7.6z" fill="#f4e6c4"/><text x="16" y="16.6" font-size="10.4" text-anchor="middle" fill="#1e1410" font-weight="900" font-family="serif">掟</text><path d="M12.4 6l2.6 3.4-2.2 2.6 3.6 3.2-1.6 4.2" stroke="#2a0810" stroke-width="1.5" fill="none" stroke-linejoin="round"/><path d="M12.4 6l2.6 3.4-2.2 2.6 3.6 3.2-1.6 4.2" stroke="#ffcf6a" stroke-width=".45" fill="none" stroke-linejoin="round"/></g><g transform="rotate(-16 21 22)"><rect x="15" y="16.2" width="12" height="12" rx="1.8" fill="#e01e24" stroke="#ff8a5a" stroke-width=".5"/><rect x="16.2" y="17.4" width="9.6" height="9.6" rx=".8" fill="none" stroke="#fff4e4" stroke-width=".7"/><text x="21" y="25.6" font-size="7.8" text-anchor="middle" fill="#fff4e4" font-weight="900" font-family="serif">破</text><circle cx="17.6" cy="27" r=".5" fill="#e01e24"/><circle cx="26.6" cy="18.6" r=".6" fill="#e01e24"/></g>${spk(25.8,8.4,1.9,"#ffe68a")}${spk(6.4,26.2,1.3,"#ffe68a")}`),
   gspr: yzRich("#fffbe0","#f0c040",`<ellipse cx="16" cy="26" rx="7" ry="2.2" fill="#a87808"/><rect x="14.6" y="14" width="2.8" height="12" fill="#e8b830" stroke="#a87808" stroke-width=".5"/><ellipse cx="16" cy="13.6" rx="4" ry="1.8" fill="#f4c542" stroke="#a87808" stroke-width=".6"/><g stroke="#ffe680" stroke-width="1.1" stroke-linecap="round" fill="none"><path d="M16 12c-2-4-6-6-9.4-5.4"/><path d="M16 12c2-4 6-6 9.4-5.4"/><path d="M16 12V3.6"/><path d="M16 12c-1-3-3-5.4-5.6-6.6"/><path d="M16 12c1-3 3-5.4 5.6-6.6"/></g><g fill="#fff3b0"><circle cx="6.6" cy="9" r=".9"/><circle cx="25.4" cy="9" r=".9"/><circle cx="10" cy="4.4" r=".7"/><circle cx="22" cy="4.4" r=".7"/></g>`),
   ssk: yzRich("#fffbe0","#e8b830",`<path d="M16 9v19" stroke="#8a5a2a" stroke-width="1.6"/><path d="M7 15.4h18" stroke="#8a5a2a" stroke-width="1.6" stroke-linecap="round"/><path d="M10 15.4l-1 6M22 15.4l1 6" stroke="#f4c542" stroke-width="1.4" stroke-linecap="round"/><path d="M11.4 14.4h9.2l1.4 9h-12z" fill="#c8384a"/><circle cx="16" cy="10" r="3.8" fill="#f4e0b0"/><path d="M9.4 8.6c1-2.8 12.2-2.8 13.2 0z" fill="#f4c542" stroke="#a87808" stroke-width=".6"/><path d="M12.4 6.4c.8-2.4 6.4-2.4 7.2 0z" fill="#ffd84a" stroke="#a87808" stroke-width=".6"/><circle cx="14.6" cy="10.4" r="1.2" fill="none" stroke="#2a1a10" stroke-width=".6"/><circle cx="17.4" cy="10.4" r="1.2" fill="none" stroke="#2a1a10" stroke-width=".6"/><path d="M15.8 10.4h.4" stroke="#2a1a10" stroke-width=".6"/><path d="M16 1.4l.9 1.8 2 .3-1.4 1.4.3 2-1.8-.9-1.8.9.3-2-1.4-1.4 2-.3z" fill="#fff3b0"/>`),
   rusu: yzRich("#f4f0ff","#9a88c8",`<rect x="10" y="3.6" width="12" height="25" rx="2" fill="#6a3a1e" stroke="#3a1e0e" stroke-width=".8"/><path d="M10 6.6c0-2.4 12-2.4 12 0" fill="#8a5230"/><circle cx="16" cy="10.6" r="4.6" fill="#fffaf0" stroke="#d9a520" stroke-width=".9"/><path d="M16 7.6v3l2 1.2" stroke="#2a1a10" stroke-width=".9" stroke-linecap="round" fill="none"/><rect x="12" y="16.4" width="8" height="10" rx="1" fill="#2a1a3a"/><path d="M16 16.6v6.4" stroke="#d9a520" stroke-width=".7"/><circle cx="16" cy="23.6" r="1.8" fill="#f4c542" stroke="#a87808" stroke-width=".5"/><path d="M23.4 6.4c1.6-.4 2.8.4 3 1.8-1.2-.6-2.2-.6-3-1.8z" fill="#fff6c0"/><text x="24.6" y="12.6" font-size="3.4" fill="#ffffff" font-weight="900">z</text><text x="26.4" y="9.4" font-size="2.6" fill="#ffffff" font-weight="900">z</text>`),
@@ -13027,7 +13031,7 @@ var YZ_TRE = {
   flag:    { per:1,   cap:100,  unit:"%", what:"村人の区画の育つ速さ" , up:10 },
   gneji:   { per:10,  cap:400,  unit:"%", what:"キーボタン1押しのキー" , up:40 },
   taiko:   { per:1,   cap:50,   unit:"%", what:"2個穫れる確率" , up:5 },
-  fuuki:   { per:1,   cap:100,  unit:"%", what:"カラスが作物を持っていく確率を下げ、超変異しやすさを上げる" , up:10 },
+  fuuki:   { per:1,   cap:100,  unit:"%", what:"変異・超変異しやすさ" , up:10 },
   kanban:  { per:1,   cap:30,   unit:"%", what:"千両箱ガチャの GSR 以上が出る確率" , up:3 },
   zou:     { per:100, cap:900,  unit:"%", what:"作物の売値" , up:100 },
   map:     { per:1,   cap:50,   unit:"枚", what:"畑の上限" , up:1.1 },   // 朱印10個で +11枚(畑は最大111枚)
@@ -13054,10 +13058,10 @@ const YZ_NEW = [
   { k:"flag", r:"GXR", name:"村の旗", desc:"村人の区画の育つ速さ +1%(1本ごと。最大 +100%)", lore:"村の真ん中に立つ旗。風にはためく音が聞こえるあいだ、村人たちは手を止めない。" },
   { k:"gneji", r:"GXR", name:"金のキー", desc:"キーボタン1押しのキー +10%(1本ごと。最大 +400%)", lore:"純金で作られたキー。どの文字も打てないが、キーボタンのそばに置くと、ボタンが少し誇らしげに光る。" },
   { k:"taiko", r:"GXR", name:"豊作の太鼓", desc:"2個穫れる確率 +1%(1つごと。最大 +50%)", lore:"収穫祭で打ち鳴らされる大太鼓。響きが届く畑では、実がもうひとつ顔を出す。" },
-  { k:"fuuki", r:"GXR", name:"風見鶏", desc:"カラスが作物を持っていく確率 −1%・超変異しやすさ +0.01%(1羽ごと。最大100羽で、カラスは作物を持っていかなくなり、超変異しやすさ +1%)", lore:"屋根の上でくるくる回る鉄の鶏。カラスはこれを本物の大きな鶏だと思っている。" },
+  { k:"fuuki", r:"GXR", name:"風見鶏", desc:"作物が変異・超変異しやすくなります +1%(1羽ごと。最大 +100%、つまり2倍)", lore:"屋根の上でくるくる回る鉄の鶏。風向きが変わるたびに、遠い土地の珍しい実りの種を畑へ運んでくる。" },
   { k:"kanban", r:"GXR", name:"大入りの看板", desc:"千両箱ガチャの GSR 以上が出る確率 +1%(1枚ごと。最大 +30%)", lore:"金文字で「大入」と書かれた看板。掛ける場所を変えるたびに、千両箱の底からいい品が出てくる。" },
   { k:"jubako", r:"GXR", name:"宴の三段重", use:true, desc:"使うと1時間、料理の効果を3つまで同時にかけられます。同じ効果を重ねても、強い方だけが効きます", lore:"黒と朱の漆塗りに、金の波。お祝いの日にだけ蔵から出される重箱で、三段ぜんぶ埋まると宴が始まる。" },
-  { k:"okite", r:"GZR", name:"掟破りの朱印", desc:"集めるほど効く千両箱の宝物の上限が、宝物ごとに上がります(10個そろうと、招き猫・豊穣の像 +1000%、キーボタン +1億キー、黄金郷の地図 +11枚 など。1つごとに少しずつ上がります。持てるのは10個まで)", lore:"「上限」と書かれた札の上から、真っ赤に押された朱印。押された掟は、その日から誰にも守られなくなる。" },
+  { k:"okite", r:"GZR", name:"掟破りの朱印", desc:"集めるほど効く千両箱の宝物の上限が、宝物ごとに上がります(1つごとに少しずつ上がり、10個そろうと上がりきります。どれだけ上がるかは宝物によって違います。持てるのは10個まで)", lore:"「上限」と書かれた札の上から、真っ赤に押された朱印。押された掟は、その日から誰にも守られなくなる。" },
   { k:"kozuchi", r:"GZR", name:"打ち出の小槌", use:true, desc:"振ると、持っているキーが2倍になります(1回で増えるのは最大1京。振れるのは10日に1回。使うとなくなります。持てるのは1つまで)", lore:"ひと振りで願いが出てくるという小槌。千両箱に納められていたものは、なぜかキーばかり出てくる。" },
   { k:"zou", r:"GZR", name:"豊穣の像", desc:"作物の売値 +100%(1体ごと。最大 +900%、つまり10倍)", lore:"実りの神をかたどった金の像。畑の見える場所に置くと、作物が自分の値打ちに気づいて胸を張る。" },
   { k:"map", r:"GZR", name:"黄金郷の地図", desc:"畑の上限 +1枚(1枚ごと。最大 +50枚。畑を増やすには土地の権利書が要ります)", lore:"地図にない国の、地図にない畑までが描かれた地図。眺めているうちに、その土地の権利がこちらに移る。" },
@@ -15572,7 +15576,7 @@ function roseBookDetail(quick){
   const cond = r.id==="rose_barabara" ? (got ? "ふたつに割れた種が、すぐそばで同じときに目を覚ますと咲くという" : "？？？")
     : r.secret ? "特別な育て方をした薔薇の種から、まれに咲きます"
     : t===0 ? (/^u/.test(r.lv) ? "薔薇ガチャの UR から出る種から咲きます" : r.lv==="ls"||r.lv==="lt" ? "TOEIC リスニングでもらえる薔薇の種から咲きます" : `TOEIC 英単語の${ROSE_LVNAME[r.lv]}でもらえる薔薇の種から咲きます`)
-    : `${ROSE_LVNAME[r.lv]}の薔薇の種が咲くとき、${t===5?+(effSup()*100).toFixed(2):+(effMut()*100).toFixed(1)}% の確率で${t===5?"超変異":"変異"}します`;
+    : `${ROSE_LVNAME[r.lv]}の薔薇の種が咲くとき、${t===5?+(pSup(mutK(r.id))*100).toFixed(2):+(pMut(mutK(r.id))*100).toFixed(1)}% の確率で${t===5?"超変異":"変異"}します`;
   const head=`<div class="btabs"><span class="btab on">薔薇 ${roseGot()} / ${cells.length}色</span></div>
     <div class="bic q${t}">${got?icoQ(r,t):"❔"}</div>
     <div class="bnm">${got?esc(qName(id,t)):"？？？"}${t===5?' <small class="rq sup">超変異</small>':t===3?' <small class="rq mut">変異</small>':""}</div>
@@ -15769,8 +15773,8 @@ function renderBook(){
       <div class="lore unknown">${c.gacha?`${gachaText(c)}(レア度 ${c.r})。引き当てると、名前がわかります。`:(c.day!=null?`${dayText(c)}。`:`${unlockText(c.unlock)}。お店に並ぶと、名前がわかります。`)}</div>`;
   }else{
     const cond = t===0 ? (c.gacha?`${gachaText(c)}(レア度 ${c.r})`:(c.day!=null?dayText(c):"種を植えて育てれば穫れます"))
-      : t===5 ? `${c.name}が実るたびに ${+(effSup()*100).toFixed(2)}% の確率で超変異します${c.rose?"":"(村人の畑では収穫されずに残ります)"}`
-      : t===3 ? `${c.name}を収穫するたびに ${+(effMut()*100).toFixed(1)}% の確率で変異します${c.rose?"":"(村人の畑では収穫されずに残ります)"}`
+      : t===5 ? `${c.name}が実るたびに ${+(pSup(mutK(c.id))*100).toFixed(2)}% の確率で超変異します${c.rose?"":"(村人の畑では収穫されずに残ります)"}`
+      : t===3 ? `${c.name}を収穫するたびに ${+(pMut(mutK(c.id))*100).toFixed(1)}% の確率で変異します${c.rose?"":"(村人の畑では収穫されずに残ります)"}`
       : (total>=QUALITY[t].need ? `${c.name}を ${QUALITY[t].need}個 収穫して穫れるようになりました`
                                 : `${c.name}を ${QUALITY[t].need}個 収穫すると穫れるようになります(あと ${QUALITY[t].need-total}個)`);
     const mutKnown = isMutT(t) && n>0;   // 変異・超変異は一度穫れるまで名前と絵を伏せる
