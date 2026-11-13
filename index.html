@@ -12085,6 +12085,7 @@ function buyGachaPass(n,m="n"){
   save(); renderAll();
 }
 let gachaRes=[], gachaShown=0, gachaTimer=null;
+let gachaScrollRes=null, gachaScrollSig="";   // 最後に自動でスクロールしたときの結果(同じなら、描き直してもスクロールしない)
 /* 大連(1111連以上)の結果: 作物ごとにまとめ、低レアから順に出す */
 let gachaBig=null;   // { n, groups:[{ r, total, items:[{id,n,isNew,sold}] }], stage, soldAll, newKinds }
 const gachaBusy = () => gachaShown<gachaRes.length || !!(gachaBig && gachaBig.stage<gachaBig.groups.length) || !!gachaMega;
@@ -12739,7 +12740,12 @@ function renderGacha(){
   // 大連の演出中は、いま出した段が見えるようにする
   const top=body.querySelector(".gmhero, .gmtopc"), mg=!top && gachaMega && body.querySelector(".gmega");
   const cur=top || body.querySelector(".gsumsec.pop, .gspot");
-  if(mg) body.scrollTop += mg.getBoundingClientRect().top - body.getBoundingClientRect().top - 6;   // 1111111連: 演出の全体が見えるように
+  /* 自動のスクロールは、引いた結果が進んだときだけ。ネジの泉などで画面を描き直しただけのときは、見ている場所をそのまま残す(下まで見られなくなるので) */
+  const ssig=[gachaShown, gachaRes.length, body.querySelectorAll(".gsumsec, .gmfill").length, top?"t":"", mg?"m":"", gachaBusy()?"b":""].join("|");
+  const moved = !(gachaRes===gachaScrollRes && ssig===gachaScrollSig);
+  gachaScrollRes=gachaRes; gachaScrollSig=ssig;
+  if(!moved){}
+  else if(mg) body.scrollTop += mg.getBoundingClientRect().top - body.getBoundingClientRect().top - 6;   // 1111111連: 演出の全体が見えるように
   else if(top) body.scrollTop += top.getBoundingClientRect().top - body.getBoundingClientRect().top - (top.classList.contains("gmtopc")?60:6);   // 結果: 最高レアに合わせる
   else if(cur) gachaFollowSec(body,cur);   // 大連のまとめ: いま出た段が下で見切れないようにする
   // 11連・111連も、めくったカードが見えるようについていく(速くめくるときはすぐ動かす)
