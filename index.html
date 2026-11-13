@@ -12839,7 +12839,7 @@ function gachaHTML(){
     </div>
     <div class="gright">
       <div class="grates">${rates}</div>
-      ${gachaMega ? megaHTML() : gachaBig ? gachaBigHTML() : `<div class="gcards">${cards||`<div class="gempty">${gachaM==="w"?"ここに引いた種や食材が出ます":gachaM==="r"?"ここに引いた薔薇や種が出ます":gachaM==="y"?"いらっしゃい。ここに引いた品が並びます":"ここに引いた種が出ます"}</div>`}</div>`}
+      ${gachaMega ? megaHTML() : gachaBig ? gachaBigHTML() : `<div class="gcards">${cards||`<div class="gempty">${gachaM==="w"?"ここに引いた種や食材が出ます":gachaM==="r"?"ここに引いた薔薇や種が出ます":gachaM==="y"?"ようこそお越しくださいました。お引きになった品は、こちらへお並べいたします":"ここに引いた種が出ます"}</div>`}</div>`}
     </div>
   </div>`;
 }
@@ -13174,12 +13174,18 @@ const mjCropId = () => { const ok=sgCrops(); return ok.some(c=>c.id===S.mjCrop) 
 const kgCropId = () => { const ok=sgCrops(); return (ok.length ? yzPick(ok) : CROP.carrot).id; };
 /* 工房職人の村人・仕込み番の村人: 料理番の村人と同じく、決めた品を作り置き(1分ごと) */
 let yzAutoAt=0;
+/* 工房職人・仕込み番の作り置きの数: 料理番とは別に、それぞれ選ぶ(1個まで・10個まで・作れるだけ) */
+const yzKeepKey = k => k==="kobo" ? "keepWork" : "keepPrep";
+const yzKeep = k => [0,1,10].includes(S[yzKeepKey(k)]) ? S[yzKeepKey(k)] : 10;
+const yzKeepTxt = k => yzKeep(k)===0 ? "作れるだけ" : `${yzKeep(k)}個まで`;
+function yzKeepStep(k,dir){ S[yzKeepKey(k)]=COOK_KEEPS[(COOK_KEEPS.indexOf(yzKeep(k))+dir+COOK_KEEPS.length)%COOK_KEEPS.length]; yzAutoAt=0; sfx.tab(); save(); }
 function yzAutoMakeTick(){
   if(Date.now()-yzAutoAt<60000) return;
   const aw=(S.autoWork||[]).slice(0,yzN("kobo")), ap=(S.autoPrep||[]).slice(0,yzN("prep"));
   if(!aw.length && !ap.length) return;
   yzAutoAt=Date.now();
-  const cap=S.cookKeep===0 ? Infinity : (S.cookKeep||10), made=[];
+  const capOf=k=>yzKeep(k)===0 ? Infinity : yzKeep(k), made=[];
+  let cap=capOf("kobo");
   for(const a of aw){
     const w=WORKS.find(x=>x.id===a.id); if(!w) continue;
     const have=()=> WORK_KEEP[w.out] ? (S[w.out]||0) : foodN(w.out);
@@ -13194,6 +13200,7 @@ function yzAutoMakeTick(){
     }
     if(k){ const it=workItem(w.out); made.push(`${ico(it)} ${esc(it.name)}×${fmtNum(k)}`); }
   }
+  cap=capOf("prep");
   for(const a of ap){
     const p=PREPS.find(x=>x.id===a.id); if(!p) continue;
     const out=a.up?p.upOut:p.out, ing=a.up?p.upIng:p.ing;
@@ -13249,8 +13256,8 @@ function yzSub(x){
   if(k==="kuwa") return n>0?`${kb("<b>Enter</b> で、いま見ている畑(畑"+(S.cur+1)+")に使う","もう一度タップで、いま見ている畑に使う")}`:"";
   if(k==="jubako") return n>0?`${kb("<b>Enter</b> で使う","もう一度タップで使う")}${jubakoOn()?` ・ 使っています(残り ${fmtLeft(S.jubakoUntil-Date.now())})`:""}`:"";
   if(k==="kozuchi") return n>0?(kozLeft()>0?`次に振れるまで あと <b>${fmtLeftD(kozLeft())}</b>`:kb("<b>Enter</b> で振る","もう一度タップで振る")):(kozLeft()>0?`次に振れるまで あと ${fmtLeftD(kozLeft())}`:"");
-  if(k==="kobo") return n>0?`作り置き <b>${cookKeepTxt()}</b>(料理番の村人と同じ) ・ 任せている品 <b>${(S.autoWork||[]).length} / ${n}</b>(${kb("Enter","もう一度タップ")}で選ぶ)`:"";
-  if(k==="prep") return n>0?`作り置き <b>${cookKeepTxt()}</b>(料理番の村人と同じ) ・ 任せている仕込み <b>${(S.autoPrep||[]).length} / ${n}</b>(${kb("Enter","もう一度タップ")}で選ぶ)`:"";
+  if(k==="kobo") return n>0?`作り置き ${sw}<br><b>${yzKeepTxt("kobo")}</b> ・ 任せている品 <b>${(S.autoWork||[]).length} / ${n}</b>(${kb("Enter","もう一度タップ")}で選ぶ)`:"";
+  if(k==="prep") return n>0?`作り置き ${sw}<br><b>${yzKeepTxt("prep")}</b> ・ 任せている仕込み <b>${(S.autoPrep||[]).length} / ${n}</b>(${kb("Enter","もう一度タップ")}で選ぶ)`:"";
   if(k==="kimori") return n>0?`${OBJ_HOW}大木のマスを押して任せます ・ 任せている大木 <b>${kmUsed()} / ${n}本</b>`:"";
   if(k==="kimagure") return n>0?`${OBJ_HOW}使っている区画 <b>${vilUsed("kg")} / ${n*KG_SLOTS}</b>`:"";
   if(k==="meijin") return n>0?`育てる作物 ${sw}<br><b>${ico(CROP[mjCropId()])} ${esc(CROP[mjCropId()].name)}</b>(${kb("Enter","もう一度タップ")}で一覧から選ぶ) ・ 使っている区画 <b>${vilUsed("mj")} / ${n*MJ_SLOTS}</b>`:"";
@@ -13306,6 +13313,7 @@ function yzAct(dir){
     if(k==="meijin"){ openPick("mj"); return; }
     sfx.nope(); return;
   }
+  if(k==="kobo"||k==="prep"){ yzKeepStep(k,dir); renderTreas(); return; }
   if(k==="meijin"){ const ok=sgCrops().map(c=>c.id); if(!ok.length){ sfx.nope(); return; } S.mjCrop=ok[(ok.indexOf(mjCropId())+dir+ok.length)%ok.length]; sfx.tab(); save(); renderAll(); renderTreas(); return; }
   sfx.nope();
 }
@@ -13342,14 +13350,14 @@ function renderYzPick(){
   ypRows=ypRowsOf(); ypCur=Math.max(0,Math.min(ypCur,ypRows.length-1));
   $("g-ypTitle").textContent = kb2 ? "工房職人の村人に任せる品" : "仕込み番の村人に任せる仕込み";
   $("g-ypRate").textContent=`あと ${Math.max(0,n-list.length)} 個任せられます`;
-  $("g-ypNote").textContent=`${kb2?"工房職人":"仕込み番"}の村人 ${n}人(1人で1種類)・作り置き ${cookKeepTxt()}(料理番の村人と同じ設定)。材料を見たことのある品から選べます。`;
+  $("g-ypNote").textContent=`${kb2?"工房職人":"仕込み番"}の村人 ${n}人(1人で1種類)・作り置き ${yzKeepTxt(yzPickKind)}${kb("(Q / E で変える)","")}。材料を見たことのある品から選べます。`;
   const body=$("g-ypBody");
   body.innerHTML = ypRows.length ? ypRows.map((r,i)=>`<div class="rowi ${i===ypCur?"cur":""}" data-i="${i}">
       <div class="ic">${r.ic}</div>
       <div><div class="nm">${r.nm}</div><div class="ds">${r.ds}</div></div>
       <div class="keyk">${window.IS_MOBILE ? shopActBtns(r.keys) : (i===ypCur?r.keys:"")}</div></div>`).join("")
     : `<p class="empty" style="padding:1rem .4rem">選べる品がまだありません。</p>`;
-  $("g-ypHint").innerHTML = window.IS_MOBILE ? "" : "<b>↑ ↓</b> 選ぶ"+(kb2?"":" ・ <b>← →</b> ふつう / 上位種")+" ・ <b>Enter</b> 任せる / やめる ・ <b>Esc</b> 貴重品に戻る";
+  $("g-ypHint").innerHTML = window.IS_MOBILE ? "" : "<b>↑ ↓</b> 選ぶ"+(kb2?"":" ・ <b>← →</b> ふつう / 上位種")+" ・ <b>Enter</b> 任せる / やめる ・ <b>Q</b> / <b>E</b> 作り置きの数 ・ <b>Esc</b> 貴重品に戻る";
   keepVisible(body);
 }
 function ypToggle(){
@@ -13371,6 +13379,7 @@ function ypKey(e){
   if((k==="ArrowUp"||k==="ArrowDown") && n){ e.preventDefault(); ypCur=(ypCur+(k==="ArrowDown"?1:-1)+n)%n; sfx.cursor(); renderSoon(renderYzPick); return; }
   if((k==="ArrowLeft"||k==="ArrowRight") && yzPickKind==="prep"){ e.preventDefault(); const r=ypRows[ypCur]; if(r){ ypUp[r.id]=!r.up; sfx.tab(); renderYzPick(); } return; }
   if(k==="Enter"){ e.preventDefault(); ypToggle(); }
+  if(k==="q"||k==="Q"||k==="e"||k==="E"){ e.preventDefault(); yzKeepStep(yzPickKind,(k==="e"||k==="E")?1:-1); renderYzPick(); }
 }
 $("g-ypBody").addEventListener("click",e=>{
   const row=e.target.closest && e.target.closest(".rowi"); if(!row) return;
@@ -13770,7 +13779,7 @@ function renderTreas(){
   root.querySelectorAll("#g-treasTabs .tab").forEach(t=>t.classList.toggle("on", +t.dataset.tt===treasTab));
   $("g-treasNote").textContent = treasTab===3 ? YZ_TRE_NOTE : treasTab===2 ? ROSE_TRE_NOTE : treasTab ? KIT_NOTE : TREAS_NOTE;
   if(treasTab===4){ $("g-treasNote").textContent="持っているキーが1京をこえた人だけが手にする、クリアの証です。"; $("g-treasHint").innerHTML="<b>Tab</b> 次のタブへ ・ <b>Enter</b> 王冠を付ける / 外す ・ <b>8</b> / <b>Esc</b> 閉じる"; renderKcTre(); return; }
-  if(treasTab===3){ $("g-treasHint").innerHTML="<b>Tab</b> 次のタブへ ・ <b>↑ ↓ ← →</b> 選ぶ ・ <b>Enter</b> 使う・任せる品を選ぶ ・ <b>Q</b> / <b>E</b> 名人村人の作物を切り替え ・ <b>8</b> / <b>Esc</b> 閉じる"; renderYzTre(); return; }
+  if(treasTab===3){ $("g-treasHint").innerHTML="<b>Tab</b> 次のタブへ ・ <b>↑ ↓ ← →</b> 選ぶ ・ <b>Enter</b> 使う・任せる品を選ぶ ・ <b>Q</b> / <b>E</b> 作り置きの数・名人村人の作物を切り替え ・ <b>8</b> / <b>Esc</b> 閉じる"; renderYzTre(); return; }
   if(treasTab===2){ $("g-treasHint").innerHTML="<b>Tab</b> 次のタブへ ・ <b>↑ ↓ ← →</b> 選ぶ ・ <b>Enter</b> オン・オフ"+(S.rkam?" ・ 薔薇のかまどは <b>Enter</b> で色を一覧から選ぶ ・ <b>Q</b> / <b>E</b> 花びらの色":"")+(S.gx&&S.gx.plate?" ・ <b>N</b> プレートの名前":"")+" ・ <b>8</b> / <b>Esc</b> 閉じる"; renderRoseTre(); return; }
   $("g-treasHint").innerHTML = treasTab ? "<b>Tab</b> 貴重品へ ・ <b>↑ ↓ ← →</b> 選ぶ ・ <b>Enter</b> 使う ・ <b>Q</b> / <b>E</b> かまどの色・シゴデキ村人の作物を切り替え ・ <b>8</b> / <b>Esc</b> 閉じる" : (kitAny()?"<b>Tab</b> 台所の宝物へ ・ ":"")+"<b>↑ ↓</b> 見る ・ <b>8</b> / <b>Esc</b> 閉じる";
   if(treasTab){ renderKit(); return; }
@@ -16589,6 +16598,22 @@ function showBtNotice(){
   openModal("notice"); sfx.vil();
 }
 /* 薔薇ガチャの解放のお知らせ: 薔薇を10色集めたとき(更新の前から10色持っている人には、更新後に庭を開いたとき)に1回だけ */
+/* 大きな更新のお知らせ(千両箱ガチャ・エンディング・音と演出)。農園に入ったときに一度だけ出す */
+function showUpNotice(){
+  if(S.up2611Noticed || scene!=="garden" || modal || realFields) return;
+  try{ if(tutStep()) return; }catch(e){ return; }
+  S.up2611Noticed=true; save();
+  $("g-noticeTitle").textContent="🎉 大きな更新が入りました!";
+  $("g-noticeBody").innerHTML=`<ul>
+    <li><b>千両箱ガチャ</b>: ガチャに4台目が加わりました。累計獲得キーが 100億 を超えると開きます。いちばん上のレア度 <b>GZR</b> と、新しい貴重品が19種類出ます。</li>
+    <li><b>ゲームクリア</b>: 実績のいちばん下に、持っているキーが1京を超える実績が加わりました。受け取るとエンディングが流れます。そのあとも、そのまま遊べます。</li>
+    <li><b>音と演出</b>: 画面ごとに BGM が流れ、効果音と演出が新しくなりました。ホームの「音と演出」${kb("(<b>V</b>)","")}で、音量を変えたり、これまでの音と見た目に戻したりできます。</li>
+    <li>肥料${kb("(<b>5</b>)","")}と設置物・村人${kb("(<b>6</b>)","")}も、種と同じように、長押しか${kb("すばやく2回押す","ダブルタップ")}と一覧から選べます。</li>
+    <li>くわしくは、ホームの「更新情報」${kb("(<b>U</b>)","")}をどうぞ。</li>
+  </ul>`;
+  $("g-noticeOk").textContent=kb("わかった(Enter)","わかった");
+  openModal("notice"); sfx.vil();
+}
 function showRoseNotice(){
   if(S.rgNoticed || !roseGachaOpen() || scene!=="garden" || modal || realFields) return;
   S.rgNoticed=true; save();
@@ -16635,7 +16660,7 @@ function showGiftNotice(){
 }
 function renderCookLock(){ const b=$("g-cookBtn"); if(!b) return; const ok=cookOpen(); b.classList.toggle("locked",!ok); b.title=ok?"":COOK_LOCK_MSG(); }
 // マウスでも閉じられるように: 閉じるボタンと、ウィンドウの外側のクリック
-root.querySelectorAll("[data-close]").forEach(b=>b.addEventListener("click",()=>closeModal()));
+root.querySelectorAll("[data-close]").forEach(b=>b.addEventListener("click",()=>{ if(modal==="yzpick" || modal==="cvpick" || (modal==="pick" && pickKind!=="seed" && pickKind!=="fert" && pickKind!=="obj")) openModal("treas"); else closeModal(); }));   // 貴重品から開いた「選ぶ画面」は、閉じると貴重品に戻る
 root.querySelectorAll(".modal").forEach(m=>m.addEventListener("click",e=>{ if(e.target===m && m.id!=="g-notice") closeModal(); }));   // お知らせは、まわりを押しても閉じない
 $("g-noticeOk").addEventListener("click",()=>closeModal());
 // ボタンにフォーカスが残って Enter/Space が二重に効かないようにする
@@ -16675,7 +16700,7 @@ function enterIn(){
   crowVisit();
   flushToastBatch();
   clearInterval(loopId); clearInterval(saveId);
-  loopId=setInterval(()=>{ const q3=ev("Q3",30/60,3,0); /* 料理: 農園の時計(分) */ if(q3) applySkip(q3,"k"); { const kr=yzv("karakuri")/100; if(kr) applySkip(kr/60,"k"); } /* からくり時計 */ yzKimoriTick(); yzAutoMakeTick(); showCookNotice(); showRoseNotice(); showBtNotice(); showGiftNotice(); autoCookTick(); tick(); reportVillagers(); renderBar(); renderField(); renderInfo(); renderCounter(); renderBuff(); if(modal==="cook") $("g-cookNow").innerHTML=cookNowText(); },1000);
+  loopId=setInterval(()=>{ const q3=ev("Q3",30/60,3,0); /* 料理: 農園の時計(分) */ if(q3) applySkip(q3,"k"); { const kr=yzv("karakuri")/100; if(kr) applySkip(kr/60,"k"); } /* からくり時計 */ yzKimoriTick(); yzAutoMakeTick(); showCookNotice(); showRoseNotice(); showBtNotice(); showUpNotice(); showGiftNotice(); autoCookTick(); tick(); reportVillagers(); renderBar(); renderField(); renderInfo(); renderCounter(); renderBuff(); if(modal==="cook") $("g-cookNow").innerHTML=cookNowText(); },1000);
   saveId=setInterval(save,15000);
 }
 function leave(){
@@ -19363,9 +19388,6 @@ html.fx #screen-battle.fx-shake{animation:fx-shake .36s cubic-bezier(.3,.7,.3,1)
 html.fx .word-panel.hit{box-shadow:0 0 0 3px rgba(190,120,255,.8), 0 0 34px rgba(190,120,255,.6)}
 /* fx-shake2 */
 .fxp-more{margin:.6rem .5rem 0; font-size:.75rem; color:#97a1af}
-/* ---- 庭の時間帯 ---- */
-#fxSky{position:fixed; inset:0; pointer-events:none; z-index:48; mix-blend-mode:multiply; transition:background 1.5s linear}
-html:not(.fx) #fxSky{display:none}
 /* ---- 料理: 食べると、色がにじんで広がる ---- */
 .fx-wash{position:fixed; inset:0; pointer-events:none; z-index:49; background:radial-gradient(circle at 50% 55%, var(--c) 0, var(--c) 30%, transparent 70%); animation:fx-wash 1.4s cubic-bezier(.2,.7,.2,1) forwards}
 @keyframes fx-wash{0%{opacity:.75; transform:scale(.05); filter:blur(6px)}45%{opacity:.5}100%{opacity:0; transform:scale(3.2); filter:blur(30px)}}
@@ -19462,14 +19484,14 @@ async function bench(){
   if(cfg.bench!=null || cfg.lite!=null) return;
   try{ const OC=window.OfflineAudioContext||window.webkitOfflineAudioContext; if(!OC) return;
     let ms=1e9;
-    for(let k=0;k<2;k++){   // 2回測って、速いほうを取る(読み込み中の重さに引きずられないように)
+    for(let k=0;k<3;k++){   // 3回測って、いちばん速い回を取る(読み込み中の重さに引きずられないように)
     const oc=new OC(2,44100,44100), cv=oc.createConvolver(); cv.buffer=impulse(oc,2.4,2.6); cv.connect(oc.destination);
     for(let i=0;i<36;i++){ const o=oc.createOscillator(), f=oc.createBiquadFilter(), g=oc.createGain(); o.type="sawtooth"; o.frequency.value=110+i*37; f.type="lowpass"; f.frequency.value=1200; g.gain.value=.01; o.connect(f); f.connect(g); g.connect(oc.destination); g.connect(cv); o.start(0); }
     const t0=performance.now(); await oc.startRendering(); ms=Math.min(ms,Math.round(performance.now()-t0)); }
     cfg.bench=ms; if(ms>BENCH_SLOW) cfg.autoLite=1; saveCfg(); setLite(); paintPanel();
   }catch(e){}
 }
-const BENCH_SLOW=220;   // 1秒ぶんの計算に、これより長くかかる端末は軽い音で始める(ミリ秒)
+const BENCH_SLOW=280;   // 実機の値: 新しいパソコン 170〜185 / 古い Chromebook 300〜740 / 途切れたスマホ 1400〜2100   // 1秒ぶんの計算に、これより長くかかる端末は軽い音で始める(ミリ秒)
 function applyVol(){ if(!B) return; B.sfx.gain.value=cfg.sv*1.25; B.sfxRv.gain.value=cfg.sv*1.25; B.bgm.gain.value=cfg.bgm ? cfg.bv : 0; B.jk.gain.value=jkVol(); if(cur) cur.rv.gain.value=cur.forced ? jkVol() : cfg.bgm ? cfg.bv : 0; }
 /* もとの音は「出口」につないでいる。その行き先を、ここのミキサーに付け替える */
 AudioNode.prototype.connect=function(dst,...a){
@@ -19672,7 +19694,7 @@ const TR={
     if(i===4||i===12) snare(o,t,.045);
     if(rush && b%2===1 && i>=12) snare(o,t,.02+(i-12)*.008);
     if(i%4===2) hat(o,t,.022,.06);
-    const lv=o.forced ? Math.min(3,L) : streakLv();   // ミスなしで続けて打つほど、楽器が増える(一覧で聴くときは、くり返すごとに増える)
+    const lv=o.forced ? Math.min(3,L) : band;   // ミスなしで続けて打つほど、楽器が増える(一覧で聴くときは、くり返すごとに増える)
     if((lv>=1||rush) && i%2===1) hat(o,t,rush?.014:.008,.025);
     if(i===0) for(const n of tri) T(o,t,n,sp*15,{ type:"sawtooth", lp:880, v:.0075, a:.2, r:.6, hold:1, rv:.3 });
     if(i%2===0) T(o,t,root+[0,0,12,0,0,0,7,12][i>>1],sp*1.6,{ type:"sawtooth", lp:520, q:2, v:.075, r:.05 });
@@ -19925,30 +19947,12 @@ function vines(g,t,al){
   vine(g,W+u*.04,-u*.03,Math.PI-.7,u*.85,6,t,al,2.6); vine(g,W+u*.05,H*.42,Math.PI+.2,u*.42,4,t,al,5.5);
   if(!RM && t-leafT>5){ leafT=t+rnd(0,4); const left=R()<.5; add({ k:"leaf", x:left?rnd(0,W*.25):rnd(W*.75,W), y:left?H*.55:-10, vx:left?rnd(20,50):rnd(-50,-20), vy:rnd(18,40), g:6, dr:.05, life:rnd(7,11), age:0, sz:rnd(3,5), col:pick(["110,190,100","150,220,120"]), rot:R()*6.28, vr:rnd(-1.5,1.5), amb:1 }); }
 }
-/* 庭の時間帯: 朝・昼・夕方・夜で、空の色みと光の向きが変わる */
-const SKY=[[0,[38,52,120,.30]],[4.5,[38,52,120,.30]],[5.5,[255,170,150,.20]],[7,[255,225,180,.09]],[9.5,[255,255,255,0]],[15.5,[255,255,255,0]],[17,[255,170,90,.17]],[18.3,[240,120,110,.22]],[19.3,[90,80,150,.27]],[20.5,[38,52,120,.30]],[24,[38,52,120,.30]]];
-function skyCol(h){ let a=SKY[0], b=SKY[SKY.length-1]; for(let i=0;i<SKY.length-1;i++) if(h>=SKY[i][0] && h<=SKY[i+1][0]){ a=SKY[i]; b=SKY[i+1]; break; } const u=(h-a[0])/((b[0]-a[0])||1); return a[1].map((v,i)=>v+(b[1][i]-v)*u); }
-let skyKey="";
-function skyTint(sc){
-  const el=$("fxSky"); if(!el) return;
-  const on=sc==="garden" && !$("kyoEnd") && !baraNow(), c=on?skyCol(hourNow()):[0,0,0,0], key=on?c.map(v=>v.toFixed(2)).join():"";
-  if(key===skyKey) return; skyKey=key; el.style.background=on?`rgba(${c[0]|0},${c[1]|0},${c[2]|0},${c[3].toFixed(3)})`:"transparent";
-}
-const STARS=Array.from({length:70},(_,i)=>[(i*.6180339)%1,(i*.3819660*1.7)%1,.5+((i*7)%10)/9]);
-function skyDraw(gb,gt,t){
-  const h=hourNow(), day=h>=5 && h<19, u=day ? (h-5)/14 : ((h>=19?h-19:h+5)/10), x=W*(.06+.88*u), y=H*(.52-Math.sin(Math.PI*u)*.44), s=Math.min(W,H);
-  if(!day){ for(const [sx,sy,sz] of STARS){ const a=.35+.3*Math.sin(t*1.3+sx*40); gb.fillStyle=`rgba(255,250,230,${a})`; gb.beginPath(); gb.arc(sx*W,sy*H*.7,sz,0,6.283); gb.fill(); } }
-  const edge=day ? Math.min(1,Math.min(u,1-u)*5) : 1, warm=day ? (u<.18||u>.82 ? "255,170,90" : "255,244,200") : "200,215,255";
-  const R1=s*(day?.9:.6), gr=gt.createRadialGradient(x,y,0,x,y,R1); gr.addColorStop(0,`rgba(${warm},${(day?.22:.13)*edge})`); gr.addColorStop(.35,`rgba(${warm},${(day?.08:.05)*edge})`); gr.addColorStop(1,`rgba(${warm},0)`);
-  gt.globalCompositeOperation="source-over"; gt.fillStyle=gr; gt.fillRect(0,0,W,H);
-  gb.fillStyle=day?`rgba(255,246,210,${.85*edge})`:"rgba(245,240,215,.9)"; gb.beginPath(); gb.arc(x,y,s*(day?.035:.028),0,6.283); gb.fill();
-  if(!day){ gb.globalCompositeOperation="destination-out"; gb.beginPath(); gb.arc(x-s*.012,y-s*.004,s*.025,0,6.283); gb.fill(); gb.globalCompositeOperation="source-over"; }
-}
 function frame(ts){
   raf=requestAnimationFrame(frame);
   if(MOB && ts-last<30) return;   // スマホ: 絵は1秒30回まで
   const dt=Math.min(.05,(ts-last)/1000||0); last=ts;
   if(!cfg.on || document.hidden){ return; }
+  if(B && bgmTimer) bgmTick();
   const sc=sceneNow(), light=(sc==="garden"||sc==="poem");
   ambient(dt,sc); extras(dt,sc);
   const gb=back.getContext("2d"), gt=top.getContext("2d");
@@ -19956,7 +19960,6 @@ function frame(ts){
   /* 歯車(暗い画面のホームだけ。ほかの画面では、すっと消える) */
   gearAl+=((sc==="title"&&!RM&&!TG?1:0)-gearAl)*Math.min(1,dt*3); gearA+=dt*.06;
   leafAl+=((sc==="title"&&TG?1:0)-leafAl)*Math.min(1,dt*3); if(leafAl>.01) vines(gb,ts/1000,leafAl);
-  if(sc==="garden" && !$("kyoEnd") && !MOB) skyDraw(gb,gt,ts/1000); skyTint(sc);
   if(gearAl>.01){ const u=Math.min(W,H); gear(gb,W*.06,H*.84,u*.3,14,gearA,.045*gearAl); gear(gb,W*.06+u*.44,H*.84+u*.2,u*.19,9,-gearA*14/9+.2,.04*gearAl); gear(gb,W*.95,H*.14,u*.24,12,-gearA*.8,.042*gearAl); gear(gb,W*.95-u*.33,H*.14-u*.13,u*.13,7,gearA*.8*12/7+.3,.036*gearAl); }
   for(let i=P.length-1;i>=0;i--){ const p=P[i]; p.age+=dt; if(p.age>=p.life){ P.splice(i,1); continue; }
     const g=p.top?gt:gb, u=p.age/p.life;
@@ -19982,27 +19985,21 @@ const flash=cls=>{ const v=$("fxVig"); if(!v||RM) return; v.className=""; void v
 const kickAnim=(el,cls)=>{ if(!el||RM) return; el.classList.remove(cls); void el.offsetWidth; el.classList.add(cls); clearTimeout(el["__"+cls]); el["__"+cls]=setTimeout(()=>el.classList.remove(cls),700); };
 let streak=0, heatT=0;
 const streakLv=()=>streak>=90?3 : streak>=45?2 : streak>=15?1 : 0;
-function streakUp(){ const a=streakLv(); streak++; const b=streakLv(); if(b>a && sceneNow()==="game" && !inBattle()){ snd("lvup",b); const p=$("wordPanel"), c=p&&center(p); if(c){ ring(c[0],c[1],"120,255,170",c[2].width*.5); burst(c[0],c[2].top,10+b*6,{ ang:-Math.PI/2, spread:1.3, v0:120, v1:320, g:400, col:GREEN, l0:.4, l1:.9 }); } } }
+let band=0;   // BGM の楽器の段。言葉を打ち終えたときにだけ上がる(打っている途中で変わらないように)
+function bandUp(){ const b=streakLv(); if(b>band && sceneNow()==="game" && !inBattle()){ snd("lvup",b); const p=$("wordPanel"), c=p&&center(p); if(c){ ring(c[0],c[1],"120,255,170",c[2].width*.5); burst(c[0],c[2].top,10+b*6,{ ang:-Math.PI/2, spread:1.3, v0:120, v1:320, g:400, col:GREEN, l0:.4, l1:.9 }); } } band=b; heat(); }
 function heat(){ const p=$("wordPanel"); if(p) p.style.setProperty("--fxheat",Math.min(1,streak/60).toFixed(3)); }
 const GOLD=["255,214,110","255,176,58","255,240,190"], GREEN=["120,255,170","190,255,210","255,240,170"];
 /* 音が鳴るのと同じきっかけで、絵も動かす */
 function vis(name,arg){
   if(RM) return;
   const sc=sceneNow();
-  if(name==="type"){
-    if(sc!=="game") return;
-    streakUp(); requestAnimationFrame(()=>{ const d=document.querySelector("#romaji .done"); if(!d) return; const r=d.getBoundingClientRect(); if(!r.width) return;
-      burst(r.right,r.top+r.height*.55,streak>40?5:3,{ ang:-Math.PI/2, spread:1.1, v0:60, v1:190, g:520, col:baraNow()?["255,90,120","255,180,200","214,40,70"]:GREEN, l0:.2, l1:.45, s0:1, s1:2 });
-      if(streak%25===0){ ring(r.right,r.top+r.height/2,"120,255,170",40); kickAnim($("wordPanel"),"fx-pulse"); }
-      heat(); });
-    return;
-  }
+  if(name==="type"){ if(sc==="game") streak++; return; }   // 打っている途中は、絵を出さない(気が散るので)
   if(name==="done"){
     const s=document.querySelector("#plate .screw:not(.out):not(.gone)"), c=s&&center(s);
     if(c){ burst(c[0],c[1],MOB?12:22,{ v0:90, v1:340, g:620, col:GOLD, l0:.35, l1:.8, s0:1.2, s1:2.8 }); ring(c[0],c[1],"255,196,84",44); }
-    kickAnim($("wordPanel"),"fx-done"); return;
+    kickAnim($("wordPanel"),"fx-done"); bandUp(); return;
   }
-  if(name==="miss"){ if(sc==="game"){ streak=0; heat(); } flash("miss"); return; }
+  if(name==="miss"){ if(sc==="game"){ streak=0; band=0; heat(); } flash("miss"); return; }
   if(name==="penalty"){ flash("miss big"); return; }
   if(name==="plate"){ const c=$("plate")&&center($("plate")); if(c){ burst(c[0],c[1],MOB?26:48,{ jx:c[2].width*.4, v0:120, v1:460, g:700, col:GOLD, l0:.5, l1:1.1, s0:1.4, s1:3.2 }); ring(c[0],c[1],"255,214,110",150); } kickAnim($("screen-game"),"fx-shake"); return; }
   if(name==="stageUp"){ flash("up"); kickAnim($("wordPanel"),"fx-pulse"); return; }
@@ -20010,9 +20007,9 @@ function vis(name,arg){
     const k=name.slice(3), wp=$("wordPanel"), scr=sc==="battle" ? $("screen-battle") : $("screen-game");
     const c=(sc==="game" && wp && center(wp)) || [W/2,H*.4,{ width:W*.5, height:H*.2, left:W*.25, right:W*.75, top:H*.3, bottom:H*.5 }];
     if(k==="go"){ ring(W/2,H/2,"255,214,110",Math.min(W,H)*.45); burst(W/2,H/2,MOB?24:50,{ v0:160, v1:560, g:200, col:GOLD, l0:.4, l1:1, s0:1.4, s1:3 }); flash("up"); }
-    else if(k==="type"){ if(sc==="game"){ streak++; requestAnimationFrame(()=>{ const d=document.querySelector("#romaji .done"); if(!d) return; const r=d.getBoundingClientRect(); if(r.width) burst(r.right,r.top+r.height*.55,3,{ ang:-Math.PI/2, spread:1.1, v0:60, v1:190, g:520, col:GREEN, l0:.2, l1:.45, s0:1, s1:2 }); heat(); }); } }
+    else if(k==="type"){ if(sc==="game") streak++; }
     else if(k==="done"){ const p=arg||1; burst(c[0],c[1],p>=3?30:p>=2?20:12,{ jx:c[2].width*.3, v0:90, v1:320, g:560, col:p>=2?GOLD:GREEN, l0:.35, l1:.8 }); kickAnim(wp,"fx-done"); }
-    else if(k==="miss"){ streak=0; heat(); flash("miss"); }
+    else if(k==="miss"){ streak=0; band=0; heat(); flash("miss"); }
     else if(k==="chain"){ const n=arg||0; if(n && n%5===0){ ring(c[0],c[1],"120,220,255",70+Math.min(n,30)*3); burst(c[0],c[1],14,{ v0:120, v1:300, g:300, col:["120,220,255","200,240,255"], l0:.4, l1:.8 }); } }
     else if(k==="gold"){ burst(c[0],c[1],MOB?18:34,{ jx:c[2].width*.3, v0:100, v1:380, g:520, col:["255,208,84","255,232,150","232,170,40"], k:"coin", l0:.5, l1:1, s0:2, s1:3 }); ring(c[0],c[1],"255,214,110",110); }
     else if(k==="fever"){ flash("up"); for(let q=0;q<3;q++) setTimeout(()=>{ ring(c[0],c[1],"255,150,60",90+q*50); burst(rnd(W*.2,W*.8),rnd(H*.2,H*.5),MOB?12:24,{ v0:120, v1:380, g:280, col:["255,150,60","255,214,110","255,90,60"], l0:.5, l1:1.1 }); },q*110); kickAnim(wp,"fx-pulse"); }
@@ -20057,7 +20054,6 @@ function paintPanel(){
   const q=s=>w.querySelector(s);
   q("[data-fx=on]").textContent=cfg.on?"オン":"オフ"; q("[data-fx=on]").classList.toggle("on",cfg.on);
   q("[data-fx=bgm]").textContent=cfg.bgm?"オン":"オフ"; q("[data-fx=bgm]").classList.toggle("on",cfg.bgm);
-  q("[data-val=bench]").textContent=cfg.bench!=null?` (この端末の測定 ${cfg.bench})`:"";
   { const b=q("[data-fx=lite]"); b.textContent=cfg.lite===true?"オン":cfg.lite===false?"オフ":LITE?"自動(軽い音)":"自動"; b.classList.toggle("on",LITE); }
   q("[data-fx=bv]").value=Math.round(cfg.bv*100); q("[data-fx=sv]").value=Math.round(cfg.sv*100);
   q("[data-val=bv]").textContent=Math.round(cfg.bv*100); q("[data-val=sv]").textContent=Math.round(cfg.sv*100);
@@ -20073,7 +20069,7 @@ function rowAct(r,dir){   // dir: 0=決める -1/+1=左右
   if(!r) return;
   const k=r.dataset.row;
   if(k==="on"||k==="bgm"){ setOpt(k,!cfg[k]); if(cfg.on) snd("g:tab"); }
-  else if(k==="lite"){ if(dir) return; if(cfg.lite==null){ cfg.lite=true; } else if(cfg.lite===true){ cfg.lite=false; } else { delete cfg.lite; delete cfg.autoLite; if(cfg.bench>BENCH_SLOW) cfg.autoLite=1; } saveCfg(); setLite(); paintPanel(); if(ac()) bgmTick(); if(cfg.on) snd("g:tab"); }
+  else if(k==="lite"){ if(dir) return; if(cfg.lite==null){ cfg.lite=true; } else if(cfg.lite===true){ cfg.lite=false; } else { delete cfg.lite; delete cfg.autoLite; delete cfg.bench; setTimeout(bench,300); } saveCfg(); setLite(); paintPanel(); if(ac()) bgmTick(); if(cfg.on) snd("g:tab"); }
   else if(k==="bv"||k==="sv"){ if(!dir) return; setOpt(k,Math.max(0,Math.min(1,Math.round((cfg[k]+dir*.05)*20)/20))); if(k==="sv") snd("vol")||(typeof beep==="function" && beep(1320,.06,"square",.035)); }
   else if(k==="song"){ if(!dir) songToggle(r.dataset.song); }
   else if(k==="close"){ if(!dir) closePanel(); }
@@ -20085,7 +20081,7 @@ function openPanel(){
   w.innerHTML=`<div class="fxp-box" role="dialog" aria-modal="true" aria-label="音と演出"><h3>音と演出</h3><div class="fxp-scroll">
     <div class="fxp-row" data-row="on"><span>新しい音と演出<small>オフにすると、これまでの音と見た目に戻ります</small></span><button type="button" data-fx="on" tabindex="-1"></button></div>
     <div class="fxp-row" data-row="bgm"><span>BGM</span><button type="button" data-fx="bgm" tabindex="-1"></button></div>
-    <div class="fxp-row" data-row="lite"><span>軽い音<small>音が途切れるときに。自動では、途切れを見つけると切り替わります<i data-val="bench"></i></small></span><button type="button" data-fx="lite" tabindex="-1"></button></div>
+    <div class="fxp-row" data-row="lite"><span>軽い音<small>音がブツブツ途切れる端末のために、響きと音の重なりを減らします。「自動」のままで、必要な端末だけ切り替わります</small></span><button type="button" data-fx="lite" tabindex="-1"></button></div>
     <label class="fxp-row" data-row="bv"><span>BGM の音量 <b data-val="bv"></b></span><input type="range" min="0" max="100" step="5" data-fx="bv" tabindex="-1"></label>
     <label class="fxp-row" data-row="sv"><span>効果音の音量 <b data-val="sv"></b></span><input type="range" min="0" max="100" step="5" data-fx="sv" tabindex="-1"></label>
     <div class="fxp-hd">曲を聴く</div>
@@ -20144,7 +20140,6 @@ function boot(){
   document.documentElement.classList.toggle("fx",cfg.on); document.documentElement.classList.toggle("fx-rm",RM);
   back=mkCanvas("fxBack",1); top=mkCanvas("fxTop",50); resize(); addEventListener("resize",resize);
   const v=document.createElement("div"); v.id="fxVig"; v.setAttribute("aria-hidden","true"); document.body.appendChild(v);
-  const sky=document.createElement("div"); sky.id="fxSky"; sky.setAttribute("aria-hidden","true"); document.body.appendChild(sky);
   /* ネジの詩: 打ち終えた行に、墨の音としぶき */
   const pls=$("poemLines");
   if(pls && window.MutationObserver) new MutationObserver(ms=>{ if(!cfg.on) return;
@@ -20153,9 +20148,9 @@ function boot(){
   const row=document.querySelector("#screen-title .btn-row");
   if(row && !$("fxBtn")){ const b=document.createElement("button"); b.className="btn"; b.id="fxBtn"; b.type="button"; b.innerHTML='🎧 音と演出'+(MOB?"":' <span class="kbdh">V</span>'); b.addEventListener("click",openPanel); row.appendChild(b); }
   raf=requestAnimationFrame(frame);
-  setTimeout(bench,1200);   // 読み込みが落ち着いてから測る
+  setTimeout(bench,2000);   // 読み込みが落ち着いてから測る
   /* 音は、はじめて操作されたときに用意する(ブラウザの決まり) */
-  const wake=()=>{ if(!cfg.on && !force) return; if(ac()) bgmRun(); };
+  const wake=()=>{ if(!cfg.on && !force) return; if(ac()){ bgmRun(); bgmTick(); } };   // キーの押しっぱなしで画面の処理が詰まっても、キーのたびに曲の予約を進める
   for(const ev of ["pointerdown","keydown","touchstart"]) window.addEventListener(ev,wake,{ capture:true, passive:true });
   /* ガチャ: 出てきた札に合わせて火花 */
   const gb=$("g-gachaBody");
@@ -20175,11 +20170,11 @@ function boot(){
     /* 詩を読み終えたら、少し見せてから巻物を閉じる */
     { const pr=$("poemResult"), pp=$("poemPaper"), on=!!(pr && pr.classList.contains("show") && sceneNow()==="poem");
       if(on!==poemShown){ poemShown=on; clearTimeout(poemT); if(pp){ if(on && cfg.on) poemT=setTimeout(()=>{ if(poemShown){ pp.classList.add("fx-close"); snd("poem:close"); } },2200); else pp.classList.remove("fx-close"); } } }
-    const sc=sceneNow(); if(sc===prev) return; const from=prev; prev=sc; streak=0; heat();
+    const sc=sceneNow(); if(sc===prev) return; const from=prev; prev=sc; streak=0; band=0; heat();
     if(sc==="result" && from==="game" && cfg.on && !inBattle()){ snd("fanfare"); if(!RM) for(let i=0;i<5;i++) setTimeout(()=>burst(rnd(W*.25,W*.75),rnd(H*.2,H*.45),MOB?10:18,{ v0:80, v1:320, g:300, col:GOLD.concat(["120,220,255","255,150,170"]), l0:.6, l1:1.3, s0:1.2, s1:2.8 }),i*130); }
   },120);
 }
-window.FX={ pos:()=>cur&&[cur.name,cur.loop,cur.step], lite:()=>LITE, strike:()=>{ strikes=5; if(wd) wd.w-=1500; }, voices:()=>voices, setHour:h=>{ hourFix=h; }, hour:hourNow, snd, cfg, set:setOpt, open:openPanel, burst, ring, dbg, track:()=>cur&&cur.name, parts:()=>P.length, bus:()=>B, ending, endingLen:n=>n*END_SEC, wake:()=>{ if(ac()) bgmRun(); } };
+window.FX={ pos:()=>cur&&[cur.name,cur.loop,cur.step], lite:()=>LITE, strike:()=>{ strikes=5; if(wd) wd.w-=1500; }, voices:()=>voices, snd, cfg, set:setOpt, open:openPanel, burst, ring, dbg, track:()=>cur&&cur.name, parts:()=>P.length, bus:()=>B, ending, endingLen:n=>n*END_SEC, wake:()=>{ if(ac()) bgmRun(); } };
 if(document.readyState==="loading") document.addEventListener("DOMContentLoaded",boot); else boot();
 })();
 </script>
