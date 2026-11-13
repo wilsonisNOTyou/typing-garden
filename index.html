@@ -19768,7 +19768,7 @@ const TR={
     if(L>=1) for(const [a,n,len] of GACHA_M[b]) if(a===i){ T(o,t,n,len*sp*.9,{ type:"square", lp:3000, v:.02, a:.01, r:.1, vib:9, hold:1, rv:.4 }); T(o,t,n,len*sp*.9,{ v:.016, a:.01, r:.1, hold:1 }); }
     if(b===7 && i>=12) N(o,t,.05,{ f:1500+i*120, q:1, v:.02+(i-12)*.006 });
   }},
-  /* 千両箱ガチャ: 祭りばやし。太鼓と鉦、三味線と篠笛。16小節でひと回り: はじまり → 笛が上で歌う → 静かな中休み → 盛り上がって戻る */
+  /* 千両箱ガチャ: 祭りばやし。太鼓、三味線と篠笛。16小節でひと回り: はじまり → 笛が上で歌う → 静かな中休み → 盛り上がって戻る */
   gachaY:{ bpm:()=>104, len:256, step(s,t,o,L,sp){
     const b=s>>4, i=s&15, sec=b>>2, k=b&3, calm=sec===2;
     if(i===0||(i===8&&!calm)){ T(o,t,38,.2,{ v:calm?.13:.2, a:.004, bend:12, bt:.09, r:.2, rv:.25 }); N(o,t,.12,{ ft:"lowpass", f:700, v:calm?.04:.07 }); T(o,t,38,sp*6,{ v:.05, r:.2 }); }
@@ -19777,7 +19777,6 @@ const TR={
     if(calm ? (i===4||i===12) : (i===3||i===11||i===14)) N(o,t,.035,{ f:950, q:2.2, v:calm?.03:.05 });
     if(b===11 && i>=8) N(o,t,.03,{ f:950, q:2.2, v:.02+(i-8)*.005 });
     if(b===15 && i>=8 && i%2===0) T(o,t,38+(i>=12?3:0),.1,{ v:.1+(i-8)*.012, a:.004, bend:9, bt:.06, r:.1 });
-    if(sec===3 ? (i===4||i===12) : sec===1 ? i===12 : sec===0 ? (i===12&&(k&1)) : false){ T(o,t,84,.2,{ type:"triangle", lp:2400, v:.014, r:.35, rv:.4 }); T(o,t,91.4,.15,{ v:.004, r:.25, rv:.4 }); }   // 鉦: 低めの丸い音で、場面ごとに数を変える(中休みでは鳴らさない)
     for(const [a,n] of (calm?SHAMI_B:sec===3?SHAMI_C:SHAMI)[k]) if(a===i){ T(o,t,n,.07,{ type:"sawtooth", lp:2300, q:2, v:calm?.04:.05, a:.002, bend:.3, bt:.02, r:calm?.4:.22, sus:.4, rv:calm?.35:.2 }); N(o,t,.012,{ f:2400, q:1.5, v:.02 }); }
     const fue=sec===0 ? (L%2===1?FUE:null) : sec===1 ? FUE_A2 : calm ? (k>=2?FUE_B:null) : FUE_C;   // 笛は1オクターブ下げて、休む小節もつくる(高い音が鳴りっぱなしだと耳が疲れるので)
     if(fue) for(const [a,n,len] of fue[k]) if(a===i){ const m=n-12; T(o,t,m,len*sp*.92,{ v:calm?.04:.036, a:calm?.08:.04, r:.12, vib:14, hold:1, bend:-.6, bt:.07, rv:.5 }); T(o,t,m,len*sp*.92,{ type:"triangle", lp:1800, v:.012, a:.05, r:.12, hold:1 }); N(o,t,Math.min(.2,len*sp),{ f:hz(m)*2, q:3, v:.005 }); }
