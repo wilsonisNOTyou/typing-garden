@@ -1225,7 +1225,7 @@ h2.rank-title{color:var(--amber); letter-spacing:.2em; margin-bottom:1rem; text-
 .rank-tabs .btn.active{color:#1b1405; background:linear-gradient(180deg,#ffd75e,var(--amber)); border-color:#c79100}
 .rank-tabs .btn.ta.active{color:#08282b; background:linear-gradient(180deg,#9fe4e8,var(--cyan)); border-color:#3d8d95}
 .tab-group-label{color:#6b7484; font-size:.75rem; letter-spacing:.2em; margin:.5rem 0 .3rem}
-.rank-list{list-style:none; width:min(460px,90vw); margin:0 auto; text-align:left; max-height:42vh; overflow-y:auto}
+.rank-list{list-style:none; width:min(460px,90vw); margin:.5rem auto .9rem; text-align:left; max-height:42vh; overflow-y:auto}
 .rank-row{
   display:flex; align-items:center; gap:.8rem;
   background:linear-gradient(180deg,var(--panel-hi),var(--panel));
@@ -5798,6 +5798,10 @@ async function openRanking(d,highlight){
   const myReq=++rankReq;   // 素早く切り替えたとき、古い読み込み結果を捨てる
   for(const t of RANK_TABS) $("tab-"+t).classList.toggle("active",d===t);
   if(window.tqRankSync) tqRankSync(d);   // TOEIC: 始めたレベルを選ぶボタン
+  { // 一覧は、選んだタブの段のすぐ下に出す(いちばん下だと、上のほうのタブを選んだときに見づらい)
+    const btn=$("tab-"+d); let at=btn && (btn.closest(".rank-pair") || btn.closest(".rank-tabs"));
+    if(at){ const nx=at.nextElementSibling; if(nx && nx.id==="tqRankLvs" && !nx.hidden) at=nx; if(at.nextElementSibling!==$("rankList")) at.after($("rankList"), $("rankStatus")); }
+  }
   show("ranking");
   const list=$("rankList");
   list.innerHTML="";
@@ -6914,7 +6918,7 @@ const mtRomaLen = k => { try{ return tokenize(k).reduce((a,c)=>a+((c.alts&&c.alt
 const mtPick = (r,w) => { let x=r()*Object.values(w).reduce((a,b)=>a+b,0); for(const [k,v] of Object.entries(w)){ x-=v; if(x<0) return k; } return Object.keys(w)[0]; };
 
 /* ---- 音: 試合だけの効果音と BGM(ファイルを使わず、その場で作る) ---- */
-const mtAC = () => { try{ audioCtx=audioCtx||new (window.AudioContext||window.webkitAudioContext)(); if(audioCtx.state==="suspended") audioCtx.resume(); return audioCtx; }catch(e){ return null; } };
+const mtAC = () => { try{ audioCtx=audioCtx||new (window.AudioContext||window.webkitAudioContext)(); if(audioCtx.state==="suspended" && !document.hidden) audioCtx.resume(); return audioCtx; }catch(e){ return null; } };
 function mtTone(f,dur,type="square",vol=.05,delay=0,f2=null){
   const ac=mtAC(); if(!ac) return;
   try{ const t=ac.currentTime+delay, o=ac.createOscillator(), g=ac.createGain();
@@ -10234,7 +10238,10 @@ function reportVillagers(){
   const mutOf = x => { const [id,q]=String(x).split(":"); return [id, q==="5"?5:3]; };   // "carrot" は変異、"carrot:5" は超変異
   // 変異・超変異は作物ごとにまとめて1つの知らせにする(長い時間がまとめて進むと何百個も穫れ、音が一度に鳴りすぎるため)
   const byCrop = arr => { const m={}; for(const [x,n] of vlogEntries(arr)){ const [id,t]=mutOf(x); if(CROP[id]){ const k=id+":"+t; m[k]=(m[k]||0)+n; } } return Object.entries(m).map(([k,n])=>{ const [id,t]=mutOf(k); return [id,t,n]; }); };
-  const mutList = arr => arr.map(([id,t,n])=>`${icoQ(CROP[id],t)} ${esc(qName(id,t))}${n>1?` ×${fmtNum(n)}`:""}`).join(" ・ ");
+  // 並べるのは多い順に決まった数まで。残りは「ほか○種」にまとめる(気まぐれ村人・ひまわりの種クッキーで何十種類も穫れると、知らせが画面を覆うので)
+  const VT_MUT=8, VT_H=14;
+  const more = n => n>0 ? ` ほか${fmtNum(n)}種` : "";
+  const mutList = arr => { const s=arr.slice().sort((x,y)=>y[1]-x[1] || y[2]-x[2]); return s.slice(0,VT_MUT).map(([id,t,n])=>`${icoQ(CROP[id],t)} ${esc(qName(id,t))}${n>1?` ×${fmtNum(n)}`:""}`).join(" ・ ")+more(s.length-VT_MUT); };
   const head = arr => arr.some(([,t])=>t===5) ? "✧ 超変異!" : "✦ 変異!";
   const cls  = arr => arr.some(([,t])=>t===5) ? "good mut sup" : "good mut";
   const got=byCrop(L.mutGot), wait=byCrop(L.mutWait), msold=byCrop(L.mutSold);
@@ -10242,7 +10249,7 @@ function reportVillagers(){
   const addMut = arr => a => { for(const [id,t,n] of arr){ const k=id+":"+t; a.m[k]=(a.m[k]||0)+n; } };
   const mutArr = a => Object.entries(a.m).map(([k,n])=>{ const [id,t]=mutOf(k); return [id,t,n]; });
   const addH = obj => a => { for(const [id,n] of Object.entries(obj||{})) a.h[id]=(a.h[id]||0)+n; };
-  const hList = a => Object.entries(a.h).map(([id,n])=>`${ico(CROP[id])}×${fmtNum(n)}`).join(" ");
+  const hList = a => { const s=Object.entries(a.h).sort((x,y)=>y[1]-x[1]); return s.slice(0,VT_H).map(([id,n])=>`${ico(CROP[id])}×${fmtNum(n)}`).join(" ")+more(s.length-VT_H); };
   if(got.length) vilToast("got", addMut(got), a=>`${head(mutArr(a))} 村人が ${mutList(mutArr(a))} を収穫しました(持ち物に入れました)`, a=>cls(mutArr(a)), 9000);
   if(msold.length) vilToast("msold", a=>{ addMut(msold)(a); a.earn+=L.mutEarn||0; }, a=>`${head(mutArr(a))} 村人が ${mutList(mutArr(a))} を収穫して売りました(+${fmtNum(a.earn)}キー)`, a=>cls(mutArr(a)), 9000);
   if(wait.length) vilToast("wait", addMut(wait), a=>`${head(mutArr(a))} 村人の畑で ${mutList(mutArr(a))} が実りました。村人は収穫せずに残しています(素手で収穫できます)`, a=>cls(mutArr(a)), 9000);
@@ -16064,7 +16071,7 @@ let kyoKey=null, kyoTimers=[], kyoStop=null, kyoBusy=false;
 /* エンディングの曲: 前奏2小節 → A(8小節) → B(サビ8小節) を loops 回 → 最後の和音。
    2回目からは、主旋律に3度下のハモり・軽い打楽器・高い音の重ねが入る。残響と山びこをかけて、時刻を前もって決めて鳴らす。stop で止める */
 function kyoMusic(delay,loops=1){
-  let ctx; try{ audioCtx=audioCtx||new (window.AudioContext||window.webkitAudioContext)(); ctx=audioCtx; if(ctx.state==="suspended") ctx.resume(); }catch(e){ return ()=>{}; }
+  let ctx; try{ audioCtx=audioCtx||new (window.AudioContext||window.webkitAudioContext)(); ctx=audioCtx; if(ctx.state==="suspended" && !document.hidden) ctx.resume(); }catch(e){ return ()=>{}; }
   const nodes=[], B=.6;   // 1拍 0.6秒(テンポ100)
   const out=ctx.createGain(); out.gain.value=.85; out.connect(ctx.destination);
   // 残響(ノイズから作る)と、主旋律の山びこ
@@ -19481,6 +19488,17 @@ html.fx #screen-poem:not(.bara) .pline.past .pk, html.fx #screen-poem:not(.bara)
 @keyframes fx-ink{0%{clip-path:inset(-20% 100% -20% 0); text-shadow:0 0 14px rgba(20,14,10,.9); filter:blur(1.2px)}70%{text-shadow:0 0 8px rgba(20,14,10,.6); filter:blur(.4px)}100%{clip-path:inset(-20% 0 -20% 0); text-shadow:0 0 0 rgba(20,14,10,0); filter:none}}
 html.fx .paper.fx-close{height:0 !important; transition:height 1s cubic-bezier(.5,0,.3,1)}
 @media (prefers-reduced-motion:reduce){ html.fx #screen-poem .pline.past .pt, html.fx .fx-best, .fx-wash{animation:none !important} }
+
+/* 全体の音量(どの画面でも左下) */
+#fxVolBtn{position:fixed; left:10px; bottom:calc(10px + env(safe-area-inset-bottom,0px)); z-index:30005; width:38px; height:38px; border-radius:50%; border:2px solid rgba(255,255,255,.55); background:rgba(30,26,20,.55); color:#fff; font-size:18px; line-height:1; cursor:pointer; opacity:.6; transition:opacity .15s, transform .15s; padding:0; display:flex; align-items:center; justify-content:center}
+#fxVolBtn:hover, #fxVolBtn:focus-visible{opacity:1; transform:scale(1.06)}
+#fxVolPop{position:fixed; left:10px; bottom:calc(56px + env(safe-area-inset-bottom,0px)); z-index:30006; width:min(260px, calc(100vw - 20px)); background:linear-gradient(180deg,#333a45,#232831); color:#e8ecf2; border:2px solid #4b5462; border-radius:12px; padding:.7rem .8rem .6rem; box-shadow:0 10px 30px rgba(0,0,0,.5); font-size:.9rem}
+#fxVolPop .fxv-hd{font-weight:800; margin-bottom:.35rem}
+#fxVolPop .fxv-hd b{color:#ffd86a; margin-left:.3rem}
+#fxVolPop input{width:100%; accent-color:#ffd86a}
+#fxVolPop .fxv-row{display:flex; gap:.4rem; margin:.45rem 0 .3rem}
+#fxVolPop .fxv-row button{flex:1; font:inherit; font-weight:700; font-size:.82rem; padding:.3rem .4rem; border-radius:8px; border:1.5px solid #5a6474; background:#3a4250; color:#e8ecf2; cursor:pointer}
+#fxVolPop small{display:block; color:#a8b0bc; font-size:.72rem}
 </style>
 <script id="fxScript">
 const FX_TG=true;
@@ -19495,7 +19513,7 @@ const TG=(typeof FX_TG!=="undefined" && FX_TG);   // タイピングガーデン
 const PRE=(typeof LS_PREFIX!=="undefined" ? LS_PREFIX : "fx:");
 const KEY=PRE+"fx";
 const dbg={ steps:0, snd:0, errs:[] };
-const cfg=Object.assign({ on:true, bgm:true, bv:.5, sv:.8 }, (()=>{ try{ return JSON.parse(localStorage.getItem(KEY)||"{}")||{}; }catch(e){ return {}; } })());
+const cfg=Object.assign({ on:true, bgm:true, bv:.5, sv:.8, mv:1 }, (()=>{ try{ return JSON.parse(localStorage.getItem(KEY)||"{}")||{}; }catch(e){ return {}; } })());
 const saveCfg=()=>{ try{ localStorage.setItem(KEY,JSON.stringify(cfg)); }catch(e){} };
 const RM=(()=>{ try{ return matchMedia("(prefers-reduced-motion:reduce)").matches; }catch(e){ return false; } })();
 const MOB=!!window.IS_MOBILE;
@@ -19532,9 +19550,9 @@ function bus(c){
     const d1=c.createDelay(.5), d2=c.createDelay(.5), lp=c.createBiquadFilter(), fb=c.createGain(); d1.delayTime.value=.097; d2.delayTime.value=.163; lp.type="lowpass"; lp.frequency.value=2600; fb.gain.value=.42; wet.gain.value=.5;
     rawConnect.call(rev,d1); rawConnect.call(d1,lp); rawConnect.call(lp,wet); rawConnect.call(lp,fb); rawConnect.call(fb,d2); rawConnect.call(d2,lp);
   }
-  rawConnect.call(sfxRv,rev); rawConnect.call(bgm,out); rawConnect.call(jk,out); rawConnect.call(out,comp); rawConnect.call(comp,c.destination);
+  rawConnect.call(sfxRv,rev); rawConnect.call(bgm,out); rawConnect.call(jk,out); const mst=c.createGain(); mst.gain.value=cfg.mv; rawConnect.call(out,comp); rawConnect.call(comp,mst); rawConnect.call(mst,c.destination);   // mst: 全体の音量
   try{ if(c.renderCapacity && !c.__fxCap){ c.__fxCap=1; c.renderCapacity.addEventListener("update",e=>{ if(wd && (e.underrunRatio>.02 || e.averageLoad>.9)) wd.under=(wd.under||0)+(e.underrunRatio>.1?2:1); }); c.renderCapacity.start({ updateInterval:.5 }); } }catch(e){}
-  B={ c, sfx, bgm, jk, rev, out, noise, sfxRv, o:{ g:sfx, rv:sfxRv } };   // 効果音が残響に送る分も、効果音の音量を通す(音量0なら残響も消える)
+  B={ c, sfx, bgm, jk, rev, out, mst, noise, sfxRv, o:{ g:sfx, rv:sfxRv } };   // 効果音が残響に送る分も、効果音の音量を通す(音量0なら残響も消える)
   applyVol();
   return B;
 }
@@ -19571,15 +19589,17 @@ async function bench(){
   }catch(e){}
 }
 const BENCH_SLOW=280;   // 実機の値: 新しいパソコン 170〜185 / 古い Chromebook 300〜740 / 途切れたスマホ 1400〜2100   // 1秒ぶんの計算に、これより長くかかる端末は軽い音で始める(ミリ秒)
-function applyVol(){ if(!B) return; B.sfx.gain.value=cfg.sv*1.25; B.sfxRv.gain.value=cfg.sv*1.25; B.bgm.gain.value=cfg.bgm ? cfg.bv : 0; B.jk.gain.value=jkVol(); if(cur) cur.rv.gain.value=cur.forced ? jkVol() : cfg.bgm ? cfg.bv : 0; }
+function applyVol(){ for(const g of PM.values()) g.gain.value=cfg.mv; if(!B) return; B.mst.gain.value=cfg.mv; B.sfx.gain.value=cfg.sv*1.25; B.sfxRv.gain.value=cfg.sv*1.25; B.bgm.gain.value=cfg.bgm ? cfg.bv : 0; B.jk.gain.value=jkVol(); if(cur) cur.rv.gain.value=cur.forced ? jkVol() : cfg.bgm ? cfg.bv : 0; }
 /* もとの音は「出口」につないでいる。その行き先を、ここのミキサーに付け替える */
+const PM=new Map();   // 新しい音と演出をオフにしているときの、全体の音量(画面の音の出口ごとに1つ)
+const pmOf=c=>{ let g=PM.get(c); if(!g){ g=c.createGain(); g.gain.value=cfg.mv; rawConnect.call(g,c.destination); PM.set(c,g); } return g; };
 AudioNode.prototype.connect=function(dst,...a){
-  try{ if(cfg.on && dst instanceof AudioDestinationNode){ const b=bus(dst.context); return rawConnect.call(this,b.sfx,...a); } }catch(e){}
+  try{ if(dst instanceof AudioDestinationNode && !(dst.context instanceof (window.OfflineAudioContext||function(){}))){ if(cfg.on){ const b=bus(dst.context); return rawConnect.call(this,b.sfx,...a); } return rawConnect.call(this,pmOf(dst.context),...a); } }catch(e){}
   return rawConnect.call(this,dst,...a);
 };
 function ac(){
   try{ if(!audioCtx){ if(LITE){ try{ audioCtx=new AC({ latencyHint:"playback", sampleRate:32000 }); }catch(e){ try{ audioCtx=new AC({ latencyHint:"playback" }); }catch(e2){} } } audioCtx=audioCtx||new AC(); }   // スマホ: 余裕を持って処理できる設定にする
-    if(audioCtx.state==="suspended") audioCtx.resume(); return bus(audioCtx); }catch(e){ return null; }
+    if(audioCtx.state==="suspended" && !document.hidden) audioCtx.resume(); return bus(audioCtx); }catch(e){ return null; }
 }
 const hz=n=>440*Math.pow(2,(n-69)/12);
 /* 音(ひとつ): o={g:つなぎ先, rv:残響の入り口} / n は音の高さ(ピアノの鍵盤の番号) */
@@ -19950,7 +19970,8 @@ function switchTo(name){
   const c=B.c, now=c.currentTime;
   if(cur){ const g=cur.g, r=cur.rv; for(const x of [g,r]){ x.gain.cancelScheduledValues(now); x.gain.setTargetAtTime(.0001,now,.18); } setTimeout(()=>{ try{ g.disconnect(); r.disconnect(); }catch(e){} },2500); cur=null; }
   if(!name) return;
-  const forced=!!force, g=c.createGain(), rv=c.createGain(); g.gain.value=.0001; g.gain.setTargetAtTime(1,now+.05,firstSong?.7:.25); firstSong=false;   // いちばん最初の曲だけ、ゆっくり入る rv.gain.value=forced ? jkVol() : cfg.bgm ? cfg.bv : 0;
+  const forced=!!force, g=c.createGain(), rv=c.createGain(); g.gain.value=.0001; g.gain.setTargetAtTime(1,now+.05,firstSong?.7:.25); firstSong=false;   // いちばん最初の曲だけ、ゆっくり入る
+  rv.gain.value=forced ? jkVol() : cfg.bgm ? cfg.bv : 0;   // 残響に送る分にも BGM の音量をかける(かけないと、音量0でも響きだけ聞こえる)
   rawConnect.call(g,forced ? B.jk : B.bgm); rawConnect.call(rv,B.rev);   // 残響に送る分にも、BGM の音量をかける
   cur={ name, g, rv, step:0, loop:0, next:now+.14, dk:1, forced, f:force, n:force ? force.n : 0 };
 }
@@ -20137,7 +20158,7 @@ function setOpt(k,v){
   cfg[k]=v; saveCfg(); applyVol();
   document.documentElement.classList.toggle("fx",cfg.on); document.documentElement.classList.toggle("fx-rm",RM);
   if(!cfg.on){ P.length=0; for(const c of [back,top]) if(c) c.getContext("2d").clearRect(0,0,c.width,c.height); }
-  paintPanel(); try{ window.dispatchEvent(new CustomEvent("fxchange")); }catch(e){}
+  paintPanel(); paintVol(); try{ window.dispatchEvent(new CustomEvent("fxchange")); }catch(e){}
 }
 let pSel=0, panelKey=null;
 const pRows=()=>[...document.querySelectorAll("#fxPanel [data-row]")].filter(r=>!r.hidden);
@@ -20147,7 +20168,7 @@ function paintPanel(){
   q("[data-fx=on]").textContent=cfg.on?"オン":"オフ"; q("[data-fx=on]").classList.toggle("on",cfg.on);
   q("[data-fx=bgm]").textContent=cfg.bgm?"オン":"オフ"; q("[data-fx=bgm]").classList.toggle("on",cfg.bgm);
   { const b=q("[data-fx=lite]"); b.textContent=cfg.lite===true?"オン":cfg.lite===false?"オフ":LITE?"自動(軽い音)":"自動"; b.classList.toggle("on",LITE); }
-  q("[data-fx=bv]").value=Math.round(cfg.bv*100); q("[data-fx=sv]").value=Math.round(cfg.sv*100);
+  q("[data-fx=mv]").value=Math.round(cfg.mv*100); q("[data-val=mv]").textContent=Math.round(cfg.mv*100); q("[data-fx=bv]").value=Math.round(cfg.bv*100); q("[data-fx=sv]").value=Math.round(cfg.sv*100);
   q("[data-val=bv]").textContent=Math.round(cfg.bv*100); q("[data-val=sv]").textContent=Math.round(cfg.sv*100);
   for(const b of w.querySelectorAll("[data-song]")){ const on=!!(force && force.jk && force.name===b.dataset.song); b.classList.toggle("on",on); b.querySelector("i").textContent=on?"■ 止める":"▶ 聴く"; }
   const rows=pRows(); pSel=Math.max(0,Math.min(rows.length-1,pSel));
@@ -20162,7 +20183,7 @@ function rowAct(r,dir){   // dir: 0=決める -1/+1=左右
   const k=r.dataset.row;
   if(k==="on"||k==="bgm"){ setOpt(k,!cfg[k]); if(cfg.on) snd("g:tab"); }
   else if(k==="lite"){ if(dir) return; if(cfg.lite==null){ cfg.lite=true; } else if(cfg.lite===true){ cfg.lite=false; } else { delete cfg.lite; delete cfg.autoLite; delete cfg.bench; setTimeout(bench,300); } saveCfg(); setLite(); paintPanel(); if(ac()) bgmTick(); if(cfg.on) snd("g:tab"); }
-  else if(k==="bv"||k==="sv"){ if(!dir) return; setOpt(k,Math.max(0,Math.min(1,Math.round((cfg[k]+dir*.05)*20)/20))); if(k==="sv") snd("vol")||(typeof beep==="function" && beep(1320,.06,"square",.035)); }
+  else if(k==="bv"||k==="sv"||k==="mv"){ if(!dir) return; setOpt(k,Math.max(0,Math.min(1,Math.round((cfg[k]+dir*.05)*20)/20))); if(k==="sv") snd("vol")||(typeof beep==="function" && beep(1320,.06,"square",.035)); }
   else if(k==="song"){ if(!dir) songToggle(r.dataset.song); }
   else if(k==="close"){ if(!dir) closePanel(); }
 }
@@ -20174,6 +20195,7 @@ function openPanel(){
     <div class="fxp-row" data-row="on"><span>新しい音と演出<small>オフにすると、これまでの音と見た目に戻ります</small></span><button type="button" data-fx="on" tabindex="-1"></button></div>
     <div class="fxp-row" data-row="bgm"><span>BGM</span><button type="button" data-fx="bgm" tabindex="-1"></button></div>
     <div class="fxp-row" data-row="lite"><span>軽い音<small>音がブツブツ途切れる端末のために、響きと音の重なりを減らします。「自動」のままで、必要な端末だけ切り替わります</small></span><button type="button" data-fx="lite" tabindex="-1"></button></div>
+    <label class="fxp-row" data-row="mv"><span>全体の音量 <b data-val="mv"></b><small>どの画面でも、左下の 🔊 か ${MOB?"":"<b>Alt+↑ ↓</b>(Mac は Option)"}で変えられます</small></span><input type="range" min="0" max="100" step="5" data-fx="mv" tabindex="-1"></label>
     <label class="fxp-row" data-row="bv"><span>BGM の音量 <b data-val="bv"></b></span><input type="range" min="0" max="100" step="5" data-fx="bv" tabindex="-1"></label>
     <label class="fxp-row" data-row="sv"><span>効果音の音量 <b data-val="sv"></b></span><input type="range" min="0" max="100" step="5" data-fx="sv" tabindex="-1"></label>
     <div class="fxp-hd">曲を聴く</div>
@@ -20189,7 +20211,7 @@ function openPanel(){
     else e.preventDefault(); };
   window.addEventListener("keydown",panelKey,true);
   w.addEventListener("click",e=>{ if(e.target===w){ closePanel(); return; } const r=e.target.closest("[data-row]"); if(!r) return; const rows=pRows(); pSel=Math.max(0,rows.indexOf(r)); paintPanel();
-    if(e.target.closest("input")) return; if(r.dataset.row==="bv"||r.dataset.row==="sv") return; rowAct(r,0); });
+    if(e.target.closest("input")) return; if(r.dataset.row==="bv"||r.dataset.row==="sv"||r.dataset.row==="mv") return; rowAct(r,0); });
   w.addEventListener("input",e=>{ const t=e.target.closest("input[data-fx]"); if(!t) return; setOpt(t.dataset.fx,(+t.value)/100); if(t.dataset.fx==="sv" && cfg.on) snd("vol"); });
 }
 
@@ -20266,6 +20288,59 @@ function boot(){
     if(sc==="result" && from==="game" && cfg.on && !inBattle()){ snd("fanfare"); if(!RM) for(let i=0;i<5;i++) setTimeout(()=>burst(rnd(W*.25,W*.75),rnd(H*.2,H*.45),MOB?10:18,{ v0:80, v1:320, g:300, col:GOLD.concat(["120,220,255","255,150,170"]), l0:.6, l1:1.3, s0:1.2, s1:2.8 }),i*130); }
   },120);
 }
+/* どの画面でも: 左下の 🔊 で全体の音量を変える(タイピング中も、押せばすぐ変えられる) */
+let volKey=null;
+function paintVol(){
+  const b=$("fxVolBtn"); if(b){ b.textContent=cfg.mv<=0?"🔇":cfg.mv<.4?"🔈":"🔊"; b.setAttribute("aria-label",`全体の音量 ${Math.round(cfg.mv*100)}`); }
+  const p=$("fxVolPop"); if(p){ p.querySelector("input").value=Math.round(cfg.mv*100); p.querySelector("b").textContent=Math.round(cfg.mv*100); p.querySelector("[data-mute]").textContent=cfg.mv<=0?"音を出す":"消す"; }
+}
+function volClose(){ const p=$("fxVolPop"); if(p) p.remove(); if(volKey){ window.removeEventListener("keydown",volKey,true); volKey=null; } }
+function volSet(v){ const was=cfg.mv; v=Math.max(0,Math.min(1,Math.round(v*20)/20)); if(v>0) cfg.mvLast=v; setOpt("mv",v); if(v>0 && v!==was) snd("vol"); }
+function volOpen(){
+  if($("fxVolPop")){ volClose(); return; }
+  const p=document.createElement("div"); p.id="fxVolPop"; p.setAttribute("role","dialog"); p.setAttribute("aria-label","全体の音量");
+  p.innerHTML=`<div class="fxv-hd">全体の音量 <b></b></div><input type="range" min="0" max="100" step="5" aria-label="全体の音量"><div class="fxv-row"><button type="button" data-mute></button><button type="button" data-more>音と演出…</button></div>${MOB?"":'<small><b>← →</b> 変える ・ <b>M</b> 消す ・ <b>Esc</b> 閉じる<br>どの画面でも <b>Alt+↑ ↓</b> で音量、<b>Alt+M</b> で消す(Mac は Option)</small>'}`;
+  document.body.appendChild(p); paintVol();
+  p.querySelector("input").addEventListener("input",e=>{ volOsd=null; volSet(+e.target.value/100); });
+  p.addEventListener("pointerdown",()=>{ volOsd=null; });   // さわったら、自分で閉じるまで出しておく
+  p.querySelector("[data-mute]").addEventListener("click",()=>volSet(cfg.mv>0?0:(cfg.mvLast||1)));
+  p.querySelector("[data-more]").addEventListener("click",()=>{ volClose(); openPanel(); });
+  volKey=e=>{ const k=e.key; if(e.altKey && /^(ArrowUp|ArrowDown|KeyM)$/.test(e.code)) return;   // 開いているあいだは、キーをここで受け取る(ゲームに打ち込まれないように)
+    volOsd=null;
+    if(k==="Escape"){ e.preventDefault(); e.stopImmediatePropagation(); volClose(); return; }
+    if(k==="ArrowRight"||k==="ArrowUp"){ e.preventDefault(); e.stopImmediatePropagation(); volSet(cfg.mv+.05); return; }
+    if(k==="ArrowLeft"||k==="ArrowDown"){ e.preventDefault(); e.stopImmediatePropagation(); volSet(cfg.mv-.05); return; }
+    if(k==="m"||k==="M"){ e.preventDefault(); e.stopImmediatePropagation(); volSet(cfg.mv>0?0:(cfg.mvLast||1)); return; }
+    volClose(); };   // ほかのキーを押したら閉じて、そのキーはゲームに渡す
+  window.addEventListener("keydown",volKey,true);
+  setTimeout(()=>document.addEventListener("pointerdown",function f(e){ if(!e.target.closest("#fxVolPop,#fxVolBtn")){ volClose(); document.removeEventListener("pointerdown",f,true); } else if(!$("fxVolPop")) document.removeEventListener("pointerdown",f,true); },true),0);
+}
+function volButton(){
+  if($("fxVolBtn")) return;
+  const b=document.createElement("button"); b.id="fxVolBtn"; b.type="button"; b.tabIndex=-1;
+  b.addEventListener("click",e=>{ e.stopPropagation(); volOpen(); });
+  document.body.appendChild(b); paintVol();
+}
+if(document.readyState==="loading") document.addEventListener("DOMContentLoaded",volButton); else volButton();
+/* ショートカット(どの画面でも): Alt(Mac は Option)+ ↑ / ↓ で全体の音量、Alt + M で消す・戻す。
+   文字キーはタイピングに使うので Alt と組み合わせる(Alt + ← → はブラウザの「戻る・進む」なので使わない) */
+let volOsd=null;
+window.addEventListener("keydown",e=>{
+  if(!e.altKey || e.ctrlKey || e.metaKey) return;
+  const c=e.code;
+  if(c!=="ArrowUp" && c!=="ArrowDown" && c!=="KeyM") return;
+  e.preventDefault(); e.stopImmediatePropagation();
+  volSet(c==="KeyM" ? (cfg.mv>0?0:(cfg.mvLast||1)) : cfg.mv+(c==="ArrowUp"?.05:-.05));
+  if(!$("fxVolPop")){ volOpen(); volOsd=true; }
+  clearTimeout(volClose.t); if(volOsd) volClose.t=setTimeout(()=>{ if(volOsd){ volOsd=null; volClose(); } },1600);   // ショートカットで開いたときは、少しして閉じる
+},true);
+/* 別のタブに移ったら、BGM も効果音もまとめて止める(戻ったら続きから) */
+let hidSusp=false;
+document.addEventListener("visibilitychange",()=>{
+  let c=null; try{ c=audioCtx; }catch(e){} if(!c) return;
+  if(document.hidden){ volClose(); if(c.state==="running"){ hidSusp=true; c.suspend().catch(()=>{}); } }
+  else if(hidSusp){ hidSusp=false; c.resume().catch(()=>{}); }
+});
 window.FX={ pos:()=>cur&&[cur.name,cur.loop,cur.step], lite:()=>LITE, strike:()=>{ strikes=5; if(wd) wd.w-=1500; }, voices:()=>voices, snd, cfg, set:setOpt, open:openPanel, burst, ring, dbg, track:()=>cur&&cur.name, parts:()=>P.length, bus:()=>B, ending, endingLen:n=>n*END_SEC, wake:()=>{ if(ac()) bgmRun(); } };
 if(document.readyState==="loading") document.addEventListener("DOMContentLoaded",boot); else boot();
 /* 図鑑・料理図鑑・実績のあいだを移るときは、開くときの演出(いったん消えて出直す)を出さない */
