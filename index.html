@@ -20195,7 +20195,7 @@ function openPanel(){
     <div class="fxp-row" data-row="on"><span>新しい音と演出<small>オフにすると、これまでの音と見た目に戻ります</small></span><button type="button" data-fx="on" tabindex="-1"></button></div>
     <div class="fxp-row" data-row="bgm"><span>BGM</span><button type="button" data-fx="bgm" tabindex="-1"></button></div>
     <div class="fxp-row" data-row="lite"><span>軽い音<small>音がブツブツ途切れる端末のために、響きと音の重なりを減らします。「自動」のままで、必要な端末だけ切り替わります</small></span><button type="button" data-fx="lite" tabindex="-1"></button></div>
-    <label class="fxp-row" data-row="mv"><span>全体の音量 <b data-val="mv"></b><small>画面の左下の 🔊 からも、どの画面でも変えられます</small></span><input type="range" min="0" max="100" step="5" data-fx="mv" tabindex="-1"></label>
+    <label class="fxp-row" data-row="mv"><span>全体の音量 <b data-val="mv"></b><small>どの画面でも、左下の 🔊 か ${MOB?"":"<b>Alt+↑ ↓</b>(Mac は Option)"}で変えられます</small></span><input type="range" min="0" max="100" step="5" data-fx="mv" tabindex="-1"></label>
     <label class="fxp-row" data-row="bv"><span>BGM の音量 <b data-val="bv"></b></span><input type="range" min="0" max="100" step="5" data-fx="bv" tabindex="-1"></label>
     <label class="fxp-row" data-row="sv"><span>効果音の音量 <b data-val="sv"></b></span><input type="range" min="0" max="100" step="5" data-fx="sv" tabindex="-1"></label>
     <div class="fxp-hd">曲を聴く</div>
@@ -20299,12 +20299,14 @@ function volSet(v){ const was=cfg.mv; v=Math.max(0,Math.min(1,Math.round(v*20)/2
 function volOpen(){
   if($("fxVolPop")){ volClose(); return; }
   const p=document.createElement("div"); p.id="fxVolPop"; p.setAttribute("role","dialog"); p.setAttribute("aria-label","全体の音量");
-  p.innerHTML=`<div class="fxv-hd">全体の音量 <b></b></div><input type="range" min="0" max="100" step="5" aria-label="全体の音量"><div class="fxv-row"><button type="button" data-mute></button><button type="button" data-more>音と演出…</button></div>${MOB?"":'<small><b>← →</b> 変える ・ <b>M</b> 消す ・ <b>Esc</b> 閉じる</small>'}`;
+  p.innerHTML=`<div class="fxv-hd">全体の音量 <b></b></div><input type="range" min="0" max="100" step="5" aria-label="全体の音量"><div class="fxv-row"><button type="button" data-mute></button><button type="button" data-more>音と演出…</button></div>${MOB?"":'<small><b>← →</b> 変える ・ <b>M</b> 消す ・ <b>Esc</b> 閉じる<br>どの画面でも <b>Alt+↑ ↓</b> で音量、<b>Alt+M</b> で消す(Mac は Option)</small>'}`;
   document.body.appendChild(p); paintVol();
-  p.querySelector("input").addEventListener("input",e=>volSet(+e.target.value/100));
+  p.querySelector("input").addEventListener("input",e=>{ volOsd=null; volSet(+e.target.value/100); });
+  p.addEventListener("pointerdown",()=>{ volOsd=null; });   // さわったら、自分で閉じるまで出しておく
   p.querySelector("[data-mute]").addEventListener("click",()=>volSet(cfg.mv>0?0:(cfg.mvLast||1)));
   p.querySelector("[data-more]").addEventListener("click",()=>{ volClose(); openPanel(); });
-  volKey=e=>{ const k=e.key;   // 開いているあいだは、キーをここで受け取る(ゲームに打ち込まれないように)
+  volKey=e=>{ const k=e.key; if(e.altKey && /^(ArrowUp|ArrowDown|KeyM)$/.test(e.code)) return;   // 開いているあいだは、キーをここで受け取る(ゲームに打ち込まれないように)
+    volOsd=null;
     if(k==="Escape"){ e.preventDefault(); e.stopImmediatePropagation(); volClose(); return; }
     if(k==="ArrowRight"||k==="ArrowUp"){ e.preventDefault(); e.stopImmediatePropagation(); volSet(cfg.mv+.05); return; }
     if(k==="ArrowLeft"||k==="ArrowDown"){ e.preventDefault(); e.stopImmediatePropagation(); volSet(cfg.mv-.05); return; }
@@ -20320,6 +20322,18 @@ function volButton(){
   document.body.appendChild(b); paintVol();
 }
 if(document.readyState==="loading") document.addEventListener("DOMContentLoaded",volButton); else volButton();
+/* ショートカット(どの画面でも): Alt(Mac は Option)+ ↑ / ↓ で全体の音量、Alt + M で消す・戻す。
+   文字キーはタイピングに使うので Alt と組み合わせる(Alt + ← → はブラウザの「戻る・進む」なので使わない) */
+let volOsd=null;
+window.addEventListener("keydown",e=>{
+  if(!e.altKey || e.ctrlKey || e.metaKey) return;
+  const c=e.code;
+  if(c!=="ArrowUp" && c!=="ArrowDown" && c!=="KeyM") return;
+  e.preventDefault(); e.stopImmediatePropagation();
+  volSet(c==="KeyM" ? (cfg.mv>0?0:(cfg.mvLast||1)) : cfg.mv+(c==="ArrowUp"?.05:-.05));
+  if(!$("fxVolPop")){ volOpen(); volOsd=true; }
+  clearTimeout(volClose.t); if(volOsd) volClose.t=setTimeout(()=>{ if(volOsd){ volOsd=null; volClose(); } },1600);   // ショートカットで開いたときは、少しして閉じる
+},true);
 /* 別のタブに移ったら、BGM も効果音もまとめて止める(戻ったら続きから) */
 let hidSusp=false;
 document.addEventListener("visibilitychange",()=>{
