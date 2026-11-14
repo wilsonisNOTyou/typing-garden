@@ -1225,7 +1225,7 @@ h2.rank-title{color:var(--amber); letter-spacing:.2em; margin-bottom:1rem; text-
 .rank-tabs .btn.active{color:#1b1405; background:linear-gradient(180deg,#ffd75e,var(--amber)); border-color:#c79100}
 .rank-tabs .btn.ta.active{color:#08282b; background:linear-gradient(180deg,#9fe4e8,var(--cyan)); border-color:#3d8d95}
 .tab-group-label{color:#6b7484; font-size:.75rem; letter-spacing:.2em; margin:.5rem 0 .3rem}
-.rank-list{list-style:none; width:min(460px,90vw); margin:0 auto; text-align:left; max-height:42vh; overflow-y:auto}
+.rank-list{list-style:none; width:min(460px,90vw); margin:.5rem auto .9rem; text-align:left; max-height:42vh; overflow-y:auto}
 .rank-row{
   display:flex; align-items:center; gap:.8rem;
   background:linear-gradient(180deg,var(--panel-hi),var(--panel));
@@ -5798,6 +5798,10 @@ async function openRanking(d,highlight){
   const myReq=++rankReq;   // 素早く切り替えたとき、古い読み込み結果を捨てる
   for(const t of RANK_TABS) $("tab-"+t).classList.toggle("active",d===t);
   if(window.tqRankSync) tqRankSync(d);   // TOEIC: 始めたレベルを選ぶボタン
+  { // 一覧は、選んだタブの段のすぐ下に出す(いちばん下だと、上のほうのタブを選んだときに見づらい)
+    const btn=$("tab-"+d); let at=btn && (btn.closest(".rank-pair") || btn.closest(".rank-tabs"));
+    if(at){ const nx=at.nextElementSibling; if(nx && nx.id==="tqRankLvs" && !nx.hidden) at=nx; if(at.nextElementSibling!==$("rankList")) at.after($("rankList"), $("rankStatus")); }
+  }
   show("ranking");
   const list=$("rankList");
   list.innerHTML="";
@@ -10234,7 +10238,10 @@ function reportVillagers(){
   const mutOf = x => { const [id,q]=String(x).split(":"); return [id, q==="5"?5:3]; };   // "carrot" は変異、"carrot:5" は超変異
   // 変異・超変異は作物ごとにまとめて1つの知らせにする(長い時間がまとめて進むと何百個も穫れ、音が一度に鳴りすぎるため)
   const byCrop = arr => { const m={}; for(const [x,n] of vlogEntries(arr)){ const [id,t]=mutOf(x); if(CROP[id]){ const k=id+":"+t; m[k]=(m[k]||0)+n; } } return Object.entries(m).map(([k,n])=>{ const [id,t]=mutOf(k); return [id,t,n]; }); };
-  const mutList = arr => arr.map(([id,t,n])=>`${icoQ(CROP[id],t)} ${esc(qName(id,t))}${n>1?` ×${fmtNum(n)}`:""}`).join(" ・ ");
+  // 並べるのは多い順に決まった数まで。残りは「ほか○種」にまとめる(気まぐれ村人・ひまわりの種クッキーで何十種類も穫れると、知らせが画面を覆うので)
+  const VT_MUT=8, VT_H=14;
+  const more = n => n>0 ? ` ほか${fmtNum(n)}種` : "";
+  const mutList = arr => { const s=arr.slice().sort((x,y)=>y[1]-x[1] || y[2]-x[2]); return s.slice(0,VT_MUT).map(([id,t,n])=>`${icoQ(CROP[id],t)} ${esc(qName(id,t))}${n>1?` ×${fmtNum(n)}`:""}`).join(" ・ ")+more(s.length-VT_MUT); };
   const head = arr => arr.some(([,t])=>t===5) ? "✧ 超変異!" : "✦ 変異!";
   const cls  = arr => arr.some(([,t])=>t===5) ? "good mut sup" : "good mut";
   const got=byCrop(L.mutGot), wait=byCrop(L.mutWait), msold=byCrop(L.mutSold);
@@ -10242,7 +10249,7 @@ function reportVillagers(){
   const addMut = arr => a => { for(const [id,t,n] of arr){ const k=id+":"+t; a.m[k]=(a.m[k]||0)+n; } };
   const mutArr = a => Object.entries(a.m).map(([k,n])=>{ const [id,t]=mutOf(k); return [id,t,n]; });
   const addH = obj => a => { for(const [id,n] of Object.entries(obj||{})) a.h[id]=(a.h[id]||0)+n; };
-  const hList = a => Object.entries(a.h).map(([id,n])=>`${ico(CROP[id])}×${fmtNum(n)}`).join(" ");
+  const hList = a => { const s=Object.entries(a.h).sort((x,y)=>y[1]-x[1]); return s.slice(0,VT_H).map(([id,n])=>`${ico(CROP[id])}×${fmtNum(n)}`).join(" ")+more(s.length-VT_H); };
   if(got.length) vilToast("got", addMut(got), a=>`${head(mutArr(a))} 村人が ${mutList(mutArr(a))} を収穫しました(持ち物に入れました)`, a=>cls(mutArr(a)), 9000);
   if(msold.length) vilToast("msold", a=>{ addMut(msold)(a); a.earn+=L.mutEarn||0; }, a=>`${head(mutArr(a))} 村人が ${mutList(mutArr(a))} を収穫して売りました(+${fmtNum(a.earn)}キー)`, a=>cls(mutArr(a)), 9000);
   if(wait.length) vilToast("wait", addMut(wait), a=>`${head(mutArr(a))} 村人の畑で ${mutList(mutArr(a))} が実りました。村人は収穫せずに残しています(素手で収穫できます)`, a=>cls(mutArr(a)), 9000);
