@@ -4932,7 +4932,7 @@ const dbNeji = lv => { try{ return Garden.dailyNeji(lv); }catch(e){ return 0; } 
 function dbLabel(b){
   const v=DB_VAL[b.kind], x=v?v[b.lv]:0;
   return b.kind==="sap" ? `${DB_TREEN[b.lv]}の苗木`
-    : b.kind==="neji" ? `キー ${Math.floor(dbNeji(b.lv)).toLocaleString("ja-JP")}`
+    : b.kind==="neji" ? `キー ${jpNum(dbNeji(b.lv))}`
     : b.kind==="min" ? `最後まで遊ぶと 1打の時間 +${x}分`
     : b.kind==="fuyo" ? `腐葉土 ${x}個`
     : b.kind==="rose" ? `薔薇の種 ${x}個`
@@ -5367,7 +5367,7 @@ async function endGame(){
   const toGarden=gardenScrews(diff,score);
   if(mtOn()){   // 対戦: 料理の倍率なし・日替わりのご褒美なし・ランキングに載せない
     typePk=null; dbFinish(null); recordStats(score, toGarden, true);
-    $("resultGarden").textContent = toGarden>0 ? `農園に ${toGarden.toLocaleString("ja-JP")}キー 届きます` : "";
+    $("resultGarden").textContent = toGarden>0 ? `農園に ${jpNum(toGarden)}キー 届きます` : "";
     mtFinish(toGarden); return;
   }
   typePk=gameBara?null:dbPk(diff,true); dbFinish(gameBara?null:diff);   // バラバラ中は、日替わりのご褒美も10倍もなし
@@ -5420,7 +5420,7 @@ function gardenScrews(d,n){
   if(d==="book") return n;
   return n*(SCREW_MULT[d]||1);
 }
-const showGardenScrews = (el,n) => { const m=gardenScrewMul(); $(el).textContent = n>0 ? `農園に ${Math.floor(n*m).toLocaleString("ja-JP")}キー 届きます${m>1?`(料理で1本 ${m.toLocaleString("ja-JP")}キー)`:""}` : ""; };
+const showGardenScrews = (el,n) => { const m=gardenScrewMul(); $(el).textContent = n>0 ? `農園に ${jpNum(n*m)}キー 届きます${m>1?`(料理で1本 ${jpNum(m)}キー)`:""}` : ""; };
 
 /* ---------- 入力 ---------- */
 const START_KEYS={"1":"easy","2":"normal","3":"hard","4":"ta-easy","5":"ta-normal","6":"ta-hard","7":"oneshot"};
@@ -5671,10 +5671,13 @@ try{ playerName=localStorage.getItem("typinggarden:playerName")||""; }catch(e){}
    ノーミス勝負: 本数が多いほど上、同本数はタイムが短いほど上
    スコアアタック: 本数が多いほど上 */
 /* 庭の番付の数(端数があれば足した正確な数) */
+/* そろばん: 大きな数を、庭で選んだ書き方(そのまま・万億兆で区切る・短く)で出す */
+const jpNum = n => { try{ return Garden.fmtNum(n); }catch(e){ return Math.floor(+n||0).toLocaleString("ja-JP"); } };
 function rankExact(r){
   const s=Math.floor(r.s||0), c=Math.round(r.c||0);
-  if(Math.abs(s)<2**53) return (s+c).toLocaleString("ja-JP");   // 9000兆より小さければ、ふつうの数のまま
-  try{ return (BigInt(s)+BigInt(c)).toLocaleString("ja-JP"); }catch(e){ return (s+c).toLocaleString("ja-JP"); }
+  let str; try{ str=(BigInt(s)+BigInt(c)).toString(); }catch(e){ str=null; }   // 9000兆を超えても1の位まで
+  if(str!=null) try{ return Garden.numStr(str); }catch(e){}
+  return (s+c).toLocaleString("ja-JP");
 }
 function betterRecord(a,b,d){
   if(isTimeRanked(d)){
@@ -6542,7 +6545,7 @@ function wcPopup(html){
 }
 setInterval(()=>{ if(wcPend && !wcQuiet()){ const h=wcPend; wcPend=null; wcPopup(h); } if(wcQuiet()) $("wcPop").hidden=true; },1500);
 $("wcPop").addEventListener("click",()=>{ $("wcPop").hidden=true; openWorld(); });
-const wcNum = v => Math.floor(+v||0).toLocaleString("ja-JP");
+const wcNum = v => jpNum(v);   // そろばんの書き方に合わせる
 /* リアクション: 発言ごとに、ひとり1つの絵文字(もう一度押すと取り消し) */
 const WC_RX=["👍","🌹","😂","😮","🎉","🙏"];
 let wcRxOpen=null;
@@ -7484,7 +7487,7 @@ function mtFinishCommon(o){
   $("resultCount").classList.remove("ta"); $("resultCaption").textContent=o.cap;
   $("resultScore").textContent=o.s.toLocaleString("ja-JP"); $("resultUnit").textContent=o.unit;
   $("resultSubLine").textContent=o.sub; $("resultNew").textContent="";
-  $("resultGarden").textContent = o.toGarden>0 ? `農園に ${o.toGarden.toLocaleString("ja-JP")}キー${o.mins?` ・ 農園の時間 +${tqHours(o.mins)}`:""} 届きました` : "";
+  $("resultGarden").textContent = o.toGarden>0 ? `農園に ${jpNum(o.toGarden)}キー${o.mins?` ・ 農園の時間 +${tqHours(o.mins)}`:""} 届きました` : "";
   $("registerBox").style.display="none";
   mtResultBtns();
   document.getElementById("screen-result").classList.add("mtr");
@@ -10522,7 +10525,7 @@ function toastNext(){ while(toastWait.length && liveToasts.filter(o=>o.imp && !o
 function toastBtn(){
   const b=$("g-logBtn"); if(!b) return;
   b.hidden=!toastLog.length; root.classList.toggle("haslog",!!toastLog.length);
-  b.innerHTML=`🔔${toastUnread?`<b>${toastUnread>99?"99+":toastUnread}</b>`:""}${toastWait.length?`<small>あと${toastWait.length}件</small>`:""}${MOB?"":'<span class="kb">;</span>'}`;
+  b.innerHTML=`🔔${toastUnread?`<b>${toastUnread>99?"99+":toastUnread}</b>`:""}${toastWait.length?`<small>あと${toastWait.length}件</small>`:""}`;
   b.title="これまでのお知らせ";
 }
 /* これまでのお知らせの一覧(見逃した分を読み返す) */
@@ -13679,7 +13682,7 @@ function rgConvert(i,want){   // want: 変換する数(マイナスなら、そ�
   const gB=kB*BigInt(Math.round(x.v)), gain=Number(gB);
   xAddBig(S,"roseCoin",gB); S.roseCoinTotal=(S.roseCoinTotal||0)+gain;
   sfx.sell();
-  toast(`${x.ic} ${esc(x.nm)}を ${kB.toLocaleString("ja-JP")}つ、薔薇ガチャコイン ${gB.toLocaleString("ja-JP")}枚に変えました`,"good",2400,true);
+  toast(`${x.ic} ${esc(x.nm)}を ${fmtNum(kB)}つ、薔薇ガチャコイン ${fmtNum(gB)}枚に変えました`,"good",2400,true);
   checkUnlocks(); save(); renderAll(); renderGacha();
 }
 function rgConvHTML(){
@@ -16598,7 +16601,6 @@ function onKeyMain(e){
   if(k==="Escape"){ backToTitle(); return; }
   if(k==="-"){ e.preventDefault(); leave(); openToeic(); return; }   // TOEIC 英単語へ
   if(k==="/"){ e.preventDefault(); openLayout(); return; }   // 配置セット
-  if(k===";"){ e.preventDefault(); if(toastLog.length) toastLogOpen(); return; }   // これまでのお知らせ
   if(k==="["){ const b=$("g-basket").querySelector("[data-bmore]"); if(b){ e.preventDefault(); b.click(); } return; }   // 収穫かごをひらく・たたむ
   if(k==="Enter"){ e.preventDefault(); openWorld(); return; }   // 農園の寄り合い
   if(k==="4" && e.repeat){ openPick("seed"); return; }   // 4 を長押し: 種の一覧
@@ -16925,7 +16927,7 @@ function debugStart2(){
   save();
 }
 function alive(){ if(kitN("fridge")>0){ fridgeKeep(); save(); } }
-return { fxInfo:()=>({ kyo:!!(S.goals && S.goals.kei), bara:baraSeen() }), yzPress:()=>yzPress(false), yzBtn:()=>({ on:yzHas("button"), gain:yzBtnGain(), auto:yzv("izumi") }), peek:()=>{ consumeInbox(); tick(); return tutState(); }, roseName:roseNameHTML, roseNamePlate, roseRowStyle, roseRowCls, nameDeco, drunkNow, tqBoost:()=>({ rose:(1+rgGurPct("sh")/100)*otsuMul("Z2"), sc:1+rgGurPct("pen")/100, min:1+rgGurPct("dial")/100 }), rose:(lv,n)=>{ roseGive(lv,n); S.roseIn=(S.roseIn||0)+Math.floor(n); save(); }, screwMul, charmLives, applyTheme, alive, themeScrewArt, enter, leave, onKey, summary, dailyGive, dailyNeji, dailySapLeft, dailyOpen, btOpen, mtGive, mtInfoSeen:()=>!!S.mtInfoSeen, mtInfoMark:()=>{ S.mtInfoSeen=true; save(); }, dbInfoSeen:()=>!!S.dbInfoSeen, dbInfoMark:()=>{ S.dbInfoSeen=true; save(); }, debugUnlock, debugStart2, tutState, tutGive, tutGrow, tutSeed, tutSandbox, refreshRank, openModal, ownerId, useName, baraOn, baraLeft, baraSeen, debugStart5, debugStart6, debugStart3, debugStart4, wcDishes, wcUse, wcRefund, wcLabel, wcReceive, wcTaken, wcAllDishes:()=>Object.keys(DISH).filter(wcCanThrow), wcCropIds:()=>CROPS.filter(c=>!c.secret && SUPER[c.id]).map(c=>c.id), wcFarmNow:()=>({ m:Math.floor(S.money), h:Math.floor(S.totalHarvest||0) }),
+return { fmtNum, numStr, fxInfo:()=>({ kyo:!!(S.goals && S.goals.kei), bara:baraSeen() }), yzPress:()=>yzPress(false), yzBtn:()=>({ on:yzHas("button"), gain:yzBtnGain(), auto:yzv("izumi") }), peek:()=>{ consumeInbox(); tick(); return tutState(); }, roseName:roseNameHTML, roseNamePlate, roseRowStyle, roseRowCls, nameDeco, drunkNow, tqBoost:()=>({ rose:(1+rgGurPct("sh")/100)*otsuMul("Z2"), sc:1+rgGurPct("pen")/100, min:1+rgGurPct("dial")/100 }), rose:(lv,n)=>{ roseGive(lv,n); S.roseIn=(S.roseIn||0)+Math.floor(n); save(); }, screwMul, charmLives, applyTheme, alive, themeScrewArt, enter, leave, onKey, summary, dailyGive, dailyNeji, dailySapLeft, dailyOpen, btOpen, mtGive, mtInfoSeen:()=>!!S.mtInfoSeen, mtInfoMark:()=>{ S.mtInfoSeen=true; save(); }, dbInfoSeen:()=>!!S.dbInfoSeen, dbInfoMark:()=>{ S.dbInfoSeen=true; save(); }, debugUnlock, debugStart2, tutState, tutGive, tutGrow, tutSeed, tutSandbox, refreshRank, openModal, ownerId, useName, baraOn, baraLeft, baraSeen, debugStart5, debugStart6, debugStart3, debugStart4, wcDishes, wcUse, wcRefund, wcLabel, wcReceive, wcTaken, wcAllDishes:()=>Object.keys(DISH).filter(wcCanThrow), wcCropIds:()=>CROPS.filter(c=>!c.secret && SUPER[c.id]).map(c=>c.id), wcFarmNow:()=>({ m:Math.floor(S.money), h:Math.floor(S.totalHarvest||0) }),
   wcGoalPicks:()=>[
     { name:"不思議な肥料と摩訶不思議な肥料", ic:ico(GUR.mfert), give:()=>{ S.sfert=(S.sfert||0)+1; S.mfert=(S.mfert||0)+1; } },
     { name:GUR.bento.name, ic:ico(GUR.bento), give:()=>{ S.bento=(S.bento||0)+1; } },
@@ -17418,7 +17420,7 @@ function bundleSummary(s){
     const g=JSON.parse(o["garden:save"]||"null");
     const st=JSON.parse(o.stats||"null");
     const parts=[];
-    if(g && typeof g.money==="number") parts.push(`<span class="kicon"></span>${Math.floor(g.money).toLocaleString("ja-JP")}`);
+    if(g && typeof g.money==="number") parts.push(`<span class="kicon"></span>${jpNum(g.money)}`);
     if(st && st.plays) parts.push(`${st.plays}回プレイ`);
     return parts.join(" ・ ")||"記録";
   }catch(e){ return "読めない記録"; }
@@ -17611,7 +17613,7 @@ document.addEventListener("keydown",syncGuardInput,true);
 function refreshGardenStat(id="gardenStat"){
   const el=$(id); if(!el) return;
   let s; try{ s=Garden.summary(); }catch(e){ return; }
-  const fmt=n=>Math.floor(n).toLocaleString("ja-JP");
+  const fmt=n=>jpNum(n);
   let t=`<span class="kicon"></span>所持キー<b>${s.moneyTxt||fmt(s.money)}</b>`;
   if(s.pending) t+=`<small>(+${fmt(s.pending)} 受け取り待ち)</small>`;
   const todo=[];
