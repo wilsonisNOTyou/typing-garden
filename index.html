@@ -4891,7 +4891,7 @@ function show(name){
   if(name!=="title" && typeof mtInfoOpen!=="undefined" && mtInfoOpen) closeMtInfo(false);
   if(name!=="result" && typeof mtRes!=="undefined" && mtRes) mtResultClose();   // 対戦の結果から離れた
   if(prev==="ranking" && name!=="ranking"){ try{ if(syncDirty) syncPush(false); syncMaybePull(); }catch(e){} }   // ランキングを見ているあいだ待っていた同期を、閉じたときに送る
-  try{ window.scrollTo(0,0); }catch(e){}
+  if(prev!==name){ try{ window.scrollTo(0,0); }catch(e){} }   // 同じ画面のまま(ランキングのタブの切りかえなど)は、上に戻さない
   for(const k in screens) screens[k].classList.toggle("active",k===name);
   document.body.classList.toggle("garden", name==="garden");
   if(!(mtOn() || mtRes)){ try{ Garden.applyTheme(); }catch(e){} }   // 料理の色(ホーム画面とタイピング)。対戦中は付けない
@@ -5800,6 +5800,13 @@ const RANK_CACHE_MS=30000;
 let rankReq=0;
 const baraSeen = () => { try{ return !!Garden.baraSeen(); }catch(e){ return false; } };   // 一度バラバラになったら、ランキングはずっと見られる
 const rankTabsNow = () => RANK_TABS.filter(t=>t!=="barabara" || baraSeen());
+/* ランキングのタブを切りかえたとき: 画面は動かさず、選んだタブの段が見えていなければ、見える位置まで少しだけ動かす */
+function rankKeepView(d){
+  const btn=$("tab-"+d), row=btn && (btn.closest(".rank-pair") || btn.closest(".rank-tabs")); if(!row) return;
+  const top=row.getBoundingClientRect().top, vh=window.innerHeight||document.documentElement.clientHeight;
+  if(top<8) window.scrollBy(0, top-8);
+  else if(top>vh*.6) window.scrollBy(0, top-vh*.25);
+}
 async function openRanking(d,highlight){
   if(d==="barabara" && !baraSeen()) d="normal";
   $("tab-barabara").hidden=!baraSeen();
@@ -5811,9 +5818,12 @@ async function openRanking(d,highlight){
     const btn=$("tab-"+d); let at=btn && (btn.closest(".rank-pair") || btn.closest(".rank-tabs"));
     if(at){ const nx=at.nextElementSibling; if(nx && nx.id==="tqRankLvs" && !nx.hidden) at=nx; if(at.nextElementSibling!==$("rankList")) at.after($("rankList"), $("rankStatus")); }
   }
+  const same=scene==="ranking";
   show("ranking");
   const list=$("rankList");
+  if(same && list.offsetHeight) list.style.minHeight=list.offsetHeight+"px";   // 読み込むあいだ一覧の高さを保ち、画面が跳ねないように
   list.innerHTML="";
+  if(same) rankKeepView(d);
   if(!db){
     $("rankStatus").textContent="※Firebase未設定のためランキングは表示できません";
     return;
@@ -5824,7 +5834,7 @@ async function openRanking(d,highlight){
     const rows = hit && Date.now()-hit.t<RANK_CACHE_MS ? hit.rows : await fetchRanking(d);
     if(!(hit && Date.now()-hit.t<RANK_CACHE_MS)) rankCache[ck]={ t:Date.now(), rows };
     if(myReq!==rankReq) return;          // 別のタブに移っていたら何もしない
-    list.innerHTML="";
+    list.innerHTML=""; list.style.minHeight="";
     $("rankStatus").textContent=rows.length?"":"まだ記録がありません。一番乗りのチャンス!";
     rows.forEach((r,i)=>{
       const li=document.createElement("li");
@@ -5849,7 +5859,7 @@ async function openRanking(d,highlight){
       list.appendChild(li);
     });
   }catch(e){
-    if(myReq===rankReq) $("rankStatus").textContent="読み込みに失敗しました。通信環境を確認してください。";
+    if(myReq===rankReq){ list.style.minHeight=""; $("rankStatus").textContent="読み込みに失敗しました。通信環境を確認してください。"; }
   }
 }
 
