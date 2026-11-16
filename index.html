@@ -9997,7 +9997,7 @@ function vilBulk(p,t,g3){
   recordHarvestN(c.id,q,iN); recordHarvestN(c.id,3,iM); recordHarvestN(c.id,5,iS);
   if(vilKeepN(c.id)){ if(iN){ invAdd(c.id,q,iN); S.vLog.k=S.vLog.k||{}; S.vLog.k[c.id]=(S.vLog.k[c.id]||0)+iN; } }
   else if(iN){ const price=priceOf(c.id,q)*iN; xAdd(S,"money",price); S.totalSales+=price; S.vLog.h=S.vLog.h||{}; S.vLog.h[c.id]=(S.vLog.h[c.id]||0)+iN; S.vLog.earn=(S.vLog.earn||0)+price; }
-  if(S.vilOrder2 && S.vilSellM){
+  if(vilSellMut(c.id)){
     const price=priceOf(c.id,3)*iM+priceOf(c.id,5)*iS;
     if(price){ xAdd(S,"money",price); S.totalSales+=price; S.vLog.mutEarn=(S.vLog.mutEarn||0)+price; }
     vlogAdd("mutSold",c.id,iM); vlogAdd("mutSold",c.id+":5",iS);
@@ -10046,7 +10046,7 @@ function villagerAdvance(p,dt,g3){
         p.crop=null;
         const num = g3 ? 3 : mn && mr===3 ? mn : 1 + (Math.random()<effDouble() ? 1 : 0);
         for(let i=0;i<num;i++) recordHarvest(c.id,mr,true);
-        if(S.vilOrder2 && S.vilSellM){                // 指示書2: 変異もその場で売る
+        if(vilSellMut(c.id)){                         // 指示書2: 変異もその場で売る(作物ごとの自動売却に合わせるときは、その作物の設定で)
           const price=priceOf(c.id,mr)*num;
           xAdd(S,"money",price); S.totalSales+=price;
           vlogAdd("mutSold",c.id+(mr===5?":5":""),num);
@@ -10087,6 +10087,8 @@ const autoCost = id => AUTO_COSTS[(CROP[id]&&CROP[id].r)||"N"] || AUTO_COSTS.N;
 const autoOf = id => S.auto[id] || null;
 const autoCrop = id => { const a=autoOf(id); return !!(a && a.c); };
 const autoSeed = id => { const a=autoOf(id); return !!(a && a.s); };
+const autoHasMut = id => hasMut(id) || hasSup(id);   // 変異・超変異のある作物だけ、変異の自動売却を選べる
+const autoMut = id => { const a=autoOf(id); return !!(a && a.m) && autoHasMut(id); };
 
 /* 村人の指示書・畑のカウンタ */
 const VIL_ORDER_COST=10000, COUNTER_COST=50000;
@@ -10122,14 +10124,15 @@ function toggleVilUseSeed(){
 }
 /* 指示書2: 村人が穫ったふつうの作物を持ち物に入れるか(vilSellN: true 売る / false 売らない / "auto" 作物ごとの自動売却(収穫物)に合わせる) */
 const vilKeepN = id => !!S.vilOrder2 && (S.vilSellN===false || (S.vilSellN==="auto" && !autoCrop(id)));
+const vilSellMut = id => !!S.vilOrder2 && (S.vilSellM===true || (S.vilSellM==="auto" && autoMut(id)));   // 指示書2: 変異・超変異を売るか
 const vilSellTxt = v => v==="auto" ? "作物ごとの自動売却に合わせて売ります" : v ? "売ります" : "売らずに持ち物に入れます";
 function toggleVilSell(w){
   if(!S.vilOrder2) return;
   tick();   // ここまでの分は、今の設定で進めてから切り替える
-  if(w==="N") S.vilSellN = S.vilSellN===true ? false : S.vilSellN===false ? "auto" : true; else S.vilSellM=!S.vilSellM;   // ふつうの作物: 売る → 売らない → 自動売却に合わせる → 売る
+  if(w==="N") S.vilSellN = S.vilSellN===true ? false : S.vilSellN===false ? "auto" : true; else S.vilSellM = S.vilSellM===true ? false : S.vilSellM===false ? "auto" : true;   // 売る → 売らない → 自動売却に合わせる → 売る
   sfx.tool();
   toast(w==="N" ? `村人が収穫したふつうの作物を${vilSellTxt(S.vilSellN)}${S.vilSellN==="auto"?"(お店の「自動売却」で収穫物がオンの作物は売り、オフの作物は持ち物に入れます)":""}`
-                : `村人が収穫した変異の作物を${S.vilSellM?"売ります":"売らずに持ち物に入れます"}${S.vilSellM&&!S.vilAutoM?"(変異の自動収穫がオンのときに効きます)":""}`,"",3200);
+                : `村人が収穫した変異の作物を${vilSellTxt(S.vilSellM)}${S.vilSellM==="auto"?"(お店の「自動売却」で変異がオンの作物は売り、オフの作物は持ち物に入れます)":""}${S.vilSellM&&!S.vilAutoM?"(変異の自動収穫がオンのときに効きます)":""}`,"",3200);
   save(); renderAll();
 }
 const sortActive = () => S.seedSort && S.sortOn!==false;
@@ -10957,10 +10960,12 @@ function harvestOne(k){
   const mut = mq>0;
   if(mut) t=mq;
   const num = gsprSet(S.cur).has(k) ? 3 : mutN && isMutT(mq) ? mutN : 1 + (Math.random()<effDouble() ? 1 : 0);   // 金のスプリンクラーの届く区画は、かならず3個   // 不思議な肥料・摩訶不思議な肥料は3個
-  if(autoCrop(c.id) && !mut){                           // 変異は自動売却しない
-    const gain=priceOf(c.id,t)*num;
+  const sold = mut ? autoMut(c.id) : autoCrop(c.id);   // 変異・超変異は、自動売却の「変異」がオンの作物だけ売る
+  let gain=0;
+  if(sold){
+    gain=priceOf(c.id,t)*num;
     xAdd(S,"money",gain); S.totalSales+=gain;
-    floatAt(k,`${ico(c)}${QUALITY[t].mark}${num>1?"×"+num:""} +${fmtNum(gain)}`);
+    floatAt(k,`${mut?icoQ(c,t):ico(c)+QUALITY[t].mark}${num>1?"×"+num:""} +${fmtNum(gain)}`);
   }else{
     invAdd(c.id,t,num);
     floatAt(k,"+"+icoQ(c,t)+(mut?"":QUALITY[t].mark)+(num>1?"×"+num:""));
@@ -10968,7 +10973,7 @@ function harvestOne(k){
   const first=!((S.harvestQ[c.id]||[])[t]>0);
   for(let i=0;i<num;i++) recordHarvest(c.id,t,false);
   if(mut){
-    toast(`${t===5?"✧ 超変異!":"✦ 変異!"} ${icoQ(c,t)} ${esc(qName(c.id,t))}${num>1?` ×${num}`:""} が穫れました${first?"(図鑑に載りました)":""}`,t===5?"good mut sup":"good mut",t===5?9000:6000,true);
+    toast(`${t===5?"✧ 超変異!":"✦ 変異!"} ${icoQ(c,t)} ${esc(qName(c.id,t))}${num>1?` ×${num}`:""} が穫れました${first?"(図鑑に載りました)":""}${sold?`。自動売却で売りました(+${fmtNum(gain)}キー)`:""}`,t===5?"good mut sup":"good mut",t===5?9000:6000,true);
     if(!byVil) wcGoalAdd("mut",num);   // みんなの目標・自動のお知らせには、村人が植えた畑のぶんは入れない
     if(!c.secret && !byVil) wcAnnounce(`${t===5?"超変異":"変異"}の「${qName(c.id,t)}」を収穫しました${num>1?` ×${num}`:""}${first?"(はじめて!)":""}`, t===5?4:2);
     sfx.vil();
@@ -11485,22 +11490,24 @@ function shopRows(){
       const ready=tierOf(c.id)>=2;   // ☆☆ まで育てた作物だけが解禁される
       const left=Math.max(0, QUALITY[2].need-(S.harvestBy[c.id]||0));
       const on=v=>v?'<b style="color:#2e7d32">オン</b>':'<span style="color:var(--ink-l)">オフ</span>';
-      const chip=(w,nm)=>`<button class="acchip${a[w]?" on":""}" data-act="${w==="c"?"enter":"shift"}">${nm} ${a[w]?"オン":"オフ"}</button>`;
+      const chip=(w,nm)=>`<button class="acchip${a[w]?" on":""}" data-act="${w==="c"?"enter":w==="s"?"shift":"all"}">${nm} ${a[w]?"オン":"オフ"}</button>`;
+      const hm=autoHasMut(c.id);   // 変異・超変異のある作物だけ「変異」を出す
       rows.push({
         cell:true, cnm:esc(c.name),
         sub: a ? "" : ready ? `${fmtNum(autoCost(c.id))}キー` : `${QUALITY[2].mark} まで あと${fmtNum(left)}個`,
-        chips: a ? `<div class="acchips">${chip("c","収穫物")}${chip("s","種")}</div>` : ready ? `<div class="acchips"><button class="acchip buy" data-act="enter">買う</button></div>` : "",
+        chips: a ? `<div class="acchips">${chip("c","収穫物")}${chip("s","種")}${hm?chip("m","変異"):""}</div>` : ready ? `<div class="acchips"><button class="acchip buy" data-act="enter">買う</button></div>` : "",
         locked: !a && !ready,
         ic: ico(c),
         nm: a?`${c.name}の自動売却 <span style="color:var(--ink-l)">購入済み</span>`
              :(ready?`${c.name}の自動売却 <span style="color:var(--ink-l)">${fmtNum(autoCost(c.id))}キー</span>`
                     :`${c.name}の自動売却 <span style="color:var(--ink-l)">未解禁</span>`),
-        ds: a?`収穫物 ${on(a.c)}(売値 ${priceOf(c.id,tierOf(c.id))}キー) ・ ガチャで出た種 ${on(a.s)}(売値 ${seedPrice(c)}キー)<br>穫れた${c.name}と、ガチャから出た${c.name}の種を、その場で自動で売ります`
+        ds: a?`収穫物 ${on(a.c)}(売値 ${priceOf(c.id,tierOf(c.id))}キー) ・ ガチャで出た種 ${on(a.s)}(売値 ${seedPrice(c)}キー)${hm?` ・ 変異 ${on(a.m)}(変異・超変異も売ります)`:""}<br>穫れた${c.name}と、ガチャから出た${c.name}の種を、その場で自動で売ります`
              :(ready?`収穫した${c.name}と、ガチャから出た${c.name}の種を、その場で自動で売れるようになります(それぞれオンオフできます)`
                     :`${c.name}が ${QUALITY[2].mark} になると買えるようになります(${c.name}をあと ${fmtNum(left)}個 収穫 ・ 今 ${fmtNum(S.harvestBy[c.id]||0)}/${QUALITY[2].need}個)`),
-        keys: a?"<b>Enter</b> 収穫物のオンオフ<br><b>Shift+Enter</b> 種のオンオフ":(ready?"<b>Enter</b> 買う":""),
+        keys: a?"<b>Enter</b> 収穫物のオンオフ<br><b>Shift+Enter</b> 種のオンオフ"+(hm?"<br><b>Ctrl+Enter</b> 変異のオンオフ":""):(ready?"<b>Enter</b> 買う":""),
         enter: ()=>a?toggleAuto(c.id,"c"):(ready&&buyAuto(c.id)),
         shift: ()=>a?toggleAuto(c.id,"s"):(ready&&buyAuto(c.id)),
+        all: a&&hm ? ()=>toggleAuto(c.id,"m") : null,
       });
     }
   }else if(shopTab===2){
@@ -11522,7 +11529,7 @@ function shopRows(){
       const has=S.vilOrder, onoff=v=>v?'<b style="color:#2e7d32">オン</b>':'<span style="color:var(--ink-l)">オフ</span>';
       rows.push({ ic:"📜",
         nm: `村人の指示書 <span style="color:var(--ink-l)">${has?"購入済み":fmtNum(VIL_ORDER_COST)+"キー"}</span>`,
-        ds: has?`村人の自動収穫 ${onoff(S.vilAutoH)} ・ 変異の自動収穫 ${onoff(S.vilAutoM)}<br>自動収穫オフ: 実った作物は畑に残り、素手で収穫すると村人が次を植えます ・ 変異の自動収穫オン: 村人が変異も収穫して${S.vilOrder2&&S.vilSellM?"売ります":"持ち物に入れます(売りません)"}`
+        ds: has?`村人の自動収穫 ${onoff(S.vilAutoH)} ・ 変異の自動収穫 ${onoff(S.vilAutoM)}<br>自動収穫オフ: 実った作物は畑に残り、素手で収穫すると村人が次を植えます ・ 変異の自動収穫オン: 村人が変異も収穫して${S.vilOrder2&&S.vilSellM==="auto"?"作物ごとの自動売却に合わせて売ります":S.vilOrder2&&S.vilSellM?"売ります":"持ち物に入れます(売りません)"}`
                :`村人の仕事を指示できるようになります。「村人の自動収穫」と「変異の自動収穫」を、それぞれオンオフできます`,
         keys: has?"<b>Enter</b> 自動収穫のオンオフ<br><b>Shift+Enter</b> 変異の自動収穫のオンオフ":"<b>Enter</b> 買う",
         enter: ()=>has?toggleVilOrder("H"):buyVilOrder(), shift: ()=>has?toggleVilOrder("M"):buyVilOrder() });
@@ -11531,9 +11538,9 @@ function shopRows(){
         const has2=S.vilOrder2, sellTxt=v=>v==="auto"?'<b style="color:#2a6ab0">作物ごとの自動売却に合わせる</b>':v?'<b style="color:#2e7d32">売る</b>':'<b style="color:#8a5a00">売らない</b>';
         rows.push({ ic:"📜",
           nm: `村人の指示書2 <span style="color:var(--ink-l)">${has2?"購入済み":fmtNum(VIL_ORDER2_COST)+"キー"}</span>`,
-          ds: has2?`ふつうの作物 ${sellTxt(S.vilSellN)} ・ 変異の作物 ${sellTxt(S.vilSellM)}<br>売らない作物は持ち物に入ります(料理の材料にできます)。「自動売却に合わせる」では、お店の「自動売却」で収穫物がオンの作物だけ売ります。変異の作物は「変異の自動収穫」がオンのときに効きます`
+          ds: has2?`ふつうの作物 ${sellTxt(S.vilSellN)} ・ 変異の作物 ${sellTxt(S.vilSellM)}<br>売らない作物は持ち物に入ります(料理の材料にできます)。「自動売却に合わせる」では、お店の「自動売却」で、ふつうの作物は収穫物が、変異の作物は変異がオンの作物だけ売ります。変異の作物は「変異の自動収穫」がオンのときに効きます`
                   :`村人が収穫した作物を売るかどうかを、ふつうの作物と変異の作物それぞれで決められるようになります`,
-          keys: has2?"<b>Enter</b> ふつうの作物を 売る / 売らない / 自動売却に合わせる<br><b>Shift+Enter</b> 変異の作物を売る / 売らない":"<b>Enter</b> 買う",
+          keys: has2?"<b>Enter</b> ふつうの作物を 売る / 売らない / 自動売却に合わせる<br><b>Shift+Enter</b> 変異の作物を 売る / 売らない / 自動売却に合わせる":"<b>Enter</b> 買う",
           enter: ()=>has2?toggleVilSell("N"):buyVilOrder2(), shift: ()=>has2?toggleVilSell("M"):buyVilOrder2() });
         // 村人の指示書3(持っている種を使う)。指示書2を持っていると並ぶ
         if(has2){
@@ -11675,7 +11682,7 @@ function renderShop(){
   }
   $("g-shopHint").innerHTML =
     `<b>← →</b> ${SHOP_ORDER.map(i=>i===shopTab?`「${SHOP_TABS[i]}」`:SHOP_TABS[i]).join(" / ")} ・ <b>↑ ↓</b> 選ぶ ・ <b>Enter</b> / <b>Shift+Enter</b> 決定`+
-    (shopTab===5 ? " ・ 作物のマスでは <b>← → ↑ ↓</b> で選ぶ(タブの切りかえは上の3行で)" : "")+
+    (shopTab===5 ? " ・ 作物のマスでは <b>← → ↑ ↓</b> で選ぶ(タブの切りかえは上のまとめの行で)" : "")+
     (shopTab===3 && total>0 ? ` ・ <b>A</b> 作物をすべて売る(${fmtNum(total)}キー・種・食材と変異・超変異は売りません)` : "")+
     ` ・ <b>Tab</b> / <b>Esc</b> 閉じる`;
   keepVisible(body);
@@ -11812,15 +11819,19 @@ function buyVilUp(){
 function autoSumRows(rows){
   const seen=CROPS.filter(c=>!c.treasure && (S.harvestBy[c.id]||0)>0);
   const canBuy=seen.filter(c=>!S.auto[c.id] && tierOf(c.id)>=2).sort((a,b)=>autoCost(a.id)-autoCost(b.id));
-  const sum=canBuy.reduce((a,c)=>a+autoCost(c.id),0), own=seen.filter(c=>S.auto[c.id]);
+  const sum=canBuy.reduce((a,c)=>a+autoCost(c.id),0), own=seen.filter(c=>S.auto[c.id]), ownM=own.filter(c=>autoHasMut(c.id));
   rows.push({ ic:"🛒", locked:!canBuy.length,
     nm:`解禁した自動売却をまとめて買う <span style="color:var(--ink-l)">${canBuy.length?`${canBuy.length}種類 ・ ${fmtNum(sum)}キー`:"買えるものはありません"}</span>`,
     ds:"安いものから、キーが足りるところまで買います。買ったものは、収穫物も種もオンになります",
     keys: canBuy.length?"<b>Enter</b> まとめて買う":"", enter:()=>buyAutoAll(canBuy), shift:()=>buyAutoAll(canBuy) });
-  for(const [w,nm] of [["c","収穫物"],["s","ガチャで出た種"]]) rows.push({ ic:w==="c"?"🧺":"🌱", locked:!own.length,
-    nm:`${nm}の自動売却をまとめて切りかえ`,
-    ds:`買ってある${own.length}種類の、${nm}の自動売却をまとめてオンかオフにします`,
-    keys: own.length?"<b>Enter</b> 全部オン<br><b>Shift+Enter</b> 全部オフ":"", enter:()=>setAutoAll(w,true), shift:()=>setAutoAll(w,false) });
+  for(const [w,nm] of [["c","収穫物"],["s","ガチャで出た種"],["m","変異"]]){
+    const L = w==="m" ? ownM : own;
+    if(w==="m" && !L.length) continue;   // 変異のある作物の自動売却を持っていなければ出さない
+    rows.push({ ic:w==="c"?"🧺":w==="s"?"🌱":"✦", locked:!L.length,
+      nm:`${nm}の自動売却をまとめて切りかえ`,
+      ds:`買ってある${L.length}種類の、${w==="m"?"変異・超変異":nm}の自動売却をまとめてオンかオフにします`,
+      keys: L.length?"<b>Enter</b> 全部オン<br><b>Shift+Enter</b> 全部オフ":"", enter:()=>setAutoAll(w,true), shift:()=>setAutoAll(w,false) });
+  }
 }
 function buyAutoAll(list){
   let n=0, cost=0;
@@ -11830,8 +11841,8 @@ function buyAutoAll(list){
   save(); renderAll();
 }
 function setAutoAll(w,on){
-  for(const id in S.auto) if(S.auto[id]) S.auto[id][w]=on;
-  sfx.tool(); toast(`${w==="c"?"収穫物":"種"}の自動売却を、すべて${on?"オン":"オフ"}にしました`,"",2600);
+  for(const id in S.auto) if(S.auto[id] && (w!=="m" || autoHasMut(id))) S.auto[id][w]=on;
+  sfx.tool(); toast(`${w==="c"?"収穫物":w==="s"?"種":"変異"}の自動売却を、すべて${on?"オン":"オフ"}にしました`,"",2600);
   save(); renderAll();
 }
 function buyAuto(id){
@@ -11846,7 +11857,7 @@ function toggleAuto(id,which){
   const a=S.auto[id]; if(!a) return;
   a[which]=!a[which];
   sfx.tool();
-  toast(`${ico(CROP[id])} ${esc(CROP[id].name)}の${which==="c"?"収穫物":"種"}の自動売却を ${a[which]?"オン":"オフ"} にしました`,"",2400,true);
+  toast(`${ico(CROP[id])} ${esc(CROP[id].name)}の${which==="c"?"収穫物":which==="s"?"種":"変異・超変異"}の自動売却を ${a[which]?"オン":"オフ"} にしました`,"",2400,true);
   save(); renderAll();
 }
 function buyField(){
