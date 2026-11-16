@@ -1490,6 +1490,10 @@ html.mobile.gated body{overflow:hidden}
 .wb-empty{color:var(--steel); text-align:center; padding:1rem}
 .wb-preh{color:var(--amber); font-size:.9rem; letter-spacing:.1em; margin:.8rem 0 0; padding-top:.6rem; border-top:1px dashed var(--line)}
 .wb-item.pre{background:rgba(242,193,78,.04)}
+.wb-mode{display:flex; gap:.25rem; margin:.3rem 0 .1rem}
+.wb-mode button{font-family:inherit; font-size:.75rem; background:none; border:1px solid var(--line); color:var(--steel); border-radius:999px; cursor:pointer; padding:.05rem .6rem}
+.wb-mode button.on{border-color:var(--amber); color:var(--amber); background:rgba(242,193,78,.1)}
+#wordQ .wq-k{display:block; font-size:.78rem; color:var(--steel); letter-spacing:.04em}
 .wb-editor{width:min(620px,100%); margin:1rem auto 0; text-align:left}
 .wb-lbl{display:block; color:var(--steel); font-size:.85rem; margin:.8rem 0 .3rem}
 .wb-in{font-family:inherit; font-size:1rem; color:var(--ink); background:#0f1511; border:2px solid var(--line); border-radius:6px; padding:.5rem .7rem; width:100%; user-select:text}
@@ -3761,7 +3765,7 @@ html:not(.mobile) #screen-garden.haslog:has(.modal.open) #g-toasts{top:14px}
     <div id="wbListView">
       <div id="wbList" class="wb-list"></div>
       <p class="reg-status m-only">スマホでは単語帳の作成・編集・削除ができます。プレイはパソコンで遊べます</p>
-      <p class="keynav"><b>↑ ↓</b> 単語帳を選ぶ ・ <b>Enter</b> プレイ ・ <b>E</b> 編集 ・ <b>C</b> コピーして編集 ・ <b>Delete</b> 削除 ・ <b>1〜9</b> その単語帳をプレイ ・ <b>← →</b> 答えが出るまでの秒数(問題のある単語帳) ・ <b>N</b> 新しい単語帳 ・ <b>Esc</b> タイトルへ</p>
+      <p class="keynav"><b>↑ ↓</b> 単語帳を選ぶ ・ <b>Enter</b> プレイ ・ <b>E</b> 編集 ・ <b>C</b> コピーして編集 ・ <b>M</b> 遊び方(全部・10語・一本勝負) ・ <b>Delete</b> 削除 ・ <b>1〜9</b> その単語帳をプレイ ・ <b>← →</b> 答えが出るまでの秒数(問題のある単語帳) ・ <b>N</b> 新しい単語帳 ・ <b>Esc</b> タイトルへ</p>
       <div class="btn-row">
         <button class="btn primary" id="wbNew">新しい単語帳を作る (N)</button>
         <button class="btn" id="wbBack">タイトルへ (Esc)</button>
@@ -3772,6 +3776,7 @@ html:not(.mobile) #screen-garden.haslog:has(.modal.open) #g-toasts{top:14px}
       <input id="wbName" class="wb-in" maxlength="20" placeholder="例: 理科の用語" autocomplete="off">
       <label class="wb-lbl">言葉を追加</label>
       <input id="wbQ" class="wb-in wb-q" maxlength="80" placeholder="問題(なくてもよい。例: 植物が光から栄養を作るはたらき)" autocomplete="off">
+      <input id="wbQK" class="wb-in wb-q" maxlength="80" placeholder="問題のよみがな(なくてもよい。問題の下に小さく出ます)" autocomplete="off">
       <div class="wb-add">
         <input id="wbT" class="wb-in" maxlength="40" placeholder="言葉・答え(例: 光合成)" autocomplete="off">
         <input id="wbK" class="wb-in" maxlength="60" placeholder="よみがな(例: こうごうせい)" autocomplete="off">
@@ -3780,7 +3785,7 @@ html:not(.mobile) #screen-garden.haslog:has(.modal.open) #g-toasts{top:14px}
       <p class="wb-hint">よみがなはひらがなで入れてください(カタカナは自動でひらがなに直します)。言葉がひらがなだけなら、よみがなは空でも大丈夫です。<br>問題を入れると、遊ぶときは問題が出て、答えとよみがなは決めた秒数(単語帳の一覧で変えられます)たつまで隠れます。答えがよみがなと同じなら、答えは空でも大丈夫です</p>
       <details class="wb-bulk">
         <summary>まとめて追加する</summary>
-        <textarea id="wbBulk" class="wb-in" rows="5" placeholder="1行に「言葉,よみがな」の形で書きます&#10;光合成,こうごうせい&#10;細胞,さいぼう&#10;問題も入れるときは「問題,答え,よみがな」&#10;植物が光から栄養を作るはたらき,光合成,こうごうせい"></textarea>
+        <textarea id="wbBulk" class="wb-in" rows="5" placeholder="1行に「言葉,よみがな」の形で書きます&#10;光合成,こうごうせい&#10;細胞,さいぼう&#10;問題も入れるときは「問題,答え,よみがな」&#10;植物が光から栄養を作るはたらき,光合成,こうごうせい&#10;4つめに問題のよみがなも書けます"></textarea>
         <div class="btn-row" style="margin-top:.4rem"><button class="btn" id="wbBulkAdd">まとめて追加</button></div>
       </details>
       <p class="wb-note" id="wbNote"></p>
@@ -4679,7 +4684,7 @@ const KANA = {
 "ぁ":["xa","la"],"ぃ":["xi","li"],"ぅ":["xu","lu"],"ぇ":["xe","le"],"ぉ":["xo","lo"],
 "ゃ":["xya","lya"],"ゅ":["xyu","lyu"],"ょ":["xyo","lyo"],
 "ゔ":["vu"],"ー":["-"],
-"、":[","],"。":["."],"・":["/"],"！":["!"],"？":["?"],"〜":["~","-"],"～":["~","-"],
+"、":[","],"。":["."],"・":["/"],"！":["!"],"？":["?"],"〜":["~","-"],"～":["~","-"],"ゐ":["wi"],"ゑ":["we"],
 "きゃ":["kya"],"きゅ":["kyu"],"きょ":["kyo"],
 "しゃ":["sya","sha"],"しゅ":["syu","shu"],"しょ":["syo","sho"],"しぇ":["sye","she"],
 "ちゃ":["tya","cha","cya"],"ちゅ":["tyu","chu","cyu"],"ちょ":["tyo","cho","cyo"],"ちぇ":["tye","che"],
@@ -5148,8 +5153,20 @@ function setCurrentWord(w){
   setWord(w.k);
   $("wordText").textContent=w.t; dkWrap();
   $("wordKana").textContent=w.t===w.k?"\u00a0":w.k;
+  wbCands=null;
+  if(diff==="book" && w.k2){ const a=tkSave(); setWord(w.k2); wbCands=[{k:w.k,st:a},{k:w.k2,st:tkSave()}]; tkLoad(a); }   // どちらのよみがなで打っても正解
   renderRomaji();
   wbShowQ(w);
+}
+/* よみがなが2つある言葉: 両方を同時に進め、打ち方に合うほうを残す(表示も、残ったほうに合わせる) */
+let wbCands=null;
+function wbKey(key){
+  let res="miss", lead=null; const alive=[];
+  for(const c of wbCands){ tkLoad(c.st); const r=handleKey(key); if(r==="miss") continue; c.st=tkSave(); alive.push(c); if(r==="done"){ res="done"; lead=lead||c; } else if(res==="miss") res=r; }
+  if(!alive.length){ tkLoad(wbCands[0].st); return "miss"; }
+  wbCands=alive; lead=lead||alive[0]; tkLoad(lead.st);
+  if(currentWord && currentWord.t!==currentWord.k) $("wordKana").textContent=lead.k;
+  return res;
 }
 /* 単語帳の問題: 問題を出し、答え・よみがな・ローマ字の残りは、単語帳で決めた秒数たつまで隠す */
 let wbHideT=null, wbHideI=null, wbNoPeek=0, wbQN=0;
@@ -5163,6 +5180,7 @@ function wbShowQ(w){
   const q = diff==="book" && w && w.q ? w.q : "", el=$("wordQ");
   el.hidden=!q; el.textContent=q;
   if(!q) return;
+  if(w.qk) el.insertAdjacentHTML("beforeend",`<small class="wq-k">${escH(w.qk)}</small>`);   // 問題のよみがな
   wbQN++;
   let left=wbSec(bookPlay);
   const tip=()=>`答えが出るまで ${left}秒 ・ 見ずに打てたら「見ずに打てた」に数えます`;
@@ -5187,6 +5205,7 @@ function pickWord(){
   if(gameBara && baraMaybeQuiz()) return;   // バラバラ: TOEIC の4択
   if(isQ(diff)){
     // キューの先頭を出題し、その次を先読み表示する
+    if(diff==="book" && wbPlayMode==="one" && taQueue.length<2) wbRefill();
     const w=taQueue.shift();
     if(!w){ finishTa(); return; }
     setCurrentWord(w);
@@ -5223,7 +5242,7 @@ function clearWordPanel(){
   $("wordKana").innerHTML="&nbsp;";
   $("romaji").innerHTML="&nbsp;";
   $("nextWord").innerHTML="&nbsp;";
-  wbReveal(); $("wordQ").hidden=true; $("wordQ").textContent="";
+  wbReveal(); $("wordQ").hidden=true; $("wordQ").textContent=""; wbCands=null;
 }
 
 /* ---------- バラバラ: バラバラのローズティーが効いている間、どのモードも、なにかがおかしくなる ----------
@@ -5346,13 +5365,14 @@ function startGame(d){
   $("wordPanel").classList.remove("fatal","clear");
   if(d==="book") buildBookQueue();
   else if(ta) buildTaQueue(d);
+  const bookOne = d==="book" && wbPlayMode==="one";   // 単語帳の一本勝負: 打てた数を数え、1回ミスしたら終わり
   // HUD/タイムバーをモードごとに切り替え
-  $("scoreLabel").textContent = ta ? "残り " : "外したキー ";
+  $("scoreLabel").textContent = bookOne ? "打った " : ta ? "残り " : "外したキー ";
   $("scoreUnit").textContent = ta ? "語" : "個";
-  $("score").textContent = ta ? taGoal : 0;
-  $("missWrap").style.display = oneshot && !osCharm ? "none" : "";
+  $("score").textContent = ta && !bookOne ? taGoal : 0;
+  $("missWrap").style.display = (oneshot && !osCharm) || bookOne ? "none" : "";
   $("miss").textContent="0";
-  $("timebar").style.visibility = oneshot ? "hidden" : "visible";
+  $("timebar").style.visibility = oneshot || bookOne ? "hidden" : "visible";
   $("timeLabel").textContent = (ta||oneshot) ? "経過 " : "残り ";
   $("time").textContent = (ta||oneshot) ? 0 : GAME_SECONDS;
   const f=$("timefill");
@@ -5527,7 +5547,7 @@ document.addEventListener("keydown",e=>{
     const id=e.target.id;
     if(e.key==="Enter" && (e.ctrlKey||e.metaKey)){
       if(id==="wbBulk"){ e.preventDefault(); wbBulkAdd(); return; }
-      if(id==="wbName"||id==="wbQ"||id==="wbT"||id==="wbK"){ e.preventDefault(); wbSaveBook(); return; }
+      if(id==="wbName"||id==="wbQ"||id==="wbQK"||id==="wbT"||id==="wbK"){ e.preventDefault(); wbSaveBook(); return; }
       if(id==="fbText"||id==="fbName"){ e.preventDefault(); fbSend(); return; }
     }
     if(e.key==="Enter"){
@@ -5536,7 +5556,8 @@ document.addEventListener("keydown",e=>{
       if(id==="bkImport") backupImport();
       else if(id==="bkCode") syncJoin();
       else if(id==="wbT"||id==="wbK") wbAddWord();
-      else if(id==="wbQ") $("wbT").focus();
+      else if(id==="wbQ") $("wbQK").focus();
+      else if(id==="wbQK") $("wbT").focus();
       else if(id==="wbName") $("wbT").focus();
       else if(id==="fbName") fbSend();
       else $("regBtn").click();
@@ -5627,7 +5648,7 @@ document.addEventListener("keydown",e=>{
   if(key==="Process" || e.isComposing){ imeWarn(); return; }
   if(!/^[a-zA-Z0-9\-'!?,.~\/%&]$/.test(key)) return;
   e.preventDefault();
-  const r = baraQ ? baraAns(key) : handleKey(key);
+  const r = baraQ ? baraAns(key) : wbCands ? wbKey(key) : handleKey(key);
   if(r==="skip") return;
   if(r==="miss"){
     miss++; $("miss").textContent=miss;
@@ -5636,7 +5657,7 @@ document.addEventListener("keydown",e=>{
     p.classList.remove("shake"); void p.offsetWidth; p.classList.add("shake");
     // ノーミス勝負: 1ミスで即終了
     if(diff==="oneshot" && osLives>0){ osLives--; sndMiss(); return; }   // 料理のお守り: このミスは見逃してもらえる
-    if(diff==="oneshot"){
+    if(diff==="oneshot" || (diff==="book" && wbPlayMode==="one")){
       running=false;
       sndFatal();
       p.classList.add("fatal");
@@ -5666,7 +5687,9 @@ document.addEventListener("keydown",e=>{
       if(diff==="book" && currentWord && currentWord.q && wbHideT) wbNoPeek++;   // 答えが出る前に打てた
       if(currentWord && currentWord.bara) baraPetalRain();   // バラバラの薔薇(辞典には載せない)
       else if(diff!=="book" && currentWord && !currentWord.oj) unlockWord((currentWord.orig||currentWord).k);   // 単語帳の言葉は辞典に載せない(逆さまの言葉は、もとの言葉で載せる)
-      if(isQ(diff)){
+      if(diff==="book" && wbPlayMode==="one"){
+        $("score").textContent=score;   // 一本勝負: 打てた数
+      }else if(isQ(diff)){
         // 残り本数とゲージを更新
         const remain=Math.max(taGoal-score,0);
         $("score").textContent=remain;
@@ -6063,112 +6086,113 @@ function wbLoad(){
   wbPreLoad();
 }
 /* できあいの単語帳: 最初から並んでいて、すぐ遊べる(毎回 n 語をランダムに)。コピーすると自分の単語帳として編集できる
-   1行は「問題|答え|よみがな」(答えが空なら、よみがなを答えにする)。ベストタイムと秒数は WB_PRE_KEY に持つ */
+   1行は「問題|答え|よみがな|べつのよみがな|問題のよみがな」(答えが空なら、よみがなを答えにする。後ろの2つはなくてもよい)。
+   べつのよみがな(k2)があれば、どちらで打っても正解。ベスト・秒数・遊び方は WB_PRE_KEY に持つ */
 const WB_PRE_KEY=WB_KEY+":pre";
-const wbPre=(id,name,ds,n,txt)=>({ id, name, ds, n, pre:true, best:null, words:txt.trim().split("\n").map(l=>{ const [q,t,k]=l.split("|"); return { q, t:t||k, k }; }) });
+const wbPre=(id,name,ds,txt)=>({ id, name, ds, pre:true, bests:{}, words:txt.trim().split("\n").map(l=>{ const [q,t,k,k2,qk]=l.split("|"); const w={ q, t:t||k, k }; if(k2) w.k2=k2; if(qk) w.qk=qk; return w; }) });
 const WB_PRESETS=[
-  wbPre("p:hyakunin","百人一首","上の句を見て、下の句を打つ",20,`
-秋の田のかりほの庵の苫をあらみ|わが衣手は露にぬれつつ|わがころもではつゆにぬれつつ
-春過ぎて夏来にけらし白妙の|衣ほすてふ天の香具山|ころもほすちょうあまのかぐやま
-あしびきの山鳥の尾のしだり尾の|ながながし夜をひとりかも寝む|ながながしよをひとりかもねん
-田子の浦にうち出でてみれば白妙の|富士の高嶺に雪は降りつつ|ふじのたかねにゆきはふりつつ
-奥山に紅葉踏み分け鳴く鹿の|声聞く時ぞ秋は悲しき|こえきくときぞあきはかなしき
-かささぎの渡せる橋に置く霜の|白きを見れば夜ぞ更けにける|しろきをみればよぞふけにける
-天の原ふりさけ見れば春日なる|三笠の山に出でし月かも|みかさのやまにいでしつきかも
-わが庵は都のたつみしかぞ住む|世をうぢ山と人はいふなり|よをうじやまとひとはいうなり
-花の色は移りにけりないたづらに|わが身世にふるながめせしまに|わがみよにふるながめせしまに
-これやこの行くも帰るも別れては|知るも知らぬも逢坂の関|しるもしらぬもおうさかのせき
-わたの原八十島かけて漕ぎ出でぬと|人には告げよ海人の釣舟|ひとにはつげよあまのつりぶね
-天つ風雲の通ひ路吹き閉ぢよ|をとめの姿しばしとどめむ|おとめのすがたしばしとどめん
-筑波嶺の峰より落つるみなの川|恋ぞつもりて淵となりぬる|こいぞつもりてふちとなりぬる
-陸奥のしのぶもぢずり誰ゆゑに|乱れそめにしわれならなくに|みだれそめにしわれならなくに
-君がため春の野に出でて若菜摘む|わが衣手に雪は降りつつ|わがころもでにゆきはふりつつ
-立ち別れいなばの山の峰に生ふる|まつとし聞かば今帰り来む|まつとしきかばいまかえりこん
-ちはやぶる神代も聞かず竜田川|からくれなゐに水くくるとは|からくれないにみずくくるとは
-住の江の岸に寄る波よるさへや|夢の通ひ路人目よくらむ|ゆめのかよいじひとめよくらん
-難波潟短き蘆のふしの間も|逢はでこの世を過ぐしてよとや|あわでこのよをすぐしてよとや
-わびぬれば今はた同じ難波なる|みをつくしても逢はむとぞ思ふ|みをつくしてもあわんとぞおもう
-今来むと言ひしばかりに長月の|有明の月を待ち出でつるかな|ありあけのつきをまちいでつるかな
-吹くからに秋の草木のしをるれば|むべ山風を嵐といふらむ|むべやまかぜをあらしというらん
-月見ればちぢにものこそ悲しけれ|わが身ひとつの秋にはあらねど|わがみひとつのあきにはあらねど
-このたびは幣も取りあへず手向山|紅葉の錦神のまにまに|もみじのにしきかみのまにまに
-名にし負はば逢坂山のさねかづら|人に知られでくるよしもがな|ひとにしられでくるよしもがな
-小倉山峰のもみぢ葉心あらば|今ひとたびのみゆき待たなむ|いまひとたびのみゆきまたなん
-みかの原わきて流るるいづみ川|いつ見きとてか恋しかるらむ|いつみきとてかこいしかるらん
-山里は冬ぞ寂しさまさりける|人目も草もかれぬと思へば|ひとめもくさもかれぬとおもえば
-心あてに折らばや折らむ初霜の|置きまどはせる白菊の花|おきまどわせるしらぎくのはな
-有明のつれなく見えし別れより|暁ばかり憂きものはなし|あかつきばかりうきものはなし
-朝ぼらけ有明の月と見るまでに|吉野の里に降れる白雪|よしののさとにふれるしらゆき
-山川に風のかけたるしがらみは|流れもあへぬ紅葉なりけり|ながれもあえぬもみじなりけり
-ひさかたの光のどけき春の日に|しづ心なく花の散るらむ|しずごころなくはなのちるらん
-誰をかも知る人にせむ高砂の|松も昔の友ならなくに|まつもむかしのともならなくに
-人はいさ心も知らずふるさとは|花ぞ昔の香ににほひける|はなぞむかしのかににおいける
-夏の夜はまだ宵ながら明けぬるを|雲のいづこに月宿るらむ|くものいずこにつきやどるらん
-白露に風の吹きしく秋の野は|つらぬきとめぬ玉ぞ散りける|つらぬきとめぬたまぞちりける
-忘らるる身をば思はず誓ひてし|人の命の惜しくもあるかな|ひとのいのちのおしくもあるかな
-浅茅生の小野の篠原しのぶれど|あまりてなどか人の恋しき|あまりてなどかひとのこいしき
-しのぶれど色に出でにけりわが恋は|ものや思ふと人の問ふまで|ものやおもうとひとのとうまで
-恋すてふわが名はまだき立ちにけり|人知れずこそ思ひそめしか|ひとしれずこそおもいそめしか
-契りきなかたみに袖をしぼりつつ|末の松山波越さじとは|すえのまつやまなみこさじとは
-逢ひ見ての後の心にくらぶれば|昔はものを思はざりけり|むかしはものをおもわざりけり
-逢ふことの絶えてしなくはなかなかに|人をも身をも恨みざらまし|ひとをもみをもうらみざらまし
-あはれともいふべき人は思ほえで|身のいたづらになりぬべきかな|みのいたずらになりぬべきかな
-由良の門を渡る舟人かぢを絶え|ゆくへも知らぬ恋の道かな|ゆくえもしらぬこいのみちかな
-八重むぐら茂れる宿のさびしきに|人こそ見えね秋は来にけり|ひとこそみえねあきはきにけり
-風をいたみ岩打つ波のおのれのみ|くだけてものを思ふころかな|くだけてものをおもうころかな
-みかきもり衛士のたく火の夜は燃え|昼は消えつつものをこそ思へ|ひるはきえつつものをこそおもえ
-君がため惜しからざりし命さへ|長くもがなと思ひけるかな|ながくもがなとおもいけるかな
-かくとだにえやはいぶきのさしも草|さしも知らじな燃ゆる思ひを|さしもしらじなもゆるおもいを
-明けぬれば暮るるものとは知りながら|なほ恨めしき朝ぼらけかな|なおうらめしきあさぼらけかな
-嘆きつつひとり寝る夜の明くる間は|いかに久しきものとかは知る|いかにひさしきものとかはしる
-忘れじの行く末まではかたければ|今日を限りの命ともがな|きょうをかぎりのいのちともがな
-滝の音は絶えて久しくなりぬれど|名こそ流れてなほ聞こえけれ|なこそながれてなおきこえけれ
-あらざらむこの世のほかの思ひ出に|今ひとたびの逢ふこともがな|いまひとたびのおうこともがな
-めぐり逢ひて見しやそれともわかぬ間に|雲隠れにし夜半の月かな|くもがくれにしよわのつきかな
-有馬山猪名の笹原風吹けば|いでそよ人を忘れやはする|いでそよひとをわすれやはする
-やすらはで寝なましものをさ夜更けて|かたぶくまでの月を見しかな|かたぶくまでのつきをみしかな
-大江山いく野の道の遠ければ|まだふみもみず天の橋立|まだふみもみずあまのはしだて
-いにしへの奈良の都の八重桜|けふ九重ににほひぬるかな|きょうここのえににおいぬるかな
-夜をこめて鳥のそら音ははかるとも|よに逢坂の関は許さじ|よにおうさかのせきはゆるさじ
-今はただ思ひ絶えなむとばかりを|人づてならで言ふよしもがな|ひとづてならでいうよしもがな
-朝ぼらけ宇治の川霧たえだえに|あらはれわたる瀬々の網代木|あらわれわたるせぜのあじろぎ
-恨みわびほさぬ袖だにあるものを|恋に朽ちなむ名こそ惜しけれ|こいにくちなんなこそおしけれ
-もろともにあはれと思へ山桜|花よりほかに知る人もなし|はなよりほかにしるひともなし
-春の夜の夢ばかりなる手枕に|かひなく立たむ名こそ惜しけれ|かいなくたたんなこそおしけれ
-心にもあらで憂き世にながらへば|恋しかるべき夜半の月かな|こいしかるべきよわのつきかな
-嵐吹く三室の山のもみぢ葉は|竜田の川の錦なりけり|たつたのかわのにしきなりけり
-さびしさに宿を立ち出でてながむれば|いづこも同じ秋の夕暮れ|いずこもおなじあきのゆうぐれ
-夕されば門田の稲葉おとづれて|蘆のまろやに秋風ぞ吹く|あしのまろやにあきかぜぞふく
-音に聞く高師の浜のあだ波は|かけじや袖の濡れもこそすれ|かけじやそでのぬれもこそすれ
-高砂の尾の上の桜咲きにけり|外山の霞立たずもあらなむ|とやまのかすみたたずもあらなん
-憂かりける人を初瀬の山おろしよ|激しかれとは祈らぬものを|はげしかれとはいのらぬものを
-契りおきしさせもが露を命にて|あはれ今年の秋もいぬめり|あわれことしのあきもいぬめり
-わたの原漕ぎ出でて見ればひさかたの|雲居にまがふ沖つ白波|くもいにまがうおきつしらなみ
-瀬を早み岩にせかるる滝川の|われても末に逢はむとぞ思ふ|われてもすえにあわんとぞおもう
-淡路島通ふ千鳥の鳴く声に|幾夜寝覚めぬ須磨の関守|いくよねざめぬすまのせきもり
-秋風にたなびく雲の絶え間より|もれ出づる月の影のさやけさ|もれいずるつきのかげのさやけさ
-長からむ心も知らず黒髪の|乱れて今朝はものをこそ思へ|みだれてけさはものをこそおもえ
-ほととぎす鳴きつる方をながむれば|ただ有明の月ぞ残れる|ただありあけのつきぞのこれる
-思ひわびさても命はあるものを|憂きに堪へぬは涙なりけり|うきにたえぬはなみだなりけり
-世の中よ道こそなけれ思ひ入る|山の奥にも鹿ぞ鳴くなる|やまのおくにもしかぞなくなる
-ながらへばまたこのごろやしのばれむ|憂しと見し世ぞ今は恋しき|うしとみしよぞいまはこいしき
-夜もすがらもの思ふころは明けやらで|閨のひまさへつれなかりけり|ねやのひまさえつれなかりけり
-嘆けとて月やはものを思はする|かこち顔なるわが涙かな|かこちがおなるわがなみだかな
-村雨の露もまだひぬ槙の葉に|霧立ちのぼる秋の夕暮れ|きりたちのぼるあきのゆうぐれ
-難波江の蘆のかりねのひとよゆゑ|みをつくしてや恋ひわたるべき|みをつくしてやこいわたるべき
-玉の緒よ絶えなば絶えねながらへば|忍ぶることの弱りもぞする|しのぶることのよわりもぞする
-見せばやな雄島の海人の袖だにも|濡れにぞ濡れし色は変はらず|ぬれにぞぬれしいろはかわらず
-きりぎりす鳴くや霜夜のさむしろに|衣かたしきひとりかも寝む|ころもかたしきひとりかもねん
-わが袖は潮干に見えぬ沖の石の|人こそ知らね乾く間もなし|ひとこそしらねかわくまもなし
-世の中は常にもがもな渚漕ぐ|海人の小舟の綱手かなしも|あまのおぶねのつなでかなしも
-み吉野の山の秋風さ夜更けて|ふるさと寒く衣打つなり|ふるさとさむくころもうつなり
-おほけなく憂き世の民におほふかな|わが立つ杣に墨染の袖|わがたつそまにすみぞめのそで
-花さそふ嵐の庭の雪ならで|ふりゆくものはわが身なりけり|ふりゆくものはわがみなりけり
-来ぬ人をまつほの浦の夕なぎに|焼くや藻塩の身もこがれつつ|やくやもしおのみもこがれつつ
-風そよぐならの小川の夕暮れは|みそぎぞ夏のしるしなりける|みそぎぞなつのしるしなりける
-人も惜し人も恨めしあぢきなく|世を思ふゆゑにもの思ふ身は|よをおもうゆえにものおもうみは
-百敷や古き軒端のしのぶにも|なほあまりある昔なりけり|なおあまりあるむかしなりけり`),
-  wbPre("p:nandoku","難読漢字","漢字を見て、よみを打つ",20,`
+  wbPre("p:hyakunin","百人一首","上の句を見て、下の句を打つ(昔の仮名づかい・今の仮名づかいのどちらでも打てる)",`
+秋の田のかりほの庵の苫をあらみ|わが衣手は露にぬれつつ|わがころもではつゆにぬれつつ||あきのたのかりほのいほのとまをあらみ
+春過ぎて夏来にけらし白妙の|衣ほすてふ天の香具山|ころもほすてふあまのかぐやま|ころもほすちょうあまのかぐやま|はるすぎてなつきにけらししろたへの
+あしびきの山鳥の尾のしだり尾の|ながながし夜をひとりかも寝む|ながながしよをひとりかもねむ|ながながしよをひとりかもねん|あしびきのやまどりのをのしだりをの
+田子の浦にうち出でてみれば白妙の|富士の高嶺に雪は降りつつ|ふじのたかねにゆきはふりつつ||たごのうらにうちいでてみればしろたへの
+奥山に紅葉踏み分け鳴く鹿の|声聞く時ぞ秋は悲しき|こゑきくときぞあきはかなしき|こえきくときぞあきはかなしき|おくやまにもみぢふみわけなくしかの
+かささぎの渡せる橋に置く霜の|白きを見れば夜ぞ更けにける|しろきをみればよぞふけにける||かささぎのわたせるはしにおくしもの
+天の原ふりさけ見れば春日なる|三笠の山に出でし月かも|みかさのやまにいでしつきかも||あまのはらふりさけみればかすがなる
+わが庵は都のたつみしかぞ住む|世をうぢ山と人はいふなり|よをうぢやまとひとはいふなり|よをうじやまとひとはいうなり|わがいほはみやこのたつみしかぞすむ
+花の色は移りにけりないたづらに|わが身世にふるながめせしまに|わがみよにふるながめせしまに||はなのいろはうつりにけりないたづらに
+これやこの行くも帰るも別れては|知るも知らぬも逢坂の関|しるもしらぬもあふさかのせき|しるもしらぬもおうさかのせき|これやこのゆくもかへるもわかれては
+わたの原八十島かけて漕ぎ出でぬと|人には告げよ海人の釣舟|ひとにはつげよあまのつりぶね||わたのはらやそしまかけてこぎいでぬと
+天つ風雲の通ひ路吹き閉ぢよ|をとめの姿しばしとどめむ|をとめのすがたしばしとどめむ|おとめのすがたしばしとどめん|あまつかぜくものかよひぢふきとぢよ
+筑波嶺の峰より落つるみなの川|恋ぞつもりて淵となりぬる|こひぞつもりてふちとなりぬる|こいぞつもりてふちとなりぬる|つくばねのみねよりおつるみなのがは
+陸奥のしのぶもぢずり誰ゆゑに|乱れそめにしわれならなくに|みだれそめにしわれならなくに||みちのくのしのぶもぢずりたれゆゑに
+君がため春の野に出でて若菜摘む|わが衣手に雪は降りつつ|わがころもでにゆきはふりつつ||きみがためはるののにいでてわかなつむ
+立ち別れいなばの山の峰に生ふる|まつとし聞かば今帰り来む|まつとしきかばいまかへりこむ|まつとしきかばいまかえりこん|たちわかれいなばのやまのみねにおふる
+ちはやぶる神代も聞かず竜田川|からくれなゐに水くくるとは|からくれなゐにみづくくるとは|からくれないにみずくくるとは|ちはやぶるかみよもきかずたつたがは
+住の江の岸に寄る波よるさへや|夢の通ひ路人目よくらむ|ゆめのかよひぢひとめよくらむ|ゆめのかよいじひとめよくらん|すみのえのきしによるなみよるさへや
+難波潟短き蘆のふしの間も|逢はでこの世を過ぐしてよとや|あはでこのよをすぐしてよとや|あわでこのよをすぐしてよとや|なにはがたみじかきあしのふしのまも
+わびぬれば今はた同じ難波なる|みをつくしても逢はむとぞ思ふ|みをつくしてもあはむとぞおもふ|みをつくしてもあわんとぞおもう|わびぬればいまはたおなじなにはなる
+今来むと言ひしばかりに長月の|有明の月を待ち出でつるかな|ありあけのつきをまちいでつるかな||いまこむといひしばかりにながつきの
+吹くからに秋の草木のしをるれば|むべ山風を嵐といふらむ|むべやまかぜをあらしといふらむ|むべやまかぜをあらしというらん|ふくからにあきのくさきのしをるれば
+月見ればちぢにものこそ悲しけれ|わが身ひとつの秋にはあらねど|わがみひとつのあきにはあらねど||つきみればちぢにものこそかなしけれ
+このたびは幣も取りあへず手向山|紅葉の錦神のまにまに|もみぢのにしきかみのまにまに|もみじのにしきかみのまにまに|このたびはぬさもとりあへずたむけやま
+名にし負はば逢坂山のさねかづら|人に知られでくるよしもがな|ひとにしられでくるよしもがな||なにしおはばあふさかやまのさねかづら
+小倉山峰のもみぢ葉心あらば|今ひとたびのみゆき待たなむ|いまひとたびのみゆきまたなむ|いまひとたびのみゆきまたなん|をぐらやまみねのもみぢばこころあらば
+みかの原わきて流るるいづみ川|いつ見きとてか恋しかるらむ|いつみきとてかこひしかるらむ|いつみきとてかこいしかるらん|みかのはらわきてながるるいづみがは
+山里は冬ぞ寂しさまさりける|人目も草もかれぬと思へば|ひとめもくさもかれぬとおもへば|ひとめもくさもかれぬとおもえば|やまざとはふゆぞさびしさまさりける
+心あてに折らばや折らむ初霜の|置きまどはせる白菊の花|おきまどはせるしらぎくのはな|おきまどわせるしらぎくのはな|こころあてにをらばやをらむはつしもの
+有明のつれなく見えし別れより|暁ばかり憂きものはなし|あかつきばかりうきものはなし||ありあけのつれなくみえしわかれより
+朝ぼらけ有明の月と見るまでに|吉野の里に降れる白雪|よしののさとにふれるしらゆき||あさぼらけありあけのつきとみるまでに
+山川に風のかけたるしがらみは|流れもあへぬ紅葉なりけり|ながれもあへぬもみぢなりけり|ながれもあえぬもみじなりけり|やまがはにかぜのかけたるしがらみは
+ひさかたの光のどけき春の日に|しづ心なく花の散るらむ|しづごころなくはなのちるらむ|しずごころなくはなのちるらん|ひさかたのひかりのどけきはるのひに
+誰をかも知る人にせむ高砂の|松も昔の友ならなくに|まつもむかしのともならなくに||たれをかもしるひとにせむたかさごの
+人はいさ心も知らずふるさとは|花ぞ昔の香ににほひける|はなぞむかしのかににほひける|はなぞむかしのかににおいける|ひとはいさこころもしらずふるさとは
+夏の夜はまだ宵ながら明けぬるを|雲のいづこに月宿るらむ|くものいづこにつきやどるらむ|くものいずこにつきやどるらん|なつのよはまだよひながらあけぬるを
+白露に風の吹きしく秋の野は|つらぬきとめぬ玉ぞ散りける|つらぬきとめぬたまぞちりける||しらつゆにかぜのふきしくあきののは
+忘らるる身をば思はず誓ひてし|人の命の惜しくもあるかな|ひとのいのちのをしくもあるかな|ひとのいのちのおしくもあるかな|わすらるるみをばおもはずちかひてし
+浅茅生の小野の篠原しのぶれど|あまりてなどか人の恋しき|あまりてなどかひとのこひしき|あまりてなどかひとのこいしき|あさぢふのをののしのはらしのぶれど
+しのぶれど色に出でにけりわが恋は|ものや思ふと人の問ふまで|ものやおもふとひとのとふまで|ものやおもうとひとのとうまで|しのぶれどいろにいでにけりわがこひは
+恋すてふわが名はまだき立ちにけり|人知れずこそ思ひそめしか|ひとしれずこそおもひそめしか|ひとしれずこそおもいそめしか|こひすてふわがなはまだきたちにけり
+契りきなかたみに袖をしぼりつつ|末の松山波越さじとは|すゑのまつやまなみこさじとは|すえのまつやまなみこさじとは|ちぎりきなかたみにそでをしぼりつつ
+逢ひ見ての後の心にくらぶれば|昔はものを思はざりけり|むかしはものをおもはざりけり|むかしはものをおもわざりけり|あひみてののちのこころにくらぶれば
+逢ふことの絶えてしなくはなかなかに|人をも身をも恨みざらまし|ひとをもみをもうらみざらまし||あふことのたえてしなくはなかなかに
+あはれともいふべき人は思ほえで|身のいたづらになりぬべきかな|みのいたづらになりぬべきかな|みのいたずらになりぬべきかな|あはれともいふべきひとはおもほえで
+由良の門を渡る舟人かぢを絶え|ゆくへも知らぬ恋の道かな|ゆくへもしらぬこひのみちかな|ゆくえもしらぬこいのみちかな|ゆらのとをわたるふなびとかぢをたえ
+八重むぐら茂れる宿のさびしきに|人こそ見えね秋は来にけり|ひとこそみえねあきはきにけり||やへむぐらしげれるやどのさびしきに
+風をいたみ岩打つ波のおのれのみ|くだけてものを思ふころかな|くだけてものをおもふころかな|くだけてものをおもうころかな|かぜをいたみいはうつなみのおのれのみ
+みかきもり衛士のたく火の夜は燃え|昼は消えつつものをこそ思へ|ひるはきえつつものをこそおもへ|ひるはきえつつものをこそおもえ|みかきもりゑじのたくひのよるはもえ
+君がため惜しからざりし命さへ|長くもがなと思ひけるかな|ながくもがなとおもひけるかな|ながくもがなとおもいけるかな|きみがためをしからざりしいのちさへ
+かくとだにえやはいぶきのさしも草|さしも知らじな燃ゆる思ひを|さしもしらじなもゆるおもひを|さしもしらじなもゆるおもいを|かくとだにえやはいぶきのさしもぐさ
+明けぬれば暮るるものとは知りながら|なほ恨めしき朝ぼらけかな|なほうらめしきあさぼらけかな|なおうらめしきあさぼらけかな|あけぬればくるるものとはしりながら
+嘆きつつひとり寝る夜の明くる間は|いかに久しきものとかは知る|いかにひさしきものとかはしる||なげきつつひとりぬるよのあくるまは
+忘れじの行く末まではかたければ|今日を限りの命ともがな|けふをかぎりのいのちともがな|きょうをかぎりのいのちともがな|わすれじのゆくすゑまではかたければ
+滝の音は絶えて久しくなりぬれど|名こそ流れてなほ聞こえけれ|なこそながれてなほきこえけれ|なこそながれてなおきこえけれ|たきのおとはたえてひさしくなりぬれど
+あらざらむこの世のほかの思ひ出に|今ひとたびの逢ふこともがな|いまひとたびのあふこともがな|いまひとたびのおうこともがな|あらざらむこのよのほかのおもひでに
+めぐり逢ひて見しやそれともわかぬ間に|雲隠れにし夜半の月かな|くもがくれにしよはのつきかな|くもがくれにしよわのつきかな|めぐりあひてみしやそれともわかぬまに
+有馬山猪名の笹原風吹けば|いでそよ人を忘れやはする|いでそよひとをわすれやはする||ありまやまゐなのささはらかぜふけば
+やすらはで寝なましものをさ夜更けて|かたぶくまでの月を見しかな|かたぶくまでのつきをみしかな||やすらはでねなましものをさよふけて
+大江山いく野の道の遠ければ|まだふみもみず天の橋立|まだふみもみずあまのはしだて||おほえやまいくののみちのとほければ
+いにしへの奈良の都の八重桜|けふ九重ににほひぬるかな|けふここのへににほひぬるかな|きょうここのえににおいぬるかな|いにしへのならのみやこのやへざくら
+夜をこめて鳥のそら音ははかるとも|よに逢坂の関は許さじ|よにあふさかのせきはゆるさじ|よにおうさかのせきはゆるさじ|よをこめてとりのそらねははかるとも
+今はただ思ひ絶えなむとばかりを|人づてならで言ふよしもがな|ひとづてならでいふよしもがな|ひとづてならでいうよしもがな|いまはただおもひたえなむとばかりを
+朝ぼらけ宇治の川霧たえだえに|あらはれわたる瀬々の網代木|あらはれわたるせぜのあじろぎ|あらわれわたるせぜのあじろぎ|あさぼらけうぢのかはぎりたえだえに
+恨みわびほさぬ袖だにあるものを|恋に朽ちなむ名こそ惜しけれ|こひにくちなむなこそをしけれ|こいにくちなんなこそおしけれ|うらみわびほさぬそでだにあるものを
+もろともにあはれと思へ山桜|花よりほかに知る人もなし|はなよりほかにしるひともなし||もろともにあはれとおもへやまざくら
+春の夜の夢ばかりなる手枕に|かひなく立たむ名こそ惜しけれ|かひなくたたむなこそをしけれ|かいなくたたんなこそおしけれ|はるのよのゆめばかりなるたまくらに
+心にもあらで憂き世にながらへば|恋しかるべき夜半の月かな|こひしかるべきよはのつきかな|こいしかるべきよわのつきかな|こころにもあらでうきよにながらへば
+嵐吹く三室の山のもみぢ葉は|竜田の川の錦なりけり|たつたのかはのにしきなりけり|たつたのかわのにしきなりけり|あらしふくみむろのやまのもみぢばは
+さびしさに宿を立ち出でてながむれば|いづこも同じ秋の夕暮れ|いづこもおなじあきのゆふぐれ|いずこもおなじあきのゆうぐれ|さびしさにやどをたちいでてながむれば
+夕されば門田の稲葉おとづれて|蘆のまろやに秋風ぞ吹く|あしのまろやにあきかぜぞふく||ゆふさればかどたのいなばおとづれて
+音に聞く高師の浜のあだ波は|かけじや袖の濡れもこそすれ|かけじやそでのぬれもこそすれ||おとにきくたかしのはまのあだなみは
+高砂の尾の上の桜咲きにけり|外山の霞立たずもあらなむ|とやまのかすみたたずもあらなむ|とやまのかすみたたずもあらなん|たかさごのをのへのさくらさきにけり
+憂かりける人を初瀬の山おろしよ|激しかれとは祈らぬものを|はげしかれとはいのらぬものを||うかりけるひとをはつせのやまおろしよ
+契りおきしさせもが露を命にて|あはれ今年の秋もいぬめり|あはれことしのあきもいぬめり|あわれことしのあきもいぬめり|ちぎりおきしさせもがつゆをいのちにて
+わたの原漕ぎ出でて見ればひさかたの|雲居にまがふ沖つ白波|くもゐにまがふおきつしらなみ|くもいにまがうおきつしらなみ|わたのはらこぎいでてみればひさかたの
+瀬を早み岩にせかるる滝川の|われても末に逢はむとぞ思ふ|われてもすゑにあはむとぞおもふ|われてもすえにあわんとぞおもう|せをはやみいはにせかるるたきがはの
+淡路島通ふ千鳥の鳴く声に|幾夜寝覚めぬ須磨の関守|いくよねざめぬすまのせきもり||あはぢしまかよふちどりのなくこゑに
+秋風にたなびく雲の絶え間より|もれ出づる月の影のさやけさ|もれいづるつきのかげのさやけさ|もれいずるつきのかげのさやけさ|あきかぜにたなびくくものたえまより
+長からむ心も知らず黒髪の|乱れて今朝はものをこそ思へ|みだれてけさはものをこそおもへ|みだれてけさはものをこそおもえ|ながからむこころもしらずくろかみの
+ほととぎす鳴きつる方をながむれば|ただ有明の月ぞ残れる|ただありあけのつきぞのこれる||ほととぎすなきつるかたをながむれば
+思ひわびさても命はあるものを|憂きに堪へぬは涙なりけり|うきにたへぬはなみだなりけり|うきにたえぬはなみだなりけり|おもひわびさてもいのちはあるものを
+世の中よ道こそなけれ思ひ入る|山の奥にも鹿ぞ鳴くなる|やまのおくにもしかぞなくなる||よのなかよみちこそなけれおもひいる
+ながらへばまたこのごろやしのばれむ|憂しと見し世ぞ今は恋しき|うしとみしよぞいまはこひしき|うしとみしよぞいまはこいしき|ながらへばまたこのごろやしのばれむ
+夜もすがらもの思ふころは明けやらで|閨のひまさへつれなかりけり|ねやのひまさへつれなかりけり|ねやのひまさえつれなかりけり|よもすがらものおもふころはあけやらで
+嘆けとて月やはものを思はする|かこち顔なるわが涙かな|かこちがほなるわがなみだかな|かこちがおなるわがなみだかな|なげけとてつきやはものをおもはする
+村雨の露もまだひぬ槙の葉に|霧立ちのぼる秋の夕暮れ|きりたちのぼるあきのゆふぐれ|きりたちのぼるあきのゆうぐれ|むらさめのつゆもまだひぬまきのはに
+難波江の蘆のかりねのひとよゆゑ|みをつくしてや恋ひわたるべき|みをつくしてやこひわたるべき|みをつくしてやこいわたるべき|なにはえのあしのかりねのひとよゆゑ
+玉の緒よ絶えなば絶えねながらへば|忍ぶることの弱りもぞする|しのぶることのよわりもぞする||たまのをよたえなばたえねながらへば
+見せばやな雄島の海人の袖だにも|濡れにぞ濡れし色は変はらず|ぬれにぞぬれしいろはかはらず|ぬれにぞぬれしいろはかわらず|みせばやなをじまのあまのそでだにも
+きりぎりす鳴くや霜夜のさむしろに|衣かたしきひとりかも寝む|ころもかたしきひとりかもねむ|ころもかたしきひとりかもねん|きりぎりすなくやしもよのさむしろに
+わが袖は潮干に見えぬ沖の石の|人こそ知らね乾く間もなし|ひとこそしらねかわくまもなし||わがそではしほひにみえぬおきのいしの
+世の中は常にもがもな渚漕ぐ|海人の小舟の綱手かなしも|あまのをぶねのつなでかなしも|あまのおぶねのつなでかなしも|よのなかはつねにもがもななぎさこぐ
+み吉野の山の秋風さ夜更けて|ふるさと寒く衣打つなり|ふるさとさむくころもうつなり||みよしののやまのあきかぜさよふけて
+おほけなく憂き世の民におほふかな|わが立つ杣に墨染の袖|わがたつそまにすみぞめのそで||おほけなくうきよのたみにおほふかな
+花さそふ嵐の庭の雪ならで|ふりゆくものはわが身なりけり|ふりゆくものはわがみなりけり||はなさそふあらしのにはのゆきならで
+来ぬ人をまつほの浦の夕なぎに|焼くや藻塩の身もこがれつつ|やくやもしほのみもこがれつつ|やくやもしおのみもこがれつつ|こぬひとをまつほのうらのゆふなぎに
+風そよぐならの小川の夕暮れは|みそぎぞ夏のしるしなりける|みそぎぞなつのしるしなりける||かぜそよぐならのをがはのゆふぐれは
+人も惜し人も恨めしあぢきなく|世を思ふゆゑにもの思ふ身は|よをおもふゆゑにものおもふみは|よをおもうゆえにものおもうみは|ひともをしひともうらめしあぢきなく
+百敷や古き軒端のしのぶにも|なほあまりある昔なりけり|なほあまりあるむかしなりけり|なおあまりあるむかしなりけり|ももしきやふるきのきばのしのぶにも`),
+  wbPre("p:nandoku","難読漢字","漢字を見て、よみを打つ",`
 紫陽花||あじさい
 向日葵||ひまわり
 蒲公英||たんぽぽ
@@ -6224,7 +6248,7 @@ const WB_PRESETS=[
 陽炎||かげろう
 十六夜||いざよい
 不知火||しらぬい`),
-  wbPre("p:kencho","県庁所在地","都道府県を見て、県庁所在地を打つ",20,`
+  wbPre("p:kencho","県庁所在地","都道府県を見て、県庁所在地を打つ",`
 北海道|札幌市|さっぽろし
 青森県|青森市|あおもりし
 岩手県|盛岡市|もりおかし
@@ -6272,7 +6296,7 @@ const WB_PRESETS=[
 宮崎県|宮崎市|みやざきし
 鹿児島県|鹿児島市|かごしまし
 沖縄県|那覇市|なはし`),
-  wbPre("p:yoji","四字熟語","意味を見て、四字熟語を打つ",20,`
+  wbPre("p:yoji","四字熟語","意味を見て、四字熟語を打つ",`
 一つのことをして、二つの得をすること|一石二鳥|いっせきにちょう
 多くの人が、口をそろえて同じことを言うこと|異口同音|いくどうおん
 言葉にしなくても、気持ちが通じ合うこと|以心伝心|いしんでんしん
@@ -6313,7 +6337,7 @@ const WB_PRESETS=[
 名前ばかりで、中身がともなわないこと|有名無実|ゆうめいむじつ
 油断は、失敗のもとになる恐ろしい敵であること|油断大敵|ゆだんたいてき
 その場に応じて、ふさわしい対応をすること|臨機応変|りんきおうへん`),
-  wbPre("p:kotowaza","ことわざ","意味を見て、ことわざを打つ",20,`
+  wbPre("p:kotowaza","ことわざ","意味を見て、ことわざを打つ",`
 名人でも、ときには失敗する|猿も木から落ちる|さるもきからおちる
 価値の分からない人に、よいものを与えても役に立たない|猫に小判|ねこにこばん
 がまん強く続ければ、いつか報われる|石の上にも三年|いしのうえにもさんねん
@@ -6355,13 +6379,24 @@ const WB_PRESETS=[
 ];
 function wbPreLoad(){
   let o={}; try{ o=JSON.parse(localStorage.getItem(WB_PRE_KEY)||"{}")||{}; }catch(e){}
-  for(const b of WB_PRESETS){ const v=o[b.id]||{}; b.best=typeof v.best==="number"?v.best:null; b.sec=v.sec; }
+  for(const b of WB_PRESETS){ const v=o[b.id]||{}; b.bests=v.bests&&typeof v.bests==="object"?v.bests:{}; b.sec=v.sec; b.mode=v.mode; }
 }
 function wbPreStore(){
-  const o={}; for(const b of WB_PRESETS) o[b.id]={ best:b.best, sec:b.sec };
+  const o={}; for(const b of WB_PRESETS) o[b.id]={ bests:b.bests, sec:b.sec, mode:b.mode };
   try{ localStorage.setItem(WB_PRE_KEY,JSON.stringify(o)); return true; }catch(e){ return false; }
 }
 const wbAll = () => wbBooks.concat(WB_PRESETS);   // 一覧の並び: 自分の単語帳 → できあいの単語帳
+/* 遊び方: 全部(自分の単語帳だけ)/ 10語 / 一本勝負(1回でもミスしたら終わり、打てた数を競う)。ベストは遊び方ごと */
+const WB_MODES = { all:"全部", 10:"10語", one:"一本勝負" };
+const wbModes = b => b.pre ? ["10","one"] : ["all","10","one"];
+const wbMode = b => wbModes(b).includes(String(b.mode)) ? String(b.mode) : wbModes(b)[0];
+const wbBests = b => { if(!b.bests || typeof b.bests!=="object") b.bests={}; if(b.best!=null && b.bests.all==null){ b.bests.all=b.best; } return b.bests; };   // 前の「ベスト」は「全部」のベストにする
+const wbBestTxt = (b,m=wbMode(b)) => { const v=wbBests(b)[m]; return v==null ? "" : m==="one" ? `${v}語` : fmtTime(v); };
+function wbSetMode(i,m){
+  const b=wbAll()[i]; if(!b) return;
+  const ms=wbModes(b); b.mode = m==="next" ? ms[(ms.indexOf(wbMode(b))+1)%ms.length] : m;
+  if(b.pre) wbPreStore(); else wbStore(); renderBooks();
+}
 
 function wbStore(){
   try{ localStorage.setItem(WB_KEY, JSON.stringify(wbBooks)); return true; }
@@ -6386,8 +6421,8 @@ function wbBadChars(k){
   return [...bad];
 }
 /* 1語ぶんの入力を確かめる。よいときは {t,k}(問題があれば q も)、だめなときは {err} */
-function wbCheckWord(t,k,q){
-  t=String(t||"").trim(); k=wbNormKana(k); q=String(q||"").trim().slice(0,80);
+function wbCheckWord(t,k,q,qk){
+  t=String(t||"").trim(); k=wbNormKana(k); q=String(q||"").trim().slice(0,80); qk=q ? String(qk||"").trim().slice(0,80) : "";
   if(!k && /^[ぁ-んー、。！？・〜]+$/.test(wbNormKana(t))) k=wbNormKana(t);   // ひらがなだけの言葉は、よみがなを省ける
   if(!t && k) t=k;
   if(!t) return {err:"言葉を入れてください"};
@@ -6395,7 +6430,7 @@ function wbCheckWord(t,k,q){
   const bad=wbBadChars(k);
   if(bad.length) return {err:`「${t}」のよみがなに入力できない文字があります: ${bad.join(" ")}`};
   if(k.length>60) return {err:`「${t}」のよみがなが長すぎます(60文字まで)`};
-  return q ? {q, t:t.slice(0,40), k} : {t:t.slice(0,40), k};
+  return q ? Object.assign({q, t:t.slice(0,40), k}, qk?{qk}:{}) : {t:t.slice(0,40), k};
 }
 function openBooks(){
   wbLoad(); wbEdit=null;
@@ -6408,7 +6443,8 @@ function renderBooks(){
   wbCur=Math.max(0,Math.min(wbCur,all.length-1));
   const item=(b,i)=>`<div class="wb-item${i===wbCur?" cur":""}${b.pre?" pre":""}" data-i="${i}">
     <span class="wb-no">${!b.pre&&i<9?i+1:""}</span>
-    <div class="wb-info"><b>${escH(b.name)}</b><small>${b.pre?`${escH(b.ds)} ・ ${b.words.length}語から毎回${b.n}語`:`${b.words.length}語`}${b.best!=null?` ・ ベスト ${fmtTime(b.best)}`:""}${wbHasQ(b)?`<span class="wb-sec">答えが出るまで<button data-sd="-1" aria-label="1秒短く">−</button><b>${wbSec(b)}</b>秒<button data-sd="1" aria-label="1秒長く">+</button></span>`:""}</small></div>
+    <div class="wb-info"><b>${escH(b.name)}</b><small>${b.pre?`${escH(b.ds)} ・ `:""}${b.words.length}語${wbBestTxt(b)?` ・ ${WB_MODES[wbMode(b)]}のベスト ${wbBestTxt(b)}`:""}</small>
+    <span class="wb-mode">${wbModes(b).map(m=>`<button class="${m===wbMode(b)?"on":""}" data-mode="${m}">${WB_MODES[m]}</button>`).join("")}</span><small>${wbHasQ(b)?`<span class="wb-sec">答えが出るまで<button data-sd="-1" aria-label="1秒短く">−</button><b>${wbSec(b)}</b>秒<button data-sd="1" aria-label="1秒長く">+</button></span>`:""}</small></div>
     <div class="wb-acts">
       <button class="btn primary" data-play="${i}">プレイ</button>
       ${b.pre?`<button class="btn" data-copy="${i}">コピーして編集</button>`:`<button class="btn" data-edit="${i}">編集</button>
@@ -6445,7 +6481,7 @@ function deleteBook(i){
 function wbCopy(i){
   const b=wbAll()[i]; if(!b) return;
   if(wbBooks.length>=WB_MAX_BOOKS){ alert(`単語帳は${WB_MAX_BOOKS}冊まで作れます`); return; }
-  const words=b.words.slice(0,WB_MAX_WORDS).map(w=>w.q?{q:w.q,t:w.t,k:w.k}:{t:w.t,k:w.k});
+  const words=b.words.slice(0,WB_MAX_WORDS).map(w=>({...w}));
   wbBooks.push({ id:Date.now().toString(36)+Math.random().toString(36).slice(2,6), name:(b.name+"(コピー)").slice(0,20), words, best:null, sec:b.sec });
   if(!wbStore()){ wbBooks.pop(); alert("保存できませんでした(ブラウザの保存容量がいっぱいかもしれません)"); return; }
   wbCur=wbBooks.length-1; editBook(wbCur);
@@ -6458,7 +6494,7 @@ function editBook(i){
   wbEdit.orig=JSON.stringify({ name:wbEdit.name, words:wbEdit.words });
   wbWordCur=-1;
   $("wbListView").style.display="none"; $("wbEditor").style.display="";
-  $("wbName").value=wbEdit.name; $("wbQ").value=""; $("wbT").value=""; $("wbK").value=""; $("wbBulk").value="";
+  $("wbName").value=wbEdit.name; $("wbQ").value=""; $("wbQK").value=""; $("wbT").value=""; $("wbK").value=""; $("wbBulk").value="";
   $("wbNote").textContent="";
   $("wbKeys").innerHTML='入力中: <b>Enter</b> 追加 ・ <b>Tab</b> 次の欄 ・ <b>Ctrl+Enter</b> 保存(まとめて追加の欄では追加) ・ <b>Esc</b> 入力をやめる<br>'+
     '入力していないとき: <b>Q</b> 問題を入力 ・ <b>T</b> 言葉を入力 ・ <b>M</b> 名前を入力 ・ <b>B</b> まとめて追加 ・ <b>↑ ↓</b> 言葉を選ぶ ・ <b>Delete</b> 選んだ言葉を外す ・ <b>S</b> 保存 ・ <b>Esc</b> やめる';
@@ -6468,7 +6504,7 @@ function editBook(i){
 function renderWbWords(){
   const ol=$("wbWords");
   if(wbWordCur>=wbEdit.words.length) wbWordCur=wbEdit.words.length-1;
-  ol.innerHTML=wbEdit.words.map((w,j)=>`<li class="${j===wbWordCur?"cur":""}"><span class="no">${j+1}</span><span>${w.q?`<span class="q">${escH(w.q)}</span>`:""}${escH(w.t)}</span><span class="k">${escH(w.k)}</span><button class="x" data-x="${j}" title="この言葉を外す">✕</button></li>`).join("");
+  ol.innerHTML=wbEdit.words.map((w,j)=>`<li class="${j===wbWordCur?"cur":""}"><span class="no">${j+1}</span><span>${w.q?`<span class="q">${escH(w.q)}${w.qk?`(${escH(w.qk)})`:""}</span>`:""}${escH(w.t)}</span><span class="k">${escH(w.k)}</span><button class="x" data-x="${j}" title="この言葉を外す">✕</button></li>`).join("");
   const cur=ol.querySelector("li.cur"); if(cur && cur.scrollIntoView) cur.scrollIntoView({block:"nearest"});
 }
 /* 編集をやめる(変えたところがあれば確かめる) */
@@ -6480,8 +6516,8 @@ function wbCancelEdit(){
   }
   openBooks();
 }
-function wbAddOne(t,k,q){
-  const r=wbCheckWord(t,k,q);
+function wbAddOne(t,k,q,qk){
+  const r=wbCheckWord(t,k,q,qk);
   if(r.err) return r.err;
   if(wbEdit.words.length>=WB_MAX_WORDS) return `1冊に入れられるのは${WB_MAX_WORDS}語までです`;
   if(wbEdit.words.some(w=>w.t===r.t && w.k===r.k && (w.q||"")===(r.q||""))) return `「${r.q||r.t}」はもう入っています`;
@@ -6490,10 +6526,10 @@ function wbAddOne(t,k,q){
 }
 function wbAddWord(){
   if(!wbEdit) return;
-  const err=wbAddOne($("wbT").value,$("wbK").value,$("wbQ").value);
+  const err=wbAddOne($("wbT").value,$("wbK").value,$("wbQ").value,$("wbQK").value);
   $("wbNote").textContent=err;
   if(err) return;
-  $("wbQ").value=""; $("wbT").value=""; $("wbK").value="";
+  $("wbQ").value=""; $("wbQK").value=""; $("wbT").value=""; $("wbK").value="";
   renderWbWords();
   const ol=$("wbWords"); ol.scrollTop=ol.scrollHeight;
   $(wbEdit.words.some(w=>w.q)?"wbQ":"wbT").focus();
@@ -6504,7 +6540,7 @@ function wbBulkAdd(){
   let ok=0; const errs=[];
   for(const l of lines){
     const c=l.split(/[,，、\t]/);
-    const err = c.length>=3 ? wbAddOne(c[1],c[2],c[0]) : wbAddOne(c[0],c[1]||"");   // 3つなら「問題,答え,よみがな」
+    const err = c.length>=3 ? wbAddOne(c[1],c[2],c[0],c[3]||"") : wbAddOne(c[0],c[1]||"");   // 3つなら「問題,答え,よみがな」、4つめは問題のよみがな
     if(err) errs.push(err); else ok++;
   }
   renderWbWords();
@@ -6560,12 +6596,14 @@ function booksKey(e){
   if(k==="Enter"||k===" "){ e.preventDefault(); playBook(wbCur); return; }
   if(k==="e"||k==="E"){ e.preventDefault(); editBook(wbCur); return; }
   if(k==="c"||k==="C"){ e.preventDefault(); wbCopy(wbCur); return; }
+  if(k==="m"||k==="M"){ e.preventDefault(); wbSetMode(wbCur,"next"); return; }
   if(k==="Delete"||k==="Backspace"||k==="x"||k==="X"){ e.preventDefault(); deleteBook(wbCur); return; }
 }
 $("wbList").addEventListener("click",e=>{
   const row=e.target.closest(".wb-item"); if(row){ wbCur=+row.dataset.i; }
   const b=e.target.closest("button"); if(!b){ renderBooks(); return; }
   if(b.dataset.sd!=null){ wbSetSec(wbCur,+b.dataset.sd); return; }
+  if(b.dataset.mode!=null){ wbSetMode(wbCur,b.dataset.mode); return; }
   if(b.dataset.play!=null) playBook(+b.dataset.play);
   else if(b.dataset.edit!=null) editBook(+b.dataset.edit);
   else if(b.dataset.copy!=null) wbCopy(+b.dataset.copy);
@@ -6583,25 +6621,42 @@ $("wbSave").addEventListener("click",wbSaveBook);
 $("wbCancel").addEventListener("click",wbCancelEdit);
 /* プレイ: 単語帳の言葉を全部、順番を混ぜて出す */
 function buildBookQueue(){
-  const pool=bookPlay.words.map(w=>w.q?{q:w.q,t:w.t,k:w.k}:{t:w.t,k:w.k});
-  wbNoPeek=0; wbQN=0;
+  const pool=bookPlay.words.map(w=>({...w}));
+  wbNoPeek=0; wbQN=0; wbPlayMode=wbMode(bookPlay);
   for(let i=pool.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [pool[i],pool[j]]=[pool[j],pool[i]]; }
-  if(bookPlay.n) pool.length=Math.min(pool.length,bookPlay.n);   // できあいの単語帳は、毎回 n 語だけ
+  if(wbPlayMode==="10") pool.length=Math.min(pool.length,10);
   taGoal=pool.length; taQueue=pool;
 }
+/* 一本勝負: 言葉が尽きたら、混ぜ直して足す(直前の言葉がすぐ続かないように) */
+let wbPlayMode="all";
+function wbRefill(){
+  const last=currentWord, pool=bookPlay.words.map(w=>({...w}));
+  for(let i=pool.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [pool[i],pool[j]]=[pool[j],pool[i]]; }
+  if(pool.length>1 && last && pool[0].k===last.k && (pool[0].q||"")===(last.q||"")) pool.push(pool.shift());
+  taQueue.push(...pool);
+}
 function endBookGame(){
-  const time=Number(elapsed.toFixed(2));
+  const time=Number(elapsed.toFixed(2)), one=wbPlayMode==="one", m=wbPlayMode;
   wbLoad();
   const b=(bookPlay.pre?WB_PRESETS:wbBooks).find(x=>x.id===bookPlay.id);
-  const isNew = !!b && (b.best==null || time<b.best);
-  if(isNew){ b.best=time; if(b.pre) wbPreStore(); else wbStore(); bookPlay=b; }
-  const best = b ? b.best : null;
-  $("resultDiff").textContent=`— 単語帳「${bookPlay.name}」 —`;
-  $("resultCount").classList.add("ta");
-  $("resultCaption").textContent=`${taGoal}語タイム`;
-  $("resultScore").textContent=elapsed.toFixed(2);
-  $("resultUnit").textContent="秒";
-  $("resultSubLine").textContent=`ミス ${miss}回 / この単語帳のベスト ${best==null?"--":fmtTime(best)}`+(wbQN?` / 答えを見ずに打てた ${wbNoPeek}/${wbQN}問`:"");
+  const bs=b ? wbBests(b) : {};
+  const isNew = !!b && (one ? score>0 && (bs[m]==null || score>bs[m]) : (bs[m]==null || time<bs[m]));
+  if(isNew){ bs[m]= one ? score : time; delete b.best; if(b.pre) wbPreStore(); else wbStore(); bookPlay=b; }
+  const bestTxt = b ? wbBestTxt(b,m) : "";
+  $("resultDiff").textContent=`— 単語帳「${bookPlay.name}」 ${WB_MODES[m]} —`;
+  if(one){
+    $("resultCount").classList.remove("ta");
+    $("resultCaption").textContent="打てた言葉";
+    $("resultScore").textContent=score;
+    $("resultUnit").textContent="語";
+    $("resultSubLine").textContent=`経過 ${time.toFixed(2)}秒 / ${WB_MODES[m]}のベスト ${bestTxt||"--"}`+(wbQN?` / 答えを見ずに打てた ${wbNoPeek}/${score}問`:"");
+  }else{
+    $("resultCount").classList.add("ta");
+    $("resultCaption").textContent=`${taGoal}語タイム`;
+    $("resultScore").textContent=elapsed.toFixed(2);
+    $("resultUnit").textContent="秒";
+    $("resultSubLine").textContent=`ミス ${miss}回 / ${WB_MODES[m]}のベスト ${bestTxt||"--"}`+(wbQN?` / 答えを見ずに打てた ${wbNoPeek}/${wbQN}問`:"");
+  }
   wbReveal();
   $("resultNew").textContent=isNew?"★ ベスト更新! ★":"";
   $("registerBox").style.display="none";   // 単語帳はランキングに載せない
