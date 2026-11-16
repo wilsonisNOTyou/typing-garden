@@ -1811,6 +1811,7 @@ html:not(.mobile) #screen-garden:has(.modal.open) .toast{font-size:.78rem; paddi
 #screen-garden .plist{max-height:52vh; overflow:auto; padding-right:.2rem}
 #screen-garden .rowi{border-radius:8px; border-bottom:1px dashed #d9ccb0}
 /* お店の自動売却: 作物を小さなマスで並べる */
+#screen-garden #g-shopBody{overflow-anchor:none}   /* 描き直しで、ブラウザがスクロールの位置を勝手に合わせ直さないように */
 #screen-garden .acgrid{display:grid; grid-template-columns:repeat(auto-fill,minmax(9.5rem,1fr)); gap:.4rem; padding:.45rem 0}
 #screen-garden .rowi.acell{display:flex; flex-direction:column; align-items:flex-start; gap:.2rem; padding:.4rem .5rem; border:1px solid #e3d8bf; border-radius:8px; min-width:0}
 #screen-garden .acell .acth{display:flex; align-items:center; gap:.35rem; font-weight:700; min-width:0; max-width:100%}
@@ -11714,9 +11715,12 @@ function renderShop(){
     body.phtml=rows.map((r,i)=>r.cell ? "" : `<div class="rowi ${r.locked?"locked":""} ${i===cur?"cur":""}" data-i="${i}">
       <div class="ic">${r.ic}</div>
       <div><div class="nm">${r.nm}</div><div class="ds">${r.ds}</div></div>
-      <div class="keyk">${window.IS_MOBILE ? (r.locked?"":shopActBtns(r.keys)) : (i===cur?r.keys:"")}</div></div>`).join("")
-      + (cells ? `<div class="acgrid">${rows.map((r,i)=>!r.cell ? "" : `<div class="rowi acell ${r.locked?"locked":""} ${i===cur?"cur":""}" data-i="${i}">
-      <div class="acth"><span class="ic">${r.ic}</span><span class="acnm">${r.cnm}</span></div>${r.sub?`<div class="acsub">${r.sub}</div>`:""}${r.chips||""}</div>`).join("")}</div>` : "");
+      <div class="keyk">${window.IS_MOBILE ? (r.locked?"":shopActBtns(r.keys)) : (i===cur||cells?r.keys:"")}</div></div>`).join("")   // 自動売却: 上のまとめの行はキーをいつも出す(選ぶたびに行の高さが変わって、一覧がずれないように)
+      + (cells ? `<div class="acgrid"></div>` : "");
+    // 作物のマスは1つずつ描き直す(まとめて入れ替えると、スクロールの位置が少しずれることがある)
+    const grid=cells && body.querySelector(".acgrid");
+    if(grid) grid.phtml=rows.map((r,i)=>!r.cell ? "" : `<div class="rowi acell ${r.locked?"locked":""} ${i===cur?"cur":""}" data-i="${i}">
+      <div class="acth"><span class="ic">${r.ic}</span><span class="acnm">${r.cnm}</span></div>${r.sub?`<div class="acsub">${r.sub}</div>`:""}${r.chips||""}</div>`).join("");
   }
   const total=invTotal().v;
   if(window.IS_MOBILE){
