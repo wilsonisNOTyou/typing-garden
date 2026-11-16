@@ -2566,6 +2566,11 @@ html.mobile #screen-garden .planter.gxhedge::after{inset:-12px; padding:10px; ba
 #screen-garden .buff.sup{background:linear-gradient(135deg,#fffbea,#ffeaf6,#eaf6ff); box-shadow:inset 0 0 0 2px #e0a020, 0 0 10px rgba(255,200,80,.7)}
 #screen-garden .buff b{font-variant-numeric:tabular-nums}
 #screen-garden .cooknow{font-size:.8rem; max-width:60%}
+html.mobile #g-cook .phead{display:grid; grid-template-columns:1fr auto; gap:.3rem .5rem; margin-bottom:.4rem}
+html.mobile #g-cook .phead h2{grid-row:1; grid-column:1}
+html.mobile #g-cook .phead .xbtn{grid-row:1; grid-column:2; padding:.25rem .7rem}
+html.mobile #g-cook .phead .cooknow{grid-row:2; grid-column:1 / -1; margin:0}
+html.mobile #screen-garden .cooknow{font-size:.7rem; line-height:1.4; max-width:none; flex:1 1 100%; max-height:2.9em; overflow:auto; padding:.15rem .5rem}   /* スマホ: 料理の効果は短く2行まで(画面をふさがない) */
 #screen-garden .dic{display:inline-block}
 #screen-garden .dic .cart{width:1.35em; height:1.35em; vertical-align:-.3em}
 #screen-garden .dic.mut{filter:drop-shadow(0 0 4px rgba(178,124,232,.9))}
@@ -2804,7 +2809,8 @@ html.mobile #screen-garden .keyhint:not(#g-shopHint):not(#g-gachaHint){display:n
 /* お知らせは下に出して、上のボタンを隠さない */
 /* スマホ: お知らせは下に小さく(2行まで・2つまで)。畑や道具を隠さないように */
 html.mobile #screen-garden #g-toasts{top:auto; bottom:calc(max(8px, env(safe-area-inset-bottom)) + 2.6rem); left:50%; transform:translateX(-50%); align-items:center; flex-direction:column-reverse; width:calc(100% - 16px); gap:.25rem}
-html.mobile #screen-garden .toast{font-size:.74rem; padding:.25rem .6rem; line-height:1.4; border-width:1.5px; opacity:.94}
+html.mobile #screen-garden .toast{font-size:.74rem; padding:.25rem .6rem; line-height:1.4; border-width:1.5px; opacity:.94; pointer-events:none}   /* スマホ: 知らせの上からでも、下のボタンを押せる */
+html.mobile #screen-garden .toast .tx, html.mobile #screen-garden .toast.imp .tx{display:-webkit-box; -webkit-box-orient:vertical; -webkit-line-clamp:3; line-clamp:3; overflow:hidden}   /* スマホ: 3行まで(全部は 🔔 の一覧で読める) */
 html.mobile #screen-garden .gacts{justify-content:center}
 html.mobile #screen-garden .gacts{gap:.3rem}
 html.mobile #screen-garden .gacts .sbtn{flex:1 1 30%; max-width:none; padding:.4rem .3rem; font-size:.82rem; line-height:1.25}   /* 何連のボタンが多くても、ガチャの中身が見えるように小さく */
@@ -9989,7 +9995,7 @@ function vilBulk(p,t,g3){
   const mk=(mj?2:1)*mutK(c.id), nS=binom(m, hasSup(c.id)?pSup(mk):0), nM=binom(m-nS, hasMut(c.id)?pMut(mk):0), nN=m-nS-nM, d=effDouble();
   const iN=g3?nN*3:nN+binom(nN,d), iM=g3?nM*3:nM+binom(nM,d), iS=g3?nS*3:nS+binom(nS,d), q=mj?4:qualUp(tierOf(c.id));
   recordHarvestN(c.id,q,iN); recordHarvestN(c.id,3,iM); recordHarvestN(c.id,5,iS);
-  if(S.vilOrder2 && !S.vilSellN){ if(iN){ invAdd(c.id,q,iN); S.vLog.k=S.vLog.k||{}; S.vLog.k[c.id]=(S.vLog.k[c.id]||0)+iN; } }
+  if(vilKeepN(c.id)){ if(iN){ invAdd(c.id,q,iN); S.vLog.k=S.vLog.k||{}; S.vLog.k[c.id]=(S.vLog.k[c.id]||0)+iN; } }
   else if(iN){ const price=priceOf(c.id,q)*iN; xAdd(S,"money",price); S.totalSales+=price; S.vLog.h=S.vLog.h||{}; S.vLog.h[c.id]=(S.vLog.h[c.id]||0)+iN; S.vLog.earn=(S.vLog.earn||0)+price; }
   if(S.vilOrder2 && S.vilSellM){
     const price=priceOf(c.id,3)*iM+priceOf(c.id,5)*iS;
@@ -10063,7 +10069,7 @@ function villagerAdvance(p,dt,g3){
     const q=p.vil==="mj" ? 4 : qualUp(tierOf(c.id));   // q: 品質(t は残り時間なので別名に)。超シゴデキ村人はかならず ☆☆☆
     const num = g3 ? 3 : 1 + (Math.random()<effDouble() ? 1 : 0);   // 金のスプリンクラーの届く区画は、かならず3個
     for(let i=0;i<num;i++) recordHarvest(c.id,q,true);
-    if(S.vilOrder2 && !S.vilSellN){                 // 指示書2: ふつうの作物は売らずに持ち物へ
+    if(vilKeepN(c.id)){                 // 指示書2: ふつうの作物は売らずに持ち物へ(作物ごとの自動売却に合わせるときは、その作物の設定で)
       invAdd(c.id,q,num);
       S.vLog.k=S.vLog.k||{}; S.vLog.k[c.id]=(S.vLog.k[c.id]||0)+num;
       continue;
@@ -10114,12 +10120,15 @@ function toggleVilUseSeed(){
   toast(S.vilUseSeed ? "村人は、持っている種があれば買わずにそれを植えます" : "村人は、いつも種を買って植えます(持っている種は使いません)","",3200);
   save(); renderAll();
 }
+/* 指示書2: 村人が穫ったふつうの作物を持ち物に入れるか(vilSellN: true 売る / false 売らない / "auto" 作物ごとの自動売却(収穫物)に合わせる) */
+const vilKeepN = id => !!S.vilOrder2 && (S.vilSellN===false || (S.vilSellN==="auto" && !autoCrop(id)));
+const vilSellTxt = v => v==="auto" ? "作物ごとの自動売却に合わせて売ります" : v ? "売ります" : "売らずに持ち物に入れます";
 function toggleVilSell(w){
   if(!S.vilOrder2) return;
   tick();   // ここまでの分は、今の設定で進めてから切り替える
-  if(w==="N") S.vilSellN=!S.vilSellN; else S.vilSellM=!S.vilSellM;
+  if(w==="N") S.vilSellN = S.vilSellN===true ? false : S.vilSellN===false ? "auto" : true; else S.vilSellM=!S.vilSellM;   // ふつうの作物: 売る → 売らない → 自動売却に合わせる → 売る
   sfx.tool();
-  toast(w==="N" ? `村人が収穫したふつうの作物を${S.vilSellN?"売ります":"売らずに持ち物に入れます"}`
+  toast(w==="N" ? `村人が収穫したふつうの作物を${vilSellTxt(S.vilSellN)}${S.vilSellN==="auto"?"(お店の「自動売却」で収穫物がオンの作物は売り、オフの作物は持ち物に入れます)":""}`
                 : `村人が収穫した変異の作物を${S.vilSellM?"売ります":"売らずに持ち物に入れます"}${S.vilSellM&&!S.vilAutoM?"(変異の自動収穫がオンのときに効きます)":""}`,"",3200);
   save(); renderAll();
 }
@@ -11322,7 +11331,7 @@ function openModal(name){
   modal=name;
   sfx.open();
   $("g-"+name).classList.add("open");
-  if(name==="shop") renderShop();
+  if(name==="shop"){ shopCur[5]=0; renderShop(); }   // 自動売却: 作物のマスの中にいると ← → でタブを移れないので、開くたびに上に戻す
   if(name==="gacha"){ rgView="gacha"; renderGacha(); }   // 開いたときは、いつもガチャの画面から(コインに変換の画面を開いたままにしない)
   if(name==="treas"){ treasScrolled=""; renderTreas(); }
   if(name==="book"){ bookQ=""; $("g-bookQ").value=""; bookShowDetail("g-book",false); renderBook(); }
@@ -11519,12 +11528,12 @@ function shopRows(){
         enter: ()=>has?toggleVilOrder("H"):buyVilOrder(), shift: ()=>has?toggleVilOrder("M"):buyVilOrder() });
       // 村人の指示書2(収穫したあと売るか)。指示書を持っていると並ぶ
       if(has){
-        const has2=S.vilOrder2, sellTxt=v=>v?'<b style="color:#2e7d32">売る</b>':'<b style="color:#8a5a00">売らない</b>';
+        const has2=S.vilOrder2, sellTxt=v=>v==="auto"?'<b style="color:#2a6ab0">作物ごとの自動売却に合わせる</b>':v?'<b style="color:#2e7d32">売る</b>':'<b style="color:#8a5a00">売らない</b>';
         rows.push({ ic:"📜",
           nm: `村人の指示書2 <span style="color:var(--ink-l)">${has2?"購入済み":fmtNum(VIL_ORDER2_COST)+"キー"}</span>`,
-          ds: has2?`ふつうの作物 ${sellTxt(S.vilSellN)} ・ 変異の作物 ${sellTxt(S.vilSellM)}<br>売らない作物は持ち物に入ります(料理の材料にできます)。変異の作物は「変異の自動収穫」がオンのときに効きます`
+          ds: has2?`ふつうの作物 ${sellTxt(S.vilSellN)} ・ 変異の作物 ${sellTxt(S.vilSellM)}<br>売らない作物は持ち物に入ります(料理の材料にできます)。「自動売却に合わせる」では、お店の「自動売却」で収穫物がオンの作物だけ売ります。変異の作物は「変異の自動収穫」がオンのときに効きます`
                   :`村人が収穫した作物を売るかどうかを、ふつうの作物と変異の作物それぞれで決められるようになります`,
-          keys: has2?"<b>Enter</b> ふつうの作物を売る / 売らない<br><b>Shift+Enter</b> 変異の作物を売る / 売らない":"<b>Enter</b> 買う",
+          keys: has2?"<b>Enter</b> ふつうの作物を 売る / 売らない / 自動売却に合わせる<br><b>Shift+Enter</b> 変異の作物を売る / 売らない":"<b>Enter</b> 買う",
           enter: ()=>has2?toggleVilSell("N"):buyVilOrder2(), shift: ()=>has2?toggleVilSell("M"):buyVilOrder2() });
         // 村人の指示書3(持っている種を使う)。指示書2を持っていると並ぶ
         if(has2){
@@ -15264,7 +15273,14 @@ function renderCook(){
     `<b>Tab</b> ${COOK_TABS.slice(0,cookTabsN()).map((t,i)=>i===cookTab?`「${t}」`:t).join(" / ")} ・ <b>↑ ↓</b> 選ぶ`+(cookTab===0?" ・ <b>← →</b> 段階(ふつう / 変異 / 超変異)"+(kitN("cookvil")>0?` ・ <b>A</b> 料理番に任せる(${(S.autoCook||[]).length} / ${kitN("cookvil")})`:""):cookTab===1?" ・ <b>← →</b> 段階(作り置きのあるもの)":"")+(cookTab<2?" ・ <b>S</b> お気に入り":"")+` ・ <b>Enter</b> 決定 ・ <b>0</b> / <b>Esc</b> 閉じる`;
   keepVisible(body);
 }
+function cookNowShort(){   // スマホ: 料理名と残り時間だけを1行に(効果の説明は下の一覧にある)
+  const xs=[buffNow(), buff2Now(), buff3Now()].filter(Boolean), gf=giftNow();
+  const one = x => `${dishIco(DISH[x.d],x.t)}${esc(dishName(DISH[x.d],x.t))} ${fmtLeft(x.until-Date.now())}`;
+  const parts=xs.map(one); if(gf) parts.push(`🎁${one(gf)}`); if(bentoOn()) parts.push(`🍱 ${fmtLeft(S.bentoUntil-Date.now())}`);
+  return parts.length ? parts.join(" ・ ") : "";
+}
 function cookNowText(){
+  if(window.IS_MOBILE) return cookNowShort();
   const gf=giftNow(), gl = gf ? `<br>🎁 ${esc(gf.from)}さんからもらった料理: ${dishIco(DISH[gf.d],gf.t)} ${esc(dishName(DISH[gf.d],gf.t))} ・ ${esc(effText(DISH[gf.d],gf.t))} ・ 残り ${fmtLeft(gf.until-Date.now())}` : "";
   return cookNowText0()+gl;
 }
