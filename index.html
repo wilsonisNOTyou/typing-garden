@@ -10375,8 +10375,8 @@ function dailyGive(kind,lv){
     if(!(S.dbSap && S.dbSap.d===dbgDay())) S.dbSap={ d:dbgDay(), n:0 };
     S.dbSap.n++; S.seeds[id]=(S.seeds[id]||0)+1; btBookMark(id); S.dbSapGot=(S.dbSapGot||0)+1;
     msg=`${b.icon} ${b.name}の苗木を受け取りました ・ 今日はあと${dailySapLeft()}本`;
-  }else if(kind==="neji"){ const a=dailyNeji(lv); xAdd(S,"money",a); msg=`🔩 ${fmtNum(a)}キーを受け取りました`; }
-  else if(kind==="own"){ const a=Math.floor(Math.max(0,S.money)*[.005,.01,.02][lv]); xAdd(S,"money",a); msg=`💰 所持キーの${[.5,1,2][lv]}% ${fmtNum(a)}キーを受け取りました`; }
+  }else if(kind==="neji"){ const a=dailyNeji(lv); xAdd(S,"money",a); earnAdd(a); msg=`🔩 ${fmtNum(a)}キーを受け取りました`; }
+  else if(kind==="own"){ const a=Math.floor(Math.max(0,S.money)*[.005,.01,.02][lv]); xAdd(S,"money",a); earnAdd(a); msg=`💰 所持キーの${[.5,1,2][lv]}% ${fmtNum(a)}キーを受け取りました`; }
   else if(kind==="fuyo"){ const a=[1,2,3][lv]; S.fuyo=(S.fuyo||0)+a; msg=`🍂 腐葉土 ${a}個を受け取りました`; }
   else if(kind==="rose"){ const a=[3,6,12][lv], c={}; for(let i=0;i<a;i++){ const l=DBG_ROSE[Math.random()*DBG_ROSE.length|0]; c[l]=(c[l]||0)+1; } for(const l in c) roseGive(l,c[l]); msg=`🌹 薔薇の種 ${a}個を受け取りました`; }
   else if(kind==="min") msg=`このプレイは1打の時短 +${[10,20,40][lv]}分で農園に届きます`;
@@ -13250,7 +13250,7 @@ function yzKozuchi(ok){
   if(ok!==true){ gAsk(`打ち出の小槌を振りますか? 持っているキー ${xFmt(S.money,"money")} が2倍になります(1回で増えるのは最大1京)。小槌はなくなり、次に振れるのは10日後です`,"振る").then(y=>{ if(y) yzKozuchi(true); }); return; }
   yzSet("kozuchi",yzN("kozuchi")-1);
   const before=xFmt(S.money,"money");
-  xAddBig(S,"money",add); S.yzKozAt=Date.now();
+  xAddBig(S,"money",add); earnAdd(Number(add)); S.yzKozAt=Date.now();
   S.yzKozuchiUsed=(S.yzKozuchiUsed||0)+1;
   sfx.vil(); toast(`${ico(YZ_NEWK.kozuchi)} 打ち出の小槌を振りました! ${before} → ${xFmt(S.money,"money")}キー`,"good mut sup",7000,true);
   yzCoinRain(80);
@@ -16477,7 +16477,7 @@ function tutSandbox(on){
   else{ S.fields=realFields; S.cur=realCur; realFields=null; save(); }
   if(document.body.classList.contains("garden")) renderAll();
 }
-function tutGive(n){ xAdd(S,"money",n); save(); if(document.body.classList.contains("garden")) renderAll(); }
+function tutGive(n){ xAdd(S,"money",n); earnAdd(n); save(); if(document.body.classList.contains("garden")) renderAll(); }
 /* スマホはタイピングできないので、ガイドの間だけ植えた作物を実らせる */
 function tutGrow(){
   tick();
@@ -16485,8 +16485,17 @@ function tutGrow(){
   save(); if(document.body.classList.contains("garden")) renderAll();
 }
 
-/* 累計獲得キー: 売上(作物・種・村人・自動売却)+ タイピングから届いたキー + 受け取った実績のごほうび */
-const earnedTotal = () => (S.totalSales||0) + (S.fromTypingScrews||0) + GOALS.filter(goalClaimed).reduce((a,g)=>a+g.rw,0) + (S.goalBonus||0);
+/* 累計獲得キー: 売上(作物・種・村人・自動売却)+ タイピングから届いたキー + 受け取った実績のごほうび
+   + キーボタン・キーの泉 + そのほか(日替わりのご褒美・打ち出の小槌・チャットの目標・はじめてガイド)
+   earnFix: これらを数えていなかったころのぶん。読み込んだときに1回だけ、所持キーに届かなければ所持キーまで引き上げる */
+const earnAdd = a => { if(a>0) S.otherEarn=(S.otherEarn||0)+a; };
+const earnedBase = () => (S.totalSales||0) + (S.fromTypingScrews||0) + GOALS.filter(goalClaimed).reduce((a,g)=>a+g.rw,0) + (S.goalBonus||0) + (S.yzEarn||0) + (S.otherEarn||0) + (S.earnFix||0);
+function earnFixOnce(){
+  if(S.earnFixed) return; S.earnFixed=1;
+  let m=0; try{ m=Number(xBig(S.money,"money")); }catch(e){ m=+S.money||0; }
+  const gap=m-earnedBase(); if(gap>0) S.earnFix=(S.earnFix||0)+gap;
+}
+const earnedTotal = () => { earnFixOnce(); return earnedBase(); };
 /* ---------- 番付(所持キー・累計収穫) ----------
    名前ごとに1件。自分の庭の印(owner)で、同じ名前の別人の記録を上書きしないようにする */
 const rankKey = name => encodeURIComponent(name).replace(/\./g,"%2E");
@@ -16995,7 +17004,7 @@ return { fmtNum, numStr, fxInfo:()=>({ kyo:!!(S.goals && S.goals.kei), bara:bara
     { name:GUR.bento.name, ic:ico(GUR.bento), give:()=>{ S.bento=(S.bento||0)+1; } },
     ...RG_GHR.filter(x=>x.k!=="rkam").map(x=>({ name:x.name, ic:ico(x), give:x.give })) ],   // 薔薇ガチャの GHR から、かまど以外の4つ
   wcFanfare:()=>{ seq([523,659,784,1047],110,"triangle",.06,.25); setTimeout(()=>seq([1047,1319,1568,2093],70,"sine",.04,.2),520); },
-  wcGoalGot:wk=>!!(S.wcGoal && S.wcGoal[wk]), wcGoalPrize:(wk,money,coin)=>{ S.wcGoal=S.wcGoal||{}; if(S.wcGoal[wk]) return null; S.wcGoal[wk]=1; xAdd(S,"money",money); xAdd(S,"roseCoin",coin);
+  wcGoalGot:wk=>!!(S.wcGoal && S.wcGoal[wk]), wcGoalPrize:(wk,money,coin)=>{ S.wcGoal=S.wcGoal||{}; if(S.wcGoal[wk]) return null; S.wcGoal[wk]=1; xAdd(S,"money",money); earnAdd(money); xAdd(S,"roseCoin",coin);
     const ps=Garden.wcGoalPicks(), it=ps[Math.floor(Math.random()*ps.length)]; it.give(); save(); try{ renderAll(); }catch(e){} return { name:it.name, ic:it.ic }; },
   wcCardOpts:()=>{ const out=[];
     for(const c of CROPS){ const q=S.harvestQ[c.id]||[]; for(const t of [5,3]) if(q[t]>0){ out.push({ c:{ k:"crop", id:c.id, t, n:q[t] }, label:`${icoQ(c,t)} ${esc(qName(c.id,t))}`, sub:`${t===5?"超変異":"変異"} ・ ${fmtNum(q[t])}個収穫`, p:t*1e9+c.price }); break; } }
