@@ -9061,6 +9061,7 @@ const btTrees = f => f && f.bt ? Object.keys(f.bt).filter(gi=>f.bt[gi]).map(gi=>
 const btItem = (base,q) => q ? base+"2" : base;   // 変異・超変異の木からは上位の品
 const fmtYears = ms => { const d=Math.ceil(ms/(24*HOUR)); if(d<=1) return fmtDur(Math.max(0,ms)); const y=Math.floor(d/365), m=Math.floor((d%365)/30), dd=(d%365)%30; return (y?y+"年":"")+(m?m+"か月":"")+(!y&&dd?dd+"日":"") || "1日"; };
 const AXE_COST = 5000, FUYO_COST = 100000, BT_FERT = 2;
+const BT_FERT_MAX = 10;   // 大木の腐葉土の回数の上限
 const dayKey = () => new Date(Date.now()+9*3600000).toISOString().slice(0,10);   // 日本時間の日付(日替わりのご褒美と同じ区切り)
 const fuyoToday = () => S.fuyoDay===dayKey();
 const FUYO_ART = `<svg viewBox="0 0 32 32"><ellipse cx="16" cy="25" rx="13" ry="4.5" fill="#3e2716"/><path d="M4 24c2-7 6-11 12-11s10 4 12 11z" fill="#5a3a22"/><path d="M7 22c3-1 5 0 7-2M17 20c3 0 5 1 8 0" stroke="#7a5232" stroke-width="1.4" fill="none"/><path d="M10 13c2-5 7-6 9-4-3 0-6 2-9 4z" fill="#c8862e"/><path d="M17 12c3-4 8-3 9 0-3-1-6-1-9 0z" fill="#9a6a24"/><path d="M13 16c1-3 4-4 6-3-2 1-4 2-6 3z" fill="#7aa848"/></svg>`;
@@ -9082,19 +9083,36 @@ const WORK_KEEP = Object.fromEntries(WORK_FOODS.map(f=>[f.id,f]));   // 工房�
 const workSeen = id => !!(S.workSeen && S.workSeen[id]) || (S[id]||0)>0;
 const BT_MUT = [0.03, 0.003];   // 実った瞬間に変異・超変異になる確率
 
+/* 木守りの村人が収穫した実(知らせは庭の画面でまとめて出す) */
+let kmGot=null;
+const kmOn = t => !!t.km && yzN("kimori")>0;
+function kmTake(t,c){
+  const b=BTS[t.id], id=btItem(b.fruit,t.q), m=b.fN*(t.q===5?2:1)*c;
+  btGive(id,m); S.btHarvest=(S.btHarvest||0)+m;
+  kmGot=kmGot||{}; kmGot[id]=(kmGot[id]||0)+m;
+}
 /* 育つ: ms は「水が効いていた時間 × 速さ」 */
 function btGrow(t,ms){
   if(!(ms>0)) return;
   if(!t.rip){
     t.g+=ms; const n=btNeed(t);
     if(t.g<n) return;
+    const over=t.g-n;
     t.g=n; t.rip=true; t.ready=true; t.fr=0;
     if(!t.q && !t.plain){ const r=Math.random(); if(r<BT_MUT[1]) t.q=5; else if(r<BT_MUT[0]) t.q=3; }   // 素朴な肥料をまいた木は変異しない
     S.btRipe=(S.btRipe||0)+1; S.btRipeBy=S.btRipeBy||{}; S.btRipeBy[t.id]=(S.btRipeBy[t.id]||0)+1;
     btBookMark(t.id,t.q||0);
     if(t.q===3) S.btMut=(S.btMut||0)+1; if(t.q===5) S.btSup=(S.btSup||0)+1;   // 実績: 変異の大木 / 超変異の大木
     try{ toast(`${BTS[t.id].icon} ${esc(btName(t))}が実りました!${t.q===5?"(超変異)":t.q===3?"(変異)":""}`, t.q===5?"good mut sup":t.q===3?"good mut":"good", 7000, true); }catch(e){}
-    return;   // あまりは次の実りに持ち越さない
+    if(!kmOn(t)) return;   // あまりは次の実りに持ち越さない(木守りに任せた木は、収穫してそのまま次を育てる)
+    ms=over;
+  }
+  if(kmOn(t)){   // 木守りの村人: 実った回数ぶん、その場で収穫する(タイピングなどで時間がまとめて進んでも取りこぼさない)
+    let c=t.ready?1:0; t.ready=false;
+    t.fr=(t.fr||0)+ms; const need=btReNeed(t);
+    if(t.fr>=need){ const m=Math.floor(t.fr/need); c+=m; t.fr-=m*need; }
+    if(c) kmTake(t,c);
+    return;
   }
   if(t.ready) return;
   t.fr=(t.fr||0)+ms;
@@ -9144,6 +9162,7 @@ function btCut(gi){
   toast(`🪓 ${esc(btName(t))}を切りました。${msg}`,"good",5200,true);
 }
 const BT_FERT2 = 3;   // 御神木の腐葉土
+const btFertMax = () => ev("K",3,BT_FERT_MAX,2);   // 1本の木に腐葉土を使える回数(超変異のにんじんグラッセでも10回まで)
 const btFertMul = (base=BT_FERT) => base*(1+Math.max(0,effFert()-FERT_BOOST));   // 肥料の効きが上がる料理・貴重品のぶん上乗せ(最大2.8倍)
 function btFert(k,t){
   const sel=S.fertSel;
@@ -9165,12 +9184,12 @@ function btFert(k,t){
   }
   if(sel!=="fuyo" && sel!=="fuyo2"){ nope(k,"ふつうの肥料は大木には効きません。腐葉土を使います"); return; }
   if(!(S[sel]>0)){ nope(k, sel==="fuyo2" ? "御神木の腐葉土がありません(工房で御神木の葉から作れます)" : "腐葉土がありません(工房で杉の葉から作るか、お店で1日1つ買えます)"); return; }
-  const fmax=ev("K",3,Infinity,2);
+  const fmax=btFertMax();
   if((t.fert||0)>=fmax){ nope(k,`この木に腐葉土はもう${fmax}回使っています`); return; }
   const m=btFertMul(sel==="fuyo2"?BT_FERT2:BT_FERT);
   t.fert=(t.fert||0)+1; t.mul=(t.mul||1)*m;
   if(Math.random()<ev("η",.5,1,0)) floatAt(k,"🍂 減らなかった!"); else S[sel]--;
-  hit(k); sfx.fert(); floatAt(k,`🍂 成長速度×${+m.toFixed(2)} ${t.fert}/${fmax===Infinity?"∞":fmax}`);
+  hit(k); sfx.fert(); floatAt(k,`🍂 成長速度×${+m.toFixed(2)} ${t.fert}/${fmax}`);
 }
 let btCutAsk=null;   // 斧: 切る前に、もう一度押してもらう
 /* 大木の区画を押したとき。ふつうの処理に任せるとき(水やり)は false */
@@ -9626,7 +9645,7 @@ function isValidState(o){
 /* 古い記録(第1段階)にも足りない項目を補って読み込む */
 function normalize(o){
   const s=Object.assign(newState(),o);
-  s.fields=s.fields.map(f=>{ const g=makeField(); for(const k of KEYS) if(f&&f[k]) g[k]=Object.assign(g[k],f[k]); if(f&&f.bt&&typeof f.bt==="object") g.bt=f.bt;   // 大木
+  s.fields=s.fields.map(f=>{ const g=makeField(); for(const k of KEYS) if(f&&f[k]) g[k]=Object.assign(g[k],f[k]); if(f&&f.bt&&typeof f.bt==="object"){ g.bt=f.bt; for(const t of Object.values(g.bt)) if(t && t.fert>BT_FERT_MAX){ t.mul=Math.pow(t.mul||1, BT_FERT_MAX/t.fert); t.fert=BT_FERT_MAX; } }   // 大木(腐葉土の回数が上限をこえた木は、上限の回数ぶんの速さに直す)
     for(const k of KEYS){ const q=g[k]; if(q && q.bt!=null && !(g.bt&&g.bt[q.bt])) q.bt=null; }   // 木のない大木の印は外す
     return g; });
   if(s.cur>=s.fields.length) s.cur=0;
@@ -13262,6 +13281,7 @@ function yzKimoriTick(force){
   S.fields.forEach(f=>{ for(const gi of Object.keys(f.bt||{})){ const t=f.bt[gi]; if(!t || !t.km || !t.ready) continue;
     const b=BTS[t.id], id=btItem(b.fruit,t.q), m=b.fN*(t.q===5?2:1);
     t.ready=false; t.fr=0; btGive(id,m); S.btHarvest=(S.btHarvest||0)+m; got[id]=(got[id]||0)+m; } });
+  if(kmGot){ for(const id in kmGot) got[id]=(got[id]||0)+kmGot[id]; kmGot=null; }   // 時間がまとめて進んだあいだに収穫したぶん
   const ks=Object.keys(got);
   if(ks.length){ toast(`${ico(YZ_NEWK.kimori)} 木守りの村人が ${ks.map(id=>`${ico(FOOD[id])} ${esc(FOOD[id].name)}×${fmtNum(got[id])}`).join(" ・ ")} を収穫しました`,"good",4200,true); save(); }
 }
@@ -14705,7 +14725,7 @@ const EFFS = {
   H:{ nm:"種が安い",             n:"種の値段 −30%",                       s:"種の値段 −75%" },
   I:{ nm:"ガチャが安い",         n:"ガチャのキー −10%",                   s:"ガチャのキー −50%" },   // キーで引くガチャだけ(薔薇ガチャのコインは減らない)
   J:{ nm:"肥料の効果",           n:"肥料の効き +10%",                     s:"肥料の効き +20%" },
-  K:{ nm:"肥料の回数",           n:"1つの作物に肥料を3回まで",            s:"1つの作物に肥料を何回でも" },
+  K:{ nm:"肥料の回数",           n:"1つの作物に肥料を3回まで",            s:"1つの作物に肥料を何回でも(大木の腐葉土は10回まで)" },
   L:{ nm:"一括植え",             n:"種を植えると、その畑の空いた土ぜんぶに植わる", s:"種を植えると、すべての畑の空いた土に植わる" },
   M:{ nm:"画面の色",             n:"ホーム画面とタイピングが料理の色に染まる", s:"ホーム画面とタイピングが料理の色に鮮やかに染まり、作物が舞い、キーが料理に変わる。農園では収穫のたびに花火があがる" },
   N:{ nm:"1語のキー",            n:"タイピングゲームから農園に届くキー1本が、いちばん高い作物1個分の売値になる", s:"タイピングゲームから農園に届くキー1本が、いちばん高い作物2個分の売値になる" },
