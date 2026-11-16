@@ -707,6 +707,10 @@ h1.logo .gd::after{content:'🌱'; position:absolute; right:-.55em; top:-.55em; 
 .word-panel .corner::after{bottom:8px;right:8px}
 
 #wordText{font-size:clamp(1.4rem,4.5vw,2.2rem); letter-spacing:.06em; margin-bottom:.4rem; min-height:1.3em}
+/* 単語帳の問題: 問題を出して、答えとよみがなは決めた秒数たつまで隠す */
+#wordQ{font-size:clamp(1.05rem,3vw,1.45rem); line-height:1.55; color:var(--amber); margin-bottom:.5rem; white-space:pre-wrap; overflow-wrap:anywhere}
+#wordQ .wq-wait{display:block; font-size:.8rem; color:var(--steel); margin-top:.2rem}
+#wordPanel.wbhide #wordText, #wordPanel.wbhide #wordKana, #wordPanel.wbhide #romaji .rest{visibility:hidden}
 #wordKana{font-size:1rem; color:var(--steel); margin-bottom:.9rem; min-height:1.2em}
 #romaji{font-size:clamp(1.1rem,3.5vw,1.5rem); letter-spacing:.14em; font-family:'DotGothic16',monospace; min-height:1.3em}
 #romaji .done{color:var(--ok)}
@@ -1489,6 +1493,11 @@ html.mobile.gated body{overflow:hidden}
 .wb-in{font-family:inherit; font-size:1rem; color:var(--ink); background:#0f1511; border:2px solid var(--line); border-radius:6px; padding:.5rem .7rem; width:100%; user-select:text}
 .wb-in:focus{outline:none; border-color:var(--amber)}
 .wb-add{display:grid; grid-template-columns:1fr 1fr auto; gap:.5rem}
+.wb-q{margin-bottom:.5rem}
+.wb-words .q{display:block; color:var(--amber); font-size:.8rem; overflow-wrap:anywhere}
+.wb-sec{display:inline-flex; align-items:center; gap:.3rem; margin-left:.4rem; color:var(--steel); font-size:.8rem}
+.wb-sec button{font-family:inherit; background:none; border:1px solid var(--line); color:var(--ink); border-radius:5px; cursor:pointer; padding:0 .45rem; line-height:1.4}
+.wb-sec b{color:var(--ink); min-width:1.2em; text-align:center}
 .wb-add .btn{padding:.5rem 1rem; font-size:.9rem}
 .wb-hint{color:#7d8b80; font-size:.78rem; margin-top:.35rem; line-height:1.6}
 .wb-bulk{margin-top:.6rem; color:var(--steel); font-size:.85rem}
@@ -3356,6 +3365,7 @@ html:not(.mobile) #screen-garden.haslog:has(.modal.open) #g-toasts{top:14px}
       <div class="mt-pop" id="mtPop"></div>
       <span class="corner"></span>
       <div id="penaltyPop">ミス上限! キーが1個はまった…</div>
+      <div id="wordQ" hidden></div>
       <div id="wordText">&nbsp;</div>
       <div id="wordKana">&nbsp;</div>
       <div id="romaji">&nbsp;</div>
@@ -3749,7 +3759,7 @@ html:not(.mobile) #screen-garden.haslog:has(.modal.open) #g-toasts{top:14px}
     <div id="wbListView">
       <div id="wbList" class="wb-list"></div>
       <p class="reg-status m-only">スマホでは単語帳の作成・編集・削除ができます。プレイはパソコンで遊べます</p>
-      <p class="keynav"><b>↑ ↓</b> 単語帳を選ぶ ・ <b>Enter</b> プレイ ・ <b>E</b> 編集 ・ <b>Delete</b> 削除 ・ <b>1〜9</b> その単語帳をプレイ ・ <b>N</b> 新しい単語帳 ・ <b>Esc</b> タイトルへ</p>
+      <p class="keynav"><b>↑ ↓</b> 単語帳を選ぶ ・ <b>Enter</b> プレイ ・ <b>E</b> 編集 ・ <b>Delete</b> 削除 ・ <b>1〜9</b> その単語帳をプレイ ・ <b>← →</b> 答えが出るまでの秒数(問題のある単語帳) ・ <b>N</b> 新しい単語帳 ・ <b>Esc</b> タイトルへ</p>
       <div class="btn-row">
         <button class="btn primary" id="wbNew">新しい単語帳を作る (N)</button>
         <button class="btn" id="wbBack">タイトルへ (Esc)</button>
@@ -3759,15 +3769,16 @@ html:not(.mobile) #screen-garden.haslog:has(.modal.open) #g-toasts{top:14px}
       <label class="wb-lbl">単語帳の名前</label>
       <input id="wbName" class="wb-in" maxlength="20" placeholder="例: 理科の用語" autocomplete="off">
       <label class="wb-lbl">言葉を追加</label>
+      <input id="wbQ" class="wb-in wb-q" maxlength="80" placeholder="問題(なくてもよい。例: 植物が光から栄養を作るはたらき)" autocomplete="off">
       <div class="wb-add">
-        <input id="wbT" class="wb-in" maxlength="40" placeholder="言葉(例: 光合成)" autocomplete="off">
+        <input id="wbT" class="wb-in" maxlength="40" placeholder="言葉・答え(例: 光合成)" autocomplete="off">
         <input id="wbK" class="wb-in" maxlength="60" placeholder="よみがな(例: こうごうせい)" autocomplete="off">
         <button class="btn" id="wbAdd">追加 (Enter)</button>
       </div>
-      <p class="wb-hint">よみがなはひらがなで入れてください(カタカナは自動でひらがなに直します)。言葉がひらがなだけなら、よみがなは空でも大丈夫です</p>
+      <p class="wb-hint">よみがなはひらがなで入れてください(カタカナは自動でひらがなに直します)。言葉がひらがなだけなら、よみがなは空でも大丈夫です。<br>問題を入れると、遊ぶときは問題が出て、答えとよみがなは決めた秒数(単語帳の一覧で変えられます)たつまで隠れます。答えがよみがなと同じなら、答えは空でも大丈夫です</p>
       <details class="wb-bulk">
         <summary>まとめて追加する</summary>
-        <textarea id="wbBulk" class="wb-in" rows="5" placeholder="1行に「言葉,よみがな」の形で書きます&#10;光合成,こうごうせい&#10;細胞,さいぼう"></textarea>
+        <textarea id="wbBulk" class="wb-in" rows="5" placeholder="1行に「言葉,よみがな」の形で書きます&#10;光合成,こうごうせい&#10;細胞,さいぼう&#10;問題も入れるときは「問題,答え,よみがな」&#10;植物が光から栄養を作るはたらき,光合成,こうごうせい"></textarea>
         <div class="btn-row" style="margin-top:.4rem"><button class="btn" id="wbBulkAdd">まとめて追加</button></div>
       </details>
       <p class="wb-note" id="wbNote"></p>
@@ -5136,13 +5147,34 @@ function setCurrentWord(w){
   $("wordText").textContent=w.t; dkWrap();
   $("wordKana").textContent=w.t===w.k?"\u00a0":w.k;
   renderRomaji();
+  wbShowQ(w);
+}
+/* 単語帳の問題: 問題を出し、答え・よみがな・ローマ字の残りは、単語帳で決めた秒数たつまで隠す */
+let wbHideT=null, wbHideI=null, wbNoPeek=0, wbQN=0;
+function wbReveal(){
+  clearTimeout(wbHideT); clearInterval(wbHideI); wbHideT=wbHideI=null;
+  $("wordPanel").classList.remove("wbhide");
+  const s=$("wordQ").querySelector(".wq-wait"); if(s) s.remove();
+}
+function wbShowQ(w){
+  wbReveal();
+  const q = diff==="book" && w && w.q ? w.q : "", el=$("wordQ");
+  el.hidden=!q; el.textContent=q;
+  if(!q) return;
+  wbQN++;
+  let left=wbSec(bookPlay);
+  const tip=()=>`答えが出るまで ${left}秒 ・ 見ずに打てたら「見ずに打てた」に数えます`;
+  $("wordPanel").classList.add("wbhide");
+  el.insertAdjacentHTML("beforeend",`<small class="wq-wait">${tip()}</small>`);
+  wbHideI=setInterval(()=>{ left--; const s=el.querySelector(".wq-wait"); if(s) s.textContent=tip(); },1000);
+  wbHideT=setTimeout(wbReveal,left*1000);
 }
 function renderNextWord(){
   const el=$("nextWord");
   if(!isQ(diff)){ el.innerHTML="&nbsp;"; return; }
   if(nextWord){
     el.innerHTML='<span class="lbl">NEXT</span>';
-    el.appendChild(document.createTextNode(nextWord.t));
+    el.appendChild(document.createTextNode(nextWord.q||nextWord.t));   // 単語帳の問題は、答えではなく問題を見せる
   }else{
     el.innerHTML='<span class="lbl">NEXT</span>— ラスト1語 —';
   }
@@ -5189,6 +5221,7 @@ function clearWordPanel(){
   $("wordKana").innerHTML="&nbsp;";
   $("romaji").innerHTML="&nbsp;";
   $("nextWord").innerHTML="&nbsp;";
+  wbReveal(); $("wordQ").hidden=true; $("wordQ").textContent="";
 }
 
 /* ---------- バラバラ: バラバラのローズティーが効いている間、どのモードも、なにかがおかしくなる ----------
@@ -5492,7 +5525,7 @@ document.addEventListener("keydown",e=>{
     const id=e.target.id;
     if(e.key==="Enter" && (e.ctrlKey||e.metaKey)){
       if(id==="wbBulk"){ e.preventDefault(); wbBulkAdd(); return; }
-      if(id==="wbName"||id==="wbT"||id==="wbK"){ e.preventDefault(); wbSaveBook(); return; }
+      if(id==="wbName"||id==="wbQ"||id==="wbT"||id==="wbK"){ e.preventDefault(); wbSaveBook(); return; }
       if(id==="fbText"||id==="fbName"){ e.preventDefault(); fbSend(); return; }
     }
     if(e.key==="Enter"){
@@ -5501,6 +5534,7 @@ document.addEventListener("keydown",e=>{
       if(id==="bkImport") backupImport();
       else if(id==="bkCode") syncJoin();
       else if(id==="wbT"||id==="wbK") wbAddWord();
+      else if(id==="wbQ") $("wbT").focus();
       else if(id==="wbName") $("wbT").focus();
       else if(id==="fbName") fbSend();
       else $("regBtn").click();
@@ -5627,6 +5661,7 @@ document.addEventListener("keydown",e=>{
     if(r==="done"){
       if(mtOn()) mtWordDone(); else { score++; sndDone(); }   // 対戦: 金・2倍・おじゃま・連鎖・アイテム
       removeScrew();
+      if(diff==="book" && currentWord && currentWord.q && wbHideT) wbNoPeek++;   // 答えが出る前に打てた
       if(currentWord && currentWord.bara) baraPetalRain();   // バラバラの薔薇(辞典には載せない)
       else if(diff!=="book" && currentWord && !currentWord.oj) unlockWord((currentWord.orig||currentWord).k);   // 単語帳の言葉は辞典に載せない(逆さまの言葉は、もとの言葉で載せる)
       if(isQ(diff)){
@@ -6046,9 +6081,9 @@ function wbBadChars(k){
   }
   return [...bad];
 }
-/* 1語ぶんの入力を確かめる。よいときは {t,k}、だめなときは {err} */
-function wbCheckWord(t,k){
-  t=String(t||"").trim(); k=wbNormKana(k);
+/* 1語ぶんの入力を確かめる。よいときは {t,k}(問題があれば q も)、だめなときは {err} */
+function wbCheckWord(t,k,q){
+  t=String(t||"").trim(); k=wbNormKana(k); q=String(q||"").trim().slice(0,80);
   if(!k && /^[ぁ-んー、。！？・〜]+$/.test(wbNormKana(t))) k=wbNormKana(t);   // ひらがなだけの言葉は、よみがなを省ける
   if(!t && k) t=k;
   if(!t) return {err:"言葉を入れてください"};
@@ -6056,7 +6091,7 @@ function wbCheckWord(t,k){
   const bad=wbBadChars(k);
   if(bad.length) return {err:`「${t}」のよみがなに入力できない文字があります: ${bad.join(" ")}`};
   if(k.length>60) return {err:`「${t}」のよみがなが長すぎます(60文字まで)`};
-  return {t:t.slice(0,40), k};
+  return q ? {q, t:t.slice(0,40), k} : {t:t.slice(0,40), k};
 }
 function openBooks(){
   wbLoad(); wbEdit=null;
@@ -6070,7 +6105,7 @@ function renderBooks(){
   wbCur=Math.max(0,Math.min(wbCur,wbBooks.length-1));
   list.innerHTML=wbBooks.map((b,i)=>`<div class="wb-item${i===wbCur?" cur":""}" data-i="${i}">
     <span class="wb-no">${i<9?i+1:""}</span>
-    <div class="wb-info"><b>${escH(b.name)}</b><small>${b.words.length}語${b.best!=null?` ・ ベスト ${fmtTime(b.best)}`:""}</small></div>
+    <div class="wb-info"><b>${escH(b.name)}</b><small>${b.words.length}語${b.best!=null?` ・ ベスト ${fmtTime(b.best)}`:""}${wbHasQ(b)?`<span class="wb-sec">答えが出るまで<button data-sd="-1" aria-label="1秒短く">−</button><b>${wbSec(b)}</b>秒<button data-sd="1" aria-label="1秒長く">+</button></span>`:""}</small></div>
     <div class="wb-acts">
       <button class="btn primary" data-play="${i}">プレイ</button>
       <button class="btn" data-edit="${i}">編集</button>
@@ -6084,6 +6119,15 @@ function playBook(i){
   if(!b.words.length){ alert("この単語帳には言葉がありません。編集から追加してください"); return; }
   bookPlay=b;
   startGame("book");
+}
+/* 問題のある単語帳: 答えとよみがなが出るまでの秒数(単語帳ごと) */
+const WB_SEC_MIN=1, WB_SEC_MAX=30, WB_SEC_DEF=5;
+const wbHasQ = b => !!(b && b.words && b.words.some(w=>w.q));
+const wbSec = b => { const v=b && b.sec|0; return v>=WB_SEC_MIN && v<=WB_SEC_MAX ? v : WB_SEC_DEF; };
+function wbSetSec(i,d){
+  const b=wbBooks[i]; if(!wbHasQ(b)) return;
+  const v=Math.max(WB_SEC_MIN,Math.min(WB_SEC_MAX,wbSec(b)+d)); if(v===wbSec(b)) return;
+  b.sec=v; wbStore(); renderBooks();
 }
 function deleteBook(i){
   const b=wbBooks[i]; if(!b) return;
@@ -6099,17 +6143,17 @@ function editBook(i){
   wbEdit.orig=JSON.stringify({ name:wbEdit.name, words:wbEdit.words });
   wbWordCur=-1;
   $("wbListView").style.display="none"; $("wbEditor").style.display="";
-  $("wbName").value=wbEdit.name; $("wbT").value=""; $("wbK").value=""; $("wbBulk").value="";
+  $("wbName").value=wbEdit.name; $("wbQ").value=""; $("wbT").value=""; $("wbK").value=""; $("wbBulk").value="";
   $("wbNote").textContent="";
   $("wbKeys").innerHTML='入力中: <b>Enter</b> 追加 ・ <b>Tab</b> 次の欄 ・ <b>Ctrl+Enter</b> 保存(まとめて追加の欄では追加) ・ <b>Esc</b> 入力をやめる<br>'+
-    '入力していないとき: <b>T</b> 言葉を入力 ・ <b>M</b> 名前を入力 ・ <b>B</b> まとめて追加 ・ <b>↑ ↓</b> 言葉を選ぶ ・ <b>Delete</b> 選んだ言葉を外す ・ <b>S</b> 保存 ・ <b>Esc</b> やめる';
+    '入力していないとき: <b>Q</b> 問題を入力 ・ <b>T</b> 言葉を入力 ・ <b>M</b> 名前を入力 ・ <b>B</b> まとめて追加 ・ <b>↑ ↓</b> 言葉を選ぶ ・ <b>Delete</b> 選んだ言葉を外す ・ <b>S</b> 保存 ・ <b>Esc</b> やめる';
   renderWbWords();
   setTimeout(()=>$(b?"wbT":"wbName").focus(),30);
 }
 function renderWbWords(){
   const ol=$("wbWords");
   if(wbWordCur>=wbEdit.words.length) wbWordCur=wbEdit.words.length-1;
-  ol.innerHTML=wbEdit.words.map((w,j)=>`<li class="${j===wbWordCur?"cur":""}"><span class="no">${j+1}</span><span>${escH(w.t)}</span><span class="k">${escH(w.k)}</span><button class="x" data-x="${j}" title="この言葉を外す">✕</button></li>`).join("");
+  ol.innerHTML=wbEdit.words.map((w,j)=>`<li class="${j===wbWordCur?"cur":""}"><span class="no">${j+1}</span><span>${w.q?`<span class="q">${escH(w.q)}</span>`:""}${escH(w.t)}</span><span class="k">${escH(w.k)}</span><button class="x" data-x="${j}" title="この言葉を外す">✕</button></li>`).join("");
   const cur=ol.querySelector("li.cur"); if(cur && cur.scrollIntoView) cur.scrollIntoView({block:"nearest"});
 }
 /* 編集をやめる(変えたところがあれば確かめる) */
@@ -6121,31 +6165,31 @@ function wbCancelEdit(){
   }
   openBooks();
 }
-function wbAddOne(t,k){
-  const r=wbCheckWord(t,k);
+function wbAddOne(t,k,q){
+  const r=wbCheckWord(t,k,q);
   if(r.err) return r.err;
   if(wbEdit.words.length>=WB_MAX_WORDS) return `1冊に入れられるのは${WB_MAX_WORDS}語までです`;
-  if(wbEdit.words.some(w=>w.t===r.t && w.k===r.k)) return `「${r.t}」はもう入っています`;
+  if(wbEdit.words.some(w=>w.t===r.t && w.k===r.k && (w.q||"")===(r.q||""))) return `「${r.q||r.t}」はもう入っています`;
   wbEdit.words.push(r);
   return "";
 }
 function wbAddWord(){
   if(!wbEdit) return;
-  const err=wbAddOne($("wbT").value,$("wbK").value);
+  const err=wbAddOne($("wbT").value,$("wbK").value,$("wbQ").value);
   $("wbNote").textContent=err;
   if(err) return;
-  $("wbT").value=""; $("wbK").value="";
+  $("wbQ").value=""; $("wbT").value=""; $("wbK").value="";
   renderWbWords();
   const ol=$("wbWords"); ol.scrollTop=ol.scrollHeight;
-  $("wbT").focus();
+  $(wbEdit.words.some(w=>w.q)?"wbQ":"wbT").focus();
 }
 function wbBulkAdd(){
   if(!wbEdit) return;
   const lines=$("wbBulk").value.split(/\r?\n/).map(l=>l.trim()).filter(Boolean);
   let ok=0; const errs=[];
   for(const l of lines){
-    const [t,k=""]=l.split(/[,，、\t]/);
-    const err=wbAddOne(t,k);
+    const c=l.split(/[,，、\t]/);
+    const err = c.length>=3 ? wbAddOne(c[1],c[2],c[0]) : wbAddOne(c[0],c[1]||"");   // 3つなら「問題,答え,よみがな」
     if(err) errs.push(err); else ok++;
   }
   renderWbWords();
@@ -6176,6 +6220,7 @@ function booksKey(e){
     if(k==="Escape"){ e.preventDefault(); wbCancelEdit(); return; }
     if(k==="s"||k==="S"){ e.preventDefault(); wbSaveBook(); return; }
     if(k==="t"||k==="T"){ e.preventDefault(); $("wbT").focus(); return; }
+    if(k==="q"||k==="Q"){ e.preventDefault(); $("wbQ").focus(); return; }
     if(k==="m"||k==="M"){ e.preventDefault(); $("wbName").focus(); return; }
     if(k==="b"||k==="B"){ e.preventDefault(); $("wbEditor").querySelector(".wb-bulk").open=true; $("wbBulk").focus(); return; }
     if((k==="ArrowDown"||k==="ArrowUp") && n){
@@ -6196,6 +6241,7 @@ function booksKey(e){
   if(/^[1-9]$/.test(k) && wbBooks[+k-1]){ e.preventDefault(); wbCur=+k-1; playBook(wbCur); return; }
   if(!n) return;
   if(k==="ArrowDown"||k==="ArrowUp"){ e.preventDefault(); wbCur=(wbCur+(k==="ArrowDown"?1:-1)+n)%n; renderBooks(); return; }
+  if(k==="ArrowLeft"||k==="ArrowRight"){ e.preventDefault(); wbSetSec(wbCur,k==="ArrowRight"?1:-1); return; }   // 答えが出るまでの秒数
   if(k==="Enter"||k===" "){ e.preventDefault(); playBook(wbCur); return; }
   if(k==="e"||k==="E"){ e.preventDefault(); editBook(wbCur); return; }
   if(k==="Delete"||k==="Backspace"||k==="x"||k==="X"){ e.preventDefault(); deleteBook(wbCur); return; }
@@ -6203,6 +6249,7 @@ function booksKey(e){
 $("wbList").addEventListener("click",e=>{
   const row=e.target.closest(".wb-item"); if(row){ wbCur=+row.dataset.i; }
   const b=e.target.closest("button"); if(!b){ renderBooks(); return; }
+  if(b.dataset.sd!=null){ wbSetSec(wbCur,+b.dataset.sd); return; }
   if(b.dataset.play!=null) playBook(+b.dataset.play);
   else if(b.dataset.edit!=null) editBook(+b.dataset.edit);
   else if(b.dataset.del!=null) deleteBook(+b.dataset.del);
@@ -6219,7 +6266,8 @@ $("wbSave").addEventListener("click",wbSaveBook);
 $("wbCancel").addEventListener("click",wbCancelEdit);
 /* プレイ: 単語帳の言葉を全部、順番を混ぜて出す */
 function buildBookQueue(){
-  const pool=bookPlay.words.map(w=>({t:w.t,k:w.k}));
+  const pool=bookPlay.words.map(w=>w.q?{q:w.q,t:w.t,k:w.k}:{t:w.t,k:w.k});
+  wbNoPeek=0; wbQN=0;
   for(let i=pool.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [pool[i],pool[j]]=[pool[j],pool[i]]; }
   taGoal=pool.length; taQueue=pool;
 }
@@ -6235,7 +6283,8 @@ function endBookGame(){
   $("resultCaption").textContent=`${taGoal}語タイム`;
   $("resultScore").textContent=elapsed.toFixed(2);
   $("resultUnit").textContent="秒";
-  $("resultSubLine").textContent=`ミス ${miss}回 / この単語帳のベスト ${best==null?"--":fmtTime(best)}`;
+  $("resultSubLine").textContent=`ミス ${miss}回 / この単語帳のベスト ${best==null?"--":fmtTime(best)}`+(wbQN?` / 答えを見ずに打てた ${wbNoPeek}/${wbQN}問`:"");
+  wbReveal();
   $("resultNew").textContent=isNew?"★ ベスト更新! ★":"";
   $("registerBox").style.display="none";   // 単語帳はランキングに載せない
   $("resultKeys").innerHTML='<b>Enter</b> もう一回 ・ <b>Esc</b> 単語帳へ ・ <b>G</b> 庭へ';
