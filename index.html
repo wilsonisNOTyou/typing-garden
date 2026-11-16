@@ -1817,8 +1817,8 @@ html:not(.mobile) #screen-garden:has(.modal.open) .toast{font-size:.78rem; paddi
 #screen-garden .acell .acth .ic{font-size:1.15rem; width:auto; flex:none}
 #screen-garden .acell .acnm{overflow:hidden; text-overflow:ellipsis; white-space:nowrap}
 #screen-garden .acell .acsub{font-size:.74rem; color:var(--ink-l)}
-#screen-garden .acell .acchips{display:flex; gap:.3rem; flex-wrap:wrap}
-#screen-garden .acell .acchip{font:inherit; font-size:.72rem; padding:.12rem .5rem; border-radius:999px; border:1px solid #c9b98f; background:#f4ecd8; color:var(--ink-l); cursor:pointer}
+#screen-garden .acell .acchips{display:flex; gap:.22rem; flex-wrap:wrap}
+#screen-garden .acell .acchip{font:inherit; font-size:.68rem; padding:.12rem .36rem; white-space:nowrap; border-radius:999px; border:1px solid #c9b98f; background:#f4ecd8; color:var(--ink-l); cursor:pointer}
 #screen-garden .acell .acchip.on{background:#dff0d0; border-color:#5f8f32; color:#2e6b18; font-weight:700}
 #screen-garden .acell .acchip.buy{background:var(--sun); border-color:#a8801c; color:#3a2a08; font-weight:700}
 #screen-garden .rowi.cur{
@@ -2566,6 +2566,11 @@ html.mobile #screen-garden .planter.gxhedge::after{inset:-12px; padding:10px; ba
 #screen-garden .buff.sup{background:linear-gradient(135deg,#fffbea,#ffeaf6,#eaf6ff); box-shadow:inset 0 0 0 2px #e0a020, 0 0 10px rgba(255,200,80,.7)}
 #screen-garden .buff b{font-variant-numeric:tabular-nums}
 #screen-garden .cooknow{font-size:.8rem; max-width:60%}
+html.mobile #g-cook .phead{display:grid; grid-template-columns:1fr auto; gap:.3rem .5rem; margin-bottom:.4rem}
+html.mobile #g-cook .phead h2{grid-row:1; grid-column:1}
+html.mobile #g-cook .phead .xbtn{grid-row:1; grid-column:2; padding:.25rem .7rem}
+html.mobile #g-cook .phead .cooknow{grid-row:2; grid-column:1 / -1; margin:0}
+html.mobile #screen-garden .cooknow{font-size:.7rem; line-height:1.4; max-width:none; flex:1 1 100%; max-height:2.9em; overflow:auto; padding:.15rem .5rem}   /* スマホ: 料理の効果は短く2行まで(画面をふさがない) */
 #screen-garden .dic{display:inline-block}
 #screen-garden .dic .cart{width:1.35em; height:1.35em; vertical-align:-.3em}
 #screen-garden .dic.mut{filter:drop-shadow(0 0 4px rgba(178,124,232,.9))}
@@ -2804,7 +2809,8 @@ html.mobile #screen-garden .keyhint:not(#g-shopHint):not(#g-gachaHint){display:n
 /* お知らせは下に出して、上のボタンを隠さない */
 /* スマホ: お知らせは下に小さく(2行まで・2つまで)。畑や道具を隠さないように */
 html.mobile #screen-garden #g-toasts{top:auto; bottom:calc(max(8px, env(safe-area-inset-bottom)) + 2.6rem); left:50%; transform:translateX(-50%); align-items:center; flex-direction:column-reverse; width:calc(100% - 16px); gap:.25rem}
-html.mobile #screen-garden .toast{font-size:.74rem; padding:.25rem .6rem; line-height:1.4; border-width:1.5px; opacity:.94}
+html.mobile #screen-garden .toast{font-size:.74rem; padding:.25rem .6rem; line-height:1.4; border-width:1.5px; opacity:.94; pointer-events:none}   /* スマホ: 知らせの上からでも、下のボタンを押せる */
+html.mobile #screen-garden .toast .tx, html.mobile #screen-garden .toast.imp .tx{display:-webkit-box; -webkit-box-orient:vertical; -webkit-line-clamp:3; line-clamp:3; overflow:hidden}   /* スマホ: 3行まで(全部は 🔔 の一覧で読める) */
 html.mobile #screen-garden .gacts{justify-content:center}
 html.mobile #screen-garden .gacts{gap:.3rem}
 html.mobile #screen-garden .gacts .sbtn{flex:1 1 30%; max-width:none; padding:.4rem .3rem; font-size:.82rem; line-height:1.25}   /* 何連のボタンが多くても、ガチャの中身が見えるように小さく */
@@ -4932,7 +4938,7 @@ const dbNeji = lv => { try{ return Garden.dailyNeji(lv); }catch(e){ return 0; } 
 function dbLabel(b){
   const v=DB_VAL[b.kind], x=v?v[b.lv]:0;
   return b.kind==="sap" ? `${DB_TREEN[b.lv]}の苗木`
-    : b.kind==="neji" ? `キー ${Math.floor(dbNeji(b.lv)).toLocaleString("ja-JP")}`
+    : b.kind==="neji" ? `キー ${jpNum(dbNeji(b.lv))}`
     : b.kind==="min" ? `最後まで遊ぶと 1打の時間 +${x}分`
     : b.kind==="fuyo" ? `腐葉土 ${x}個`
     : b.kind==="rose" ? `薔薇の種 ${x}個`
@@ -5367,7 +5373,7 @@ async function endGame(){
   const toGarden=gardenScrews(diff,score);
   if(mtOn()){   // 対戦: 料理の倍率なし・日替わりのご褒美なし・ランキングに載せない
     typePk=null; dbFinish(null); recordStats(score, toGarden, true);
-    $("resultGarden").textContent = toGarden>0 ? `農園に ${toGarden.toLocaleString("ja-JP")}キー 届きます` : "";
+    $("resultGarden").textContent = toGarden>0 ? `農園に ${jpNum(toGarden)}キー 届きます` : "";
     mtFinish(toGarden); return;
   }
   typePk=gameBara?null:dbPk(diff,true); dbFinish(gameBara?null:diff);   // バラバラ中は、日替わりのご褒美も10倍もなし
@@ -5420,7 +5426,7 @@ function gardenScrews(d,n){
   if(d==="book") return n;
   return n*(SCREW_MULT[d]||1);
 }
-const showGardenScrews = (el,n) => { const m=gardenScrewMul(); $(el).textContent = n>0 ? `農園に ${Math.floor(n*m).toLocaleString("ja-JP")}キー 届きます${m>1?`(料理で1本 ${m.toLocaleString("ja-JP")}キー)`:""}` : ""; };
+const showGardenScrews = (el,n) => { const m=gardenScrewMul(); $(el).textContent = n>0 ? `農園に ${jpNum(n*m)}キー 届きます${m>1?`(料理で1本 ${jpNum(m)}キー)`:""}` : ""; };
 
 /* ---------- 入力 ---------- */
 const START_KEYS={"1":"easy","2":"normal","3":"hard","4":"ta-easy","5":"ta-normal","6":"ta-hard","7":"oneshot"};
@@ -5671,10 +5677,13 @@ try{ playerName=localStorage.getItem("typinggarden:playerName")||""; }catch(e){}
    ノーミス勝負: 本数が多いほど上、同本数はタイムが短いほど上
    スコアアタック: 本数が多いほど上 */
 /* 庭の番付の数(端数があれば足した正確な数) */
+/* そろばん: 大きな数を、庭で選んだ書き方(そのまま・万億兆で区切る・短く)で出す */
+const jpNum = n => { try{ return Garden.fmtNum(n); }catch(e){ return Math.floor(+n||0).toLocaleString("ja-JP"); } };
 function rankExact(r){
   const s=Math.floor(r.s||0), c=Math.round(r.c||0);
-  if(Math.abs(s)<2**53) return (s+c).toLocaleString("ja-JP");   // 9000兆より小さければ、ふつうの数のまま
-  try{ return (BigInt(s)+BigInt(c)).toLocaleString("ja-JP"); }catch(e){ return (s+c).toLocaleString("ja-JP"); }
+  let str; try{ str=(BigInt(s)+BigInt(c)).toString(); }catch(e){ str=null; }   // 9000兆を超えても1の位まで
+  if(str!=null) try{ return Garden.numStr(str); }catch(e){}
+  return (s+c).toLocaleString("ja-JP");
 }
 function betterRecord(a,b,d){
   if(isTimeRanked(d)){
@@ -6226,6 +6235,20 @@ function endBookGame(){
 /* ---------- 更新情報 ----------
    新しいものを上に足していく。d は YYYY-MM-DD */
 const NEWS=[
+  { d:"2026-11-16", t:"自動売却と村人の売り方", items:[
+    "お店の自動売却で、作物ごとに「変異」もオンオフできるようになりました。オンにすると、その作物の変異・超変異も収穫したその場で売ります。はじめはオフです",
+    "村人の指示書2で、ふつうの作物と変異の作物のそれぞれを「作物ごとの自動売却に合わせる」にできるようになりました。自動売却がオンの作物は売り、オフの作物は持ち物に入れます",
+  ]},
+  { d:"2026-11-16", t:"大木と肥料", items:[
+    "大木の実を収穫する村人が、タイピングなどで農園の時間がまとめて進んだときも、そのあいだに実ったぶんを全部収穫するようになりました",
+    "肥料と腐葉土をたくさん使える料理の効果は、何回でもから10回までに変えました。それより多くまいてあった大木は、10回ぶんの速さになります",
+  ]},
+  { d:"2026-11-16", t:"音・表示・操作", items:[
+    "どの画面でも全体の音量を変えられるようになりました。左下の 🔊 か Alt+↑↓ で変えられ、Alt+M で消す・戻すができます。別のタブを見ているあいだは音を止めます",
+    "ランキングや結果画面などのキーの数も、農園で選んだそろばんの書き方で出すようにしました",
+    "これまでのお知らせを ; キーで開く操作をやめました。🔔 のボタンから開けます",
+    "スマホで、料理の画面の今の効果と知らせを小さくしました。村人の収穫の知らせも短くしました",
+  ]},
   { d:"2026-11-13", t:"千両箱ガチャ", items:[
     "農園のガチャに、4台目の「千両箱ガチャ」を追加しました。累計獲得キーが100億を超えると開きます",
     "いちばん上の新しいレア度 GZR と、新しい貴重品が23種類出ます。貴重品の「千両箱」タブで、効果を確かめたり使ったりできます",
@@ -6542,7 +6565,7 @@ function wcPopup(html){
 }
 setInterval(()=>{ if(wcPend && !wcQuiet()){ const h=wcPend; wcPend=null; wcPopup(h); } if(wcQuiet()) $("wcPop").hidden=true; },1500);
 $("wcPop").addEventListener("click",()=>{ $("wcPop").hidden=true; openWorld(); });
-const wcNum = v => Math.floor(+v||0).toLocaleString("ja-JP");
+const wcNum = v => jpNum(v);   // そろばんの書き方に合わせる
 /* リアクション: 発言ごとに、ひとり1つの絵文字(もう一度押すと取り消し) */
 const WC_RX=["👍","🌹","😂","😮","🎉","🙏"];
 let wcRxOpen=null;
@@ -7484,7 +7507,7 @@ function mtFinishCommon(o){
   $("resultCount").classList.remove("ta"); $("resultCaption").textContent=o.cap;
   $("resultScore").textContent=o.s.toLocaleString("ja-JP"); $("resultUnit").textContent=o.unit;
   $("resultSubLine").textContent=o.sub; $("resultNew").textContent="";
-  $("resultGarden").textContent = o.toGarden>0 ? `農園に ${o.toGarden.toLocaleString("ja-JP")}キー${o.mins?` ・ 農園の時間 +${tqHours(o.mins)}`:""} 届きました` : "";
+  $("resultGarden").textContent = o.toGarden>0 ? `農園に ${jpNum(o.toGarden)}キー${o.mins?` ・ 農園の時間 +${tqHours(o.mins)}`:""} 届きました` : "";
   $("registerBox").style.display="none";
   mtResultBtns();
   document.getElementById("screen-result").classList.add("mtr");
@@ -9052,6 +9075,8 @@ const btTrees = f => f && f.bt ? Object.keys(f.bt).filter(gi=>f.bt[gi]).map(gi=>
 const btItem = (base,q) => q ? base+"2" : base;   // 変異・超変異の木からは上位の品
 const fmtYears = ms => { const d=Math.ceil(ms/(24*HOUR)); if(d<=1) return fmtDur(Math.max(0,ms)); const y=Math.floor(d/365), m=Math.floor((d%365)/30), dd=(d%365)%30; return (y?y+"年":"")+(m?m+"か月":"")+(!y&&dd?dd+"日":"") || "1日"; };
 const AXE_COST = 5000, FUYO_COST = 100000, BT_FERT = 2;
+const BT_FERT_MAX = 10;   // 肥料・腐葉土の回数の上限(超変異のにんじんグラッセのとき)
+const fertMax = () => ev("K",3,BT_FERT_MAX,2);   // 1つの作物・1本の大木に、肥料・腐葉土を使える回数
 const dayKey = () => new Date(Date.now()+9*3600000).toISOString().slice(0,10);   // 日本時間の日付(日替わりのご褒美と同じ区切り)
 const fuyoToday = () => S.fuyoDay===dayKey();
 const FUYO_ART = `<svg viewBox="0 0 32 32"><ellipse cx="16" cy="25" rx="13" ry="4.5" fill="#3e2716"/><path d="M4 24c2-7 6-11 12-11s10 4 12 11z" fill="#5a3a22"/><path d="M7 22c3-1 5 0 7-2M17 20c3 0 5 1 8 0" stroke="#7a5232" stroke-width="1.4" fill="none"/><path d="M10 13c2-5 7-6 9-4-3 0-6 2-9 4z" fill="#c8862e"/><path d="M17 12c3-4 8-3 9 0-3-1-6-1-9 0z" fill="#9a6a24"/><path d="M13 16c1-3 4-4 6-3-2 1-4 2-6 3z" fill="#7aa848"/></svg>`;
@@ -9073,19 +9098,36 @@ const WORK_KEEP = Object.fromEntries(WORK_FOODS.map(f=>[f.id,f]));   // 工房�
 const workSeen = id => !!(S.workSeen && S.workSeen[id]) || (S[id]||0)>0;
 const BT_MUT = [0.03, 0.003];   // 実った瞬間に変異・超変異になる確率
 
+/* 木守りの村人が収穫した実(知らせは庭の画面でまとめて出す) */
+let kmGot=null;
+const kmOn = t => !!t.km && yzN("kimori")>0;
+function kmTake(t,c){
+  const b=BTS[t.id], id=btItem(b.fruit,t.q), m=b.fN*(t.q===5?2:1)*c;
+  btGive(id,m); S.btHarvest=(S.btHarvest||0)+m;
+  kmGot=kmGot||{}; kmGot[id]=(kmGot[id]||0)+m;
+}
 /* 育つ: ms は「水が効いていた時間 × 速さ」 */
 function btGrow(t,ms){
   if(!(ms>0)) return;
   if(!t.rip){
     t.g+=ms; const n=btNeed(t);
     if(t.g<n) return;
+    const over=t.g-n;
     t.g=n; t.rip=true; t.ready=true; t.fr=0;
     if(!t.q && !t.plain){ const r=Math.random(); if(r<BT_MUT[1]) t.q=5; else if(r<BT_MUT[0]) t.q=3; }   // 素朴な肥料をまいた木は変異しない
     S.btRipe=(S.btRipe||0)+1; S.btRipeBy=S.btRipeBy||{}; S.btRipeBy[t.id]=(S.btRipeBy[t.id]||0)+1;
     btBookMark(t.id,t.q||0);
     if(t.q===3) S.btMut=(S.btMut||0)+1; if(t.q===5) S.btSup=(S.btSup||0)+1;   // 実績: 変異の大木 / 超変異の大木
     try{ toast(`${BTS[t.id].icon} ${esc(btName(t))}が実りました!${t.q===5?"(超変異)":t.q===3?"(変異)":""}`, t.q===5?"good mut sup":t.q===3?"good mut":"good", 7000, true); }catch(e){}
-    return;   // あまりは次の実りに持ち越さない
+    if(!kmOn(t)) return;   // あまりは次の実りに持ち越さない(木守りに任せた木は、収穫してそのまま次を育てる)
+    ms=over;
+  }
+  if(kmOn(t)){   // 木守りの村人: 実った回数ぶん、その場で収穫する(タイピングなどで時間がまとめて進んでも取りこぼさない)
+    let c=t.ready?1:0; t.ready=false;
+    t.fr=(t.fr||0)+ms; const need=btReNeed(t);
+    if(t.fr>=need){ const m=Math.floor(t.fr/need); c+=m; t.fr-=m*need; }
+    if(c) kmTake(t,c);
+    return;
   }
   if(t.ready) return;
   t.fr=(t.fr||0)+ms;
@@ -9135,6 +9177,7 @@ function btCut(gi){
   toast(`🪓 ${esc(btName(t))}を切りました。${msg}`,"good",5200,true);
 }
 const BT_FERT2 = 3;   // 御神木の腐葉土
+const btFertMax = () => fertMax();
 const btFertMul = (base=BT_FERT) => base*(1+Math.max(0,effFert()-FERT_BOOST));   // 肥料の効きが上がる料理・貴重品のぶん上乗せ(最大2.8倍)
 function btFert(k,t){
   const sel=S.fertSel;
@@ -9156,12 +9199,12 @@ function btFert(k,t){
   }
   if(sel!=="fuyo" && sel!=="fuyo2"){ nope(k,"ふつうの肥料は大木には効きません。腐葉土を使います"); return; }
   if(!(S[sel]>0)){ nope(k, sel==="fuyo2" ? "御神木の腐葉土がありません(工房で御神木の葉から作れます)" : "腐葉土がありません(工房で杉の葉から作るか、お店で1日1つ買えます)"); return; }
-  const fmax=ev("K",3,Infinity,2);
+  const fmax=btFertMax();
   if((t.fert||0)>=fmax){ nope(k,`この木に腐葉土はもう${fmax}回使っています`); return; }
   const m=btFertMul(sel==="fuyo2"?BT_FERT2:BT_FERT);
   t.fert=(t.fert||0)+1; t.mul=(t.mul||1)*m;
   if(Math.random()<ev("η",.5,1,0)) floatAt(k,"🍂 減らなかった!"); else S[sel]--;
-  hit(k); sfx.fert(); floatAt(k,`🍂 成長速度×${+m.toFixed(2)} ${t.fert}/${fmax===Infinity?"∞":fmax}`);
+  hit(k); sfx.fert(); floatAt(k,`🍂 成長速度×${+m.toFixed(2)} ${t.fert}/${fmax}`);
 }
 let btCutAsk=null;   // 斧: 切る前に、もう一度押してもらう
 /* 大木の区画を押したとき。ふつうの処理に任せるとき(水やり)は false */
@@ -9617,7 +9660,7 @@ function isValidState(o){
 /* 古い記録(第1段階)にも足りない項目を補って読み込む */
 function normalize(o){
   const s=Object.assign(newState(),o);
-  s.fields=s.fields.map(f=>{ const g=makeField(); for(const k of KEYS) if(f&&f[k]) g[k]=Object.assign(g[k],f[k]); if(f&&f.bt&&typeof f.bt==="object") g.bt=f.bt;   // 大木
+  s.fields=s.fields.map(f=>{ const g=makeField(); for(const k of KEYS) if(f&&f[k]) g[k]=Object.assign(g[k],f[k]); if(f&&f.bt&&typeof f.bt==="object"){ g.bt=f.bt; for(const t of Object.values(g.bt)) if(t && t.fert>BT_FERT_MAX){ t.mul=Math.pow(t.mul||1, BT_FERT_MAX/t.fert); t.fert=BT_FERT_MAX; } }   // 大木(腐葉土の回数が上限をこえた木は、上限の回数ぶんの速さに直す)
     for(const k of KEYS){ const q=g[k]; if(q && q.bt!=null && !(g.bt&&g.bt[q.bt])) q.bt=null; }   // 木のない大木の印は外す
     return g; });
   if(s.cur>=s.fields.length) s.cur=0;
@@ -9986,9 +10029,9 @@ function vilBulk(p,t,g3){
   const mk=(mj?2:1)*mutK(c.id), nS=binom(m, hasSup(c.id)?pSup(mk):0), nM=binom(m-nS, hasMut(c.id)?pMut(mk):0), nN=m-nS-nM, d=effDouble();
   const iN=g3?nN*3:nN+binom(nN,d), iM=g3?nM*3:nM+binom(nM,d), iS=g3?nS*3:nS+binom(nS,d), q=mj?4:qualUp(tierOf(c.id));
   recordHarvestN(c.id,q,iN); recordHarvestN(c.id,3,iM); recordHarvestN(c.id,5,iS);
-  if(S.vilOrder2 && !S.vilSellN){ if(iN){ invAdd(c.id,q,iN); S.vLog.k=S.vLog.k||{}; S.vLog.k[c.id]=(S.vLog.k[c.id]||0)+iN; } }
+  if(vilKeepN(c.id)){ if(iN){ invAdd(c.id,q,iN); S.vLog.k=S.vLog.k||{}; S.vLog.k[c.id]=(S.vLog.k[c.id]||0)+iN; } }
   else if(iN){ const price=priceOf(c.id,q)*iN; xAdd(S,"money",price); S.totalSales+=price; S.vLog.h=S.vLog.h||{}; S.vLog.h[c.id]=(S.vLog.h[c.id]||0)+iN; S.vLog.earn=(S.vLog.earn||0)+price; }
-  if(S.vilOrder2 && S.vilSellM){
+  if(vilSellMut(c.id)){
     const price=priceOf(c.id,3)*iM+priceOf(c.id,5)*iS;
     if(price){ xAdd(S,"money",price); S.totalSales+=price; S.vLog.mutEarn=(S.vLog.mutEarn||0)+price; }
     vlogAdd("mutSold",c.id,iM); vlogAdd("mutSold",c.id+":5",iS);
@@ -10037,7 +10080,7 @@ function villagerAdvance(p,dt,g3){
         p.crop=null;
         const num = g3 ? 3 : mn && mr===3 ? mn : 1 + (Math.random()<effDouble() ? 1 : 0);
         for(let i=0;i<num;i++) recordHarvest(c.id,mr,true);
-        if(S.vilOrder2 && S.vilSellM){                // 指示書2: 変異もその場で売る
+        if(vilSellMut(c.id)){                         // 指示書2: 変異もその場で売る(作物ごとの自動売却に合わせるときは、その作物の設定で)
           const price=priceOf(c.id,mr)*num;
           xAdd(S,"money",price); S.totalSales+=price;
           vlogAdd("mutSold",c.id+(mr===5?":5":""),num);
@@ -10060,7 +10103,7 @@ function villagerAdvance(p,dt,g3){
     const q=p.vil==="mj" ? 4 : qualUp(tierOf(c.id));   // q: 品質(t は残り時間なので別名に)。超シゴデキ村人はかならず ☆☆☆
     const num = g3 ? 3 : 1 + (Math.random()<effDouble() ? 1 : 0);   // 金のスプリンクラーの届く区画は、かならず3個
     for(let i=0;i<num;i++) recordHarvest(c.id,q,true);
-    if(S.vilOrder2 && !S.vilSellN){                 // 指示書2: ふつうの作物は売らずに持ち物へ
+    if(vilKeepN(c.id)){                 // 指示書2: ふつうの作物は売らずに持ち物へ(作物ごとの自動売却に合わせるときは、その作物の設定で)
       invAdd(c.id,q,num);
       S.vLog.k=S.vLog.k||{}; S.vLog.k[c.id]=(S.vLog.k[c.id]||0)+num;
       continue;
@@ -10078,6 +10121,8 @@ const autoCost = id => AUTO_COSTS[(CROP[id]&&CROP[id].r)||"N"] || AUTO_COSTS.N;
 const autoOf = id => S.auto[id] || null;
 const autoCrop = id => { const a=autoOf(id); return !!(a && a.c); };
 const autoSeed = id => { const a=autoOf(id); return !!(a && a.s); };
+const autoHasMut = id => hasMut(id) || hasSup(id);   // 変異・超変異のある作物だけ、変異の自動売却を選べる
+const autoMut = id => { const a=autoOf(id); return !!(a && a.m) && autoHasMut(id); };
 
 /* 村人の指示書・畑のカウンタ */
 const VIL_ORDER_COST=10000, COUNTER_COST=50000;
@@ -10111,13 +10156,17 @@ function toggleVilUseSeed(){
   toast(S.vilUseSeed ? "村人は、持っている種があれば買わずにそれを植えます" : "村人は、いつも種を買って植えます(持っている種は使いません)","",3200);
   save(); renderAll();
 }
+/* 指示書2: 村人が穫ったふつうの作物を持ち物に入れるか(vilSellN: true 売る / false 売らない / "auto" 作物ごとの自動売却(ふつう)に合わせる) */
+const vilKeepN = id => !!S.vilOrder2 && (S.vilSellN===false || (S.vilSellN==="auto" && !autoCrop(id)));
+const vilSellMut = id => !!S.vilOrder2 && (S.vilSellM===true || (S.vilSellM==="auto" && autoMut(id)));   // 指示書2: 変異・超変異を売るか
+const vilSellTxt = v => v==="auto" ? "作物ごとの自動売却に合わせて売ります" : v ? "売ります" : "売らずに持ち物に入れます";
 function toggleVilSell(w){
   if(!S.vilOrder2) return;
   tick();   // ここまでの分は、今の設定で進めてから切り替える
-  if(w==="N") S.vilSellN=!S.vilSellN; else S.vilSellM=!S.vilSellM;
+  if(w==="N") S.vilSellN = S.vilSellN===true ? false : S.vilSellN===false ? "auto" : true; else S.vilSellM = S.vilSellM===true ? false : S.vilSellM===false ? "auto" : true;   // 売る → 売らない → 自動売却に合わせる → 売る
   sfx.tool();
-  toast(w==="N" ? `村人が収穫したふつうの作物を${S.vilSellN?"売ります":"売らずに持ち物に入れます"}`
-                : `村人が収穫した変異の作物を${S.vilSellM?"売ります":"売らずに持ち物に入れます"}${S.vilSellM&&!S.vilAutoM?"(変異の自動収穫がオンのときに効きます)":""}`,"",3200);
+  toast(w==="N" ? `村人が収穫したふつうの作物を${vilSellTxt(S.vilSellN)}${S.vilSellN==="auto"?"(お店の「自動売却」で「ふつう」がオンの作物は売り、オフの作物は持ち物に入れます)":""}`
+                : `村人が収穫した変異の作物を${vilSellTxt(S.vilSellM)}${S.vilSellM==="auto"?"(お店の「自動売却」で変異がオンの作物は売り、オフの作物は持ち物に入れます)":""}${S.vilSellM&&!S.vilAutoM?"(変異の自動収穫がオンのときに効きます)":""}`,"",3200);
   save(); renderAll();
 }
 const sortActive = () => S.seedSort && S.sortOn!==false;
@@ -10522,7 +10571,7 @@ function toastNext(){ while(toastWait.length && liveToasts.filter(o=>o.imp && !o
 function toastBtn(){
   const b=$("g-logBtn"); if(!b) return;
   b.hidden=!toastLog.length; root.classList.toggle("haslog",!!toastLog.length);
-  b.innerHTML=`🔔${toastUnread?`<b>${toastUnread>99?"99+":toastUnread}</b>`:""}${toastWait.length?`<small>あと${toastWait.length}件</small>`:""}${MOB?"":'<span class="kb">;</span>'}`;
+  b.innerHTML=`🔔${toastUnread?`<b>${toastUnread>99?"99+":toastUnread}</b>`:""}${toastWait.length?`<small>あと${toastWait.length}件</small>`:""}`;
   b.title="これまでのお知らせ";
 }
 /* これまでのお知らせの一覧(見逃した分を読み返す) */
@@ -10945,10 +10994,12 @@ function harvestOne(k){
   const mut = mq>0;
   if(mut) t=mq;
   const num = gsprSet(S.cur).has(k) ? 3 : mutN && isMutT(mq) ? mutN : 1 + (Math.random()<effDouble() ? 1 : 0);   // 金のスプリンクラーの届く区画は、かならず3個   // 不思議な肥料・摩訶不思議な肥料は3個
-  if(autoCrop(c.id) && !mut){                           // 変異は自動売却しない
-    const gain=priceOf(c.id,t)*num;
+  const sold = mut ? autoMut(c.id) : autoCrop(c.id);   // 変異・超変異は、自動売却の「変異」がオンの作物だけ売る
+  let gain=0;
+  if(sold){
+    gain=priceOf(c.id,t)*num;
     xAdd(S,"money",gain); S.totalSales+=gain;
-    floatAt(k,`${ico(c)}${QUALITY[t].mark}${num>1?"×"+num:""} +${fmtNum(gain)}`);
+    floatAt(k,`${mut?icoQ(c,t):ico(c)+QUALITY[t].mark}${num>1?"×"+num:""} +${fmtNum(gain)}`);
   }else{
     invAdd(c.id,t,num);
     floatAt(k,"+"+icoQ(c,t)+(mut?"":QUALITY[t].mark)+(num>1?"×"+num:""));
@@ -10956,7 +11007,7 @@ function harvestOne(k){
   const first=!((S.harvestQ[c.id]||[])[t]>0);
   for(let i=0;i<num;i++) recordHarvest(c.id,t,false);
   if(mut){
-    toast(`${t===5?"✧ 超変異!":"✦ 変異!"} ${icoQ(c,t)} ${esc(qName(c.id,t))}${num>1?` ×${num}`:""} が穫れました${first?"(図鑑に載りました)":""}`,t===5?"good mut sup":"good mut",t===5?9000:6000,true);
+    toast(`${t===5?"✧ 超変異!":"✦ 変異!"} ${icoQ(c,t)} ${esc(qName(c.id,t))}${num>1?` ×${num}`:""} が穫れました${first?"(図鑑に載りました)":""}${sold?`。自動売却で売りました(+${fmtNum(gain)}キー)`:""}`,t===5?"good mut sup":"good mut",t===5?9000:6000,true);
     if(!byVil) wcGoalAdd("mut",num);   // みんなの目標・自動のお知らせには、村人が植えた畑のぶんは入れない
     if(!c.secret && !byVil) wcAnnounce(`${t===5?"超変異":"変異"}の「${qName(c.id,t)}」を収穫しました${num>1?` ×${num}`:""}${first?"(はじめて!)":""}`, t===5?4:2);
     sfx.vil();
@@ -11064,14 +11115,14 @@ function act(k){
       if(S.fert<=0){ nope(k,kb("肥料がありません。Tab でお店へ","肥料がありません。お店で買えます")); break; }
       if(!p.crop){ nope(k,"作物が植わっていません"); break; }
       if(isRipe(p)){ nope(k,"もう実っています"); break; }
-      const fmax=ev("K",3,Infinity,2);
+      const fmax=fertMax();
       if((p.crop.fert||0)>=fmax){ nope(k,`この作物に肥料はもう${fmax}回使っています`); break; }
       p.crop.fert=(p.crop.fert||0)+1;
       if(Math.random()<ev("η",.5,1,0)) floatAt(k,"🍂 減らなかった!"); else S.fert--;
       grow(p, need(p.crop)*effFert(), Date.now(), "f", Infinity);   // 実った時刻は「今」
       if(!p.crop){ hit(k); sfx.fert(); break; }   // 薔・薇: 実って消えた
       if(isRipe(p)) p.crop.ripeAt=Date.now();
-      hit(k); floatAt(k,`🍂 ${p.crop.fert}/${fmax===Infinity?"∞":fmax}`); sfx.fert();
+      hit(k); floatAt(k,`🍂 ${p.crop.fert}/${fmax}`); sfx.fert();
       break;
     }
     case 6: { // 設置: スプリンクラーや案山子を置く / 村人に区画をまかせる
@@ -11319,7 +11370,7 @@ function openModal(name){
   modal=name;
   sfx.open();
   $("g-"+name).classList.add("open");
-  if(name==="shop") renderShop();
+  if(name==="shop"){ shopCur[5]=0; renderShop(); }   // 自動売却: 作物のマスの中にいると ← → でタブを移れないので、開くたびに上に戻す
   if(name==="gacha"){ rgView="gacha"; renderGacha(); }   // 開いたときは、いつもガチャの画面から(コインに変換の画面を開いたままにしない)
   if(name==="treas"){ treasScrolled=""; renderTreas(); }
   if(name==="book"){ bookQ=""; $("g-bookQ").value=""; bookShowDetail("g-book",false); renderBook(); }
@@ -11473,22 +11524,24 @@ function shopRows(){
       const ready=tierOf(c.id)>=2;   // ☆☆ まで育てた作物だけが解禁される
       const left=Math.max(0, QUALITY[2].need-(S.harvestBy[c.id]||0));
       const on=v=>v?'<b style="color:#2e7d32">オン</b>':'<span style="color:var(--ink-l)">オフ</span>';
-      const chip=(w,nm)=>`<button class="acchip${a[w]?" on":""}" data-act="${w==="c"?"enter":"shift"}">${nm} ${a[w]?"オン":"オフ"}</button>`;
+      const chip=(w,nm)=>`<button class="acchip${a[w]?" on":""}" data-act="${w==="c"?"enter":w==="s"?"shift":"all"}">${nm} ${a[w]?"オン":"オフ"}</button>`;
+      const hm=autoHasMut(c.id);   // 変異・超変異のある作物だけ「変異」を出す
       rows.push({
         cell:true, cnm:esc(c.name),
         sub: a ? "" : ready ? `${fmtNum(autoCost(c.id))}キー` : `${QUALITY[2].mark} まで あと${fmtNum(left)}個`,
-        chips: a ? `<div class="acchips">${chip("c","収穫物")}${chip("s","種")}</div>` : ready ? `<div class="acchips"><button class="acchip buy" data-act="enter">買う</button></div>` : "",
+        chips: a ? `<div class="acchips">${chip("c","ふつう")}${hm?chip("m","変異"):""}${chip("s","種")}</div>` : ready ? `<div class="acchips"><button class="acchip buy" data-act="enter">買う</button></div>` : "",
         locked: !a && !ready,
         ic: ico(c),
         nm: a?`${c.name}の自動売却 <span style="color:var(--ink-l)">購入済み</span>`
              :(ready?`${c.name}の自動売却 <span style="color:var(--ink-l)">${fmtNum(autoCost(c.id))}キー</span>`
                     :`${c.name}の自動売却 <span style="color:var(--ink-l)">未解禁</span>`),
-        ds: a?`収穫物 ${on(a.c)}(売値 ${priceOf(c.id,tierOf(c.id))}キー) ・ ガチャで出た種 ${on(a.s)}(売値 ${seedPrice(c)}キー)<br>穫れた${c.name}と、ガチャから出た${c.name}の種を、その場で自動で売ります`
+        ds: a?`ふつうの${c.name} ${on(a.c)}(売値 ${priceOf(c.id,tierOf(c.id))}キー)${hm?` ・ 変異・超変異の${c.name} ${on(a.m)}`:""} ・ ガチャで出た種 ${on(a.s)}(売値 ${seedPrice(c)}キー)<br>オンにしたものを、穫れたときやガチャで出たときに、その場で自動で売ります`
              :(ready?`収穫した${c.name}と、ガチャから出た${c.name}の種を、その場で自動で売れるようになります(それぞれオンオフできます)`
                     :`${c.name}が ${QUALITY[2].mark} になると買えるようになります(${c.name}をあと ${fmtNum(left)}個 収穫 ・ 今 ${fmtNum(S.harvestBy[c.id]||0)}/${QUALITY[2].need}個)`),
-        keys: a?"<b>Enter</b> 収穫物のオンオフ<br><b>Shift+Enter</b> 種のオンオフ":(ready?"<b>Enter</b> 買う":""),
+        keys: a?"<b>Enter</b> ふつうのオンオフ"+(hm?"<br><b>Ctrl+Enter</b> 変異のオンオフ":"")+"<br><b>Shift+Enter</b> 種のオンオフ":(ready?"<b>Enter</b> 買う":""),
         enter: ()=>a?toggleAuto(c.id,"c"):(ready&&buyAuto(c.id)),
         shift: ()=>a?toggleAuto(c.id,"s"):(ready&&buyAuto(c.id)),
+        all: a&&hm ? ()=>toggleAuto(c.id,"m") : null,
       });
     }
   }else if(shopTab===2){
@@ -11510,18 +11563,18 @@ function shopRows(){
       const has=S.vilOrder, onoff=v=>v?'<b style="color:#2e7d32">オン</b>':'<span style="color:var(--ink-l)">オフ</span>';
       rows.push({ ic:"📜",
         nm: `村人の指示書 <span style="color:var(--ink-l)">${has?"購入済み":fmtNum(VIL_ORDER_COST)+"キー"}</span>`,
-        ds: has?`村人の自動収穫 ${onoff(S.vilAutoH)} ・ 変異の自動収穫 ${onoff(S.vilAutoM)}<br>自動収穫オフ: 実った作物は畑に残り、素手で収穫すると村人が次を植えます ・ 変異の自動収穫オン: 村人が変異も収穫して${S.vilOrder2&&S.vilSellM?"売ります":"持ち物に入れます(売りません)"}`
+        ds: has?`村人の自動収穫 ${onoff(S.vilAutoH)} ・ 変異の自動収穫 ${onoff(S.vilAutoM)}<br>自動収穫オフ: 実った作物は畑に残り、素手で収穫すると村人が次を植えます ・ 変異の自動収穫オン: 村人が変異も収穫して${S.vilOrder2&&S.vilSellM==="auto"?"作物ごとの自動売却に合わせて売ります":S.vilOrder2&&S.vilSellM?"売ります":"持ち物に入れます(売りません)"}`
                :`村人の仕事を指示できるようになります。「村人の自動収穫」と「変異の自動収穫」を、それぞれオンオフできます`,
         keys: has?"<b>Enter</b> 自動収穫のオンオフ<br><b>Shift+Enter</b> 変異の自動収穫のオンオフ":"<b>Enter</b> 買う",
         enter: ()=>has?toggleVilOrder("H"):buyVilOrder(), shift: ()=>has?toggleVilOrder("M"):buyVilOrder() });
       // 村人の指示書2(収穫したあと売るか)。指示書を持っていると並ぶ
       if(has){
-        const has2=S.vilOrder2, sellTxt=v=>v?'<b style="color:#2e7d32">売る</b>':'<b style="color:#8a5a00">売らない</b>';
+        const has2=S.vilOrder2, sellTxt=v=>v==="auto"?'<b style="color:#2a6ab0">作物ごとの自動売却に合わせる</b>':v?'<b style="color:#2e7d32">売る</b>':'<b style="color:#8a5a00">売らない</b>';
         rows.push({ ic:"📜",
           nm: `村人の指示書2 <span style="color:var(--ink-l)">${has2?"購入済み":fmtNum(VIL_ORDER2_COST)+"キー"}</span>`,
-          ds: has2?`ふつうの作物 ${sellTxt(S.vilSellN)} ・ 変異の作物 ${sellTxt(S.vilSellM)}<br>売らない作物は持ち物に入ります(料理の材料にできます)。変異の作物は「変異の自動収穫」がオンのときに効きます`
+          ds: has2?`ふつうの作物 ${sellTxt(S.vilSellN)} ・ 変異の作物 ${sellTxt(S.vilSellM)}<br>売らない作物は持ち物に入ります(料理の材料にできます)。「自動売却に合わせる」では、お店の「自動売却」で、ふつうの作物は「ふつう」が、変異の作物は「変異」がオンの作物だけ売ります。変異の作物は「変異の自動収穫」がオンのときに効きます`
                   :`村人が収穫した作物を売るかどうかを、ふつうの作物と変異の作物それぞれで決められるようになります`,
-          keys: has2?"<b>Enter</b> ふつうの作物を売る / 売らない<br><b>Shift+Enter</b> 変異の作物を売る / 売らない":"<b>Enter</b> 買う",
+          keys: has2?"<b>Enter</b> ふつうの作物を 売る / 売らない / 自動売却に合わせる<br><b>Shift+Enter</b> 変異の作物を 売る / 売らない / 自動売却に合わせる":"<b>Enter</b> 買う",
           enter: ()=>has2?toggleVilSell("N"):buyVilOrder2(), shift: ()=>has2?toggleVilSell("M"):buyVilOrder2() });
         // 村人の指示書3(持っている種を使う)。指示書2を持っていると並ぶ
         if(has2){
@@ -11663,7 +11716,7 @@ function renderShop(){
   }
   $("g-shopHint").innerHTML =
     `<b>← →</b> ${SHOP_ORDER.map(i=>i===shopTab?`「${SHOP_TABS[i]}」`:SHOP_TABS[i]).join(" / ")} ・ <b>↑ ↓</b> 選ぶ ・ <b>Enter</b> / <b>Shift+Enter</b> 決定`+
-    (shopTab===5 ? " ・ 作物のマスでは <b>← → ↑ ↓</b> で選ぶ(タブの切りかえは上の3行で)" : "")+
+    (shopTab===5 ? " ・ 作物のマスでは <b>← → ↑ ↓</b> で選ぶ(タブの切りかえは上のまとめの行で)" : "")+
     (shopTab===3 && total>0 ? ` ・ <b>A</b> 作物をすべて売る(${fmtNum(total)}キー・種・食材と変異・超変異は売りません)` : "")+
     ` ・ <b>Tab</b> / <b>Esc</b> 閉じる`;
   keepVisible(body);
@@ -11796,19 +11849,23 @@ function buyVilUp(){
   sfx.vil();
   save(); renderAll();
 }
-/* 自動売却のタブの上: 解禁した分をまとめて買う / 収穫物・種をまとめてオンオフ */
+/* 自動売却のタブの上: 解禁した分をまとめて買う / ふつう・変異・種をまとめてオンオフ */
 function autoSumRows(rows){
   const seen=CROPS.filter(c=>!c.treasure && (S.harvestBy[c.id]||0)>0);
   const canBuy=seen.filter(c=>!S.auto[c.id] && tierOf(c.id)>=2).sort((a,b)=>autoCost(a.id)-autoCost(b.id));
-  const sum=canBuy.reduce((a,c)=>a+autoCost(c.id),0), own=seen.filter(c=>S.auto[c.id]);
+  const sum=canBuy.reduce((a,c)=>a+autoCost(c.id),0), own=seen.filter(c=>S.auto[c.id]), ownM=own.filter(c=>autoHasMut(c.id));
   rows.push({ ic:"🛒", locked:!canBuy.length,
     nm:`解禁した自動売却をまとめて買う <span style="color:var(--ink-l)">${canBuy.length?`${canBuy.length}種類 ・ ${fmtNum(sum)}キー`:"買えるものはありません"}</span>`,
-    ds:"安いものから、キーが足りるところまで買います。買ったものは、収穫物も種もオンになります",
+    ds:"安いものから、キーが足りるところまで買います。買ったものは、ふつうの作物と種がオンになります",
     keys: canBuy.length?"<b>Enter</b> まとめて買う":"", enter:()=>buyAutoAll(canBuy), shift:()=>buyAutoAll(canBuy) });
-  for(const [w,nm] of [["c","収穫物"],["s","ガチャで出た種"]]) rows.push({ ic:w==="c"?"🧺":"🌱", locked:!own.length,
-    nm:`${nm}の自動売却をまとめて切りかえ`,
-    ds:`買ってある${own.length}種類の、${nm}の自動売却をまとめてオンかオフにします`,
-    keys: own.length?"<b>Enter</b> 全部オン<br><b>Shift+Enter</b> 全部オフ":"", enter:()=>setAutoAll(w,true), shift:()=>setAutoAll(w,false) });
+  for(const [w,nm] of [["c","ふつうの作物"],["m","変異・超変異の作物"],["s","ガチャで出た種"]]){
+    const L = w==="m" ? ownM : own;
+    if(w==="m" && !L.length) continue;   // 変異のある作物の自動売却を持っていなければ出さない
+    rows.push({ ic:w==="c"?"🧺":w==="s"?"🌱":"✦", locked:!L.length,
+      nm:`${nm}の自動売却をまとめて切りかえ`,
+      ds:`買ってある${L.length}種類の、${nm}の自動売却をまとめてオンかオフにします`,
+      keys: L.length?"<b>Enter</b> 全部オン<br><b>Shift+Enter</b> 全部オフ":"", enter:()=>setAutoAll(w,true), shift:()=>setAutoAll(w,false) });
+  }
 }
 function buyAutoAll(list){
   let n=0, cost=0;
@@ -11818,8 +11875,8 @@ function buyAutoAll(list){
   save(); renderAll();
 }
 function setAutoAll(w,on){
-  for(const id in S.auto) if(S.auto[id]) S.auto[id][w]=on;
-  sfx.tool(); toast(`${w==="c"?"収穫物":"種"}の自動売却を、すべて${on?"オン":"オフ"}にしました`,"",2600);
+  for(const id in S.auto) if(S.auto[id] && (w!=="m" || autoHasMut(id))) S.auto[id][w]=on;
+  sfx.tool(); toast(`${w==="c"?"ふつうの作物":w==="s"?"種":"変異・超変異の作物"}の自動売却を、すべて${on?"オン":"オフ"}にしました`,"",2600);
   save(); renderAll();
 }
 function buyAuto(id){
@@ -11827,14 +11884,14 @@ function buyAuto(id){
   if(tierOf(id)<2){ sfx.nope(); toast(`${CROP[id].name}が ${QUALITY[2].mark} になると買えます`,"warn"); return; }
   if(!spend(autoCost(id))) return;
   S.auto[id]={c:true,s:true};
-  toast(`${ico(CROP[id])} ${esc(CROP[id].name)}の自動売却を買いました(収穫物・種ともオン)`,"good",4200,true);
+  toast(`${ico(CROP[id])} ${esc(CROP[id].name)}の自動売却を買いました(ふつうの作物と種がオン)`,"good",4200,true);
   save(); renderAll();
 }
 function toggleAuto(id,which){
   const a=S.auto[id]; if(!a) return;
   a[which]=!a[which];
   sfx.tool();
-  toast(`${ico(CROP[id])} ${esc(CROP[id].name)}の${which==="c"?"収穫物":"種"}の自動売却を ${a[which]?"オン":"オフ"} にしました`,"",2400,true);
+  toast(`${ico(CROP[id])} ${esc(CROP[id].name)}の${which==="c"?"ふつうの作物":which==="s"?"種":"変異・超変異の作物"}の自動売却を ${a[which]?"オン":"オフ"} にしました`,"",2400,true);
   save(); renderAll();
 }
 function buyField(){
@@ -13239,6 +13296,7 @@ function yzKimoriTick(force){
   S.fields.forEach(f=>{ for(const gi of Object.keys(f.bt||{})){ const t=f.bt[gi]; if(!t || !t.km || !t.ready) continue;
     const b=BTS[t.id], id=btItem(b.fruit,t.q), m=b.fN*(t.q===5?2:1);
     t.ready=false; t.fr=0; btGive(id,m); S.btHarvest=(S.btHarvest||0)+m; got[id]=(got[id]||0)+m; } });
+  if(kmGot){ for(const id in kmGot) got[id]=(got[id]||0)+kmGot[id]; kmGot=null; }   // 時間がまとめて進んだあいだに収穫したぶん
   const ks=Object.keys(got);
   if(ks.length){ toast(`${ico(YZ_NEWK.kimori)} 木守りの村人が ${ks.map(id=>`${ico(FOOD[id])} ${esc(FOOD[id].name)}×${fmtNum(got[id])}`).join(" ・ ")} を収穫しました`,"good",4200,true); save(); }
 }
@@ -13679,7 +13737,7 @@ function rgConvert(i,want){   // want: 変換する数(マイナスなら、そ�
   const gB=kB*BigInt(Math.round(x.v)), gain=Number(gB);
   xAddBig(S,"roseCoin",gB); S.roseCoinTotal=(S.roseCoinTotal||0)+gain;
   sfx.sell();
-  toast(`${x.ic} ${esc(x.nm)}を ${kB.toLocaleString("ja-JP")}つ、薔薇ガチャコイン ${gB.toLocaleString("ja-JP")}枚に変えました`,"good",2400,true);
+  toast(`${x.ic} ${esc(x.nm)}を ${fmtNum(kB)}つ、薔薇ガチャコイン ${fmtNum(gB)}枚に変えました`,"good",2400,true);
   checkUnlocks(); save(); renderAll(); renderGacha();
 }
 function rgConvHTML(){
@@ -14682,7 +14740,7 @@ const EFFS = {
   H:{ nm:"種が安い",             n:"種の値段 −30%",                       s:"種の値段 −75%" },
   I:{ nm:"ガチャが安い",         n:"ガチャのキー −10%",                   s:"ガチャのキー −50%" },   // キーで引くガチャだけ(薔薇ガチャのコインは減らない)
   J:{ nm:"肥料の効果",           n:"肥料の効き +10%",                     s:"肥料の効き +20%" },
-  K:{ nm:"肥料の回数",           n:"1つの作物に肥料を3回まで",            s:"1つの作物に肥料を何回でも" },
+  K:{ nm:"肥料の回数",           n:"1つの作物に肥料を3回まで",            s:"1つの作物に肥料を10回まで" },
   L:{ nm:"一括植え",             n:"種を植えると、その畑の空いた土ぜんぶに植わる", s:"種を植えると、すべての畑の空いた土に植わる" },
   M:{ nm:"画面の色",             n:"ホーム画面とタイピングが料理の色に染まる", s:"ホーム画面とタイピングが料理の色に鮮やかに染まり、作物が舞い、キーが料理に変わる。農園では収穫のたびに花火があがる" },
   N:{ nm:"1語のキー",            n:"タイピングゲームから農園に届くキー1本が、いちばん高い作物1個分の売値になる", s:"タイピングゲームから農園に届くキー1本が、いちばん高い作物2個分の売値になる" },
@@ -15261,7 +15319,14 @@ function renderCook(){
     `<b>Tab</b> ${COOK_TABS.slice(0,cookTabsN()).map((t,i)=>i===cookTab?`「${t}」`:t).join(" / ")} ・ <b>↑ ↓</b> 選ぶ`+(cookTab===0?" ・ <b>← →</b> 段階(ふつう / 変異 / 超変異)"+(kitN("cookvil")>0?` ・ <b>A</b> 料理番に任せる(${(S.autoCook||[]).length} / ${kitN("cookvil")})`:""):cookTab===1?" ・ <b>← →</b> 段階(作り置きのあるもの)":"")+(cookTab<2?" ・ <b>S</b> お気に入り":"")+` ・ <b>Enter</b> 決定 ・ <b>0</b> / <b>Esc</b> 閉じる`;
   keepVisible(body);
 }
+function cookNowShort(){   // スマホ: 料理名と残り時間だけを1行に(効果の説明は下の一覧にある)
+  const xs=[buffNow(), buff2Now(), buff3Now()].filter(Boolean), gf=giftNow();
+  const one = x => `${dishIco(DISH[x.d],x.t)}${esc(dishName(DISH[x.d],x.t))} ${fmtLeft(x.until-Date.now())}`;
+  const parts=xs.map(one); if(gf) parts.push(`🎁${one(gf)}`); if(bentoOn()) parts.push(`🍱 ${fmtLeft(S.bentoUntil-Date.now())}`);
+  return parts.length ? parts.join(" ・ ") : "";
+}
 function cookNowText(){
+  if(window.IS_MOBILE) return cookNowShort();
   const gf=giftNow(), gl = gf ? `<br>🎁 ${esc(gf.from)}さんからもらった料理: ${dishIco(DISH[gf.d],gf.t)} ${esc(dishName(DISH[gf.d],gf.t))} ・ ${esc(effText(DISH[gf.d],gf.t))} ・ 残り ${fmtLeft(gf.until-Date.now())}` : "";
   return cookNowText0()+gl;
 }
@@ -16598,7 +16663,6 @@ function onKeyMain(e){
   if(k==="Escape"){ backToTitle(); return; }
   if(k==="-"){ e.preventDefault(); leave(); openToeic(); return; }   // TOEIC 英単語へ
   if(k==="/"){ e.preventDefault(); openLayout(); return; }   // 配置セット
-  if(k===";"){ e.preventDefault(); if(toastLog.length) toastLogOpen(); return; }   // これまでのお知らせ
   if(k==="["){ const b=$("g-basket").querySelector("[data-bmore]"); if(b){ e.preventDefault(); b.click(); } return; }   // 収穫かごをひらく・たたむ
   if(k==="Enter"){ e.preventDefault(); openWorld(); return; }   // 農園の寄り合い
   if(k==="4" && e.repeat){ openPick("seed"); return; }   // 4 を長押し: 種の一覧
@@ -16925,7 +16989,7 @@ function debugStart2(){
   save();
 }
 function alive(){ if(kitN("fridge")>0){ fridgeKeep(); save(); } }
-return { fxInfo:()=>({ kyo:!!(S.goals && S.goals.kei), bara:baraSeen() }), yzPress:()=>yzPress(false), yzBtn:()=>({ on:yzHas("button"), gain:yzBtnGain(), auto:yzv("izumi") }), peek:()=>{ consumeInbox(); tick(); return tutState(); }, roseName:roseNameHTML, roseNamePlate, roseRowStyle, roseRowCls, nameDeco, drunkNow, tqBoost:()=>({ rose:(1+rgGurPct("sh")/100)*otsuMul("Z2"), sc:1+rgGurPct("pen")/100, min:1+rgGurPct("dial")/100 }), rose:(lv,n)=>{ roseGive(lv,n); S.roseIn=(S.roseIn||0)+Math.floor(n); save(); }, screwMul, charmLives, applyTheme, alive, themeScrewArt, enter, leave, onKey, summary, dailyGive, dailyNeji, dailySapLeft, dailyOpen, btOpen, mtGive, mtInfoSeen:()=>!!S.mtInfoSeen, mtInfoMark:()=>{ S.mtInfoSeen=true; save(); }, dbInfoSeen:()=>!!S.dbInfoSeen, dbInfoMark:()=>{ S.dbInfoSeen=true; save(); }, debugUnlock, debugStart2, tutState, tutGive, tutGrow, tutSeed, tutSandbox, refreshRank, openModal, ownerId, useName, baraOn, baraLeft, baraSeen, debugStart5, debugStart6, debugStart3, debugStart4, wcDishes, wcUse, wcRefund, wcLabel, wcReceive, wcTaken, wcAllDishes:()=>Object.keys(DISH).filter(wcCanThrow), wcCropIds:()=>CROPS.filter(c=>!c.secret && SUPER[c.id]).map(c=>c.id), wcFarmNow:()=>({ m:Math.floor(S.money), h:Math.floor(S.totalHarvest||0) }),
+return { fmtNum, numStr, fxInfo:()=>({ kyo:!!(S.goals && S.goals.kei), bara:baraSeen() }), yzPress:()=>yzPress(false), yzBtn:()=>({ on:yzHas("button"), gain:yzBtnGain(), auto:yzv("izumi") }), peek:()=>{ consumeInbox(); tick(); return tutState(); }, roseName:roseNameHTML, roseNamePlate, roseRowStyle, roseRowCls, nameDeco, drunkNow, tqBoost:()=>({ rose:(1+rgGurPct("sh")/100)*otsuMul("Z2"), sc:1+rgGurPct("pen")/100, min:1+rgGurPct("dial")/100 }), rose:(lv,n)=>{ roseGive(lv,n); S.roseIn=(S.roseIn||0)+Math.floor(n); save(); }, screwMul, charmLives, applyTheme, alive, themeScrewArt, enter, leave, onKey, summary, dailyGive, dailyNeji, dailySapLeft, dailyOpen, btOpen, mtGive, mtInfoSeen:()=>!!S.mtInfoSeen, mtInfoMark:()=>{ S.mtInfoSeen=true; save(); }, dbInfoSeen:()=>!!S.dbInfoSeen, dbInfoMark:()=>{ S.dbInfoSeen=true; save(); }, debugUnlock, debugStart2, tutState, tutGive, tutGrow, tutSeed, tutSandbox, refreshRank, openModal, ownerId, useName, baraOn, baraLeft, baraSeen, debugStart5, debugStart6, debugStart3, debugStart4, wcDishes, wcUse, wcRefund, wcLabel, wcReceive, wcTaken, wcAllDishes:()=>Object.keys(DISH).filter(wcCanThrow), wcCropIds:()=>CROPS.filter(c=>!c.secret && SUPER[c.id]).map(c=>c.id), wcFarmNow:()=>({ m:Math.floor(S.money), h:Math.floor(S.totalHarvest||0) }),
   wcGoalPicks:()=>[
     { name:"不思議な肥料と摩訶不思議な肥料", ic:ico(GUR.mfert), give:()=>{ S.sfert=(S.sfert||0)+1; S.mfert=(S.mfert||0)+1; } },
     { name:GUR.bento.name, ic:ico(GUR.bento), give:()=>{ S.bento=(S.bento||0)+1; } },
@@ -17418,7 +17482,7 @@ function bundleSummary(s){
     const g=JSON.parse(o["garden:save"]||"null");
     const st=JSON.parse(o.stats||"null");
     const parts=[];
-    if(g && typeof g.money==="number") parts.push(`<span class="kicon"></span>${Math.floor(g.money).toLocaleString("ja-JP")}`);
+    if(g && typeof g.money==="number") parts.push(`<span class="kicon"></span>${jpNum(g.money)}`);
     if(st && st.plays) parts.push(`${st.plays}回プレイ`);
     return parts.join(" ・ ")||"記録";
   }catch(e){ return "読めない記録"; }
@@ -17611,7 +17675,7 @@ document.addEventListener("keydown",syncGuardInput,true);
 function refreshGardenStat(id="gardenStat"){
   const el=$(id); if(!el) return;
   let s; try{ s=Garden.summary(); }catch(e){ return; }
-  const fmt=n=>Math.floor(n).toLocaleString("ja-JP");
+  const fmt=n=>jpNum(n);
   let t=`<span class="kicon"></span>所持キー<b>${s.moneyTxt||fmt(s.money)}</b>`;
   if(s.pending) t+=`<small>(+${fmt(s.pending)} 受け取り待ち)</small>`;
   const todo=[];
