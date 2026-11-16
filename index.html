@@ -11435,6 +11435,7 @@ function keepVisible(listEl){
    ← → タブ / ↑ ↓ 品物 / Enter 1つ買う・1つ売る / Shift+Enter 10買う・全部売る / A すべて売る */
 const SHOP_TABS=["種","道具・土地","効率化","売る","レシピ","自動売却"];
 const SHOP_ORDER=[0,1,2,5,4,3];   // 画面での並び: 種 / 道具・土地 / 効率化 / 自動売却 / レシピ / 売る
+let shopClickAt=0;   // お店の一覧をマウス・タップで押した時刻
 let shopTab=0, shopCur=[0,0,0,0,0,0];   // タブごとの選択位置(種・道具・効率化・売る・レシピ・自動売却)
 function shopRows(){
   const rows=[];
@@ -11721,7 +11722,7 @@ function renderShop(){
   if(window.IS_MOBILE){
     $("g-shopHint").innerHTML = shopTab===3 && total>0
       ? `<button class="sbtn main" data-sellall>作物をすべて売る(${fmtNum(total)}キー・種・食材と変異・超変異は売りません)</button>` : "";
-    keepVisible(body);
+    if(Date.now()-shopClickAt>400) keepVisible(body);
     return;
   }
   $("g-shopHint").innerHTML =
@@ -11729,7 +11730,7 @@ function renderShop(){
     (shopTab===5 ? " ・ 作物のマスでは <b>← → ↑ ↓</b> で選ぶ(タブの切りかえは上のまとめの行で)" : "")+
     (shopTab===3 && total>0 ? ` ・ <b>A</b> 作物をすべて売る(${fmtNum(total)}キー・種・食材と変異・超変異は売りません)` : "")+
     ` ・ <b>Tab</b> / <b>Esc</b> 閉じる`;
-  keepVisible(body);
+  if(Date.now()-shopClickAt>400) keepVisible(body);
 }
 /* 「<b>Enter</b> 1つ<br><b>Shift+Enter</b> 10個」から、タップ用のボタンを作る */
 function shopActBtns(keys){
@@ -11967,6 +11968,7 @@ function sellAll(){
 /* マウスでも使えるように(キーボードだけで完結するのが基本) */
 $("g-shopBody").addEventListener("click",e=>{
   const row=e.target.closest && e.target.closest(".rowi"); if(!row) return;
+  shopClickAt=Date.now();   // 押した品はもう見えているので、描き直しで一覧を動かさない(はみ出したマスを押したときに、少し上下していた)
   shopCur[shopTab]=+row.dataset.i;
   const b=e.target.closest("[data-act]");
   if(b){
