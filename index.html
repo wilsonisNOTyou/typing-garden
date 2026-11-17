@@ -1603,6 +1603,8 @@ html.mobile .wb-in{font-size:16px}
 .fb-cats .btn.on{color:#1b1405; background:linear-gradient(180deg,#ffd75e,var(--amber)); border-color:#c79100}
 .fb-text{height:8rem; font-size:.95rem !important}
 .fb-name{width:min(300px,100%); margin-top:.5rem}
+.fb-mail{width:min(460px,100%); margin-top:.5rem}
+.fb-book{margin-top:.4rem}
 html.mobile .fb-text{font-size:16px !important}
 
 /* ---- キーボード農園のボタン(黄緑)・ランキングの農園タブ ---- */
@@ -4005,12 +4007,18 @@ html:not(.mobile) #screen-garden.haslog:has(.modal.open) #g-toasts{top:14px}
       <button class="btn on" data-c="feature">機能</button>
       <button class="btn" data-c="bug">バグ</button>
       <button class="btn" data-c="other">その他</button>
+      <button class="btn" data-c="book">共有された単語帳の削除依頼</button>
+    </div>
+    <div class="fb-book" id="fbBook" hidden>
+      <p class="bk-p">共有された単語帳に、ご自身が権利を持つ文章などが無断で使われているときは、ここからお知らせください。確認して、取り込めないようにします。どの単語帳かを探せるよう、相手から渡された6文字の共有コードを書いてください。</p>
+      <input class="bk-codein fb-name" id="fbCode" maxlength="8" placeholder="共有コード(英字と数字の6文字)" autocomplete="off">
+      <input class="bk-codein fb-mail" id="fbMail" maxlength="100" placeholder="連絡先(メールアドレスなど。確認のご連絡に使います)" autocomplete="off">
     </div>
     <h3>内容</h3>
     <textarea class="bk-code fb-text" id="fbText" maxlength="1000" placeholder="例: ハードに入れてほしい言葉があります / ガチャに○○の作物がほしい / スマホで○○を押すと動かない"></textarea>
     <input class="bk-codein fb-name" id="fbName" maxlength="20" placeholder="名前(なくても大丈夫です)" autocomplete="off">
     <div class="bk-foot"><span class="bk-note" id="fbNote"></span><button class="btn primary" id="fbSend">送る</button></div>
-    <p class="keynav"><b>1〜6</b> 種類 ・ <b>T</b> 内容を書く ・ <b>N</b> 名前 ・ <b>Ctrl+Enter</b> / <b>Enter</b>(入力欄の外) 送る ・ 入力中の <b>Esc</b> で入力をやめる ・ <b>Esc</b> 閉じる</p>
+    <p class="keynav"><b>1〜7</b> 種類 ・ <b>T</b> 内容を書く ・ <b>N</b> 名前 ・ <b>Ctrl+Enter</b> / <b>Enter</b>(入力欄の外) 送る ・ 入力中の <b>Esc</b> で入力をやめる ・ <b>Esc</b> 閉じる</p>
   </div>
 </div>
 
@@ -5696,7 +5704,7 @@ document.addEventListener("keydown",e=>{
   if(fbOpen && !(e.target && (e.target.tagName==="TEXTAREA"||e.target.tagName==="INPUT"))){
     const k=e.key;
     if(k==="Escape"){ e.preventDefault(); closeFeedback(); }
-    else if(/^[1-6]$/.test(k)){ e.preventDefault(); $("fbCats").querySelectorAll("[data-c]")[+k-1].click(); }
+    else if(/^[1-7]$/.test(k)){ e.preventDefault(); $("fbCats").querySelectorAll("[data-c]")[+k-1].click(); }
     else if(k==="t"||k==="T"){ e.preventDefault(); $("fbText").focus(); }
     else if(k==="n"||k==="N"){ e.preventDefault(); $("fbName").focus(); }
     else if(k==="Enter"){ e.preventDefault(); fbSend(); }
@@ -5708,7 +5716,7 @@ document.addEventListener("keydown",e=>{
     if(e.key==="Enter" && (e.ctrlKey||e.metaKey)){
       if(id==="wbBulk"){ e.preventDefault(); wbBulkAdd(); return; }
       if(id==="wbName"||id==="wbQ"||id==="wbQK"||id==="wbT"||id==="wbK"){ e.preventDefault(); wbSaveBook(); return; }
-      if(id==="fbText"||id==="fbName"){ e.preventDefault(); fbSend(); return; }
+      if(id==="fbText"||id==="fbName"||id==="fbCode"||id==="fbMail"){ e.preventDefault(); fbSend(); return; }
     }
     if(e.key==="Enter"){
       if(id==="wbBulk"||id==="fbText") return;       // 複数行の入力欄は改行する
@@ -6582,7 +6590,7 @@ async function wbShare(i){
   const b=wbBooks[i]; if(!b) return;   // おためし単語帳は共有しない(みんな持っている)
   if(!db){ wbShareMsg("共有するには通信が必要です(今はデータベースにつながっていません)"); return; }
   const show=code=>{
-    wbShareMsg(`単語帳「${escH(b.name)}」の共有コード: <b class="wb-code">${code}</b> <button class="btn" id="wbCodeCopy">コピー</button><br><small>このコードを渡すと、相手は「コードで取り込む」で同じ単語帳を自分のものにできます。言葉を変えたら、もう一度「共有」すると新しいコードになります。<br>市販の単語帳や問題集の中身など、ほかの人が作ったものをそのまま写した単語帳は、共有しないでください</small>`);
+    wbShareMsg(`単語帳「${escH(b.name)}」の共有コード: <b class="wb-code">${code}</b> <button class="btn" id="wbCodeCopy">コピー</button><br><small>このコードを渡すと、相手は「コードで取り込む」で同じ単語帳を自分のものにできます。言葉を変えたら、もう一度「共有」すると新しいコードになります。<br>市販の単語帳や問題集の中身など、ほかの人が作ったものをそのまま写した単語帳は、共有しないでください(権利を持つ方からの削除のご依頼は「要望・バグ報告」で受け付けています)</small>`);
     $("wbCodeCopy").onclick=()=>{ try{ navigator.clipboard.writeText(code).then(()=>{ $("wbCodeCopy").textContent="コピーしました"; },()=>{}); }catch(e){} };
   };
   if(b.share && b.shareSig===wbShareSig(b)){ show(b.share); return; }
@@ -8632,6 +8640,7 @@ function wcMatchHTML(m,head){
 /* ---------- 要望・バグ報告 ----------
    Firebase の typinggarden/feedback に書き込むだけ(読むのは作者だけ) */
 let fbOpen=false, fbCat="feature";
+const FB_PH=document.getElementById("fbText").placeholder;
 const FB_WAIT=30000;   // 送りすぎないよう、30秒あける
 function openFeedback(){
   fbOpen=true;
@@ -8648,6 +8657,11 @@ async function fbSend(){
   const note=$("fbNote"), text=$("fbText").value.trim(), name=$("fbName").value.trim();
   if(!db){ note.textContent="※Firebase未設定のため送れません"; return; }
   if(!text){ note.textContent="内容を書いてください"; $("fbText").focus(); return; }
+  const code=$("fbCode").value.trim().toUpperCase(), mail=$("fbMail").value.trim();
+  if(fbCat==="book"){
+    if(!/^[A-HJ-NP-Z2-9]{6}$/.test(code)){ note.textContent="共有コード(英字と数字の6文字)を書いてください"; $("fbCode").focus(); return; }
+    if(!mail){ note.textContent="連絡先を書いてください"; $("fbMail").focus(); return; }
+  }
   let last=0; try{ last=+(localStorage.getItem("typinggarden:sync:fbLast")||0); }catch(e){}
   const wait=FB_WAIT-(Date.now()-last);
   if(wait>0){ note.textContent=`続けて送るには、あと${Math.ceil(wait/1000)}秒待ってください`; return; }
@@ -8655,9 +8669,10 @@ async function fbSend(){
   try{
     const item={ c:fbCat, x:text.slice(0,1000), t:Date.now(), d:window.IS_MOBILE?"mobile":"pc" };
     if(name) item.n=name.slice(0,20);
+    if(fbCat==="book"){ item.b=code; item.m=mail.slice(0,100); }
     await db.ref("typinggarden/feedback").push(item);
     try{ localStorage.setItem("typinggarden:sync:fbLast", String(Date.now())); }catch(e){}
-    $("fbText").value="";
+    $("fbText").value=""; $("fbCode").value=""; $("fbMail").value="";
     note.textContent="送りました。ありがとうございます!";
   }catch(e){
     note.textContent=/permission/i.test(String(e&&(e.code||e.message)||""))
@@ -8672,6 +8687,8 @@ $("fb").addEventListener("click",e=>{ if(e.target===$("fb")) closeFeedback(); })
 $("fbCats").addEventListener("click",e=>{
   const b=e.target.closest("[data-c]"); if(!b) return;
   fbCat=b.dataset.c;
+  $("fbBook").hidden = fbCat!=="book";   // 単語帳の削除依頼: 共有コードと連絡先を書いてもらう
+  $("fbText").placeholder = fbCat==="book" ? "例: この単語帳の問題文は、○○社の『△△』からの無断転載です。わたしは△△の発行元の担当者です" : FB_PH;
   $("fbCats").querySelectorAll("[data-c]").forEach(x=>x.classList.toggle("on",x===b));
 });
 
