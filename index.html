@@ -1490,6 +1490,45 @@ html.mobile.gated body{overflow:hidden}
 .wb-empty{color:var(--steel); text-align:center; padding:1rem}
 .wb-preh{color:var(--amber); font-size:.9rem; letter-spacing:.1em; margin:.8rem 0 0; padding-top:.6rem; border-top:1px dashed var(--line)}
 .wb-item.pre{background:rgba(242,193,78,.04)}
+/* 本棚 */
+#screen-books{--bw:104px; --bh:142px; --bg:22px}
+html.mobile #screen-books{--bw:88px; --bh:122px; --bg:18px}
+.wb-shelfh{width:min(680px,100%); margin:1.1rem auto .3rem; color:var(--amber); font-size:.9rem; letter-spacing:.12em; text-align:left}
+.wb-shelf{width:min(680px,100%); margin:0 auto; display:grid; grid-template-columns:repeat(auto-fill,var(--bw)); grid-auto-rows:var(--bh); gap:var(--bg) 14px; justify-content:center; padding:10px 12px 14px;
+  background:repeating-linear-gradient(to bottom, transparent 0, transparent calc(var(--bh) + 10px), #7a5532 calc(var(--bh) + 10px), #5a3b20 calc(var(--bh) + 10px + var(--bg) * .55), transparent calc(var(--bh) + 10px + var(--bg) * .55), transparent calc(var(--bh) + var(--bg))), linear-gradient(#20180f,#17110b);
+  border:1px solid #3b2a18; border-radius:6px; box-shadow:inset 0 6px 14px rgba(0,0,0,.5)}
+.wb-book{position:relative; cursor:pointer; border-radius:3px 7px 7px 3px; background:linear-gradient(100deg, hsl(var(--h) 38% 24%) 0 9%, hsl(var(--h) 42% 34%) 11%, hsl(var(--h) 46% 30%) 100%);
+  box-shadow:inset 3px 0 0 rgba(255,255,255,.12), inset -2px 0 0 rgba(0,0,0,.35), 2px 3px 6px rgba(0,0,0,.55); transition:transform .15s; overflow:hidden}
+.wb-book:hover{transform:translateY(-4px)}
+.wb-book.cur{transform:translateY(-6px); box-shadow:0 0 0 2px var(--amber), 0 0 14px rgba(242,193,78,.4), 2px 3px 6px rgba(0,0,0,.55)}
+.wb-cover{position:absolute; inset:8px 6px 14px 14px; display:flex; flex-direction:column; align-items:center; gap:.2rem; text-align:center; border:1px solid hsl(var(--h) 50% 60% / .35); border-radius:3px; padding:.35rem .2rem}
+.wb-bic{font-size:1.9rem; line-height:1.1; color:hsl(var(--h) 70% 82%); font-family:serif; text-shadow:0 1px 0 rgba(0,0,0,.4)}
+.wb-bt{font-weight:400; font-size:.74rem; line-height:1.3; color:#f4ecd8; display:-webkit-box; -webkit-box-orient:vertical; -webkit-line-clamp:3; overflow:hidden; word-break:break-all}
+.wb-cover small{margin-top:auto; font-size:.66rem; color:hsl(var(--h) 30% 78%)}
+.wb-band{position:absolute; left:14px; right:6px; bottom:5px; height:5px; border-radius:3px; background:rgba(0,0,0,.4)}
+.wb-band i{display:block; height:100%; border-radius:3px; background:linear-gradient(90deg,#9be28a,#f2c14e)}
+.wb-bno{position:absolute; top:3px; right:5px; font-size:.65rem; color:rgba(255,255,255,.55)}
+.wb-newbook{cursor:pointer; border:2px dashed #6b5638; border-radius:6px; display:flex; flex-direction:column; align-items:center; justify-content:center; color:#c9b28a; gap:.2rem}
+.wb-newbook span{font-size:1.8rem; line-height:1}
+.wb-newbook small{font-size:.72rem; text-align:center}
+.wb-newbook:hover{border-color:var(--amber); color:var(--amber)}
+.wb-detail{position:sticky; top:env(safe-area-inset-top,0px); z-index:5; width:min(680px,100%); margin:0 auto; display:flex; gap:.9rem; padding:.8rem .9rem; text-align:left;
+  background:linear-gradient(135deg, #1b211d, #141915); border:1px solid hsl(var(--h) 45% 45% / .7); border-radius:10px; box-shadow:0 6px 16px rgba(0,0,0,.5)}
+.wb-dcover{flex:0 0 auto; width:58px; height:80px; border-radius:3px 6px 6px 3px; display:flex; align-items:center; justify-content:center; background:linear-gradient(100deg, hsl(var(--h) 38% 24%) 0 10%, hsl(var(--h) 46% 34%) 12%, hsl(var(--h) 46% 28%)); box-shadow:inset 3px 0 0 rgba(255,255,255,.12), 2px 3px 6px rgba(0,0,0,.5)}
+.wb-dcover span{font-size:1.7rem; font-family:serif; color:hsl(var(--h) 70% 82%)}
+.wb-dinfo{flex:1; min-width:0; display:flex; flex-direction:column; gap:.3rem}
+.wb-dname{font-weight:400; color:var(--ink); font-size:1.05rem}
+.wb-dtag{margin-left:.5rem; font-size:.7rem; color:var(--amber); border:1px solid var(--amber); border-radius:999px; padding:0 .45rem; vertical-align:middle}
+.wb-dinfo > small{color:var(--steel); font-size:.8rem; line-height:1.5}
+.wb-dprog{display:flex; align-items:center; gap:.5rem; font-size:.78rem; color:var(--steel)}
+.wb-dprog i{flex:1; max-width:220px; height:6px; border-radius:3px; background:rgba(255,255,255,.08); overflow:hidden}
+.wb-dprog i b{display:block; height:100%; background:linear-gradient(90deg,#9be28a,#f2c14e)}
+.wb-dopts{display:flex; flex-wrap:wrap; gap:.35rem .8rem; align-items:center}
+.wb-dopts .wb-mode{margin:0}
+.wb-dopts .wb-sec{margin-left:0}
+.wb-detail .wb-acts{justify-content:flex-start; margin-top:.2rem}
+html.mobile .wb-dcover{display:none}
+html.mobile .wb-detail{position:static}
 .wb-share-note{width:min(620px,100%); margin:.8rem auto 0; padding:.6rem .8rem; border:1px solid var(--amber); border-radius:8px; color:var(--ink); text-align:left; font-size:.9rem; line-height:1.7}
 .wb-share-note .wb-code{color:var(--amber); font-size:1.3rem; letter-spacing:.2em; margin:0 .3rem}
 .wb-share-note .btn{padding:.2rem .6rem; font-size:.8rem}
@@ -3786,7 +3825,7 @@ html:not(.mobile) #screen-garden.haslog:has(.modal.open) #g-toasts{top:14px}
       <p class="wb-share-note" id="wbShareNote" hidden></p>
       <div id="wbList" class="wb-list"></div>
       <p class="reg-status m-only">スマホでは、問題のある言葉が4つ以上ある単語帳を4択で遊べます(作成・編集・共有もできます)。タイピングはパソコンで遊べます</p>
-      <p class="keynav"><b>↑ ↓</b> 単語帳を選ぶ ・ <b>Enter</b> プレイ ・ <b>E</b> 編集 ・ <b>M</b> 遊び方(全部・10語) ・ <b>F</b> タイピング / 4択 ・ <b>V</b> 単語リスト ・ <b>S</b> 共有 ・ <b>I</b> コードで取り込む ・ <b>Delete</b> 削除 ・ <b>1〜9</b> その単語帳をプレイ ・ <b>← →</b> 答えが出るまでの秒数(問題のある単語帳) ・ <b>N</b> 新しい単語帳 ・ <b>Esc</b> タイトルへ</p>
+      <p class="keynav"><b>← → ↑ ↓</b> 本を選ぶ ・ <b>Enter</b> プレイ ・ <b>E</b> 編集 ・ <b>M</b> 遊び方(全部・10語) ・ <b>F</b> タイピング / 4択 ・ <b>V</b> 単語リスト ・ <b>S</b> 共有 ・ <b>I</b> コードで取り込む ・ <b>Delete</b> 削除 ・ <b>1〜9</b> その単語帳をプレイ ・ <b>− +</b> 答えが出るまでの秒数 ・ <b>N</b> 新しい単語帳 ・ <b>Esc</b> タイトルへ</p>
       <div class="btn-row">
         <button class="btn primary" id="wbNew">新しい単語帳を作る (N)</button>
         <button class="btn" id="wbImport">コードで取り込む (I)</button>
@@ -6614,24 +6653,48 @@ function openBooks(){
   renderBooks();
   show("books");
 }
+/* 一覧は本棚: 単語帳を「本」として棚に並べ、選んだ本のくわしい欄を上に出す */
+const WB_COVER={ "p:hyakunin":["歌",352], "p:nandoku":["難",232], "p:kencho":["県",140], "p:yoji":["熟",28], "p:kotowaza":["諺",188] };
+function wbCover(b){
+  const c=WB_COVER[b.id]; if(c) return c;
+  let h=0; for(const ch of String(b.id)) h=(h*31+ch.charCodeAt(0))%360;
+  return [Array.from(b.name.trim())[0]||"本", h];
+}
 function renderBooks(){
   const list=$("wbList"), all=wbAll();
   wbCur=Math.max(0,Math.min(wbCur,all.length-1));
-  const item=(b,i)=>`<div class="wb-item${i===wbCur?" cur":""}${b.pre?" pre":""}" data-i="${i}">
-    <span class="wb-no">${!b.pre&&i<9?i+1:""}</span>
-    <div class="wb-info"><b>${escH(b.name)}</b><small>${b.pre?`${escH(b.ds)} ・ `:""}${b.words.length}語${wbStyle(b)==="type"&&wbBestTxt(b)?` ・ ${WB_MODES[wbMode(b)]}のベスト ${wbBestTxt(b)}`:""}${wbCan4(b)?` ・ 覚えた ${wbMemCount(b).good}/${wbMemCount(b).all}`:""}</small>
-    ${wbCan4(b)&&!window.IS_MOBILE?`<span class="wb-mode">${[["type","タイピング"],["4","4択"]].map(([v,n])=>`<button class="${wbStyle(b)===v?"on":""}" data-style="${v}">${n}</button>`).join("")}</span>`:""}
-    ${wbModes(b).length>1?`<span class="wb-mode">${wbModes(b).map(m=>`<button class="${m===wbMode(b)?"on":""}" data-mode="${m}">${WB_MODES[m]}</button>`).join("")}</span>`:""}<small>${wbHasQ(b)&&!window.IS_MOBILE?`<span class="wb-sec">${wbStyle(b)==="4"?"4択になるまで":"答えが出るまで"}<button data-sd="-1" aria-label="1秒短く">−</button><b>${wbSec(b)}</b>秒<button data-sd="1" aria-label="1秒長く">+</button></span>`:""}</small></div>
-    <div class="wb-acts">
-      <button class="btn primary" data-play="${i}">プレイ</button>
-      <button class="btn" data-view="${i}">単語リスト</button>
-      ${b.pre?"":`<button class="btn" data-edit="${i}">編集</button>
-      <button class="btn" data-share="${i}">共有</button>
-      <button class="btn wb-del" data-del="${i}">削除</button>`}
-    </div></div>`;
-  list.innerHTML=(wbBooks.length ? wbBooks.map(item).join("") : '<p class="wb-empty">まだ自分の単語帳がありません。「新しい単語帳を作る」で作るか、下のおためし単語帳で遊んでみましょう</p>')
-    + '<p class="wb-preh">おためし単語帳</p>' + WB_PRESETS.map((b,j)=>item(b,wbBooks.length+j)).join("");
-  const cur=list.querySelector(".wb-item.cur"); if(cur && cur.scrollIntoView) cur.scrollIntoView({block:"nearest"});
+  const book=(b,i)=>{ const [ic,h]=wbCover(b), c=wbCan4(b)?wbMemCount(b):null;
+    return `<div class="wb-book${i===wbCur?" cur":""}" data-i="${i}" style="--h:${h}" title="${escH(b.name)}">
+      <div class="wb-cover"><span class="wb-bic">${escH(ic)}</span><b class="wb-bt">${escH(b.name)}</b><small>${b.words.length}語</small></div>
+      ${c?`<div class="wb-band" title="覚えた ${c.good}/${c.all}"><i style="width:${c.all?Math.round(c.good/c.all*100):0}%"></i></div>`:""}
+      ${!b.pre&&i<9?`<span class="wb-bno">${i+1}</span>`:""}
+    </div>`; };
+  const b=all[wbCur], cnt=b&&wbCan4(b)?wbMemCount(b):null;
+  const detail = b ? `<div class="wb-detail" style="--h:${wbCover(b)[1]}">
+    <div class="wb-dcover"><span>${escH(wbCover(b)[0])}</span></div>
+    <div class="wb-dinfo">
+      <b class="wb-dname">${escH(b.name)}${b.pre?'<small class="wb-dtag">おためし</small>':""}</b>
+      <small>${b.pre?`${escH(b.ds)} ・ `:""}${b.words.length}語${wbStyle(b)==="type"&&wbBestTxt(b)?` ・ ${WB_MODES[wbMode(b)]}のベスト ${wbBestTxt(b)}`:""}</small>
+      ${cnt?`<div class="wb-dprog"><span>覚えた ${cnt.good}/${cnt.all}</span><i><b style="width:${cnt.all?Math.round(cnt.good/cnt.all*100):0}%"></b></i></div>`:""}
+      <div class="wb-dopts">
+        ${wbCan4(b)&&!window.IS_MOBILE?`<span class="wb-mode">${[["type","タイピング"],["4","4択"]].map(([v,n])=>`<button class="${wbStyle(b)===v?"on":""}" data-style="${v}">${n}</button>`).join("")}</span>`:""}
+        ${wbModes(b).length>1?`<span class="wb-mode">${wbModes(b).map(m=>`<button class="${m===wbMode(b)?"on":""}" data-mode="${m}">${WB_MODES[m]}</button>`).join("")}</span>`:""}
+        ${wbHasQ(b)&&!window.IS_MOBILE?`<span class="wb-sec">${wbStyle(b)==="4"?"4択になるまで":"答えが出るまで"}<button data-sd="-1" aria-label="1秒短く">−</button><b>${wbSec(b)}</b>秒<button data-sd="1" aria-label="1秒長く">+</button></span>`:""}
+      </div>
+      <div class="wb-acts">
+        <button class="btn primary" data-play="${wbCur}">プレイ</button>
+        <button class="btn" data-view="${wbCur}">単語リスト</button>
+        ${b.pre?"":`<button class="btn" data-edit="${wbCur}">編集</button>
+        <button class="btn" data-share="${wbCur}">共有</button>
+        <button class="btn wb-del" data-del="${wbCur}">削除</button>`}
+      </div>
+    </div></div>` : "";
+  list.innerHTML = detail
+    + '<p class="wb-shelfh">わたしの単語帳</p><div class="wb-shelf">' + wbBooks.map(book).join("")
+    + '<div class="wb-newbook" title="新しい単語帳を作る"><span>+</span><small>新しい<br>単語帳</small></div></div>'
+    + (wbBooks.length ? "" : '<p class="wb-empty">まだ自分の単語帳がありません。「+ 新しい単語帳」で作るか、下のおためし単語帳で遊んでみましょう</p>')
+    + '<p class="wb-shelfh">おためし単語帳</p><div class="wb-shelf">' + WB_PRESETS.map((x,j)=>book(x,wbBooks.length+j)).join("") + '</div>';
+  const cur=list.querySelector(".wb-book.cur"); if(cur && cur.scrollIntoView && !window.IS_MOBILE) cur.scrollIntoView({block:"nearest"});
 }
 function playBook(i){
   const b=wbAll()[i]; if(!b) return;
@@ -6737,6 +6800,7 @@ const WB_AI_PROMPT=`次の内容を、タイピング練習用の単語帳に取
 よみがなのきまり:
 ・ひらがなだけで書く(カタカナ・漢字・空白は使わない)
 ・のばす音は「ー」、英字と数字はそのまま書いてよい
+・答えが英語(英単語など)のときは、よみがなの欄にも英語をそのまま書く(打つのは英字)
 ・句読点「、」「。」や「！」「？」は使ってよい
 
 返事は変換した行だけにして、見出し・説明・番号は付けないでください。
@@ -6799,8 +6863,19 @@ function booksKey(e){
   if(k==="n"||k==="N"){ e.preventDefault(); editBook(-1); return; }
   if(/^[1-9]$/.test(k) && wbBooks[+k-1]){ e.preventDefault(); wbCur=+k-1; playBook(wbCur); return; }
   if(!n) return;
-  if(k==="ArrowDown"||k==="ArrowUp"){ e.preventDefault(); wbCur=(wbCur+(k==="ArrowDown"?1:-1)+n)%n; renderBooks(); return; }
-  if(k==="ArrowLeft"||k==="ArrowRight"){ e.preventDefault(); wbSetSec(wbCur,k==="ArrowRight"?1:-1); return; }   // 答えが出るまでの秒数
+  if(k==="ArrowLeft"||k==="ArrowRight"){ e.preventDefault(); wbCur=(wbCur+(k==="ArrowRight"?1:-1)+n)%n; renderBooks(); return; }
+  if(k==="ArrowDown"||k==="ArrowUp"){   // 本棚の上下の段へ(同じ列あたりの本)
+    e.preventDefault();
+    const els=[...$("wbList").querySelectorAll(".wb-book")], me=els.find(x=>+x.dataset.i===wbCur); if(!me) return;
+    const r0=me.getBoundingClientRect(), down=k==="ArrowDown";
+    const cand=els.filter(x=>{ const r=x.getBoundingClientRect(); return down ? r.top>r0.top+30 : r.top<r0.top-30; });   // 選んだ本は少し浮いているので、段のちがいは大きめに見る
+    if(!cand.length) return;
+    const ty=down ? Math.min(...cand.map(x=>x.getBoundingClientRect().top)) : Math.max(...cand.map(x=>x.getBoundingClientRect().top));
+    const row=cand.filter(x=>Math.abs(x.getBoundingClientRect().top-ty)<5);
+    row.sort((a,b)=>Math.abs(a.getBoundingClientRect().left-r0.left)-Math.abs(b.getBoundingClientRect().left-r0.left));
+    wbCur=+row[0].dataset.i; renderBooks(); return;
+  }
+  if(k==="-"||k==="+"||k==="="||k===";"){ e.preventDefault(); wbSetSec(wbCur,k==="-"?-1:1); return; }   // 答えが出るまでの秒数
   if(k==="Enter"||k===" "){ e.preventDefault(); playBook(wbCur); return; }
   if(k==="e"||k==="E"){ e.preventDefault(); editBook(wbCur); return; }
   if(k==="m"||k==="M"){ e.preventDefault(); wbSetMode(wbCur,"next"); return; }
@@ -6811,8 +6886,15 @@ function booksKey(e){
   if(k==="Delete"||k==="Backspace"||k==="x"||k==="X"){ e.preventDefault(); deleteBook(wbCur); return; }
 }
 $("wbList").addEventListener("click",e=>{
-  const row=e.target.closest(".wb-item"); if(row){ wbCur=+row.dataset.i; }
-  const b=e.target.closest("button"); if(!b){ renderBooks(); return; }
+  if(e.target.closest(".wb-newbook")){ editBook(-1); return; }
+  const bk=e.target.closest(".wb-book");
+  if(bk){   // 本を押す: 選ぶ(選んでいる本をもう一度押すと遊ぶ)
+    const i=+bk.dataset.i; if(i===wbCur && !window.IS_MOBILE){ playBook(i); return; }
+    wbCur=i; renderBooks();
+    if(window.IS_MOBILE){ const d=$("wbList").querySelector(".wb-detail"); if(d) d.scrollIntoView({block:"start",behavior:"smooth"}); }
+    return;
+  }
+  const b=e.target.closest("button"); if(!b) return;
   if(b.dataset.sd!=null){ wbSetSec(wbCur,+b.dataset.sd); return; }
   if(b.dataset.mode!=null){ wbSetMode(wbCur,b.dataset.mode); return; }
   if(b.dataset.style!=null){ if(b.dataset.style!==wbStyle(wbAll()[wbCur])) wbSetStyle(wbCur); return; }
@@ -20480,6 +20562,8 @@ const GAME=[[38,[62,65,69]],[38,[62,65,69]],[34,[62,65,70]],[36,[60,64,67]],[38,
 const GARDEN=[[43,[59,62,67]],[40,[59,64,67]],[36,[60,64,67]],[38,[57,62,66]],[43,[59,62,67]],[35,[59,62,66]],[36,[60,64,67]],[38,[57,62,66]]];
 const GARDEN_M=[[[0,74,4],[4,79,4],[8,78,2],[10,79,2],[12,74,4]], [[0,76,6],[6,74,2],[8,71,8]], [[0,72,4],[4,76,4],[8,79,6],[14,76,2]], [[0,74,8],[8,69,4],[12,66,4]],
                 [[0,74,4],[4,79,4],[8,83,4],[12,79,4]], [[0,78,6],[6,74,2],[8,71,8]], [[0,72,2],[2,74,2],[4,76,4],[8,79,4],[12,76,4]], [[0,74,6],[6,72,2],[8,69,8]]];
+const LIB=[[53,[60,64,69,72]],[52,[59,62,67,71]],[50,[57,60,65,69]],[55,[59,62,65,69]],[53,[57,60,64,69]],[57,[60,64,67,72]],[50,[60,62,65,69]],[55,[59,62,65,67]]];   // 単語帳の曲: F Em Dm G / F Am Dm G
+const LIB_M=[[[0,76],[6,74],[8,72],[12,69]],[[0,71],[4,74],[8,79],[14,76]],[[0,77],[6,76],[8,74],[12,72]],[[0,74],[8,71],[12,67]],[[0,72],[4,76],[8,81],[12,79]],[[0,76],[6,79],[8,84],[12,79]],[[0,77],[4,76],[8,74],[10,72],[12,74]],[[0,71],[8,74],[12,79]]];
 const STUDY=[[48,[59,62,64,67]],[45,[55,59,60,64]],[50,[57,60,64,65]],[43,[53,57,59,64]],[52,[55,59,62,64]],[45,[55,60,64,67]],[50,[53,57,60,64]],[43,[53,55,60,62]]];
 const STUDY_M=[[[8,76,2],[10,79,2],[12,81,4]], [[0,79,6]], [[8,77,2],[10,76,2],[12,74,4]], [[0,71,6]], [[8,74,2],[10,76,2],[12,79,4]], [[0,76,4],[4,72,4]], [[8,69,2],[10,72,2],[12,76,4]], [[0,74,8]]];
 const KOTO=[ [[0,62],[4,69],[8,70],[12,69],[16,67],[24,63],[28,62],[40,57],[44,58],[48,62],[56,50]],
@@ -20582,6 +20666,16 @@ const TR={
     hat(o,t,i%2===0?.011:.005,.022);
     if(!(b&1) && i===0) T(o,t,vo[3]+24,.3,{ v:.012, r:.5, rv:.6 });
     if(L%2===1) for(const [a,n,len] of STUDY_M[b]) if(a===i){ T(o,t,n,Math.min(len*sp,.3),{ v:.036, a:.003, r:.5, sus:.3, rv:.45 }); T(o,t,n+12,.12,{ v:.007, r:.2 }); }
+  }},
+  /* タイピング単語帳: 図書館のように静かな曲。やわらかいピアノの和音と、遠くで鳴るオルゴール。ときどき、ページをめくる音 */
+  books:{ bpm:()=>74, len:128, step(s,t,o,L,sp){
+    const b=s>>4, i=s&15, [root,vo]=LIB[b];
+    if(i===0){ T(o,t,root-12,sp*15,{ v:.055, a:.03, r:1.4, sus:.5, rv:.45 }); vo.forEach((n,k)=>T(o,t+k*.035,n,sp*11,{ type:"triangle", lp:1700, v:.02, a:.01, r:1.6, sus:.3, rv:.6 })); }
+    if(i===8) vo.slice(1).forEach((n,k)=>T(o,t+k*.05,n,sp*6,{ type:"triangle", lp:1500, v:.012, a:.01, r:1.2, sus:.3, rv:.6 }));
+    if(i===4||i===12) T(o,t,root,sp*3,{ v:.03, a:.02, r:.9, sus:.4, rv:.4 });
+    if(i%4===2) T(o,t,vo[[0,2,1,3][i>>2]]+12,sp*3,{ v:.011, a:.005, r:.9, sus:.2, rv:.65 });
+    if(L%2===1) for(const [a,n] of LIB_M[b]) if(a===i){ T(o,t,n,.22,{ v:.028, a:.002, r:1.2, sus:.15, rv:.75 }); T(o,t,n+12,.1,{ v:.005, r:.7, rv:.75 }); }
+    if(i===0 && b===4 && R()<.45) N(o,t+rnd(.4,1.6),.28,{ f:3000, q:.6, v:.005, a:.09 });
   }},
   /* ネジの詩: 琴と尺八。間を大きくとる */
   poem:{ bpm:()=>66, len:64, step(s,t,o,L,sp){
@@ -20686,7 +20780,8 @@ function wantTrack(){
   const sc=sceneNow();
   if(sc==="battle") return null;
   if(baraNow()) return "bara";
-  if(sc==="game"){ let d=""; try{ d=String(diff); }catch(e){} return d==="oneshot" ? "oneshot" : "game"; }
+  if(sc==="game"){ let d=""; try{ d=String(diff); }catch(e){} return d==="oneshot" ? "oneshot" : d==="book" ? "books" : "game"; }   // 単語帳で遊んでいるあいだも、単語帳の曲
+  if(sc==="books") return "books";
   if(sc==="garden") return gachaOpen() ? (document.querySelector("#g-gachaBody .gacha.y") ? "gachaY" : "gacha") : "garden";
   if(sc==="toeic") return "toeic";
   if(sc==="poem") return "poem";
@@ -20883,7 +20978,7 @@ function vis(name,arg){
 }
 
 /* ---------------------------------------------------------------- 設定の窓(キーボードでも操作できる)と、曲の一覧 */
-const SONGS=[["title","ホーム"],["game",TG?"タイピング":"ネジ打ち"],["oneshot",TG?"ノーミス勝負":"一本勝負"],["garden",TG?"農園":"庭"],["toeic","TOEIC 英単語"],["poem","ネジの詩"],["gacha","ガチャ"],["gachaY","千両箱ガチャ"],["battle","対戦"],["bara","バラバラ"],["ending","エンディング"]].filter(s=>s[0]!=="poem" || $("screen-poem"));
+const SONGS=[["title","ホーム"],["game",TG?"タイピング":"ネジ打ち"],["oneshot",TG?"ノーミス勝負":"一本勝負"],["garden",TG?"農園":"庭"],["toeic","TOEIC 英単語"],["books","タイピング単語帳"],["poem","ネジの詩"],["gacha","ガチャ"],["gachaY","千両箱ガチャ"],["battle","対戦"],["bara","バラバラ"],["ending","エンディング"]].filter(s=>s[0]!=="poem" || $("screen-poem"));
 const songOk=k=>k==="title" || !!(cfg.heard && cfg.heard[k]);   // ゲームの中で一度流れた曲だけ
 function setOpt(k,v){
   cfg[k]=v; saveCfg(); applyVol();
