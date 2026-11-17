@@ -1509,6 +1509,8 @@ html.mobile.gated body{overflow:hidden}
 .wb-bulk{margin-top:.6rem; color:var(--steel); font-size:.85rem}
 .wb-bulk summary{cursor:pointer}
 .wb-bulk textarea{margin-top:.4rem; resize:vertical}
+.wb-ai{margin-top:.6rem}
+.wb-ai textarea{font-size:.8rem; color:var(--steel)}
 .wb-note{min-height:1.3em; color:#ffb38a; font-size:.85rem; margin:.5rem 0}
 .wb-words{list-style:none; max-height:40vh; overflow:auto; border:1px solid var(--line); border-radius:8px}
 .wb-words:empty{display:none}
@@ -3785,8 +3787,12 @@ html:not(.mobile) #screen-garden.haslog:has(.modal.open) #g-toasts{top:14px}
       <p class="wb-hint">よみがなはひらがなで入れてください(カタカナは自動でひらがなに直します)。言葉がひらがなだけなら、よみがなは空でも大丈夫です。<br>問題を入れると、遊ぶときは問題が出て、答えとよみがなは決めた秒数(単語帳の一覧で変えられます)たつまで隠れます。答えがよみがなと同じなら、答えは空でも大丈夫です</p>
       <details class="wb-bulk">
         <summary>まとめて追加する</summary>
-        <textarea id="wbBulk" class="wb-in" rows="5" placeholder="1行に「言葉,よみがな」の形で書きます&#10;光合成,こうごうせい&#10;細胞,さいぼう&#10;問題も入れるときは「問題,答え,よみがな」&#10;植物が光から栄養を作るはたらき,光合成,こうごうせい&#10;4つめに問題のよみがなも書けます"></textarea>
-        <div class="btn-row" style="margin-top:.4rem"><button class="btn" id="wbBulkAdd">まとめて追加</button></div>
+        <textarea id="wbBulk" class="wb-in" rows="6" placeholder="1行に1語。「言葉|よみがな」か「問題|答え|よみがな|問題のよみがな」で書きます(問題のよみがなはなくてもよい)&#10;光合成|こうごうせい&#10;植物が光から栄養を作るはたらき|光合成|こうごうせい&#10;区切りは | のほか、タブ・カンマ(,)も使えます。読点(、)は言葉の一部になります"></textarea>
+        <div class="btn-row" style="margin-top:.4rem"><button class="btn" id="wbBulkAdd">まとめて追加</button><button class="btn" id="wbAiCopy">AIに頼む文章をコピー</button></div>
+        <details class="wb-ai"><summary>AIに頼む文章(教科書のまとめや用語の一覧を、AIにこの形へ直してもらう)</summary>
+          <p class="wb-hint">下の文章をコピーして、ChatGPT や Claude などに貼り、最後に変換したい内容を貼りつけて送ります。返ってきた行を、上の欄にそのまま貼れば追加できます。</p>
+          <textarea id="wbAiText" class="wb-in" rows="8" readonly></textarea>
+        </details>
       </details>
       <p class="wb-note" id="wbNote"></p>
       <ol id="wbWords" class="wb-words"></ol>
@@ -6385,7 +6391,7 @@ function wbPreStore(){
 const wbAll = () => wbBooks.concat(WB_PRESETS);   // 一覧の並び: 自分の単語帳 → できあいの単語帳
 /* 遊び方: 全部(自分の単語帳だけ)/ 10語。ベストは遊び方ごと */
 const WB_MODES = { all:"全部", 10:"10語" };
-const wbModes = b => b.pre ? ["10"] : ["all","10"];
+const wbModes = b => b.pre ? ["10","all"] : ["all","10"];
 const wbMode = b => wbModes(b).includes(String(b.mode)) ? String(b.mode) : wbModes(b)[0];
 const wbBests = b => { if(!b.bests || typeof b.bests!=="object") b.bests={}; if(b.best!=null && b.bests.all==null){ b.bests.all=b.best; } return b.bests; };   // 前の「ベスト」は「全部」のベストにする
 const wbBestTxt = (b,m=wbMode(b)) => { const v=wbBests(b)[m]; return v==null ? "" : fmtTime(v); };
@@ -6440,7 +6446,7 @@ function renderBooks(){
   wbCur=Math.max(0,Math.min(wbCur,all.length-1));
   const item=(b,i)=>`<div class="wb-item${i===wbCur?" cur":""}${b.pre?" pre":""}" data-i="${i}">
     <span class="wb-no">${!b.pre&&i<9?i+1:""}</span>
-    <div class="wb-info"><b>${escH(b.name)}</b><small>${b.pre?`${escH(b.ds)} ・ ${b.words.length}語から毎回10語`:`${b.words.length}語`}${wbBestTxt(b)?` ・ ${WB_MODES[wbMode(b)]}のベスト ${wbBestTxt(b)}`:""}</small>
+    <div class="wb-info"><b>${escH(b.name)}</b><small>${b.pre?`${escH(b.ds)} ・ `:""}${b.words.length}語${wbBestTxt(b)?` ・ ${WB_MODES[wbMode(b)]}のベスト ${wbBestTxt(b)}`:""}</small>
     ${wbModes(b).length>1?`<span class="wb-mode">${wbModes(b).map(m=>`<button class="${m===wbMode(b)?"on":""}" data-mode="${m}">${WB_MODES[m]}</button>`).join("")}</span>`:""}<small>${wbHasQ(b)?`<span class="wb-sec">答えが出るまで<button data-sd="-1" aria-label="1秒短く">−</button><b>${wbSec(b)}</b>秒<button data-sd="1" aria-label="1秒長く">+</button></span>`:""}</small></div>
     <div class="wb-acts">
       <button class="btn primary" data-play="${i}">プレイ</button>
@@ -6531,18 +6537,46 @@ function wbAddWord(){
   const ol=$("wbWords"); ol.scrollTop=ol.scrollHeight;
   $(wbEdit.words.some(w=>w.q)?"wbQ":"wbT").focus();
 }
+/* まとめて追加: 1行の区切りは | → タブ → カンマ(, ，)の順に、行にあるものを使う。読点(、)は区切りにしない(言葉の一部) */
+function wbSplitLine(l){
+  l=l.replace(/^```.*$/,"").replace(/^\s*[-・*]\s+/,"");   // AI の返事にありがちな、コードの囲みと行頭の「- 」は外す
+  const sep = /[|｜]/.test(l) ? /[|｜]/ : l.includes("\t") ? /\t/ : /[,，]/;
+  return l.split(sep).map(x=>x.trim());
+}
 function wbBulkAdd(){
   if(!wbEdit) return;
-  const lines=$("wbBulk").value.split(/\r?\n/).map(l=>l.trim()).filter(Boolean);
-  let ok=0; const errs=[];
-  for(const l of lines){
-    const c=l.split(/[,，、\t]/);
-    const err = c.length>=3 ? wbAddOne(c[1],c[2],c[0],c[3]||"") : wbAddOne(c[0],c[1]||"");   // 3つなら「問題,答え,よみがな」、4つめは問題のよみがな
-    if(err) errs.push(err); else ok++;
-  }
+  const lines=$("wbBulk").value.split(/\r?\n/).map(l=>l.trim()).filter(l=>l && !/^```/.test(l));
+  let ok=0; const errs=[], bad=[];
+  lines.forEach((l,n)=>{
+    const c=wbSplitLine(l); if(!c.join("")) return;
+    const err = c.length>=3 ? wbAddOne(c[1],c[2],c[0],c[3]||"") : wbAddOne(c[0],c[1]||"");   // 3つ以上なら「問題|答え|よみがな|問題のよみがな」
+    if(err){ errs.push(`${n+1}行目: ${err}`); bad.push(l); } else ok++;
+  });
   renderWbWords();
-  $("wbNote").textContent = `${ok}語を追加しました`+(errs.length?` ・ 追加できなかった行: ${errs.length}(${errs.slice(0,2).join(" / ")}${errs.length>2?" ほか":""})`:"");
-  if(!errs.length) $("wbBulk").value="";
+  $("wbNote").textContent = `${ok}語を追加しました`+(errs.length?` ・ 追加できなかった行が ${errs.length}行あります(欄に残しました): ${errs.slice(0,3).join(" / ")}${errs.length>3?" ほか":""}`:"");
+  $("wbBulk").value=bad.join("\n");   // 追加できなかった行だけ残して、直せるようにする
+}
+const WB_AI_PROMPT=`次の内容を、タイピング練習用の単語帳に取り込める形に変換してください。
+
+形式:
+・1行に1語。区切りは半角の縦棒「|」
+・問題と答えがあるもの: 問題|答え|答えのよみがな|問題のよみがな
+・問題がないもの(言葉を見て打つだけ): 言葉|よみがな
+・問題のよみがなは、問題に難しい漢字があるときだけ書く(なくてもよい)
+
+よみがなのきまり:
+・ひらがなだけで書く(カタカナ・漢字・空白は使わない)
+・のばす音は「ー」、英字と数字はそのまま書いてよい
+・句読点「、」「。」や「！」「？」は使ってよい
+
+返事は変換した行だけにして、見出し・説明・番号は付けないでください。
+
+変換する内容:
+`;
+function wbAiCopy(){
+  const ta=$("wbAiText"); ta.value=WB_AI_PROMPT;
+  const done=ok=>{ $("wbNote").textContent = ok ? "AIに頼む文章をコピーしました。AIに貼って、最後に変換したい内容を足して送ってください" : "コピーできませんでした。下の文章を選んでコピーしてください"; if(!ok){ $("wbEditor").querySelector(".wb-ai").open=true; ta.focus(); ta.select(); } };
+  try{ navigator.clipboard.writeText(WB_AI_PROMPT).then(()=>done(true),()=>done(false)); }catch(e){ done(false); }
 }
 function wbSaveBook(){
   if(!wbEdit) return;
@@ -6614,6 +6648,8 @@ $("wbNew").addEventListener("click",()=>editBook(-1));
 $("wbBack").addEventListener("click",()=>show("title"));
 $("wbAdd").addEventListener("click",wbAddWord);
 $("wbBulkAdd").addEventListener("click",wbBulkAdd);
+$("wbAiCopy").addEventListener("click",wbAiCopy);
+$("wbAiText").value=WB_AI_PROMPT;
 $("wbSave").addEventListener("click",wbSaveBook);
 $("wbCancel").addEventListener("click",wbCancelEdit);
 /* プレイ: 単語帳の言葉を全部、順番を混ぜて出す */
@@ -6633,12 +6669,12 @@ function endBookGame(){
   const isNew = !!b && (bs[m]==null || time<bs[m]);
   if(isNew){ bs[m]=time; delete b.best; if(b.pre) wbPreStore(); else wbStore(); bookPlay=b; }
   const bestTxt = b ? wbBestTxt(b,m) : "";
-  $("resultDiff").textContent=`— 単語帳「${bookPlay.name}」${m==="10"?" 10語":""} —`;
+  $("resultDiff").textContent=`— 単語帳「${bookPlay.name}」 ${WB_MODES[m]} —`;
   $("resultCount").classList.add("ta");
   $("resultCaption").textContent=`${taGoal}語タイム`;
   $("resultScore").textContent=elapsed.toFixed(2);
   $("resultUnit").textContent="秒";
-  $("resultSubLine").textContent=`ミス ${miss}回 / ${bookPlay.pre?"":WB_MODES[m]+"の"}ベスト ${bestTxt||"--"}`+(wbQN?` / 答えを見ずに打てた ${wbNoPeek}/${wbQN}問`:"");
+  $("resultSubLine").textContent=`ミス ${miss}回 / ${WB_MODES[m]}のベスト ${bestTxt||"--"}`+(wbQN?` / 答えを見ずに打てた ${wbNoPeek}/${wbQN}問`:"");
   wbReveal();
   $("resultNew").textContent=isNew?"★ ベスト更新! ★":"";
   $("registerBox").style.display="none";   // 単語帳はランキングに載せない
