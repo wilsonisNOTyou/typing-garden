@@ -3244,6 +3244,7 @@ html.mobile #screen-garden .gacha.wide .gmachine{zoom:.42}
 .gask-acts button{font:inherit; font-size:.95rem; padding:.45rem 1.1rem; border-radius:999px; cursor:pointer; border:2px solid #7a5230; background:#fff; color:#3a2a1a; box-shadow:0 3px 0 #7a5230}
 .gask-acts .gask-ok{background:#d8402e; border-color:#8a1e12; color:#fff; box-shadow:0 3px 0 #8a1e12}
 .gask-acts button:focus-visible, .gask-acts button:focus{outline:3px solid #f4c542; outline-offset:2px}
+.gask-in{display:block; width:100%; box-sizing:border-box; margin:0 0 .9rem; font:inherit; font-size:1.1rem; letter-spacing:.15em; padding:.45rem .7rem; border:2px solid #7a5230; border-radius:10px; background:#fff; color:#3a2a1a; text-transform:uppercase}
 .gask-box small{display:block; margin-top:.6rem; text-align:right; font-size:.72rem; font-weight:400; color:#8a7058}
 @keyframes gask-in{from{opacity:0}to{opacity:1}}
 /* 大事なお知らせは、目に入るように少し強く */
@@ -3998,7 +3999,7 @@ html:not(.mobile) #screen-garden.haslog:has(.modal.open) #g-toasts{top:14px}
 <div id="fb" class="bk-modal">
   <div class="bk-panel">
     <div class="bk-head"><h2>要望・バグ報告</h2><button class="btn bk-x" id="fbClose">閉じる ✕</button></div>
-    <p class="bk-p">追加してほしい言葉・作物・ガチャ・機能や、見つけたバグを自由に書いて送ってください。送られた内容は作者が確認して、今後の参考にします(個別の返信はできません)。</p>
+    <p class="bk-p">追加してほしい言葉・作物・ガチャ・機能や、見つけたバグを自由に書いて送ってください。送られた内容は作者が確認して、今後の参考にします。</p>
     <h3>種類</h3>
     <div class="fb-cats" id="fbCats">
       <button class="btn" data-c="word">言葉</button>
@@ -4007,7 +4008,7 @@ html:not(.mobile) #screen-garden.haslog:has(.modal.open) #g-toasts{top:14px}
       <button class="btn on" data-c="feature">機能</button>
       <button class="btn" data-c="bug">バグ</button>
       <button class="btn" data-c="other">その他</button>
-      <button class="btn" data-c="book">共有された単語帳の削除依頼</button>
+      <button class="btn" data-c="book">単語帳の削除依頼</button>
     </div>
     <div class="fb-book" id="fbBook" hidden>
       <p class="bk-p">共有された単語帳に、ご自身が権利を持つ文章などが無断で使われているときは、ここからお知らせください。確認して、取り込めないようにします。どの単語帳かを探せるよう、相手から渡された6文字の共有コードを書いてください。</p>
@@ -6608,7 +6609,7 @@ async function wbShare(i){
 async function wbImport(){
   if(!db){ wbShareMsg("取り込むには通信が必要です(今はデータベースにつながっていません)"); return; }
   if(wbBooks.length>=WB_MAX_BOOKS){ wbShareMsg(`単語帳は${WB_MAX_BOOKS}冊まで作れます。いらない単語帳を消してから取り込んでください`); return; }
-  const raw=prompt("共有コード(6文字)を入れてください");
+  const raw=await uiAsk("共有コード(6文字)を入れてください","取り込む",{ input:"例: AB23CD", max:8 });
   const code=String(raw||"").toUpperCase().replace(/[^A-Z0-9]/g,"");
   if(!code) return;
   if(!/^[A-HJ-NP-Z2-9]{6}$/.test(code)){ wbShareMsg("コードは、英字と数字の6文字です"); return; }
@@ -6706,10 +6707,10 @@ function renderBooks(){
 }
 function playBook(i){
   const b=wbAll()[i]; if(!b) return;
-  if(window.IS_MOBILE && !wbCan4(b)){ alert("タイピングはパソコンで遊べます。スマホでは、問題のある言葉が4つ以上ある単語帳を4択で遊べます(作成・編集・削除もできます)"); return; }
-  if(!b.words.length){ alert("この単語帳には言葉がありません。編集から追加してください"); return; }
+  if(window.IS_MOBILE && !wbCan4(b)){ uiTell("タイピングはパソコンで遊べます。スマホでは、問題のある言葉が4つ以上ある単語帳を4択で遊べます(作成・編集・削除もできます)"); return; }
+  if(!b.words.length){ uiTell("この単語帳には言葉がありません。編集から追加してください"); return; }
   bookPlay=b; wb4=wbStyle(b)==="4";
-  if(!wbPlayWords(b,wb4).length){ alert("逆向きのタイピングで打てる言葉がありません。問題のよみがなを入れるか、4択で遊んでください"); return; }
+  if(!wbPlayWords(b,wb4).length){ uiTell("逆向きのタイピングで打てる言葉がありません。問題のよみがなを入れるか、4択で遊んでください"); return; }
   startGame("book");
 }
 /* 問題のある単語帳: 答えとよみがなが出るまでの秒数(単語帳ごと) */
@@ -6721,9 +6722,35 @@ function wbSetSec(i,d){
   const v=Math.max(WB_SEC_MIN,Math.min(WB_SEC_MAX,wbSec(b)+d)); if(v===wbSec(b)) return;
   b.sec=v; if(b.pre) wbPreStore(); else wbStore(); renderBooks();
 }
-function deleteBook(i){
+/* 単語帳の確認・お知らせ・入力の窓(ブラウザの窓は使わない。庭の確認の窓と同じ見た目)
+   o.tell: 「OK」だけ / o.input: 入力欄つき(入れた文字を返す。やめたら null)/ ほかは はい → true、やめる → false */
+function uiAsk(msg, okLabel="OK", o={}){
+  return new Promise(res=>{
+    const t0=Date.now(), w=document.createElement("div"); w.className="gask";
+    w.innerHTML=`<div class="gask-box" role="dialog" aria-modal="true"><p>${escH(msg).replace(/\n/g,"<br>")}</p>${o.input?`<input class="gask-in" maxlength="${o.max||20}" placeholder="${escH(o.input)}" autocomplete="off">`:""}<div class="gask-acts">${o.tell?"":'<button type="button" class="gask-no">やめる</button>'}<button type="button" class="gask-ok">${escH(okLabel)}</button></div>${window.IS_MOBILE?"":`<small>${o.tell?"Enter / Esc で閉じる":o.input?"Enter で決める ・ Esc でやめる":"Y で決める ・ N / Esc でやめる"}</small>`}</div>`;
+    document.body.appendChild(w);
+    const no=w.querySelector(".gask-no"), ok=w.querySelector(".gask-ok"), inp=w.querySelector(".gask-in");
+    const done=v=>{ if(Date.now()-t0<250) return; window.removeEventListener("keydown",key,true); w.remove(); res(o.tell ? true : o.input ? (v ? inp.value : null) : v); };
+    const key=e=>{ e.stopImmediatePropagation(); const k=e.key;
+      if(k==="Escape"){ e.preventDefault(); done(false); return; }
+      if(inp && e.target===inp){ if(k==="Enter"){ e.preventDefault(); if(!e.repeat && !e.isComposing) done(true); } return; }   // 入力欄では文字を打てるように
+      if(o.tell){ if(k==="Enter"||k===" "){ e.preventDefault(); if(!e.repeat) done(true); } else e.preventDefault(); return; }
+      if(!inp && (k==="n"||k==="N")){ e.preventDefault(); done(false); }
+      else if(!inp && (k==="y"||k==="Y")){ e.preventDefault(); done(true); }
+      else if(k==="ArrowLeft"||k==="ArrowRight"||k==="Tab"){ e.preventDefault(); const els=[inp,no,ok].filter(Boolean); els[(els.indexOf(document.activeElement)+1)%els.length].focus(); }
+      else if(k==="Enter"){ e.preventDefault(); if(!e.repeat) done(document.activeElement===ok); }
+      else e.preventDefault(); };
+    window.addEventListener("keydown",key,true);
+    if(no) no.addEventListener("click",()=>done(false)); ok.addEventListener("click",()=>done(true));
+    w.addEventListener("click",e=>{ if(e.target===w) done(false); });
+    (inp||(o.tell?ok:no)).focus();
+  });
+}
+const uiTell = msg => uiAsk(msg,"OK",{ tell:true });
+async function deleteBook(i){
   const b=wbBooks[i]; if(!b) return;   // おためし単語帳は消せない
-  if(!confirm(`単語帳「${b.name}」(${b.words.length}語)を削除します。元には戻せません。よろしいですか?`)) return;
+  if(!await uiAsk(`単語帳「${b.name}」(${b.words.length}語)を削除します。元には戻せません。よろしいですか?`,"削除する")) return;
+  if(wbBooks[i]!==b) return;
   wbBooks.splice(i,1); wbStore();
   if(wbMem[b.id]){ delete wbMem[b.id]; wbMemStore(); }
   if(wbCur>=wbBooks.length) wbCur=wbBooks.length-1;
@@ -6731,7 +6758,7 @@ function deleteBook(i){
 }
 function editBook(i){
   if(i>=wbBooks.length) return;   // おためし単語帳は編集しない
-  if(i<0 && wbBooks.length>=WB_MAX_BOOKS){ alert(`単語帳は${WB_MAX_BOOKS}冊まで作れます`); return; }
+  if(i<0 && wbBooks.length>=WB_MAX_BOOKS){ uiTell(`単語帳は${WB_MAX_BOOKS}冊まで作れます`); return; }
   const b=i>=0 ? wbBooks[i] : null;
   wbEdit={ i, name:b?b.name:"", words:b?b.words.map(w=>({...w})):[] };
   wbEdit.orig=JSON.stringify({ name:wbEdit.name, words:wbEdit.words });
@@ -6753,11 +6780,12 @@ function renderWbWords(){
   const cur=ol.querySelector("li.cur"); if(cur && cur.scrollIntoView) cur.scrollIntoView({block:"nearest"});
 }
 /* 編集をやめる(変えたところがあれば確かめる) */
-function wbCancelEdit(){
+async function wbCancelEdit(){
   if(wbEdit){
-    wbEdit.name=$("wbName").value.trim();
-    const now=JSON.stringify({ name:wbEdit.name, words:wbEdit.words });
-    if(now!==wbEdit.orig && !confirm("変えたところを保存せずに戻ります。よろしいですか?")) return;
+    const ed=wbEdit; ed.name=$("wbName").value.trim();
+    const now=JSON.stringify({ name:ed.name, words:ed.words });
+    if(now!==ed.orig && !await uiAsk("変えたところを保存せずに戻ります。よろしいですか?","保存せずに戻る")) return;
+    if(wbEdit!==ed) return;
   }
   openBooks();
 }
