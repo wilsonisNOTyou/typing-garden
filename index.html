@@ -7051,7 +7051,7 @@ function wbBulkAdd(){
     if(err){ errs.push(`${n+1}行目: ${err}`); bad.push(l); } else ok++;
   });
   renderWbWords();
-  const same=lines.map(wbSplitLine).filter(c=>c.length===2 && c[0] && c[0].toLowerCase().replace(/[^a-z0-9]/g,"")===String(c[1]||"").toLowerCase().replace(/[^a-z0-9]/g,"") && /[a-z]/i.test(c[0])).length;
+  const same=wbAiKind==="plain" ? 0 : lines.map(wbSplitLine).filter(c=>c.length===2 && c[0] && !/\s/.test(c[0].trim()) && c[0].toLowerCase().replace(/[^a-z0-9]/g,"")===String(c[1]||"").toLowerCase().replace(/[^a-z0-9]/g,"") && /[a-z]/i.test(c[0])).length;
   const warn = same>=3 && same>=lines.length*.5 ? " ・ 英字をそのまま打つだけの行が多いようです。英単語の意味で覚えたいときは、AIに頼む文章の形を「英語・外国語の単語と意味」にして、AIに頼み直してください" : "";
   $("wbNote").textContent = `${ok}語を追加しました${warn}`+(wbNoK?` ・ そのうち${wbNoK}語は、よみがながないか打てない文字があるので、4択で遊ぶときだけ出ます`:"")+(errs.length?` ・ 追加できなかった行が ${errs.length}行あります(欄に残しました): ${errs.slice(0,3).join(" / ")}${errs.length>3?" ほか":""}`:"");
   $("wbBulk").value=bad.join("\n");   // 追加できなかった行だけ残して、直せるようにする
@@ -7104,6 +7104,7 @@ ${x.how}
 よみがなのきまり:
 ・ひらがなか、英字(小文字)と数字だけで書く。カタカナ・漢字・かっこは使わない
 ・空白は、英語の熟語や英文の単語の間にだけ入れてよい(打つときもスペースキーで打ちます)
+・「~」「～」「...」など、ほかの言葉が入る所を示す印は、よみがなに入れない(例: look forward to ~ → look forward to)
 ・ä・ö・ü・ß・é など英字にない文字は、その言語でふつうの英字の書きかえにする(ドイツ語は ä→ae、ö→oe、ü→ue、ß→ss。フランス語などの é・è は e)
 ・漢字やカタカナの言葉には、必ずひらがなのよみを書く(例: 北海道 → ほっかいどう、富士山 → ふじさん)。答えのよみがなは空にしない
 ・空にしてよいのは、外国語の文字で、英字に書きかえる方法もないときだけ(その言葉は4択で遊ぶときだけ出ます)
