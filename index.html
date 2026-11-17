@@ -1490,6 +1490,9 @@ html.mobile.gated body{overflow:hidden}
 .wb-empty{color:var(--steel); text-align:center; padding:1rem}
 .wb-preh{color:var(--amber); font-size:.9rem; letter-spacing:.1em; margin:.8rem 0 0; padding-top:.6rem; border-top:1px dashed var(--line)}
 .wb-item.pre{background:rgba(242,193,78,.04)}
+.wb-share-note{width:min(620px,100%); margin:.8rem auto 0; padding:.6rem .8rem; border:1px solid var(--amber); border-radius:8px; color:var(--ink); text-align:left; font-size:.9rem; line-height:1.7}
+.wb-share-note .wb-code{color:var(--amber); font-size:1.3rem; letter-spacing:.2em; margin:0 .3rem}
+.wb-share-note .btn{padding:.2rem .6rem; font-size:.8rem}
 .wb-vname{color:var(--amber); font-weight:400; margin:.2rem 0}
 .wb-vwords{max-height:55vh}
 .wb-vwords li{grid-template-columns:2.4em 1fr 1fr auto}
@@ -3770,13 +3773,15 @@ html:not(.mobile) #screen-garden.haslog:has(.modal.open) #g-toasts{top:14px}
   <!-- タイピング単語帳 -->
   <section id="screen-books" class="screen">
     <h2 class="rank-title">タイピング単語帳</h2>
-    <p class="reg-status">言葉とよみがなを登録して、自分だけの単語帳でタイピングの練習ができます。全部の言葉を打ち終えるまでのタイムを計ります</p>
+    <p class="reg-status">言葉とよみがなを登録して、自分だけの単語帳でタイピングや4択の練習ができます。できあいの単語帳もあり、コードで人と共有もできます</p>
     <div id="wbListView">
+      <p class="wb-share-note" id="wbShareNote" hidden></p>
       <div id="wbList" class="wb-list"></div>
-      <p class="reg-status m-only">スマホでは単語帳の作成・編集・削除ができます。プレイはパソコンで遊べます</p>
-      <p class="keynav"><b>↑ ↓</b> 単語帳を選ぶ ・ <b>Enter</b> プレイ ・ <b>E</b> 編集 ・ <b>C</b> コピーして編集 ・ <b>M</b> 遊び方(全部・10語) ・ <b>F</b> タイピング / 4択 ・ <b>V</b> 中身を見る ・ <b>Delete</b> 削除 ・ <b>1〜9</b> その単語帳をプレイ ・ <b>← →</b> 答えが出るまでの秒数(問題のある単語帳) ・ <b>N</b> 新しい単語帳 ・ <b>Esc</b> タイトルへ</p>
+      <p class="reg-status m-only">スマホでは、問題のある言葉が4つ以上ある単語帳を4択で遊べます(作成・編集・共有もできます)。タイピングはパソコンで遊べます</p>
+      <p class="keynav"><b>↑ ↓</b> 単語帳を選ぶ ・ <b>Enter</b> プレイ ・ <b>E</b> 編集 ・ <b>C</b> コピーして編集 ・ <b>M</b> 遊び方(全部・10語) ・ <b>F</b> タイピング / 4択 ・ <b>V</b> 中身を見る ・ <b>S</b> 共有 ・ <b>I</b> コードで取り込む ・ <b>Delete</b> 削除 ・ <b>1〜9</b> その単語帳をプレイ ・ <b>← →</b> 答えが出るまでの秒数(問題のある単語帳) ・ <b>N</b> 新しい単語帳 ・ <b>Esc</b> タイトルへ</p>
       <div class="btn-row">
         <button class="btn primary" id="wbNew">新しい単語帳を作る (N)</button>
+        <button class="btn" id="wbImport">コードで取り込む (I)</button>
         <button class="btn" id="wbBack">タイトルへ (Esc)</button>
       </div>
     </div>
@@ -6522,6 +6527,55 @@ function wbCheckWord(t,k,q,qk){
   if(k.length>60) return {err:`「${t}」のよみがなが長すぎます(60文字まで)`};
   return q ? Object.assign({q, t:t.slice(0,40), k}, qk?{qk}:{}) : {t:t.slice(0,40), k};
 }
+/* 共有: 自分の単語帳をデータベースに置いて、6文字のコードで渡す。受け取った人は「コードで取り込む」で自分の単語帳にコピーする。
+   置いた単語帳はあとから書きかえない(言葉を変えて共有し直すと、新しいコードになる) */
+const WB_SHARE_PATH="typinggarden/books";
+const WB_CODE_CH="ABCDEFGHJKLMNPQRSTUVWXYZ23456789";   // 見まちがえやすい I O 0 1 は使わない
+const wbShareSig = b => JSON.stringify([b.name,b.words]);
+function wbShareMsg(html){ const el=$("wbShareNote"); el.hidden=!html; el.innerHTML=html||""; }
+async function wbShare(i){
+  const b=wbBooks[i]; if(!b) return;   // できあいの単語帳は共有しない(みんな持っている)
+  if(!db){ wbShareMsg("共有するには通信が必要です(今はデータベースにつながっていません)"); return; }
+  const show=code=>{
+    wbShareMsg(`単語帳「${escH(b.name)}」の共有コード: <b class="wb-code">${code}</b> <button class="btn" id="wbCodeCopy">コピー</button><br><small>このコードを渡すと、相手は「コードで取り込む」で同じ単語帳を自分のものにできます。言葉を変えたら、もう一度「共有」すると新しいコードになります</small>`);
+    $("wbCodeCopy").onclick=()=>{ try{ navigator.clipboard.writeText(code).then(()=>{ $("wbCodeCopy").textContent="コピーしました"; },()=>{}); }catch(e){} };
+  };
+  if(b.share && b.shareSig===wbShareSig(b)){ show(b.share); return; }
+  wbShareMsg("共有しています…");
+  const words=b.words.map(w=>{ const o={ t:w.t, k:w.k }; for(const f of ["q","qk","k2","t2"]) if(w[f]) o[f]=w[f]; return o; });
+  for(let n=0;n<6;n++){
+    let code=""; for(let j=0;j<6;j++) code+=WB_CODE_CH[Math.floor(Math.random()*WB_CODE_CH.length)];
+    try{
+      await db.ref(WB_SHARE_PATH+"/"+code).set({ n:b.name, w:words, t:Date.now(), ...(b.sec?{ sec:wbSec(b) }:{}) });
+      b.share=code; b.shareSig=wbShareSig(b); wbStore(); show(code); return;
+    }catch(e){ /* 同じコードがもうある(書けない)ときは、別のコードで試す */ }
+  }
+  wbShareMsg("共有できませんでした。少し時間をおいて、もう一度試してください");
+}
+async function wbImport(){
+  if(!db){ wbShareMsg("取り込むには通信が必要です(今はデータベースにつながっていません)"); return; }
+  if(wbBooks.length>=WB_MAX_BOOKS){ wbShareMsg(`単語帳は${WB_MAX_BOOKS}冊まで作れます。いらない単語帳を消してから取り込んでください`); return; }
+  const raw=prompt("共有コード(6文字)を入れてください");
+  const code=String(raw||"").toUpperCase().replace(/[^A-Z0-9]/g,"");
+  if(!code) return;
+  if(!/^[A-HJ-NP-Z2-9]{6}$/.test(code)){ wbShareMsg("コードは、英字と数字の6文字です"); return; }
+  wbShareMsg("取り込んでいます…");
+  let v=null; try{ v=(await db.ref(WB_SHARE_PATH+"/"+code).once("value")).val(); }catch(e){}
+  if(!v || !v.w){ wbShareMsg(`コード「${code}」の単語帳は見つかりませんでした`); return; }
+  const words=[];
+  for(const w of Object.values(v.w).slice(0,WB_MAX_WORDS)){
+    const r=wbCheckWord(w.t,w.k,w.q,w.qk); if(r.err) continue;
+    if(w.k2 && !wbBadChars(wbNormKana(w.k2)).length) r.k2=wbNormKana(w.k2).slice(0,60);
+    if(w.t2) r.t2=String(w.t2).slice(0,40);
+    words.push(r);
+  }
+  if(!words.length){ wbShareMsg("この単語帳には、取り込める言葉がありませんでした"); return; }
+  const name=String(v.n||"共有された単語帳").slice(0,20);
+  wbBooks.push({ id:Date.now().toString(36)+Math.random().toString(36).slice(2,6), name, words, best:null, ...(v.sec?{ sec:Math.max(WB_SEC_MIN,Math.min(WB_SEC_MAX,v.sec|0)) }:{}), from:code });
+  if(!wbStore()){ wbBooks.pop(); wbShareMsg("保存できませんでした(ブラウザの保存容量がいっぱいかもしれません)"); return; }
+  wbCur=wbBooks.length-1; renderBooks();
+  wbShareMsg(`単語帳「${escH(name)}」(${words.length}語)を取り込みました`);
+}
 let wbViewI=-1;   // 中身を見ている単語帳(一覧の番号)。見ていなければ -1
 /* 単語帳の中身: 言葉ごとに、4択の覚えぐあいを出す */
 function wbView(i){
@@ -6534,7 +6588,7 @@ function wbView(i){
   $("wbVWords").innerHTML=b.words.map((w,j)=>`<li><span class="no">${j+1}</span><span>${w.q?`<span class="q">${escH(w.q)}</span>`:""}${escH(w.t)}${w.t2?` / ${escH(w.t2)}`:""}</span><span class="k">${escH(w.k)}${w.k2?`<br>${escH(w.k2)}`:""}</span><span class="wb-st">${w.q&&wbCan4(b)?wbStTxt(b,w):""}</span></li>`).join("");
 }
 function openBooks(){
-  wbLoad(); wbEdit=null; wbViewI=-1;
+  wbLoad(); wbEdit=null; wbViewI=-1; wbShareMsg("");
   $("wbViewer").style.display="none";
   $("wbEditor").style.display="none"; $("wbListView").style.display="";
   renderBooks();
@@ -6552,6 +6606,7 @@ function renderBooks(){
       <button class="btn primary" data-play="${i}">プレイ</button>
       <button class="btn" data-view="${i}">中身</button>
       ${b.pre?`<button class="btn" data-copy="${i}">コピーして編集</button>`:`<button class="btn" data-edit="${i}">編集</button>
+      <button class="btn" data-share="${i}">共有</button>
       <button class="btn wb-del" data-del="${i}">削除</button>`}
     </div></div>`;
   list.innerHTML=(wbBooks.length ? wbBooks.map(item).join("") : '<p class="wb-empty">まだ自分の単語帳がありません。「新しい単語帳を作る」で作るか、下のできあいの単語帳で遊んでみましょう</p>')
@@ -6737,6 +6792,8 @@ function booksKey(e){
   if(k==="m"||k==="M"){ e.preventDefault(); wbSetMode(wbCur,"next"); return; }
   if(k==="f"||k==="F"){ e.preventDefault(); wbSetStyle(wbCur); return; }
   if(k==="v"||k==="V"){ e.preventDefault(); wbView(wbCur); return; }
+  if(k==="s"||k==="S"){ e.preventDefault(); wbShare(wbCur); return; }
+  if(k==="i"||k==="I"){ e.preventDefault(); wbImport(); return; }
   if(k==="Delete"||k==="Backspace"||k==="x"||k==="X"){ e.preventDefault(); deleteBook(wbCur); return; }
 }
 $("wbList").addEventListener("click",e=>{
@@ -6746,6 +6803,7 @@ $("wbList").addEventListener("click",e=>{
   if(b.dataset.mode!=null){ wbSetMode(wbCur,b.dataset.mode); return; }
   if(b.dataset.style!=null){ if(b.dataset.style!==wbStyle(wbAll()[wbCur])) wbSetStyle(wbCur); return; }
   if(b.dataset.view!=null){ wbView(+b.dataset.view); return; }
+  if(b.dataset.share!=null){ wbShare(+b.dataset.share); return; }
   if(b.dataset.play!=null) playBook(+b.dataset.play);
   else if(b.dataset.edit!=null) editBook(+b.dataset.edit);
   else if(b.dataset.copy!=null) wbCopy(+b.dataset.copy);
@@ -6760,6 +6818,7 @@ $("wbBack").addEventListener("click",()=>show("title"));
 $("wbAdd").addEventListener("click",wbAddWord);
 $("wbBulkAdd").addEventListener("click",wbBulkAdd);
 $("wbVPlay").addEventListener("click",()=>playBook(wbViewI));
+$("wbImport").addEventListener("click",()=>wbImport());
 $("wbVBack").addEventListener("click",()=>openBooks());
 $("wbAiCopy").addEventListener("click",wbAiCopy);
 $("wbAiText").value=WB_AI_PROMPT;
