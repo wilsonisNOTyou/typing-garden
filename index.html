@@ -6331,54 +6331,55 @@ const WB_PRESETS=[
 陽炎||かげろう
 十六夜||いざよい
 不知火||しらぬい`),
-  wbPre("p:kencho","県庁所在地","都道府県を見て、県庁所在地を打つ(東京都は東京でも新宿でもよい)",`
-北海道|札幌|さっぽろ
-青森県|青森|あおもり
-岩手県|盛岡|もりおか
-宮城県|仙台|せんだい
-秋田県|秋田|あきた
-山形県|山形|やまがた
-福島県|福島|ふくしま
-茨城県|水戸|みと
-栃木県|宇都宮|うつのみや
-群馬県|前橋|まえばし
-埼玉県|さいたま|さいたま
-千葉県|千葉|ちば
-東京都|東京|とうきょう|しんじゅく||新宿
-神奈川県|横浜|よこはま
-新潟県|新潟|にいがた
-富山県|富山|とやま
-石川県|金沢|かなざわ
-福井県|福井|ふくい
-山梨県|甲府|こうふ
-長野県|長野|ながの
-岐阜県|岐阜|ぎふ
-静岡県|静岡|しずおか
-愛知県|名古屋|なごや
-三重県|津|つ
-滋賀県|大津|おおつ
-京都府|京都|きょうと
-大阪府|大阪|おおさか
-兵庫県|神戸|こうべ
-奈良県|奈良|なら
-和歌山県|和歌山|わかやま
-鳥取県|鳥取|とっとり
-島根県|松江|まつえ
-岡山県|岡山|おかやま
-広島県|広島|ひろしま
-山口県|山口|やまぐち
-徳島県|徳島|とくしま
-香川県|高松|たかまつ
-愛媛県|松山|まつやま
-高知県|高知|こうち
-福岡県|福岡|ふくおか
-佐賀県|佐賀|さが
-長崎県|長崎|ながさき
-熊本県|熊本|くまもと
-大分県|大分|おおいた
-宮崎県|宮崎|みやざき
-鹿児島県|鹿児島|かごしま
-沖縄県|那覇|なは`),
+  wbPre("p:kencho","県庁所在地","都道府県を見て、県庁所在地を打つ(東京都は東京でも新宿でもよい。逆向きでは県の名前を打つ)",`
+北海道|札幌|さっぽろ||ほっかいどう
+青森県|青森|あおもり||あおもりけん
+岩手県|盛岡|もりおか||いわてけん
+宮城県|仙台|せんだい||みやぎけん
+秋田県|秋田|あきた||あきたけん
+山形県|山形|やまがた||やまがたけん
+福島県|福島|ふくしま||ふくしまけん
+茨城県|水戸|みと||いばらきけん
+栃木県|宇都宮|うつのみや||とちぎけん
+群馬県|前橋|まえばし||ぐんまけん
+埼玉県|さいたま|さいたま||さいたまけん
+千葉県|千葉|ちば||ちばけん
+東京都|東京|とうきょう|しんじゅく|とうきょうと|新宿
+神奈川県|横浜|よこはま||かながわけん
+新潟県|新潟|にいがた||にいがたけん
+富山県|富山|とやま||とやまけん
+石川県|金沢|かなざわ||いしかわけん
+福井県|福井|ふくい||ふくいけん
+山梨県|甲府|こうふ||やまなしけん
+長野県|長野|ながの||ながのけん
+岐阜県|岐阜|ぎふ||ぎふけん
+静岡県|静岡|しずおか||しずおかけん
+愛知県|名古屋|なごや||あいちけん
+三重県|津|つ||みえけん
+滋賀県|大津|おおつ||しがけん
+京都府|京都|きょうと||きょうとふ
+大阪府|大阪|おおさか||おおさかふ
+兵庫県|神戸|こうべ||ひょうごけん
+奈良県|奈良|なら||ならけん
+和歌山県|和歌山|わかやま||わかやまけん
+鳥取県|鳥取|とっとり||とっとりけん
+島根県|松江|まつえ||しまねけん
+岡山県|岡山|おかやま||おかやまけん
+広島県|広島|ひろしま||ひろしまけん
+山口県|山口|やまぐち||やまぐちけん
+徳島県|徳島|とくしま||とくしまけん
+香川県|高松|たかまつ||かがわけん
+愛媛県|松山|まつやま||えひめけん
+高知県|高知|こうち||こうちけん
+福岡県|福岡|ふくおか||ふくおかけん
+佐賀県|佐賀|さが||さがけん
+長崎県|長崎|ながさき||ながさきけん
+熊本県|熊本|くまもと||くまもとけん
+大分県|大分|おおいた||おおいたけん
+宮崎県|宮崎|みやざき||みやざきけん
+鹿児島県|鹿児島|かごしま||かごしまけん
+沖縄県|那覇|なは||おきなわけん
+`),
   wbPre("p:yoji","四字熟語","意味を見て、四字熟語を打つ",`
 一つのことをして、二つの得をすること|一石二鳥|いっせきにちょう
 多くの人が、口をそろえて同じことを言うこと|異口同音|いくどうおん
@@ -6485,10 +6486,191 @@ const WB_PRESETS=[
 |お綾や八百屋にお謝り|おあややややおやにおあやまり
 |麦ごみ麦ごみ三麦ごみ|むぎごみむぎごみみむぎごみ
 |打者走者勝者走者一掃|だしゃそうしゃしょうしゃそうしゃいっそう
-|書写山の社僧正|しょしゃざんのしゃそうじょう`)
+|書写山の社僧正|しょしゃざんのしゃそうじょう`),
+  Object.assign(wbPre("p:german","かんたんドイツ語","ドイツ語の単語を見て、意味を4択で選ぶ(ä・ö・ü・ß があるので、打たずに選ぶだけ)",`
+der Hund|犬|いぬ
+die Katze|猫|ねこ
+das Haus|家|いえ
+das Buch|本|ほん
+der Apfel|りんご|りんご
+das Brot|パン|ぱん
+das Wasser|水|みず
+die Milch|牛乳|ぎゅうにゅう
+der Käse|チーズ|ちーず
+der Tisch|机|つくえ
+der Stuhl|いす|いす
+die Tür|ドア|どあ
+der Schlüssel|かぎ|かぎ
+die Schule|学校|がっこう
+der Lehrer|先生|せんせい
+das Auto|車|くるま
+der Zug|列車|れっしゃ
+die Stadt|町|まち
+die Straße|通り|とおり
+der Baum|木|き
+die Blume|花|はな
+die Sonne|太陽|たいよう
+der Mond|月|つき
+die Mutter|母|はは
+der Vater|父|ちち
+das Kind|子ども|こども
+das Mädchen|女の子|おんなのこ
+der Freund|友だち|ともだち
+das Jahr|年|ねん
+die Nacht|夜|よる
+gehen|行く|いく
+kommen|来る|くる
+essen|食べる|たべる
+trinken|飲む|のむ
+schlafen|眠る|ねむる
+sprechen|話す|はなす
+lesen|読む|よむ
+spielen|遊ぶ|あそぶ
+groß|大きい|おおきい
+klein|小さい|ちいさい
+schön|美しい|うつくしい
+gut|良い|よい
+alt|古い|ふるい
+schnell|速い|はやい
+Danke|ありがとう|ありがとう
+Hallo|こんにちは|こんにちは
+Tschüss|またね|またね
+Guten Morgen|おはよう|おはよう
+Ja|はい|はい
+Nein|いいえ|いいえ
+`),{ only4:true }),
+  wbPre("p:genso","元素記号","元素の名前を見て、元素記号を打つ(逆向きでは名前を打つ)",`
+水素|H|h||すいそ
+ヘリウム|He|he
+リチウム|Li|li
+ベリリウム|Be|be
+ホウ素|B|b||ほうそ
+炭素|C|c||たんそ
+窒素|N|n||ちっそ
+酸素|O|o||さんそ
+フッ素|F|f||ふっそ
+ネオン|Ne|ne
+ナトリウム|Na|na
+マグネシウム|Mg|mg
+アルミニウム|Al|al
+ケイ素|Si|si||けいそ
+リン|P|p
+硫黄|S|s||いおう
+塩素|Cl|cl||えんそ
+アルゴン|Ar|ar
+カリウム|K|k
+カルシウム|Ca|ca
+チタン|Ti|ti
+クロム|Cr|cr
+マンガン|Mn|mn
+鉄|Fe|fe||てつ
+ニッケル|Ni|ni
+銅|Cu|cu||どう
+亜鉛|Zn|zn||あえん
+臭素|Br|br||しゅうそ
+銀|Ag|ag||ぎん
+スズ|Sn|sn
+ヨウ素|I|i||ようそ
+白金|Pt|pt||はっきん
+金|Au|au||きん
+水銀|Hg|hg||すいぎん
+鉛|Pb|pb||なまり
+ウラン|U|u
+`),
+  wbPre("p:tsuki","月の異名","月を見て、昔の呼び名を打つ(逆向きでは何月かを打つ)",`
+1月|睦月|むつき||いちがつ
+2月|如月|きさらぎ||にがつ
+3月|弥生|やよい||さんがつ
+4月|卯月|うづき||しがつ
+5月|皐月|さつき||ごがつ
+6月|水無月|みなづき||ろくがつ
+7月|文月|ふみづき|ふづき|しちがつ
+8月|葉月|はづき||はちがつ
+9月|長月|ながつき||くがつ
+10月|神無月|かんなづき||じゅうがつ
+11月|霜月|しもつき||じゅういちがつ
+12月|師走|しわす||じゅうにがつ
+`),
+  wbPre("p:rekishi","日本の歴史 一問一答","問題を読んで、人物やできごとを答える",`
+縄文時代の人々が、貝がらや食べ物の残りを捨てた跡は?|貝塚|かいづか
+卑弥呼が治めていたとされる国は?|邪馬台国|やまたいこく
+聖徳太子が定めた、役人の心がまえを示した決まりは?|十七条の憲法|じゅうしちじょうのけんぽう
+645年、中大兄皇子と中臣鎌足が始めた政治の改革は?|大化の改新|たいかのかいしん
+710年に都が置かれた、奈良の都の名前は?|平城京|へいじょうきょう
+奈良の東大寺に大仏をつくらせた天皇は?|聖武天皇|しょうむてんのう
+794年に都が置かれた、京都の都の名前は?|平安京|へいあんきょう
+遣唐使をやめることを提案した人は?|菅原道真|すがわらのみちざね
+『源氏物語』を書いた人は?|紫式部|むらさきしきぶ
+『枕草子』を書いた人は?|清少納言|せいしょうなごん
+藤原道長らが、天皇に代わって政治を動かしたしくみは?|摂関政治|せっかんせいじ
+鎌倉幕府を開いた人は?|源頼朝|みなもとのよりとも
+1232年に鎌倉幕府が定めた、武士のための法律は?|御成敗式目|ごせいばいしきもく
+元(モンゴル)の軍が2度にわたって九州に攻めてきたできごとは?|元寇|げんこう
+室町幕府を開いた人は?|足利尊氏|あしかがたかうじ
+京都の北山に金閣を建てた将軍は?|足利義満|あしかがよしみつ
+1467年に始まり、戦国時代のきっかけとなった戦いは?|応仁の乱|おうにんのらん
+1543年、種子島に伝わった武器は?|鉄砲|てっぽう
+1549年、日本にキリスト教を伝えた宣教師は?|ザビエル|ざびえる
+長篠の戦いで鉄砲を使い、天下統一を進めた武将は?|織田信長|おだのぶなが
+太閤検地や刀狩を行った人は?|豊臣秀吉|とよとみひでよし
+1600年、「天下分け目」と呼ばれた戦いは?|関ヶ原の戦い|せきがはらのたたかい
+江戸幕府を開いた人は?|徳川家康|とくがわいえやす
+大名が1年おきに江戸と領地を行き来したしくみは?|参勤交代|さんきんこうたい
+江戸幕府が、外国との行き来や貿易を限った政策は?|鎖国|さこく
+8代将軍の徳川吉宗が行った改革は?|享保の改革|きょうほうのかいかく
+1837年、大阪で反乱を起こした元役人は?|大塩平八郎|おおしおへいはちろう
+1853年、浦賀に来航したアメリカの使節は?|ペリー|ぺりー
+1867年、徳川慶喜が政権を朝廷に返したできごとは?|大政奉還|たいせいほうかん
+1871年、藩をなくして県を置いた改革は?|廃藩置県|はいはんちけん
+『学問のすゝめ』を書いた人は?|福沢諭吉|ふくざわゆきち
+日本の初代内閣総理大臣は?|伊藤博文|いとうひろぶみ
+1889年に発布された憲法は?|大日本帝国憲法|だいにっぽんていこくけんぽう|だいにほんていこくけんぽう
+1894年に始まった、日本と清の戦争は?|日清戦争|にっしんせんそう
+1904年に始まった、日本とロシアの戦争は?|日露戦争|にちろせんそう
+1918年に、初めての本格的な政党内閣をつくった首相は?|原敬|はらたかし
+1923年に関東地方をおそった大地震は?|関東大震災|かんとうだいしんさい
+1946年に公布された、今の日本の憲法は?|日本国憲法|にほんこくけんぽう|にっぽんこくけんぽう
+1964年に東京で開かれた、世界のスポーツの祭典は?|東京オリンピック|とうきょうおりんぴっく
+`),
+  wbPre("p:joho","情報モラル","説明を読んで、ネットの安全やマナーの言葉を答える",`
+SMS(ショートメッセージ)で偽のリンクを送り、個人情報を盗もうとする詐欺|スミッシング|すみっしんぐ
+本物そっくりの偽のサイトやメールで、IDやパスワードを盗もうとする詐欺|フィッシング|ふぃっしんぐ
+偽の警告画面を出してサポートに電話させ、お金をだまし取る詐欺|サポート詐欺|さぽーとさぎ
+押しただけで「契約が成立した」と、料金を請求してくる詐欺|ワンクリック詐欺|わんくりっくさぎ
+「当選しました」などと言って、手数料を先に払わせる詐欺|当選詐欺|とうせんさぎ
+データを勝手に暗号化し、元に戻す代わりにお金を要求するソフト|ランサムウェア|らんさむうぇあ
+パソコンやスマホに入りこんで悪い動きをするソフトをまとめた呼び名|マルウェア|まるうぇあ
+役に立つソフトのふりをして入りこみ、裏で悪いことをするソフト|トロイの木馬|とろいのもくば
+気づかないうちに、入力した内容や行動を記録して外に送るソフト|スパイウェア|すぱいうぇあ
+大量のアクセスを一度に送りつけて、サーバーを使えなくする攻撃|DoS攻撃|どすこうげき
+ほかのサービスから漏れたIDとパスワードの組を、別のサービスで試す攻撃|パスワードリスト攻撃|ぱすわーどりすとこうげき
+他人のIDとパスワードを使って、勝手にサービスにログインすること|不正アクセス|ふせいあくせす
+人の油断や思いこみにつけこんで、パスワードなどを聞き出す手口|ソーシャルエンジニアリング|そーしゃるえんじにありんぐ
+後ろから画面やキーボードをのぞき見て、パスワードを盗む手口|ショルダーハッキング|しょるだーはっきんぐ
+実在する人や会社をよそおって、メールやメッセージを送ること|なりすまし|なりすまし
+パスワードに加えて、スマホに届く番号などでも本人かを確かめるしくみ|二段階認証|にだんかいにんしょう
+ソフトの弱点のうち、攻撃に使われるおそれがあるもの|脆弱性|ぜいじゃくせい
+ソフトの弱点を直すために配られる更新を、こまめに入れること|アップデート|あっぷでーと
+データの写しを、別の場所に取っておくこと|バックアップ|ばっくあっぷ
+通信やデータを、関係のない人には読めない形に変えること|暗号化|あんごうか
+名前・住所・生年月日など、特定の個人がわかる情報|個人情報|こじんじょうほう
+写真に記録されることがある、撮った場所を示す情報|位置情報|いちじょうほう
+本人の許可なく、顔や姿が写った写真を公開されない権利|肖像権|しょうぞうけん
+小説・音楽・絵など、作った人の作品を守る権利|著作権|ちょさくけん
+他人の文章を、出どころを示して自分の文章の中で使うこと|引用|いんよう
+ネット上で、ある人や投稿に批判が殺到して収まらなくなること|炎上|えんじょう
+一度ネットに出た情報が、消してもコピーされて残り続けること|デジタルタトゥー|でじたるたとぅー
+根拠のない、うその情報|デマ|でま
+「○人に回さないと不幸になる」などと、転送を求めるメッセージ|チェーンメール|ちぇーんめーる
+受け取る人の同意なく、大量に送りつけられる広告などのメール|迷惑メール|めいわくめーる
+カフェや駅などで使える、パスワードのかかっていない無線LAN|フリーWi-Fi|ふりーわいふぁい
+ネットの使いすぎで、生活や体調に悪い影響が出る状態|ネット依存|ねっといぞん
+ネット上で、悪口や仲間はずれなどで人を傷つけること|ネットいじめ|ねっといじめ
+アプリが連絡先や位置情報などを使うために、利用者から得る許可|アクセス許可|あくせすきょか
+`)
 ];
 /* おためし単語帳の初期設定: ことわざは長いので4択、難読漢字・県庁所在地・四字熟語はタイピング */
-const WB_PRE_DEF={ "p:nandoku":{ style:"type", sec:5 }, "p:kencho":{ style:"type", sec:5 }, "p:yoji":{ style:"type", sec:8 }, "p:kotowaza":{ style:"4", sec:8 }, "p:hayakuchi":{ style:"type" } };
+const WB_PRE_DEF={ "p:nandoku":{ style:"type", sec:5 }, "p:kencho":{ style:"type", sec:5 }, "p:yoji":{ style:"type", sec:8 }, "p:kotowaza":{ style:"4", sec:8 }, "p:hayakuchi":{ style:"type" }, "p:german":{ style:"4", sec:0 }, "p:genso":{ style:"type", sec:5 }, "p:tsuki":{ style:"type", sec:5 }, "p:rekishi":{ style:"4", sec:8 }, "p:joho":{ style:"4", sec:8 } };
 const WB_PRE_VER=2;
 function wbPreLoad(){
   let o={}; try{ o=JSON.parse(localStorage.getItem(WB_PRE_KEY)||"{}")||{}; }catch(e){}
@@ -6512,7 +6694,7 @@ const wbGood = (b,w) => { const st=wbSt(b,w); return !!st && st.s>=3; };
 const wbQWords = b => b.words.filter(w=>w.q);
 const wbAnsTxt = w => [w.t, ...(w.a||[]).map(x=>x.t)].join("／");   // 別解もまとめて見せる(4択・一覧)
 const wbCan4 = b => !!b && new Set(wbQWords(b).map(w=>w.t)).size>=4;
-const wbStyle = b => wbCan4(b) && (window.IS_MOBILE || b.style==="4") ? "4" : "type";   // スマホは4択だけ
+const wbStyle = b => wbCan4(b) && (window.IS_MOBILE || b.only4 || b.style==="4") ? "4" : "type";   // only4: 打たずに4択だけ(ドイツ語のように打ちにくい文字があるとき)   // スマホは4択だけ
 function wbMemCount(b,dir=wbDir(b)){ const qs=dir==="r" ? wbQWords(b).map(wbRevWord) : wbQWords(b); return { all:qs.length, good:qs.filter(w=>wbGood(b,w)).length }; }
 const wbStTxt = (b,w) => { const st=wbSt(b,w); return !st ? "まだ" : st.s>=3 ? "✓ 覚えた" : st.s>0 ? `${st.s}回続けて正解` : "✕ 苦手"; };
 /* 向き・覚えた言葉を出さない の切りかえ(単語帳ごとに残す) */
@@ -6523,7 +6705,7 @@ function wbToggle(i,f){
   if(b.pre) wbPreStore(); else wbStore(); renderBooks();
 }
 function wbSetStyle(i){
-  const b=wbAll()[i]; if(!wbCan4(b) || window.IS_MOBILE) return;
+  const b=wbAll()[i]; if(!wbCan4(b) || window.IS_MOBILE || b.only4) return;
   b.style = wbStyle(b)==="4" ? "type" : "4";
   if(b.pre) wbPreStore(); else wbStore(); renderBooks();
 }
@@ -6665,8 +6847,8 @@ function openBooks(){
   show("books");
 }
 /* 一覧は本棚: 単語帳を「本」として棚に並べ、選んだ本のくわしい欄を上に出す */
-const WB_COVER={ "p:nandoku":["難",232], "p:kencho":["県",140], "p:yoji":["熟",28], "p:kotowaza":["諺",188], "p:hayakuchi":["早",312] };
-const WB_ART={"p:nandoku": "<svg viewBox=\"0 0 48 48\"><rect x=\"5\" y=\"29\" width=\"26\" height=\"13\" rx=\"3\" fill=\"#2b2b33\" stroke=\"currentColor\" stroke-width=\"1.2\"/><ellipse cx=\"17\" cy=\"34\" rx=\"8\" ry=\"2.6\" fill=\"#0d0d12\"/><path d=\"M28 7l10 21\" stroke=\"#caa56b\" stroke-width=\"3.2\" stroke-linecap=\"round\"/><path d=\"M28 7l10 21\" stroke=\"#8a6a3e\" stroke-width=\"1\" stroke-linecap=\"round\"/><path d=\"M36.5 25.5l7 14.5-8.5-11z\" fill=\"#1c1c22\" stroke=\"currentColor\" stroke-width=\".9\"/></svg>", "p:kencho": "<svg viewBox=\"0 0 48 48\"><g fill=\"currentColor\" opacity=\".9\"><path d=\"M31 5l8 1.5 3 5-6 2.5-5-3z\"/><path d=\"M33 16l3.5 3-1.5 7-6 6.5-8 3.5-7.5.8-1-3 7-2.5 7-3.5 4.5-6z\"/><path d=\"M17 37.5l6-1.2-1 3.4-5 .8z\"/><path d=\"M8 35.5l4.5 2-1 5.5-4.5-1.2z\"/></g><circle cx=\"28.5\" cy=\"27\" r=\"2.6\" fill=\"#e8384f\" stroke=\"#fff\" stroke-width=\".8\"/></svg>", "p:yoji": "<svg viewBox=\"0 0 48 48\"><rect x=\"11\" y=\"13\" width=\"26\" height=\"22\" fill=\"#f4ecd8\" stroke=\"currentColor\" stroke-width=\"1\"/><rect x=\"7\" y=\"10\" width=\"5\" height=\"28\" rx=\"2.5\" fill=\"#8a5a2b\" stroke=\"currentColor\" stroke-width=\".8\"/><rect x=\"36\" y=\"10\" width=\"5\" height=\"28\" rx=\"2.5\" fill=\"#8a5a2b\" stroke=\"currentColor\" stroke-width=\".8\"/><path d=\"M31 17v13M26 17v13M21 17v13M16 17v13\" stroke=\"#3a2a1a\" stroke-width=\"1.6\" stroke-linecap=\"round\" stroke-dasharray=\"3 2\"/></svg>", "p:kotowaza": "<svg viewBox=\"0 0 48 48\"><path d=\"M8 9h32a4 4 0 0 1 4 4v15a4 4 0 0 1-4 4H23l-9 8v-8H8a4 4 0 0 1-4-4V13a4 4 0 0 1 4-4z\" fill=\"#f4ecd8\" stroke=\"currentColor\" stroke-width=\"1.4\"/><circle cx=\"16\" cy=\"20.5\" r=\"2.4\" fill=\"#3a2a1a\"/><circle cx=\"24\" cy=\"20.5\" r=\"2.4\" fill=\"#3a2a1a\"/><circle cx=\"32\" cy=\"20.5\" r=\"2.4\" fill=\"#3a2a1a\"/></svg>", "p:hayakuchi": "<svg viewBox=\"0 0 48 48\"><g fill=\"none\" stroke=\"currentColor\" stroke-width=\"2.4\" stroke-linecap=\"round\"><path d=\"M5 15q4-5 8 0t8 0 8 0 8 0 8 0\"/><path d=\"M5 24q4-5 8 0t8 0 8 0 8 0 8 0\"/><path d=\"M5 33q4-5 8 0t8 0 8 0 8 0 8 0\"/></g><path d=\"M41 6l3 2-2 3\" fill=\"none\" stroke=\"#f2c14e\" stroke-width=\"1.6\" stroke-linecap=\"round\"/></svg>"};   // おためし単語帳の表紙の絵
+const WB_COVER={ "p:nandoku":["難",232], "p:kencho":["県",140], "p:yoji":["熟",28], "p:kotowaza":["諺",188], "p:hayakuchi":["早",312], "p:german":["独",0], "p:genso":["元",200], "p:tsuki":["月",260], "p:rekishi":["史",40], "p:joho":["情",170] };
+const WB_ART={"p:nandoku": "<svg viewBox=\"0 0 48 48\"><rect x=\"5\" y=\"29\" width=\"26\" height=\"13\" rx=\"3\" fill=\"#2b2b33\" stroke=\"currentColor\" stroke-width=\"1.2\"/><ellipse cx=\"17\" cy=\"34\" rx=\"8\" ry=\"2.6\" fill=\"#0d0d12\"/><path d=\"M28 7l10 21\" stroke=\"#caa56b\" stroke-width=\"3.2\" stroke-linecap=\"round\"/><path d=\"M28 7l10 21\" stroke=\"#8a6a3e\" stroke-width=\"1\" stroke-linecap=\"round\"/><path d=\"M36.5 25.5l7 14.5-8.5-11z\" fill=\"#1c1c22\" stroke=\"currentColor\" stroke-width=\".9\"/></svg>", "p:kencho": "<svg viewBox=\"0 0 48 48\"><g fill=\"currentColor\" opacity=\".9\"><path d=\"M31 5l8 1.5 3 5-6 2.5-5-3z\"/><path d=\"M33 16l3.5 3-1.5 7-6 6.5-8 3.5-7.5.8-1-3 7-2.5 7-3.5 4.5-6z\"/><path d=\"M17 37.5l6-1.2-1 3.4-5 .8z\"/><path d=\"M8 35.5l4.5 2-1 5.5-4.5-1.2z\"/></g><circle cx=\"28.5\" cy=\"27\" r=\"2.6\" fill=\"#e8384f\" stroke=\"#fff\" stroke-width=\".8\"/></svg>", "p:yoji": "<svg viewBox=\"0 0 48 48\"><rect x=\"11\" y=\"13\" width=\"26\" height=\"22\" fill=\"#f4ecd8\" stroke=\"currentColor\" stroke-width=\"1\"/><rect x=\"7\" y=\"10\" width=\"5\" height=\"28\" rx=\"2.5\" fill=\"#8a5a2b\" stroke=\"currentColor\" stroke-width=\".8\"/><rect x=\"36\" y=\"10\" width=\"5\" height=\"28\" rx=\"2.5\" fill=\"#8a5a2b\" stroke=\"currentColor\" stroke-width=\".8\"/><path d=\"M31 17v13M26 17v13M21 17v13M16 17v13\" stroke=\"#3a2a1a\" stroke-width=\"1.6\" stroke-linecap=\"round\" stroke-dasharray=\"3 2\"/></svg>", "p:kotowaza": "<svg viewBox=\"0 0 48 48\"><path d=\"M8 9h32a4 4 0 0 1 4 4v15a4 4 0 0 1-4 4H23l-9 8v-8H8a4 4 0 0 1-4-4V13a4 4 0 0 1 4-4z\" fill=\"#f4ecd8\" stroke=\"currentColor\" stroke-width=\"1.4\"/><circle cx=\"16\" cy=\"20.5\" r=\"2.4\" fill=\"#3a2a1a\"/><circle cx=\"24\" cy=\"20.5\" r=\"2.4\" fill=\"#3a2a1a\"/><circle cx=\"32\" cy=\"20.5\" r=\"2.4\" fill=\"#3a2a1a\"/></svg>", "p:hayakuchi": "<svg viewBox=\"0 0 48 48\"><g fill=\"none\" stroke=\"currentColor\" stroke-width=\"2.4\" stroke-linecap=\"round\"><path d=\"M5 15q4-5 8 0t8 0 8 0 8 0 8 0\"/><path d=\"M5 24q4-5 8 0t8 0 8 0 8 0 8 0\"/><path d=\"M5 33q4-5 8 0t8 0 8 0 8 0 8 0\"/></g><path d=\"M41 6l3 2-2 3\" fill=\"none\" stroke=\"#f2c14e\" stroke-width=\"1.6\" stroke-linecap=\"round\"/></svg>", "p:german": "<svg viewBox=\"0 0 48 48\"><rect x=\"7\" y=\"11\" width=\"34\" height=\"8.7\" fill=\"#1c1c22\" stroke=\"currentColor\" stroke-width=\".8\"/><rect x=\"7\" y=\"19.7\" width=\"34\" height=\"8.6\" fill=\"#d22d2d\"/><rect x=\"7\" y=\"28.3\" width=\"34\" height=\"8.7\" fill=\"#f2c14e\"/><rect x=\"7\" y=\"11\" width=\"34\" height=\"26\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.2\"/></svg>", "p:genso": "<svg viewBox=\"0 0 48 48\"><rect x=\"9\" y=\"9\" width=\"30\" height=\"30\" rx=\"3\" fill=\"#f4ecd8\" stroke=\"currentColor\" stroke-width=\"1.4\"/><text x=\"13\" y=\"17\" font-size=\"6\" fill=\"#3a2a1a\" font-family=\"sans-serif\">26</text><text x=\"24\" y=\"33\" font-size=\"15\" font-weight=\"700\" text-anchor=\"middle\" fill=\"#3a2a1a\" font-family=\"sans-serif\">Fe</text></svg>", "p:tsuki": "<svg viewBox=\"0 0 48 48\"><path d=\"M30 8a15 15 0 1 0 10 25 13 13 0 1 1-10-25z\" fill=\"#f2d98a\" stroke=\"currentColor\" stroke-width=\"1.2\"/><g fill=\"#fff6d0\"><circle cx=\"38\" cy=\"10\" r=\"1.4\"/><circle cx=\"41\" cy=\"18\" r=\"1\"/><circle cx=\"33\" cy=\"15\" r=\".9\"/></g></svg>", "p:rekishi": "<svg viewBox=\"0 0 48 48\"><path d=\"M6 13h36M9 18h30\" stroke=\"#d2402e\" stroke-width=\"3.2\" stroke-linecap=\"round\"/><path d=\"M14 18v23M34 18v23\" stroke=\"#d2402e\" stroke-width=\"3.6\" stroke-linecap=\"round\"/><path d=\"M24 13v5\" stroke=\"#d2402e\" stroke-width=\"2.4\"/><path d=\"M5 12q19-5 38 0\" fill=\"none\" stroke=\"#3a2a1a\" stroke-width=\"2.4\" stroke-linecap=\"round\"/></svg>", "p:joho": "<svg viewBox=\"0 0 48 48\"><path d=\"M24 5l15 5v11c0 10-6.5 17-15 21-8.5-4-15-11-15-21V10z\" fill=\"#3a6ea8\" stroke=\"currentColor\" stroke-width=\"1.3\"/><rect x=\"17.5\" y=\"22\" width=\"13\" height=\"10\" rx=\"1.6\" fill=\"#f4ecd8\"/><path d=\"M20 22v-3a4 4 0 0 1 8 0v3\" fill=\"none\" stroke=\"#f4ecd8\" stroke-width=\"2\"/><circle cx=\"24\" cy=\"26.5\" r=\"1.5\" fill=\"#3a2a1a\"/></svg>"};   // おためし単語帳の表紙の絵
 const wbIcon = b => WB_ART[b.id] ? `<span class="wb-bart">${WB_ART[b.id]}</span>` : `<span class="wb-bic">${escH(wbCover(b)[0])}</span>`;
 function wbCover(b){
   const c=WB_COVER[b.id]; if(c) return c;
@@ -6690,11 +6872,12 @@ function renderBooks(){
       <small>${b.pre?`${escH(b.ds)} ・ `:""}${b.words.length}語${wbStyle(b)==="type"&&wbBestTxt(b)?` ・ ${WB_MODES[wbMode(b)]}のベスト ${wbBestTxt(b)}`:""}</small>
       ${cnt?`<div class="wb-dprog"><span>覚えた ${cnt.good}/${cnt.all}</span><i><b style="width:${cnt.all?Math.round(cnt.good/cnt.all*100):0}%"></b></i></div>`:""}
       <div class="wb-dopts">
-        ${wbCan4(b)&&!window.IS_MOBILE?`<span class="wb-mode">${[["type","タイピング"],["4","4択"]].map(([v,n])=>`<button class="${wbStyle(b)===v?"on":""}" data-style="${v}">${n}</button>`).join("")}<span class="kbdh">F</span></span>`:""}
+        ${b.only4?`<span class="wb-mode"><button class="on" disabled>4択だけ(打たない)</button></span>`:""}
+        ${wbCan4(b)&&!window.IS_MOBILE&&!b.only4?`<span class="wb-mode">${[["type","タイピング"],["4","4択"]].map(([v,n])=>`<button class="${wbStyle(b)===v?"on":""}" data-style="${v}">${n}</button>`).join("")}<span class="kbdh">F</span></span>`:""}
         ${wbModes(b).length>1?`<span class="wb-mode">${wbModes(b).map(m=>`<button class="${m===wbMode(b)?"on":""}" data-mode="${m}">${WB_MODES[m]}</button>`).join("")}<span class="kbdh">M</span></span>`:""}
         ${wbHasQ(b)?`<span class="wb-mode">${[["f","問題 → 答え"],["r","答え → 問題"]].map(([v,n])=>`<button class="${wbDir(b)===v?"on":""}" data-dir="${v}">${n}</button>`).join("")}<span class="kbdh">D</span></span>`:""}
         ${wbCan4(b)?`<span class="wb-mode"><button class="${b.hideGood?"on":""}" data-hidegood="1">覚えた言葉を出さない</button><span class="kbdh">H</span></span>`:""}
-        ${wbHasQ(b)&&!window.IS_MOBILE?`<span class="wb-sec">${wbStyle(b)==="4"?"4択になるまで":"答えが出るまで"}<button data-sd="-1" aria-label="1秒短く">−</button><b>${wbSec(b)}</b>秒<button data-sd="1" aria-label="1秒長く">+</button><span class="kbdh">− +</span></span>`:""}
+        ${wbHasQ(b)&&!window.IS_MOBILE&&!b.only4?`<span class="wb-sec">${wbStyle(b)==="4"?"4択になるまで":"答えが出るまで"}<button data-sd="-1" aria-label="1秒短く">−</button><b>${wbSec(b)}</b>秒<button data-sd="1" aria-label="1秒長く">+</button><span class="kbdh">− +</span></span>`:""}
       </div>
       <div class="wb-acts">
         <button class="btn primary" data-play="${wbCur}">プレイ <span class="kbdh">Enter</span></button>
@@ -6716,15 +6899,16 @@ function playBook(i){
   if(window.IS_MOBILE && !wbCan4(b)){ uiTell("タイピングはパソコンで遊べます。スマホでは、問題のある言葉が4つ以上ある単語帳を4択で遊べます(作成・編集・削除もできます)"); return; }
   if(!b.words.length){ uiTell("この単語帳には言葉がありません。編集から追加してください"); return; }
   bookPlay=b; wb4=wbStyle(b)==="4";
+  if(!wbPlayWords(b,wb4).length && wbCan4(b)) wb4=true;   // 逆向きで打てる言葉がないときは、4択で遊ぶ
   if(!wbPlayWords(b,wb4).length){ uiTell("逆向きのタイピングで打てる言葉がありません。問題のよみがなを入れるか、4択で遊んでください"); return; }
   startGame("book");
 }
 /* 問題のある単語帳: 答えとよみがなが出るまでの秒数(単語帳ごと) */
 const WB_SEC_MIN=0, WB_SEC_MAX=30, WB_SEC_DEF=5;   // 0秒: 隠さずにすぐ答えを出す(4択はすぐ4択)
 const wbHasQ = b => !!(b && b.words && b.words.some(w=>w.q));
-const wbSec = b => { const v=b ? b.sec : null; return typeof v==="number" && v>=WB_SEC_MIN && v<=WB_SEC_MAX ? Math.round(v) : WB_SEC_DEF; };
+const wbSec = b => { if(b && b.only4) return 0; const v=b ? b.sec : null; return typeof v==="number" && v>=WB_SEC_MIN && v<=WB_SEC_MAX ? Math.round(v) : WB_SEC_DEF; };
 function wbSetSec(i,d){
-  const b=wbAll()[i]; if(!wbHasQ(b)) return;
+  const b=wbAll()[i]; if(!wbHasQ(b) || b.only4) return;
   const v=Math.max(WB_SEC_MIN,Math.min(WB_SEC_MAX,wbSec(b)+d)); if(v===wbSec(b)) return;
   b.sec=v; if(b.pre) wbPreStore(); else wbStore(); renderBooks();
 }
