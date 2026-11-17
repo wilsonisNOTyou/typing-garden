@@ -1472,9 +1472,13 @@ html.mobile.gated body{overflow:hidden}
 @media (prefers-reduced-motion: reduce){ .diff-btn.dbon{animation:none} }
 .result-garden{color:#9fd36a; font-size:.95rem; margin:.1rem 0 .4rem; min-height:1.2em}
 /* ---- タイピング単語帳 ---- */
-.diff-btn.books{border-color:#5b6f9a; width:min(220px,90vw)}
-.diff-btn.books .name{color:#a9c4ff}
-.diff-btn.books:hover,.diff-btn.books:focus-visible{border-color:#a9c4ff}
+.diff-btn.books{border-color:#8a6a3e; width:min(240px,90vw); background:linear-gradient(180deg,#2a241c,#1d1913)}
+.diff-btn.books .name{color:#f2c98a}
+.diff-btn.books:hover,.diff-btn.books:focus-visible{border-color:#f2c98a}
+.diff-btn.books .tb-shelf{display:flex; align-items:flex-end; gap:2px; height:24px; margin-top:.45rem; padding:0 .3rem; border-bottom:4px solid #7a5532; box-shadow:0 2px 0 #4a321c}
+.diff-btn.books .tb-shelf i{width:9px; height:20px; border-radius:2px 2px 0 0; background:linear-gradient(90deg, hsl(var(--h) 40% 30%), hsl(var(--h) 46% 42%) 40%, hsl(var(--h) 40% 30%)); box-shadow:inset 0 3px 0 hsl(var(--h) 60% 70% / .35); transition:transform .15s}
+.diff-btn.books .tb-shelf i:nth-child(2){height:17px} .diff-btn.books .tb-shelf i:nth-child(3){height:22px} .diff-btn.books .tb-shelf i:nth-child(4){height:18px} .diff-btn.books .tb-shelf i:nth-child(5){height:21px; width:11px} .diff-btn.books .tb-shelf i:nth-child(6){height:16px} .diff-btn.books .tb-shelf i:nth-child(7){height:19px; transform:rotate(12deg); transform-origin:bottom left; margin-left:2px}
+.diff-btn.books:hover .tb-shelf i:nth-child(3), .diff-btn.books:focus-visible .tb-shelf i:nth-child(3){transform:translateY(-5px)}
 .wb-list{display:flex; flex-direction:column; gap:.5rem; width:min(620px,100%); margin:1rem auto 0; text-align:left}
 .wb-item{display:flex; align-items:center; gap:.8rem; padding:.7rem .9rem; border:1px solid var(--line); border-radius:8px; background:rgba(0,0,0,.18)}
 .wb-item .wb-no{color:var(--amber); width:1.4em; text-align:center}
@@ -1526,6 +1530,8 @@ html.mobile #screen-books{--bw:88px; --bh:122px; --bg:18px}
 .wb-dopts{display:flex; flex-wrap:wrap; gap:.35rem .8rem; align-items:center}
 .wb-dopts .wb-mode{margin:0}
 .wb-dopts .wb-sec{margin-left:0}
+.wb-dopts .kbdh{margin-left:.3rem}
+.wb-detail .wb-acts .kbdh{margin-left:.15rem}
 .wb-detail .wb-acts{justify-content:flex-start; margin-top:.2rem}
 html.mobile .wb-dcover{display:none}
 html.mobile .wb-detail{position:static}
@@ -3317,7 +3323,8 @@ html:not(.mobile) #screen-garden.haslog:has(.modal.open) #g-toasts{top:14px}
         </button>
         <button class="diff-btn books" data-diff="books">
           <div class="name">タイピング単語帳<span class="kbd">0</span></div>
-          <div class="desc">自分で言葉とよみがなを登録して<br>その単語帳で練習する</div>
+          <div class="desc">百人一首などのおためし単語帳や<br>自分の単語帳を、タイピングと4択で覚える</div>
+          <span class="tb-shelf" aria-hidden="true"><i style="--h:352"></i><i style="--h:232"></i><i style="--h:140"></i><i style="--h:28"></i><i style="--h:188"></i><i style="--h:280"></i><i style="--h:60"></i></span>
         </button>
         <button class="diff-btn toeic" data-diff="toeic">
           <div class="name">TOEIC 英単語<span class="kbd">E</span></div>
@@ -6507,9 +6514,11 @@ const WB_PRESETS=[
 悪いことに、さらに悪いことが重なる|泣きっ面に蜂|なきっつらにはち
 実力のある人は、それをむやみに見せびらかさない|能ある鷹は爪を隠す|のうあるたかはつめをかくす`),
 ];
+/* おためし単語帳の初期設定: 百人一首とことわざは長いので4択、難読漢字・県庁所在地・四字熟語はタイピング */
+const WB_PRE_DEF={ "p:hyakunin":{ style:"4", sec:10 }, "p:nandoku":{ style:"type", sec:5 }, "p:kencho":{ style:"type", sec:5 }, "p:yoji":{ style:"type", sec:8 }, "p:kotowaza":{ style:"4", sec:8 } };
 function wbPreLoad(){
   let o={}; try{ o=JSON.parse(localStorage.getItem(WB_PRE_KEY)||"{}")||{}; }catch(e){}
-  for(const b of WB_PRESETS){ const v=o[b.id]||{}; b.bests=v.bests&&typeof v.bests==="object"?v.bests:{}; b.sec=v.sec; b.mode=v.mode; b.style=v.style; }
+  for(const b of WB_PRESETS){ const v=o[b.id]||{}, d=WB_PRE_DEF[b.id]||{}; b.bests=v.bests&&typeof v.bests==="object"?v.bests:{}; b.sec=v.sec??d.sec; b.mode=v.mode; b.style=v.style??d.style; }
 }
 /* 4択: 問題のある言葉が4つ以上(答えがちがうもの)あれば、同じ単語帳の答えから4択を作れる。
    正解・まちがいは4択のときだけ記録し、3回続けて正解で「覚えた」(TOEIC と同じ) */
@@ -6677,16 +6686,16 @@ function renderBooks(){
       <small>${b.pre?`${escH(b.ds)} ・ `:""}${b.words.length}語${wbStyle(b)==="type"&&wbBestTxt(b)?` ・ ${WB_MODES[wbMode(b)]}のベスト ${wbBestTxt(b)}`:""}</small>
       ${cnt?`<div class="wb-dprog"><span>覚えた ${cnt.good}/${cnt.all}</span><i><b style="width:${cnt.all?Math.round(cnt.good/cnt.all*100):0}%"></b></i></div>`:""}
       <div class="wb-dopts">
-        ${wbCan4(b)&&!window.IS_MOBILE?`<span class="wb-mode">${[["type","タイピング"],["4","4択"]].map(([v,n])=>`<button class="${wbStyle(b)===v?"on":""}" data-style="${v}">${n}</button>`).join("")}</span>`:""}
-        ${wbModes(b).length>1?`<span class="wb-mode">${wbModes(b).map(m=>`<button class="${m===wbMode(b)?"on":""}" data-mode="${m}">${WB_MODES[m]}</button>`).join("")}</span>`:""}
-        ${wbHasQ(b)&&!window.IS_MOBILE?`<span class="wb-sec">${wbStyle(b)==="4"?"4択になるまで":"答えが出るまで"}<button data-sd="-1" aria-label="1秒短く">−</button><b>${wbSec(b)}</b>秒<button data-sd="1" aria-label="1秒長く">+</button></span>`:""}
+        ${wbCan4(b)&&!window.IS_MOBILE?`<span class="wb-mode">${[["type","タイピング"],["4","4択"]].map(([v,n])=>`<button class="${wbStyle(b)===v?"on":""}" data-style="${v}">${n}</button>`).join("")}<span class="kbdh">F</span></span>`:""}
+        ${wbModes(b).length>1?`<span class="wb-mode">${wbModes(b).map(m=>`<button class="${m===wbMode(b)?"on":""}" data-mode="${m}">${WB_MODES[m]}</button>`).join("")}<span class="kbdh">M</span></span>`:""}
+        ${wbHasQ(b)&&!window.IS_MOBILE?`<span class="wb-sec">${wbStyle(b)==="4"?"4択になるまで":"答えが出るまで"}<button data-sd="-1" aria-label="1秒短く">−</button><b>${wbSec(b)}</b>秒<button data-sd="1" aria-label="1秒長く">+</button><span class="kbdh">− +</span></span>`:""}
       </div>
       <div class="wb-acts">
-        <button class="btn primary" data-play="${wbCur}">プレイ</button>
-        <button class="btn" data-view="${wbCur}">単語リスト</button>
-        ${b.pre?"":`<button class="btn" data-edit="${wbCur}">編集</button>
-        <button class="btn" data-share="${wbCur}">共有</button>
-        <button class="btn wb-del" data-del="${wbCur}">削除</button>`}
+        <button class="btn primary" data-play="${wbCur}">プレイ <span class="kbdh">Enter</span></button>
+        <button class="btn" data-view="${wbCur}">単語リスト <span class="kbdh">V</span></button>
+        ${b.pre?"":`<button class="btn" data-edit="${wbCur}">編集 <span class="kbdh">E</span></button>
+        <button class="btn" data-share="${wbCur}">共有 <span class="kbdh">S</span></button>
+        <button class="btn wb-del" data-del="${wbCur}">削除 <span class="kbdh">Del</span></button>`}
       </div>
     </div></div>` : "";
   list.innerHTML = detail
@@ -6888,9 +6897,8 @@ function booksKey(e){
 $("wbList").addEventListener("click",e=>{
   if(e.target.closest(".wb-newbook")){ editBook(-1); return; }
   const bk=e.target.closest(".wb-book");
-  if(bk){   // 本を押す: 選ぶ(選んでいる本をもう一度押すと遊ぶ)
-    const i=+bk.dataset.i; if(i===wbCur && !window.IS_MOBILE){ playBook(i); return; }
-    wbCur=i; renderBooks();
+  if(bk){   // 本を押す: 選ぶだけ(遊ぶのはプレイのボタンか Enter)
+    wbCur=+bk.dataset.i; renderBooks();
     if(window.IS_MOBILE){ const d=$("wbList").querySelector(".wb-detail"); if(d) d.scrollIntoView({block:"start",behavior:"smooth"}); }
     return;
   }
@@ -20780,7 +20788,7 @@ function wantTrack(){
   const sc=sceneNow();
   if(sc==="battle") return null;
   if(baraNow()) return "bara";
-  if(sc==="game"){ let d=""; try{ d=String(diff); }catch(e){} return d==="oneshot" ? "oneshot" : d==="book" ? "books" : "game"; }   // 単語帳で遊んでいるあいだも、単語帳の曲
+  if(sc==="game"){ let d=""; try{ d=String(diff); }catch(e){} return d==="oneshot" ? "oneshot" : "game"; }
   if(sc==="books") return "books";
   if(sc==="garden") return gachaOpen() ? (document.querySelector("#g-gachaBody .gacha.y") ? "gachaY" : "gacha") : "garden";
   if(sc==="toeic") return "toeic";
