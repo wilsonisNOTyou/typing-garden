@@ -122,7 +122,7 @@
             ".validate": "newData.isNumber()"
           },
           "sec": {
-            ".validate": "newData.isNumber() && newData.val() >= 1 && newData.val() <= 30"
+            ".validate": "newData.isNumber() && newData.val() >= 0 && newData.val() <= 30"
           },
           "w": {
             "$i": {
@@ -144,6 +144,20 @@
               },
               "t2": {
                 ".validate": "newData.isString() && newData.val().length >= 1 && newData.val().length <= 40"
+              },
+              "a": {
+                "$j": {
+                  ".validate": "$j.matches(/^[0-3]$/) && newData.hasChildren(['t', 'k'])",
+                  "t": {
+                    ".validate": "newData.isString() && newData.val().length >= 1 && newData.val().length <= 40"
+                  },
+                  "k": {
+                    ".validate": "newData.isString() && newData.val().length >= 1 && newData.val().length <= 60"
+                  },
+                  "$other": {
+                    ".validate": false
+                  }
+                }
               },
               "$other": {
                 ".validate": false
