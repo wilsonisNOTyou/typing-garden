@@ -6850,7 +6850,7 @@ function wbView(i,keep){
   $("wbVWords").innerHTML=show.length ? show.map(([w,j])=>`<li><span class="no">${j+1}</span><span>${w.q?`<span class="q">${escH(w.q)}</span>`:""}${escH(wbAnsTxt(w))}${w.t2?` / ${escH(w.t2)}`:""}</span><span class="k">${w.k?escH([w.k,...(w.a||[]).map(x=>x.k)].join("／")):"(4択だけ)"}${w.k2?`<br>${escH(w.k2)}`:""}</span><span class="wb-st">${w.q&&can?wbStTxt(b,mw(w)):""}</span></li>`).join("") : '<li class="wb-vnone">この中には、まだありません</li>';
 }
 function openBooks(){
-  wbLoad(); wbEdit=null; wbViewI=-1; wbShareMsg("");
+  wbScrCur=null; wbLoad(); wbEdit=null; wbViewI=-1; wbShareMsg("");
   $("wbViewer").style.display="none";
   $("wbEditor").style.display="none"; $("wbListView").style.display="";
   renderBooks();
@@ -6865,6 +6865,7 @@ function wbCover(b){
   let h=0; for(const ch of String(b.id)) h=(h*31+ch.charCodeAt(0))%360;
   return [Array.from(b.name.trim())[0]||"本", h];
 }
+let wbScrCur=null;
 function renderBooks(){
   const list=$("wbList"), all=wbAll();
   wbCur=Math.max(0,Math.min(wbCur,all.length-1));
@@ -6901,7 +6902,9 @@ function renderBooks(){
     + '<div class="wb-newbook" title="新しい単語帳を作る"><span>+</span><small>新しい<br>単語帳</small><span class="kbdh">N</span></div></div>'
     + (wbBooks.length ? "" : '<p class="wb-empty">まだ自分の単語帳がありません。「+ 新しい単語帳」で作るか、下のおためし単語帳で遊んでみましょう</p>')
     + '<p class="wb-shelfh">おためし単語帳</p><div class="wb-shelf">' + WB_PRESETS.map((x,j)=>book(x,wbBooks.length+j)).join("") + '</div>';
-  const cur=list.querySelector(".wb-book.cur"); if(cur && cur.scrollIntoView && !window.IS_MOBILE) cur.scrollIntoView({block:"nearest"});
+  const cur=list.querySelector(".wb-book.cur");
+  if(cur && cur.scrollIntoView && !window.IS_MOBILE && wbCur!==wbScrCur) cur.scrollIntoView({block:"nearest"});   // 選ぶ本が変わったときだけ見える所へ(設定の切りかえでは動かさない)
+  wbScrCur=wbCur;
 }
 function playBook(i){
   const b=wbAll()[i]; if(!b) return;
