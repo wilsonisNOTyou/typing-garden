@@ -7006,11 +7006,11 @@ function buildBookQueue(){
   else{
     pool=wbPW.map(w=>({...w}));
     if(bookPlay.hideGood){ const left=pool.filter(w=>!wbGood(bookPlay,w)); if(left.length) pool=left; }   // 覚えた言葉は出さない(全部覚えていたら全部)
-    for(let i=pool.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [pool[i],pool[j]]=[pool[j],pool[i]]; }
-    const rank=w=>{ const st=wbSt(bookPlay,w); return !st ? 2 : st.s>=3 ? 3 : st.s===0 ? 0 : 1; };   // 苦手 → 練習中 → まだ → 覚えた の順に出す
-    pool.sort((a,b)=>rank(a)-rank(b));
-    if(wbPlayMode==="10") pool.length=Math.min(pool.length,10);
-    for(let i=pool.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [pool[i],pool[j]]=[pool[j],pool[i]]; }   // 選んだ10語の中では順番を混ぜる
+    if(wbPlayMode==="10"){   // 10語を選ぶ: TOEICの10語セットと同じく、苦手・まだの言葉ほど出やすく、覚えた言葉は出にくい
+      const wt=w=>{ const st=wbSt(bookPlay,w); return !st ? 3 : st.s>=3 ? .5 : st.s===0 ? 4 : 2; }, out=[];
+      while(out.length<10 && pool.length){ let r=Math.random()*pool.reduce((a,w)=>a+wt(w),0), i=0; for(; i<pool.length-1; i++){ r-=wt(pool[i]); if(r<0) break; } out.push(pool.splice(i,1)[0]); }
+      pool=out;
+    } else for(let i=pool.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [pool[i],pool[j]]=[pool[j],pool[i]]; }
   }
   taGoal=pool.length; taQueue=pool;
 }
