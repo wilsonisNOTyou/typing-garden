@@ -3328,8 +3328,8 @@ html:not(.mobile) #screen-garden.haslog:has(.modal.open) #g-toasts{top:14px}
         </button>
         <button class="diff-btn books" data-diff="books">
           <div class="name">タイピング単語帳<span class="kbd">0</span></div>
-          <div class="desc">百人一首などのおためし単語帳や<br>自分の単語帳を、タイピングと4択で覚える</div>
-          <span class="tb-shelf" aria-hidden="true"><i style="--h:352"></i><i style="--h:232"></i><i style="--h:140"></i><i style="--h:28"></i><i style="--h:188"></i><i style="--h:280"></i><i style="--h:60"></i></span>
+          <div class="desc">難読漢字などのおためし単語帳や<br>自分の単語帳を、タイピングと4択で覚える</div>
+          <span class="tb-shelf" aria-hidden="true"><i style="--h:312"></i><i style="--h:232"></i><i style="--h:140"></i><i style="--h:28"></i><i style="--h:188"></i><i style="--h:280"></i><i style="--h:60"></i></span>
         </button>
         <button class="diff-btn toeic" data-diff="toeic">
           <div class="name">TOEIC 英単語<span class="kbd">E</span></div>
@@ -3450,7 +3450,7 @@ html:not(.mobile) #screen-garden.haslog:has(.modal.open) #g-toasts{top:14px}
     <div id="nextWord">&nbsp;</div>
 
     <div class="plate" id="plate"></div>
-    <p class="game-esc"><button class="btn" id="gameQuit" tabindex="-1">やめる <span class="kbdh">Esc</span></button><button class="btn mt-bgm" id="mtBgm" tabindex="-1" hidden>🔊 BGM</button></p>
+    <p class="game-esc"><button class="btn" id="wbPeekBtn" tabindex="-1" hidden>答えを見る <span class="kbdh">Enter</span></button><button class="btn" id="gameQuit" tabindex="-1">やめる <span class="kbdh">Esc</span></button><button class="btn mt-bgm" id="mtBgm" tabindex="-1" hidden>🔊 BGM</button></p>
   </section>
 
   <!-- 対戦の会場(TOEIC・農業) -->
@@ -5275,7 +5275,7 @@ function wbKey(key){
 /* 単語帳の問題: 問題を出し、答え・よみがな・ローマ字の残りは、単語帳で決めた秒数たつまで隠す */
 let wbHideT=null, wbHideI=null, wbNoPeek=0, wbQN=0;
 function wbReveal(){
-  clearTimeout(wbHideT); clearInterval(wbHideI); wbHideT=wbHideI=null;
+  clearTimeout(wbHideT); clearInterval(wbHideI); wbHideT=wbHideI=null; $("wbPeekBtn").hidden=true;
   $("wordPanel").classList.remove("wbhide");
   const s=$("wordQ").querySelector(".wq-wait"); if(s) s.remove();
 }
@@ -5289,16 +5289,19 @@ function wbShowQ(w){
   let left=wbSec(bookPlay);
   if(left<=0 && !wb4){ wbQN--; return; }   // 0秒: 隠さない(「見ずに打てた」にも数えない)
   if(wb4 && (window.IS_MOBILE || left<=0)){ $("wordPanel").classList.add("wbhide"); el.insertAdjacentHTML("beforeend",`<small class="wq-wait"></small>`); wb4Open(); return; }   // スマホ: すぐ4択
-  const tip=()=> wb4 ? `4択になるまで ${left}秒 ・ 打ち切れば正解(農園に届くキーが2倍) ・ Enter ですぐ4択` : `答えが出るまで ${left}秒 ・ 見ずに打てたら「見ずに打てた」に数えます`;
+  const tip=()=> wb4 ? `4択になるまで ${left}秒 ・ 打ち切れば正解(農園に届くキーが2倍) ・ Enter ですぐ4択` : `答えが出るまで ${left}秒 ・ 見ずに打てたら「見ずに打てた」に数えます ・ Enter ですぐ答えを見る`;
   $("wordPanel").classList.add("wbhide");
   el.insertAdjacentHTML("beforeend",`<small class="wq-wait">${tip()}</small>`);
   wbHideI=setInterval(()=>{ left--; const s=el.querySelector(".wq-wait"); if(s) s.textContent=tip(); },1000);
   wbHideT=setTimeout(wb4?wb4Open:wbReveal,left*1000);
+  const pb=$("wbPeekBtn"); pb.hidden=false; pb.firstChild.textContent = wb4 ? "すぐ4択にする " : "答えを見る ";   // Enter と同じ
 }
+/* Enter かボタン: 待たずに答えを出す(4択なら4択にする) */
+function wbPeek(){ if(!running || diff!=="book" || !wbHideT) return; if(wb4) wb4Open(); else wbReveal(); }
 /* 単語帳の4択 */
 let wb4=false, wb4Ch=null, wb4Busy=false, wb4Typed=0, wb4Chose=0, wb4Ans=0, wb4Wrong=0, wb4New=0;
 function wb4Open(){
-  clearTimeout(wbHideT); clearInterval(wbHideI); wbHideT=wbHideI=null;
+  clearTimeout(wbHideT); clearInterval(wbHideI); wbHideT=wbHideI=null; $("wbPeekBtn").hidden=true;
   const w=currentWord; if(!w || wb4Ch || !running) return;
   const mix=a=>{ for(let i=a.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [a[i],a[j]]=[a[j],a[i]]; } return a; };
   const mine=new Set([w.t, w.t2, ...(w.a||[]).map(x=>x.t)].filter(Boolean));
@@ -5792,6 +5795,7 @@ document.addEventListener("keydown",e=>{
     if(wb4Ch){ if(/^[1-4]$/.test(key)){ e.preventDefault(); wb4Answer(+key-1); } return; }
     if(key==="Enter"){ e.preventDefault(); wb4Open(); return; }
   }
+  if(diff==="book" && !wb4 && key==="Enter"){ e.preventDefault(); wbPeek(); return; }   // 単語帳: Enter で待たずに答えを見る
   if(key===" " && mtOn()){ e.preventDefault(); mtUseItem(); return; }   // 対戦: アイテムを使う
   if(key==="Process" || e.isComposing){ imeWarn(); return; }
   if(!/^[a-zA-Z0-9\-'!?,.~\/%&]$/.test(key)) return;
@@ -5861,6 +5865,7 @@ document.querySelectorAll(".diff-btn").forEach(b=>{
 });
 $("retryBtn").addEventListener("click",()=>{ if(mtRes){ mtRematch(); return; } startGame(diff); });
 $("titleBtn").addEventListener("click",()=>{ if(diff==="book") openBooks(); else show("title"); });
+$("wbPeekBtn").addEventListener("click",()=>wbPeek());
 $("romaji").addEventListener("click",e=>{ const c=e.target.closest(".bq"); if(c && diff==="book" && wb4 && wb4Ch && running && !wb4Busy) wb4Answer(+c.dataset.i); });   // 4択はタップでも答えられる
 
 let resultAt=0;
@@ -6239,107 +6244,6 @@ function wbLoad(){
 const WB_PRE_KEY=WB_KEY+":pre";
 const wbPre=(id,name,ds,txt)=>({ id, name, ds, pre:true, bests:{}, words:txt.trim().split("\n").map(l=>{ const [q,t,k,k2,qk,t2]=l.split("|"); const w={ t:t||k, k }; if(q) w.q=q; if(k2) w.k2=k2; if(qk) w.qk=qk; if(t2) w.t2=t2; return w; }) });
 const WB_PRESETS=[
-  wbPre("p:hyakunin","百人一首","上の句を見て、下の句を打つ(昔の仮名づかい・今の仮名づかいのどちらでも打てる)",`
-秋の田のかりほの庵の苫をあらみ|わが衣手は露にぬれつつ|わがころもではつゆにぬれつつ||あきのたのかりほのいほのとまをあらみ
-春過ぎて夏来にけらし白妙の|衣ほすてふ天の香具山|ころもほすてふあまのかぐやま|ころもほすちょうあまのかぐやま|はるすぎてなつきにけらししろたへの
-あしびきの山鳥の尾のしだり尾の|ながながし夜をひとりかも寝む|ながながしよをひとりかもねむ|ながながしよをひとりかもねん|あしびきのやまどりのをのしだりをの
-田子の浦にうち出でてみれば白妙の|富士の高嶺に雪は降りつつ|ふじのたかねにゆきはふりつつ||たごのうらにうちいでてみればしろたへの
-奥山に紅葉踏み分け鳴く鹿の|声聞く時ぞ秋は悲しき|こゑきくときぞあきはかなしき|こえきくときぞあきはかなしき|おくやまにもみぢふみわけなくしかの
-かささぎの渡せる橋に置く霜の|白きを見れば夜ぞ更けにける|しろきをみればよぞふけにける||かささぎのわたせるはしにおくしもの
-天の原ふりさけ見れば春日なる|三笠の山に出でし月かも|みかさのやまにいでしつきかも||あまのはらふりさけみればかすがなる
-わが庵は都のたつみしかぞ住む|世をうぢ山と人はいふなり|よをうぢやまとひとはいふなり|よをうじやまとひとはいうなり|わがいほはみやこのたつみしかぞすむ
-花の色は移りにけりないたづらに|わが身世にふるながめせしまに|わがみよにふるながめせしまに||はなのいろはうつりにけりないたづらに
-これやこの行くも帰るも別れては|知るも知らぬも逢坂の関|しるもしらぬもあふさかのせき|しるもしらぬもおうさかのせき|これやこのゆくもかへるもわかれては
-わたの原八十島かけて漕ぎ出でぬと|人には告げよ海人の釣舟|ひとにはつげよあまのつりぶね||わたのはらやそしまかけてこぎいでぬと
-天つ風雲の通ひ路吹き閉ぢよ|をとめの姿しばしとどめむ|をとめのすがたしばしとどめむ|おとめのすがたしばしとどめん|あまつかぜくものかよひぢふきとぢよ
-筑波嶺の峰より落つるみなの川|恋ぞつもりて淵となりぬる|こひぞつもりてふちとなりぬる|こいぞつもりてふちとなりぬる|つくばねのみねよりおつるみなのがは
-陸奥のしのぶもぢずり誰ゆゑに|乱れそめにしわれならなくに|みだれそめにしわれならなくに||みちのくのしのぶもぢずりたれゆゑに
-君がため春の野に出でて若菜摘む|わが衣手に雪は降りつつ|わがころもでにゆきはふりつつ||きみがためはるののにいでてわかなつむ
-立ち別れいなばの山の峰に生ふる|まつとし聞かば今帰り来む|まつとしきかばいまかへりこむ|まつとしきかばいまかえりこん|たちわかれいなばのやまのみねにおふる
-ちはやぶる神代も聞かず竜田川|からくれなゐに水くくるとは|からくれなゐにみづくくるとは|からくれないにみずくくるとは|ちはやぶるかみよもきかずたつたがは
-住の江の岸に寄る波よるさへや|夢の通ひ路人目よくらむ|ゆめのかよひぢひとめよくらむ|ゆめのかよいじひとめよくらん|すみのえのきしによるなみよるさへや
-難波潟短き蘆のふしの間も|逢はでこの世を過ぐしてよとや|あはでこのよをすぐしてよとや|あわでこのよをすぐしてよとや|なにはがたみじかきあしのふしのまも
-わびぬれば今はた同じ難波なる|みをつくしても逢はむとぞ思ふ|みをつくしてもあはむとぞおもふ|みをつくしてもあわんとぞおもう|わびぬればいまはたおなじなにはなる
-今来むと言ひしばかりに長月の|有明の月を待ち出でつるかな|ありあけのつきをまちいでつるかな||いまこむといひしばかりにながつきの
-吹くからに秋の草木のしをるれば|むべ山風を嵐といふらむ|むべやまかぜをあらしといふらむ|むべやまかぜをあらしというらん|ふくからにあきのくさきのしをるれば
-月見ればちぢにものこそ悲しけれ|わが身ひとつの秋にはあらねど|わがみひとつのあきにはあらねど||つきみればちぢにものこそかなしけれ
-このたびは幣も取りあへず手向山|紅葉の錦神のまにまに|もみぢのにしきかみのまにまに|もみじのにしきかみのまにまに|このたびはぬさもとりあへずたむけやま
-名にし負はば逢坂山のさねかづら|人に知られでくるよしもがな|ひとにしられでくるよしもがな||なにしおはばあふさかやまのさねかづら
-小倉山峰のもみぢ葉心あらば|今ひとたびのみゆき待たなむ|いまひとたびのみゆきまたなむ|いまひとたびのみゆきまたなん|をぐらやまみねのもみぢばこころあらば
-みかの原わきて流るるいづみ川|いつ見きとてか恋しかるらむ|いつみきとてかこひしかるらむ|いつみきとてかこいしかるらん|みかのはらわきてながるるいづみがは
-山里は冬ぞ寂しさまさりける|人目も草もかれぬと思へば|ひとめもくさもかれぬとおもへば|ひとめもくさもかれぬとおもえば|やまざとはふゆぞさびしさまさりける
-心あてに折らばや折らむ初霜の|置きまどはせる白菊の花|おきまどはせるしらぎくのはな|おきまどわせるしらぎくのはな|こころあてにをらばやをらむはつしもの
-有明のつれなく見えし別れより|暁ばかり憂きものはなし|あかつきばかりうきものはなし||ありあけのつれなくみえしわかれより
-朝ぼらけ有明の月と見るまでに|吉野の里に降れる白雪|よしののさとにふれるしらゆき||あさぼらけありあけのつきとみるまでに
-山川に風のかけたるしがらみは|流れもあへぬ紅葉なりけり|ながれもあへぬもみぢなりけり|ながれもあえぬもみじなりけり|やまがはにかぜのかけたるしがらみは
-ひさかたの光のどけき春の日に|しづ心なく花の散るらむ|しづごころなくはなのちるらむ|しずごころなくはなのちるらん|ひさかたのひかりのどけきはるのひに
-誰をかも知る人にせむ高砂の|松も昔の友ならなくに|まつもむかしのともならなくに||たれをかもしるひとにせむたかさごの
-人はいさ心も知らずふるさとは|花ぞ昔の香ににほひける|はなぞむかしのかににほひける|はなぞむかしのかににおいける|ひとはいさこころもしらずふるさとは
-夏の夜はまだ宵ながら明けぬるを|雲のいづこに月宿るらむ|くものいづこにつきやどるらむ|くものいずこにつきやどるらん|なつのよはまだよひながらあけぬるを
-白露に風の吹きしく秋の野は|つらぬきとめぬ玉ぞ散りける|つらぬきとめぬたまぞちりける||しらつゆにかぜのふきしくあきののは
-忘らるる身をば思はず誓ひてし|人の命の惜しくもあるかな|ひとのいのちのをしくもあるかな|ひとのいのちのおしくもあるかな|わすらるるみをばおもはずちかひてし
-浅茅生の小野の篠原しのぶれど|あまりてなどか人の恋しき|あまりてなどかひとのこひしき|あまりてなどかひとのこいしき|あさぢふのをののしのはらしのぶれど
-しのぶれど色に出でにけりわが恋は|ものや思ふと人の問ふまで|ものやおもふとひとのとふまで|ものやおもうとひとのとうまで|しのぶれどいろにいでにけりわがこひは
-恋すてふわが名はまだき立ちにけり|人知れずこそ思ひそめしか|ひとしれずこそおもひそめしか|ひとしれずこそおもいそめしか|こひすてふわがなはまだきたちにけり
-契りきなかたみに袖をしぼりつつ|末の松山波越さじとは|すゑのまつやまなみこさじとは|すえのまつやまなみこさじとは|ちぎりきなかたみにそでをしぼりつつ
-逢ひ見ての後の心にくらぶれば|昔はものを思はざりけり|むかしはものをおもはざりけり|むかしはものをおもわざりけり|あひみてののちのこころにくらぶれば
-逢ふことの絶えてしなくはなかなかに|人をも身をも恨みざらまし|ひとをもみをもうらみざらまし||あふことのたえてしなくはなかなかに
-あはれともいふべき人は思ほえで|身のいたづらになりぬべきかな|みのいたづらになりぬべきかな|みのいたずらになりぬべきかな|あはれともいふべきひとはおもほえで
-由良の門を渡る舟人かぢを絶え|ゆくへも知らぬ恋の道かな|ゆくへもしらぬこひのみちかな|ゆくえもしらぬこいのみちかな|ゆらのとをわたるふなびとかぢをたえ
-八重むぐら茂れる宿のさびしきに|人こそ見えね秋は来にけり|ひとこそみえねあきはきにけり||やへむぐらしげれるやどのさびしきに
-風をいたみ岩打つ波のおのれのみ|くだけてものを思ふころかな|くだけてものをおもふころかな|くだけてものをおもうころかな|かぜをいたみいはうつなみのおのれのみ
-みかきもり衛士のたく火の夜は燃え|昼は消えつつものをこそ思へ|ひるはきえつつものをこそおもへ|ひるはきえつつものをこそおもえ|みかきもりゑじのたくひのよるはもえ
-君がため惜しからざりし命さへ|長くもがなと思ひけるかな|ながくもがなとおもひけるかな|ながくもがなとおもいけるかな|きみがためをしからざりしいのちさへ
-かくとだにえやはいぶきのさしも草|さしも知らじな燃ゆる思ひを|さしもしらじなもゆるおもひを|さしもしらじなもゆるおもいを|かくとだにえやはいぶきのさしもぐさ
-明けぬれば暮るるものとは知りながら|なほ恨めしき朝ぼらけかな|なほうらめしきあさぼらけかな|なおうらめしきあさぼらけかな|あけぬればくるるものとはしりながら
-嘆きつつひとり寝る夜の明くる間は|いかに久しきものとかは知る|いかにひさしきものとかはしる||なげきつつひとりぬるよのあくるまは
-忘れじの行く末まではかたければ|今日を限りの命ともがな|けふをかぎりのいのちともがな|きょうをかぎりのいのちともがな|わすれじのゆくすゑまではかたければ
-滝の音は絶えて久しくなりぬれど|名こそ流れてなほ聞こえけれ|なこそながれてなほきこえけれ|なこそながれてなおきこえけれ|たきのおとはたえてひさしくなりぬれど
-あらざらむこの世のほかの思ひ出に|今ひとたびの逢ふこともがな|いまひとたびのあふこともがな|いまひとたびのおうこともがな|あらざらむこのよのほかのおもひでに
-めぐり逢ひて見しやそれともわかぬ間に|雲隠れにし夜半の月かな|くもがくれにしよはのつきかな|くもがくれにしよわのつきかな|めぐりあひてみしやそれともわかぬまに
-有馬山猪名の笹原風吹けば|いでそよ人を忘れやはする|いでそよひとをわすれやはする||ありまやまゐなのささはらかぜふけば
-やすらはで寝なましものをさ夜更けて|かたぶくまでの月を見しかな|かたぶくまでのつきをみしかな||やすらはでねなましものをさよふけて
-大江山いく野の道の遠ければ|まだふみもみず天の橋立|まだふみもみずあまのはしだて||おほえやまいくののみちのとほければ
-いにしへの奈良の都の八重桜|けふ九重ににほひぬるかな|けふここのへににほひぬるかな|きょうここのえににおいぬるかな|いにしへのならのみやこのやへざくら
-夜をこめて鳥のそら音ははかるとも|よに逢坂の関は許さじ|よにあふさかのせきはゆるさじ|よにおうさかのせきはゆるさじ|よをこめてとりのそらねははかるとも
-今はただ思ひ絶えなむとばかりを|人づてならで言ふよしもがな|ひとづてならでいふよしもがな|ひとづてならでいうよしもがな|いまはただおもひたえなむとばかりを
-朝ぼらけ宇治の川霧たえだえに|あらはれわたる瀬々の網代木|あらはれわたるせぜのあじろぎ|あらわれわたるせぜのあじろぎ|あさぼらけうぢのかはぎりたえだえに
-恨みわびほさぬ袖だにあるものを|恋に朽ちなむ名こそ惜しけれ|こひにくちなむなこそをしけれ|こいにくちなんなこそおしけれ|うらみわびほさぬそでだにあるものを
-もろともにあはれと思へ山桜|花よりほかに知る人もなし|はなよりほかにしるひともなし||もろともにあはれとおもへやまざくら
-春の夜の夢ばかりなる手枕に|かひなく立たむ名こそ惜しけれ|かひなくたたむなこそをしけれ|かいなくたたんなこそおしけれ|はるのよのゆめばかりなるたまくらに
-心にもあらで憂き世にながらへば|恋しかるべき夜半の月かな|こひしかるべきよはのつきかな|こいしかるべきよわのつきかな|こころにもあらでうきよにながらへば
-嵐吹く三室の山のもみぢ葉は|竜田の川の錦なりけり|たつたのかはのにしきなりけり|たつたのかわのにしきなりけり|あらしふくみむろのやまのもみぢばは
-さびしさに宿を立ち出でてながむれば|いづこも同じ秋の夕暮れ|いづこもおなじあきのゆふぐれ|いずこもおなじあきのゆうぐれ|さびしさにやどをたちいでてながむれば
-夕されば門田の稲葉おとづれて|蘆のまろやに秋風ぞ吹く|あしのまろやにあきかぜぞふく||ゆふさればかどたのいなばおとづれて
-音に聞く高師の浜のあだ波は|かけじや袖の濡れもこそすれ|かけじやそでのぬれもこそすれ||おとにきくたかしのはまのあだなみは
-高砂の尾の上の桜咲きにけり|外山の霞立たずもあらなむ|とやまのかすみたたずもあらなむ|とやまのかすみたたずもあらなん|たかさごのをのへのさくらさきにけり
-憂かりける人を初瀬の山おろしよ|激しかれとは祈らぬものを|はげしかれとはいのらぬものを||うかりけるひとをはつせのやまおろしよ
-契りおきしさせもが露を命にて|あはれ今年の秋もいぬめり|あはれことしのあきもいぬめり|あわれことしのあきもいぬめり|ちぎりおきしさせもがつゆをいのちにて
-わたの原漕ぎ出でて見ればひさかたの|雲居にまがふ沖つ白波|くもゐにまがふおきつしらなみ|くもいにまがうおきつしらなみ|わたのはらこぎいでてみればひさかたの
-瀬を早み岩にせかるる滝川の|われても末に逢はむとぞ思ふ|われてもすゑにあはむとぞおもふ|われてもすえにあわんとぞおもう|せをはやみいはにせかるるたきがはの
-淡路島通ふ千鳥の鳴く声に|幾夜寝覚めぬ須磨の関守|いくよねざめぬすまのせきもり||あはぢしまかよふちどりのなくこゑに
-秋風にたなびく雲の絶え間より|もれ出づる月の影のさやけさ|もれいづるつきのかげのさやけさ|もれいずるつきのかげのさやけさ|あきかぜにたなびくくものたえまより
-長からむ心も知らず黒髪の|乱れて今朝はものをこそ思へ|みだれてけさはものをこそおもへ|みだれてけさはものをこそおもえ|ながからむこころもしらずくろかみの
-ほととぎす鳴きつる方をながむれば|ただ有明の月ぞ残れる|ただありあけのつきぞのこれる||ほととぎすなきつるかたをながむれば
-思ひわびさても命はあるものを|憂きに堪へぬは涙なりけり|うきにたへぬはなみだなりけり|うきにたえぬはなみだなりけり|おもひわびさてもいのちはあるものを
-世の中よ道こそなけれ思ひ入る|山の奥にも鹿ぞ鳴くなる|やまのおくにもしかぞなくなる||よのなかよみちこそなけれおもひいる
-ながらへばまたこのごろやしのばれむ|憂しと見し世ぞ今は恋しき|うしとみしよぞいまはこひしき|うしとみしよぞいまはこいしき|ながらへばまたこのごろやしのばれむ
-夜もすがらもの思ふころは明けやらで|閨のひまさへつれなかりけり|ねやのひまさへつれなかりけり|ねやのひまさえつれなかりけり|よもすがらものおもふころはあけやらで
-嘆けとて月やはものを思はする|かこち顔なるわが涙かな|かこちがほなるわがなみだかな|かこちがおなるわがなみだかな|なげけとてつきやはものをおもはする
-村雨の露もまだひぬ槙の葉に|霧立ちのぼる秋の夕暮れ|きりたちのぼるあきのゆふぐれ|きりたちのぼるあきのゆうぐれ|むらさめのつゆもまだひぬまきのはに
-難波江の蘆のかりねのひとよゆゑ|みをつくしてや恋ひわたるべき|みをつくしてやこひわたるべき|みをつくしてやこいわたるべき|なにはえのあしのかりねのひとよゆゑ
-玉の緒よ絶えなば絶えねながらへば|忍ぶることの弱りもぞする|しのぶることのよわりもぞする||たまのをよたえなばたえねながらへば
-見せばやな雄島の海人の袖だにも|濡れにぞ濡れし色は変はらず|ぬれにぞぬれしいろはかはらず|ぬれにぞぬれしいろはかわらず|みせばやなをじまのあまのそでだにも
-きりぎりす鳴くや霜夜のさむしろに|衣かたしきひとりかも寝む|ころもかたしきひとりかもねむ|ころもかたしきひとりかもねん|きりぎりすなくやしもよのさむしろに
-わが袖は潮干に見えぬ沖の石の|人こそ知らね乾く間もなし|ひとこそしらねかわくまもなし||わがそではしほひにみえぬおきのいしの
-世の中は常にもがもな渚漕ぐ|海人の小舟の綱手かなしも|あまのをぶねのつなでかなしも|あまのおぶねのつなでかなしも|よのなかはつねにもがもななぎさこぐ
-み吉野の山の秋風さ夜更けて|ふるさと寒く衣打つなり|ふるさとさむくころもうつなり||みよしののやまのあきかぜさよふけて
-おほけなく憂き世の民におほふかな|わが立つ杣に墨染の袖|わがたつそまにすみぞめのそで||おほけなくうきよのたみにおほふかな
-花さそふ嵐の庭の雪ならで|ふりゆくものはわが身なりけり|ふりゆくものはわがみなりけり||はなさそふあらしのにはのゆきならで
-来ぬ人をまつほの浦の夕なぎに|焼くや藻塩の身もこがれつつ|やくやもしほのみもこがれつつ|やくやもしおのみもこがれつつ|こぬひとをまつほのうらのゆふなぎに
-風そよぐならの小川の夕暮れは|みそぎぞ夏のしるしなりける|みそぎぞなつのしるしなりける||かぜそよぐならのをがはのゆふぐれは
-人も惜し人も恨めしあぢきなく|世を思ふゆゑにもの思ふ身は|よをおもふゆゑにものおもふみは|よをおもうゆえにものおもうみは|ひともをしひともうらめしあぢきなく
-百敷や古き軒端のしのぶにも|なほあまりある昔なりけり|なほあまりあるむかしなりけり|なおあまりあるむかしなりけり|ももしきやふるきのきばのしのぶにも`),
   wbPre("p:nandoku","難読漢字","漢字を見て、よみを打つ",`
 紫陽花||あじさい
 向日葵||ひまわり
@@ -6549,11 +6453,11 @@ const WB_PRESETS=[
 |派出所で手術中|はしゅつじょでしゅじゅつちゅう
 |お綾や八百屋にお謝り|おあややややおやにおあやまり
 |麦ごみ麦ごみ三麦ごみ|むぎごみむぎごみみむぎごみ
-|この竹垣に竹立てかけたのは竹立てかけたかったから竹立てかけた|このたけがきにたけたてかけたのはたけたてかけたかったからたけたてかけた
-|蛙ぴょこぴょこ三ぴょこぴょこ合わせてぴょこぴょこ六ぴょこぴょこ|かえるぴょこぴょこみぴょこぴょこあわせてぴょこぴょこむぴょこぴょこ`)
+|打者走者勝者走者一掃|だしゃそうしゃしょうしゃそうしゃいっそう
+|書写山の社僧正|しょしゃざんのしゃそうじょう`)
 ];
-/* おためし単語帳の初期設定: 百人一首とことわざは長いので4択、難読漢字・県庁所在地・四字熟語はタイピング */
-const WB_PRE_DEF={ "p:hyakunin":{ style:"4", sec:10 }, "p:nandoku":{ style:"type", sec:5 }, "p:kencho":{ style:"type", sec:5 }, "p:yoji":{ style:"type", sec:8 }, "p:kotowaza":{ style:"4", sec:8 }, "p:hayakuchi":{ style:"type" } };
+/* おためし単語帳の初期設定: ことわざは長いので4択、難読漢字・県庁所在地・四字熟語はタイピング */
+const WB_PRE_DEF={ "p:nandoku":{ style:"type", sec:5 }, "p:kencho":{ style:"type", sec:5 }, "p:yoji":{ style:"type", sec:8 }, "p:kotowaza":{ style:"4", sec:8 }, "p:hayakuchi":{ style:"type" } };
 function wbPreLoad(){
   let o={}; try{ o=JSON.parse(localStorage.getItem(WB_PRE_KEY)||"{}")||{}; }catch(e){}
   for(const b of WB_PRESETS){ const v=o[b.id]||{}, d=WB_PRE_DEF[b.id]||{}; b.bests=v.bests&&typeof v.bests==="object"?v.bests:{}; b.sec=v.sec??d.sec; b.mode=v.mode; b.style=v.style??d.style; }
@@ -6701,7 +6605,7 @@ function wbView(i){
   $("wbListView").style.display="none"; $("wbEditor").style.display="none"; $("wbViewer").style.display="";
   $("wbVName").textContent=b.name;
   const c=wbMemCount(b);
-  $("wbVSum").textContent = `${b.words.length}語`+(wbCan4(b) ? ` ・ 4択で覚えた ${c.good}/${c.all}(3回続けて正解で「覚えた」。まちがえると数え直し)` : " ・ 問題のある言葉が4つ以上あると、4択で遊べて、覚えぐあいがここに出ます");
+  $("wbVSum").textContent = `${b.words.length}語`+(wbCan4(b) ? ` ・ 4択で覚えた ${c.good}/${c.all}(正解・まちがいは4択で遊んだときだけ記録します。3回続けて正解で「覚えた」、まちがえると数え直し)` : " ・ 問題のある言葉が4つ以上あると、4択で遊べて、覚えぐあいがここに出ます");
   $("wbVWords").innerHTML=b.words.map((w,j)=>`<li><span class="no">${j+1}</span><span>${w.q?`<span class="q">${escH(w.q)}</span>`:""}${escH(wbAnsTxt(w))}${w.t2?` / ${escH(w.t2)}`:""}</span><span class="k">${escH([w.k,...(w.a||[]).map(x=>x.k)].join("／"))}${w.k2?`<br>${escH(w.k2)}`:""}</span><span class="wb-st">${w.q&&wbCan4(b)?wbStTxt(b,w):""}</span></li>`).join("");
 }
 function openBooks(){
@@ -6712,8 +6616,8 @@ function openBooks(){
   show("books");
 }
 /* 一覧は本棚: 単語帳を「本」として棚に並べ、選んだ本のくわしい欄を上に出す */
-const WB_COVER={ "p:hyakunin":["歌",352], "p:nandoku":["難",232], "p:kencho":["県",140], "p:yoji":["熟",28], "p:kotowaza":["諺",188], "p:hayakuchi":["早",312] };
-const WB_ART={"p:hyakunin": "<svg viewBox=\"0 0 48 48\"><g transform=\"rotate(-9 24 24)\"><rect x=\"12\" y=\"8\" width=\"21\" height=\"31\" rx=\"2\" fill=\"#e9dcc0\" stroke=\"currentColor\" stroke-width=\"1.2\"/></g><g transform=\"rotate(7 26 25)\"><rect x=\"15\" y=\"9\" width=\"21\" height=\"31\" rx=\"2\" fill=\"#fbf6ea\" stroke=\"currentColor\" stroke-width=\"1.4\"/><path d=\"M31 14v13M27.5 14v17M24 14v9M20.5 14v14\" stroke=\"#3a2a1a\" stroke-width=\"1.3\" stroke-linecap=\"round\"/><circle cx=\"20\" cy=\"35\" r=\"2\" fill=\"#c8402e\"/></g></svg>", "p:nandoku": "<svg viewBox=\"0 0 48 48\"><rect x=\"5\" y=\"29\" width=\"26\" height=\"13\" rx=\"3\" fill=\"#2b2b33\" stroke=\"currentColor\" stroke-width=\"1.2\"/><ellipse cx=\"17\" cy=\"34\" rx=\"8\" ry=\"2.6\" fill=\"#0d0d12\"/><path d=\"M28 7l10 21\" stroke=\"#caa56b\" stroke-width=\"3.2\" stroke-linecap=\"round\"/><path d=\"M28 7l10 21\" stroke=\"#8a6a3e\" stroke-width=\"1\" stroke-linecap=\"round\"/><path d=\"M36.5 25.5l7 14.5-8.5-11z\" fill=\"#1c1c22\" stroke=\"currentColor\" stroke-width=\".9\"/></svg>", "p:kencho": "<svg viewBox=\"0 0 48 48\"><g fill=\"currentColor\" opacity=\".9\"><path d=\"M31 5l8 1.5 3 5-6 2.5-5-3z\"/><path d=\"M33 16l3.5 3-1.5 7-6 6.5-8 3.5-7.5.8-1-3 7-2.5 7-3.5 4.5-6z\"/><path d=\"M17 37.5l6-1.2-1 3.4-5 .8z\"/><path d=\"M8 35.5l4.5 2-1 5.5-4.5-1.2z\"/></g><circle cx=\"28.5\" cy=\"27\" r=\"2.6\" fill=\"#e8384f\" stroke=\"#fff\" stroke-width=\".8\"/></svg>", "p:yoji": "<svg viewBox=\"0 0 48 48\"><rect x=\"11\" y=\"13\" width=\"26\" height=\"22\" fill=\"#f4ecd8\" stroke=\"currentColor\" stroke-width=\"1\"/><rect x=\"7\" y=\"10\" width=\"5\" height=\"28\" rx=\"2.5\" fill=\"#8a5a2b\" stroke=\"currentColor\" stroke-width=\".8\"/><rect x=\"36\" y=\"10\" width=\"5\" height=\"28\" rx=\"2.5\" fill=\"#8a5a2b\" stroke=\"currentColor\" stroke-width=\".8\"/><path d=\"M31 17v13M26 17v13M21 17v13M16 17v13\" stroke=\"#3a2a1a\" stroke-width=\"1.6\" stroke-linecap=\"round\" stroke-dasharray=\"3 2\"/></svg>", "p:kotowaza": "<svg viewBox=\"0 0 48 48\"><path d=\"M8 9h32a4 4 0 0 1 4 4v15a4 4 0 0 1-4 4H23l-9 8v-8H8a4 4 0 0 1-4-4V13a4 4 0 0 1 4-4z\" fill=\"#f4ecd8\" stroke=\"currentColor\" stroke-width=\"1.4\"/><circle cx=\"16\" cy=\"20.5\" r=\"2.4\" fill=\"#3a2a1a\"/><circle cx=\"24\" cy=\"20.5\" r=\"2.4\" fill=\"#3a2a1a\"/><circle cx=\"32\" cy=\"20.5\" r=\"2.4\" fill=\"#3a2a1a\"/></svg>", "p:hayakuchi": "<svg viewBox=\"0 0 48 48\"><g fill=\"none\" stroke=\"currentColor\" stroke-width=\"2.4\" stroke-linecap=\"round\"><path d=\"M5 15q4-5 8 0t8 0 8 0 8 0 8 0\"/><path d=\"M5 24q4-5 8 0t8 0 8 0 8 0 8 0\"/><path d=\"M5 33q4-5 8 0t8 0 8 0 8 0 8 0\"/></g><path d=\"M41 6l3 2-2 3\" fill=\"none\" stroke=\"#f2c14e\" stroke-width=\"1.6\" stroke-linecap=\"round\"/></svg>"};   // おためし単語帳の表紙の絵
+const WB_COVER={ "p:nandoku":["難",232], "p:kencho":["県",140], "p:yoji":["熟",28], "p:kotowaza":["諺",188], "p:hayakuchi":["早",312] };
+const WB_ART={"p:nandoku": "<svg viewBox=\"0 0 48 48\"><rect x=\"5\" y=\"29\" width=\"26\" height=\"13\" rx=\"3\" fill=\"#2b2b33\" stroke=\"currentColor\" stroke-width=\"1.2\"/><ellipse cx=\"17\" cy=\"34\" rx=\"8\" ry=\"2.6\" fill=\"#0d0d12\"/><path d=\"M28 7l10 21\" stroke=\"#caa56b\" stroke-width=\"3.2\" stroke-linecap=\"round\"/><path d=\"M28 7l10 21\" stroke=\"#8a6a3e\" stroke-width=\"1\" stroke-linecap=\"round\"/><path d=\"M36.5 25.5l7 14.5-8.5-11z\" fill=\"#1c1c22\" stroke=\"currentColor\" stroke-width=\".9\"/></svg>", "p:kencho": "<svg viewBox=\"0 0 48 48\"><g fill=\"currentColor\" opacity=\".9\"><path d=\"M31 5l8 1.5 3 5-6 2.5-5-3z\"/><path d=\"M33 16l3.5 3-1.5 7-6 6.5-8 3.5-7.5.8-1-3 7-2.5 7-3.5 4.5-6z\"/><path d=\"M17 37.5l6-1.2-1 3.4-5 .8z\"/><path d=\"M8 35.5l4.5 2-1 5.5-4.5-1.2z\"/></g><circle cx=\"28.5\" cy=\"27\" r=\"2.6\" fill=\"#e8384f\" stroke=\"#fff\" stroke-width=\".8\"/></svg>", "p:yoji": "<svg viewBox=\"0 0 48 48\"><rect x=\"11\" y=\"13\" width=\"26\" height=\"22\" fill=\"#f4ecd8\" stroke=\"currentColor\" stroke-width=\"1\"/><rect x=\"7\" y=\"10\" width=\"5\" height=\"28\" rx=\"2.5\" fill=\"#8a5a2b\" stroke=\"currentColor\" stroke-width=\".8\"/><rect x=\"36\" y=\"10\" width=\"5\" height=\"28\" rx=\"2.5\" fill=\"#8a5a2b\" stroke=\"currentColor\" stroke-width=\".8\"/><path d=\"M31 17v13M26 17v13M21 17v13M16 17v13\" stroke=\"#3a2a1a\" stroke-width=\"1.6\" stroke-linecap=\"round\" stroke-dasharray=\"3 2\"/></svg>", "p:kotowaza": "<svg viewBox=\"0 0 48 48\"><path d=\"M8 9h32a4 4 0 0 1 4 4v15a4 4 0 0 1-4 4H23l-9 8v-8H8a4 4 0 0 1-4-4V13a4 4 0 0 1 4-4z\" fill=\"#f4ecd8\" stroke=\"currentColor\" stroke-width=\"1.4\"/><circle cx=\"16\" cy=\"20.5\" r=\"2.4\" fill=\"#3a2a1a\"/><circle cx=\"24\" cy=\"20.5\" r=\"2.4\" fill=\"#3a2a1a\"/><circle cx=\"32\" cy=\"20.5\" r=\"2.4\" fill=\"#3a2a1a\"/></svg>", "p:hayakuchi": "<svg viewBox=\"0 0 48 48\"><g fill=\"none\" stroke=\"currentColor\" stroke-width=\"2.4\" stroke-linecap=\"round\"><path d=\"M5 15q4-5 8 0t8 0 8 0 8 0 8 0\"/><path d=\"M5 24q4-5 8 0t8 0 8 0 8 0 8 0\"/><path d=\"M5 33q4-5 8 0t8 0 8 0 8 0 8 0\"/></g><path d=\"M41 6l3 2-2 3\" fill=\"none\" stroke=\"#f2c14e\" stroke-width=\"1.6\" stroke-linecap=\"round\"/></svg>"};   // おためし単語帳の表紙の絵
 const wbIcon = b => WB_ART[b.id] ? `<span class="wb-bart">${WB_ART[b.id]}</span>` : `<span class="wb-bic">${escH(wbCover(b)[0])}</span>`;
 function wbCover(b){
   const c=WB_COVER[b.id]; if(c) return c;
