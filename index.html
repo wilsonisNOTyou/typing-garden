@@ -5321,7 +5321,7 @@ function wbShowQ(w){
   const q = diff==="book" && w && w.q ? w.q : "", el=$("wordQ");
   el.hidden=!q; el.textContent=q;
   if(!q) return;
-  if(w.qk && wbNormKana(w.qk).replace(/ /g,"")!==wbNormKana(w.q).replace(/ /g,"")) el.insertAdjacentHTML("beforeend",`<small class="wq-k">${escH(w.qk)}</small>`);   // 問題のよみがな(問題と同じなら出さない)
+  if(w.qk && /[ぁ-んァ-ン]/.test(w.qk) && wbNormKana(w.qk).replace(/ /g,"")!==wbNormKana(w.q).replace(/ /g,"")) el.insertAdjacentHTML("beforeend",`<small class="wq-k">${escH(w.qk)}</small>`);   // 問題のよみがな(問題と同じとき・英字だけのときは出さない)
   wbQN++;
   let left=wbSec(bookPlay);
   if(left<=0 && !wb4){ wbQN--; return; }   // 0秒: 隠さない(「見ずに打てた」にも数えない)
@@ -7103,7 +7103,8 @@ ${x.how}
 よみがなのきまり:
 ・ひらがなか、英字(小文字)と数字だけで書く。カタカナ・漢字・かっこは使わない
 ・空白は、英語の熟語や英文の単語の間にだけ入れてよい(打つときもスペースキーで打ちます)
-・よみがなに、英字で書けない文字(ä・ö・ü・ß・é などや、漢字のままの言葉)が残るときは、そのよみがなを空にする(その言葉は4択で遊ぶときだけ出ます)
+・ä・ö・ü・ß・é など英字にない文字は、その言語でふつうの英字の書きかえにする(ドイツ語は ä→ae、ö→oe、ü→ue、ß→ss。フランス語などの é・è は e)
+・それでも英字で書けない文字(漢字のままの言葉など)が残るときは、そのよみがなを空にする(その言葉は4択で遊ぶときだけ出ます)
 ・のばす音は「ー」。句読点「、」「。」や「！」「？」は使ってよい
 
 そのほか:
