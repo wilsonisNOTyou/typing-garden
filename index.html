@@ -3861,7 +3861,7 @@ html:not(.mobile) #screen-garden.haslog:has(.modal.open) #g-toasts{top:14px}
       <p class="wb-share-note" id="wbShareNote" hidden></p>
       <div id="wbList" class="wb-list"></div>
       <p class="reg-status m-only">スマホでは、問題のある言葉が4つ以上ある単語帳を4択で遊べます(作成・編集・共有もできます)。タイピングはパソコンで遊べます</p>
-      <p class="keynav"><b>← → ↑ ↓</b> 本を選ぶ ・ <b>Enter</b> プレイ ・ <b>E</b> 編集 ・ <b>M</b> 遊び方(全部・10語) ・ <b>F</b> タイピング / 4択 / 4択だけ ・ <b>D</b> 向き ・ <b>H</b> 覚えた言葉を出さない ・ <b>V</b> 単語リスト ・ <b>S</b> 共有 ・ <b>I</b> コードで取り込む ・ <b>Delete</b> 削除 ・ <b>1〜9</b> その単語帳をプレイ ・ <b>− +</b> 答えが出るまでの秒数 ・ <b>N</b> 新しい単語帳 ・ <b>Esc</b> タイトルへ</p>
+      <p class="keynav"><b>← → ↑ ↓</b> 本を選ぶ ・ <b>Enter</b> プレイ ・ <b>E</b> 編集 ・ <b>M</b> 遊び方(全部・10語) ・ <b>F</b> タイピング / 4択 ・ <b>D</b> 向き ・ <b>H</b> 覚えた言葉を出さない ・ <b>V</b> 単語リスト ・ <b>S</b> 共有 ・ <b>I</b> コードで取り込む ・ <b>Delete</b> 削除 ・ <b>1〜9</b> その単語帳をプレイ ・ <b>− +</b> 答えが出るまでの秒数 ・ <b>N</b> 新しい単語帳 ・ <b>Esc</b> タイトルへ</p>
       <div class="btn-row">
         <button class="btn primary" id="wbNew">新しい単語帳を作る (N)</button>
         <button class="btn" id="wbImport">コードで取り込む (I)</button>
@@ -3898,11 +3898,11 @@ html:not(.mobile) #screen-garden.haslog:has(.modal.open) #g-toasts{top:14px}
       </div>
       <label class="wb-lbl">遊び方の初期設定(一覧でも変えられ、変えたものが残ります)</label>
       <div class="wb-def">
-        <label>出し方<select id="wbDefStyle"><option value="type">タイピング</option><option value="4">4択</option><option value="4o">4択だけ(打たない)</option></select></label>
+        <label>出し方<select id="wbDefStyle"><option value="type">タイピング</option><option value="4">4択</option></select></label>
         <label>出す数<select id="wbDefMode"><option value="all">全部</option><option value="10">10語</option></select></label>
-        <label>答え・4択が出るまで<input id="wbDefSec" type="number" min="0" max="30" step="1">秒</label>
+        <label>答えが出るまで(タイピング)<input id="wbDefSec" type="number" min="0" max="30" step="1">秒</label>
       </div>
-      <p class="wb-hint">4択は、問題のある言葉が4つ以上(答えがちがうもの)あるときに遊べます。英単語の意味のように、答えを1つに決めて打ちにくい単語帳は「4択」にしておくのがおすすめです。共有するときも、この設定が一緒に届きます</p>
+      <p class="wb-hint">4択は、問題のある言葉が4つ以上(答えがちがうもの)あるときに遊べます。打たずに、すぐ4つの答えから選びます。英単語の意味のように、答えを1つに決めて打ちにくい単語帳や、打てない文字がある外国語の単語帳は「4択」にしておくのがおすすめです。共有するときも、この設定が一緒に届きます</p>
       <label class="wb-lbl" id="wbAddLbl">1語ずつ追加する・直す(1冊 300語まで。下の一覧の言葉を押すと直せます)</label>
       <input id="wbQ" class="wb-in wb-q" maxlength="80" placeholder="問題(なくてもよい。例: 植物が光から栄養を作るはたらき)" autocomplete="off">
       <input id="wbQK" class="wb-in wb-q" maxlength="80" placeholder="問題のよみがな(なくてもよい。問題の下に小さく出ます)" autocomplete="off">
@@ -3911,7 +3911,7 @@ html:not(.mobile) #screen-garden.haslog:has(.modal.open) #g-toasts{top:14px}
         <input id="wbK" class="wb-in" maxlength="60" placeholder="よみがな(例: こうごうせい)" autocomplete="off">
         <button class="btn" id="wbAdd">追加 (Enter)</button>
       </div>
-      <p class="wb-hint">よみがなはひらがなで入れてください(カタカナは自動でひらがなに直します)。言葉がひらがなだけなら、よみがなは空でも大丈夫です。英語の熟語や英文は、よみがなを空白入りのまま書けます(打つときは空白のところだけスペースキー)。問題のある言葉は、よみがなを空にすると打たずに4択だけで出ます(打てない文字がある外国語など)。<br>問題を入れると、遊ぶときは問題が出て、答えとよみがなは決めた秒数(単語帳の一覧で変えられます)たつまで隠れます。答えがよみがなと同じなら、答えは空でも大丈夫です。<br>答えが何通りもあるときは、答えとよみがなを「／」で区切って同じ順に並べると、どれを打っても正解になります(例: 問題／発行する ・ もんだい／はっこうする)</p>
+      <p class="wb-hint">よみがなはひらがなで入れてください(カタカナは自動でひらがなに直します)。言葉がひらがなだけなら、よみがなは空でも大丈夫です。英語の熟語や英文は、よみがなを空白入りのまま書けます(打つときは空白のところだけスペースキー)。問題のある言葉は、よみがなを空にすると4択で遊ぶときだけ出ます(打てない文字がある外国語など)。<br>問題を入れると、遊ぶときは問題が出て、答えとよみがなは決めた秒数(単語帳の一覧で変えられます)たつまで隠れます。答えがよみがなと同じなら、答えは空でも大丈夫です。<br>答えが何通りもあるときは、答えとよみがなを「／」で区切って同じ順に並べると、どれを打っても正解になります(例: 問題／発行する ・ もんだい／はっこうする)</p>
       <p class="wb-note" id="wbNote"></p>
       <ol id="wbWords" class="wb-words"></ol>
       <p class="keynav" id="wbKeys"></p>
@@ -5370,7 +5370,7 @@ function wb4Next(ok,typed,delay){
   setTimeout(()=>{
     wb4Busy=false; if(!running) return;
     wb4Ch=null; $("wordPanel").classList.remove("quiz","wb4");
-    if(remain<=0){ score=wb4Typed*2+wb4Chose; finishTa(); } else pickWord();   // 農園に届くキー: 打てたら2つ、選んで正解なら1つ
+    if(remain<=0){ score=wb4Typed+wb4Chose; finishTa(); } else pickWord();   // 正解1つにつき1つ届く
   },delay);
 }
 function renderNextWord(){
@@ -5827,7 +5827,7 @@ document.addEventListener("keydown",e=>{
   }
   if(!running) return;
   const key=e.key;
-  if(diff==="book" && wb4){   // 単語帳の4択: 4択が出たら 1〜4 で答える。打っているあいだは Enter ですぐ4択
+  if(diff==="book" && wb4){   // 単語帳の4択: 打たずに、1〜4 で答える
     if(wb4Busy) return;
     if(wb4Ch){ if(/^[1-4]$/.test(key)){ e.preventDefault(); wb4Answer(+key-1); } return; }
     if(key==="Enter"){ e.preventDefault(); wb4Open(); return; }
@@ -6494,7 +6494,7 @@ const WB_PRESETS=[
 |麦ごみ麦ごみ三麦ごみ|むぎごみむぎごみみむぎごみ
 |打者走者勝者走者一掃|だしゃそうしゃしょうしゃそうしゃいっそう
 |書写山の社僧正|しょしゃざんのしゃそうじょう`),
-  wbPre("p:german","かんたんドイツ語","ドイツ語の単語を見て、意味を4択で選ぶ(はじめは打たずに選ぶ「4択だけ」。逆向きのタイピングは ä・ö・ü・ß のない言葉だけ)",`
+  wbPre("p:german","かんたんドイツ語","ドイツ語の単語を見て、意味を4択で選ぶ(タイピングにすると意味のよみを打つ。逆向きのタイピングは ä・ö・ü・ß のない言葉だけ)",`
 der Hund|犬|いぬ
 die Katze|猫|ねこ
 das Haus|家|いえ
@@ -6677,7 +6677,7 @@ SMS(ショートメッセージ)で偽のリンクを送り、個人情報を盗
 `)
 ];
 /* おためし単語帳の初期設定: ことわざは長いので4択、難読漢字・県庁所在地・四字熟語はタイピング */
-const WB_PRE_DEF={ "p:nandoku":{ style:"type", sec:5 }, "p:kencho":{ style:"type", sec:5 }, "p:yoji":{ style:"type", sec:8 }, "p:kotowaza":{ style:"4", sec:8 }, "p:hayakuchi":{ style:"type" }, "p:german":{ style:"4o", sec:5 }, "p:genso":{ style:"type", sec:5 }, "p:tsuki":{ style:"type", sec:5 }, "p:rekishi":{ style:"4", sec:8 }, "p:joho":{ style:"4", sec:8 } };
+const WB_PRE_DEF={ "p:nandoku":{ style:"type", sec:5 }, "p:kencho":{ style:"type", sec:5 }, "p:yoji":{ style:"type", sec:8 }, "p:kotowaza":{ style:"4", sec:8 }, "p:hayakuchi":{ style:"type" }, "p:german":{ style:"4", sec:5 }, "p:genso":{ style:"type", sec:5 }, "p:tsuki":{ style:"type", sec:5 }, "p:rekishi":{ style:"4", sec:8 }, "p:joho":{ style:"4", sec:8 } };
 const WB_PRE_VER=2;
 function wbPreLoad(){
   let o={}; try{ o=JSON.parse(localStorage.getItem(WB_PRE_KEY)||"{}")||{}; }catch(e){}
@@ -6702,8 +6702,8 @@ const wbQWords = b => b.words.filter(w=>w.q);
 const wbAnsTxt = w => [w.t, ...(w.a||[]).map(x=>x.t)].join("／");   // 別解もまとめて見せる(4択・一覧)
 const wbCan4 = b => !!b && new Set(wbQWords(b).map(w=>w.t)).size>=4;
 const wbStyle = b => wbCan4(b) && (window.IS_MOBILE || b.style==="4" || b.style==="4o") ? "4" : "type";
-const wb4o = b => wbCan4(b) && b.style==="4o";   // 4択だけ: 打たずに、すぐ4択(打ちにくい文字がある単語帳など)
-const wbStyle3 = b => !wbCan4(b) ? "type" : b.style==="4o" ? "4o" : wbStyle(b);   // スマホは4択だけ
+const wb4o = b => wbStyle(b)==="4";   // 4択は打たずに、すぐ4択(前の「4択だけ」(4o)も4択として扱う)
+const wbStyle3 = wbStyle;   // スマホは4択だけ
 function wbMemCount(b,dir=wbDir(b)){ const qs=dir==="r" ? wbQWords(b).map(wbRevWord) : wbQWords(b); return { all:qs.length, good:qs.filter(w=>wbGood(b,w)).length }; }
 const wbStTxt = (b,w) => { const st=wbSt(b,w); return !st ? "まだ" : st.s>=3 ? "✓ 覚えた" : st.s>0 ? `${st.s}回続けて正解` : "✕ 苦手"; };
 /* 向き・覚えた言葉を出さない の切りかえ(単語帳ごとに残す) */
@@ -6715,7 +6715,7 @@ function wbToggle(i,f){
 }
 function wbSetStyle(i,to){
   const b=wbAll()[i]; if(!wbCan4(b) || window.IS_MOBILE) return;
-  const ord=["type","4","4o"]; b.style = to || ord[(ord.indexOf(wbStyle3(b))+1)%3];   // F: タイピング → 4択 → 4択だけ
+  b.style = to || (wbStyle(b)==="4" ? "type" : "4");   // F: タイピング ⇔ 4択
   if(b.pre) wbPreStore(); else wbStore(); renderBooks();
 }
 function wbPreStore(){
@@ -6798,7 +6798,7 @@ async function wbShare(i){
   for(let n=0;n<6;n++){
     let code=""; for(let j=0;j<6;j++) code+=WB_CODE_CH[Math.floor(Math.random()*WB_CODE_CH.length)];
     try{
-      await db.ref(WB_SHARE_PATH+"/"+code).set({ n:b.name, w:words, t:Date.now(), ...(b.sec!=null?{ sec:wbSec(b) }:{}), ...(b.style==="4"||b.style==="4o"?{ st:b.style }:{}), ...(String(b.mode)==="10"?{ md:"10" }:{}) });
+      await db.ref(WB_SHARE_PATH+"/"+code).set({ n:b.name, w:words, t:Date.now(), ...(b.sec!=null?{ sec:wbSec(b) }:{}), ...(b.style==="4"||b.style==="4o"?{ st:"4" }:{}), ...(String(b.mode)==="10"?{ md:"10" }:{}) });
       b.share=code; b.shareSig=wbShareSig(b); wbStore(); show(code); return;
     }catch(e){ /* 同じコードがもうある(書けない)ときは、別のコードで試す */ }
   }
@@ -6824,7 +6824,7 @@ async function wbImport(){
   }
   if(!words.length){ wbShareMsg("この単語帳には、取り込める言葉がありませんでした"); return; }
   const name=String(v.n||"共有された単語帳").slice(0,20);
-  wbBooks.push({ id:Date.now().toString(36)+Math.random().toString(36).slice(2,6), name, words, best:null, ...(typeof v.sec==="number"?{ sec:Math.max(WB_SEC_MIN,Math.min(WB_SEC_MAX,v.sec|0)) }:{}), ...(v.st==="4"||v.st==="4o"?{ style:v.st }:{}), ...(v.md==="10"?{ mode:"10" }:{}), from:code });
+  wbBooks.push({ id:Date.now().toString(36)+Math.random().toString(36).slice(2,6), name, words, best:null, ...(typeof v.sec==="number"?{ sec:Math.max(WB_SEC_MIN,Math.min(WB_SEC_MAX,v.sec|0)) }:{}), ...(v.st==="4"||v.st==="4o"?{ style:"4" }:{}), ...(v.md==="10"?{ mode:"10" }:{}), from:code });
   if(!wbStore()){ wbBooks.pop(); wbShareMsg("保存できませんでした(ブラウザの保存容量がいっぱいかもしれません)"); return; }
   wbCur=wbBooks.length-1; renderBooks();
   wbShareMsg(`単語帳「${escH(name)}」(${words.length}語)を取り込みました`);
@@ -6847,7 +6847,7 @@ function wbView(i,keep){
   const cnt=k=>k==="all" ? b.words.length : b.words.filter(w=>w.q && cat(w)===k).length;
   $("wbVTabs").innerHTML = can ? cats.map(([k,n])=>`<button class="${wbVCat===k?"on":""}" data-vc="${k}">${n} ${cnt(k)}</button>`).join("") : "";
   const show=b.words.map((w,j)=>[w,j]).filter(([w])=>!can || wbVCat==="all" || (w.q && cat(w)===wbVCat));
-  $("wbVWords").innerHTML=show.length ? show.map(([w,j])=>`<li><span class="no">${j+1}</span><span>${w.q?`<span class="q">${escH(w.q)}</span>`:""}${escH(wbAnsTxt(w))}${w.t2?` / ${escH(w.t2)}`:""}</span><span class="k">${w.k?escH([w.k,...(w.a||[]).map(x=>x.k)].join("／")):"(4択だけ)"}${w.k2?`<br>${escH(w.k2)}`:""}</span><span class="wb-st">${w.q&&can?wbStTxt(b,mw(w)):""}</span></li>`).join("") : '<li class="wb-vnone">この中には、まだありません</li>';
+  $("wbVWords").innerHTML=show.length ? show.map(([w,j])=>`<li><span class="no">${j+1}</span><span>${w.q?`<span class="q">${escH(w.q)}</span>`:""}${escH(wbAnsTxt(w))}${w.t2?` / ${escH(w.t2)}`:""}</span><span class="k">${w.k?escH([w.k,...(w.a||[]).map(x=>x.k)].join("／")):"(4択のときだけ)"}${w.k2?`<br>${escH(w.k2)}`:""}</span><span class="wb-st">${w.q&&can?wbStTxt(b,mw(w)):""}</span></li>`).join("") : '<li class="wb-vnone">この中には、まだありません</li>';
 }
 function openBooks(){
   wbScrCur=null; wbLoad(); wbEdit=null; wbViewI=-1; wbShareMsg("");
@@ -6883,11 +6883,11 @@ function renderBooks(){
       <small>${b.pre?`${escH(b.ds)} ・ `:""}${b.words.length}語${wbStyle(b)==="type"&&wbBestTxt(b)?` ・ ${WB_MODES[wbMode(b)]}のベスト ${wbBestTxt(b)}`:""}</small>
       ${cnt?`<div class="wb-dprog"><span>覚えた ${cnt.good}/${cnt.all}</span><i><b style="width:${cnt.all?Math.round(cnt.good/cnt.all*100):0}%"></b></i></div>`:""}
       <div class="wb-dopts">
-        ${wbCan4(b)&&!window.IS_MOBILE?`<span class="wb-mode">${[["type","タイピング"],["4","4択"],["4o","4択だけ"]].map(([v,n])=>`<button class="${wbStyle3(b)===v?"on":""}" data-style="${v}" title="${v==="4o"?"打たずに、すぐ4択で選ぶ":v==="4"?"打ちはじめて、途中から4択":"答えを打つ"}">${n}</button>`).join("")}<span class="kbdh">F</span></span>`:""}
+        ${wbCan4(b)&&!window.IS_MOBILE?`<span class="wb-mode">${[["type","タイピング"],["4","4択"]].map(([v,n])=>`<button class="${wbStyle(b)===v?"on":""}" data-style="${v}" title="${v==="4"?"打たずに、4つの答えから選ぶ":"答えを打つ"}">${n}</button>`).join("")}<span class="kbdh">F</span></span>`:""}
         ${wbModes(b).length>1?`<span class="wb-mode">${wbModes(b).map(m=>`<button class="${m===wbMode(b)?"on":""}" data-mode="${m}">${WB_MODES[m]}</button>`).join("")}<span class="kbdh">M</span></span>`:""}
         ${wbHasQ(b)?`<span class="wb-mode">${[["f","問題 → 答え"],["r","答え → 問題"]].map(([v,n])=>`<button class="${wbDir(b)===v?"on":""}" data-dir="${v}">${n}</button>`).join("")}<span class="kbdh">D</span></span>`:""}
         ${wbCan4(b)?`<span class="wb-mode"><button class="${b.hideGood?"on":""}" data-hidegood="1">覚えた言葉を出さない</button><span class="kbdh">H</span></span>`:""}
-        ${wbHasQ(b)&&!window.IS_MOBILE&&!wb4o(b)?`<span class="wb-sec">${wbStyle(b)==="4"?"4択になるまで":"答えが出るまで"}<button data-sd="-1" aria-label="1秒短く">−</button><b>${wbSec(b)}</b>秒<button data-sd="1" aria-label="1秒長く">+</button><span class="kbdh">− +</span></span>`:""}
+        ${wbHasQ(b)&&!window.IS_MOBILE&&!wb4o(b)?`<span class="wb-sec">答えが出るまで<button data-sd="-1" aria-label="1秒短く">−</button><b>${wbSec(b)}</b>秒<button data-sd="1" aria-label="1秒長く">+</button><span class="kbdh">− +</span></span>`:""}
       </div>
       <div class="wb-acts">
         <button class="btn primary" data-play="${wbCur}">プレイ <span class="kbdh">Enter</span></button>
@@ -6966,7 +6966,7 @@ function editBook(i){
   wbEdit.orig=JSON.stringify({ name:wbEdit.name, words:wbEdit.words });
   wbWordCur=-1;
   $("wbListView").style.display="none"; $("wbEditor").style.display="";
-  $("wbDefStyle").value = b ? (b.style==="4"||b.style==="4o" ? b.style : "type") : WB_AI_KINDS[wbAiKind].st;   // 新しい単語帳は、AIに頼む形に合わせる $("wbDefMode").value = b && String(b.mode)==="10" ? "10" : "all"; $("wbDefSec").value = b ? wbSec(b) : WB_SEC_DEF;
+  $("wbDefStyle").value = b ? (b.style==="4"||b.style==="4o" ? "4" : "type") : WB_AI_KINDS[wbAiKind].st;   // 新しい単語帳は、AIに頼む形に合わせる $("wbDefMode").value = b && String(b.mode)==="10" ? "10" : "all"; $("wbDefSec").value = b ? wbSec(b) : WB_SEC_DEF;
   wbEditIdx=-1; $("wbAdd").textContent="追加 (Enter)";
   $("wbName").value=wbEdit.name; $("wbQ").value=""; $("wbQK").value=""; $("wbT").value=""; $("wbK").value=""; $("wbBulk").value="";
   $("wbNote").textContent="";
@@ -6978,7 +6978,7 @@ function editBook(i){
 function renderWbWords(){
   const ol=$("wbWords");
   if(wbWordCur>=wbEdit.words.length) wbWordCur=wbEdit.words.length-1;
-  ol.innerHTML=wbEdit.words.map((w,j)=>`<li class="${j===wbWordCur?"cur":""}${j===wbEditIdx?" edit":""}" data-j="${j}" title="押すと直せます"><span class="no">${j+1}</span><span>${w.q?`<span class="q">${escH(w.q)}${w.qk?`(${escH(w.qk)})`:""}</span>`:""}${escH(wbAnsTxt(w))}</span><span class="k">${w.k?escH([w.k,...(w.a||[]).map(x=>x.k)].join("／")):"(4択だけ)"}</span><button class="x" data-x="${j}" title="この言葉を外す">✕</button></li>`).join("");
+  ol.innerHTML=wbEdit.words.map((w,j)=>`<li class="${j===wbWordCur?"cur":""}${j===wbEditIdx?" edit":""}" data-j="${j}" title="押すと直せます"><span class="no">${j+1}</span><span>${w.q?`<span class="q">${escH(w.q)}${w.qk?`(${escH(w.qk)})`:""}</span>`:""}${escH(wbAnsTxt(w))}</span><span class="k">${w.k?escH([w.k,...(w.a||[]).map(x=>x.k)].join("／")):"(4択のときだけ)"}</span><button class="x" data-x="${j}" title="この言葉を外す">✕</button></li>`).join("");
   const cur=ol.querySelector("li.cur"); if(cur && cur.scrollIntoView) cur.scrollIntoView({block:"nearest"});
 }
 /* 編集をやめる(変えたところがあれば確かめる) */
@@ -7001,7 +7001,7 @@ function wbAddOne(t,k,q,qk){
   return "";
 }
 let wbNoK=0;   // 打てない(よみがなのない)ので4択だけで出す言葉の数(追加したとき知らせる)
-const WB_NOK_TXT="よみがながない言葉や、打てない文字(ä・é など)がある言葉は、打たずに4択だけで出します";
+const WB_NOK_TXT="よみがながない言葉や、打てない文字(ä・é など)がある言葉は、4択で遊ぶときだけ出ます";
 let wbEditIdx=-1;   // 直している言葉(一覧の番号)。追加のときは -1
 function wbEditWord(j){
   const w=wbEdit && wbEdit.words[j]; if(!w) return;
@@ -7048,7 +7048,7 @@ function wbBulkAdd(){
   renderWbWords();
   const same=lines.map(wbSplitLine).filter(c=>c.length===2 && c[0] && c[0].toLowerCase().replace(/[^a-z0-9]/g,"")===String(c[1]||"").toLowerCase().replace(/[^a-z0-9]/g,"") && /[a-z]/i.test(c[0])).length;
   const warn = same>=3 && same>=lines.length*.5 ? " ・ 英字をそのまま打つだけの行が多いようです。英単語の意味で覚えたいときは、AIに頼む文章の形を「英語・外国語の単語と意味」にして、AIに頼み直してください" : "";
-  $("wbNote").textContent = `${ok}語を追加しました${warn}`+(wbNoK?` ・ そのうち${wbNoK}語は、よみがながないか打てない文字があるので、打たずに4択だけで出します`:"")+(errs.length?` ・ 追加できなかった行が ${errs.length}行あります(欄に残しました): ${errs.slice(0,3).join(" / ")}${errs.length>3?" ほか":""}`:"");
+  $("wbNote").textContent = `${ok}語を追加しました${warn}`+(wbNoK?` ・ そのうち${wbNoK}語は、よみがながないか打てない文字があるので、4択で遊ぶときだけ出ます`:"")+(errs.length?` ・ 追加できなかった行が ${errs.length}行あります(欄に残しました): ${errs.slice(0,3).join(" / ")}${errs.length>3?" ほか":""}`:"");
   $("wbBulk").value=bad.join("\n");   // 追加できなかった行だけ残して、直せるようにする
 }
 /* AIに頼む文章: 作りたい単語帳の形を選ぶと、それに合わせた頼み方になる(英単語の一覧だけを渡すと、英単語をそのまま打つ行になりがちなので) */
@@ -7099,7 +7099,7 @@ ${x.how}
 よみがなのきまり:
 ・ひらがなか、英字(小文字)と数字だけで書く。カタカナ・漢字・かっこは使わない
 ・空白は、英語の熟語や英文の単語の間にだけ入れてよい(打つときもスペースキーで打ちます)
-・よみがなに、英字で書けない文字(ä・ö・ü・ß・é などや、漢字のままの言葉)が残るときは、そのよみがなを空にする(その言葉は打たずに4択で出ます)
+・よみがなに、英字で書けない文字(ä・ö・ü・ß・é などや、漢字のままの言葉)が残るときは、そのよみがなを空にする(その言葉は4択で遊ぶときだけ出ます)
 ・のばす音は「ー」。句読点「、」「。」や「！」「？」は使ってよい
 
 そのほか:
@@ -7127,7 +7127,7 @@ function wbSaveBook(){
   const name=$("wbName").value.trim();
   if(!name){ $("wbNote").textContent="単語帳の名前を入れてください"; $("wbName").focus(); return; }
   if(!wbEdit.words.length){ $("wbNote").textContent="言葉を1つ以上入れてください"; $("wbT").focus(); return; }
-  const def={ style:["4","4o"].includes($("wbDefStyle").value)?$("wbDefStyle").value:"type", mode:$("wbDefMode").value==="10"?"10":"all", sec:(v=>Number.isFinite(v)?Math.max(WB_SEC_MIN,Math.min(WB_SEC_MAX,Math.round(v))):WB_SEC_DEF)($("wbDefSec").value===""?NaN:+$("wbDefSec").value) };   // 遊び方の初期設定
+  const def={ style:$("wbDefStyle").value==="4"?"4":"type", mode:$("wbDefMode").value==="10"?"10":"all", sec:(v=>Number.isFinite(v)?Math.max(WB_SEC_MIN,Math.min(WB_SEC_MAX,Math.round(v))):WB_SEC_DEF)($("wbDefSec").value===""?NaN:+$("wbDefSec").value) };   // 遊び方の初期設定
   if(wbEdit.i>=0){
     const b=wbBooks[wbEdit.i];
     const changed=JSON.stringify(b.words)!==JSON.stringify(wbEdit.words);
@@ -7280,7 +7280,7 @@ function endBook4(){
   $("resultCaption").textContent="正解";
   $("resultScore").textContent=`${right}/${wb4Ans}`;
   $("resultUnit").textContent="問";
-  $("resultSubLine").textContent=`打てた ${wb4Typed} ・ 選んで正解 ${wb4Chose} ・ はずれ ${wb4Wrong} / 覚えた ${c.good}/${c.all}${wb4New?`(今回 +${wb4New})`:""} / ${elapsed.toFixed(1)}秒`;
+  $("resultSubLine").textContent=`正解 ${right} ・ はずれ ${wb4Wrong} / 覚えた ${c.good}/${c.all}${wb4New?`(今回 +${wb4New})`:""} / ${elapsed.toFixed(1)}秒`;
   wbReveal();
   $("resultNew").textContent = wb4New ? `★ ${wb4New}語 覚えた! ★` : "";
   const wl=wb4WrongList.length, wbb=$("wbWrongBtn"); wbb.hidden=!wl; wbb.textContent=`まちがえた${wl}語だけ (W)`;
