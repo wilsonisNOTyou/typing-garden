@@ -344,6 +344,12 @@ html.mobile .tq-lv small{font-size:.68rem}
 .tq-hud{align-items:center}
 .btn.tq-quit,.game-esc .btn{font-size:.8rem; padding:.2rem .7rem; min-height:0}
 .game-esc{text-align:center; margin:.8rem 0 0}
+.game-esc #wbPeekBtn{font-size:.95rem; font-weight:700; padding:.45rem 1.2rem; margin-right:.6rem; color:#1b1405; background:linear-gradient(180deg,#ffe08a,var(--amber)); border:2px solid #c79100; border-radius:999px; box-shadow:0 3px 0 #8a6400, 0 0 14px rgba(242,193,78,.45); animation:wbPeekGlow 1.6s ease-in-out infinite}   /* 答えを見る・すぐ4択にする: 押せるボタンだとわかるように */
+.game-esc #wbPeekBtn:hover{filter:brightness(1.08)}
+.game-esc #wbPeekBtn:active{transform:translateY(2px); box-shadow:0 1px 0 #8a6400}
+.game-esc #wbPeekBtn .kbdh{background:rgba(27,20,5,.18); color:#1b1405; border-color:rgba(27,20,5,.35)}
+@keyframes wbPeekGlow{50%{box-shadow:0 3px 0 #8a6400, 0 0 22px rgba(242,193,78,.75)}}
+@media (prefers-reduced-motion:reduce){ .game-esc #wbPeekBtn{animation:none} }
 .btn.tq-exb{font-size:.75rem; padding:.1rem .55rem; min-height:0; justify-self:end; align-self:center}
 .tq-ex{grid-column:1/-1; margin:.1rem 0 .3rem; padding:.45rem .7rem; border-left:3px solid var(--amber); background:rgba(255,255,255,.04); border-radius:4px; font-family:Georgia,'Times New Roman',serif; color:#e8e4da; font-size:.92rem; line-height:1.5}
 .tq-ex b{color:var(--amber)}
