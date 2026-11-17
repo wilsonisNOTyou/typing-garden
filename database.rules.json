@@ -150,6 +150,12 @@
               }
             }
           },
+          "st": {
+            ".validate": "newData.val() === '4'"
+          },
+          "md": {
+            ".validate": "newData.val() === '10'"
+          },
           "$other": {
             ".validate": false
           }
