@@ -1574,6 +1574,7 @@ html.mobile .word-panel.wb4 #romaji .bq{padding:.55rem .8rem; text-align:left}
 .wb-steps li{margin-bottom:.45rem}
 .wb-steps li b{color:var(--amber); font-weight:400}
 .wb-steps .btn{margin-top:.3rem; padding:.35rem .8rem; font-size:.85rem}
+.wb-aikind{font-family:inherit; font-size:.85rem; color:var(--ink); background:#0f1511; border:1px solid var(--line); border-radius:5px; padding:.25rem .4rem; margin-top:.3rem; max-width:100%}
 .wb-bulk > summary{color:var(--amber)}
 .wb-def{display:flex; flex-wrap:wrap; gap:.4rem 1.2rem; color:var(--steel); font-size:.88rem; align-items:center}
 .wb-def select, .wb-def input{font-family:inherit; font-size:.9rem; color:var(--ink); background:#0f1511; border:1px solid var(--line); border-radius:5px; padding:.2rem .4rem; margin-left:.3rem}
@@ -3877,7 +3878,7 @@ html:not(.mobile) #screen-garden.haslog:has(.modal.open) #g-toasts{top:14px}
         <summary>まとめて追加する(AIで作るのがおすすめ)</summary>
         <ol class="wb-steps">
           <li><b>覚えたい内容を用意する</b><br>教科書や参考書のまとめ、用語集、単語リスト、プリントの文字など。コピーできる文字にしておきます</li>
-          <li><b>AIに変換してもらう</b><br>下のボタンで頼む文章をコピーし、ChatGPT や Claude などのAIに貼ります。その下に①の内容を貼って送ります<br><button class="btn" id="wbAiCopy">AIに頼む文章をコピー</button></li>
+          <li><b>AIに変換してもらう</b><br>作りたい単語帳の形を選んでから、頼む文章をコピーして ChatGPT や Claude などのAIに貼ります。その下に①の内容を貼って送ります<br><select id="wbAiKind" class="wb-aikind"></select><br><button class="btn" id="wbAiCopy">AIに頼む文章をコピー</button></li>
           <li><b>返ってきた行を貼る</b><br>AIの返事(「問題|答え|よみがな」の行)をそのまま下の欄に貼り、「まとめて追加」を押します</li>
         </ol>
         <textarea id="wbBulk" class="wb-in" rows="6" placeholder="ここにAIの返事を貼ります。例:&#10;植物が光から栄養を作るはたらき|光合成|こうごうせい&#10;細胞|さいぼう"></textarea>
@@ -6458,9 +6459,11 @@ const WB_PRESETS=[
 ];
 /* おためし単語帳の初期設定: ことわざは長いので4択、難読漢字・県庁所在地・四字熟語はタイピング */
 const WB_PRE_DEF={ "p:nandoku":{ style:"type", sec:5 }, "p:kencho":{ style:"type", sec:5 }, "p:yoji":{ style:"type", sec:8 }, "p:kotowaza":{ style:"4", sec:8 }, "p:hayakuchi":{ style:"type" } };
+const WB_PRE_VER=2;
 function wbPreLoad(){
   let o={}; try{ o=JSON.parse(localStorage.getItem(WB_PRE_KEY)||"{}")||{}; }catch(e){}
-  for(const b of WB_PRESETS){ const v=o[b.id]||{}, d=WB_PRE_DEF[b.id]||{}; b.bests=v.bests&&typeof v.bests==="object"?v.bests:{}; b.sec=v.sec??d.sec; b.mode=v.mode; b.style=v.style??d.style; }
+  const fresh=o.__v!==WB_PRE_VER;   // 初期設定ができる前に保存した、出し方・秒数は使わない(初期設定を入れるため)
+  for(const b of WB_PRESETS){ const v=o[b.id]||{}, d=WB_PRE_DEF[b.id]||{}; b.bests=v.bests&&typeof v.bests==="object"?v.bests:{}; b.sec=fresh?d.sec:v.sec??d.sec; b.mode=v.mode; b.style=fresh?d.style:v.style??d.style; }
 }
 /* 4択: 問題のある言葉が4つ以上(答えがちがうもの)あれば、同じ単語帳の答えから4択を作れる。
    正解・まちがいは4択のときだけ記録し、3回続けて正解で「覚えた」(TOEIC と同じ) */
@@ -6488,7 +6491,7 @@ function wbSetStyle(i){
   if(b.pre) wbPreStore(); else wbStore(); renderBooks();
 }
 function wbPreStore(){
-  const o={}; for(const b of WB_PRESETS) o[b.id]={ bests:b.bests, sec:b.sec, mode:b.mode, style:b.style };
+  const o={ __v:WB_PRE_VER }; for(const b of WB_PRESETS) o[b.id]={ bests:b.bests, sec:b.sec, mode:b.mode, style:b.style };
   try{ localStorage.setItem(WB_PRE_KEY,JSON.stringify(o)); return true; }catch(e){ return false; }
 }
 const wbAll = () => wbBooks.concat(WB_PRESETS);   // 一覧の並び: 自分の単語帳 → おためし単語帳
@@ -6750,35 +6753,71 @@ function wbBulkAdd(){
     if(err){ errs.push(`${n+1}行目: ${err}`); bad.push(l); } else ok++;
   });
   renderWbWords();
-  $("wbNote").textContent = `${ok}語を追加しました`+(errs.length?` ・ 追加できなかった行が ${errs.length}行あります(欄に残しました): ${errs.slice(0,3).join(" / ")}${errs.length>3?" ほか":""}`:"");
+  const same=lines.map(wbSplitLine).filter(c=>c.length===2 && c[0] && c[0].toLowerCase().replace(/[^a-z0-9]/g,"")===String(c[1]||"").toLowerCase().replace(/[^a-z0-9]/g,"") && /[a-z]/i.test(c[0])).length;
+  const warn = same>=3 && same>=lines.length*.5 ? " ・ 英字をそのまま打つだけの行が多いようです。英単語の意味で覚えたいときは、AIに頼む文章の形を「英単語 → 意味」か「意味 → 英単語」にして、AIに頼み直してください" : "";
+  $("wbNote").textContent = `${ok}語を追加しました${warn}`+(errs.length?` ・ 追加できなかった行が ${errs.length}行あります(欄に残しました): ${errs.slice(0,3).join(" / ")}${errs.length>3?" ほか":""}`:"");
   $("wbBulk").value=bad.join("\n");   // 追加できなかった行だけ残して、直せるようにする
 }
-const WB_AI_PROMPT=`次の内容を、タイピング練習用の単語帳に取り込める形に変換してください。
+/* AIに頼む文章: 作りたい単語帳の形を選ぶと、それに合わせた頼み方になる(英単語の一覧だけを渡すと、英単語をそのまま打つ行になりがちなので) */
+const WB_AI_KINDS={
+  en2ja:{ nm:"英単語 → 意味(英単語を見て意味を答える。4択向き)", st:"4",
+    how:`・問題: 英単語(もとの表記のまま)
+・答え: その英単語の日本語の意味(短く。資料に意味が書いていなければ、その分野でのふつうの意味を補う)
+・答えのよみがな: 意味のよみ(ひらがな)
+・意味がいくつもあるときは、答えとよみがなを全角の「／」で区切って同じ順に並べる(4つまで)`,
+    ex:`issue|問題／発行する|もんだい／はっこうする
+database|データベース|でーたべーす` },
+  ja2en:{ nm:"意味 → 英単語(意味を見て英単語を打つ。タイピング向き)", st:"type",
+    how:`・問題: 英単語の日本語の意味(短く。資料に意味が書いていなければ、その分野でのふつうの意味を補う)
+・答え: 英単語(もとの表記のまま)
+・答えのよみがな: 打つための英字。英単語を小文字にして、空白・かっこ・記号を取ったもの(例: Virtual Reality (VR) → virtualreality)`,
+    ex:`発行する|issue|issue
+仮想現実|Virtual Reality (VR)|virtualreality` },
+  term:{ nm:"用語と説明(説明を見て用語を打つ)", st:"type",
+    how:`・問題: 用語の説明(1文、50字くらいまで。答えの用語そのものは書かない)
+・答え: 用語
+・答えのよみがな: 用語のよみ(ひらがな。英語の用語は英字を小文字で)
+・問題のよみがな: 説明に難しい漢字があるときだけ書く(なくてもよい)`,
+    ex:`植物が光から栄養を作るはたらき|光合成|こうごうせい` },
+  yomi:{ nm:"漢字 → よみ(漢字を見てよみを打つ)", st:"type",
+    how:`・問題: 漢字の言葉
+・答え: 空のままにする(よみがなが答えになる)
+・答えのよみがな: よみ(ひらがな)`,
+    ex:`紫陽花||あじさい` },
+  plain:{ nm:"そのまま打つ(問題なし。見た言葉を打つ練習)", st:"type",
+    how:`・言葉|よみがな の2つだけを書く(問題は書かない)`,
+    ex:`生麦生米生卵|なまむぎなまごめなまたまご` },
+};
+let wbAiKind="en2ja";
+const wbAiPrompt = (k=wbAiKind) => { const x=WB_AI_KINDS[k]||WB_AI_KINDS.en2ja; return `次の内容を、タイピング練習用の単語帳に取り込める形に変換してください。
+作りたい単語帳: ${x.nm.replace(/[(（].*$/,"")}
 
 形式:
-・1行に1語。区切りは半角の縦棒「|」
-・問題と答えがあるもの: 問題|答え|答えのよみがな|問題のよみがな
-・問題がないもの(言葉を見て打つだけ): 言葉|よみがな
-・問題のよみがなは、問題に難しい漢字があるときだけ書く(なくてもよい)
+・1行に1語。区切りは半角の縦棒「|」。並びは「問題|答え|答えのよみがな|問題のよみがな」
+${x.how}
 
 よみがなのきまり:
-・ひらがなだけで書く(カタカナ・漢字・空白は使わない)
-・のばす音は「ー」、英字と数字はそのまま書いてよい
-・答えが英語(英単語など)のときは、よみがなの欄にも英語をそのまま書く(打つのは英字)
+・ひらがなか、英字(小文字)と数字だけで書く。カタカナ・漢字・空白・かっこは使わない
+・のばす音は「ー」。句読点「、」「。」や「！」「？」は使ってよい
 
-答えが何通りもあるとき(英単語の意味がいくつもある など):
-・答えとよみがなを、全角の「／」で区切って同じ順に並べる。どれを打っても正解になる(4つまで)
-・例: issue|問題／発行する|もんだい／はっこうする
-・句読点「、」「。」や「！」「？」は使ってよい
+そのほか:
+・表の番号や単元(Units など)の列、見出しなど、言葉でないものは使わない
+・同じ言葉は1回だけ
+・返事は変換した行だけにして、見出し・説明・番号・コードの囲みは付けないでください
 
-返事は変換した行だけにして、見出し・説明・番号は付けないでください。
+例:
+${x.ex}
 
 変換する内容:
-`;
+`; };
+function wbAiSetKind(k){
+  if(!WB_AI_KINDS[k]) return; wbAiKind=k; $("wbAiKind").value=k; $("wbAiText").value=wbAiPrompt();
+  if(wbEdit && wbEdit.i<0) $("wbDefStyle").value=WB_AI_KINDS[k].st;   // 新しい単語帳なら、遊び方の初期設定も合わせる
+}
 function wbAiCopy(){
-  const ta=$("wbAiText"); ta.value=WB_AI_PROMPT;
-  const done=ok=>{ $("wbNote").textContent = ok ? "AIに頼む文章をコピーしました。AIに貼って、最後に変換したい内容を足して送ってください" : "コピーできませんでした。下の文章を選んでコピーしてください"; if(!ok){ $("wbEditor").querySelector(".wb-ai").open=true; ta.focus(); ta.select(); } };
-  try{ navigator.clipboard.writeText(WB_AI_PROMPT).then(()=>done(true),()=>done(false)); }catch(e){ done(false); }
+  const ta=$("wbAiText"), txt=wbAiPrompt(); ta.value=txt;
+  const done=ok=>{ $("wbNote").textContent = ok ? "AIに頼む文章をコピーしました。AIに貼って、その下に変換したい内容を貼って送ってください" : "コピーできませんでした。下の文章を選んでコピーしてください"; if(!ok){ $("wbEditor").querySelector(".wb-ai").open=true; ta.focus(); ta.select(); } };
+  try{ navigator.clipboard.writeText(txt).then(()=>done(true),()=>done(false)); }catch(e){ done(false); }
 }
 function wbSaveBook(){
   if(!wbEdit) return;
@@ -6883,7 +6922,9 @@ $("wbVPlay").addEventListener("click",()=>playBook(wbViewI));
 $("wbImport").addEventListener("click",()=>wbImport());
 $("wbVBack").addEventListener("click",()=>openBooks());
 $("wbAiCopy").addEventListener("click",wbAiCopy);
-$("wbAiText").value=WB_AI_PROMPT;
+$("wbAiKind").innerHTML=Object.entries(WB_AI_KINDS).map(([k,x])=>`<option value="${k}">${escH(x.nm)}</option>`).join("");
+$("wbAiKind").addEventListener("change",e=>wbAiSetKind(e.target.value));
+$("wbAiText").value=wbAiPrompt();
 $("wbSave").addEventListener("click",wbSaveBook);
 $("wbCancel").addEventListener("click",wbCancelEdit);
 /* プレイ: 単語帳の言葉を全部、順番を混ぜて出す */
