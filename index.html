@@ -1551,6 +1551,8 @@ html.mobile .wb-detail{position:static}
 .wb-share-note .btn{padding:.2rem .6rem; font-size:.8rem}
 .wb-vname{color:var(--amber); font-weight:400; margin:.2rem 0}
 .wb-vwords{max-height:55vh}
+.wb-mnote{margin:.4rem 0 0; font-size:.8rem; color:var(--amber); line-height:1.5}
+.wb-acts .btn.wb-off{opacity:.45}
 .wb-vtabs{margin:.4rem 0; flex-wrap:wrap}
 .wb-vnone{color:var(--steel); justify-content:center; display:block!important; text-align:center}
 .wb-vwords li{grid-template-columns:2.4em 1fr 1fr auto}
@@ -3887,7 +3889,7 @@ html:not(.mobile) #screen-garden.haslog:has(.modal.open) #g-toasts{top:14px}
         <ol class="wb-steps">
           <li><b>覚えたい内容を用意する</b><br>教科書や参考書のまとめ、用語集、単語リスト、プリントの文字など。コピーできる文字にしておきます</li>
           <li><b>AIに変換してもらう</b><br>作りたい単語帳の形を選んでから、頼む文章をコピーして ChatGPT や Claude などのAIに貼ります。その下に①の内容を貼って送ります<br><select id="wbAiKind" class="wb-aikind"></select><br><button class="btn" id="wbAiCopy">AIに頼む文章をコピー</button></li>
-          <li><b>返ってきた行を貼る</b><br>AIの返事(「問題|答え|よみがな」の行)をそのまま下の欄に貼り、「まとめて追加」を押します</li>
+          <li><b>返ってきた行を貼る</b><br>AIの返事(「問題|答え|よみがな」の行)を、コードブロックのコピーボタンでコピーして下の欄に貼り、「まとめて追加」を押します</li>
         </ol>
         <textarea id="wbBulk" class="wb-in" rows="6" placeholder="ここにAIの返事を貼ります。例:&#10;植物が光から栄養を作るはたらき|光合成|こうごうせい&#10;細胞|さいぼう"></textarea>
         <div class="btn-row" style="margin-top:.4rem"><button class="btn primary" id="wbBulkAdd">まとめて追加</button></div>
@@ -5875,7 +5877,7 @@ document.addEventListener("keydown",e=>{
     if(r==="done"){
       if(mtOn()) mtWordDone(); else { score++; sndDone(); }   // 対戦: 金・2倍・おじゃま・連鎖・アイテム
       removeScrew();
-      if(diff==="book" && currentWord && currentWord.q && wbHideT) wbNoPeek++;   // 答えが出る前に打てた
+      if(diff==="book" && currentWord && currentWord.q && wbHideT){ wbNoPeek++; if(wbCan4(bookPlay) && wbMark(bookPlay,currentWord,true).s===3) wb4New++; }   // 答えが出る前に打てた: 「覚えた」の正解に数える(答えを見たときは数えない)
       if(currentWord && currentWord.bara) baraPetalRain();   // バラバラの薔薇(辞典には載せない)
       else if(diff!=="book" && currentWord && !currentWord.oj) unlockWord((currentWord.orig||currentWord).k);   // 単語帳の言葉は辞典に載せない(逆さまの言葉は、もとの言葉で載せる)
       if(isQ(diff)){
@@ -6839,7 +6841,7 @@ function wbView(i,keep){
   $("wbListView").style.display="none"; $("wbEditor").style.display="none"; $("wbViewer").style.display="";
   $("wbVName").textContent=b.name;
   const c=wbMemCount(b), can0=wbCan4(b);
-  $("wbVSum").textContent = `${b.words.length}語`+(can0 ? ` ・ 4択で覚えた ${c.good}/${c.all}(正解・まちがいは4択で遊んだときだけ記録します。3回続けて正解で「覚えた」、まちがえると数え直し)` : " ・ 問題のある言葉が4つ以上あると、4択で遊べて、覚えぐあいがここに出ます");
+  $("wbVSum").textContent = `${b.words.length}語`+(can0 ? ` ・ 4択で覚えた ${c.good}/${c.all}(4択の正解・まちがいと、タイピングで答えを見ずに打てたときを記録します。3回続けて正解で「覚えた」、4択でまちがえると数え直し)` : " ・ 問題のある言葉が4つ以上あると、4択で遊べて、覚えぐあいがここに出ます");
   const rv=wbDir(b)==="r", mw=w=>rv ? wbRevWord(w) : w;   // 逆向きのときは、逆向きの記録を見せる
   if(can0 && rv) $("wbVSum").textContent+=" ・ いまは「答え → 問題」の記録です";
   const can=can0, cat=w=>{ const st=wbSt(b,mw(w)); return !st ? "new" : st.s>=3 ? "good" : st.s===0 ? "weak" : "learn"; };
@@ -6889,8 +6891,9 @@ function renderBooks(){
         ${wbCan4(b)?`<span class="wb-mode"><button class="${b.hideGood?"on":""}" data-hidegood="1">覚えた言葉を出さない</button><span class="kbdh">H</span></span>`:""}
         ${wbHasQ(b)&&!window.IS_MOBILE&&!wb4o(b)?`<span class="wb-sec">答えが出るまで<button data-sd="-1" aria-label="1秒短く">−</button><b>${wbSec(b)}</b>秒<button data-sd="1" aria-label="1秒長く">+</button><span class="kbdh">− +</span></span>`:""}
       </div>
+      ${window.IS_MOBILE&&!wbCan4(b)?`<p class="wb-mnote">${wbHasQ(b)?"この単語帳は、答えのちがう問題が4つ以上ないので4択にできず、":"この単語帳は問題がなく、見て打つだけなので、"}タイピングで遊びます。タイピングはパソコンで遊べます(スマホでは、問題のある言葉が4つ以上ある単語帳を4択で遊べます)</p>`:""}
       <div class="wb-acts">
-        <button class="btn primary" data-play="${wbCur}">プレイ <span class="kbdh">Enter</span></button>
+        <button class="btn primary${window.IS_MOBILE&&!wbCan4(b)?" wb-off":""}" data-play="${wbCur}">プレイ <span class="kbdh">Enter</span></button>
         <button class="btn" data-view="${wbCur}">単語リスト <span class="kbdh">V</span></button>
         ${b.pre?"":`<button class="btn" data-edit="${wbCur}">編集 <span class="kbdh">E</span></button>
         <button class="btn" data-share="${wbCur}">共有 <span class="kbdh">S</span></button>
@@ -7042,6 +7045,7 @@ function wbBulkAdd(){
   let ok=0; const errs=[], bad=[]; wbNoK=0;
   lines.forEach((l,n)=>{
     const c=wbSplitLine(l); if(!c.join("")) return;
+    if(l.split("|").length>5){ errs.push(`${n+1}行目: 1行に何語も続いています(改行が消えています)。AIの返事は、コードブロックのコピーボタンでコピーして貼ってください`); bad.push(l); return; }
     const err = c.length>=3 ? wbAddOne(c[1],c[2],c[0],c[3]||"") : wbAddOne(c[0],c[1]||"");   // 3つ以上なら「問題|答え|よみがな|問題のよみがな」
     if(err){ errs.push(`${n+1}行目: ${err}`); bad.push(l); } else ok++;
   });
@@ -7106,7 +7110,7 @@ ${x.how}
 ・表の番号や単元(Units など)の列、見出しなど、言葉でないものは使わない
 ・同じ言葉は1回だけ
 ・1冊 300語まで。多いときは300語ずつに分けて返す
-・返事は変換した行だけにして、見出し・説明・番号・コードの囲みは付けないでください
+・返事は、変換した行だけを「\`\`\`」で囲んだコードブロック1つに入れてください(見出し・説明・番号は付けない。1語ごとに必ず改行する)
 
 例:
 ${x.ex}
@@ -7307,7 +7311,7 @@ function endBookGame(){
   $("resultUnit").textContent="秒";
   $("resultSubLine").textContent=`ミス ${miss}回 / ${WB_MODES[m]}のベスト ${bestTxt||"--"}`+(wbQN?` / 答えを見ずに打てた ${wbNoPeek}/${wbQN}問`:"");
   wbReveal();
-  $("resultNew").textContent=isNew?"★ ベスト更新! ★":"";
+  $("resultNew").textContent=[isNew?"★ ベスト更新! ★":"", wb4New?`★ ${wb4New}語 覚えた! ★`:""].filter(Boolean).join(" ");
   $("registerBox").style.display="none";   // 単語帳はランキングに載せない
   $("resultKeys").innerHTML='<b>Enter</b> もう一回 ・ <b>Esc</b> 単語帳へ ・ <b>G</b> 農園へ';
   $("titleBtn").textContent="単語帳へ (Esc)";
