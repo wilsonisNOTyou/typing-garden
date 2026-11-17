@@ -5838,7 +5838,7 @@ document.addEventListener("keydown",e=>{
   if(key===" " && mtOn()){ e.preventDefault(); mtUseItem(); return; }   // 対戦: アイテムを使う
   if(key==="Process" || e.isComposing){ imeWarn(); return; }
   if(key===" " && diff==="book"){ e.preventDefault(); if(!wbWantsSpace()) return; }   // 単語帳: 空白を打つところでだけ、スペースキーを受け付ける
-  else if(!/^[a-zA-Z0-9\-'!?,.~\/%&]$/.test(key)) return;
+  else if(!/^[a-zA-Z0-9\-'!?,.~\/%&":;]$/.test(key) || (/^[":;]$/.test(key) && diff!=="book")) return;   // " : ; は単語帳だけ
   e.preventDefault();
   const r = baraQ ? baraAns(key) : wbCands ? wbKey(key) : handleKey(key);
   if(r==="skip") return;
@@ -6753,7 +6753,7 @@ function wbNormKana(v){
 function wbBadChars(k){
   const bad=new Set();
   for(const ch of Array.from(k)){          // 絵文字なども1文字として見る
-    if(/^[a-z0-9\-'!?,.~\/%& ]$/.test(ch)) continue;
+    if(/^[a-z0-9\-'!?,.~\/%&":; ]$/.test(ch)) continue;
     const c=tokenize(ch);
     if(c.length!==1 || c[0].literal) bad.add(ch);
   }
@@ -6763,7 +6763,8 @@ function wbBadChars(k){
 /* 別解: 答えとよみがなを「／」(または /)で区切って並べると、どれを打っても正解。1つめがふつうの答え、2つめから別解(4つまで) */
 const WB_ALT_MAX=4;
 function wbCheckWord(t,k,q,qk){
-  const ts=String(t||"").split(/[／\/]/).map(x=>x.trim()).filter(Boolean), ks=String(k||"").split(/[／\/]/).map(x=>x.trim());
+  let ts=String(t||"").split(/[／\/]/).map(x=>x.trim()).filter(Boolean); const ks=String(k||"").split(/[／\/]/).map(x=>x.trim());
+  if(!ts.length && ks.filter(Boolean).length>1) ts=ks.filter(Boolean);   // 答えが空で、よみが2つ以上(今日||きょう／こんにち): よみがそのまま答え
   if(ts.length>1 || ks.filter(Boolean).length>1){
     if(ks.filter(Boolean).length>1 && ks.length!==ts.length) return {err:`「${ts[0]||""}」の答えとよみがなの数が合いません(「／」で区切った数をそろえてください)`};
     const all=ts.slice(0,WB_ALT_MAX+1).map((x,i)=>wbCheckWord(x, ks[i]||"", q, qk));
