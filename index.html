@@ -3337,7 +3337,7 @@ html:not(.mobile) #screen-garden.haslog:has(.modal.open) #g-toasts{top:14px}
       <div class="tq-lsum" id="tqLSum"></div>
       <div class="tq-lbody" id="tqLBody"></div>
       <p class="tq-sub" id="tqLHint"></p>
-      <div class="btn-row" style="margin-top:.8rem"><button class="btn" id="tqListBack">戻る <span class="kbdh">Esc</span></button></div>
+      <div class="btn-row" style="margin-top:.8rem"><button class="btn" id="tqListBack">戻る <span class="kbdh">Esc</span></button><button class="btn tq-lclear" id="tqLClear">記録を消す <span class="kbdh">Del</span></button></div>
     </div>
   </section>
 
@@ -6249,6 +6249,7 @@ const NEWS=[
   { d:"2026-11-18", t:"TOEIC", items:[
     "4択と逆4択の「覚えた」「苦手」の記録を、別々に数えるようにしました。これまでの記録は、4択と逆4択の両方に引き継いでいます",
     "単語リストで、4択・逆4択・穴埋めの記録を切りかえて見られるようになりました(F キーでも切りかえられます)",
+    "単語リストから、レベルと形式(4択・逆4択・穴埋め)ごとに記録を消せるようになりました。消す前に必ず確認が出ます(Delete キーでも開けます)",
   ]},
   { d:"2026-11-16", t:"自動売却と村人の売り方", items:[
     "お店の自動売却で、作物ごとに「変異」もオンオフできるようになりました。オンにすると、その作物の変異・超変異も収穫したその場で売ります。はじめはオフです",
@@ -17018,7 +17019,7 @@ function debugStart2(){
   save();
 }
 function alive(){ if(kitN("fridge")>0){ fridgeKeep(); save(); } }
-return { fmtNum, numStr, fxInfo:()=>({ kyo:!!(S.goals && S.goals.kei), bara:baraSeen() }), yzPress:()=>yzPress(false), yzBtn:()=>({ on:yzHas("button"), gain:yzBtnGain(), auto:yzv("izumi") }), peek:()=>{ consumeInbox(); tick(); return tutState(); }, roseName:roseNameHTML, roseNamePlate, roseRowStyle, roseRowCls, nameDeco, drunkNow, tqBoost:()=>({ rose:(1+rgGurPct("sh")/100)*otsuMul("Z2"), sc:1+rgGurPct("pen")/100, min:1+rgGurPct("dial")/100 }), rose:(lv,n)=>{ roseGive(lv,n); S.roseIn=(S.roseIn||0)+Math.floor(n); save(); }, screwMul, charmLives, applyTheme, alive, themeScrewArt, enter, leave, onKey, summary, dailyGive, dailyNeji, dailySapLeft, dailyOpen, btOpen, mtGive, mtInfoSeen:()=>!!S.mtInfoSeen, mtInfoMark:()=>{ S.mtInfoSeen=true; save(); }, dbInfoSeen:()=>!!S.dbInfoSeen, dbInfoMark:()=>{ S.dbInfoSeen=true; save(); }, debugUnlock, debugStart2, tutState, tutGive, tutGrow, tutSeed, tutSandbox, refreshRank, openModal, ownerId, useName, baraOn, baraLeft, baraSeen, debugStart5, debugStart6, debugStart3, debugStart4, wcDishes, wcUse, wcRefund, wcLabel, wcReceive, wcTaken, wcAllDishes:()=>Object.keys(DISH).filter(wcCanThrow), wcCropIds:()=>CROPS.filter(c=>!c.secret && SUPER[c.id]).map(c=>c.id), wcFarmNow:()=>({ m:Math.floor(S.money), h:Math.floor(S.totalHarvest||0) }),
+return { fmtNum, numStr, fxInfo:()=>({ kyo:!!(S.goals && S.goals.kei), bara:baraSeen() }), yzPress:()=>yzPress(false), yzBtn:()=>({ on:yzHas("button"), gain:yzBtnGain(), auto:yzv("izumi") }), peek:()=>{ consumeInbox(); tick(); return tutState(); }, roseName:roseNameHTML, roseNamePlate, roseRowStyle, roseRowCls, nameDeco, drunkNow, ask:gAsk, tqBoost:()=>({ rose:(1+rgGurPct("sh")/100)*otsuMul("Z2"), sc:1+rgGurPct("pen")/100, min:1+rgGurPct("dial")/100 }), rose:(lv,n)=>{ roseGive(lv,n); S.roseIn=(S.roseIn||0)+Math.floor(n); save(); }, screwMul, charmLives, applyTheme, alive, themeScrewArt, enter, leave, onKey, summary, dailyGive, dailyNeji, dailySapLeft, dailyOpen, btOpen, mtGive, mtInfoSeen:()=>!!S.mtInfoSeen, mtInfoMark:()=>{ S.mtInfoSeen=true; save(); }, dbInfoSeen:()=>!!S.dbInfoSeen, dbInfoMark:()=>{ S.dbInfoSeen=true; save(); }, debugUnlock, debugStart2, tutState, tutGive, tutGrow, tutSeed, tutSandbox, refreshRank, openModal, ownerId, useName, baraOn, baraLeft, baraSeen, debugStart5, debugStart6, debugStart3, debugStart4, wcDishes, wcUse, wcRefund, wcLabel, wcReceive, wcTaken, wcAllDishes:()=>Object.keys(DISH).filter(wcCanThrow), wcCropIds:()=>CROPS.filter(c=>!c.secret && SUPER[c.id]).map(c=>c.id), wcFarmNow:()=>({ m:Math.floor(S.money), h:Math.floor(S.totalHarvest||0) }),
   wcGoalPicks:()=>[
     { name:"不思議な肥料と摩訶不思議な肥料", ic:ico(GUR.mfert), give:()=>{ S.sfert=(S.sfert||0)+1; S.mfert=(S.mfert||0)+1; } },
     { name:GUR.bento.name, ic:ico(GUR.bento), give:()=>{ S.bento=(S.bento||0)+1; } },
@@ -19288,13 +19289,25 @@ function tqRankGroupStep(dir){ const n=TQ_RANK_LVS.length, i=Math.max(0,TQ_RANK_
 $("tqRankLvs").addEventListener("click",e=>{ const b=e.target.closest("[data-lv]"); if(!b) return; tqRankLv=b.dataset.lv; openRanking(rankCur, playerName); });
 setInterval(()=>{ if(tqRegWait && !nmOpen){ tqRegWait=false; if(playerName && tqPhase==="result" && scene==="toeic") tqRegister(); } },400);
 /* ---- 単語リスト ---- */
+/* 単語リストで見ている「レベル × 形式(4択・逆4択・穴埋め)」の記録だけを消す。必ず確認を出す */
+const tqListFmt = () => tqListM==="fill" ? "fill" : tqListM==="rev" ? "rev" : "choice";
+async function tqClearLv(){
+  const lv=tqListLv, f=tqListFmt(); if(lv==="weak") return;
+  const st=tqStore(f), ws=tqPool(lv,f).filter(w=>st[w.en]);
+  if(!ws.length){ sndMiss(); return; }
+  let ok=false; try{ ok=await Garden.ask(`TOEIC「${tqLvName(lv)}」の${tqFmtName(f)}の記録(覚えた・苦手・正解の回数)を消しますか?\n\n記録のある ${ws.length}語 がまだ遊んでいない状態に戻ります。ほかのレベルや、ほかの形式の記録はそのまま残ります。\n消した記録は元に戻せません。`,"消す"); }catch(e){ return; }
+  if(!ok || tqPhase!=="list") return;
+  for(const w of ws) delete st[w.en];
+  tqSaveStat(); tqListF="all"; tqList();
+}
 let tqListF="all", tqListM="word";   // 単語リストの絞り込み(状態)・見る記録(4択 / 逆4択 / 穴埋め)
 function tqList(lv){
   if(lv && lv!==tqListLv) tqListF="all";
-  { const h=$("tqLHint"); if(h) h.innerHTML = window.IS_MOBILE ? "" : `<span class="kbdh">1〜0 -</span> <span class="kbdh">Tab</span> レベル ・ <span class="kbdh">← →</span> 絞りこみ ・ <span class="kbdh">F</span> 4択・逆4択・穴埋め ・ <span class="kbdh">E</span> 例文をまとめて開く・閉じる ・ <span class="kbdh">↑ ↓</span> スクロール ・ <span class="kbdh">Esc</span> 戻る`; }
+  { const h=$("tqLHint"); if(h) h.innerHTML = window.IS_MOBILE ? "" : `<span class="kbdh">1〜0 -</span> <span class="kbdh">Tab</span> レベル ・ <span class="kbdh">← →</span> 絞りこみ ・ <span class="kbdh">F</span> 4択・逆4択・穴埋め ・ <span class="kbdh">Delete</span> 記録を消す ・ <span class="kbdh">E</span> 例文をまとめて開く・閉じる ・ <span class="kbdh">↑ ↓</span> スクロール ・ <span class="kbdh">Esc</span> 戻る`; }
   tqListLv=lv||tqListLv; tqPhase="list"; tqView("tqList");
   $("tqLTabs").innerHTML=TQ_LEVELS.map(([k,nm],i)=>`<button class="btn${k===tqListLv?" on":""}" data-lv="${k}">${nm} <span class="kbdh">${TQ_LVKEYS[i]}</span></button>`).join("");
-  const lf = tqListM==="fill" ? "fill" : tqListM==="rev" ? "rev" : "choice", all=tqPool(tqListLv,lf);
+  const lf = tqListFmt(), all=tqPool(tqListLv,lf);
+  { const cb=$("tqLClear"), n=tqListLv==="weak" ? 0 : all.filter(w=>tqStore(lf)[w.en]).length; cb.hidden = tqListLv==="weak"; cb.disabled=!n; cb.firstChild.textContent=`「${tqLvName(tqListLv)}」の${tqFmtName(lf)}の記録を消す `; }
   const stOf = (w,f=lf) => tqGood(w.en,f) ? "good" : tqWeak(w.en,f) ? "weak" : !tqStore(f)[w.en] ? "new" : tqSt(w.en,f).s>=2 ? "s2" : tqSt(w.en,f).s>=1 ? "s1" : "new";
   const cnt={ good:0, s2:0, s1:0, weak:0, new:0 }; for(const w of all) cnt[stOf(w)]++;
   if(!cnt[tqListF] && tqListF!=="all") tqListF="all";
@@ -19330,6 +19343,7 @@ function tqKey(e){
     else if(k==="ArrowLeft"||k==="ArrowRight"){ e.preventDefault(); const fs=[...$("tqLSum").querySelectorAll("[data-lf]:not([disabled])")].map(b=>[b.dataset.lf]); tqListF=tqCycle(fs,tqListF,k==="ArrowLeft"?-1:1); tqList(); }
     else if(k==="ArrowUp"||k==="ArrowDown"){ e.preventDefault(); $("tqLBody").scrollBy(0,k==="ArrowDown"?120:-120); }
     else if(k==="e"||k==="E"){ e.preventDefault(); tqExAll($("tqLBody")); }
+    else if(k==="Delete"){ e.preventDefault(); tqClearLv(); }
     else if(k==="f"||k==="F"){ tqListM = tqListM==="word" ? "rev" : tqListM==="rev" ? "fill" : "word"; tqListF="all"; tqList(); }   // 4択 → 逆4択 → 穴埋め
     else if(k==="Tab"){ e.preventDefault(); tqList(tqCycle(TQ_LEVELS,tqListLv,e.shiftKey?-1:1)); }
     else if(li>=0) tqList(TQ_LEVELS[li][0]);
@@ -19383,6 +19397,7 @@ $("tqQuit").addEventListener("mousedown",e=>e.preventDefault());
 $("tqQuit").addEventListener("click",()=>document.body.dispatchEvent(new KeyboardEvent("keydown",{ key:"Escape", bubbles:true })));   // Esc と同じ
 $("gameQuit").addEventListener("mousedown",e=>e.preventDefault());
 $("gameQuit").addEventListener("click",()=>document.body.dispatchEvent(new KeyboardEvent("keydown",{ key:"Escape", bubbles:true })));
+$("tqLClear").addEventListener("click",()=>tqClearLv());
 $("tqLSum").addEventListener("click",e=>{ const m=e.target.closest("[data-lm]"); if(m){ tqListM=m.dataset.lm; tqListF="all"; tqList(); return; } const b=e.target.closest("[data-lf]"); if(b && !b.disabled){ tqListF=b.dataset.lf; tqList(); } });
 $("tqOptRow").addEventListener("change",e=>{ const s=e.target.closest("select[data-v]"); if(!s) return; tqVPick[s.dataset.v]=s.value; tqSaveOpt(); tqVoices(); tqVTest(); s.blur(); });   // 声を変えたら、すぐ聞いて確かめる
 $("tqOptRow").addEventListener("click",e=>{ if(e.target.closest("#tqVTest")){ tqVTest(); return; } if(e.target.closest("#tqHideBtn")){ tqHideGood=!tqHideGood; tqSaveOpt(); tqMenu(); return; } const b=e.target.closest("[data-wg]"); if(b){ tqWeakG=b.dataset.wg; tqSaveOpt(); tqMenu(); } });
