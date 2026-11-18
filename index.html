@@ -18691,13 +18691,13 @@ function tqMarkFx(en,ok){
 }
 function tqMark(en,ok){ const st=tqStore(tqFmt), t=Object.assign({c:0,w:0,s:0},st[en]); if(ok){ t.c++; t.s++; wcGoalAdd("toeic",1); }else{ t.w++; t.s=0; } t.t=Date.now(); st[en]=t; tqSaveStat(); }
 const tqHasSent = w => !!TQ_SENT[w.en];
-/* 覚えた数(ランキング用): 単語は4択の記録、穴埋めとリスニングはそれぞれの記録。全レベルの合計。
+/* 覚えた数(ランキング用): 単語は4択か逆4択のどちらかで覚えた語、穴埋めとリスニングはそれぞれの記録。全レベルの合計。
    まだ TOEIC を開いていなければ null(番付に載せない) */
 function tqLearnCounts(){
   try{
     tqLoad();
-    const w=TQ.filter(x=>tqGood(x.en,"choice")).length, f=TQ.filter(x=>tqHasSent(x) && tqGood(x.en,"fill")).length, l=TQL.filter(x=>tqGood(x.en,"listen")).length;
-    if(!Object.keys(tqStat).length && !Object.keys(tqStatF).length) return null;
+    const w=TQ.filter(x=>tqGood(x.en,"choice") || tqGood(x.en,"rev")).length, f=TQ.filter(x=>tqHasSent(x) && tqGood(x.en,"fill")).length, l=TQL.filter(x=>tqGood(x.en,"listen")).length;
+    if(!Object.keys(tqStat).length && !Object.keys(tqStatF).length && !Object.keys(tqStatR).length) return null;
     return { w:Math.min(w,TQ.length), f:Math.min(f,TQ.length), l:Math.min(l,TQL.length) };
   }catch(e){ return null; }
 }
