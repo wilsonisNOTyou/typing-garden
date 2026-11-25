@@ -10613,11 +10613,22 @@ function flushToastBatch(){
   toast(b.map(x=>x.h).join(" ・ "), "good", Math.max(...b.map(x=>x.ms))+(b.length>1?1500:0), true);
 }
 let toastHold=[];   // ガチャの演出中に届いたお知らせ(終わってから出す)
-setInterval(()=>{ if(toastHold.length && !(modal==="gacha" && gachaBusy())){ const h=toastHold; toastHold=[]; toastBatch=[]; for(const a of h) toast(...a); flushToastBatch(); } },400);
+setInterval(()=>{ if(toastHold.length && !(modal==="gacha" && gachaBusy())){ const h=toastHold; toastHold=[]; toastBatch=[]; toastUserAt=Date.now(); for(const a of h) toast(...a); flushToastBatch(); } },400);
+/* ガチャ・お店などの窓を開いているあいだは、自分で操作したことのお知らせだけを出す。
+   畑の収穫など、ひとりでに起きたお知らせは出さずに、お知らせの一覧にだけ残す(大事なものは未読の数にも入れる) */
+let toastUserAt=0;
+for(const ev of ["pointerdown","keydown"]) window.addEventListener(ev,()=>{ toastUserAt=Date.now(); },true);
+const toastQuiet = kind => !!modal && !toastWarn(kind) && Date.now()-toastUserAt>1500;
+function toastLogOnly(text,kind,html){
+  const imp=toastImp(String(text),kind), warn=toastWarn(kind), h=html?String(text):esc(String(text));
+  if(!(toastLog[0] && toastLog[0].h===h)){ toastLog.unshift({ h, imp:imp&&!warn, warn, at:Date.now() }); if(toastLog.length>60) toastLog.length=60; if(imp && !warn) toastUnread++; }
+  toastBtn();
+}
 function toast(text,kind="",ms=2600,html=false){
   const imp=toastImp(String(text),kind), warn=toastWarn(kind);
   if(!imp){ let inTut=null; try{ inTut=tutStep(); }catch(e){} if(inTut) return; }   // はじめてガイドの途中は、ふつうのお知らせを出さない(吹き出しの邪魔になる)。読み込みの途中で呼ばれたとき(ガイドの仕組みがまだ準備前)は、ガイド中ではないとみなす
   if(modal==="gacha" && gachaBusy()){ toastHold.push([text,kind,ms,html]); return; }   // ガチャの演出中は、終わってからまとめて出す
+  if(toastQuiet(kind)){ toastLogOnly(text,kind,html); return; }   // 窓を開いているあいだの、ひとりでに起きたお知らせは一覧にだけ
   if(toastBatch && !imp){ toastBatch.push({ h:html?String(text):esc(String(text)), ms }); return; }
   if(window.IS_MOBILE && !imp) ms=Math.min(ms,3200);   // スマホは短く(画面を長くふさがない)
   const key=String(text);
