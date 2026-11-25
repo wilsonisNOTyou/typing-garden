@@ -10614,11 +10614,11 @@ function flushToastBatch(){
 }
 let toastHold=[];   // ガチャの演出中に届いたお知らせ(終わってから出す)
 setInterval(()=>{ if(toastHold.length && !(modal==="gacha" && gachaBusy())){ const h=toastHold; toastHold=[]; toastBatch=[]; toastUserAt=Date.now(); for(const a of h) toast(...a); flushToastBatch(); } },400);
-/* ガチャ・お店などの窓を開いているあいだは、自分で操作したことのお知らせだけを出す。
+/* ガチャ・お店などの窓を開いているあいだは、自分で操作したことのお知らせだけを出す(スマホは注意だけ)。
    畑の収穫など、ひとりでに起きたお知らせは出さずに、お知らせの一覧にだけ残す(大事なものは未読の数にも入れる) */
 let toastUserAt=0;
 for(const ev of ["pointerdown","keydown"]) window.addEventListener(ev,()=>{ toastUserAt=Date.now(); },true);
-const toastQuiet = kind => !!modal && !toastWarn(kind) && Date.now()-toastUserAt>1500;
+const toastQuiet = kind => !!modal && !toastWarn(kind) && (window.IS_MOBILE || Date.now()-toastUserAt>1500);   // スマホは、ガチャの結果なども窓のボタンを隠すので出さない(一覧には残る)
 function toastLogOnly(text,kind,html){
   const imp=toastImp(String(text),kind), warn=toastWarn(kind), h=html?String(text):esc(String(text));
   if(!(toastLog[0] && toastLog[0].h===h)){ toastLog.unshift({ h, imp:imp&&!warn, warn, at:Date.now() }); if(toastLog.length>60) toastLog.length=60; if(imp && !warn) toastUnread++; }
