@@ -12717,15 +12717,24 @@ function bigFinale(){
   renderGacha(); renderBar(); flushGachaNote(); save();
 }
 /* ガチャの演出中は、画面のどこを押しても早送り。押した指を離したときに、出てきたボタンを押してしまわないようにする */
-let gachaTapAt=0, megaEndAt=0;
+let gachaTapAt=0, megaEndAt=0, gachaSkipAt=0;   // gachaSkipAt: 早送りした時刻(続けて押したときに、次を引いてしまわないように)
+let gachaTap=null;   // 押したところ(指で結果を動かして見るときは、早送りにしない)
 document.addEventListener("pointerdown",e=>{
+  gachaTap=null;
   if(!(gachaMega || (modal==="gacha" && gachaBusy()))) return;
   if(e.target.closest && e.target.closest('[data-g="skip"]')) return;   // 早送りボタンはそのまま
-  if(!gachaMega && e.timeStamp && e.timeStamp<megaEndAt){ gachaTapAt=Date.now(); return; }   // 計算中に押したのが遅れて届いた: 大連はもう終わっているので、段ごとの演出はとばさない
-  gachaTapAt=Date.now(); e.preventDefault(); gachaSkip();
+  gachaTap={ x:e.clientX, y:e.clientY, t:Date.now(), ts:e.timeStamp||0 };
+},true);
+document.addEventListener("pointerup",e=>{
+  const g=gachaTap; gachaTap=null; if(!g) return;
+  if(Math.abs(e.clientX-g.x)>12 || Math.abs(e.clientY-g.y)>12 || Date.now()-g.t>700) return;   // 動かした・長く押した: 早送りしない
+  if(!(gachaMega || (modal==="gacha" && gachaBusy()))) return;
+  if(!gachaMega && g.ts && g.ts<megaEndAt){ gachaTapAt=Date.now(); return; }   // 計算中に押したのが遅れて届いた: 大連はもう終わっているので、段ごとの演出はとばさない
+  gachaTapAt=Date.now(); gachaSkip();
 },true);
 document.addEventListener("click",e=>{ if(Date.now()-gachaTapAt<900){ e.preventDefault(); e.stopPropagation(); } },true);
 function gachaSkip(){
+  gachaSkipAt=Date.now();
   if(gachaMega){ megaSkip(); return; }
   clearTimeout(gachaTimer);
   if(gachaBig && gachaBig.stage<gachaBig.groups.length){
@@ -12854,6 +12863,7 @@ function renderGacha(){
   body.innerHTML=gachaHTML()+gachaListHTML();
   // 大連の演出中は、いま出した段が見えるようにする
   const top=body.querySelector(".gmhero, .gmtopc"), mg=!top && gachaMega && body.querySelector(".gmega");
+  const spot=!top && gachaBig && gachaBig.done && body.querySelector(".gspot");
   const cur=top || body.querySelector(".gsumsec.pop, .gspot");
   /* 自動のスクロールは、引いた結果が進んだときだけ。ネジの泉などで画面を描き直しただけのときは、見ている場所をそのまま残す(下まで見られなくなるので) */
   const ssig=[gachaShown, gachaRes.length, body.querySelectorAll(".gsumsec, .gmfill").length, top?"t":"", mg?"m":"", gachaBusy()?"b":""].join("|");
@@ -12862,6 +12872,7 @@ function renderGacha(){
   if(!moved){}
   else if(mg) body.scrollTop += mg.getBoundingClientRect().top - body.getBoundingClientRect().top - 6;   // 1111111連: 演出の全体が見えるように
   else if(top) body.scrollTop += top.getBoundingClientRect().top - body.getBoundingClientRect().top - (top.classList.contains("gmtopc")?60:6);   // 結果: 最高レアに合わせる
+  else if(spot){ const go=()=>{ if(spot.isConnected) body.scrollTop += spot.getBoundingClientRect().top - body.getBoundingClientRect().top - 8; }; go(); requestAnimationFrame(go); setTimeout(go,350); }   // 大連が出そろったら: 「今回の目玉」をいちばん上に(札が飛び出して高さが変わるので、少しあとにも合わせ直す)
   else if(cur) gachaFollowSec(body,cur);   // 大連のまとめ: いま出た段が下で見切れないようにする
   // 11連・111連も、めくったカードが見えるようについていく(速くめくるときはすぐ動かす)
   else if(gachaRes.length>1){
@@ -12932,7 +12943,7 @@ $("g-gachaHint").addEventListener("click",e=>{
   const v=e.target.closest("[data-rgv]"); if(v){ rgView=v.dataset.rgv; sfx.tab(); renderGacha(); return; }
   const b=e.target.closest("[data-g]"); if(!b) return;
   if(b.dataset.g==="skip") gachaSkip();
-  else if(!gachaBusy()) drawGacha(+b.dataset.g);
+  else if(!gachaBusy() && Date.now()-gachaSkipAt>600) drawGacha(+b.dataset.g);   // 早送りを続けて押したとき、出てきたボタンで引かない
 });
 function gachaKey(e){
   const k=e.key;
@@ -12943,7 +12954,7 @@ function gachaKey(e){
   if(k==="Enter"){
     e.preventDefault();
     if(gachaBusy()) gachaSkip();
-    else drawGacha((e.ctrlKey||e.metaKey) ? 111 : (e.shiftKey?11:1));
+    else if(!e.repeat && Date.now()-gachaSkipAt>600) drawGacha((e.ctrlKey||e.metaKey) ? 111 : (e.shiftKey?11:1));   // 早送りで Enter を続けて押したときや、押しっぱなしのときは引かない
     return;
   }
   if(!gachaBusy() && (k==="a"||k==="A")){ e.preventDefault(); drawGacha(1111); return; }
