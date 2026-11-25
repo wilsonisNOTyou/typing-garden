@@ -10567,6 +10567,8 @@ const esc=s=>String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;");
    多いときは古いものから消して、同時に出るのは4つまで。 */
 let liveToasts=[];
 const MAX_TOASTS=2;
+/* 窓(タブ)を開いたら、出ているお知らせと順番待ちを消す(一覧には残っている) */
+function toastClearLive(){ toastWait=[]; for(const o of liveToasts.slice()) dropToast(o); toastBtn(); }
 function dropToast(o){
   clearTimeout(o.timer);
   liveToasts=liveToasts.filter(x=>x!==o);
@@ -11395,6 +11397,7 @@ let modal=null;   // null | "shop" | "gacha" | "book" | "rank"
 function openModal(name){
   closeModal(true);
   modal=name;
+  toastClearLive();   // 出ていたお知らせがボタンに重ならないように
   sfx.open();
   $("g-"+name).classList.add("open");
   if(name==="shop"){ shopCur[5]=0; renderShop(); }   // 自動売却: 作物のマスの中にいると ← → でタブを移れないので、開くたびに上に戻す
@@ -12875,6 +12878,11 @@ function renderGacha(){
   else if(spot){ const go=()=>{ if(spot.isConnected) body.scrollTop += spot.getBoundingClientRect().top - body.getBoundingClientRect().top - 8; }; go(); requestAnimationFrame(go); setTimeout(go,350); }   // 大連が出そろったら: 「今回の目玉」をいちばん上に(札が飛び出して高さが変わるので、少しあとにも合わせ直す)
   else if(cur) gachaFollowSec(body,cur);   // 大連のまとめ: いま出た段が下で見切れないようにする
   // 11連・111連も、めくったカードが見えるようについていく(速くめくるときはすぐ動かす)
+  else if(gachaRes.length>1 && !gachaBusy()){   // 11連・111連がめくり終わったら(早送りでも): いちばんレアな札をいちばん上に
+    let bi=0; gachaRes.forEach((x,i)=>{ if(RARITY_ORDER.indexOf(x.r)>RARITY_ORDER.indexOf(gachaRes[bi].r)) bi=i; });
+    const box=body.querySelector(".gcards"), card=box && box.children[bi];
+    if(card){ const go=()=>{ if(card.isConnected) body.scrollTop += card.getBoundingClientRect().top - body.getBoundingClientRect().top - 8; }; go(); requestAnimationFrame(go); setTimeout(go,350); }
+  }
   else if(gachaRes.length>1){
     const card=body.querySelector(".gcard.pop");
     if(card) gachaFollow(body,card, gachaRes.length>20 ? "auto" : "smooth");
