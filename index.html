@@ -12888,7 +12888,8 @@ function renderGacha(){
   body.innerHTML=gachaHTML()+gachaListHTML();
   // 大連の演出中は、いま出した段が見えるようにする
   const top=body.querySelector(".gmhero, .gmtopc"), mg=!top && gachaMega && body.querySelector(".gmega");
-  const spot=!top && gachaBig && gachaBig.done && body.querySelector(".gspot");
+  const first=(gachaBig ? gachaBig.done : !gachaBusy()) && body.querySelector(".gmemo1");   // はじめて手に入れた品があれば、いちばんにそこへ
+  const spot=!first && !top && gachaBig && gachaBig.done && body.querySelector(".gspot");
   const cur=top || body.querySelector(".gsumsec.pop, .gspot");
   /* 自動のスクロールは、引いた結果が進んだときだけ。ネジの泉などで画面を描き直しただけのときは、見ている場所をそのまま残す(下まで見られなくなるので) */
   const ssig=[gachaShown, gachaRes.length, body.querySelectorAll(".gsumsec, .gmfill").length, top?"t":"", mg?"m":"", gachaBusy()?"b":""].join("|");
@@ -12896,13 +12897,14 @@ function renderGacha(){
   gachaScrollRes=gachaRes; gachaScrollSig=ssig;
   if(!moved){}
   else if(mg) body.scrollTop += mg.getBoundingClientRect().top - body.getBoundingClientRect().top - 6;   // 1111111連: 演出の全体が見えるように
+  else if(first){ const go=()=>{ if(first.isConnected) body.scrollTop += first.getBoundingClientRect().top - body.getBoundingClientRect().top - 8; }; go(); requestAnimationFrame(go); setTimeout(go,350); }
   else if(top) body.scrollTop += top.getBoundingClientRect().top - body.getBoundingClientRect().top - (top.classList.contains("gmtopc")?60:6);   // 結果: 最高レアに合わせる
   else if(spot){ const go=()=>{ if(spot.isConnected) body.scrollTop += spot.getBoundingClientRect().top - body.getBoundingClientRect().top - 8; }; go(); requestAnimationFrame(go); setTimeout(go,350); }   // 大連が出そろったら: 「今回の目玉」をいちばん上に(札が飛び出して高さが変わるので、少しあとにも合わせ直す)
   else if(cur) gachaFollowSec(body,cur);   // 大連のまとめ: いま出た段が下で見切れないようにする
   // 11連・111連も、めくったカードが見えるようについていく(速くめくるときはすぐ動かす)
   else if(gachaRes.length>1 && !gachaBusy()){   // 11連・111連がめくり終わったら(早送りでも): いちばんレアな札をいちばん上に
     let bi=0; gachaRes.forEach((x,i)=>{ if(RARITY_ORDER.indexOf(x.r)>RARITY_ORDER.indexOf(gachaRes[bi].r)) bi=i; });
-    const box=body.querySelector(".gcards"), card=body.querySelector(".gmemo1") || (box && box.children[bi]);   // はじめて手に入れた品があれば、その説明を先に
+    const box=body.querySelector(".gcards"), card=box && box.children[bi];
     if(card){ const go=()=>{ if(card.isConnected) body.scrollTop += card.getBoundingClientRect().top - body.getBoundingClientRect().top - 8; }; go(); requestAnimationFrame(go); setTimeout(go,350); }
   }
   else if(gachaRes.length>1){
