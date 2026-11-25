@@ -12257,7 +12257,7 @@ function megaStep(){
   const fnow=performance.now();
   if(M.lastF){ M.slow=(M.slow||0)*.92+(fnow-M.lastF>60?.08:0); M.lite=M.slow>.3; }   // 描くのが追いつかない端末では、低いレア度の絵を減らす
   M.lastF=fnow;
-  const until=fnow+(MEGA_FULL.includes(M.fx)?10:12);   // 画面いっぱいの演出は、描くほうに少し時間を残す
+  const until=fnow+(M.skip ? 40 : MEGA_FULL.includes(M.fx)?10:12);   // 画面いっぱいの演出は、描くほうに少し時間を残す。早送りのときは計算を多めに進める
   while(M.i<M.n && performance.now()<until){
     const k=Math.min(M.G, M.n-M.i), blk=[];
     for(let j=0;j<k;j++) blk.push(drawOne(0));
@@ -12434,7 +12434,7 @@ function megaKindsStep(now){
       const el=box.querySelector(`.gmfill[data-id="${x.id}"]`); if(el) gachaFollow($("g-gachaBody"), el, "auto");
     }
     if(ri>=M.top2){ sfxGacha(x.r); if(ri>=M.topR && !M.kFlash){ M.kFlash=1; gachaFlash(x.r, true); } } else if(ri>=3) sfxGacha(x.r); else sfxFlick(ri);   // 画面を光らせるのは、最高レアの1枚目だけ(続けて光るとチカチカする)
-    M.kindAt = now + (M.skip ? 25 : M.kindGap[M.ki-1]);
+    M.kindAt = now + (M.skip ? 0 : M.kindGap[M.ki-1]);   // 早送り: 残りの札は一度に並べる
   }
   if(M.ki>=M.kinds.length && now>=M.kindAt+600){ megaEnd(true); return; }   // 並べ終えた札は、そのまま結果として残す
   requestAnimationFrame(megaStep);
@@ -12557,7 +12557,7 @@ function megaEnd(keep){
   if(!ownedSeeds().includes(S.seedId)){ const sd=Object.values(M.by).find(x=>CROP[x.id] && S.seeds[x.id]>0); if(sd) S.seedId=sd.id; }
   checkUnlocks(); gachaAnnounce(M.bestItem);
   gachaBig=gachaGroups(M.n,M.by,M.extra);
-  if(M.fx===7){ renderBar(); save(); renderGacha(); revealBigNext(); return; }   // いつもの: 低いレア度から段ごとに
+  if(M.fx===7){ renderBar(); save(); renderGacha(); if(M.skip){ gachaBig.stage=gachaBig.groups.length; bigFinale(); } else revealBigNext(); return; }   // いつもの: 低いレア度から段ごとに(計算中に早送りしたら、段ごとの演出もとばす)
   gachaBig.stage=gachaBig.groups.length; gachaBig.done=true; gachaBig.mega=true;
   if(kept) gachaBig.megaHTML=kept.outerHTML.replace(/ pop(?=["\s])/g,"");   // 全種類の札: 並べた札をそのまま結果にする
   renderGacha(); renderBar(); flushGachaNote(); save();
