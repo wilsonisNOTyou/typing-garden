@@ -12246,8 +12246,8 @@ const MEGA_QN={8:170,12:110,13:110,16:80,19:160};   // 見せる札のおおよ�
 const MEGA_GAP={5:26,9:42,10:28,11:22,12:45,13:45,14:36,15:30,16:70,17:26,18:26,19:18};   // 札1枚あたりの間隔(ミリ秒)
 const MEGA_CAP = n => MOB ? Math.round(n*.6) : n;   // 同時に出す数の上限(スマホは少なめにして軽くする)   // 演出セットを使っているときにランダムで出る演出(いつものは出ない)
 const MEGA_SET_PRICE=100000000;   // 大連ガチャの演出セット
-const MEGA_CARD_MS=5500;   // 札を見せる演出: 札がめくれ続ける長さ
-const MEGA_MIN_MS=4500;   // 計算が速くても、カウンターが回りきるまでこれだけ見せる
+const MEGA_CARD_MS=2500;   // 札を見せる演出: 札がめくれ続ける長さ
+const MEGA_MIN_MS=2000;   // 計算が速くても、カウンターが回りきるまでこれだけ見せる
 function megaStart(n){
   { const sg=$("screen-garden"); if(sg) sg.classList.add("gmhide"); }
   drawMemoStart();
@@ -12260,15 +12260,17 @@ function megaStart(n){
     if(M.fx!==7) M.sweep=sfxSweep(M.fx===4?7500:M.fx>=3?MEGA_CARD_MS:MEGA_MIN_MS); }
   renderGacha();
   megaFullMake(gachaMega.fx);
+  megaNext();
   if(gachaMega.fx!==7) seq([196,262,330,392,523],90,"sawtooth",.05,.16);
   megaStep();
 }
-function megaStep(){
-  const M=gachaMega; if(!M) return;
-  const fnow=performance.now();
-  if(M.lastF){ M.slow=(M.slow||0)*.92+(fnow-M.lastF>60?.08:0); M.lite=M.slow>.3; }   // 描くのが追いつかない端末では、低いレア度の絵を減らす
-  M.lastF=fnow;
-  const until=fnow+(M.skip ? 40 : MEGA_FULL.includes(M.fx)?10:12);   // 画面いっぱいの演出は、描くほうに少し時間を残す。早送りのときは計算を多めに進める
+/* 大連の計算: 画面を描く回数とは別に、少しずつ続けて進める(描くのが重い端末でも、計算が遅れないように) */
+const megaCh = typeof MessageChannel==="function" ? new MessageChannel() : null;
+if(megaCh) megaCh.port1.onmessage=()=>megaPump();
+const megaNext = () => { if(megaCh) megaCh.port2.postMessage(0); else setTimeout(megaPump,0); };
+function megaPump(){
+  const M=gachaMega; if(!M || M.i>=M.n) return;
+  const until=performance.now()+(M.skip ? 1000 : 250);   // 1回に進める長さ(早送りなら長め)。間で画面も描かれる。計算はふつうの端末なら合わせて0.1秒ほどなので、先に済ませてしまう(遅い端末でも描くのを待たずに進む)
   while(M.i<M.n && performance.now()<until){
     const k=Math.min(M.G, M.n-M.i), blk=[];
     for(let j=0;j<k;j++) blk.push(drawOne(0));
@@ -12287,6 +12289,13 @@ function megaStep(){
     }
     M.i+=k;
   }
+  if(M.i<M.n) megaNext();
+}
+function megaStep(){
+  const M=gachaMega; if(!M) return;
+  const fnow=performance.now();
+  if(M.lastF){ M.slow=(M.slow||0)*.92+(fnow-M.lastF>60?.08:0); M.lite=M.slow>.3; }   // 描くのが追いつかない端末では、低いレア度の絵を減らす
+  M.lastF=fnow;
   if(performance.now()-M.t0<1200){ const body=$("g-gachaBody"), mg=body && body.querySelector(".gmega"); if(mg) body.scrollTop += mg.getBoundingClientRect().top - body.getBoundingClientRect().top - 6; }   // はじめのうちは、演出の上端に合わせ続ける
   if(M.fx===7){   // いつもの: 計算が終わったら、段ごとに出す
     const el=$("g-megaNum"); if(el){ el.textContent=fmtNum(M.i); $("g-megaProg").style.width=(M.i/M.n*100).toFixed(1)+"%"; }
@@ -12312,10 +12321,10 @@ function megaCards(){
     const t=Math.min(1,(now-M.t0)/MEGA_CARD_MS);
     if(now>=M.pauseUntil){
       const expect=M.q.length+(M.n-M.i)*M.qp;
-      let target = (M.skip || (M.i>=M.n && t>=1)) ? M.q.length : Math.floor(expect*Math.pow(t,2.2));   // はじめはゆっくり、だんだん速く
+      let target = (M.skip || (M.i>=M.n && t>=1)) ? M.q.length : Math.floor(expect*Math.pow(t,1.2));   // はじめから同じくらいの速さで(少しだけ、だんだん速く)
       target=Math.min(target,M.q.length);
       const gap=MEGA_GAP[M.fx]||20;   // 札1枚あたりの間隔(ミリ秒)。速くなりすぎて見えなくならないように
-      let lim = (M.skip || t>=1) ? 40 : Math.min(6, Math.floor((now-(M.lastC||now-gap))/gap));   // 予定の長さを過ぎたら、残りは一気に
+      let lim = (M.skip || t>=1) ? 40 : Math.min(12, Math.floor((now-(M.lastC||now-gap))/gap));   // 予定の長さを過ぎたら、残りは一気に
       if(lim>0) M.lastC=now;
       while(M.qi<target && lim-->0){ if(megaCardShow(M,M.q[M.qi++],now)) break; }
     }
@@ -12555,6 +12564,7 @@ function megaFullMake(fx){
 function megaFullEnd(){ const el=document.getElementById("g-megaFull"); if(!el) return; el.classList.add("out"); setTimeout(()=>el.remove(),700); }
 function megaEnd(keep){
   const M=gachaMega; if(!M) return;
+  megaEndAt=performance.now();
   megaFullEnd();
   { const sg=$("screen-garden"); if(sg) sg.classList.remove("gmhide"); }
   const kept = keep ? document.querySelector(".gmega") : null;
@@ -12568,7 +12578,7 @@ function megaEnd(keep){
   if(!ownedSeeds().includes(S.seedId)){ const sd=Object.values(M.by).find(x=>CROP[x.id] && S.seeds[x.id]>0); if(sd) S.seedId=sd.id; }
   checkUnlocks(); gachaAnnounce(M.bestItem);
   gachaBig=gachaGroups(M.n,M.by,M.extra);
-  if(M.fx===7){ renderBar(); save(); renderGacha(); if(M.skip){ gachaBig.stage=gachaBig.groups.length; bigFinale(); } else revealBigNext(); return; }   // いつもの: 低いレア度から段ごとに(計算中に早送りしたら、段ごとの演出もとばす)
+  if(M.fx===7){ renderBar(); save(); renderGacha(); revealBigNext(); return; }   // いつもの: 低いレア度から段ごとに(もう一度早送りすると全部出す)
   gachaBig.stage=gachaBig.groups.length; gachaBig.done=true; gachaBig.mega=true;
   if(kept) gachaBig.megaHTML=kept.outerHTML.replace(/ pop(?=["\s])/g,"");   // 全種類の札: 並べた札をそのまま結果にする
   renderGacha(); renderBar(); flushGachaNote(); save();
@@ -12706,6 +12716,15 @@ function bigFinale(){
   if(best>=3 || B.newKinds){ setTimeout(()=>{ sfxGacha(RARITY_ORDER[best]); gachaFlash(RARITY_ORDER[best], best>=4); },120); }
   renderGacha(); renderBar(); flushGachaNote(); save();
 }
+/* ガチャの演出中は、画面のどこを押しても早送り。押した指を離したときに、出てきたボタンを押してしまわないようにする */
+let gachaTapAt=0, megaEndAt=0;
+document.addEventListener("pointerdown",e=>{
+  if(!(gachaMega || (modal==="gacha" && gachaBusy()))) return;
+  if(e.target.closest && e.target.closest('[data-g="skip"]')) return;   // 早送りボタンはそのまま
+  if(!gachaMega && e.timeStamp && e.timeStamp<megaEndAt){ gachaTapAt=Date.now(); return; }   // 計算中に押したのが遅れて届いた: 大連はもう終わっているので、段ごとの演出はとばさない
+  gachaTapAt=Date.now(); e.preventDefault(); gachaSkip();
+},true);
+document.addEventListener("click",e=>{ if(Date.now()-gachaTapAt<900){ e.preventDefault(); e.stopPropagation(); } },true);
 function gachaSkip(){
   if(gachaMega){ megaSkip(); return; }
   clearTimeout(gachaTimer);
