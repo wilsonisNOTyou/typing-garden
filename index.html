@@ -2418,6 +2418,12 @@ html.mobile #g-cookShow .csnm{font-size:1.3rem}
 #screen-garden .gsumit .gsold{color:#2e7d32; font-size:.72rem}
 #screen-garden .gsumit.new{background:#fff0f3; box-shadow:0 0 0 2px #d9573f, 0 0 10px rgba(217,87,63,.45)}
 @keyframes g-newpulse{0%,100%{transform:scale(1)}50%{transform:scale(1.18)}}
+#screen-garden .gmemo{margin:.2rem 0 .6rem; display:flex; flex-direction:column; gap:.4rem}
+#screen-garden .gmemo1{border-radius:12px; padding:.55rem .8rem; background:#fff8e6; box-shadow:inset 0 0 0 2px #e3c341}
+#screen-garden .gmemoh{font-weight:800; color:#8a5a00; margin-bottom:.25rem}
+#screen-garden .gmemoit{font-size:.88rem; line-height:1.55; padding:.3rem 0; border-top:1px dashed #e8d9b0}
+#screen-garden .gmemoit:first-of-type{border-top:0}
+#screen-garden .gmemol{font-size:.82rem; line-height:1.5; color:#6b604e; background:#f6efe0; border-radius:8px; padding:.35rem .6rem}
 #screen-garden .gspot{border-radius:12px; padding:.6rem; background:linear-gradient(135deg,#fff8e6,#fdf0ff 50%,#eef6ff); box-shadow:inset 0 0 0 2px #e3c341; animation:g-secin .5s ease-out}
 #screen-garden .gspot.plain{box-shadow:inset 0 0 0 2px #e3d7bd; background:#fff; color:var(--ink-l); font-size:.88rem}
 #screen-garden .gspothead{font-weight:800; text-align:center; margin-bottom:.4rem; letter-spacing:.1em; color:#8a6a10}
@@ -2810,6 +2816,7 @@ html.mobile #screen-garden .keyhint:not(#g-shopHint):not(#g-gachaHint){display:n
 /* お知らせは下に出して、上のボタンを隠さない */
 /* スマホ: お知らせは下に小さく(2行まで・2つまで)。畑や道具を隠さないように */
 html.mobile #screen-garden #g-toasts{top:auto; bottom:calc(max(8px, env(safe-area-inset-bottom)) + 2.6rem); left:50%; transform:translateX(-50%); align-items:center; flex-direction:column-reverse; width:calc(100% - 16px); gap:.25rem}
+html.mobile #screen-garden:has(.modal.open) #g-toasts{top:var(--toastTop,64px); bottom:auto; flex-direction:column}   /* 窓を開いているときは、閉じるボタンの下に出す */
 html.mobile #screen-garden .toast{font-size:.74rem; padding:.25rem .6rem; line-height:1.4; border-width:1.5px; opacity:.94; pointer-events:none}   /* スマホ: 知らせの上からでも、下のボタンを押せる */
 html.mobile #screen-garden .toast .tx, html.mobile #screen-garden .toast.imp .tx{display:-webkit-box; -webkit-box-orient:vertical; -webkit-line-clamp:3; line-clamp:3; overflow:hidden}   /* スマホ: 3行まで(全部は 🔔 の一覧で読める) */
 html.mobile #screen-garden .gacts{justify-content:center}
@@ -6246,6 +6253,12 @@ function endBookGame(){
 /* ---------- 更新情報 ----------
    新しいものを上に足していく。d は YYYY-MM-DD */
 const NEWS=[
+  { d:"2026-11-25", t:"ガチャとお知らせ", items:[
+    "大連ガチャの計算を速くしました。重いスマホでも、ゲージが早く満タンになります。演出の長さも短くしました",
+    "大連ガチャの演出中は、画面のどこを押しても早送りできるようになりました",
+    "ガチャやお店などを開いているあいだは、畑の収穫などのお知らせを出さないようにしました(お知らせの一覧には残ります)。開いたときに出ていたお知らせも消えます。スマホでは、開いているあいだのお知らせを、閉じるボタンのすぐ下に出します",
+    "ガチャで、はじめて手に入れた品の説明や、上限まで来ている宝物のかわりに受け取ったキーなどは、お知らせではなく、ガチャの結果の欄に書くようにしました",
+  ]},
   { d:"2026-11-18", t:"TOEIC", items:[
     "4択と逆4択の「覚えた」「苦手」の記録を、別々に数えるようにしました。これまでの記録は、4択と逆4択の両方に引き継いでいます",
     "単語リストで、4択・逆4択・穴埋めの記録を切りかえて見られるようになりました(F キーでも切りかえられます)",
@@ -10567,6 +10580,8 @@ const esc=s=>String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;");
    多いときは古いものから消して、同時に出るのは4つまで。 */
 let liveToasts=[];
 const MAX_TOASTS=2;
+/* 窓(タブ)を開いたら、出ているお知らせと順番待ちを消す(一覧には残っている) */
+function toastClearLive(){ toastWait=[]; for(const o of liveToasts.slice()) dropToast(o); toastBtn(); }
 function dropToast(o){
   clearTimeout(o.timer);
   liveToasts=liveToasts.filter(x=>x!==o);
@@ -10613,11 +10628,22 @@ function flushToastBatch(){
   toast(b.map(x=>x.h).join(" ・ "), "good", Math.max(...b.map(x=>x.ms))+(b.length>1?1500:0), true);
 }
 let toastHold=[];   // ガチャの演出中に届いたお知らせ(終わってから出す)
-setInterval(()=>{ if(toastHold.length && !(modal==="gacha" && gachaBusy())){ const h=toastHold; toastHold=[]; toastBatch=[]; for(const a of h) toast(...a); flushToastBatch(); } },400);
+setInterval(()=>{ if(toastHold.length && !(modal==="gacha" && gachaBusy())){ const h=toastHold; toastHold=[]; toastBatch=[]; toastUserAt=Date.now(); for(const a of h) toast(...a); flushToastBatch(); } },400);
+/* ガチャ・お店などの窓を開いているあいだは、自分で操作したことのお知らせだけを出す(スマホは窓の上、閉じるボタンの下に出す)。
+   畑の収穫など、ひとりでに起きたお知らせは出さずに、お知らせの一覧にだけ残す(大事なものは未読の数にも入れる) */
+let toastUserAt=0;
+for(const ev of ["pointerdown","keydown"]) window.addEventListener(ev,()=>{ toastUserAt=Date.now(); },true);
+const toastQuiet = kind => !!modal && !toastWarn(kind) && Date.now()-toastUserAt>1500;
+function toastLogOnly(text,kind,html){
+  const imp=toastImp(String(text),kind), warn=toastWarn(kind), h=html?String(text):esc(String(text));
+  if(!(toastLog[0] && toastLog[0].h===h)){ toastLog.unshift({ h, imp:imp&&!warn, warn, at:Date.now() }); if(toastLog.length>60) toastLog.length=60; if(imp && !warn) toastUnread++; }
+  toastBtn();
+}
 function toast(text,kind="",ms=2600,html=false){
   const imp=toastImp(String(text),kind), warn=toastWarn(kind);
   if(!imp){ let inTut=null; try{ inTut=tutStep(); }catch(e){} if(inTut) return; }   // はじめてガイドの途中は、ふつうのお知らせを出さない(吹き出しの邪魔になる)。読み込みの途中で呼ばれたとき(ガイドの仕組みがまだ準備前)は、ガイド中ではないとみなす
   if(modal==="gacha" && gachaBusy()){ toastHold.push([text,kind,ms,html]); return; }   // ガチャの演出中は、終わってからまとめて出す
+  if(toastQuiet(kind)){ toastLogOnly(text,kind,html); return; }   // 窓を開いているあいだの、ひとりでに起きたお知らせは一覧にだけ
   if(toastBatch && !imp){ toastBatch.push({ h:html?String(text):esc(String(text)), ms }); return; }
   if(window.IS_MOBILE && !imp) ms=Math.min(ms,3200);   // スマホは短く(画面を長くふさがない)
   const key=String(text);
@@ -10641,6 +10667,10 @@ function toast(text,kind="",ms=2600,html=false){
 function toastShow(text,kind,ms,html){
   const imp=toastImp(String(text),kind), warn=toastWarn(kind), key=String(text);
   if(imp && !warn && toastWait.length>=3) ms=Math.max(3200,Math.round(ms*.6));   // たまっているときは、少し早めに次へ
+  if(window.IS_MOBILE && modal){   // スマホで窓を開いているとき: 窓の見出し(閉じるボタン)のすぐ下に出す(下のボタンを隠さない)
+    const hd=$("g-"+modal) && $("g-"+modal).querySelector(".phead"), hr=hd && hd.getBoundingClientRect();
+    $("g-toasts").style.setProperty("--toastTop", Math.round(hr && hr.bottom>0 ? hr.bottom+4 : 64)+"px");
+  }
   const tb=root.querySelector(".top"), tr=tb && tb.getBoundingClientRect();
   if(tr){   // PC: 左の空いたところの幅に合わせる(狭いときは看板の幅まで)
     const sg=root.querySelector(".sign"), sr=sg && sg.getBoundingClientRect();
@@ -11384,6 +11414,7 @@ let modal=null;   // null | "shop" | "gacha" | "book" | "rank"
 function openModal(name){
   closeModal(true);
   modal=name;
+  toastClearLive();   // 出ていたお知らせがボタンに重ならないように
   sfx.open();
   $("g-"+name).classList.add("open");
   if(name==="shop"){ shopCur[5]=0; renderShop(); }   // 自動売却: 作物のマスの中にいると ← → でタブを移れないので、開くたびに上に戻す
@@ -12091,7 +12122,7 @@ const gachaCost = (n,m=gachaM) => Math.max(1, Math.round((
 function switchMachine(m){
   if(gachaBusy() || m===gachaM || window.tutGachaEggplant) return;   // はじめてガイドの1回(なす確定)は種ガチャで
   if(!machineOpen(m)){ sfx.nope(); toast(machineLockMsg(m),"warn",4200); return; }
-  gachaM=m; gachaRes=[]; gachaShown=0; gachaBig=null; rgView="gacha";
+  gachaM=m; gachaRes=[]; gachaShown=0; gachaBig=null; gachaMemo=null; rgView="gacha";
   sfx.tab(); renderGacha();
 }
 /* GUR を受け取る。知らせる文を返す */
@@ -12135,6 +12166,8 @@ function gainGur(id){   // 返す文は、その宝物をはじめて手に入�
   return "";
 }
 const guardEvery = () => ev("λ",8,5,11);   // SR以上が1つ確定する間隔
+let gachaMemo=null;   // 結果の欄の下に書く知らせ { firsts:[はじめて手に入れた品の説明], line:権利書・上限の宝物 }
+const gachaMemoHTML = () => !gachaMemo ? "" : `<div class="gmemo">${gachaMemo.firsts.length?`<div class="gmemo1"><div class="gmemoh">🆕 はじめて手に入れた品</div>${gachaMemo.firsts.map(m=>`<div class="gmemoit">${m}</div>`).join("")}</div>`:""}${gachaMemo.line?`<div class="gmemol">${gachaMemo.line}</div>`:""}</div>`;
 let gachaNote=[];   // 演出が終わってから出す宝物の知らせ { id, m(はじめての知らせ) / swap(上限で換えた) }
 /* 演出のあとに知らせを出す。はじめての宝物はひとつずつ(長めに)、上限まで来ていてキーに換えた分と2枚目からの土地の権利書は、まとめて1つの短い知らせにする */
 function flushGachaNote(){
@@ -12144,7 +12177,8 @@ function flushGachaNote(){
     else if(n.m) firsts.push(n.m);
     else if(n.id==="deed") deeds++;
   }
-  for(const m of firsts) toast(m,"good mut sup",15000,true);
+  // ガチャの結果の知らせは、お知らせにせず、結果の欄の下に書く(お知らせの一覧には残す)
+  for(const m of firsts) toastLogOnly(m,"good",true);
   const parts=[];
   if(deeds) parts.push(`${ico(GUR.deed)} 土地の権利書を ${fmtNum(deeds)}枚 手に入れました(持っている権利書 ${fmtNum(S.deeds||0)}枚)`);
   const ids=Object.keys(swap);
@@ -12152,7 +12186,8 @@ function flushGachaNote(){
     const n=ids.reduce((a,k)=>a+swap[k],0);
     parts.push(`上限まで来ている宝物 ${ids.map(k=>`${ico(itemOf(k))}${esc(itemOf(k).name)}×${fmtNum(swap[k])}`).join("・")} のかわりに、${fmtNum(swapAmt)}キー を受け取りました`);
   }
-  if(parts.length) toast(parts.join("<br>"),"good",5000,true);
+  if(parts.length) toastLogOnly(parts.join("<br>"),"good",true);
+  gachaMemo = firsts.length||parts.length ? { firsts, line:parts.join("<br>") } : null;
   gachaNote=[];
 }
 function buyMegaSet(){
@@ -12188,6 +12223,7 @@ function drawGacha(n){
   const cost=gachaCost(n);
   if(gachaWallet()<cost){ sfx.nope(); toast(MACHINES[gachaM].coin ? "薔薇ガチャコインが足りません(薔薇や種をコインに変換できます)" : "キーが足りません","warn",3200); return; }
   if(MACHINES[gachaM].coin) xAdd(S,"roseCoin",-cost); else xAdd(S,"money",-(cost));
+  gachaMemo=null;
   if(n>=1111){ megaStart(n); return; }   // 大連は少しずつ計算しながら、演出(演出セットならランダム)で見せる
   const res=[];
   drawMemoStart();
@@ -12235,8 +12271,8 @@ const MEGA_QN={8:170,12:110,13:110,16:80,19:160};   // 見せる札のおおよ�
 const MEGA_GAP={5:26,9:42,10:28,11:22,12:45,13:45,14:36,15:30,16:70,17:26,18:26,19:18};   // 札1枚あたりの間隔(ミリ秒)
 const MEGA_CAP = n => MOB ? Math.round(n*.6) : n;   // 同時に出す数の上限(スマホは少なめにして軽くする)   // 演出セットを使っているときにランダムで出る演出(いつものは出ない)
 const MEGA_SET_PRICE=100000000;   // 大連ガチャの演出セット
-const MEGA_CARD_MS=5500;   // 札を見せる演出: 札がめくれ続ける長さ
-const MEGA_MIN_MS=4500;   // 計算が速くても、カウンターが回りきるまでこれだけ見せる
+const MEGA_CARD_MS=2500;   // 札を見せる演出: 札がめくれ続ける長さ
+const MEGA_MIN_MS=2000;   // 計算が速くても、カウンターが回りきるまでこれだけ見せる
 function megaStart(n){
   { const sg=$("screen-garden"); if(sg) sg.classList.add("gmhide"); }
   drawMemoStart();
@@ -12249,15 +12285,17 @@ function megaStart(n){
     if(M.fx!==7) M.sweep=sfxSweep(M.fx===4?7500:M.fx>=3?MEGA_CARD_MS:MEGA_MIN_MS); }
   renderGacha();
   megaFullMake(gachaMega.fx);
+  megaNext();
   if(gachaMega.fx!==7) seq([196,262,330,392,523],90,"sawtooth",.05,.16);
   megaStep();
 }
-function megaStep(){
-  const M=gachaMega; if(!M) return;
-  const fnow=performance.now();
-  if(M.lastF){ M.slow=(M.slow||0)*.92+(fnow-M.lastF>60?.08:0); M.lite=M.slow>.3; }   // 描くのが追いつかない端末では、低いレア度の絵を減らす
-  M.lastF=fnow;
-  const until=fnow+(MEGA_FULL.includes(M.fx)?10:12);   // 画面いっぱいの演出は、描くほうに少し時間を残す
+/* 大連の計算: 画面を描く回数とは別に、少しずつ続けて進める(描くのが重い端末でも、計算が遅れないように) */
+const megaCh = typeof MessageChannel==="function" ? new MessageChannel() : null;
+if(megaCh) megaCh.port1.onmessage=()=>megaPump();
+const megaNext = () => { if(megaCh) megaCh.port2.postMessage(0); else setTimeout(megaPump,0); };
+function megaPump(){
+  const M=gachaMega; if(!M || M.i>=M.n) return;
+  const until=performance.now()+(M.skip ? 1000 : 250);   // 1回に進める長さ(早送りなら長め)。間で画面も描かれる。計算はふつうの端末なら合わせて0.1秒ほどなので、先に済ませてしまう(遅い端末でも描くのを待たずに進む)
   while(M.i<M.n && performance.now()<until){
     const k=Math.min(M.G, M.n-M.i), blk=[];
     for(let j=0;j<k;j++) blk.push(drawOne(0));
@@ -12276,6 +12314,13 @@ function megaStep(){
     }
     M.i+=k;
   }
+  if(M.i<M.n) megaNext();
+}
+function megaStep(){
+  const M=gachaMega; if(!M) return;
+  const fnow=performance.now();
+  if(M.lastF){ M.slow=(M.slow||0)*.92+(fnow-M.lastF>60?.08:0); M.lite=M.slow>.3; }   // 描くのが追いつかない端末では、低いレア度の絵を減らす
+  M.lastF=fnow;
   if(performance.now()-M.t0<1200){ const body=$("g-gachaBody"), mg=body && body.querySelector(".gmega"); if(mg) body.scrollTop += mg.getBoundingClientRect().top - body.getBoundingClientRect().top - 6; }   // はじめのうちは、演出の上端に合わせ続ける
   if(M.fx===7){   // いつもの: 計算が終わったら、段ごとに出す
     const el=$("g-megaNum"); if(el){ el.textContent=fmtNum(M.i); $("g-megaProg").style.width=(M.i/M.n*100).toFixed(1)+"%"; }
@@ -12301,10 +12346,10 @@ function megaCards(){
     const t=Math.min(1,(now-M.t0)/MEGA_CARD_MS);
     if(now>=M.pauseUntil){
       const expect=M.q.length+(M.n-M.i)*M.qp;
-      let target = (M.skip || (M.i>=M.n && t>=1)) ? M.q.length : Math.floor(expect*Math.pow(t,2.2));   // はじめはゆっくり、だんだん速く
+      let target = (M.skip || (M.i>=M.n && t>=1)) ? M.q.length : Math.floor(expect*Math.pow(t,1.2));   // はじめから同じくらいの速さで(少しだけ、だんだん速く)
       target=Math.min(target,M.q.length);
       const gap=MEGA_GAP[M.fx]||20;   // 札1枚あたりの間隔(ミリ秒)。速くなりすぎて見えなくならないように
-      let lim = (M.skip || t>=1) ? 40 : Math.min(6, Math.floor((now-(M.lastC||now-gap))/gap));   // 予定の長さを過ぎたら、残りは一気に
+      let lim = (M.skip || t>=1) ? 40 : Math.min(12, Math.floor((now-(M.lastC||now-gap))/gap));   // 予定の長さを過ぎたら、残りは一気に
       if(lim>0) M.lastC=now;
       while(M.qi<target && lim-->0){ if(megaCardShow(M,M.q[M.qi++],now)) break; }
     }
@@ -12434,7 +12479,7 @@ function megaKindsStep(now){
       const el=box.querySelector(`.gmfill[data-id="${x.id}"]`); if(el) gachaFollow($("g-gachaBody"), el, "auto");
     }
     if(ri>=M.top2){ sfxGacha(x.r); if(ri>=M.topR && !M.kFlash){ M.kFlash=1; gachaFlash(x.r, true); } } else if(ri>=3) sfxGacha(x.r); else sfxFlick(ri);   // 画面を光らせるのは、最高レアの1枚目だけ(続けて光るとチカチカする)
-    M.kindAt = now + (M.skip ? 25 : M.kindGap[M.ki-1]);
+    M.kindAt = now + (M.skip ? 0 : M.kindGap[M.ki-1]);   // 早送り: 残りの札は一度に並べる
   }
   if(M.ki>=M.kinds.length && now>=M.kindAt+600){ megaEnd(true); return; }   // 並べ終えた札は、そのまま結果として残す
   requestAnimationFrame(megaStep);
@@ -12544,6 +12589,7 @@ function megaFullMake(fx){
 function megaFullEnd(){ const el=document.getElementById("g-megaFull"); if(!el) return; el.classList.add("out"); setTimeout(()=>el.remove(),700); }
 function megaEnd(keep){
   const M=gachaMega; if(!M) return;
+  megaEndAt=performance.now();
   megaFullEnd();
   { const sg=$("screen-garden"); if(sg) sg.classList.remove("gmhide"); }
   const kept = keep ? document.querySelector(".gmega") : null;
@@ -12557,10 +12603,10 @@ function megaEnd(keep){
   if(!ownedSeeds().includes(S.seedId)){ const sd=Object.values(M.by).find(x=>CROP[x.id] && S.seeds[x.id]>0); if(sd) S.seedId=sd.id; }
   checkUnlocks(); gachaAnnounce(M.bestItem);
   gachaBig=gachaGroups(M.n,M.by,M.extra);
-  if(M.fx===7){ renderBar(); save(); renderGacha(); revealBigNext(); return; }   // いつもの: 低いレア度から段ごとに
+  if(M.fx===7){ renderBar(); save(); renderGacha(); revealBigNext(); return; }   // いつもの: 低いレア度から段ごとに(もう一度早送りすると全部出す)
   gachaBig.stage=gachaBig.groups.length; gachaBig.done=true; gachaBig.mega=true;
   if(kept) gachaBig.megaHTML=kept.outerHTML.replace(/ pop(?=["\s])/g,"");   // 全種類の札: 並べた札をそのまま結果にする
-  renderGacha(); renderBar(); flushGachaNote(); save();
+  flushGachaNote(); renderGacha(); renderBar(); save();
   megaFinale(M);
 }
 /* 終わり: 画面が揺れて、真ん中に大きく「達成!」、花火が上がる */
@@ -12666,7 +12712,7 @@ function gachaGroups(n,by,extra){
 }
 function revealNext(){
   clearTimeout(gachaTimer);
-  if(gachaShown>=gachaRes.length){ renderGacha(); renderBar(); flushGachaNote(); save(); return; }
+  if(gachaShown>=gachaRes.length){ flushGachaNote(); renderGacha(); renderBar(); save(); return; }
   gachaShown++;
   sfxGacha(gachaRes[gachaShown-1].r);
   if(gachaM==="w"||gachaM==="r"||gachaM==="y"){   // わくわくガチャ・薔薇ガチャ・千両箱ガチャ: 1回引きは HR 以上、まとめて引くときは GSR 以上で光らせる
@@ -12693,9 +12739,27 @@ function bigFinale(){
   B.done=true;
   const best=B.groups.reduce((a,g)=>Math.max(a,RARITY_ORDER.indexOf(g.r)),0);
   if(best>=3 || B.newKinds){ setTimeout(()=>{ sfxGacha(RARITY_ORDER[best]); gachaFlash(RARITY_ORDER[best], best>=4); },120); }
-  renderGacha(); renderBar(); flushGachaNote(); save();
+  flushGachaNote(); renderGacha(); renderBar(); save();
 }
+/* ガチャの演出中は、画面のどこを押しても早送り。押した指を離したときに、出てきたボタンを押してしまわないようにする */
+let gachaTapAt=0, megaEndAt=0, gachaSkipAt=0;   // gachaSkipAt: 早送りした時刻(続けて押したときに、次を引いてしまわないように)
+let gachaTap=null;   // 押したところ(指で結果を動かして見るときは、早送りにしない)
+document.addEventListener("pointerdown",e=>{
+  gachaTap=null;
+  if(!(gachaMega || (modal==="gacha" && gachaBusy()))) return;
+  if(e.target.closest && e.target.closest('[data-g="skip"]')) return;   // 早送りボタンはそのまま
+  gachaTap={ x:e.clientX, y:e.clientY, t:Date.now(), ts:e.timeStamp||0 };
+},true);
+document.addEventListener("pointerup",e=>{
+  const g=gachaTap; gachaTap=null; if(!g) return;
+  if(Math.abs(e.clientX-g.x)>12 || Math.abs(e.clientY-g.y)>12 || Date.now()-g.t>700) return;   // 動かした・長く押した: 早送りしない
+  if(!(gachaMega || (modal==="gacha" && gachaBusy()))) return;
+  if(!gachaMega && g.ts && g.ts<megaEndAt){ gachaTapAt=Date.now(); return; }   // 計算中に押したのが遅れて届いた: 大連はもう終わっているので、段ごとの演出はとばさない
+  gachaTapAt=Date.now(); gachaSkip();
+},true);
+document.addEventListener("click",e=>{ if(Date.now()-gachaTapAt<900){ e.preventDefault(); e.stopPropagation(); } },true);
 function gachaSkip(){
+  gachaSkipAt=Date.now();
   if(gachaMega){ megaSkip(); return; }
   clearTimeout(gachaTimer);
   if(gachaBig && gachaBig.stage<gachaBig.groups.length){
@@ -12707,7 +12771,7 @@ function gachaSkip(){
   gachaShown=gachaRes.length;
   const best=gachaRes.reduce((a,x)=>Math.max(a,RARITY_ORDER.indexOf(x.r)),0);
   sfxGacha(RARITY_ORDER[best]);
-  renderGacha(); renderBar(); flushGachaNote();
+  flushGachaNote(); renderGacha(); renderBar();
 }
 function sfxGacha(r){
   const i=RARITY_ORDER.indexOf(r);
@@ -12824,6 +12888,7 @@ function renderGacha(){
   body.innerHTML=gachaHTML()+gachaListHTML();
   // 大連の演出中は、いま出した段が見えるようにする
   const top=body.querySelector(".gmhero, .gmtopc"), mg=!top && gachaMega && body.querySelector(".gmega");
+  const spot=!top && gachaBig && gachaBig.done && body.querySelector(".gspot");
   const cur=top || body.querySelector(".gsumsec.pop, .gspot");
   /* 自動のスクロールは、引いた結果が進んだときだけ。ネジの泉などで画面を描き直しただけのときは、見ている場所をそのまま残す(下まで見られなくなるので) */
   const ssig=[gachaShown, gachaRes.length, body.querySelectorAll(".gsumsec, .gmfill").length, top?"t":"", mg?"m":"", gachaBusy()?"b":""].join("|");
@@ -12832,8 +12897,14 @@ function renderGacha(){
   if(!moved){}
   else if(mg) body.scrollTop += mg.getBoundingClientRect().top - body.getBoundingClientRect().top - 6;   // 1111111連: 演出の全体が見えるように
   else if(top) body.scrollTop += top.getBoundingClientRect().top - body.getBoundingClientRect().top - (top.classList.contains("gmtopc")?60:6);   // 結果: 最高レアに合わせる
+  else if(spot){ const go=()=>{ if(spot.isConnected) body.scrollTop += spot.getBoundingClientRect().top - body.getBoundingClientRect().top - 8; }; go(); requestAnimationFrame(go); setTimeout(go,350); }   // 大連が出そろったら: 「今回の目玉」をいちばん上に(札が飛び出して高さが変わるので、少しあとにも合わせ直す)
   else if(cur) gachaFollowSec(body,cur);   // 大連のまとめ: いま出た段が下で見切れないようにする
   // 11連・111連も、めくったカードが見えるようについていく(速くめくるときはすぐ動かす)
+  else if(gachaRes.length>1 && !gachaBusy()){   // 11連・111連がめくり終わったら(早送りでも): いちばんレアな札をいちばん上に
+    let bi=0; gachaRes.forEach((x,i)=>{ if(RARITY_ORDER.indexOf(x.r)>RARITY_ORDER.indexOf(gachaRes[bi].r)) bi=i; });
+    const box=body.querySelector(".gcards"), card=body.querySelector(".gmemo1") || (box && box.children[bi]);   // はじめて手に入れた品があれば、その説明を先に
+    if(card){ const go=()=>{ if(card.isConnected) body.scrollTop += card.getBoundingClientRect().top - body.getBoundingClientRect().top - 8; }; go(); requestAnimationFrame(go); setTimeout(go,350); }
+  }
   else if(gachaRes.length>1){
     const card=body.querySelector(".gcard.pop");
     if(card) gachaFollow(body,card, gachaRes.length>20 ? "auto" : "smooth");
@@ -12902,7 +12973,7 @@ $("g-gachaHint").addEventListener("click",e=>{
   const v=e.target.closest("[data-rgv]"); if(v){ rgView=v.dataset.rgv; sfx.tab(); renderGacha(); return; }
   const b=e.target.closest("[data-g]"); if(!b) return;
   if(b.dataset.g==="skip") gachaSkip();
-  else if(!gachaBusy()) drawGacha(+b.dataset.g);
+  else if(!gachaBusy() && Date.now()-gachaSkipAt>600) drawGacha(+b.dataset.g);   // 早送りを続けて押したとき、出てきたボタンで引かない
 });
 function gachaKey(e){
   const k=e.key;
@@ -12913,7 +12984,7 @@ function gachaKey(e){
   if(k==="Enter"){
     e.preventDefault();
     if(gachaBusy()) gachaSkip();
-    else drawGacha((e.ctrlKey||e.metaKey) ? 111 : (e.shiftKey?11:1));
+    else if(!e.repeat && Date.now()-gachaSkipAt>600) drawGacha((e.ctrlKey||e.metaKey) ? 111 : (e.shiftKey?11:1));   // 早送りで Enter を続けて押したときや、押しっぱなしのときは引かない
     return;
   }
   if(!gachaBusy() && (k==="a"||k==="A")){ e.preventDefault(); drawGacha(1111); return; }
@@ -12932,7 +13003,7 @@ function megaHeroHTML(B){
 }
 function gachaBigHTML(){
   const B=gachaBig;
-  if(B.megaHTML) return B.megaHTML;
+  if(B.megaHTML) return B.megaHTML+gachaMemoHTML();
   const shown=B.groups.slice(0,B.stage);
   const secs=shown.map((g,i)=>{
     const ri=RARITY_ORDER.indexOf(g.r), last=i===shown.length-1 && !B.done;
@@ -12954,9 +13025,9 @@ function gachaBigHTML(){
           ${x.upg?'<span class="gextra">化けた!</span>':""}${x.isNew?'<span class="gnew">NEW</span>':""}<span class="gcnt">×${fmtNum(x.n)}</span></div>`; }).join("")+`</div></div>`
       : `<div class="gspot plain">今回は HR 以上・NEW はありませんでした。また挑戦しましょう</div>`;
   }
-  return `${B.mega?megaHeroHTML(B):""}<div class="gsum">
+  return `${B.mega?megaHeroHTML(B)+(B.done?gachaMemoHTML():""):""}<div class="gsum">
     <div class="gsumtop">${fmtNum(B.n)}連の結果${B.extra?` ・ ガチャおかわり +${fmtNum(B.extra)}回`:""}${B.bonus?` ・ 種・食材おかわり +${fmtNum(B.bonus)}個`:""}${B.done?` ・ NEW ${B.newKinds}種${B.soldAll?` ・ 種の自動売却 +${fmtNum(B.soldAll)}キー`:""}`:" ・ 開封中…"}</div>
-    ${secs}${spot}
+    ${secs}${spot}${B.done && !B.mega?gachaMemoHTML():""}
   </div>`;
 }
 function gachaHTML(){
@@ -12980,7 +13051,7 @@ function gachaHTML(){
     </div>
     <div class="gright">
       <div class="grates">${rates}</div>
-      ${gachaMega ? megaHTML() : gachaBig ? gachaBigHTML() : `<div class="gcards">${cards||`<div class="gempty">${gachaM==="w"?"ここに引いた種や食材が出ます":gachaM==="r"?"ここに引いた薔薇や種が出ます":gachaM==="y"?"ようこそお越しくださいました。お引きになった品は、こちらへお並べいたします":"ここに引いた種が出ます"}</div>`}</div>`}
+      ${gachaMega ? megaHTML() : gachaBig ? gachaBigHTML() : `${gachaShown>=gachaRes.length?gachaMemoHTML():""}<div class="gcards">${cards||`<div class="gempty">${gachaM==="w"?"ここに引いた種や食材が出ます":gachaM==="r"?"ここに引いた薔薇や種が出ます":gachaM==="y"?"ようこそお越しくださいました。お引きになった品は、こちらへお並べいたします":"ここに引いた種が出ます"}</div>`}</div>`}
     </div>
   </div>`;
 }
