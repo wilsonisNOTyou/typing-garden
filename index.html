@@ -10632,8 +10632,11 @@ setInterval(()=>{ if(toastHold.length && !(modal==="gacha" && gachaBusy())){ con
 /* ガチャ・お店などの窓を開いているあいだは、自分で操作したことのお知らせだけを出す(スマホは窓の上、閉じるボタンの下に出す)。
    畑の収穫など、ひとりでに起きたお知らせは出さずに、お知らせの一覧にだけ残す(大事なものは未読の数にも入れる) */
 let toastUserAt=0;
-for(const ev of ["pointerdown","keydown"]) window.addEventListener(ev,()=>{ toastUserAt=Date.now(); },true);
-const toastQuiet = kind => !!modal && !toastWarn(kind) && Date.now()-toastUserAt>1500;
+// 見て回るだけのキー(矢印・Tab・ページ送りなど)や、押しっぱなしのくり返しは、自分の操作に数えない(見ているあいだに村人などのお知らせが出ないように)
+const TOAST_NAV_KEYS=new Set(["ArrowUp","ArrowDown","ArrowLeft","ArrowRight","Tab","PageUp","PageDown","Home","End","Shift","Control","Alt","Meta"," "]);
+window.addEventListener("keydown",e=>{ if(!e.repeat && !TOAST_NAV_KEYS.has(e.key)) toastUserAt=Date.now(); },true);
+window.addEventListener("pointerdown",()=>{ toastUserAt=Date.now(); },true);
+const toastQuiet = kind => !!modal && !toastWarn(kind) && Date.now()-toastUserAt>700;
 function toastLogOnly(text,kind,html){
   const imp=toastImp(String(text),kind), warn=toastWarn(kind), h=html?String(text):esc(String(text));
   if(!(toastLog[0] && toastLog[0].h===h)){ toastLog.unshift({ h, imp:imp&&!warn, warn, at:Date.now() }); if(toastLog.length>60) toastLog.length=60; if(imp && !warn) toastUnread++; }
