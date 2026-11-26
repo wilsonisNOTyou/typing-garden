@@ -10628,15 +10628,15 @@ function flushToastBatch(){
   toast(b.map(x=>x.h).join(" ・ "), "good", Math.max(...b.map(x=>x.ms))+(b.length>1?1500:0), true);
 }
 let toastHold=[];   // ガチャの演出中に届いたお知らせ(終わってから出す)
-setInterval(()=>{ if(toastHold.length && !(modal==="gacha" && gachaBusy())){ const h=toastHold; toastHold=[]; toastBatch=[]; toastUserAt=Date.now(); for(const a of h) toast(...a); flushToastBatch(); } },400);
+setInterval(()=>{ if(toastHold.length && !(modal==="gacha" && gachaBusy())){ const h=toastHold; toastHold=[]; toastBatch=[]; toastInUser=true; try{ for(const a of h) toast(...a); flushToastBatch(); }finally{ toastInUser=false; } } },400);   // ガチャの演出のあいだにためた、自分で引いた結果のお知らせ
 /* ガチャ・お店などの窓を開いているあいだは、自分で操作したことのお知らせだけを出す(スマホは窓の上、閉じるボタンの下に出す)。
    畑の収穫など、ひとりでに起きたお知らせは出さずに、お知らせの一覧にだけ残す(大事なものは未読の数にも入れる) */
-let toastUserAt=0;
-// 見て回るだけのキー(矢印・Tab・ページ送りなど)や、押しっぱなしのくり返しは、自分の操作に数えない(見ているあいだに村人などのお知らせが出ないように)
-const TOAST_NAV_KEYS=new Set(["ArrowUp","ArrowDown","ArrowLeft","ArrowRight","Tab","PageUp","PageDown","Home","End","Shift","Control","Alt","Meta"," "]);
-window.addEventListener("keydown",e=>{ if(!e.repeat && !TOAST_NAV_KEYS.has(e.key)) toastUserAt=Date.now(); },true);
-window.addEventListener("pointerdown",()=>{ toastUserAt=Date.now(); },true);
-const toastQuiet = kind => !!modal && !toastWarn(kind) && Date.now()-toastUserAt>700;
+
+// 自分の操作(押したキー・クリック)の処理の中で出たお知らせだけを「自分の操作のお知らせ」とする。
+// 村人・収穫など、裏で進む処理から出たお知らせは、窓を開いているあいだは出さない(時間では見分けない)
+let toastInUser=false;
+for(const ev of ["keydown","pointerdown","pointerup","click","change"]) window.addEventListener(ev,()=>{ if(toastInUser) return; toastInUser=true; setTimeout(()=>{ toastInUser=false; },0); },true);
+const toastQuiet = kind => !!modal && !toastWarn(kind) && !toastInUser;
 function toastLogOnly(text,kind,html){
   const imp=toastImp(String(text),kind), warn=toastWarn(kind), h=html?String(text):esc(String(text));
   if(!(toastLog[0] && toastLog[0].h===h)){ toastLog.unshift({ h, imp:imp&&!warn, warn, at:Date.now() }); if(toastLog.length>60) toastLog.length=60; if(imp && !warn) toastUnread++; }
