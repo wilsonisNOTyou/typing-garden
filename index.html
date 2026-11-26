@@ -12211,7 +12211,7 @@ let gachaRes=[], gachaShown=0, gachaTimer=null;
 let gachaScrollRes=null, gachaScrollSig="";   // 最後に自動でスクロールしたときの結果(同じなら、描き直してもスクロールしない)
 /* 大連(1111連以上)の結果: 作物ごとにまとめ、低レアから順に出す */
 let gachaBig=null;   // { n, groups:[{ r, total, items:[{id,n,isNew,sold}] }], stage, soldAll, newKinds }
-const gachaBusy = () => gachaShown<gachaRes.length || !!(gachaBig && gachaBig.stage<gachaBig.groups.length) || !!gachaMega;
+const gachaBusy = () => gachaShown<gachaRes.length || !!(gachaBig && !gachaBig.done) || !!gachaMega;   // 大連は、最後の段のあと「今回の目玉」が出るまで(done)を演出中とする
 /* ← → で次の台へ。まだ開いていない台はとばして、その先の開いている台へ。開いている台がほかにないときは、となりの台の知らせを出して止まる */
 function stepMachine(dir){
   const i=MACHINE_ORDER.indexOf(gachaM), n=MACHINE_ORDER.length;
@@ -12765,7 +12765,7 @@ function gachaSkip(){
   gachaSkipAt=Date.now();
   if(gachaMega){ megaSkip(); return; }
   clearTimeout(gachaTimer);
-  if(gachaBig && gachaBig.stage<gachaBig.groups.length){
+  if(gachaBig && !gachaBig.done){   // 最後の段を出したあとの間でも、押せばすぐ「今回の目玉」まで出す
     gachaBig.stage=gachaBig.groups.length;
     bigFinale();
     return;
@@ -12895,7 +12895,7 @@ function renderGacha(){
   const spot=!first && !top && gachaBig && gachaBig.done && body.querySelector(".gspot");
   const cur=top || body.querySelector(".gsumsec.pop, .gspot");
   /* 自動のスクロールは、引いた結果が進んだときだけ。ネジの泉などで画面を描き直しただけのときは、見ている場所をそのまま残す(下まで見られなくなるので) */
-  const ssig=[gachaShown, gachaRes.length, body.querySelectorAll(".gsumsec, .gmfill").length, top?"t":"", mg?"m":"", gachaBusy()?"b":""].join("|");
+  const ssig=[gachaShown, gachaRes.length, body.querySelectorAll(".gsumsec, .gmfill").length, top?"t":"", mg?"m":"", gachaBusy()?"b":"", gachaBig&&gachaBig.done?"d":""].join("|");   // 「今回の目玉」が出たときも動かす
   const moved = !(gachaRes===gachaScrollRes && ssig===gachaScrollSig);
   gachaScrollRes=gachaRes; gachaScrollSig=ssig;
   if(!moved){}
