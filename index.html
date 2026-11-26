@@ -11716,12 +11716,15 @@ function flushToastBatch(){
   toast(b.map(x=>x.h).join(" ・ "), "good", Math.max(...b.map(x=>x.ms))+(b.length>1?1500:0), true);
 }
 let toastHold=[];   // ガチャの演出中に届いたお知らせ(終わってから出す)
-setInterval(()=>{ if(toastHold.length && !(modal==="gacha" && gachaBusy())){ const h=toastHold; toastHold=[]; toastBatch=[]; toastUserAt=Date.now(); for(const a of h) toast(...a); flushToastBatch(); } },400);
+setInterval(()=>{ if(toastHold.length && !(modal==="gacha" && gachaBusy())){ const h=toastHold; toastHold=[]; toastBatch=[]; toastInUser=true; try{ for(const a of h) toast(...a); flushToastBatch(); }finally{ toastInUser=false; } } },400);   // ガチャの演出のあいだにためた、自分で引いた結果のお知らせ
 /* ガチャ・お店などの窓を開いているあいだは、自分で操作したことのお知らせだけを出す(スマホは窓の上、閉じるボタンの下に出す)。
    畑の収穫など、ひとりでに起きたお知らせは出さずに、お知らせの一覧にだけ残す(大事なものは未読の数にも入れる) */
-let toastUserAt=0;
-for(const ev of ["pointerdown","keydown"]) window.addEventListener(ev,()=>{ toastUserAt=Date.now(); },true);
-const toastQuiet = kind => !!modal && !toastWarn(kind) && Date.now()-toastUserAt>1500;
+
+// 自分の操作(押したキー・クリック)の処理の中で出たお知らせだけを「自分の操作のお知らせ」とする。
+// 村人・収穫など、裏で進む処理から出たお知らせは、窓を開いているあいだは出さない(時間では見分けない)
+let toastInUser=false;
+for(const ev of ["keydown","pointerdown","pointerup","click","change"]) window.addEventListener(ev,()=>{ if(toastInUser) return; toastInUser=true; setTimeout(()=>{ toastInUser=false; },0); },true);
+const toastQuiet = kind => !!modal && !toastWarn(kind) && !toastInUser;
 function toastLogOnly(text,kind,html){
   const imp=toastImp(String(text),kind), warn=toastWarn(kind), h=html?String(text):esc(String(text));
   if(!(toastLog[0] && toastLog[0].h===h)){ toastLog.unshift({ h, imp:imp&&!warn, warn, at:Date.now() }); if(toastLog.length>60) toastLog.length=60; if(imp && !warn) toastUnread++; }
@@ -13296,7 +13299,7 @@ let gachaRes=[], gachaShown=0, gachaTimer=null;
 let gachaScrollRes=null, gachaScrollSig="";   // 最後に自動でスクロールしたときの結果(同じなら、描き直してもスクロールしない)
 /* 大連(1111連以上)の結果: 作物ごとにまとめ、低レアから順に出す */
 let gachaBig=null;   // { n, groups:[{ r, total, items:[{id,n,isNew,sold}] }], stage, soldAll, newKinds }
-const gachaBusy = () => gachaShown<gachaRes.length || !!(gachaBig && gachaBig.stage<gachaBig.groups.length) || !!gachaMega;
+const gachaBusy = () => gachaShown<gachaRes.length || !!(gachaBig && !gachaBig.done) || !!gachaMega;   // 大連は、最後の段のあと「今回の目玉」が出るまで(done)を演出中とする
 /* ← → で次の台へ。まだ開いていない台はとばして、その先の開いている台へ。開いている台がほかにないときは、となりの台の知らせを出して止まる */
 function stepMachine(dir){
   const i=MACHINE_ORDER.indexOf(gachaM), n=MACHINE_ORDER.length;
@@ -13850,7 +13853,7 @@ function gachaSkip(){
   gachaSkipAt=Date.now();
   if(gachaMega){ megaSkip(); return; }
   clearTimeout(gachaTimer);
-  if(gachaBig && gachaBig.stage<gachaBig.groups.length){
+  if(gachaBig && !gachaBig.done){   // 最後の段を出したあとの間でも、押せばすぐ「今回の目玉」まで出す
     gachaBig.stage=gachaBig.groups.length;
     bigFinale();
     return;
@@ -13976,21 +13979,23 @@ function renderGacha(){
   body.innerHTML=gachaHTML()+gachaListHTML();
   // 大連の演出中は、いま出した段が見えるようにする
   const top=body.querySelector(".gmhero, .gmtopc"), mg=!top && gachaMega && body.querySelector(".gmega");
-  const spot=!top && gachaBig && gachaBig.done && body.querySelector(".gspot");
+  const first=(gachaBig ? gachaBig.done : !gachaBusy()) && body.querySelector(".gmemo1");   // はじめて手に入れた品があれば、いちばんにそこへ
+  const spot=!first && !top && gachaBig && gachaBig.done && body.querySelector(".gspot");
   const cur=top || body.querySelector(".gsumsec.pop, .gspot");
   /* 自動のスクロールは、引いた結果が進んだときだけ。ネジの泉などで画面を描き直しただけのときは、見ている場所をそのまま残す(下まで見られなくなるので) */
-  const ssig=[gachaShown, gachaRes.length, body.querySelectorAll(".gsumsec, .gmfill").length, top?"t":"", mg?"m":"", gachaBusy()?"b":""].join("|");
+  const ssig=[gachaShown, gachaRes.length, body.querySelectorAll(".gsumsec, .gmfill").length, top?"t":"", mg?"m":"", gachaBusy()?"b":"", gachaBig&&gachaBig.done?"d":""].join("|");   // 「今回の目玉」が出たときも動かす
   const moved = !(gachaRes===gachaScrollRes && ssig===gachaScrollSig);
   gachaScrollRes=gachaRes; gachaScrollSig=ssig;
   if(!moved){}
   else if(mg) body.scrollTop += mg.getBoundingClientRect().top - body.getBoundingClientRect().top - 6;   // 1111111連: 演出の全体が見えるように
+  else if(first){ const go=()=>{ if(first.isConnected) body.scrollTop += first.getBoundingClientRect().top - body.getBoundingClientRect().top - 8; }; go(); requestAnimationFrame(go); setTimeout(go,350); }
   else if(top) body.scrollTop += top.getBoundingClientRect().top - body.getBoundingClientRect().top - (top.classList.contains("gmtopc")?60:6);   // 結果: 最高レアに合わせる
   else if(spot){ const go=()=>{ if(spot.isConnected) body.scrollTop += spot.getBoundingClientRect().top - body.getBoundingClientRect().top - 8; }; go(); requestAnimationFrame(go); setTimeout(go,350); }   // 大連が出そろったら: 「今回の目玉」をいちばん上に(札が飛び出して高さが変わるので、少しあとにも合わせ直す)
   else if(cur) gachaFollowSec(body,cur);   // 大連のまとめ: いま出た段が下で見切れないようにする
   // 11連・111連も、めくったカードが見えるようについていく(速くめくるときはすぐ動かす)
   else if(gachaRes.length>1 && !gachaBusy()){   // 11連・111連がめくり終わったら(早送りでも): いちばんレアな札をいちばん上に
     let bi=0; gachaRes.forEach((x,i)=>{ if(RARITY_ORDER.indexOf(x.r)>RARITY_ORDER.indexOf(gachaRes[bi].r)) bi=i; });
-    const box=body.querySelector(".gcards"), card=body.querySelector(".gmemo1") || (box && box.children[bi]);   // はじめて手に入れた品があれば、その説明を先に
+    const box=body.querySelector(".gcards"), card=box && box.children[bi];
     if(card){ const go=()=>{ if(card.isConnected) body.scrollTop += card.getBoundingClientRect().top - body.getBoundingClientRect().top - 8; }; go(); requestAnimationFrame(go); setTimeout(go,350); }
   }
   else if(gachaRes.length>1){
