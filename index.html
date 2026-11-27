@@ -344,6 +344,12 @@ html.mobile .tq-lv small{font-size:.68rem}
 .tq-hud{align-items:center}
 .btn.tq-quit,.game-esc .btn{font-size:.8rem; padding:.2rem .7rem; min-height:0}
 .game-esc{text-align:center; margin:.8rem 0 0}
+.game-esc #wbPeekBtn{font-size:.95rem; font-weight:700; padding:.45rem 1.2rem; margin-right:.6rem; color:#1b1405; background:linear-gradient(180deg,#ffe08a,var(--amber)); border:2px solid #c79100; border-radius:999px; box-shadow:0 3px 0 #8a6400, 0 0 14px rgba(242,193,78,.45); animation:wbPeekGlow 1.6s ease-in-out infinite}   /* 答えを見る・すぐ4択にする: 押せるボタンだとわかるように */
+.game-esc #wbPeekBtn:hover{filter:brightness(1.08)}
+.game-esc #wbPeekBtn:active{transform:translateY(2px); box-shadow:0 1px 0 #8a6400}
+.game-esc #wbPeekBtn .kbdh{background:rgba(27,20,5,.18); color:#1b1405; border-color:rgba(27,20,5,.35)}
+@keyframes wbPeekGlow{50%{box-shadow:0 3px 0 #8a6400, 0 0 22px rgba(242,193,78,.75)}}
+@media (prefers-reduced-motion:reduce){ .game-esc #wbPeekBtn{animation:none} }
 .btn.tq-exb{font-size:.75rem; padding:.1rem .55rem; min-height:0; justify-self:end; align-self:center}
 .tq-ex{grid-column:1/-1; margin:.1rem 0 .3rem; padding:.45rem .7rem; border-left:3px solid var(--amber); background:rgba(255,255,255,.04); border-radius:4px; font-family:Georgia,'Times New Roman',serif; color:#e8e4da; font-size:.92rem; line-height:1.5}
 .tq-ex b{color:var(--amber)}
@@ -383,6 +389,8 @@ html.mobile .tq-lv small{font-size:.68rem}
 .tq-opt .no{flex:none; width:1.6rem; height:1.6rem; border-radius:50%; display:grid; place-items:center; background:rgba(255,255,255,.1); font-size:.85rem}
 .tq-opt.ok{border-color:#5fbf6a; background:rgba(95,191,106,.22)}
 .tq-opt.ng{border-color:#e05a4a; background:rgba(224,90,74,.22)}
+.wb4opts .tq-opt{flex-wrap:nowrap}   /* 単語帳の4択: 長い答えでも番号の横で折り返す */
+.wb4opts .tq-opt>span:last-child{flex:1; min-width:0; overflow-wrap:anywhere}
 .tq-opt.tq-idk{grid-column:1/-1; justify-content:center; min-height:2.6rem; padding:.5rem .9rem; color:var(--steel); font-size:.92rem}   /* 分からない */
 .tq-fb{min-height:1.6em; margin-top:.7rem; font-size:1.05rem}
 /* 単語の状態(出題時)と、答えたあとの知らせ */
@@ -707,6 +715,10 @@ h1.logo .gd::after{content:'🌱'; position:absolute; right:-.55em; top:-.55em; 
 .word-panel .corner::after{bottom:8px;right:8px}
 
 #wordText{font-size:clamp(1.4rem,4.5vw,2.2rem); letter-spacing:.06em; margin-bottom:.4rem; min-height:1.3em}
+/* 単語帳の問題: 問題を出して、答えとよみがなは決めた秒数たつまで隠す */
+#wordQ{font-size:clamp(1.05rem,3vw,1.45rem); line-height:1.55; color:var(--amber); margin-bottom:.5rem; white-space:pre-wrap; overflow-wrap:anywhere}
+#wordQ .wq-wait{display:block; font-size:.8rem; color:var(--steel); margin-top:.2rem}
+#wordPanel.wbhide #wordText, #wordPanel.wbhide #wordKana, #wordPanel.wbhide #romaji .rest{visibility:hidden}
 #wordKana{font-size:1rem; color:var(--steel); margin-bottom:.9rem; min-height:1.2em}
 #romaji{font-size:clamp(1.1rem,3.5vw,1.5rem); letter-spacing:.14em; font-family:'DotGothic16',monospace; min-height:1.3em}
 #romaji .done{color:var(--ok)}
@@ -1468,9 +1480,13 @@ html.mobile.gated body{overflow:hidden}
 @media (prefers-reduced-motion: reduce){ .diff-btn.dbon{animation:none} }
 .result-garden{color:#9fd36a; font-size:.95rem; margin:.1rem 0 .4rem; min-height:1.2em}
 /* ---- タイピング単語帳 ---- */
-.diff-btn.books{border-color:#5b6f9a; width:min(220px,90vw)}
-.diff-btn.books .name{color:#a9c4ff}
-.diff-btn.books:hover,.diff-btn.books:focus-visible{border-color:#a9c4ff}
+.diff-btn.books{border-color:#8a6a3e; width:min(240px,90vw); background:linear-gradient(180deg,#2a241c,#1d1913)}
+.diff-btn.books .name{color:#f2c98a}
+.diff-btn.books:hover,.diff-btn.books:focus-visible{border-color:#f2c98a}
+.diff-btn.books .tb-shelf{display:flex; align-items:flex-end; gap:2px; height:24px; margin-top:.45rem; padding:0 .3rem; border-bottom:4px solid #7a5532; box-shadow:0 2px 0 #4a321c}
+.diff-btn.books .tb-shelf i{width:9px; height:20px; border-radius:2px 2px 0 0; background:linear-gradient(90deg, hsl(var(--h) 40% 30%), hsl(var(--h) 46% 42%) 40%, hsl(var(--h) 40% 30%)); box-shadow:inset 0 3px 0 hsl(var(--h) 60% 70% / .35); transition:transform .15s}
+.diff-btn.books .tb-shelf i:nth-child(2){height:17px} .diff-btn.books .tb-shelf i:nth-child(3){height:22px} .diff-btn.books .tb-shelf i:nth-child(4){height:18px} .diff-btn.books .tb-shelf i:nth-child(5){height:21px; width:11px} .diff-btn.books .tb-shelf i:nth-child(6){height:16px} .diff-btn.books .tb-shelf i:nth-child(7){height:19px; transform:rotate(12deg); transform-origin:bottom left; margin-left:2px}
+.diff-btn.books:hover .tb-shelf i:nth-child(3), .diff-btn.books:focus-visible .tb-shelf i:nth-child(3){transform:translateY(-5px)}
 .wb-list{display:flex; flex-direction:column; gap:.5rem; width:min(620px,100%); margin:1rem auto 0; text-align:left}
 .wb-item{display:flex; align-items:center; gap:.8rem; padding:.7rem .9rem; border:1px solid var(--line); border-radius:8px; background:rgba(0,0,0,.18)}
 .wb-item .wb-no{color:var(--amber); width:1.4em; text-align:center}
@@ -1484,16 +1500,119 @@ html.mobile.gated body{overflow:hidden}
 .wb-acts .btn{padding:.4rem .8rem; font-size:.85rem}
 .wb-acts .btn.wb-del{border-color:#7a3b3b}
 .wb-empty{color:var(--steel); text-align:center; padding:1rem}
+.wb-preh{color:var(--amber); font-size:.9rem; letter-spacing:.1em; margin:.8rem 0 0; padding-top:.6rem; border-top:1px dashed var(--line)}
+.wb-item.pre{background:rgba(242,193,78,.04)}
+/* 本棚 */
+#screen-books{--bw:104px; --bh:142px; --bg:22px}
+html.mobile #screen-books{--bw:88px; --bh:122px; --bg:18px}
+.wb-shelfh{width:min(680px,100%); margin:1.1rem auto .3rem; color:var(--amber); font-size:.9rem; letter-spacing:.12em; text-align:left}
+.wb-shelf{width:min(680px,100%); margin:0 auto; display:grid; grid-template-columns:repeat(auto-fill,var(--bw)); grid-auto-rows:var(--bh); gap:var(--bg) 14px; justify-content:center; padding:10px 12px 14px;
+  background:repeating-linear-gradient(to bottom, transparent 0, transparent calc(var(--bh) + 10px), #7a5532 calc(var(--bh) + 10px), #5a3b20 calc(var(--bh) + 10px + var(--bg) * .55), transparent calc(var(--bh) + 10px + var(--bg) * .55), transparent calc(var(--bh) + var(--bg))), linear-gradient(#20180f,#17110b);
+  border:1px solid #3b2a18; border-radius:6px; box-shadow:inset 0 6px 14px rgba(0,0,0,.5)}
+.wb-book{position:relative; cursor:pointer; border-radius:3px 7px 7px 3px; background:linear-gradient(100deg, hsl(var(--h) 38% 24%) 0 9%, hsl(var(--h) 42% 34%) 11%, hsl(var(--h) 46% 30%) 100%);
+  box-shadow:inset 3px 0 0 rgba(255,255,255,.12), inset -2px 0 0 rgba(0,0,0,.35), 2px 3px 6px rgba(0,0,0,.55); transition:transform .15s; overflow:hidden}
+.wb-book:hover{transform:translateY(-4px)}
+.wb-book.cur{transform:translateY(-6px); box-shadow:0 0 0 2px var(--amber), 0 0 14px rgba(242,193,78,.4), 2px 3px 6px rgba(0,0,0,.55)}
+.wb-cover{position:absolute; inset:8px 6px 14px 14px; display:flex; flex-direction:column; align-items:center; gap:.2rem; text-align:center; border:1px solid hsl(var(--h) 50% 60% / .35); border-radius:3px; padding:.35rem .2rem}
+.wb-bart{display:block; width:44px; height:44px; color:hsl(var(--h) 70% 82%)}
+.wb-bart svg{width:100%; height:100%; display:block}
+.wb-dcover .wb-bart{width:44px; height:44px}
+.wb-dcover .wb-bic{font-size:1.7rem}
+.wb-bic{font-size:1.9rem; line-height:1.1; color:hsl(var(--h) 70% 82%); font-family:serif; text-shadow:0 1px 0 rgba(0,0,0,.4)}
+.wb-bt{font-weight:400; font-size:.74rem; line-height:1.3; color:#f4ecd8; display:-webkit-box; -webkit-box-orient:vertical; -webkit-line-clamp:3; overflow:hidden; word-break:break-all}
+.wb-cover small{margin-top:auto; font-size:.66rem; color:hsl(var(--h) 30% 78%)}
+.wb-band{position:absolute; left:14px; right:6px; bottom:5px; height:5px; border-radius:3px; background:rgba(0,0,0,.4)}
+.wb-band i{display:block; height:100%; border-radius:3px; background:linear-gradient(90deg,#9be28a,#f2c14e)}
+.wb-bno{position:absolute; top:3px; right:5px; font-size:.65rem; color:rgba(255,255,255,.55)}
+.wb-newbook{cursor:pointer; border:2px dashed #6b5638; border-radius:6px; display:flex; flex-direction:column; align-items:center; justify-content:center; color:#c9b28a; gap:.2rem}
+.wb-newbook span:first-child{font-size:1.8rem; line-height:1}
+.wb-newbook .kbdh{font-size:.68rem; margin-top:.15rem}
+.wb-newbook small{font-size:.72rem; text-align:center}
+.wb-newbook:hover{border-color:var(--amber); color:var(--amber)}
+.wb-detail{position:sticky; top:env(safe-area-inset-top,0px); z-index:5; width:min(680px,100%); margin:0 auto; display:flex; gap:.9rem; padding:.8rem .9rem; text-align:left;
+  background:linear-gradient(135deg, #1b211d, #141915); border:1px solid hsl(var(--h) 45% 45% / .7); border-radius:10px; box-shadow:0 6px 16px rgba(0,0,0,.5)}
+.wb-dcover{flex:0 0 auto; width:58px; height:80px; border-radius:3px 6px 6px 3px; display:flex; align-items:center; justify-content:center; background:linear-gradient(100deg, hsl(var(--h) 38% 24%) 0 10%, hsl(var(--h) 46% 34%) 12%, hsl(var(--h) 46% 28%)); box-shadow:inset 3px 0 0 rgba(255,255,255,.12), 2px 3px 6px rgba(0,0,0,.5)}
+.wb-dcover span{font-size:1.7rem; font-family:serif; color:hsl(var(--h) 70% 82%)}
+.wb-dinfo{flex:1; min-width:0; display:flex; flex-direction:column; gap:.3rem}
+.wb-dname{font-weight:400; color:var(--ink); font-size:1.05rem}
+.wb-dtag{margin-left:.5rem; font-size:.7rem; color:var(--amber); border:1px solid var(--amber); border-radius:999px; padding:0 .45rem; vertical-align:middle}
+.wb-dinfo > small{color:var(--steel); font-size:.8rem; line-height:1.5}
+.wb-dprog{display:flex; align-items:center; gap:.5rem; font-size:.78rem; color:var(--steel)}
+.wb-dprog i{flex:1; max-width:220px; height:6px; border-radius:3px; background:rgba(255,255,255,.08); overflow:hidden}
+.wb-dprog i b{display:block; height:100%; background:linear-gradient(90deg,#9be28a,#f2c14e)}
+.wb-dopts{display:flex; flex-wrap:wrap; gap:.35rem .8rem; align-items:center}
+.wb-dopts .wb-mode{margin:0}
+.wb-dopts .wb-sec{margin-left:0}
+.wb-dopts .kbdh{margin-left:.3rem}
+.wb-detail .wb-acts .kbdh{margin-left:.15rem}
+.wb-detail .wb-acts{justify-content:flex-start; margin-top:.2rem}
+html.mobile .wb-dcover{display:none}
+html.mobile .wb-detail{position:static}
+.wb-share-note{width:min(620px,100%); margin:.8rem auto 0; padding:.6rem .8rem; border:1px solid var(--amber); border-radius:8px; color:var(--ink); text-align:left; font-size:.9rem; line-height:1.7}
+.wb-share-note .wb-code{color:var(--amber); font-size:1.3rem; letter-spacing:.2em; margin:0 .3rem}
+.wb-share-note .btn{padding:.2rem .6rem; font-size:.8rem}
+.wb-vname{color:var(--amber); font-weight:400; margin:.2rem 0}
+.wb-vwords{max-height:55vh}
+.wb-mnote{margin:.4rem 0 0; font-size:.8rem; color:var(--amber); line-height:1.5}
+.wb-acts .btn.wb-off{opacity:.45}
+.wb-vtabs{margin:.4rem 0; flex-wrap:wrap}
+.wb-vnone{color:var(--steel); justify-content:center; display:block!important; text-align:center}
+.wb-vwords li{grid-template-columns:2.4em 1fr 1fr auto}
+.wb-st{font-size:.78rem; color:var(--steel); white-space:nowrap}
+.word-panel.wb4 #romaji .bq{cursor:pointer}
+.word-panel.wb4 #romaji{display:block; font-family:inherit; letter-spacing:0; font-size:1rem}
+.wb4opts{width:min(640px,100%); margin:.2rem auto 0}
+.word-panel.wb4 #romaji .wb4opts .tq-opt{padding:.8rem .9rem; border-radius:10px; border:1px solid var(--line); font-size:1rem; line-height:1.4; color:var(--ink)}
+.word-panel.wb4 #romaji .wb4opts .tq-opt .no{color:#ffd84a}
+.word-panel.wb4 #romaji .wb4opts .tq-opt.ok{border-color:#5fbf6a; background:rgba(95,191,106,.22)}
+.word-panel.wb4 #romaji .wb4opts .tq-opt.ng{border-color:#e05a4a; background:rgba(224,90,74,.22)}
+.word-panel.wb4 #romaji .wb4opts .tq-opt.x{opacity:.45}
+html.mobile .wb4opts{grid-template-columns:1fr}
+html.mobile .word-panel.wb4 #romaji .wb4opts .tq-opt{padding:.6rem .8rem; min-height:2.8rem}
+.wb-mode{display:flex; gap:.25rem; margin:.3rem 0 .1rem}
+.wb-mode button{font-family:inherit; font-size:.75rem; background:none; border:1px solid var(--line); color:var(--steel); border-radius:999px; cursor:pointer; padding:.05rem .6rem}
+.wb-mode button.on{border-color:var(--amber); color:var(--amber); background:rgba(242,193,78,.1)}
+#wordQ .wq-k{display:block; font-size:.78rem; color:var(--steel); letter-spacing:.04em}
 .wb-editor{width:min(620px,100%); margin:1rem auto 0; text-align:left}
 .wb-lbl{display:block; color:var(--steel); font-size:.85rem; margin:.8rem 0 .3rem}
 .wb-in{font-family:inherit; font-size:1rem; color:var(--ink); background:#0f1511; border:2px solid var(--line); border-radius:6px; padding:.5rem .7rem; width:100%; user-select:text}
 .wb-in:focus{outline:none; border-color:var(--amber)}
 .wb-add{display:grid; grid-template-columns:1fr 1fr auto; gap:.5rem}
+.wb-q{margin-bottom:.5rem}
+.wb-words .q{display:block; color:var(--amber); font-size:.8rem; overflow-wrap:anywhere}
+.wb-sec{display:inline-flex; align-items:center; gap:.3rem; margin-left:.4rem; color:var(--steel); font-size:.8rem}
+.wb-sec button{font-family:inherit; background:none; border:1px solid var(--line); color:var(--ink); border-radius:5px; cursor:pointer; padding:0 .45rem; line-height:1.4}
+.wb-sec b{color:var(--ink); min-width:1.2em; text-align:center}
 .wb-add .btn{padding:.5rem 1rem; font-size:.9rem}
 .wb-hint{color:#7d8b80; font-size:.78rem; margin-top:.35rem; line-height:1.6}
 .wb-bulk{margin-top:.6rem; color:var(--steel); font-size:.85rem}
 .wb-bulk summary{cursor:pointer}
 .wb-bulk textarea{margin-top:.4rem; resize:vertical}
+.wb-ai{margin-top:.6rem}
+.wb-steps{margin:.6rem 0 .5rem 1.4rem; padding:0; color:var(--ink); font-size:.88rem; line-height:1.7}
+.wb-steps li{margin-bottom:.45rem}
+.wb-steps li b{color:var(--amber); font-weight:400}
+.wb-steps .btn{margin-top:.3rem; padding:.35rem .8rem; font-size:.85rem}
+.wb-aikind{font-family:inherit; font-size:.85rem; color:var(--ink); background:#0f1511; border:1px solid var(--line); border-radius:5px; padding:.25rem .4rem; margin-top:.3rem; max-width:100%}
+.wb-aibox{margin-top:.8rem; padding:.7rem .9rem; border:1px solid var(--amber); border-radius:10px; background:rgba(242,193,78,.05)}
+.wb-aih{margin:0; color:var(--amber); font-weight:400; font-size:1rem}
+.wb-aih small{color:var(--steel); font-size:.75rem; margin-left:.4rem}
+.wb-words li .wb-wt{cursor:pointer}
+.wb-words li.edit{outline:1px dashed var(--cyan)}
+.wb-def{display:flex; flex-wrap:wrap; gap:.4rem 1.2rem; color:var(--steel); font-size:.88rem; align-items:center}
+.wb-def select, .wb-def input{font-family:inherit; font-size:.9rem; color:var(--ink); background:#0f1511; border:1px solid var(--line); border-radius:5px; padding:.2rem .4rem; margin-left:.3rem}
+.wb-def input{width:4em}
+.wb-ai textarea{font-size:.8rem; color:var(--steel)}
+.wb-li-note{display:block; margin-top:.25rem; color:var(--steel); font-size:.8rem; line-height:1.5}
+.wb-cnote{display:block; margin-top:.35rem; font-size:.85rem; min-height:0}
+.wb-cnote.ng{color:#ffb38a}
+.wb-bnote[hidden]{display:none}
+.wb-bnote{margin:.5rem 0; padding:.55rem .7rem; border:1px solid var(--line); border-radius:8px; background:rgba(255,255,255,.03); font-size:.85rem; display:grid; gap:.3rem}
+.wb-bnote .ok{font-weight:700; font-size:.95rem}
+.wb-bnote .ng{color:#ffb38a}
+.wb-bnote .ws{color:var(--steel); overflow-wrap:anywhere}
+.wb-bnote .btn{justify-self:start; padding:.25rem .7rem; font-size:.8rem}
+.wb-words li.new{background:rgba(120,200,140,.1)}
 .wb-note{min-height:1.3em; color:#ffb38a; font-size:.85rem; margin:.5rem 0}
 .wb-words{list-style:none; max-height:40vh; overflow:auto; border:1px solid var(--line); border-radius:8px}
 .wb-words:empty{display:none}
@@ -1511,6 +1630,8 @@ html.mobile .wb-in{font-size:16px}
 .fb-cats .btn.on{color:#1b1405; background:linear-gradient(180deg,#ffd75e,var(--amber)); border-color:#c79100}
 .fb-text{height:8rem; font-size:.95rem !important}
 .fb-name{width:min(300px,100%); margin-top:.5rem}
+.fb-mail{width:min(460px,100%); margin-top:.5rem}
+.fb-book{margin-top:.4rem}
 html.mobile .fb-text{font-size:16px !important}
 
 /* ---- キーボード農園のボタン(黄緑)・ランキングの農園タブ ---- */
@@ -3157,6 +3278,7 @@ html.mobile #screen-garden .gacha.wide .gmachine{zoom:.42}
 .gask-acts button{font:inherit; font-size:.95rem; padding:.45rem 1.1rem; border-radius:999px; cursor:pointer; border:2px solid #7a5230; background:#fff; color:#3a2a1a; box-shadow:0 3px 0 #7a5230}
 .gask-acts .gask-ok{background:#d8402e; border-color:#8a1e12; color:#fff; box-shadow:0 3px 0 #8a1e12}
 .gask-acts button:focus-visible, .gask-acts button:focus{outline:3px solid #f4c542; outline-offset:2px}
+.gask-in{display:block; width:100%; box-sizing:border-box; margin:0 0 .9rem; font:inherit; font-size:1.1rem; letter-spacing:.15em; padding:.45rem .7rem; border:2px solid #7a5230; border-radius:10px; background:#fff; color:#3a2a1a; text-transform:uppercase}
 .gask-box small{display:block; margin-top:.6rem; text-align:right; font-size:.72rem; font-weight:400; color:#8a7058}
 @keyframes gask-in{from{opacity:0}to{opacity:1}}
 /* 大事なお知らせは、目に入るように少し強く */
@@ -3250,7 +3372,8 @@ html:not(.mobile) #screen-garden.haslog:has(.modal.open) #g-toasts{top:14px}
         </button>
         <button class="diff-btn books" data-diff="books">
           <div class="name">タイピング単語帳<span class="kbd">0</span></div>
-          <div class="desc">自分で言葉とよみがなを登録して<br>その単語帳で練習する</div>
+          <div class="desc">難読漢字などのおためし単語帳や<br>自分の単語帳を、タイピングと4択で覚える</div>
+          <span class="tb-shelf" aria-hidden="true"><i style="--h:312"></i><i style="--h:232"></i><i style="--h:140"></i><i style="--h:28"></i><i style="--h:188"></i><i style="--h:280"></i><i style="--h:60"></i></span>
         </button>
         <button class="diff-btn toeic" data-diff="toeic">
           <div class="name">TOEIC 英単語<span class="kbd">E</span></div>
@@ -3363,6 +3486,7 @@ html:not(.mobile) #screen-garden.haslog:has(.modal.open) #g-toasts{top:14px}
       <div class="mt-pop" id="mtPop"></div>
       <span class="corner"></span>
       <div id="penaltyPop">ミス上限! キーが1個はまった…</div>
+      <div id="wordQ" hidden></div>
       <div id="wordText">&nbsp;</div>
       <div id="wordKana">&nbsp;</div>
       <div id="romaji">&nbsp;</div>
@@ -3370,7 +3494,7 @@ html:not(.mobile) #screen-garden.haslog:has(.modal.open) #g-toasts{top:14px}
     <div id="nextWord">&nbsp;</div>
 
     <div class="plate" id="plate"></div>
-    <p class="game-esc"><button class="btn" id="gameQuit" tabindex="-1">やめる <span class="kbdh">Esc</span></button><button class="btn mt-bgm" id="mtBgm" tabindex="-1" hidden>🔊 BGM</button></p>
+    <p class="game-esc"><button class="btn" id="wbPeekBtn" tabindex="-1" hidden>答えを見る <span class="kbdh">Enter</span></button><button class="btn" id="gameQuit" tabindex="-1">やめる <span class="kbdh">Esc</span></button><button class="btn mt-bgm" id="mtBgm" tabindex="-1" hidden>🔊 BGM</button></p>
   </section>
 
   <!-- 対戦の会場(TOEIC・農業) -->
@@ -3404,6 +3528,7 @@ html:not(.mobile) #screen-garden.haslog:has(.modal.open) #g-toasts{top:14px}
     <p class="keynav" id="resultKeys"><b>N</b> 名前を入力 → <b>Enter</b> で登録 ・ 入力中の <b>Esc</b> で入力をやめる</p>
     <div class="btn-row">
       <button class="btn primary" id="retryBtn">もう一回 (Enter)</button>
+      <button class="btn" id="wbWrongBtn" hidden>まちがえた言葉だけ (W)</button>
       <button class="btn mt-chatb" id="mtChatBtn" hidden>💬 チャットへ (C)</button>
       <button class="btn" id="titleBtn">タイトルへ (Esc)</button>
       <button class="btn" id="toGardenBtn">農園へ (G)</button>
@@ -3752,34 +3877,67 @@ html:not(.mobile) #screen-garden.haslog:has(.modal.open) #g-toasts{top:14px}
   <!-- タイピング単語帳 -->
   <section id="screen-books" class="screen">
     <h2 class="rank-title">タイピング単語帳</h2>
-    <p class="reg-status">言葉とよみがなを登録して、自分だけの単語帳でタイピングの練習ができます。全部の言葉を打ち終えるまでのタイムを計ります</p>
+    <p class="reg-status">言葉とよみがなを登録して、自分だけの単語帳でタイピングや4択の練習ができます。おためし単語帳もあり、コードで人と共有もできます</p>
     <div id="wbListView">
+      <p class="wb-share-note" id="wbShareNote" hidden></p>
       <div id="wbList" class="wb-list"></div>
-      <p class="reg-status m-only">スマホでは単語帳の作成・編集・削除ができます。プレイはパソコンで遊べます</p>
-      <p class="keynav"><b>↑ ↓</b> 単語帳を選ぶ ・ <b>Enter</b> プレイ ・ <b>E</b> 編集 ・ <b>Delete</b> 削除 ・ <b>1〜9</b> その単語帳をプレイ ・ <b>N</b> 新しい単語帳 ・ <b>Esc</b> タイトルへ</p>
+      <p class="reg-status m-only">スマホでは、問題のある言葉が4つ以上ある単語帳を4択で遊べます(作成・編集・共有もできます)。タイピングはパソコンで遊べます</p>
+      <p class="keynav"><b>← → ↑ ↓</b> 本を選ぶ ・ <b>Enter</b> プレイ ・ <b>E</b> 編集 ・ <b>M</b> 遊び方(全部・10語) ・ <b>F</b> タイピング / 4択 ・ <b>D</b> 向き ・ <b>H</b> 覚えた言葉を出さない ・ <b>V</b> 単語リスト ・ <b>S</b> 共有 ・ <b>I</b> コードで取り込む ・ <b>Delete</b> 削除 ・ <b>1〜9</b> その単語帳をプレイ ・ <b>− +</b> 答えが出るまでの秒数 ・ <b>N</b> 新しい単語帳 ・ <b>Esc</b> タイトルへ</p>
       <div class="btn-row">
         <button class="btn primary" id="wbNew">新しい単語帳を作る (N)</button>
+        <button class="btn" id="wbImport">コードで取り込む (I)</button>
         <button class="btn" id="wbBack">タイトルへ (Esc)</button>
       </div>
     </div>
+    <div id="wbViewer" class="wb-editor" style="display:none">
+      <h3 class="wb-vname" id="wbVName"></h3>
+      <p class="wb-hint" id="wbVSum"></p>
+      <div class="wb-mode wb-vtabs" id="wbVTabs"></div>
+      <ol id="wbVWords" class="wb-words wb-vwords"></ol>
+      <p class="keynav"><b>← →</b> 覚えた・苦手などでしぼりこむ ・ <b>Enter</b> プレイ ・ <b>Esc</b> 一覧へ</p>
+      <div class="btn-row">
+        <button class="btn primary" id="wbVPlay">プレイ (Enter)</button>
+        <button class="btn" id="wbVBack">一覧へ (Esc)</button>
+      </div>
+    </div>
     <div id="wbEditor" class="wb-editor" style="display:none">
-      <label class="wb-lbl">単語帳の名前</label>
-      <input id="wbName" class="wb-in" maxlength="20" placeholder="例: 理科の用語" autocomplete="off">
-      <label class="wb-lbl">言葉を追加</label>
+      <label class="wb-lbl">単語帳のタイトル</label>
+      <input id="wbTtl" name="wb-ttl" class="wb-in" maxlength="20" placeholder="例: 理科の用語" autocomplete="off" data-lpignore="true" data-1p-ignore>
+      <div class="wb-bulk wb-aibox">
+        <h4 class="wb-aih">AIでまとめて作る <small>おすすめ ・ 1冊 300語まで(多いときは単語帳を分けてください)</small></h4>
+        <ol class="wb-steps">
+          <li><b>覚えたい内容を用意する</b><br>自分のノートやまとめ、用語集、単語リスト、プリントの文字など。コピーできる文字にしておきます<br><small class="wb-li-note">手元の教材やプリントは、自分の勉強用の単語帳づくりに使えます。共有するときは、ほかの人が作った文章をそのまま写した単語帳にならないようにしてください</small></li>
+          <li><b>AIに変換してもらう</b><br>作りたい単語帳の形を選んでから、頼む文章をコピーして ChatGPT や Claude などのAIに貼ります。その下に①の内容を貼って送ります<br><select id="wbAiKind" class="wb-aikind"></select><br><button class="btn" id="wbAiCopy">AIに頼む文章をコピー</button><span id="wbAiCopyNote" class="wb-cnote" aria-live="polite"></span></li>
+          <li><b>返ってきた行を貼る</b><br>AIの返事(「問題|答え|よみがな」の行)を、コードブロックのコピーボタンでコピーして下の欄に貼り、「まとめて追加」を押します</li>
+        </ol>
+        <textarea id="wbBulk" class="wb-in" rows="6" placeholder="ここにAIの返事を貼ります。例:&#10;植物が光から栄養を作るはたらき|光合成|こうごうせい&#10;細胞|さいぼう"></textarea>
+        <div class="btn-row" style="margin-top:.4rem"><button class="btn primary" id="wbBulkAdd">まとめて追加</button></div>
+        <div id="wbBulkNote" class="wb-bnote" hidden></div>
+        <p class="wb-hint">自分で書くときは、1行に「言葉|よみがな」か「問題|答え|よみがな|問題のよみがな」(問題のよみがなはなくてもよい)。答えが何通りもあるときは、答えとよみがなを「／」で区切って同じ順に並べます(例: issue|問題／発行する|もんだい／はっこうする)。| のかわりにカンマ(,)でもかまいません。Excel やスプレッドシートの表は、列ごとにそのままコピーして貼れます(「問題・答え・よみがな」の順の列)。読点(、)は言葉の一部になります</p>
+        <details class="wb-ai"><summary>AIに頼む文章の中身を見る</summary>
+          <textarea id="wbAiText" class="wb-in" rows="8" readonly></textarea>
+        </details>
+      </div>
+      <label class="wb-lbl">遊び方の初期設定(一覧でも変えられ、変えたものが残ります)</label>
+      <div class="wb-def">
+        <label>出し方<select id="wbDefStyle"><option value="type">タイピング</option><option value="4">4択</option></select></label>
+        <label>出す数<select id="wbDefMode"><option value="all">全部</option><option value="10">10語</option></select></label>
+        <label>答えが出るまで(タイピング)<input id="wbDefSec" type="number" min="0" max="30" step="1">秒</label>
+      </div>
+      <p class="wb-hint">4択は、問題のある言葉が4つ以上(答えがちがうもの)あるときに遊べます。打たずに、すぐ4つの答えから選びます。英単語の意味のように、答えを1つに決めて打ちにくい単語帳や、打てない文字がある外国語の単語帳は「4択」にしておくのがおすすめです。共有するときも、この設定が一緒に届きます</p>
+      <label class="wb-lbl" id="wbAddLbl">1語ずつ追加する・直す(1冊 300語まで。下の一覧の言葉を押すと直せます)</label>
+      <input id="wbQ" class="wb-in wb-q" maxlength="80" placeholder="問題(なくてもよい。例: 植物が光から栄養を作るはたらき)" autocomplete="off">
+      <input id="wbQK" class="wb-in wb-q" maxlength="80" placeholder="問題のよみがな(なくてもよい。問題の下に小さく出ます)" autocomplete="off">
       <div class="wb-add">
-        <input id="wbT" class="wb-in" maxlength="40" placeholder="言葉(例: 光合成)" autocomplete="off">
+        <input id="wbT" class="wb-in" maxlength="40" placeholder="言葉・答え(例: 光合成)" autocomplete="off">
         <input id="wbK" class="wb-in" maxlength="60" placeholder="よみがな(例: こうごうせい)" autocomplete="off">
         <button class="btn" id="wbAdd">追加 (Enter)</button>
       </div>
-      <p class="wb-hint">よみがなはひらがなで入れてください(カタカナは自動でひらがなに直します)。言葉がひらがなだけなら、よみがなは空でも大丈夫です</p>
-      <details class="wb-bulk">
-        <summary>まとめて追加する</summary>
-        <textarea id="wbBulk" class="wb-in" rows="5" placeholder="1行に「言葉,よみがな」の形で書きます&#10;光合成,こうごうせい&#10;細胞,さいぼう"></textarea>
-        <div class="btn-row" style="margin-top:.4rem"><button class="btn" id="wbBulkAdd">まとめて追加</button></div>
-      </details>
-      <p class="wb-note" id="wbNote"></p>
+      <div id="wbAddNote" class="wb-bnote" hidden></div>
+      <p class="wb-hint">よみがなはひらがなで入れてください(カタカナは自動でひらがなに直します)。言葉がひらがなだけなら、よみがなは空でも大丈夫です。英語の熟語や英文は、よみがなを空白入りのまま書けます(打つときは空白のところだけスペースキー)。問題のある言葉は、よみがなを空にすると4択で遊ぶときだけ出ます(打てない文字がある外国語など)。<br>問題を入れると、遊ぶときは問題が出て、答えとよみがなは決めた秒数(単語帳の一覧で変えられます)たつまで隠れます。答えがよみがなと同じなら、答えは空でも大丈夫です。<br>答えが何通りもあるときは、答えとよみがなを「／」で区切って同じ順に並べると、どれを打っても正解になります(例: 問題／発行する ・ もんだい／はっこうする)</p>
       <ol id="wbWords" class="wb-words"></ol>
       <p class="keynav" id="wbKeys"></p>
+      <p class="wb-note" id="wbNote"></p>
       <div class="btn-row">
         <button class="btn primary" id="wbSave">保存する (S)</button>
         <button class="btn" id="wbCancel">やめる (Esc)</button>
@@ -3877,7 +4035,7 @@ html:not(.mobile) #screen-garden.haslog:has(.modal.open) #g-toasts{top:14px}
 <div id="fb" class="bk-modal">
   <div class="bk-panel">
     <div class="bk-head"><h2>要望・バグ報告</h2><button class="btn bk-x" id="fbClose">閉じる ✕</button></div>
-    <p class="bk-p">追加してほしい言葉・作物・ガチャ・機能や、見つけたバグを自由に書いて送ってください。送られた内容は作者が確認して、今後の参考にします(個別の返信はできません)。</p>
+    <p class="bk-p">追加してほしい言葉・作物・ガチャ・機能や、見つけたバグを自由に書いて送ってください。送られた内容は作者が確認して、今後の参考にします。</p>
     <h3>種類</h3>
     <div class="fb-cats" id="fbCats">
       <button class="btn" data-c="word">言葉</button>
@@ -3886,12 +4044,18 @@ html:not(.mobile) #screen-garden.haslog:has(.modal.open) #g-toasts{top:14px}
       <button class="btn on" data-c="feature">機能</button>
       <button class="btn" data-c="bug">バグ</button>
       <button class="btn" data-c="other">その他</button>
+      <button class="btn" data-c="book">単語帳の削除依頼</button>
+    </div>
+    <div class="fb-book" id="fbBook" hidden>
+      <p class="bk-p">共有された単語帳に、ご自身が権利を持つ文章などが無断で使われているときは、ここからお知らせください。確認して、取り込めないようにします。どの単語帳かを探せるよう、相手から渡された6文字の共有コードを書いてください。</p>
+      <input class="bk-codein fb-name" id="fbCode" maxlength="8" placeholder="共有コード(英字と数字の6文字)" autocomplete="off">
+      <input class="bk-codein fb-mail" id="fbMail" maxlength="100" placeholder="連絡先(メールアドレスなど。確認のご連絡に使います)" autocomplete="off">
     </div>
     <h3>内容</h3>
     <textarea class="bk-code fb-text" id="fbText" maxlength="1000" placeholder="例: ハードに入れてほしい言葉があります / ガチャに○○の作物がほしい / スマホで○○を押すと動かない"></textarea>
     <input class="bk-codein fb-name" id="fbName" maxlength="20" placeholder="名前(なくても大丈夫です)" autocomplete="off">
     <div class="bk-foot"><span class="bk-note" id="fbNote"></span><button class="btn primary" id="fbSend">送る</button></div>
-    <p class="keynav"><b>1〜6</b> 種類 ・ <b>T</b> 内容を書く ・ <b>N</b> 名前 ・ <b>Ctrl+Enter</b> / <b>Enter</b>(入力欄の外) 送る ・ 入力中の <b>Esc</b> で入力をやめる ・ <b>Esc</b> 閉じる</p>
+    <p class="keynav"><b>1〜7</b> 種類 ・ <b>T</b> 内容を書く ・ <b>N</b> 名前 ・ <b>Ctrl+Enter</b> / <b>Enter</b>(入力欄の外) 送る ・ 入力中の <b>Esc</b> で入力をやめる ・ <b>Esc</b> 閉じる</p>
   </div>
 </div>
 
@@ -4673,7 +4837,7 @@ const KANA = {
 "ぁ":["xa","la"],"ぃ":["xi","li"],"ぅ":["xu","lu"],"ぇ":["xe","le"],"ぉ":["xo","lo"],
 "ゃ":["xya","lya"],"ゅ":["xyu","lyu"],"ょ":["xyo","lyo"],
 "ゔ":["vu"],"ー":["-"],
-"、":[","],"。":["."],"・":["/"],"！":["!"],"？":["?"],"〜":["~","-"],"～":["~","-"],
+"、":[","],"。":["."],"・":["/"],"！":["!"],"？":["?"],"〜":["~","-"],"～":["~","-"],"ゐ":["wi"],"ゑ":["we"],
 "きゃ":["kya"],"きゅ":["kyu"],"きょ":["kyo"],
 "しゃ":["sya","sha"],"しゅ":["syu","shu"],"しょ":["syo","sho"],"しぇ":["sye","she"],
 "ちゃ":["tya","cha","cya"],"ちゅ":["tyu","chu","cyu"],"ちょ":["tyo","cho","cyo"],"ちぇ":["tye","che"],
@@ -4764,7 +4928,8 @@ function handleKey(rawKey){
   const ch=chunks[chunkIdx];
   // 数字・英字などの直接入力チャンクは大文字小文字を区別する(例: "E"はshift+Eが必要)
   // かな入力チャンクは小文字化して判定する
-  const key = ch.literal ? rawKey : rawKey.toLowerCase();
+  let key = ch.literal ? rawKey : rawKey.toLowerCase();
+  if(ch.literal && diff==="book" && /^[a-z]$/i.test(rawKey) && /^[a-z]$/i.test(ch.kana)) key = ch.kana===ch.kana.toUpperCase() ? rawKey.toUpperCase() : rawKey.toLowerCase();   // 単語帳の英字は、大文字でも小文字でも打てる(元素記号の Li など)
   // 「ん」+ n: 次がナ行なら n単打で確定してキーを次チャンクへ(nna=んな のIME挙動)
   if(ch.nn && buf==="n" && key==="n" && nextChunkStartsWith("n")){
     completeChunk("n");
@@ -5142,14 +5307,122 @@ function setCurrentWord(w){
   setWord(w.k);
   $("wordText").textContent=w.t; dkWrap();
   $("wordKana").textContent=w.t===w.k?"\u00a0":w.k;
+  wbCands=null;
+  if(diff==="book" && (w.k2 || (w.a && w.a.length))){   // よみがなが2つある・別解がある: どれで打っても正解
+    const a=tkSave(); wbCands=[{ k:w.k, t:w.t, st:a }];
+    for(const x of [...(w.k2?[{ k:w.k2, t:w.t2||w.t }]:[]), ...(w.a||[]).filter(x=>x.k)]){ setWord(x.k); wbCands.push({ k:x.k, t:x.t, st:tkSave() }); }
+    wbCands=wbCands.filter(c=>!wbCands.some(o=>o.k.length>c.k.length && o.k.startsWith(c.k)));   // ほかの答えの頭と同じ答え(365／365日など)は、途中で終わらないように長いほうだけを打つ
+    const l=wbCands[0]; tkLoad(l.st);
+    if(l.t!==w.t){ $("wordText").textContent=l.t; dkWrap(); }
+    if(w.t!==w.k) $("wordKana").textContent=l.k;
+  }
   renderRomaji();
+  wbShowQ(w);
+}
+function wbWantsSpace(){
+  const sts = wbCands ? wbCands.map(c=>c.st) : [tkSave()];
+  return sts.some(st=>{ const ch=st.chunks[st.chunkIdx]; return !!ch && !st.buf && ch.alts.includes(" "); });
+}
+/* よみがなが2つある言葉: 両方を同時に進め、打ち方に合うほうを残す(表示も、残ったほうに合わせる) */
+let wbCands=null;
+function wbKey(key){
+  let res="miss", lead=null; const alive=[];
+  for(const c of wbCands){ tkLoad(c.st); const r=handleKey(key); if(r==="miss") continue; c.st=tkSave(); alive.push(c); if(r==="done"){ res="done"; lead=lead||c; } else if(res==="miss") res=r; }
+  if(!alive.length){ tkLoad(wbCands[0].st); return "miss"; }
+  wbCands=alive; lead=lead||alive[0]; tkLoad(lead.st);
+  if(currentWord && (currentWord.t2 || currentWord.a) && $("wordText").textContent!==lead.t){ $("wordText").textContent=lead.t; dkWrap(); }   // 答えが2つある言葉(東京・新宿など)
+  if(currentWord && currentWord.t!==currentWord.k) $("wordKana").textContent=lead.k;
+  return res;
+}
+/* 単語帳の問題: 問題を出し、答え・よみがな・ローマ字の残りは、単語帳で決めた秒数たつまで隠す */
+let wbHideT=null, wbHideI=null, wbNoPeek=0, wbQN=0;
+function wbReveal(){
+  clearTimeout(wbHideT); clearInterval(wbHideI); wbHideT=wbHideI=null; $("wbPeekBtn").hidden=true;
+  $("wordPanel").classList.remove("wbhide");
+  const s=$("wordQ").querySelector(".wq-wait"); if(s) s.remove();
+}
+function wbShowQ(w){
+  wbReveal();
+  const q = diff==="book" && w && w.q ? w.q : "", el=$("wordQ");
+  el.hidden=!q; el.textContent=q;
+  if(!q) return;
+  if(w.qk && /[ぁ-んァ-ン]/.test(w.qk) && wbNormKana(w.qk).replace(/ /g,"")!==wbNormKana(w.q).replace(/ /g,"")) el.insertAdjacentHTML("beforeend",`<small class="wq-k">${escH(w.qk)}</small>`);   // 問題のよみがな(問題と同じとき・英字だけのときは出さない)
+  wbQN++;
+  let left=wbSec(bookPlay);
+  if(left<=0 && !wb4){ wbQN--; return; }   // 0秒: 隠さない(「見ずに打てた」にも数えない)
+  if(wb4 && (window.IS_MOBILE || left<=0 || !w.k)){ $("wordPanel").classList.add("wbhide"); el.insertAdjacentHTML("beforeend",`<small class="wq-wait"></small>`); wb4Open(); return; }   // スマホ: すぐ4択
+  const tip=()=> wb4 ? `4択になるまで ${left}秒 ・ 打ち切れば正解(農園に届くキーが2倍) ・ Enter ですぐ4択` : `答えが出るまで ${left}秒 ・ 見ずに打てたら「見ずに打てた」に数えます ・ Enter ですぐ答えを見る`;
+  $("wordPanel").classList.add("wbhide");
+  el.insertAdjacentHTML("beforeend",`<small class="wq-wait">${tip()}</small>`);
+  wbHideI=setInterval(()=>{ left--; const s=el.querySelector(".wq-wait"); if(s) s.textContent=tip(); },1000);
+  wbHideT=setTimeout(wb4?wb4Open:wbReveal,left*1000);
+  const pb=$("wbPeekBtn"); pb.hidden=false; pb.firstChild.textContent = wb4 ? "すぐ4択にする " : "答えを見る ";   // Enter と同じ
+}
+/* Enter かボタン: 待たずに答えを出す(4択なら4択にする) */
+function wbPeek(){ if(!running || diff!=="book" || !wbHideT) return; if(wb4) wb4Open(); else wbReveal(); }
+/* 単語帳の4択 */
+let wb4=false, wb4Ch=null, wb4Busy=false, wb4Typed=0, wb4Chose=0, wb4Ans=0, wb4Wrong=0, wb4New=0;
+/* 4択の外れ: 正解に似た答え(問題の終わり方・答えの終わり方・文字の種類・長さが近いもの)を先に選び、その中からランダムに3つ */
+function wb4Others(w, mine, mix){
+  const sfx=(a,b)=>{ let n=0; while(n<a.length && n<b.length && a[a.length-1-n]===b[b.length-1-n]) n++; return n; };
+  const qn=q=>String(q||"").replace(/[\s?？!！。、]+$/,"");
+  const kind=t=>/^[\x20-\x7e\u00c0-\u024f]+$/.test(t)?"en":/[\u4e00-\u9fff]/.test(t)?(/[ァ-ヶー]/.test(t)?"mix":"kan"):/[ァ-ヶー]/.test(t)?"kata":"hira";
+  const who=q=>/(人|者|家|将軍|天皇|武将|首相|大臣|宣教師|使節|人物|役人|僧|執権|老中|弟|妻|だれ|誰)は?$/.test(qn(q));   // 人をたずねる問題には、人の答えを並べる
+  const at=wbAnsTxt(w), aq=qn(w.q), ak=kind(at), aw=who(w.q), seen=new Set();
+  const cand=[];
+  for(const x of mix(wbPW.slice())){
+    const t=wbAnsTxt(x); if(seen.has(t) || mine.has(t) || t.split("／").some(y=>mine.has(y))) continue; seen.add(t);
+    const same=[...new Set(t)].filter(c=>c!=="の" && c!=="／" && at.includes(c)).length;   // 同じ文字(戦・詐欺・権など)
+    const sc = Math.min(sfx(aq,qn(x.q)),4)*2 + Math.min(sfx(at,t),3)*2 + Math.min(same,2)*0.8 + (kind(t)===ak?2:0) + (t.includes("／")===at.includes("／")?1.5:0) + (w.q && who(x.q)===aw ? 3 : 0) - Math.min(Math.abs(t.length-at.length),6)*0.4;
+    cand.push({ t, sc });
+  }
+  cand.sort((a,b)=>b.sc-a.sc);
+  return mix(cand.slice(0,5)).slice(0,3).map(c=>c.t);
+}
+function wb4Open(){
+  clearTimeout(wbHideT); clearInterval(wbHideI); wbHideT=wbHideI=null; $("wbPeekBtn").hidden=true;
+  const w=currentWord; if(!w || wb4Ch || !running) return;
+  const mix=a=>{ for(let i=a.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [a[i],a[j]]=[a[j],a[i]]; } return a; };
+  const mine=new Set([w.t, w.t2, ...(w.a||[]).map(x=>x.t)].filter(Boolean));
+  const others=wb4Others(w, mine, mix);
+  wb4Ch={ ch:mix([{ t:wbAnsTxt(w), ok:true }, ...others.map(t=>({ t, ok:false }))]) };
+  const s=$("wordQ").querySelector(".wq-wait"); if(s) s.textContent = window.IS_MOBILE ? "答えを選んでください" : "1〜4 で答えを選ぶ";
+  $("wordPanel").classList.add("quiz","wb4");
+  $("romaji").innerHTML=`<div class="tq-opts wb4opts">${wb4Ch.ch.map((c,i)=>`<button type="button" tabindex="-1" class="btn tq-opt bq${/^[\x20-\x7e\u00c0-\u024f]+$/.test(c.t)?" en":""}" data-i="${i}"><span class="no">${i+1}</span><span>${escH(c.t)}</span></button>`).join("")}</div>`;   // TOEIC と同じ 2×2 の大きなボタン
+}
+function wb4Answer(i){
+  const q=wb4Ch; if(!q || q.wait || !q.ch[i]) return;
+  q.wait=true;
+  const ok=q.ch[i].ok;
+  $("romaji").querySelectorAll(".bq").forEach((b,j)=>b.classList.add(q.ch[j].ok?"ok":j===i?"ng":"x"));
+  if(ok) sndDone(); else { sndMiss(); miss++; $("miss").textContent=miss; }
+  wb4Next(ok,false, ok?600:1500);
+}
+/* 1問終わり: 記録して、答えを見せてから次へ */
+function wb4Next(ok,typed,delay){
+  const w=currentWord; if(!w) return;
+  wb4Ans++; if(!ok) wb4Wrong++; else if(typed) wb4Typed++; else wb4Chose++;
+  const st=wbMark(bookPlay,w,ok); if(ok && st.s===3) wb4New++;
+  if(!ok) wb4WrongList.push({...w});
+  $("wordPanel").classList.remove("wbhide");   // 答えを見せる
+  removeScrew();
+  const remain=Math.max(taGoal-wb4Ans,0);
+  $("score").textContent=remain; $("timefill").style.width=(wb4Ans/taGoal*100)+"%";
+  const s=$("wordQ").querySelector(".wq-wait");
+  if(s) s.textContent=(ok?(typed?"○ 打てた!":"○ 正解"):"✕ はずれ")+" ・ "+(st.s>=3?"✓ 覚えた":ok?`${st.s}回続けて正解`:"数え直し");
+  wb4Busy=true;
+  setTimeout(()=>{
+    wb4Busy=false; if(!running) return;
+    wb4Ch=null; $("wordPanel").classList.remove("quiz","wb4");
+    if(remain<=0){ score=wb4Typed+wb4Chose; finishTa(); } else pickWord();   // 正解1つにつき1つ届く
+  },delay);
 }
 function renderNextWord(){
   const el=$("nextWord");
   if(!isQ(diff)){ el.innerHTML="&nbsp;"; return; }
   if(nextWord){
     el.innerHTML='<span class="lbl">NEXT</span>';
-    el.appendChild(document.createTextNode(nextWord.t));
+    el.appendChild(document.createTextNode(nextWord.q||nextWord.t));   // 単語帳の問題は、答えではなく問題を見せる
   }else{
     el.innerHTML='<span class="lbl">NEXT</span>— ラスト1語 —';
   }
@@ -5190,12 +5463,13 @@ function renderRomaji(){
 }
 /* カウントダウン中に前回の語が残らないよう、出題枠を空にする */
 function clearWordPanel(){
-  currentWord=null; nextWord=null; baraQ=null; $("wordPanel").classList.remove("quiz");
+  currentWord=null; nextWord=null; baraQ=null; wb4Ch=null; $("wordPanel").classList.remove("quiz","wb4");
   chunks=[]; chunkIdx=0; buf=""; typedRomaji=""; nAmbig=false;
   $("wordText").innerHTML="&nbsp;";
   $("wordKana").innerHTML="&nbsp;";
   $("romaji").innerHTML="&nbsp;";
   $("nextWord").innerHTML="&nbsp;";
+  wbReveal(); $("wordQ").hidden=true; $("wordQ").textContent=""; wbCands=null;
 }
 
 /* ---------- バラバラ: バラバラのローズティーが効いている間、どのモードも、なにかがおかしくなる ----------
@@ -5299,7 +5573,7 @@ function refreshBara(reroll){
 }
 setInterval(()=>{ if(scene==="title") refreshBara(); },15000);
 function startGame(d){
-  if(window.IS_MOBILE) return;   // スマホではタイピングできない
+  if(window.IS_MOBILE && !(d==="book" && wb4)) return;   // スマホではタイピングできない(単語帳の4択だけ遊べる)
   if(d==="barabara") d="normal";
   gameBara = baraOn() && d!=="book" && !mtOn(); baraQ=null; baraN=0;   // 対戦中はバラバラにしない
   diff=d;
@@ -5488,7 +5762,7 @@ document.addEventListener("keydown",e=>{
   if(fbOpen && !(e.target && (e.target.tagName==="TEXTAREA"||e.target.tagName==="INPUT"))){
     const k=e.key;
     if(k==="Escape"){ e.preventDefault(); closeFeedback(); }
-    else if(/^[1-6]$/.test(k)){ e.preventDefault(); $("fbCats").querySelectorAll("[data-c]")[+k-1].click(); }
+    else if(/^[1-7]$/.test(k)){ e.preventDefault(); $("fbCats").querySelectorAll("[data-c]")[+k-1].click(); }
     else if(k==="t"||k==="T"){ e.preventDefault(); $("fbText").focus(); }
     else if(k==="n"||k==="N"){ e.preventDefault(); $("fbName").focus(); }
     else if(k==="Enter"){ e.preventDefault(); fbSend(); }
@@ -5499,8 +5773,8 @@ document.addEventListener("keydown",e=>{
     const id=e.target.id;
     if(e.key==="Enter" && (e.ctrlKey||e.metaKey)){
       if(id==="wbBulk"){ e.preventDefault(); wbBulkAdd(); return; }
-      if(id==="wbName"||id==="wbT"||id==="wbK"){ e.preventDefault(); wbSaveBook(); return; }
-      if(id==="fbText"||id==="fbName"){ e.preventDefault(); fbSend(); return; }
+      if(id==="wbTtl"||id==="wbQ"||id==="wbQK"||id==="wbT"||id==="wbK"){ e.preventDefault(); wbSaveBook(); return; }
+      if(id==="fbText"||id==="fbName"||id==="fbCode"||id==="fbMail"){ e.preventDefault(); fbSend(); return; }
     }
     if(e.key==="Enter"){
       if(id==="wbBulk"||id==="fbText") return;       // 複数行の入力欄は改行する
@@ -5508,7 +5782,9 @@ document.addEventListener("keydown",e=>{
       if(id==="bkImport") backupImport();
       else if(id==="bkCode") syncJoin();
       else if(id==="wbT"||id==="wbK") wbAddWord();
-      else if(id==="wbName") $("wbT").focus();
+      else if(id==="wbQ") $("wbQK").focus();
+      else if(id==="wbQK") $("wbT").focus();
+      else if(id==="wbTtl") $("wbT").focus();
       else if(id==="fbName") fbSend();
       else $("regBtn").click();
     }
@@ -5568,7 +5844,8 @@ document.addEventListener("keydown",e=>{
       else if(e.key==="m"||e.key==="M"){ mtBgmToggle(); }
       return;
     }
-    if(e.key==="Enter") startGame(diff);
+    if(e.key==="Enter"){ $("wbWrongBtn").hidden=true; startGame(diff); }
+    if((e.key==="w"||e.key==="W") && diff==="book" && !$("wbWrongBtn").hidden){ wbRetryWrong(); return; }
     if(e.key==="Escape"){ if(diff==="book") openBooks(); else show("title"); }
     if((e.key==="n"||e.key==="N") && !playerName){ e.preventDefault(); $("nameInput").focus(); $("nameInput").select&&$("nameInput").select(); }
     if((e.key==="r"||e.key==="R") && playerName) openRanking(gameBara?"barabara":diff,playerName);
@@ -5594,11 +5871,18 @@ document.addEventListener("keydown",e=>{
   }
   if(!running) return;
   const key=e.key;
+  if(diff==="book" && wb4){   // 単語帳の4択: 打たずに、1〜4 で答える
+    if(wb4Busy) return;
+    if(wb4Ch){ if(/^[1-4]$/.test(key)){ e.preventDefault(); wb4Answer(+key-1); } return; }
+    if(key==="Enter"){ e.preventDefault(); wb4Open(); return; }
+  }
+  if(diff==="book" && !wb4 && key==="Enter"){ e.preventDefault(); wbPeek(); return; }   // 単語帳: Enter で待たずに答えを見る
   if(key===" " && mtOn()){ e.preventDefault(); mtUseItem(); return; }   // 対戦: アイテムを使う
   if(key==="Process" || e.isComposing){ imeWarn(); return; }
-  if(!/^[a-zA-Z0-9\-'!?,.~\/%&]$/.test(key)) return;
+  if(key===" " && diff==="book"){ e.preventDefault(); if(!wbWantsSpace()) return; }   // 単語帳: 空白を打つところでだけ、スペースキーを受け付ける
+  else if(!/^[a-zA-Z0-9\-'!?,.~\/%&":;]$/.test(key) || (/^[":;]$/.test(key) && diff!=="book")) return;   // " : ; は単語帳だけ
   e.preventDefault();
-  const r = baraQ ? baraAns(key) : handleKey(key);
+  const r = baraQ ? baraAns(key) : wbCands ? wbKey(key) : handleKey(key);
   if(r==="skip") return;
   if(r==="miss"){
     miss++; $("miss").textContent=miss;
@@ -5631,9 +5915,11 @@ document.addEventListener("keydown",e=>{
     gardenKeys++;
     if(diff==="oneshot") sndTypeStage(); else sndType();
     renderRomaji();
+    if(r==="done" && diff==="book" && wb4){ sndDone(); wb4Next(true,true,500); return; }   // 4択の前に打ち切れた: 正解
     if(r==="done"){
       if(mtOn()) mtWordDone(); else { score++; sndDone(); }   // 対戦: 金・2倍・おじゃま・連鎖・アイテム
       removeScrew();
+      if(diff==="book" && currentWord && currentWord.q && wbHideT){ wbNoPeek++; if(wbCan4(bookPlay) && wbMark(bookPlay,currentWord,true).s===3) wb4New++; }   // 答えが出る前に打てた: 「覚えた」の正解に数える(答えを見たときは数えない)
       if(currentWord && currentWord.bara) baraPetalRain();   // バラバラの薔薇(辞典には載せない)
       else if(diff!=="book" && currentWord && !currentWord.oj) unlockWord((currentWord.orig||currentWord).k);   // 単語帳の言葉は辞典に載せない(逆さまの言葉は、もとの言葉で載せる)
       if(isQ(diff)){
@@ -5661,6 +5947,8 @@ document.querySelectorAll(".diff-btn").forEach(b=>{
 });
 $("retryBtn").addEventListener("click",()=>{ if(mtRes){ mtRematch(); return; } startGame(diff); });
 $("titleBtn").addEventListener("click",()=>{ if(diff==="book") openBooks(); else show("title"); });
+$("wbPeekBtn").addEventListener("click",()=>wbPeek());
+$("romaji").addEventListener("click",e=>{ const c=e.target.closest(".bq"); if(c && diff==="book" && wb4 && wb4Ch && running && !wb4Busy) wb4Answer(+c.dataset.i); });   // 4択はタップでも答えられる
 
 let resultAt=0;
 /* 日本語入力がオンのまま打つと文字が届かないので、知らせる */
@@ -6030,7 +6318,548 @@ const escH = v => String(v).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&
 function wbLoad(){
   try{ wbBooks=JSON.parse(localStorage.getItem(WB_KEY)||"[]"); }catch(e){ wbBooks=[]; }
   if(!Array.isArray(wbBooks)) wbBooks=[];
+  wbPreLoad(); wbMemLoad();
 }
+/* おためし単語帳: 最初から並んでいて、すぐ遊べる(毎回 n 語をランダムに)。コピーすると自分の単語帳として編集できる
+   1行は「問題|答え|よみがな|べつのよみがな|問題のよみがな|べつの答え」(答えが空なら、よみがなを答えにする。後ろの3つはなくてもよい)。
+   べつのよみがな(k2)があれば、どちらで打っても正解。ベスト・秒数・遊び方は WB_PRE_KEY に持つ */
+const WB_PRE_KEY=WB_KEY+":pre";
+const wbPre=(id,name,ds,txt)=>({ id, name, ds, pre:true, bests:{}, words:txt.trim().split("\n").map(l=>{ const [q,t,k,k2,qk,t2]=l.split("|"); const w={ t:t||k, k }; if(q) w.q=q; if(k2) w.k2=k2; if(qk) w.qk=qk; if(t2) w.t2=t2; return w; }) });
+const WB_PRESETS=[
+  wbPre("p:nandoku","難読漢字","漢字を見て、よみを打つ",`
+紫陽花||あじさい
+向日葵||ひまわり
+蒲公英||たんぽぽ
+土筆||つくし
+躑躅||つつじ
+公孫樹||いちょう
+秋桜||こすもす
+秋刀魚||さんま
+河豚||ふぐ
+海月||くらげ
+海星||ひとで
+海豚||いるか
+海驢||あしか
+海鼠||なまこ
+栄螺||さざえ
+雲丹||うに
+寄居虫||やどかり
+蝸牛||かたつむり
+蜻蛉||とんぼ
+蟷螂||かまきり
+百足||むかで
+蚯蚓||みみず
+蜥蜴||とかげ
+蝙蝠||こうもり
+啄木鳥||きつつき
+雲雀||ひばり
+時鳥||ほととぎす
+金糸雀||かなりあ
+山葵||わさび
+胡瓜||きゅうり
+南瓜||かぼちゃ
+玉蜀黍||とうもろこし
+馬鈴薯||じゃがいも
+無花果||いちじく
+檸檬||れもん
+心太||ところてん
+出汁||だし
+硝子||がらす
+燐寸||まっち
+松明||たいまつ
+案山子||かかし
+欠伸||あくび
+胡坐||あぐら
+長閑||のどか
+流石||さすが
+生憎||あいにく
+杜撰||ずさん
+呂律||ろれつ
+鳩尾||みぞおち
+東雲||しののめ
+黄昏||たそがれ
+五月雨||さみだれ
+陽炎||かげろう
+十六夜||いざよい
+不知火||しらぬい`),
+  wbPre("p:kencho","県庁所在地","都道府県を見て、県庁所在地を打つ(県名と名前がちがう18の県だけ。逆向きでは県の名前を打つ)",`
+北海道|札幌|さっぽろ||ほっかいどう
+岩手県|盛岡|もりおか||いわてけん
+宮城県|仙台|せんだい||みやぎけん
+茨城県|水戸|みと||いばらきけん
+栃木県|宇都宮|うつのみや||とちぎけん
+群馬県|前橋|まえばし||ぐんまけん
+埼玉県|さいたま|さいたま||さいたまけん
+神奈川県|横浜|よこはま||かながわけん
+石川県|金沢|かなざわ||いしかわけん
+山梨県|甲府|こうふ||やまなしけん
+愛知県|名古屋|なごや||あいちけん
+三重県|津|つ||みえけん
+滋賀県|大津|おおつ||しがけん
+兵庫県|神戸|こうべ||ひょうごけん
+島根県|松江|まつえ||しまねけん
+香川県|高松|たかまつ||かがわけん
+愛媛県|松山|まつやま||えひめけん
+沖縄県|那覇|なは||おきなわけん
+`),
+  wbPre("p:yoji","四字熟語","意味を見て、四字熟語を打つ",`
+一つのことをして、二つの得をすること|一石二鳥|いっせきにちょう
+多くの人が、口をそろえて同じことを言うこと|異口同音|いくどうおん
+言葉にしなくても、気持ちが通じ合うこと|以心伝心|いしんでんしん
+一生に一度の出会いを大切にすること|一期一会|いちごいちえ
+状況が変わるたびに、喜んだり心配したりすること|一喜一憂|いっきいちゆう
+悪人などを、一度にすべて捕らえること|一網打尽|いちもうだじん
+古いことを学んで、新しい知識を見いだすこと|温故知新|おんこちしん
+物事を仕上げるための、最後の大事なところ|画竜点睛|がりょうてんせい
+非常に危ないところまで迫っていること|危機一髪|ききいっぱつ
+だめになりかけたものを、一気に立て直すこと|起死回生|きしかいせい
+疑い始めると、何でもないことまで怪しく思えること|疑心暗鬼|ぎしんあんき
+これまでもこれからもないような、珍しいこと|空前絶後|くうぜんぜつご
+あつかましく、恥を知らないこと|厚顔無恥|こうがんむち
+公平で、隠しごとがなく正しいこと|公明正大|こうめいせいだい
+手がかりがなく、どうしてよいか分からないこと|五里霧中|ごりむちゅう
+言葉では言い表せないほど、ひどいこと|言語道断|ごんごどうだん
+寒い日と暖かい日が、交互に繰り返されること|三寒四温|さんかんしおん
+自分のことを、自分でほめること|自画自賛|じがじさん
+自分のしたことの報いを、自分が受けること|自業自得|じごうじとく
+ひどく苦しむこと|四苦八苦|しくはっく
+強いものが、弱いものを犠牲にして栄えること|弱肉強食|じゃくにくきょうしょく
+好みや考えは、人によってさまざまであること|十人十色|じゅうにんといろ
+小さなことを、大げさに言うこと|針小棒大|しんしょうぼうだい
+めったにない、よい機会|千載一遇|せんざいいちぐう
+大人物は、年をとってから大成すること|大器晩成|たいきばんせい
+細かい違いはあるが、ほぼ同じであること|大同小異|だいどうしょうい
+前置きなしに、いきなり本題に入ること|単刀直入|たんとうちょくにゅう
+目先の違いにとらわれて、結果が同じことに気づかないこと|朝三暮四|ちょうさんぼし
+その人に合った役目につけること|適材適所|てきざいてきしょ
+動きがとても速いこと|電光石火|でんこうせっか
+絶えず、急速に進歩すること|日進月歩|にっしんげっぽ
+人の意見を気にとめず、聞き流すこと|馬耳東風|ばじとうふう
+半分信じて、半分疑っていること|半信半疑|はんしんはんぎ
+狙いや予想が、すべて当たること|百発百中|ひゃっぱつひゃくちゅう
+自分の考えがなく、他人の意見にすぐ従うこと|付和雷同|ふわらいどう
+大事なことと、つまらないことを取り違えること|本末転倒|ほんまつてんとう
+ある物事に心を奪われ、我を忘れること|無我夢中|むがむちゅう
+名前ばかりで、中身がともなわないこと|有名無実|ゆうめいむじつ
+油断は、失敗のもとになる恐ろしい敵であること|油断大敵|ゆだんたいてき
+その場に応じて、ふさわしい対応をすること|臨機応変|りんきおうへん`),
+  wbPre("p:kotowaza","ことわざ","意味を見て、ことわざを打つ",`
+名人でも、ときには失敗する|猿も木から落ちる|さるもきからおちる
+価値の分からない人に、よいものを与えても役に立たない|猫に小判|ねこにこばん
+がまん強く続ければ、いつか報われる|石の上にも三年|いしのうえにもさんねん
+急ぐときこそ、確実な方法をとるほうが早い|急がば回れ|いそがばまわれ
+見て楽しむより、実際に役立つものを選ぶ|花より団子|はなよりだんご
+思うようにならず、もどかしい|二階から目薬|にかいからめぐすり
+出歩くと、思いがけない幸運や災難にあう|犬も歩けば棒に当たる|いぬもあるけばぼうにあたる
+何度失敗しても、くじけずに立ち上がる|七転び八起き|ななころびやおき
+小さなものも、積み重なれば大きくなる|塵も積もれば山となる|ちりもつもればやまとなる
+何度も聞くより、一度自分の目で見るほうが確か|百聞は一見にしかず|ひゃくぶんはいっけんにしかず
+失敗しないよう、前もって用心しておく|転ばぬ先の杖|ころばぬさきのつえ
+どんなに温和な人でも、何度もひどいことをされれば怒る|仏の顔も三度|ほとけのかおもさんど
+平凡な人でも、三人集まって考えればよい知恵が出る|三人寄れば文殊の知恵|さんにんよればもんじゅのちえ
+朝早く起きると、何かしらよいことがある|早起きは三文の徳|はやおきはさんもんのとく
+身のためになる忠告は、聞くのがつらい|良薬は口に苦し|りょうやくはくちににがし
+一度してしまったことは、取り返しがつかない|覆水盆に返らず|ふくすいぼんにかえらず
+月日がたつのはとても早い|光陰矢のごとし|こういんやのごとし
+もめごとのあとは、かえって物事がよい状態になる|雨降って地固まる|あめふってじかたまる
+心配していたことも、やってみると意外にたやすい|案ずるより産むが易し|あんずるよりうむがやすし
+強いものが、さらに強くなる|鬼に金棒|おににかなぼう
+いつも笑っている家には、自然と幸せがやってくる|笑う門には福来る|わらうかどにはふくきたる
+狭い世界にいて、広い世界を知らない|井の中の蛙大海を知らず|いのなかのかわずたいかいをしらず
+いくら言い聞かせても、効き目がない|馬の耳に念仏|うまのみみにねんぶつ
+計画などが立派でも、実際には役に立たない|絵に描いた餅|えにかいたもち
+子どもは親に似るものだ|蛙の子は蛙|かえるのこはかえる
+秘密はもれやすい|壁に耳あり障子に目あり|かべにみみありしょうじにめあり
+すぐれたものは、だめになっても値打ちがある|腐っても鯛|くさってもたい
+うっかり言ったことが、災難をまねく|口は災いの元|くちはわざわいのもと
+何事も、成し遂げるまでには時間がかかる|桃栗三年柿八年|ももくりさんねんかきはちねん
+知らなければ、腹も立たず平気でいられる|知らぬが仏|しらぬがほとけ
+どんな所でも、住み慣れればよい所に思える|住めば都|すめばみやこ
+思いがけない幸運がまいこむ|棚からぼた餅|たなからぼたもち
+二つのものの違いが、比べものにならないほど大きい|月とすっぽん|つきとすっぽん
+身近なことは、かえって気づきにくい|灯台下暗し|とうだいもとくらし
+人に親切にすれば、めぐりめぐって自分によいことが返ってくる|情けは人のためならず|なさけはひとのためならず
+目立つ人は、人から憎まれやすい|出る杭は打たれる|でるくいはうたれる
+悪いことに、さらに悪いことが重なる|泣きっ面に蜂|なきっつらにはち
+実力のある人は、それをむやみに見せびらかさない|能ある鷹は爪を隠す|のうあるたかはつめをかくす`),
+  wbPre("p:hayakuchi","早口言葉","出てくる早口言葉を、そのまま打つ",`
+|生麦生米生卵|なまむぎなまごめなまたまご
+|隣の客はよく柿食う客だ|となりのきゃくはよくかきくうきゃくだ
+|東京特許許可局|とうきょうとっきょきょかきょく
+|特許許可局局長|とっきょきょかきょくきょくちょう
+|赤巻紙青巻紙黄巻紙|あかまきがみあおまきがみきまきがみ
+|赤パジャマ青パジャマ黄パジャマ|あかぱじゃまあおぱじゃまきぱじゃま
+|坊主が屏風に上手に坊主の絵を描いた|ぼうずがびょうぶにじょうずにぼうずのえをかいた
+|すもももももももものうち|すもももももももものうち
+|庭には二羽鶏がいる|にわにはにわにわとりがいる
+|裏庭には二羽庭には二羽鶏がいる|うらにわにはにわにわにはにわにわとりがいる
+|バスガス爆発|ばすがすばくはつ
+|新春シャンソンショー|しんしゅんしゃんそんしょー
+|骨粗鬆症|こつそしょうしょう
+|貨客船の旅客|かきゃくせんのりょかく
+|魔術師魔術修行中|まじゅつしまじゅつしゅぎょうちゅう
+|老若男女|ろうにゃくなんにょ
+|抜きにくい釘引き抜きにくい釘|ぬきにくいくぎひきぬきにくいくぎ
+|除雪車除雪作業中|じょせつしゃじょせつさぎょうちゅう
+|高架橋橋脚|こうかきょうきょうきゃく
+|新設診察室視察|しんせつしんさつしつしさつ
+|商用写真撮影|しょうようしゃしんさつえい
+|派出所で手術中|はしゅつじょでしゅじゅつちゅう
+|お綾や八百屋にお謝り|おあややややおやにおあやまり
+|麦ごみ麦ごみ三麦ごみ|むぎごみむぎごみみむぎごみ
+|打者走者勝者走者一掃|だしゃそうしゃしょうしゃそうしゃいっそう
+|書写山の社僧正|しょしゃざんのしゃそうじょう`),
+  wbPre("p:german","かんたんドイツ語","ドイツ語の単語を見て、意味を4択で選ぶ(タイピングにすると意味のよみを打つ。逆向きのタイピングは ä・ö・ü・ß のない言葉だけ)",`
+der Hund|犬|いぬ
+die Katze|猫|ねこ
+das Haus|家|いえ
+das Buch|本|ほん
+der Apfel|りんご|りんご
+das Brot|パン|ぱん
+das Wasser|水|みず
+die Milch|牛乳|ぎゅうにゅう
+der Käse|チーズ|ちーず
+der Tisch|机|つくえ
+der Stuhl|いす|いす
+die Tür|ドア|どあ
+der Schlüssel|かぎ|かぎ
+die Schule|学校|がっこう
+der Lehrer|先生|せんせい
+das Auto|車|くるま
+der Zug|列車|れっしゃ
+die Stadt|町|まち
+die Straße|通り|とおり
+der Baum|木|き
+die Blume|花|はな
+die Sonne|太陽|たいよう
+der Mond|月|つき
+die Mutter|母|はは
+der Vater|父|ちち
+das Kind|子ども|こども
+das Mädchen|女の子|おんなのこ
+der Freund|友だち|ともだち
+das Jahr|年|ねん
+die Nacht|夜|よる
+gehen|行く|いく
+kommen|来る|くる
+essen|食べる|たべる
+trinken|飲む|のむ
+schlafen|眠る|ねむる
+sprechen|話す|はなす
+lesen|読む|よむ
+spielen|遊ぶ|あそぶ
+groß|大きい|おおきい
+klein|小さい|ちいさい
+schön|美しい|うつくしい
+gut|良い|よい
+alt|古い|ふるい
+schnell|速い|はやい
+Danke|ありがとう|ありがとう
+Hallo|こんにちは|こんにちは
+Tschüss|またね|またね
+Guten Morgen|おはよう|おはよう
+Ja|はい|はい
+Nein|いいえ|いいえ
+`),
+  wbPre("p:genso","元素記号","元素の名前を見て、元素記号を打つ(逆向きでは名前を打つ)",`
+水素|H|h||すいそ
+ヘリウム|He|he
+リチウム|Li|li
+ベリリウム|Be|be
+ホウ素|B|b||ほうそ
+炭素|C|c||たんそ
+窒素|N|n||ちっそ
+酸素|O|o||さんそ
+フッ素|F|f||ふっそ
+ネオン|Ne|ne
+ナトリウム|Na|na
+マグネシウム|Mg|mg
+アルミニウム|Al|al
+ケイ素|Si|si||けいそ
+リン|P|p
+硫黄|S|s||いおう
+塩素|Cl|cl||えんそ
+アルゴン|Ar|ar
+カリウム|K|k
+カルシウム|Ca|ca
+チタン|Ti|ti
+クロム|Cr|cr
+マンガン|Mn|mn
+鉄|Fe|fe||てつ
+ニッケル|Ni|ni
+銅|Cu|cu||どう
+亜鉛|Zn|zn||あえん
+臭素|Br|br||しゅうそ
+銀|Ag|ag||ぎん
+スズ|Sn|sn
+ヨウ素|I|i||ようそ
+白金|Pt|pt||はっきん
+金|Au|au||きん
+水銀|Hg|hg||すいぎん
+鉛|Pb|pb||なまり
+ウラン|U|u
+`),
+  wbPre("p:tsuki","月の異名","月を見て、昔の呼び名を打つ(逆向きでは何月かを打つ)",`
+1月|睦月|むつき||いちがつ
+2月|如月|きさらぎ||にがつ
+3月|弥生|やよい||さんがつ
+4月|卯月|うづき||しがつ
+5月|皐月|さつき||ごがつ
+6月|水無月|みなづき||ろくがつ
+7月|文月|ふみづき|ふづき|しちがつ
+8月|葉月|はづき||はちがつ
+9月|長月|ながつき||くがつ
+10月|神無月|かんなづき||じゅうがつ
+11月|霜月|しもつき||じゅういちがつ
+12月|師走|しわす||じゅうにがつ
+`),
+  wbPre("p:rekishi","日本の歴史 一問一答","問題を読んで、人物やできごとを答える",`
+縄文時代の人々が、貝がらや食べ物の残りを捨てた跡は?|貝塚|かいづか
+卑弥呼が治めていたとされる国は?|邪馬台国|やまたいこく
+聖徳太子が定めた、役人の心がまえを示した決まりは?|十七条の憲法|じゅうしちじょうのけんぽう
+645年、中大兄皇子と中臣鎌足が始めた政治の改革は?|大化の改新|たいかのかいしん
+710年に都が置かれた、奈良の都の名前は?|平城京|へいじょうきょう
+奈良の東大寺に大仏をつくらせた天皇は?|聖武天皇|しょうむてんのう
+794年に都が置かれた、京都の都の名前は?|平安京|へいあんきょう
+遣唐使をやめることを提案した人は?|菅原道真|すがわらのみちざね
+『源氏物語』を書いた人は?|紫式部|むらさきしきぶ
+『枕草子』を書いた人は?|清少納言|せいしょうなごん
+藤原道長らが、天皇に代わって政治を動かしたしくみは?|摂関政治|せっかんせいじ
+鎌倉幕府を開いた人は?|源頼朝|みなもとのよりとも
+1232年に鎌倉幕府が定めた、武士のための法律は?|御成敗式目|ごせいばいしきもく
+元(モンゴル)の軍が2度にわたって九州に攻めてきたできごとは?|元寇|げんこう
+室町幕府を開いた人は?|足利尊氏|あしかがたかうじ
+京都の北山に金閣を建てた将軍は?|足利義満|あしかがよしみつ
+1467年に始まり、戦国時代のきっかけとなった戦いは?|応仁の乱|おうにんのらん
+1543年、種子島に伝わった武器は?|鉄砲|てっぽう
+1549年、日本にキリスト教を伝えた宣教師は?|ザビエル|ざびえる
+長篠の戦いで鉄砲を使い、天下統一を進めた武将は?|織田信長|おだのぶなが
+太閤検地や刀狩を行った人は?|豊臣秀吉|とよとみひでよし
+1600年、「天下分け目」と呼ばれた戦いは?|関ヶ原の戦い|せきがはらのたたかい
+江戸幕府を開いた人は?|徳川家康|とくがわいえやす
+大名が1年おきに江戸と領地を行き来したしくみは?|参勤交代|さんきんこうたい
+江戸幕府が、外国との行き来や貿易を限った政策は?|鎖国|さこく
+8代将軍の徳川吉宗が行った改革は?|享保の改革|きょうほうのかいかく
+1837年、大阪で反乱を起こした元役人は?|大塩平八郎|おおしおへいはちろう
+1853年、浦賀に来航したアメリカの使節は?|ペリー|ぺりー
+1867年、徳川慶喜が政権を朝廷に返したできごとは?|大政奉還|たいせいほうかん
+1871年、藩をなくして県を置いた改革は?|廃藩置県|はいはんちけん
+『学問のすゝめ』を書いた人は?|福沢諭吉|ふくざわゆきち
+日本の初代内閣総理大臣は?|伊藤博文|いとうひろぶみ
+1889年に発布された憲法は?|大日本帝国憲法|だいにっぽんていこくけんぽう|だいにほんていこくけんぽう
+1894年に始まった、日本と清の戦争は?|日清戦争|にっしんせんそう
+1904年に始まった、日本とロシアの戦争は?|日露戦争|にちろせんそう
+1918年に、初めての本格的な政党内閣をつくった首相は?|原敬|はらたかし
+1923年に関東地方をおそった大地震は?|関東大震災|かんとうだいしんさい
+1946年に公布された、今の日本の憲法は?|日本国憲法|にほんこくけんぽう|にっぽんこくけんぽう
+1964年に東京で開かれた、世界のスポーツの祭典は?|東京オリンピック|とうきょうおりんぴっく
+中大兄皇子とともに大化の改新を進め、のちに藤原の姓をあたえられた人は?|中臣鎌足|なかとみのかまたり
+607年、遣隋使として隋に送られた人は?|小野妹子|おののいもこ
+唐から日本に来て、仏教の正しい教えを広めた僧は?|鑑真|がんじん
+人々のために橋や池をつくり、東大寺の大仏づくりにも協力した僧は?|行基|ぎょうき
+平安時代のはじめに、比叡山で天台宗を開いた人は?|最澄|さいちょう
+平安時代のはじめに、高野山で真言宗を開いた人は?|空海|くうかい
+武士として初めて太政大臣になった人は?|平清盛|たいらのきよもり
+壇ノ浦の戦いで平氏をほろぼした、源頼朝の弟は?|源義経|みなもとのよしつね
+承久の乱のとき、御家人に団結をうったえた源頼朝の妻は?|北条政子|ほうじょうまさこ
+元寇のときの鎌倉幕府の執権は?|北条時宗|ほうじょうときむね
+京都の東山に銀閣を建てた将軍は?|足利義政|あしかがよしまさ
+水墨画を大成した室町時代の僧は?|雪舟|せっしゅう
+本能寺の変で織田信長をたおした武将は?|明智光秀|あけちみつひで
+参勤交代を制度として定めた、江戸幕府の3代将軍は?|徳川家光|とくがわいえみつ
+生類憐みの令を出した、江戸幕府の5代将軍は?|徳川綱吉|とくがわつなよし
+寛政の改革を行った老中は?|松平定信|まつだいらさだのぶ
+天保の改革を行った老中は?|水野忠邦|みずのただくに
+前野良沢らとともに『解体新書』を出版した人は?|杉田玄白|すぎたげんぱく
+全国を歩いて測量し、正確な日本地図をつくった人は?|伊能忠敬|いのうただたか
+『古事記伝』を書き、国学を大成した人は?|本居宣長|もとおりのりなが
+薩長同盟の仲立ちをした、土佐藩出身の人は?|坂本龍馬|さかもとりょうま
+大政奉還を行った、江戸幕府の15代将軍は?|徳川慶喜|とくがわよしのぶ
+1877年に西南戦争を起こした、鹿児島出身の人は?|西郷隆盛|さいごうたかもり
+自由民権運動を進め、自由党をつくった人は?|板垣退助|いたがきたいすけ
+1894年、領事裁判権(治外法権)の撤廃に成功した外務大臣は?|陸奥宗光|むつむねみつ
+1911年、関税自主権の回復に成功した外務大臣は?|小村寿太郎|こむらじゅたろう
+『たけくらべ』『にごりえ』を書いた、明治時代の作家は?|樋口一葉|ひぐちいちよう
+黄熱病の研究で知られる細菌学者は?|野口英世|のぐちひでよ
+672年、天智天皇の死後に起きた、あとつぎをめぐる戦いは?|壬申の乱|じんしんのらん
+1185年、源氏が平氏をほろぼした戦いは?|壇ノ浦の戦い|だんのうらのたたかい
+1221年、後鳥羽上皇が幕府をたおそうとして起こした戦いは?|承久の乱|じょうきゅうのらん
+1582年、織田信長が家臣におそわれて自害したできごとは?|本能寺の変|ほんのうじのへん
+1637年、九州でキリスト教徒の農民らが起こした一揆は?|島原・天草一揆|しまばらあまくさいっき
+1877年、士族が起こした最後で最大の反乱は?|西南戦争|せいなんせんそう
+1918年、米の値上がりをきっかけに全国に広がった騒ぎは?|米騒動|こめそうどう
+1914年に始まった、ヨーロッパを中心とする世界的な戦争は?|第一次世界大戦|だいいちじせかいたいせん
+1941年、日本軍がハワイの真珠湾を攻撃して始まった戦争は?|太平洋戦争|たいへいようせんそう
+1854年、アメリカと結び、下田と函館を開いた条約は?|日米和親条約|にちべいわしんじょうやく
+1858年、アメリカと結び、貿易を始めた条約は?|日米修好通商条約|にちべいしゅうこうつうしょうじょうやく
+1895年に結ばれた、日清戦争の講和条約は?|下関条約|しものせきじょうやく
+1905年に結ばれた、日露戦争の講和条約は?|ポーツマス条約|ぽーつますじょうやく
+1951年、日本が独立を回復した平和条約は?|サンフランシスコ平和条約|さんふらんしすこへいわじょうやく
+聖徳太子が、家柄にとらわれず能力のある人を役人に取り立てるために定めた制度は?|冠位十二階|かんいじゅうにかい
+701年に定められた、律と令による国の決まりは?|大宝律令|たいほうりつりょう
+743年、新しく開いた土地をいつまでも自分のものにしてよいとした法は?|墾田永年私財法|こんでんえいねんしざいほう
+江戸幕府が、大名を取りしまるために定めた決まりは?|武家諸法度|ぶけしょはっと
+1868年、明治政府が示した新しい政治の方針は?|五箇条の御誓文|ごかじょうのごせいもん
+1873年、土地の値段に応じて税を現金で納めさせた改革は?|地租改正|ちそかいせい
+1873年、満20歳以上の男子に兵役を義務づけた法令は?|徴兵令|ちょうへいれい
+1925年に定められた、満25歳以上の男子に選挙権をあたえた法律は?|普通選挙法|ふつうせんきょほう
+第二次世界大戦後、地主の土地を国が買い上げて小作人に安く売り渡した改革は?|農地改革|のうちかいかく
+室町時代に、勘合という合い札を使って明と行った貿易は?|勘合貿易|かんごうぼうえき
+江戸時代のはじめ、幕府の許可状を持った船が東南アジアと行った貿易は?|朱印船貿易|しゅいんせんぼうえき
+694年に完成した、日本で初めての本格的な都は?|藤原京|ふじわらきょう
+784年、桓武天皇が平城京からうつした都は?|長岡京|ながおかきょう
+現存する世界最古の木造建築がある、聖徳太子が建てた寺は?|法隆寺|ほうりゅうじ
+藤原頼通が宇治に建てた阿弥陀堂は?|平等院鳳凰堂|びょうどういんほうおうどう
+奥州藤原氏が平泉に建てた、金色の阿弥陀堂は?|中尊寺金色堂|ちゅうそんじこんじきどう
+奈良時代にまとめられた、日本でいちばん古い歌集は?|万葉集|まんようしゅう
+平安時代に紀貫之らがまとめた、天皇の命令による歌集は?|古今和歌集|こきんわかしゅう
+江戸時代、庶民の子どもが読み・書き・そろばんを学んだ所は?|寺子屋|てらこや
+`),
+  wbPre("p:joho","情報モラル","説明を読んで、ネットの安全やマナーの言葉を答える",`
+SMS(ショートメッセージ)で偽のリンクを送り、個人情報を盗もうとする詐欺|スミッシング|すみっしんぐ
+本物そっくりの偽のサイトやメールで、IDやパスワードを盗もうとする詐欺|フィッシング|ふぃっしんぐ
+偽の警告画面を出してサポートに電話させ、お金をだまし取る詐欺|サポート詐欺|さぽーとさぎ
+押しただけで「契約が成立した」と、料金を請求してくる詐欺|ワンクリック詐欺|わんくりっくさぎ
+「当選しました」などと言って、手数料を先に払わせる詐欺|当選詐欺|とうせんさぎ
+データを勝手に暗号化し、元に戻す代わりにお金を要求するソフト|ランサムウェア|らんさむうぇあ
+パソコンやスマホに入りこんで悪い動きをするソフトをまとめた呼び名|マルウェア|まるうぇあ
+役に立つソフトのふりをして入りこみ、裏で悪いことをするソフト|トロイの木馬|とろいのもくば
+気づかないうちに、入力した内容や行動を記録して外に送るソフト|スパイウェア|すぱいうぇあ
+大量のアクセスを一度に送りつけて、サーバーを使えなくする攻撃|DoS攻撃|どすこうげき
+ほかのサービスから漏れたIDとパスワードの組を、別のサービスで試す攻撃|パスワードリスト攻撃|ぱすわーどりすとこうげき
+他人のIDとパスワードを使って、勝手にサービスにログインすること|不正アクセス|ふせいあくせす
+人の油断や思いこみにつけこんで、パスワードなどを聞き出す手口|ソーシャルエンジニアリング|そーしゃるえんじにありんぐ
+後ろから画面やキーボードをのぞき見て、パスワードを盗む手口|ショルダーハッキング|しょるだーはっきんぐ
+実在する人や会社をよそおって、メールやメッセージを送ること|なりすまし|なりすまし
+パスワードに加えて、スマホに届く番号などでも本人かを確かめるしくみ|二段階認証|にだんかいにんしょう
+ソフトの弱点のうち、攻撃に使われるおそれがあるもの|脆弱性|ぜいじゃくせい
+ソフトの弱点を直すために配られる更新を、こまめに入れること|アップデート|あっぷでーと
+データの写しを、別の場所に取っておくこと|バックアップ|ばっくあっぷ
+通信やデータを、関係のない人には読めない形に変えること|暗号化|あんごうか
+名前・住所・生年月日など、特定の個人がわかる情報|個人情報|こじんじょうほう
+写真に記録されることがある、撮った場所を示す情報|位置情報|いちじょうほう
+本人の許可なく、顔や姿が写った写真を公開されない権利|肖像権|しょうぞうけん
+小説・音楽・絵など、作った人の作品を守る権利|著作権|ちょさくけん
+他人の文章を、出どころを示して自分の文章の中で使うこと|引用|いんよう
+ネット上で、ある人や投稿に批判が殺到して収まらなくなること|炎上|えんじょう
+一度ネットに出た情報が、消してもコピーされて残り続けること|デジタルタトゥー|でじたるたとぅー
+根拠のない、うその情報|デマ|でま
+「○人に回さないと不幸になる」などと、転送を求めるメッセージ|チェーンメール|ちぇーんめーる
+受け取る人の同意なく、大量に送りつけられる広告などのメール|迷惑メール|めいわくめーる
+カフェや駅などで使える、パスワードのかかっていない無線LAN|フリーWi-Fi|ふりーわいふぁい
+ネットの使いすぎで、生活や体調に悪い影響が出る状態|ネット依存|ねっといぞん
+ネット上で、悪口や仲間はずれなどで人を傷つけること|ネットいじめ|ねっといじめ
+アプリが連絡先や位置情報などを使うために、利用者から得る許可|アクセス許可|あくせすきょか
+特定の会社や組織をねらい、仕事に関係ありそうなメールでウイルスを送りつける攻撃|標的型攻撃|ひょうてきがたこうげき
+たくさんのコンピューターから一斉にアクセスを送りつけて、サーバーを使えなくする攻撃|DDoS攻撃|でぃーどすこうげき
+考えられる文字の組み合わせを、片っぱしから順番に試してパスワードを当てる攻撃|総当たり攻撃|そうあたりこうげき
+辞書にある単語や、よく使われる言葉をパスワードとして次々に試す攻撃|辞書攻撃|じしょこうげき
+ソフトの弱点が見つかってから、直す更新が配られる前にねらう攻撃|ゼロデイ攻撃|ぜろでいこうげき
+入力欄に命令文を入れて、データベースを不正に操作する攻撃|SQLインジェクション|えすきゅーえるいんじぇくしょん
+ねらった人がよく見るサイトを書きかえてウイルスを仕込み、訪れた人を感染させる攻撃|水飲み場型攻撃|みずのみばがたこうげき
+通信の間に入りこみ、やりとりをのぞいたり書きかえたりする攻撃|中間者攻撃|ちゅうかんしゃこうげき
+取引先や社長をよそおったメールで、偽の口座にお金を振りこませる詐欺|ビジネスメール詐欺|びじねすめーるさぎ
+有名な通販サイトに似せたり、安すぎる値段で誘ったりして、お金だけだまし取るサイト|偽ショッピングサイト|にせしょっぴんぐさいと
+入りこんだコンピューターを、あとで外から自由に操れるようにしておく裏口|バックドア|ばっくどあ
+自分で自分の複製を作り、ネットワークを通じて次々に広がる悪いソフト|ワーム|わーむ
+勝手に広告を出し続けるソフト|アドウェア|あどうぇあ
+乗っ取ったたくさんのコンピューターをつないで、攻撃者が遠くから一斉に操るもの|ボットネット|ぼっとねっと
+知っていること・持っているもの・体の特徴のうち2つ以上を組み合わせて、本人かを確かめるしくみ|多要素認証|たようそにんしょう
+指紋や顔など、体の特徴を使って本人かを確かめるしくみ|生体認証|せいたいにんしょう
+一度だけ使える、使い捨てのパスワード|ワンタイムパスワード|わんたいむぱすわーど
+外からの不正な通信をさえぎる、ネットワークの防火壁|ファイアウォール|ふぁいあうぉーる
+一度ログインするだけで、いくつものサービスを使えるようになるしくみ|シングルサインオン|しんぐるさいんおん
+通信を暗号化して、ふつうのインターネットを専用回線のように安全に使うしくみ|VPN|ぶいぴーえぬ
+サイトを見た人のブラウザに、ログインの状態などを一時的に保存しておく小さなデータ|クッキー|くっきー
+許可された人だけが情報を見られるようにすること(情報セキュリティの3つの要素の1つ)|機密性|きみつせい
+情報が勝手に書きかえられず、正しいまま保たれていること(情報セキュリティの3つの要素の1つ)|完全性|かんぜんせい
+必要なときに、いつでも情報やサービスを使えること(情報セキュリティの3つの要素の1つ)|可用性|かようせい
+有名人の名前や写真がもつ、お客を引きつける力を守る権利|パブリシティ権|ぱぶりしてぃけん
+作品を作った人の気持ちや名誉を守る、作った人だけがもつ権利|著作者人格権|ちょさくしゃじんかくけん
+新しい発明を、一定の期間ひとりじめして使えるようにする権利|特許権|とっきょけん
+商品やサービスに付けるマークや名前を守る権利|商標権|しょうひょうけん
+自分に関する情報を、他人にむやみに公開されない権利|プライバシー権|ぷらいばしーけん
+他人のIDやパスワードを勝手に使ってログインすることなどを禁じた法律|不正アクセス禁止法|ふせいあくせすきんしほう
+個人情報を扱う会社などに、その扱い方の決まりを定めた法律|個人情報保護法|こじんじょうほうほごほう
+自分と似た意見ばかりが聞こえてきて、考えがかたよっていく現象|エコーチェンバー|えこーちぇんばー
+好みに合わせた情報ばかりが表示されて、ほかの情報が見えにくくなる状態|フィルターバブル|ふぃるたーばぶる
+AIを使って作られた、本物そっくりの偽の動画や音声|ディープフェイク|でぃーぷふぇいく
+情報が正しいかどうかを、根拠を調べて確かめること|ファクトチェック|ふぁくとちぇっく
+ネット上の情報を、目的に合わせて正しく読み解き、使いこなす力|情報リテラシー|じょうほうりてらしー
+`)
+];
+/* おためし単語帳の初期設定: ことわざは長いので4択、難読漢字・県庁所在地・四字熟語はタイピング */
+const WB_PRE_DEF={ "p:nandoku":{ style:"type", sec:5 }, "p:kencho":{ style:"type", sec:5 }, "p:yoji":{ style:"type", sec:8 }, "p:kotowaza":{ style:"4", sec:8 }, "p:hayakuchi":{ style:"type" }, "p:german":{ style:"4", sec:5 }, "p:genso":{ style:"type", sec:5 }, "p:tsuki":{ style:"type", sec:5 }, "p:rekishi":{ style:"4", sec:8 }, "p:joho":{ style:"4", sec:8 } };
+const WB_PRE_VER=2;
+function wbPreLoad(){
+  let o={}; try{ o=JSON.parse(localStorage.getItem(WB_PRE_KEY)||"{}")||{}; }catch(e){}
+  const fresh=o.__v!==WB_PRE_VER;   // 初期設定ができる前に保存した、出し方・秒数は使わない(初期設定を入れるため)
+  for(const b of WB_PRESETS){ const v=o[b.id]||{}, d=WB_PRE_DEF[b.id]||{}; b.bests=v.bests&&typeof v.bests==="object"?v.bests:{}; b.sec=fresh?d.sec:v.sec??d.sec; b.mode=v.mode; b.style=fresh?d.style:v.style??d.style; b.dir=v.dir; b.hideGood=v.hideGood; }
+}
+/* 4択: 問題のある言葉が4つ以上(答えがちがうもの)あれば、同じ単語帳の答えから4択を作れる。
+   正解・まちがいは4択のときだけ記録し、3回続けて正解で「覚えた」(TOEIC と同じ) */
+const WB_MEM_KEY=WB_KEY+":mem";
+let wbMem={};
+function wbMemLoad(){ try{ wbMem=JSON.parse(localStorage.getItem(WB_MEM_KEY)||"{}")||{}; }catch(e){ wbMem={}; } }
+function wbMemStore(){ try{ localStorage.setItem(WB_MEM_KEY,JSON.stringify(wbMem)); }catch(e){} }
+const wbWKey = w => w.mk || ((w.q||"")+"\u0001"+w.k);   // 逆向きは「r:」付きで別に記録
+const wbSt = (b,w) => (wbMem[b.id]||{})[wbWKey(w)] || null;
+function wbMark(b,w,ok){
+  const m=wbMem[b.id]=wbMem[b.id]||{}, k=wbWKey(w), st=m[k]||{ s:0, c:0, w:0 };
+  if(ok){ st.s++; st.c++; } else { st.s=0; st.w++; }
+  m[k]=st; wbMemStore(); return st;
+}
+const wbGood = (b,w) => { const st=wbSt(b,w); return !!st && st.s>=3; };
+const wbQWords = b => b.words.filter(w=>w.q);
+const wbAnsTxt = w => [w.t, ...(w.a||[]).map(x=>x.t)].join("／");   // 別解もまとめて見せる(4択・一覧)
+const wbCan4 = b => !!b && new Set(wbQWords(b).map(w=>w.t)).size>=4;
+const wbStyle = b => wbCan4(b) && (window.IS_MOBILE || b.style==="4" || b.style==="4o") ? "4" : "type";
+const wb4o = b => wbStyle(b)==="4";   // 4択は打たずに、すぐ4択(前の「4択だけ」(4o)も4択として扱う)
+const wbStyle3 = wbStyle;   // スマホは4択だけ
+function wbMemCount(b,dir=wbDir(b)){ const qs=dir==="r" ? wbQWords(b).map(wbRevWord) : wbQWords(b); return { all:qs.length, good:qs.filter(w=>wbGood(b,w)).length }; }
+/* 「全部覚えた」をチャットに1回だけ知らせる(単語帳は向きごと、TOEIC はレベルと形式ごと) */
+const ANN_MEM_KEY=WB_KEY.replace(/:books$/,":annAllMem");
+function annAllMemOnce(id,text){
+  let o=[]; try{ o=JSON.parse(localStorage.getItem(ANN_MEM_KEY)||"[]"); if(!Array.isArray(o)) o=[]; }catch(e){ o=[]; }
+  if(o.includes(id) || !db || !playerName || isDebugSave()) return; o.push(id);   // 知らせを出せないとき(名前がない など)は、出せるようになってから知らせる
+  try{ localStorage.setItem(ANN_MEM_KEY,JSON.stringify(o)); }catch(e){ return; }
+  wcAnnounce(text,4);
+}
+const wbAnnName = b => b.pre ? `タイピング単語帳「${b.name}」` : "タイピング単語帳の自分の単語帳";   // 自分で作った単語帳の名前は出さない
+function wbAnnAllMem(b){
+  if(!b || !b.id) return; const dir=wbDir(b), c=wbMemCount(b,dir);
+  if(c.all>0 && c.good===c.all) annAllMemOnce(`wb:${b.id}:${dir}`, `${wbAnnName(b)}${dir==="r"?"(逆向き)":""}の言葉を全部覚えました(${c.all}語)`);
+}
+const wbStTxt = (b,w) => { const st=wbSt(b,w); return !st ? "まだ" : st.s>=3 ? "✓ 覚えた" : st.s>0 ? `${st.s}回続けて正解` : "✕ 苦手"; };
+/* 向き・覚えた言葉を出さない の切りかえ(単語帳ごとに残す) */
+function wbToggle(i,f){
+  const b=wbAll()[i]; if(!b) return;
+  if(f==="dir"){ if(!wbHasQ(b)) return; b.dir = wbDir(b)==="r" ? "f" : "r"; }
+  else { if(!wbCan4(b)) return; b.hideGood=!b.hideGood; }
+  if(b.pre) wbPreStore(); else wbStore(); renderBooks();
+}
+function wbSetStyle(i,to){
+  const b=wbAll()[i]; if(!wbCan4(b) || window.IS_MOBILE) return;
+  b.style = to || (wbStyle(b)==="4" ? "type" : "4");   // F: タイピング ⇔ 4択
+  if(b.pre) wbPreStore(); else wbStore(); renderBooks();
+}
+function wbPreStore(){
+  const o={ __v:WB_PRE_VER }; for(const b of WB_PRESETS) o[b.id]={ bests:b.bests, sec:b.sec, mode:b.mode, style:b.style, dir:b.dir, hideGood:b.hideGood };
+  try{ localStorage.setItem(WB_PRE_KEY,JSON.stringify(o)); return true; }catch(e){ return false; }
+}
+const wbAll = () => wbBooks.concat(WB_PRESETS);   // 一覧の並び: 自分の単語帳 → おためし単語帳
+/* 遊び方: 全部(自分の単語帳だけ)/ 10語。ベストは遊び方ごと */
+const WB_MODES = { all:"全部", 10:"10語" };
+const wbModes = b => b.pre ? ["10","all"] : ["all","10"];
+const wbMode = b => wbModes(b).includes(String(b.mode)) ? String(b.mode) : wbModes(b)[0];
+const wbBests = b => { if(!b.bests || typeof b.bests!=="object") b.bests={}; if(b.best!=null && b.bests.all==null){ b.bests.all=b.best; } return b.bests; };   // 前の「ベスト」は「全部」のベストにする
+const wbBestTxt = (b,m=wbMode(b)) => { const v=wbBests(b)[m]; return v==null ? "" : fmtTime(v); };
+function wbSetMode(i,m){
+  const b=wbAll()[i]; if(!b) return;
+  const ms=wbModes(b); b.mode = m==="next" ? ms[(ms.indexOf(wbMode(b))+1)%ms.length] : m;
+  if(b.pre) wbPreStore(); else wbStore(); renderBooks();
+}
+
 function wbStore(){
   try{ localStorage.setItem(WB_KEY, JSON.stringify(wbBooks)); return true; }
   catch(e){ return false; }
@@ -6040,212 +6869,600 @@ function wbNormKana(v){
   return String(v||"")
     .replace(/[ァ-ヶ]/g, c=>String.fromCharCode(c.charCodeAt(0)-0x60))
     .replace(/[Ａ-Ｚａ-ｚ０-９]/g, c=>String.fromCharCode(c.charCodeAt(0)-0xFEE0))
-    .replace(/[\s　]/g,"")
+    .replace(/[\s　]+/g," ").trim()   // 空白は1つにまとめて残す(英語の熟語など。打つときは空白のところだけスペースキーを受け付ける)
     .toLowerCase();
 }
 /* 打てない文字があれば、その文字を返す */
 function wbBadChars(k){
   const bad=new Set();
   for(const ch of Array.from(k)){          // 絵文字なども1文字として見る
-    if(/^[a-z0-9\-'!?,.~\/%&]$/.test(ch)) continue;
+    if(/^[a-z0-9\-'!?,.~\/%&":; ]$/.test(ch)) continue;
     const c=tokenize(ch);
     if(c.length!==1 || c[0].literal) bad.add(ch);
   }
   return [...bad];
 }
-/* 1語ぶんの入力を確かめる。よいときは {t,k}、だめなときは {err} */
-function wbCheckWord(t,k){
-  t=String(t||"").trim(); k=wbNormKana(k);
+/* 1語ぶんの入力を確かめる。よいときは {t,k}(問題があれば q も)、だめなときは {err} */
+/* 別解: 答えとよみがなを「／」(または /)で区切って並べると、どれを打っても正解。1つめがふつうの答え、2つめから別解(4つまで) */
+const WB_ALT_MAX=4;
+function wbCheckWord(t,k,q,qk){
+  let ts=String(t||"").split(/[／\/]/).map(x=>x.trim()).filter(Boolean); const ks=String(k||"").split(/[／\/]/).map(x=>x.trim());
+  if(!ts.length && ks.filter(Boolean).length>1) ts=ks.filter(Boolean);   // 答えが空で、よみが2つ以上(今日||きょう／こんにち): よみがそのまま答え
+  if(ts.length>1 || ks.filter(Boolean).length>1){
+    if(ks.filter(Boolean).length>1 && ks.length!==ts.length) return {err:`「${ts[0]||""}」の答えとよみがなの数が合いません(「／」で区切った数をそろえてください)`};
+    const all=ts.slice(0,WB_ALT_MAX+1).map((x,i)=>wbCheckWord(x, ks[i]||"", q, qk));
+    const bad=all.find(r=>r.err); if(bad) return bad;
+    const r=all[0]; if(all.length>1) r.a=all.slice(1).map(x=>({ t:x.t, k:x.k })); return r;
+  }
+  t=String(t||"").trim(); k=wbNormKana(k); q=String(q||"").trim().slice(0,80); qk=q ? String(qk||"").trim().slice(0,80) : "";
   if(!k && /^[ぁ-んー、。！？・〜]+$/.test(wbNormKana(t))) k=wbNormKana(t);   // ひらがなだけの言葉は、よみがなを省ける
   if(!t && k) t=k;
   if(!t) return {err:"言葉を入れてください"};
-  if(!k) return {err:`「${t}」のよみがなを入れてください`};
   const bad=wbBadChars(k);
+  if(q && (!k || bad.length)) return Object.assign({q, t:t.slice(0,40), k:""}, qk?{qk}:{}, k?{nk:1}:{});   // 問題のある言葉は、よみがながなくても(打てない文字でも)4択だけで出せる
+  if(!k) return {err:`「${t}」のよみがなを入れてください(問題がない言葉は打つだけなので、よみがなが要ります)`};
   if(bad.length) return {err:`「${t}」のよみがなに入力できない文字があります: ${bad.join(" ")}`};
   if(k.length>60) return {err:`「${t}」のよみがなが長すぎます(60文字まで)`};
-  return {t:t.slice(0,40), k};
+  return q ? Object.assign({q, t:t.slice(0,40), k}, qk?{qk}:{}) : {t:t.slice(0,40), k};
+}
+/* 共有: 自分の単語帳をデータベースに置いて、6文字のコードで渡す。受け取った人は「コードで取り込む」で自分の単語帳にコピーする。
+   置いた単語帳はあとから書きかえない(言葉を変えて共有し直すと、新しいコードになる) */
+const WB_SHARE_PATH="typinggarden/books";
+const WB_CODE_CH="ABCDEFGHJKLMNPQRSTUVWXYZ23456789";   // 見まちがえやすい I O 0 1 は使わない
+const wbShareSig = b => JSON.stringify([b.name,b.words,b.style||"",String(b.mode||""),b.sec||0]);
+function wbShareMsg(html){ const el=$("wbShareNote"); el.hidden=!html; el.innerHTML=html||""; }
+async function wbShare(i){
+  const b=wbBooks[i]; if(!b) return;   // おためし単語帳は共有しない(みんな持っている)
+  if(!db){ wbShareMsg("共有するには通信が必要です(今はデータベースにつながっていません)"); return; }
+  const show=code=>{
+    wbShareMsg(`単語帳「${escH(b.name)}」の共有コード: <b class="wb-code">${code}</b> <button class="btn" id="wbCodeCopy">コピー</button><br><small>このコードを渡すと、相手は「コードで取り込む」で同じ単語帳を自分のものにできます。言葉を変えたら、もう一度「共有」すると新しいコードになります。<br>市販の単語帳や問題集の中身など、ほかの人が作ったものをそのまま写した単語帳は、共有しないでください(権利を持つ方からの削除のご依頼は「要望・バグ報告」で受け付けています)</small>`);
+    $("wbCodeCopy").onclick=()=>{ try{ navigator.clipboard.writeText(code).then(()=>{ $("wbCodeCopy").textContent="コピーしました"; },()=>{}); }catch(e){} };
+  };
+  if(b.share && b.shareSig===wbShareSig(b)){ show(b.share); return; }
+  wbShareMsg("共有しています…");
+  const words=b.words.map(w=>{ const o={ t:w.t }; for(const f of ["k","q","qk","k2","t2"]) if(w[f]) o[f]=w[f]; if(w.a && w.a.length) o.a=w.a.map(x=>x.k?{ t:x.t, k:x.k }:{ t:x.t }); return o; });   // よみがなのない言葉(4択だけ)は k を送らない
+  for(let n=0;n<6;n++){
+    let code=""; for(let j=0;j<6;j++) code+=WB_CODE_CH[Math.floor(Math.random()*WB_CODE_CH.length)];
+    try{
+      await db.ref(WB_SHARE_PATH+"/"+code).set({ n:b.name, w:words, t:Date.now(), ...(b.sec!=null?{ sec:wbSec(b) }:{}), ...(b.style==="4"||b.style==="4o"?{ st:"4" }:{}), ...(String(b.mode)==="10"?{ md:"10" }:{}) });
+      b.share=code; b.shareSig=wbShareSig(b); wbStore(); show(code); return;
+    }catch(e){ /* 同じコードがもうある(書けない)ときは、別のコードで試す */ }
+  }
+  wbShareMsg("共有できませんでした。少し時間をおいて、もう一度試してください");
+}
+async function wbImport(){
+  if(!db){ wbShareMsg("取り込むには通信が必要です(今はデータベースにつながっていません)"); return; }
+  if(wbBooks.length>=WB_MAX_BOOKS){ wbShareMsg(`単語帳は${WB_MAX_BOOKS}冊まで作れます。いらない単語帳を消してから取り込んでください`); return; }
+  const raw=await uiAsk("共有コード(6文字)を入れてください","取り込む",{ input:"例: AB23CD", max:8 });
+  const code=String(raw||"").toUpperCase().replace(/[^A-Z0-9]/g,"");
+  if(!code) return;
+  if(!/^[A-HJ-NP-Z2-9]{6}$/.test(code)){ wbShareMsg("コードは、英字と数字の6文字です"); return; }
+  wbShareMsg("取り込んでいます…");
+  let v=null; try{ v=(await db.ref(WB_SHARE_PATH+"/"+code).once("value")).val(); }catch(e){}
+  if(!v || !v.w){ wbShareMsg(`コード「${code}」の単語帳は見つかりませんでした`); return; }
+  const words=[];
+  for(const w of Object.values(v.w).slice(0,WB_MAX_WORDS)){
+    const r=wbCheckWord(w.t,w.k,w.q,w.qk); if(r.err) continue; delete r.nk;
+    if(w.k2 && !wbBadChars(wbNormKana(w.k2)).length) r.k2=wbNormKana(w.k2).slice(0,60);
+    if(w.t2) r.t2=String(w.t2).slice(0,40);
+    if(w.a){ const a=[]; for(const x of Object.values(w.a).slice(0,WB_ALT_MAX)){ const y=x&&wbCheckWord(x.t,x.k,w.q); if(y && !y.err) a.push({ t:y.t, k:y.k }); } if(a.length) r.a=a; }
+    words.push(r);
+  }
+  if(!words.length){ wbShareMsg("この単語帳には、取り込める言葉がありませんでした"); return; }
+  const name=String(v.n||"共有された単語帳").slice(0,20);
+  wbBooks.push({ id:Date.now().toString(36)+Math.random().toString(36).slice(2,6), name, words, best:null, ...(typeof v.sec==="number"?{ sec:Math.max(WB_SEC_MIN,Math.min(WB_SEC_MAX,v.sec|0)) }:{}), ...(v.st==="4"||v.st==="4o"?{ style:"4" }:{}), ...(v.md==="10"?{ mode:"10" }:{}), from:code });
+  if(!wbStore()){ wbBooks.pop(); wbShareMsg("保存できませんでした(ブラウザの保存容量がいっぱいかもしれません)"); return; }
+  wbCur=wbBooks.length-1; renderBooks();
+  wbShareMsg(`単語帳「${escH(name)}」(${words.length}語)を取り込みました`);
+}
+let wbViewI=-1;   // 中身を見ている単語帳(一覧の番号)。見ていなければ -1
+/* 単語リスト: 言葉ごとに、4択の覚えぐあいを出す */
+let wbVCat="all";   // 単語リストのしぼりこみ
+function wbView(i,keep){
+  const b=wbAll()[i]; if(!b) return;
+  if(!keep) wbVCat="all";
+  wbViewI=i; wbCur=i;
+  $("wbListView").style.display="none"; $("wbEditor").style.display="none"; $("wbViewer").style.display="";
+  $("wbVName").textContent=b.name;
+  const c=wbMemCount(b), can0=wbCan4(b);
+  $("wbVSum").textContent = `${b.words.length}語`+(can0 ? ` ・ 4択で覚えた ${c.good}/${c.all}(4択の正解・まちがいと、タイピングで答えを見ずに打てたときを記録します。3回続けて正解で「覚えた」、4択でまちがえると数え直し)` : " ・ 問題のある言葉が4つ以上あると、4択で遊べて、覚えぐあいがここに出ます");
+  const rv=wbDir(b)==="r", mw=w=>rv ? wbRevWord(w) : w;   // 逆向きのときは、逆向きの記録を見せる
+  if(can0 && rv) $("wbVSum").textContent+=" ・ いまは「答え → 問題」の記録です";
+  const can=can0, cat=w=>{ const st=wbSt(b,mw(w)); return !st ? "new" : st.s>=3 ? "good" : st.s===0 ? "weak" : "learn"; };
+  const cats=[["all","すべて"],["good","覚えた"],["learn","練習中"],["weak","苦手"],["new","まだ"]];
+  const cnt=k=>k==="all" ? b.words.length : b.words.filter(w=>w.q && cat(w)===k).length;
+  $("wbVTabs").innerHTML = can ? cats.map(([k,n])=>`<button class="${wbVCat===k?"on":""}" data-vc="${k}">${n} ${cnt(k)}</button>`).join("") : "";
+  const show=b.words.map((w,j)=>[w,j]).filter(([w])=>!can || wbVCat==="all" || (w.q && cat(w)===wbVCat));
+  $("wbVWords").innerHTML=show.length ? show.map(([w,j])=>`<li><span class="no">${j+1}</span><span>${w.q?`<span class="q">${escH(w.q)}</span>`:""}${escH(wbAnsTxt(w))}${w.t2?` / ${escH(w.t2)}`:""}</span><span class="k">${w.k?escH([w.k,...(w.a||[]).map(x=>x.k)].join("／")):"(4択のときだけ)"}${w.k2?`<br>${escH(w.k2)}`:""}</span><span class="wb-st">${w.q&&can?wbStTxt(b,mw(w)):""}</span></li>`).join("") : '<li class="wb-vnone">この中には、まだありません</li>';
 }
 function openBooks(){
-  wbLoad(); wbEdit=null;
+  wbScrCur=null; wbLoad(); wbEdit=null; wbViewI=-1; wbShareMsg("");
+  $("wbViewer").style.display="none";
   $("wbEditor").style.display="none"; $("wbListView").style.display="";
   renderBooks();
   show("books");
 }
+/* 一覧は本棚: 単語帳を「本」として棚に並べ、選んだ本のくわしい欄を上に出す */
+const WB_COVER={ "p:nandoku":["難",232], "p:kencho":["県",140], "p:yoji":["熟",28], "p:kotowaza":["諺",188], "p:hayakuchi":["早",312], "p:german":["独",0], "p:genso":["元",200], "p:tsuki":["月",260], "p:rekishi":["史",40], "p:joho":["情",170] };
+const WB_ART={"p:nandoku": "<svg viewBox=\"0 0 48 48\"><rect x=\"5\" y=\"29\" width=\"26\" height=\"13\" rx=\"3\" fill=\"#2b2b33\" stroke=\"currentColor\" stroke-width=\"1.2\"/><ellipse cx=\"17\" cy=\"34\" rx=\"8\" ry=\"2.6\" fill=\"#0d0d12\"/><path d=\"M28 7l10 21\" stroke=\"#caa56b\" stroke-width=\"3.2\" stroke-linecap=\"round\"/><path d=\"M28 7l10 21\" stroke=\"#8a6a3e\" stroke-width=\"1\" stroke-linecap=\"round\"/><path d=\"M36.5 25.5l7 14.5-8.5-11z\" fill=\"#1c1c22\" stroke=\"currentColor\" stroke-width=\".9\"/></svg>", "p:kencho": "<svg viewBox=\"0 0 48 48\"><g fill=\"currentColor\" opacity=\".9\"><path d=\"M31 5l8 1.5 3 5-6 2.5-5-3z\"/><path d=\"M33 16l3.5 3-1.5 7-6 6.5-8 3.5-7.5.8-1-3 7-2.5 7-3.5 4.5-6z\"/><path d=\"M17 37.5l6-1.2-1 3.4-5 .8z\"/><path d=\"M8 35.5l4.5 2-1 5.5-4.5-1.2z\"/></g><circle cx=\"28.5\" cy=\"27\" r=\"2.6\" fill=\"#e8384f\" stroke=\"#fff\" stroke-width=\".8\"/></svg>", "p:yoji": "<svg viewBox=\"0 0 48 48\"><rect x=\"11\" y=\"13\" width=\"26\" height=\"22\" fill=\"#f4ecd8\" stroke=\"currentColor\" stroke-width=\"1\"/><rect x=\"7\" y=\"10\" width=\"5\" height=\"28\" rx=\"2.5\" fill=\"#8a5a2b\" stroke=\"currentColor\" stroke-width=\".8\"/><rect x=\"36\" y=\"10\" width=\"5\" height=\"28\" rx=\"2.5\" fill=\"#8a5a2b\" stroke=\"currentColor\" stroke-width=\".8\"/><path d=\"M31 17v13M26 17v13M21 17v13M16 17v13\" stroke=\"#3a2a1a\" stroke-width=\"1.6\" stroke-linecap=\"round\" stroke-dasharray=\"3 2\"/></svg>", "p:kotowaza": "<svg viewBox=\"0 0 48 48\"><path d=\"M8 9h32a4 4 0 0 1 4 4v15a4 4 0 0 1-4 4H23l-9 8v-8H8a4 4 0 0 1-4-4V13a4 4 0 0 1 4-4z\" fill=\"#f4ecd8\" stroke=\"currentColor\" stroke-width=\"1.4\"/><circle cx=\"16\" cy=\"20.5\" r=\"2.4\" fill=\"#3a2a1a\"/><circle cx=\"24\" cy=\"20.5\" r=\"2.4\" fill=\"#3a2a1a\"/><circle cx=\"32\" cy=\"20.5\" r=\"2.4\" fill=\"#3a2a1a\"/></svg>", "p:hayakuchi": "<svg viewBox=\"0 0 48 48\"><g fill=\"none\" stroke=\"currentColor\" stroke-width=\"2.4\" stroke-linecap=\"round\"><path d=\"M5 15q4-5 8 0t8 0 8 0 8 0 8 0\"/><path d=\"M5 24q4-5 8 0t8 0 8 0 8 0 8 0\"/><path d=\"M5 33q4-5 8 0t8 0 8 0 8 0 8 0\"/></g><path d=\"M41 6l3 2-2 3\" fill=\"none\" stroke=\"#f2c14e\" stroke-width=\"1.6\" stroke-linecap=\"round\"/></svg>", "p:german": "<svg viewBox=\"0 0 48 48\"><rect x=\"7\" y=\"11\" width=\"34\" height=\"8.7\" fill=\"#1c1c22\" stroke=\"currentColor\" stroke-width=\".8\"/><rect x=\"7\" y=\"19.7\" width=\"34\" height=\"8.6\" fill=\"#d22d2d\"/><rect x=\"7\" y=\"28.3\" width=\"34\" height=\"8.7\" fill=\"#f2c14e\"/><rect x=\"7\" y=\"11\" width=\"34\" height=\"26\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.2\"/></svg>", "p:genso": "<svg viewBox=\"0 0 48 48\"><rect x=\"9\" y=\"9\" width=\"30\" height=\"30\" rx=\"3\" fill=\"#f4ecd8\" stroke=\"currentColor\" stroke-width=\"1.4\"/><text x=\"13\" y=\"17\" font-size=\"6\" fill=\"#3a2a1a\" font-family=\"sans-serif\">26</text><text x=\"24\" y=\"33\" font-size=\"15\" font-weight=\"700\" text-anchor=\"middle\" fill=\"#3a2a1a\" font-family=\"sans-serif\">Fe</text></svg>", "p:tsuki": "<svg viewBox=\"0 0 48 48\"><path d=\"M30 8a15 15 0 1 0 10 25 13 13 0 1 1-10-25z\" fill=\"#f2d98a\" stroke=\"currentColor\" stroke-width=\"1.2\"/><g fill=\"#fff6d0\"><circle cx=\"38\" cy=\"10\" r=\"1.4\"/><circle cx=\"41\" cy=\"18\" r=\"1\"/><circle cx=\"33\" cy=\"15\" r=\".9\"/></g></svg>", "p:rekishi": "<svg viewBox=\"0 0 48 48\"><path d=\"M6 13h36M9 18h30\" stroke=\"#d2402e\" stroke-width=\"3.2\" stroke-linecap=\"round\"/><path d=\"M14 18v23M34 18v23\" stroke=\"#d2402e\" stroke-width=\"3.6\" stroke-linecap=\"round\"/><path d=\"M24 13v5\" stroke=\"#d2402e\" stroke-width=\"2.4\"/><path d=\"M5 12q19-5 38 0\" fill=\"none\" stroke=\"#3a2a1a\" stroke-width=\"2.4\" stroke-linecap=\"round\"/></svg>", "p:joho": "<svg viewBox=\"0 0 48 48\"><path d=\"M24 5l15 5v11c0 10-6.5 17-15 21-8.5-4-15-11-15-21V10z\" fill=\"#3a6ea8\" stroke=\"currentColor\" stroke-width=\"1.3\"/><rect x=\"17.5\" y=\"22\" width=\"13\" height=\"10\" rx=\"1.6\" fill=\"#f4ecd8\"/><path d=\"M20 22v-3a4 4 0 0 1 8 0v3\" fill=\"none\" stroke=\"#f4ecd8\" stroke-width=\"2\"/><circle cx=\"24\" cy=\"26.5\" r=\"1.5\" fill=\"#3a2a1a\"/></svg>"};   // おためし単語帳の表紙の絵
+const wbIcon = b => WB_ART[b.id] ? `<span class="wb-bart">${WB_ART[b.id]}</span>` : `<span class="wb-bic">${escH(wbCover(b)[0])}</span>`;
+function wbCover(b){
+  const c=WB_COVER[b.id]; if(c) return c;
+  let h=0; for(const ch of String(b.id)) h=(h*31+ch.charCodeAt(0))%360;
+  return [Array.from(b.name.trim())[0]||"本", h];
+}
+let wbScrCur=null;
 function renderBooks(){
-  const list=$("wbList");
-  if(!wbBooks.length){ list.innerHTML='<p class="wb-empty">まだ単語帳がありません。「新しい単語帳を作る」から作りましょう</p>'; return; }
-  wbCur=Math.max(0,Math.min(wbCur,wbBooks.length-1));
-  list.innerHTML=wbBooks.map((b,i)=>`<div class="wb-item${i===wbCur?" cur":""}" data-i="${i}">
-    <span class="wb-no">${i<9?i+1:""}</span>
-    <div class="wb-info"><b>${escH(b.name)}</b><small>${b.words.length}語${b.best!=null?` ・ ベスト ${fmtTime(b.best)}`:""}</small></div>
-    <div class="wb-acts">
-      <button class="btn primary" data-play="${i}">プレイ</button>
-      <button class="btn" data-edit="${i}">編集</button>
-      <button class="btn wb-del" data-del="${i}">削除</button>
-    </div></div>`).join("");
-  const cur=list.querySelector(".wb-item.cur"); if(cur && cur.scrollIntoView) cur.scrollIntoView({block:"nearest"});
+  const list=$("wbList"), all=wbAll();
+  wbCur=Math.max(0,Math.min(wbCur,all.length-1));
+  const book=(b,i)=>{ const [ic,h]=wbCover(b), c=wbCan4(b)?wbMemCount(b):null;
+    return `<div class="wb-book${i===wbCur?" cur":""}" data-i="${i}" style="--h:${h}" title="${escH(b.name)}">
+      <div class="wb-cover">${wbIcon(b)}<b class="wb-bt">${escH(b.name)}</b><small>${b.words.length}語</small></div>
+      ${c?`<div class="wb-band" title="覚えた ${c.good}/${c.all}"><i style="width:${c.all?Math.round(c.good/c.all*100):0}%"></i></div>`:""}
+      ${!b.pre&&i<9?`<span class="wb-bno">${i+1}</span>`:""}
+    </div>`; };
+  const b=all[wbCur], cnt=b&&wbCan4(b)?wbMemCount(b):null;
+  const detail = b ? `<div class="wb-detail" style="--h:${wbCover(b)[1]}">
+    <div class="wb-dcover">${wbIcon(b)}</div>
+    <div class="wb-dinfo">
+      <b class="wb-dname">${escH(b.name)}${b.pre?'<small class="wb-dtag">おためし</small>':""}</b>
+      <small>${b.pre?`${escH(b.ds)} ・ `:""}${b.words.length}語${wbStyle(b)==="type"&&wbBestTxt(b)?` ・ ${WB_MODES[wbMode(b)]}のベスト ${wbBestTxt(b)}`:""}</small>
+      ${cnt?`<div class="wb-dprog"><span>覚えた ${cnt.good}/${cnt.all}</span><i><b style="width:${cnt.all?Math.round(cnt.good/cnt.all*100):0}%"></b></i></div>`:""}
+      <div class="wb-dopts">
+        ${wbCan4(b)&&!window.IS_MOBILE?`<span class="wb-mode">${[["type","タイピング"],["4","4択"]].map(([v,n])=>`<button class="${wbStyle(b)===v?"on":""}" data-style="${v}" title="${v==="4"?"打たずに、4つの答えから選ぶ":"答えを打つ"}">${n}</button>`).join("")}<span class="kbdh">F</span></span>`:""}
+        ${wbModes(b).length>1?`<span class="wb-mode">${wbModes(b).map(m=>`<button class="${m===wbMode(b)?"on":""}" data-mode="${m}">${WB_MODES[m]}</button>`).join("")}<span class="kbdh">M</span></span>`:""}
+        ${wbHasQ(b)?`<span class="wb-mode">${[["f","問題 → 答え"],["r","答え → 問題"]].map(([v,n])=>`<button class="${wbDir(b)===v?"on":""}" data-dir="${v}">${n}</button>`).join("")}<span class="kbdh">D</span></span>`:""}
+        ${wbCan4(b)?`<span class="wb-mode"><button class="${b.hideGood?"on":""}" data-hidegood="1">覚えた言葉を出さない</button><span class="kbdh">H</span></span>`:""}
+        ${wbHasQ(b)&&!window.IS_MOBILE&&!wb4o(b)?`<span class="wb-sec">答えが出るまで<button data-sd="-1" aria-label="1秒短く">−</button><b>${wbSec(b)}</b>秒<button data-sd="1" aria-label="1秒長く">+</button><span class="kbdh">− +</span></span>`:""}
+      </div>
+      ${window.IS_MOBILE&&!wbCan4(b)?`<p class="wb-mnote">${wbHasQ(b)?"この単語帳は、答えのちがう問題が4つ以上ないので4択にできず、":"この単語帳は問題がなく、見て打つだけなので、"}タイピングで遊びます。タイピングはパソコンで遊べます(スマホでは、問題のある言葉が4つ以上ある単語帳を4択で遊べます)</p>`:""}
+      <div class="wb-acts">
+        <button class="btn primary${window.IS_MOBILE&&!wbCan4(b)?" wb-off":""}" data-play="${wbCur}">プレイ <span class="kbdh">Enter</span></button>
+        <button class="btn" data-view="${wbCur}">単語リスト <span class="kbdh">V</span></button>
+        ${b.pre?"":`<button class="btn" data-edit="${wbCur}">編集 <span class="kbdh">E</span></button>
+        <button class="btn" data-share="${wbCur}">共有 <span class="kbdh">S</span></button>
+        <button class="btn wb-del" data-del="${wbCur}">削除 <span class="kbdh">Del</span></button>`}
+      </div>
+    </div></div>` : "";
+  list.innerHTML = detail
+    + `<p class="wb-shelfh">${playerName?escH(playerName)+"の":"わたしの"}単語帳</p>`+'<div class="wb-shelf">' + wbBooks.map(book).join("")
+    + '<div class="wb-newbook" title="新しい単語帳を作る"><span>+</span><small>新しい<br>単語帳</small><span class="kbdh">N</span></div></div>'
+    + (wbBooks.length ? "" : '<p class="wb-empty">まだ自分の単語帳がありません。「+ 新しい単語帳」で作るか、下のおためし単語帳で遊んでみましょう</p>')
+    + '<p class="wb-shelfh">おためし単語帳</p><div class="wb-shelf">' + WB_PRESETS.map((x,j)=>book(x,wbBooks.length+j)).join("") + '</div>';
+  const cur=list.querySelector(".wb-book.cur");
+  if(cur && cur.scrollIntoView && !window.IS_MOBILE && wbCur!==wbScrCur) cur.scrollIntoView({block:"nearest"});   // 選ぶ本が変わったときだけ見える所へ(設定の切りかえでは動かさない)
+  wbScrCur=wbCur;
 }
 function playBook(i){
-  const b=wbBooks[i]; if(!b) return;
-  if(window.IS_MOBILE){ alert("タイピングはパソコンで遊べます。スマホでは単語帳の作成・編集・削除ができます"); return; }
-  if(!b.words.length){ alert("この単語帳には言葉がありません。編集から追加してください"); return; }
-  bookPlay=b;
+  const b=wbAll()[i]; if(!b) return;
+  if(window.IS_MOBILE && !wbCan4(b)){ uiTell("タイピングはパソコンで遊べます。スマホでは、問題のある言葉が4つ以上ある単語帳を4択で遊べます(作成・編集・削除もできます)"); return; }
+  if(!b.words.length){ uiTell("この単語帳には言葉がありません。編集から追加してください"); return; }
+  bookPlay=b; wb4=wbStyle(b)==="4";
+  if(!wbPlayWords(b,wb4).length && wbCan4(b)) wb4=true;   // 逆向きで打てる言葉がないときは、4択で遊ぶ
+  if(!wbPlayWords(b,wb4).length){ uiTell("逆向きのタイピングで打てる言葉がありません。問題のよみがなを入れるか、4択で遊んでください"); return; }
   startGame("book");
 }
-function deleteBook(i){
-  const b=wbBooks[i]; if(!b) return;
-  if(!confirm(`単語帳「${b.name}」(${b.words.length}語)を削除します。元には戻せません。よろしいですか?`)) return;
+/* 問題のある単語帳: 答えとよみがなが出るまでの秒数(単語帳ごと) */
+const WB_SEC_MIN=0, WB_SEC_MAX=30, WB_SEC_DEF=5;   // 0秒: 隠さずにすぐ答えを出す(4択はすぐ4択)
+const wbHasQ = b => !!(b && b.words && b.words.some(w=>w.q));
+const wbSec = b => { if(wb4o(b)) return 0; const v=b ? b.sec : null; return typeof v==="number" && v>=WB_SEC_MIN && v<=WB_SEC_MAX ? Math.round(v) : WB_SEC_DEF; };
+function wbSetSec(i,d){
+  const b=wbAll()[i]; if(!wbHasQ(b) || wb4o(b)) return;
+  const v=Math.max(WB_SEC_MIN,Math.min(WB_SEC_MAX,wbSec(b)+d)); if(v===wbSec(b)) return;
+  b.sec=v; if(b.pre) wbPreStore(); else wbStore(); renderBooks();
+}
+/* 単語帳の確認・お知らせ・入力の窓(ブラウザの窓は使わない。庭の確認の窓と同じ見た目)
+   o.tell: 「OK」だけ / o.input: 入力欄つき(入れた文字を返す。やめたら null)/ ほかは はい → true、やめる → false */
+function uiAsk(msg, okLabel="OK", o={}){
+  return new Promise(res=>{
+    const t0=Date.now(), w=document.createElement("div"); w.className="gask";
+    w.innerHTML=`<div class="gask-box" role="dialog" aria-modal="true"><p>${escH(msg).replace(/\n/g,"<br>")}</p>${o.input?`<input class="gask-in" maxlength="${o.max||20}" placeholder="${escH(o.input)}" autocomplete="off">`:""}<div class="gask-acts">${o.tell?"":'<button type="button" class="gask-no">やめる</button>'}<button type="button" class="gask-ok">${escH(okLabel)}</button></div>${window.IS_MOBILE?"":`<small>${o.tell?"Enter / Esc で閉じる":o.input?"Enter で決める ・ Esc でやめる":"Y で決める ・ N / Esc でやめる"}</small>`}</div>`;
+    document.body.appendChild(w);
+    const no=w.querySelector(".gask-no"), ok=w.querySelector(".gask-ok"), inp=w.querySelector(".gask-in");
+    const done=v=>{ if(Date.now()-t0<250) return; window.removeEventListener("keydown",key,true); w.remove(); res(o.tell ? true : o.input ? (v ? inp.value : null) : v); };
+    const key=e=>{ e.stopImmediatePropagation(); const k=e.key;
+      if(k==="Escape"){ e.preventDefault(); done(false); return; }
+      if(inp && e.target===inp){ if(k==="Enter"){ e.preventDefault(); if(!e.repeat && !e.isComposing) done(true); } return; }   // 入力欄では文字を打てるように
+      if(o.tell){ if(k==="Enter"||k===" "){ e.preventDefault(); if(!e.repeat) done(true); } else e.preventDefault(); return; }
+      if(!inp && (k==="n"||k==="N")){ e.preventDefault(); done(false); }
+      else if(!inp && (k==="y"||k==="Y")){ e.preventDefault(); done(true); }
+      else if(k==="ArrowLeft"||k==="ArrowRight"||k==="Tab"){ e.preventDefault(); const els=[inp,no,ok].filter(Boolean); els[(els.indexOf(document.activeElement)+1)%els.length].focus(); }
+      else if(k==="Enter"){ e.preventDefault(); if(!e.repeat) done(document.activeElement===ok); }
+      else e.preventDefault(); };
+    window.addEventListener("keydown",key,true);
+    if(no) no.addEventListener("click",()=>done(false)); ok.addEventListener("click",()=>done(true));
+    w.addEventListener("click",e=>{ if(e.target===w) done(false); });
+    (inp||(o.tell?ok:no)).focus();
+  });
+}
+const uiTell = msg => uiAsk(msg,"OK",{ tell:true });
+async function deleteBook(i){
+  const b=wbBooks[i]; if(!b) return;   // おためし単語帳は消せない
+  if(!await uiAsk(`単語帳「${b.name}」(${b.words.length}語)を削除します。元には戻せません。よろしいですか?`,"削除する")) return;
+  if(wbBooks[i]!==b) return;
   wbBooks.splice(i,1); wbStore();
+  if(wbMem[b.id]){ delete wbMem[b.id]; wbMemStore(); }
   if(wbCur>=wbBooks.length) wbCur=wbBooks.length-1;
   renderBooks();
 }
 function editBook(i){
-  if(i<0 && wbBooks.length>=WB_MAX_BOOKS){ alert(`単語帳は${WB_MAX_BOOKS}冊まで作れます`); return; }
+  if(i>=wbBooks.length) return;   // おためし単語帳は編集しない
+  if(i<0 && wbBooks.length>=WB_MAX_BOOKS){ uiTell(`単語帳は${WB_MAX_BOOKS}冊まで作れます`); return; }
   const b=i>=0 ? wbBooks[i] : null;
   wbEdit={ i, name:b?b.name:"", words:b?b.words.map(w=>({...w})):[] };
   wbEdit.orig=JSON.stringify({ name:wbEdit.name, words:wbEdit.words });
   wbWordCur=-1;
   $("wbListView").style.display="none"; $("wbEditor").style.display="";
-  $("wbName").value=wbEdit.name; $("wbT").value=""; $("wbK").value=""; $("wbBulk").value="";
-  $("wbNote").textContent="";
+  $("wbDefStyle").value = b ? (b.style==="4"||b.style==="4o" ? "4" : "type") : WB_AI_KINDS[wbAiKind].st;   // 新しい単語帳は、AIに頼む形に合わせる $("wbDefMode").value = b && String(b.mode)==="10" ? "10" : "all"; $("wbDefSec").value = b ? wbSec(b) : WB_SEC_DEF;
+  wbEditIdx=-1; $("wbAdd").textContent="追加 (Enter)";
+  $("wbTtl").value=wbEdit.name; $("wbQ").value=""; $("wbQK").value=""; $("wbT").value=""; $("wbK").value=""; $("wbBulk").value="";
+  $("wbNote").textContent=""; $("wbBulkNote").hidden=true; $("wbAddNote").hidden=true; $("wbAiCopyNote").textContent="";
   $("wbKeys").innerHTML='入力中: <b>Enter</b> 追加 ・ <b>Tab</b> 次の欄 ・ <b>Ctrl+Enter</b> 保存(まとめて追加の欄では追加) ・ <b>Esc</b> 入力をやめる<br>'+
-    '入力していないとき: <b>T</b> 言葉を入力 ・ <b>M</b> 名前を入力 ・ <b>B</b> まとめて追加 ・ <b>↑ ↓</b> 言葉を選ぶ ・ <b>Delete</b> 選んだ言葉を外す ・ <b>S</b> 保存 ・ <b>Esc</b> やめる';
+    '入力していないとき: <b>Q</b> 問題を入力 ・ <b>T</b> 言葉を入力 ・ <b>M</b> タイトルを入力 ・ <b>B</b> まとめて追加 ・ <b>↑ ↓</b> 言葉を選ぶ ・ <b>Enter</b> 選んだ言葉を直す ・ <b>Delete</b> 選んだ言葉を外す ・ <b>S</b> 保存 ・ <b>Esc</b> やめる';
   renderWbWords();
-  setTimeout(()=>$(b?"wbT":"wbName").focus(),30);
+  setTimeout(()=>$(b?"wbT":"wbTtl").focus(),30);
 }
 function renderWbWords(){
   const ol=$("wbWords");
   if(wbWordCur>=wbEdit.words.length) wbWordCur=wbEdit.words.length-1;
-  ol.innerHTML=wbEdit.words.map((w,j)=>`<li class="${j===wbWordCur?"cur":""}"><span class="no">${j+1}</span><span>${escH(w.t)}</span><span class="k">${escH(w.k)}</span><button class="x" data-x="${j}" title="この言葉を外す">✕</button></li>`).join("");
+  ol.innerHTML=wbEdit.words.map((w,j)=>`<li class="${j===wbWordCur?"cur":""}${j===wbEditIdx?" edit":""}" data-j="${j}" title="押すと直せます"><span class="no">${j+1}</span><span>${w.q?`<span class="q">${escH(w.q)}${w.qk?`(${escH(w.qk)})`:""}</span>`:""}${escH(wbAnsTxt(w))}</span><span class="k">${w.k?escH([w.k,...(w.a||[]).map(x=>x.k)].join("／")):"(4択のときだけ)"}</span><button class="x" data-x="${j}" title="この言葉を外す">✕</button></li>`).join("");
   const cur=ol.querySelector("li.cur"); if(cur && cur.scrollIntoView) cur.scrollIntoView({block:"nearest"});
 }
 /* 編集をやめる(変えたところがあれば確かめる) */
-function wbCancelEdit(){
+async function wbCancelEdit(){
   if(wbEdit){
-    wbEdit.name=$("wbName").value.trim();
-    const now=JSON.stringify({ name:wbEdit.name, words:wbEdit.words });
-    if(now!==wbEdit.orig && !confirm("変えたところを保存せずに戻ります。よろしいですか?")) return;
+    const ed=wbEdit; ed.name=$("wbTtl").value.trim();
+    const now=JSON.stringify({ name:ed.name, words:ed.words });
+    if(now!==ed.orig && !await uiAsk("変えたところを保存せずに戻ります。よろしいですか?","保存せずに戻る")) return;
+    if(wbEdit!==ed) return;
   }
   openBooks();
 }
-function wbAddOne(t,k){
-  const r=wbCheckWord(t,k);
+function wbAddOne(t,k,q,qk){
+  const r=wbCheckWord(t,k,q,qk);
   if(r.err) return r.err;
   if(wbEdit.words.length>=WB_MAX_WORDS) return `1冊に入れられるのは${WB_MAX_WORDS}語までです`;
-  if(wbEdit.words.some(w=>w.t===r.t && w.k===r.k)) return `「${r.t}」はもう入っています`;
+  if(wbEdit.words.some(w=>w.t===r.t && w.k===r.k && (w.q||"")===(r.q||""))) return `「${r.q||r.t}」はもう入っています`;
+  if(!r.k) wbNoK++; delete r.nk;
   wbEdit.words.push(r);
   return "";
 }
+let wbNoK=0;   // 打てない(よみがなのない)ので4択だけで出す言葉の数(追加したとき知らせる)
+const WB_NOK_TXT="よみがながない言葉や、打てない文字(ä・é など)がある言葉は、4択で遊ぶときだけ出ます";
+function wbAddMsg(html){ const n=$("wbAddNote"); n.innerHTML=html; n.hidden=!html; }   // 1語ずつ追加・直したときの知らせは、追加ボタンのすぐ下に出す
+let wbEditIdx=-1;   // 直している言葉(一覧の番号)。追加のときは -1
+function wbEditWord(j){
+  const w=wbEdit && wbEdit.words[j]; if(!w) return;
+  wbEditIdx=j; wbWordCur=j;
+  $("wbQ").value=w.q||""; $("wbQK").value=w.qk||"";
+  $("wbT").value=[w.t,...(w.a||[]).map(x=>x.t)].join("／"); $("wbK").value=[w.k,...(w.a||[]).map(x=>x.k)].join("／");
+  $("wbAdd").textContent="直す (Enter)"; wbAddMsg(`<div>${j+1}番目の言葉を直しています。直したら Enter か「直す」を押します</div>`);
+  renderWbWords(); $("wbT").focus();
+}
 function wbAddWord(){
   if(!wbEdit) return;
-  const err=wbAddOne($("wbT").value,$("wbK").value);
-  $("wbNote").textContent=err;
-  if(err) return;
-  $("wbT").value=""; $("wbK").value="";
+  if(wbEditIdx>=0){   // 直す
+    const r=wbCheckWord($("wbT").value,$("wbK").value,$("wbQ").value,$("wbQK").value);
+    if(r.err){ wbAddMsg(`<div class="ng">${escH(r.err)}</div>`); return; }
+    const nk=!r.k; delete r.nk;
+    const old=wbEdit.words[wbEditIdx]; if(old){ for(const f of ["k2","t2"]) if(old[f]) r[f]=old[f]; wbEdit.words[wbEditIdx]=r; }
+    wbEditIdx=-1; $("wbAdd").textContent="追加 (Enter)"; wbAddMsg(`<div class="ok">✅ 「${escH(r.t||r.k)}」を直しました</div>`+(nk?`<div class="ng">${WB_NOK_TXT}</div>`:""));
+    $("wbQ").value=""; $("wbQK").value=""; $("wbT").value=""; $("wbK").value=""; renderWbWords(); return;
+  }
+  wbNoK=0;
+  const err=wbAddOne($("wbT").value,$("wbK").value,$("wbQ").value,$("wbQK").value);
+  if(err){ wbAddMsg(`<div class="ng">${escH(err)}</div>`); return; }
+  const nw=wbEdit.words[wbEdit.words.length-1];
+  wbAddMsg(`<div class="ok">✅ 「${escH(nw.t||nw.k)}」を追加しました(この単語帳は今 ${wbEdit.words.length}語)</div>`+(wbNoK?`<div class="ng">${WB_NOK_TXT}</div>`:""));
+  $("wbQ").value=""; $("wbQK").value=""; $("wbT").value=""; $("wbK").value="";
   renderWbWords();
-  const ol=$("wbWords"); ol.scrollTop=ol.scrollHeight;
-  $("wbT").focus();
+  const ol=$("wbWords"); ol.scrollTop=ol.scrollHeight; if(ol.lastElementChild) ol.lastElementChild.classList.add("new");
+  $(wbEdit.words.some(w=>w.q)?"wbQ":"wbT").focus();
+}
+/* まとめて追加: 1行の区切りは | → タブ → カンマ(, ，)の順に、行にあるものを使う。読点(、)は区切りにしない(言葉の一部) */
+function wbSplitLine(l){
+  l=l.replace(/^```.*$/,"").replace(/^\s*[-・*]\s+/,"");   // AI の返事にありがちな、コードの囲みと行頭の「- 」は外す
+  const sep = /[|｜]/.test(l) ? /[|｜]/ : l.includes("\t") ? /\t/ : /[,，]/;
+  return l.split(sep).map(x=>x.trim());
 }
 function wbBulkAdd(){
   if(!wbEdit) return;
-  const lines=$("wbBulk").value.split(/\r?\n/).map(l=>l.trim()).filter(Boolean);
-  let ok=0; const errs=[];
-  for(const l of lines){
-    const [t,k=""]=l.split(/[,，、\t]/);
-    const err=wbAddOne(t,k);
-    if(err) errs.push(err); else ok++;
-  }
+  const lines=$("wbBulk").value.split(/\r?\n/).map(l=>l.trim()).filter(l=>l && !/^```/.test(l));
+  let ok=0; const errs=[], bad=[]; wbNoK=0; const n0=wbEdit.words.length;
+  lines.forEach((l,n)=>{
+    const c=wbSplitLine(l); if(!c.join("")) return;
+    if(l.split("|").length>5){ errs.push(`${n+1}行目: 1行に何語も続いています(改行が消えています)。AIの返事は、コードブロックのコピーボタンでコピーして貼ってください`); bad.push(l); return; }
+    const err = c.length>=3 ? wbAddOne(c[1],c[2],c[0],c[3]||"") : wbAddOne(c[0],c[1]||"");   // 3つ以上なら「問題|答え|よみがな|問題のよみがな」
+    if(err){ errs.push(`${n+1}行目: ${err}`); bad.push(l); } else ok++;
+  });
   renderWbWords();
-  $("wbNote").textContent = `${ok}語を追加しました`+(errs.length?` ・ 追加できなかった行: ${errs.length}(${errs.slice(0,2).join(" / ")}${errs.length>2?" ほか":""})`:"");
-  if(!errs.length) $("wbBulk").value="";
+  const same=wbAiKind==="plain" ? 0 : lines.map(wbSplitLine).filter(c=>c.length===2 && c[0] && !/\s/.test(c[0].trim()) && c[0].toLowerCase().replace(/[^a-z0-9]/g,"")===String(c[1]||"").toLowerCase().replace(/[^a-z0-9]/g,"") && /[a-z]/i.test(c[0])).length;
+  const warn = same>=3 && same>=lines.length*.5 ? " ・ 英字をそのまま打つだけの行が多いようです。英単語の意味で覚えたいときは、AIに頼む文章の形を「英語・外国語の単語と意味」にして、AIに頼み直してください" : "";
+  const added=wbEdit.words.slice(n0), nb=$("wbBulkNote"), esc=escH;   // 結果は「まとめて追加」のすぐ下に出す(下の一覧は遠いので)
+  nb.innerHTML = (ok ? `<div class="ok">✅ ${ok}語を追加しました(この単語帳は今 ${wbEdit.words.length}語)</div><div class="ws">${added.slice(0,6).map(w=>esc(w.t||w.k)).join("、")}${added.length>6?` ほか${added.length-6}語`:""}</div>` : `<div class="ok ng">追加できた言葉はありません</div>`)
+    + (warn ? `<div class="ng">${esc(warn.replace(/^ ・ /,""))}</div>` : "")
+    + (wbNoK ? `<div class="ng">そのうち${wbNoK}語は、よみがながないか打てない文字があるので、4択で遊ぶときだけ出ます</div>` : "")
+    + (errs.length ? `<div class="ng">追加できなかった行が ${errs.length}行あります(欄に残しました): ${esc(errs.slice(0,3).join(" / "))}${errs.length>3?" ほか":""}</div>` : "")
+    + (ok ? `<button type="button" class="btn" id="wbBulkSee">追加した言葉を一覧で見る ↓</button>` : "");
+  nb.hidden=false; $("wbNote").textContent="";
+  [...$("wbWords").children].slice(n0).forEach(li=>li.classList.add("new"));
+  const sb=$("wbBulkSee"); if(sb) sb.onclick=()=>{ const li=$("wbWords").children[n0]; (li||$("wbWords")).scrollIntoView({ behavior:"smooth", block:"center" }); };
+  $("wbBulk").value=bad.join("\n");   // 追加できなかった行だけ残して、直せるようにする
+}
+/* AIに頼む文章: 作りたい単語帳の形を選ぶと、それに合わせた頼み方になる(英単語の一覧だけを渡すと、英単語をそのまま打つ行になりがちなので) */
+const WB_AI_KINDS={
+  foreign:{ nm:"英語・外国語の単語と意味(単語を見て意味を答える。4択向き)", st:"4",
+    how:`・問題: 英語などの外国語の単語・熟語(もとの表記のまま)
+・答え: 日本語の意味(短く。資料に意味が書いていなければ、その分野でのふつうの意味を補う)
+・意味は、ふつうの日本語の訳を使う。英単語をカタカナにしただけの言葉(タイポグラフィ・インターフェースなど)は、ほかに訳があればそちらにする(例: typography → 文字組み、query → 問い合わせ)
+・ただし、日本でもカタカナで呼ぶのがふつうの用語(データベース・バイト・ゲームエンジンなど)は、カタカナのままでよい。むりに漢字の言葉を作ったり、説明文にしたりしない
+・答えのよみがな: 意味のよみ(ひらがな)
+・問題のよみがな: 単語を打つための英字(英語は単語を小文字にしたもの。熟語の空白はそのまま。中国語・韓国語などはローマ字やピンイン)
+・意味がいくつもあるときは、答えとよみがなを全角の「／」で区切って同じ順に並べる(4つまで)`,
+    ex:`issue|問題／発行する|もんだい／はっこうする|issue
+look forward to|楽しみに待つ|たのしみにまつ|look forward to
+你好|こんにちは|こんにちは|nihao` },
+  term:{ nm:"言葉と意味(用語・語句の意味を見て、その言葉を答える)", st:"4",
+    how:`・問題: 言葉の意味や説明(1文、50字くらいまで。答えの言葉そのものは書かない)
+・答え: 言葉・用語
+・答えのよみがな: 言葉のよみ(ひらがな。英語の用語は英字を小文字で)
+・問題のよみがな: 書かない`,
+    ex:`植物が光から栄養を作るはたらき|光合成|こうごうせい
+ほかのものとくらべて特に目立つこと|抜群|ばつぐん` },
+  qa:{ nm:"問題と答え(一問一答。歴史・地理・資格試験など)", st:"4",
+    how:`・問題: 問題文(1文、60字くらいまで)
+・答え: 答え(短く。人名・地名・年号など)
+・答えのよみがな: 答えのよみ(ひらがな。数字はそのまま)
+・別の答えも正解にしたいときは、答えとよみがなを全角の「／」で区切って同じ順に並べる(4つまで)
+・ほかの答えの頭と同じになる別解は入れない(例: 365日 と 365 なら 365日 だけ)
+・問題のよみがな: 書かない`,
+    ex:`鎌倉幕府を開いた人物は?|源頼朝|みなもとのよりとも
+日本でいちばん長い川は?|信濃川|しなのがわ` },
+  yomi:{ nm:"漢字・言葉のよみ(言葉を見てよみを打つ)", st:"type",
+    how:`・問題: 漢字の言葉
+・答え: 空のままにする(よみがなが答えになる)
+・よみが2つ以上あるときは、全角の「／」で区切って全部書く(例: 今日 → きょう／こんにち)
+・答えのよみがな: よみ(ひらがな)`,
+    ex:`紫陽花||あじさい` },
+  plain:{ nm:"そのまま打つ(問題なし。見た言葉を打つ練習)", st:"type",
+    how:`・言葉|よみがな の2つだけを書く(問題は書かない)
+・英文のときは、よみがなに英文を小文字で書く(単語の間の空白はそのまま)`,
+    ex:`生麦生米生卵|なまむぎなまごめなまたまご
+Practice makes perfect.|practice makes perfect.` },
+};
+let wbAiKind="foreign";
+const wbAiPrompt = (k=wbAiKind) => { const x=WB_AI_KINDS[k]||WB_AI_KINDS.foreign; return `次の内容を、タイピング練習用の単語帳に取り込める形に変換してください。
+作りたい単語帳: ${x.nm.replace(/[(（].*$/,"")}
+
+形式:
+・1行に1語。区切りは半角の縦棒「|」。並びは「問題|答え|答えのよみがな|問題のよみがな」
+${x.how}
+
+よみがなのきまり:
+・ひらがなか、英字(小文字)と数字で書く。カタカナ・漢字・かっこは使わない
+・英単語や英文にある記号 ' - , . ! ? & : ; " は、消さずにそのまま残す(打てます。例: Don't give up. → don't give up.)
+・空白は、英語の熟語や英文の単語の間にだけ入れてよい(打つときもスペースキーで打ちます)
+・「~」「～」「...」など、ほかの言葉が入る所を示す印は、よみがなに入れない(例: look forward to ~ → look forward to)
+・問題のつづりが2つ以上あるとき(colour / color など)だけは、問題のよみがなを最初の1つにする(例: colour / color → colour)。答えのよみがなは、答えと同じ数だけ書く
+・かっこの中の略語や補足は、よみがなに入れない(例: Augmented Reality (AR) → augmented reality)。中黒「・」も使わない
+・ä・ö・ü・ß・é など英字にない文字は、その言語でふつうの英字の書きかえにする(ドイツ語は ä→ae、ö→oe、ü→ue、ß→ss。フランス語などの é・è は e)
+・漢字やカタカナの言葉には、必ずひらがなのよみを書く(例: 北海道 → ほっかいどう、富士山 → ふじさん)。答えのよみがなは空にしない
+・空にしてよいのは、外国語の文字で、英字に書きかえる方法もないときだけ(その言葉は4択で遊ぶときだけ出ます)
+・のばす音は「ー」。句読点「、」「。」や「！」「？」は使ってよい
+
+そのほか:
+・表の番号や単元(Units など)の列、見出しなど、言葉でないものは使わない
+・意味・答え・よみ・説明が書いていない言葉は、あなたが正しいものを考えて補う(例: 英単語だけの表なら、意味とそのよみを書き足す)。わからない言葉は入れない。補うのは、元の内容にある言葉の足りない所だけで、言葉は増やさない
+・同じ言葉は1回だけ
+・1冊 300語まで。多いときは300語ずつに分けて返す
+・返事は、変換した行だけを「\`\`\`」で囲んだコードブロック1つに入れてください(見出し・説明・番号は付けない。1語ごとに必ず改行する)
+
+例:
+${x.ex}
+
+変換する内容:
+`; };
+function wbAiSetKind(k){
+  if(!WB_AI_KINDS[k]) return; wbAiKind=k; $("wbAiKind").value=k; $("wbAiText").value=wbAiPrompt();
+  if(wbEdit && wbEdit.i<0) $("wbDefStyle").value=WB_AI_KINDS[k].st;   // 新しい単語帳なら、遊び方の初期設定も合わせる
+}
+function wbAiCopy(){
+  const ta=$("wbAiText"), txt=wbAiPrompt(); ta.value=txt;
+  const done=ok=>{ const n=$("wbAiCopyNote"); n.className="wb-cnote"+(ok?"":" ng"); n.textContent = ok ? "✅ コピーしました。AIに貼って、その下に変換したい内容を貼って送ってください" : "コピーできませんでした。下の「AIに頼む文章の中身を見る」から選んでコピーしてください"; if(!ok){ $("wbEditor").querySelector(".wb-ai").open=true; ta.focus(); ta.select(); } };
+  try{ navigator.clipboard.writeText(txt).then(()=>done(true),()=>done(false)); }catch(e){ done(false); }
 }
 function wbSaveBook(){
   if(!wbEdit) return;
-  const name=$("wbName").value.trim();
-  if(!name){ $("wbNote").textContent="単語帳の名前を入れてください"; $("wbName").focus(); return; }
+  const name=$("wbTtl").value.trim();
+  if(!name){ $("wbNote").textContent="単語帳のタイトルを入れてください"; $("wbTtl").focus(); return; }
   if(!wbEdit.words.length){ $("wbNote").textContent="言葉を1つ以上入れてください"; $("wbT").focus(); return; }
+  const def={ style:$("wbDefStyle").value==="4"?"4":"type", mode:$("wbDefMode").value==="10"?"10":"all", sec:(v=>Number.isFinite(v)?Math.max(WB_SEC_MIN,Math.min(WB_SEC_MAX,Math.round(v))):WB_SEC_DEF)($("wbDefSec").value===""?NaN:+$("wbDefSec").value) };   // 遊び方の初期設定
   if(wbEdit.i>=0){
     const b=wbBooks[wbEdit.i];
     const changed=JSON.stringify(b.words)!==JSON.stringify(wbEdit.words);
-    b.name=name; b.words=wbEdit.words;
+    b.name=name; b.words=wbEdit.words; Object.assign(b,def);
     if(changed) b.best=null;              // 言葉が変わったらベストはリセット
   }else{
-    wbBooks.push({ id:Date.now().toString(36)+Math.random().toString(36).slice(2,6), name, words:wbEdit.words, best:null });
+    wbBooks.push({ id:Date.now().toString(36)+Math.random().toString(36).slice(2,6), name, words:wbEdit.words, best:null, ...def });
   }
   if(!wbStore()){ $("wbNote").textContent="保存できませんでした(ブラウザの保存容量がいっぱいかもしれません)"; return; }
   openBooks();
 }
 function booksKey(e){
   const k=e.key;
+  if(e.target && e.target.tagName==="SELECT") return;   // 初期設定の選びかけ
   if(e.ctrlKey||e.metaKey||e.altKey) return;
+  if(wbViewI>=0){   // 中身を見ているとき
+    if(k==="Escape"){ e.preventDefault(); openBooks(); }
+    else if(k==="Enter"){ e.preventDefault(); playBook(wbViewI); }
+    else if(k==="ArrowLeft"||k==="ArrowRight"){ const ks=["all","good","learn","weak","new"]; if(!wbCan4(wbAll()[wbViewI])) return; e.preventDefault(); wbVCat=ks[(ks.indexOf(wbVCat)+(k==="ArrowRight"?1:-1)+ks.length)%ks.length]; wbView(wbViewI,true); }
+    return;
+  }
   if(wbEdit){   // 編集中(入力欄の外)
     const n=wbEdit.words.length;
     if(k==="Escape"){ e.preventDefault(); wbCancelEdit(); return; }
     if(k==="s"||k==="S"){ e.preventDefault(); wbSaveBook(); return; }
     if(k==="t"||k==="T"){ e.preventDefault(); $("wbT").focus(); return; }
-    if(k==="m"||k==="M"){ e.preventDefault(); $("wbName").focus(); return; }
-    if(k==="b"||k==="B"){ e.preventDefault(); $("wbEditor").querySelector(".wb-bulk").open=true; $("wbBulk").focus(); return; }
+    if(k==="q"||k==="Q"){ e.preventDefault(); $("wbQ").focus(); return; }
+    if(k==="m"||k==="M"){ e.preventDefault(); $("wbTtl").focus(); return; }
+    if(k==="b"||k==="B"){ e.preventDefault(); $("wbBulk").focus(); return; }
     if((k==="ArrowDown"||k==="ArrowUp") && n){
       e.preventDefault();
       wbWordCur = wbWordCur<0 ? (k==="ArrowDown"?0:n-1) : (wbWordCur+(k==="ArrowDown"?1:-1)+n)%n;
       renderWbWords(); return;
     }
+    if(k==="Enter" && wbWordCur>=0 && n){ e.preventDefault(); wbEditWord(wbWordCur); return; }   // 選んだ言葉を直す
     if((k==="Delete"||k==="Backspace"||k==="x"||k==="X") && wbWordCur>=0 && n){
       e.preventDefault();
       wbEdit.words.splice(wbWordCur,1);
+      if(wbEditIdx===wbWordCur){ wbEditIdx=-1; $("wbAdd").textContent="追加 (Enter)"; } else if(wbEditIdx>wbWordCur) wbEditIdx--;
       renderWbWords(); return;
     }
     return;
   }
-  const n=wbBooks.length;
+  const n=wbAll().length;
   if(k==="Escape"){ show("title"); return; }
   if(k==="n"||k==="N"){ e.preventDefault(); editBook(-1); return; }
   if(/^[1-9]$/.test(k) && wbBooks[+k-1]){ e.preventDefault(); wbCur=+k-1; playBook(wbCur); return; }
   if(!n) return;
-  if(k==="ArrowDown"||k==="ArrowUp"){ e.preventDefault(); wbCur=(wbCur+(k==="ArrowDown"?1:-1)+n)%n; renderBooks(); return; }
+  if(k==="ArrowLeft"||k==="ArrowRight"){ e.preventDefault(); wbCur=(wbCur+(k==="ArrowRight"?1:-1)+n)%n; renderBooks(); return; }
+  if(k==="ArrowDown"||k==="ArrowUp"){   // 本棚の上下の段へ(同じ列あたりの本)
+    e.preventDefault();
+    const els=[...$("wbList").querySelectorAll(".wb-book")], me=els.find(x=>+x.dataset.i===wbCur); if(!me) return;
+    const r0=me.getBoundingClientRect(), down=k==="ArrowDown";
+    const cand=els.filter(x=>{ const r=x.getBoundingClientRect(); return down ? r.top>r0.top+30 : r.top<r0.top-30; });   // 選んだ本は少し浮いているので、段のちがいは大きめに見る
+    if(!cand.length) return;
+    const ty=down ? Math.min(...cand.map(x=>x.getBoundingClientRect().top)) : Math.max(...cand.map(x=>x.getBoundingClientRect().top));
+    const row=cand.filter(x=>Math.abs(x.getBoundingClientRect().top-ty)<5);
+    row.sort((a,b)=>Math.abs(a.getBoundingClientRect().left-r0.left)-Math.abs(b.getBoundingClientRect().left-r0.left));
+    wbCur=+row[0].dataset.i; renderBooks(); return;
+  }
+  if(k==="-"||k==="+"||k==="="||k===";"){ e.preventDefault(); wbSetSec(wbCur,k==="-"?-1:1); return; }   // 答えが出るまでの秒数
   if(k==="Enter"||k===" "){ e.preventDefault(); playBook(wbCur); return; }
   if(k==="e"||k==="E"){ e.preventDefault(); editBook(wbCur); return; }
+  if(k==="m"||k==="M"){ e.preventDefault(); wbSetMode(wbCur,"next"); return; }
+  if(k==="f"||k==="F"){ e.preventDefault(); wbSetStyle(wbCur); return; }
+  if(k==="v"||k==="V"){ e.preventDefault(); wbView(wbCur); return; }
+  if(k==="d"||k==="D"){ e.preventDefault(); wbToggle(wbCur,"dir"); return; }
+  if(k==="h"||k==="H"){ e.preventDefault(); wbToggle(wbCur,"hideGood"); return; }
+  if(k==="s"||k==="S"){ e.preventDefault(); wbShare(wbCur); return; }
+  if(k==="i"||k==="I"){ e.preventDefault(); wbImport(); return; }
   if(k==="Delete"||k==="Backspace"||k==="x"||k==="X"){ e.preventDefault(); deleteBook(wbCur); return; }
 }
 $("wbList").addEventListener("click",e=>{
-  const row=e.target.closest(".wb-item"); if(row){ wbCur=+row.dataset.i; }
-  const b=e.target.closest("button"); if(!b){ renderBooks(); return; }
+  if(e.target.closest(".wb-newbook")){ editBook(-1); return; }
+  const bk=e.target.closest(".wb-book");
+  if(bk){   // 本を押す: 選ぶだけ(遊ぶのはプレイのボタンか Enter)
+    wbCur=+bk.dataset.i; renderBooks();
+    if(window.IS_MOBILE){ const d=$("wbList").querySelector(".wb-detail"); if(d) d.scrollIntoView({block:"start",behavior:"smooth"}); }
+    return;
+  }
+  const b=e.target.closest("button"); if(!b) return;
+  if(b.dataset.sd!=null){ wbSetSec(wbCur,+b.dataset.sd); return; }
+  if(b.dataset.mode!=null){ wbSetMode(wbCur,b.dataset.mode); return; }
+  if(b.dataset.style!=null){ if(b.dataset.style!==wbStyle3(wbAll()[wbCur])) wbSetStyle(wbCur,b.dataset.style); return; }
+  if(b.dataset.view!=null){ wbView(+b.dataset.view); return; }
+  if(b.dataset.dir!=null){ if(b.dataset.dir!==wbDir(wbAll()[wbCur])) wbToggle(wbCur,"dir"); return; }
+  if(b.dataset.hidegood!=null){ wbToggle(wbCur,"hideGood"); return; }
+  if(b.dataset.share!=null){ wbShare(+b.dataset.share); return; }
   if(b.dataset.play!=null) playBook(+b.dataset.play);
   else if(b.dataset.edit!=null) editBook(+b.dataset.edit);
   else if(b.dataset.del!=null) deleteBook(+b.dataset.del);
 });
 $("wbWords").addEventListener("click",e=>{
-  const b=e.target.closest("[data-x]"); if(!b||!wbEdit) return;
-  wbEdit.words.splice(+b.dataset.x,1); renderWbWords();
+  if(!wbEdit) return;
+  const b=e.target.closest("[data-x]");
+  if(b){ const j=+b.dataset.x; wbEdit.words.splice(j,1); if(wbEditIdx===j){ wbEditIdx=-1; $("wbAdd").textContent="追加 (Enter)"; } else if(wbEditIdx>j) wbEditIdx--; renderWbWords(); return; }
+  const li=e.target.closest("li[data-j]"); if(li) wbEditWord(+li.dataset.j);   // 言葉を押すと直せる
 });
 $("wbNew").addEventListener("click",()=>editBook(-1));
 $("wbBack").addEventListener("click",()=>show("title"));
 $("wbAdd").addEventListener("click",wbAddWord);
 $("wbBulkAdd").addEventListener("click",wbBulkAdd);
+$("wbVPlay").addEventListener("click",()=>playBook(wbViewI));
+$("wbImport").addEventListener("click",()=>wbImport());
+$("wbVBack").addEventListener("click",()=>openBooks());
+$("wbVTabs").addEventListener("click",e=>{ const t=e.target.closest("[data-vc]"); if(t){ wbVCat=t.dataset.vc; wbView(wbViewI,true); } });
+$("wbAiCopy").addEventListener("click",wbAiCopy);
+$("wbAiKind").innerHTML=Object.entries(WB_AI_KINDS).map(([k,x])=>`<option value="${k}">${escH(x.nm)}</option>`).join("");
+$("wbAiKind").addEventListener("change",e=>wbAiSetKind(e.target.value));
+$("wbAiText").value=wbAiPrompt();
 $("wbSave").addEventListener("click",wbSaveBook);
 $("wbCancel").addEventListener("click",wbCancelEdit);
 /* プレイ: 単語帳の言葉を全部、順番を混ぜて出す */
 function buildBookQueue(){
-  const pool=bookPlay.words.map(w=>({t:w.t,k:w.k}));
-  for(let i=pool.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [pool[i],pool[j]]=[pool[j],pool[i]]; }
+  wb4Ch=null; wb4Busy=false; wb4Typed=wb4Chose=wb4Ans=wb4Wrong=wb4New=0; wb4WrongList=[];
+  wbNoPeek=0; wbQN=0; wbPlayMode=wbMode(bookPlay);
+  wbPW=wbPlayWords(bookPlay,wb4);   // この回に使う言葉(逆向きなら、問題と答えを入れかえたもの)
+  let pool;
+  if(wbRetry){ pool=wbRetry.map(w=>({...w})); wbRetry=null; wbPlayMode="retry"; }   // まちがえた言葉だけ
+  else{
+    pool=wbPW.map(w=>({...w}));
+    if(bookPlay.hideGood){ const left=pool.filter(w=>!wbGood(bookPlay,w)); if(left.length) pool=left; }   // 覚えた言葉は出さない(全部覚えていたら全部)
+    if(wbPlayMode==="10"){   // 10語を選ぶ: TOEICの10語セットと同じく、苦手・まだの言葉ほど出やすく、覚えた言葉は出にくい
+      const wt=w=>{ const st=wbSt(bookPlay,w); return !st ? 3 : st.s>=3 ? .5 : st.s===0 ? 4 : 2; }, out=[];
+      while(out.length<10 && pool.length){ let r=Math.random()*pool.reduce((a,w)=>a+wt(w),0), i=0; for(; i<pool.length-1; i++){ r-=wt(pool[i]); if(r<0) break; } out.push(pool.splice(i,1)[0]); }
+      pool=out;
+    } else for(let i=pool.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [pool[i],pool[j]]=[pool[j],pool[i]]; }
+  }
   taGoal=pool.length; taQueue=pool;
 }
+let wbPW=[], wbRetry=null, wb4WrongList=[];
+/* 向き: 問題 → 答え(ふつう)/ 答え → 問題(逆向き)。逆向きでは答えを見せ、問題を答える。
+   打つときのよみは「問題のよみがな」、なければ問題そのもの(打てる文字だけのとき)。打てない言葉は4択だけで出す */
+const wbDir = b => wbHasQ(b) && b.dir==="r" ? "r" : "f";
+function wbRevWord(w){
+  const r=[w.qk,w.q].map(x=>x && wbCheckWord(w.q,x)).find(x=>x && !x.err);
+  return { q:wbAnsTxt(w), t:w.q, k:r ? r.k : "", mk:"r:"+wbWKey(w) };
+}
+function wbPlayWords(b,four){
+  if(wbDir(b)==="r"){ const ws=wbQWords(b).map(wbRevWord); return four ? ws : ws.filter(w=>w.k); }
+  return four ? wbQWords(b) : b.words.filter(w=>w.k);   // タイピングは、よみがなのある言葉だけ
+}
+let wbPlayMode="all";
+function wbRetryWrong(){ if(!wb4WrongList.length) return; wbRetry=wb4WrongList.slice(); $("wbWrongBtn").hidden=true; startGame("book"); }
+$("wbWrongBtn").addEventListener("click",()=>wbRetryWrong());
+function endBook4(){
+  const b=bookPlay, c=wbMemCount(b), right=wb4Typed+wb4Chose;
+  wbAnnAllMem(b);
+  $("resultDiff").textContent=`— 単語帳「${b.name}」 4択 ${wbPlayMode==="retry"?"まちがえた言葉":WB_MODES[wbPlayMode]}${wbDir(b)==="r"?" 逆向き":""} —`;
+  $("resultCount").classList.remove("ta");
+  $("resultCaption").textContent="正解";
+  $("resultScore").textContent=`${right}/${wb4Ans}`;
+  $("resultUnit").textContent="問";
+  $("resultSubLine").textContent=`正解 ${right} ・ はずれ ${wb4Wrong} / 覚えた ${c.good}/${c.all}${wb4New?`(今回 +${wb4New})`:""} / ${elapsed.toFixed(1)}秒`;
+  wbReveal();
+  $("resultNew").textContent = wb4New ? `★ ${wb4New}語 覚えた! ★` : "";
+  const wl=wb4WrongList.length, wbb=$("wbWrongBtn"); wbb.hidden=!wl; wbb.textContent=`まちがえた${wl}語だけ (W)`;
+  $("registerBox").style.display="none";
+  $("resultKeys").innerHTML=(wl?'<b>W</b> まちがえた言葉だけ ・ ':'')+'<b>Enter</b> もう一回 ・ <b>Esc</b> 単語帳へ ・ <b>G</b> 農園へ';
+  $("titleBtn").textContent="単語帳へ (Esc)";
+  show("result");
+}
 function endBookGame(){
-  const time=Number(elapsed.toFixed(2));
+  const time=Number(elapsed.toFixed(2)), m=wbPlayMode;
+  $("wbWrongBtn").hidden=true;
+  if(wb4){ endBook4(); return; }
   wbLoad();
-  const b=wbBooks.find(x=>x.id===bookPlay.id);
-  const isNew = !!b && (b.best==null || time<b.best);
-  if(isNew){ b.best=time; wbStore(); bookPlay=b; }
-  const best = b ? b.best : null;
-  $("resultDiff").textContent=`— 単語帳「${bookPlay.name}」 —`;
+  const b=(bookPlay.pre?WB_PRESETS:wbBooks).find(x=>x.id===bookPlay.id);
+  const bs=b ? wbBests(b) : {};
+  const fair = wbDir(bookPlay)==="f" && !bookPlay.hideGood;   // 逆向き・覚えた言葉を出さないときは、ベストに数えない
+  const isNew = fair && !!b && (bs[m]==null || time<bs[m]);
+  const had = !!b && bs[m]!=null;
+  if(isNew){ bs[m]=time; delete b.best; if(b.pre) wbPreStore(); else wbStore(); bookPlay=b; }
+  if(isNew && had) wcAnnounce(`${wbAnnName(b)}(${WB_MODES[m]})で自己ベストを出しました(${fmtTime(time)})`, 5);   // はじめて遊んだときは出さない(ほかのモードと同じ)
+  if(b) wbAnnAllMem(b);
+  const bestTxt = b ? wbBestTxt(b,m) : "";
+  $("resultDiff").textContent=`— 単語帳「${bookPlay.name}」 ${WB_MODES[m]}${wbDir(bookPlay)==="r"?" 逆向き":""}${bookPlay.hideGood?" 覚えた言葉なし":""} —`;
   $("resultCount").classList.add("ta");
   $("resultCaption").textContent=`${taGoal}語タイム`;
   $("resultScore").textContent=elapsed.toFixed(2);
   $("resultUnit").textContent="秒";
-  $("resultSubLine").textContent=`ミス ${miss}回 / この単語帳のベスト ${best==null?"--":fmtTime(best)}`;
-  $("resultNew").textContent=isNew?"★ ベスト更新! ★":"";
+  $("resultSubLine").textContent=`ミス ${miss}回 / ${WB_MODES[m]}のベスト ${bestTxt||"--"}`+(wbQN?` / 答えを見ずに打てた ${wbNoPeek}/${wbQN}問`:"");
+  wbReveal();
+  $("resultNew").textContent=[isNew?"★ ベスト更新! ★":"", wb4New?`★ ${wb4New}語 覚えた! ★`:""].filter(Boolean).join(" ");
   $("registerBox").style.display="none";   // 単語帳はランキングに載せない
-  $("resultKeys").innerHTML='<b>Enter</b> もう一回 ・ <b>Esc</b> 単語帳へ ・ <b>G</b> 庭へ';
+  $("resultKeys").innerHTML='<b>Enter</b> もう一回 ・ <b>Esc</b> 単語帳へ ・ <b>G</b> 農園へ';
   $("titleBtn").textContent="単語帳へ (Esc)";
   show("result");
 }
@@ -6253,6 +7470,16 @@ function endBookGame(){
 /* ---------- 更新情報 ----------
    新しいものを上に足していく。d は YYYY-MM-DD */
 const NEWS=[
+  { d:"2026-11-28", t:"タイピング単語帳 大型アップデート", items:[
+    "AIで単語帳が作れるようになりました。ノートやまとめ・単語リスト・プリントの文字などを、用意された頼む文章といっしょに ChatGPT・Claude・Copilot などのAIに貼るだけで、問題・答え・よみがなの付いた単語帳ができあがります。英単語だけの一覧でも、意味はAIが補います",
+    "作れる形は「英単語と意味」「言葉と意味」「一問一答」「漢字のよみ」「そのまま打つ」の5つです。答えが何通りもある言葉や、読みが2つある漢字にも対応しています",
+    "問題を見て答えを打つ遊び方ができました。答えは決めた秒数まで隠れ、見ずに打てたら「見ずに打てた」に数えます。Enter で待たずに答えを見ることもできます",
+    "4択で遊べるようになりました。TOEIC と同じ大きなボタンで、打ちにくい外国語の単語帳も遊べます。外れは正解に似た答えから選ぶので、しっかり手ごたえがあります",
+    "答えを見て問題を当てる、逆向きでも遊べます",
+    "覚えた・苦手を記録して、単語帳の中身の画面で見られるようになりました。10語は苦手・まだの言葉ほど出やすく、まちがえた言葉だけもう一度遊ぶこともできます",
+    "すぐ遊べるおためし単語帳を10冊入れました。難読漢字・県庁所在地・四字熟語・ことわざ・早口言葉・かんたんドイツ語・元素記号・月の異名・日本の歴史 一問一答・情報モラルです",
+    "作った単語帳は、コードで友だちと共有できます",
+  ]},
   { d:"2026-11-25", t:"ガチャとお知らせ", items:[
     "大連ガチャの計算を速くしました。重いスマホでも、ゲージが早く満タンになります。演出の長さも短くしました",
     "大連ガチャの演出中は、画面のどこを押しても早送りできるようになりました",
@@ -6459,7 +7686,7 @@ const NEWS=[
     "時間を進める料理: ふつうの料理は6時間から3時間に、変異・超変異の料理は3日から1日にしました",
     "肥料が減らない料理: ふつうの料理は30%から50%に、変異・超変異の料理は60%から「かならず減らない」にしました",
     "タイピングで肥料が届く料理: ふつうの料理は100打ごとから20打ごとに、変異・超変異の料理は30打ごとから5打ごとにしました",
-    "1語のキーの料理: タイピングから届くキー1本が、これまでに収穫した作物でいちばん高い売値(今の☆の値段)の1個分になります。変異・超変異の料理は2個分です(これまでは2倍・4倍)",
+    "1語のキーの料理: タイピングから届くキー1個が、これまでに収穫した作物でいちばん高い売値(今の☆の値段)の1個分になります。変異・超変異の料理は2個分です(これまでは2倍・4倍)",
   ]},
   { d:"2026-10-06", t:"お店の効率化に「仕分け帳」「貴重品の種の自動売却」「村人の指示書2」が登場しました", items:[
     "仕分け帳(100,000キー): お店の「売る」で、作物・食材・種を選んだ1種類ずつ、100個・1000個残して、残りをまとめて売れるようになります(オンオフできます)",
@@ -7823,6 +9050,7 @@ function wcMatchHTML(m,head){
 /* ---------- 要望・バグ報告 ----------
    Firebase の typinggarden/feedback に書き込むだけ(読むのは作者だけ) */
 let fbOpen=false, fbCat="feature";
+const FB_PH=document.getElementById("fbText").placeholder;
 const FB_WAIT=30000;   // 送りすぎないよう、30秒あける
 function openFeedback(){
   fbOpen=true;
@@ -7839,6 +9067,11 @@ async function fbSend(){
   const note=$("fbNote"), text=$("fbText").value.trim(), name=$("fbName").value.trim();
   if(!db){ note.textContent="※Firebase未設定のため送れません"; return; }
   if(!text){ note.textContent="内容を書いてください"; $("fbText").focus(); return; }
+  const code=$("fbCode").value.trim().toUpperCase(), mail=$("fbMail").value.trim();
+  if(fbCat==="book"){
+    if(!/^[A-HJ-NP-Z2-9]{6}$/.test(code)){ note.textContent="共有コード(英字と数字の6文字)を書いてください"; $("fbCode").focus(); return; }
+    if(!mail){ note.textContent="連絡先を書いてください"; $("fbMail").focus(); return; }
+  }
   let last=0; try{ last=+(localStorage.getItem("typinggarden:sync:fbLast")||0); }catch(e){}
   const wait=FB_WAIT-(Date.now()-last);
   if(wait>0){ note.textContent=`続けて送るには、あと${Math.ceil(wait/1000)}秒待ってください`; return; }
@@ -7846,9 +9079,10 @@ async function fbSend(){
   try{
     const item={ c:fbCat, x:text.slice(0,1000), t:Date.now(), d:window.IS_MOBILE?"mobile":"pc" };
     if(name) item.n=name.slice(0,20);
+    if(fbCat==="book"){ item.b=code; item.m=mail.slice(0,100); }
     await db.ref("typinggarden/feedback").push(item);
     try{ localStorage.setItem("typinggarden:sync:fbLast", String(Date.now())); }catch(e){}
-    $("fbText").value="";
+    $("fbText").value=""; $("fbCode").value=""; $("fbMail").value="";
     note.textContent="送りました。ありがとうございます!";
   }catch(e){
     note.textContent=/permission/i.test(String(e&&(e.code||e.message)||""))
@@ -7863,6 +9097,8 @@ $("fb").addEventListener("click",e=>{ if(e.target===$("fb")) closeFeedback(); })
 $("fbCats").addEventListener("click",e=>{
   const b=e.target.closest("[data-c]"); if(!b) return;
   fbCat=b.dataset.c;
+  $("fbBook").hidden = fbCat!=="book";   // 単語帳の削除依頼: 共有コードと連絡先を書いてもらう
+  $("fbText").placeholder = fbCat==="book" ? "例: この単語帳の問題文は、○○社の『△△』からの無断転載です。わたしは△△の発行元の担当者です" : FB_PH;
   $("fbCats").querySelectorAll("[data-c]").forEach(x=>x.classList.toggle("on",x===b));
 });
 
@@ -14840,7 +16076,7 @@ const EFFS = {
   K:{ nm:"肥料の回数",           n:"1つの作物に肥料を3回まで",            s:"1つの作物に肥料を10回まで" },
   L:{ nm:"一括植え",             n:"種を植えると、その畑の空いた土ぜんぶに植わる", s:"種を植えると、すべての畑の空いた土に植わる" },
   M:{ nm:"画面の色",             n:"ホーム画面とタイピングが料理の色に染まる", s:"ホーム画面とタイピングが料理の色に鮮やかに染まり、作物が舞い、キーが料理に変わる。農園では収穫のたびに花火があがる" },
-  N:{ nm:"1語のキー",            n:"タイピングゲームから農園に届くキー1本が、いちばん高い作物1個分の売値になる", s:"タイピングゲームから農園に届くキー1本が、いちばん高い作物2個分の売値になる" },
+  N:{ nm:"1語のキー",            n:"タイピングゲームから農園に届くキー1個が、いちばん高い作物1個分の売値になる", s:"タイピングゲームから農園に届くキー1個が、いちばん高い作物2個分の売値になる" },
   O:{ nm:"村人がガチャの作物",   n:"村人がガチャの作物(N・R)を育てる",  s:"村人がガチャの作物(SR〜UR)を育てる" },
   P:{ nm:"一括水やり",           n:"じょうろ1回で、その畑ぜんぶに水やり",  s:"じょうろ1回で、すべての畑に水やり" },
   Q:{ nm:"一括収穫",             n:"収穫すると、その畑の実りをぜんぶ収穫", s:"収穫すると、すべての畑の実りをぜんぶ収穫" },
@@ -15728,7 +16964,7 @@ function dishFirework(k){
   }
 }
 /* タイピング本編から使う: 届くキーの倍率・ノーミス勝負のお守りの数 */
-/* 料理「1語のキー」: タイピングから届くキー1本が、収穫したことのある作物で いちばん高い売値(今の☆の値段)の 1個分・2個分になる。
+/* 料理「1語のキー」: タイピングから届くキー1個が、収穫したことのある作物で いちばん高い売値(今の☆の値段)の 1個分・2個分になる。
    売値アップの料理・貴重品と変異の売値は入れない(重ねると大きくなりすぎるため) */
 const bestCropPrice = () => CROPS.reduce((m,c)=>c.treasure||!(S.harvestBy[c.id]>0) ? m : Math.max(m, Math.round(c.price*QUALITY[tierOf(c.id)].mult)), 0);
 const screwMul = () => { const x=eff("N"); return (x ? Math.max(1, bestCropPrice())*(x===2?2:1) : 1)*otsuMul("Z1"); };   // 燻製たまご: 酔っている間
@@ -18756,7 +19992,7 @@ function tqMarkFx(en,ok){
   tqMark(en,ok);
   const t=tqSt(en), g1=tqGood(en), w1=tqWeak(en), u = tqFmt==="listen" ? "問題" : "単語";
   let html="";
-  if(ok && !g0 && g1) html=`<span class="good">🎉 3回続けて正解! この${u}を覚えた!</span>`;
+  if(ok && !g0 && g1){ html=`<span class="good">🎉 3回続けて正解! この${u}を覚えた!</span>`; tqAnnAllMem(en); }
   else if(ok && w0 && !w1) html=`<span class="over">💪 苦手を解消しました</span>`;
   else if(ok && w0) html=`<span class="run">正解 ・ あと${2-t.s}回続けて正解すると苦手を解消できます</span>`;
   else if(!ok && w0) html=`<span class="weak">苦手のまま ・ 2回続けて正解すると解消できます</span>`;
@@ -18764,6 +20000,11 @@ function tqMarkFx(en,ok){
   else if(ok && t.s>0 && !g1) html=`<span class="run">${t.s>1?`${t.s}回連続で正解`:"正解"} ・ あと${3-t.s}回続けて正解すると覚えられます</span>`;
   const el=$("tqWmsg"); if(el) el.innerHTML=html;
   if(html){ const w=tqWords[tqI]; if(w) tqWstShow(w); }
+}
+function tqAnnAllMem(en){   // そのレベル(この形式)の単語を全部覚えたら、チャットに1回だけ知らせる
+  const w=(tqFmt==="listen"?TQL:TQ).find(x=>x.en===en); if(!w) return;
+  const pool=tqPool(w.lv); if(!pool.length || !pool.every(x=>tqGood(x.en))) return;
+  annAllMemOnce(`tq:${tqFmt}:${w.lv}`, `TOEIC 英単語の${tqLvName(w.lv)}(${tqFmtName(tqFmt)})の${tqUnit()==="問"?"問題":"単語"}を全部覚えました(${pool.length}${tqUnit()})`);
 }
 function tqMark(en,ok){ const st=tqStore(tqFmt), t=Object.assign({c:0,w:0,s:0},st[en]); if(ok){ t.c++; t.s++; wcGoalAdd("toeic",1); }else{ t.w++; t.s=0; } t.t=Date.now(); st[en]=t; tqSaveStat(); }
 const tqHasSent = w => !!TQ_SENT[w.en];
@@ -19934,6 +21175,8 @@ const GAME=[[38,[62,65,69]],[38,[62,65,69]],[34,[62,65,70]],[36,[60,64,67]],[38,
 const GARDEN=[[43,[59,62,67]],[40,[59,64,67]],[36,[60,64,67]],[38,[57,62,66]],[43,[59,62,67]],[35,[59,62,66]],[36,[60,64,67]],[38,[57,62,66]]];
 const GARDEN_M=[[[0,74,4],[4,79,4],[8,78,2],[10,79,2],[12,74,4]], [[0,76,6],[6,74,2],[8,71,8]], [[0,72,4],[4,76,4],[8,79,6],[14,76,2]], [[0,74,8],[8,69,4],[12,66,4]],
                 [[0,74,4],[4,79,4],[8,83,4],[12,79,4]], [[0,78,6],[6,74,2],[8,71,8]], [[0,72,2],[2,74,2],[4,76,4],[8,79,4],[12,76,4]], [[0,74,6],[6,72,2],[8,69,8]]];
+const LIB=[[53,[60,64,69,72]],[52,[59,62,67,71]],[50,[57,60,65,69]],[55,[59,62,65,69]],[53,[57,60,64,69]],[57,[60,64,67,72]],[50,[60,62,65,69]],[55,[59,62,65,67]]];   // 単語帳の曲: F Em Dm G / F Am Dm G
+const LIB_M=[[[0,76],[6,74],[8,72],[12,69]],[[0,71],[4,74],[8,79],[14,76]],[[0,77],[6,76],[8,74],[12,72]],[[0,74],[8,71],[12,67]],[[0,72],[4,76],[8,81],[12,79]],[[0,76],[6,79],[8,84],[12,79]],[[0,77],[4,76],[8,74],[10,72],[12,74]],[[0,71],[8,74],[12,79]]];
 const STUDY=[[48,[59,62,64,67]],[45,[55,59,60,64]],[50,[57,60,64,65]],[43,[53,57,59,64]],[52,[55,59,62,64]],[45,[55,60,64,67]],[50,[53,57,60,64]],[43,[53,55,60,62]]];
 const STUDY_M=[[[8,76,2],[10,79,2],[12,81,4]], [[0,79,6]], [[8,77,2],[10,76,2],[12,74,4]], [[0,71,6]], [[8,74,2],[10,76,2],[12,79,4]], [[0,76,4],[4,72,4]], [[8,69,2],[10,72,2],[12,76,4]], [[0,74,8]]];
 const KOTO=[ [[0,62],[4,69],[8,70],[12,69],[16,67],[24,63],[28,62],[40,57],[44,58],[48,62],[56,50]],
@@ -20036,6 +21279,16 @@ const TR={
     hat(o,t,i%2===0?.011:.005,.022);
     if(!(b&1) && i===0) T(o,t,vo[3]+24,.3,{ v:.012, r:.5, rv:.6 });
     if(L%2===1) for(const [a,n,len] of STUDY_M[b]) if(a===i){ T(o,t,n,Math.min(len*sp,.3),{ v:.036, a:.003, r:.5, sus:.3, rv:.45 }); T(o,t,n+12,.12,{ v:.007, r:.2 }); }
+  }},
+  /* タイピング単語帳: 図書館のように静かな曲。やわらかいピアノの和音と、遠くで鳴るオルゴール。ときどき、ページをめくる音 */
+  books:{ bpm:()=>74, len:128, step(s,t,o,L,sp){
+    const b=s>>4, i=s&15, [root,vo]=LIB[b];
+    if(i===0){ T(o,t,root-12,sp*15,{ v:.055, a:.03, r:1.4, sus:.5, rv:.45 }); vo.forEach((n,k)=>T(o,t+k*.035,n,sp*11,{ type:"triangle", lp:1700, v:.02, a:.01, r:1.6, sus:.3, rv:.6 })); }
+    if(i===8) vo.slice(1).forEach((n,k)=>T(o,t+k*.05,n,sp*6,{ type:"triangle", lp:1500, v:.012, a:.01, r:1.2, sus:.3, rv:.6 }));
+    if(i===4||i===12) T(o,t,root,sp*3,{ v:.03, a:.02, r:.9, sus:.4, rv:.4 });
+    if(i%4===2) T(o,t,vo[[0,2,1,3][i>>2]]+12,sp*3,{ v:.011, a:.005, r:.9, sus:.2, rv:.65 });
+    if(L%2===1) for(const [a,n] of LIB_M[b]) if(a===i){ T(o,t,n,.22,{ v:.028, a:.002, r:1.2, sus:.15, rv:.75 }); T(o,t,n+12,.1,{ v:.005, r:.7, rv:.75 }); }
+    if(i===0 && b===4 && R()<.45) N(o,t+rnd(.4,1.6),.28,{ f:3000, q:.6, v:.005, a:.09 });
   }},
   /* ネジの詩: 琴と尺八。間を大きくとる */
   poem:{ bpm:()=>66, len:64, step(s,t,o,L,sp){
@@ -20141,6 +21394,7 @@ function wantTrack(){
   if(sc==="battle") return null;
   if(baraNow()) return "bara";
   if(sc==="game"){ let d=""; try{ d=String(diff); }catch(e){} return d==="oneshot" ? "oneshot" : "game"; }
+  if(sc==="books") return "books";
   if(sc==="garden") return gachaOpen() ? (document.querySelector("#g-gachaBody .gacha.y") ? "gachaY" : "gacha") : "garden";
   if(sc==="toeic") return "toeic";
   if(sc==="poem") return "poem";
@@ -20337,7 +21591,7 @@ function vis(name,arg){
 }
 
 /* ---------------------------------------------------------------- 設定の窓(キーボードでも操作できる)と、曲の一覧 */
-const SONGS=[["title","ホーム"],["game",TG?"タイピング":"ネジ打ち"],["oneshot",TG?"ノーミス勝負":"一本勝負"],["garden",TG?"農園":"庭"],["toeic","TOEIC 英単語"],["poem","ネジの詩"],["gacha","ガチャ"],["gachaY","千両箱ガチャ"],["battle","対戦"],["bara","バラバラ"],["ending","エンディング"]].filter(s=>s[0]!=="poem" || $("screen-poem"));
+const SONGS=[["title","ホーム"],["game",TG?"タイピング":"ネジ打ち"],["oneshot",TG?"ノーミス勝負":"一本勝負"],["garden",TG?"農園":"庭"],["toeic","TOEIC 英単語"],["books","タイピング単語帳"],["poem","ネジの詩"],["gacha","ガチャ"],["gachaY","千両箱ガチャ"],["battle","対戦"],["bara","バラバラ"],["ending","エンディング"]].filter(s=>s[0]!=="poem" || $("screen-poem"));
 const songOk=k=>k==="title" || !!(cfg.heard && cfg.heard[k]);   // ゲームの中で一度流れた曲だけ
 function setOpt(k,v){
   cfg[k]=v; saveCfg(); applyVol();
