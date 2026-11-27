@@ -1603,6 +1603,7 @@ html.mobile .word-panel.wb4 #romaji .wb4opts .tq-opt{padding:.6rem .8rem; min-he
 .wb-def select, .wb-def input{font-family:inherit; font-size:.9rem; color:var(--ink); background:#0f1511; border:1px solid var(--line); border-radius:5px; padding:.2rem .4rem; margin-left:.3rem}
 .wb-def input{width:4em}
 .wb-ai textarea{font-size:.8rem; color:var(--steel)}
+.wb-li-note{display:block; margin-top:.25rem; color:var(--steel); font-size:.8rem; line-height:1.5}
 .wb-cnote{display:block; margin-top:.35rem; font-size:.85rem; min-height:0}
 .wb-cnote.ng{color:#ffb38a}
 .wb-bnote[hidden]{display:none}
@@ -3905,7 +3906,7 @@ html:not(.mobile) #screen-garden.haslog:has(.modal.open) #g-toasts{top:14px}
       <div class="wb-bulk wb-aibox">
         <h4 class="wb-aih">AIでまとめて作る <small>おすすめ ・ 1冊 300語まで(多いときは単語帳を分けてください)</small></h4>
         <ol class="wb-steps">
-          <li><b>覚えたい内容を用意する</b><br>自分のノートやまとめ、用語集、単語リスト、プリントの文字など。コピーできる文字にしておきます</li>
+          <li><b>覚えたい内容を用意する</b><br>自分のノートやまとめ、用語集、単語リスト、プリントの文字など。コピーできる文字にしておきます<br><small class="wb-li-note">手元の教材やプリントは、自分の勉強用の単語帳づくりに使えます。共有するときは、ほかの人が作った文章をそのまま写した単語帳にならないようにしてください</small></li>
           <li><b>AIに変換してもらう</b><br>作りたい単語帳の形を選んでから、頼む文章をコピーして ChatGPT や Claude などのAIに貼ります。その下に①の内容を貼って送ります<br><select id="wbAiKind" class="wb-aikind"></select><br><button class="btn" id="wbAiCopy">AIに頼む文章をコピー</button><span id="wbAiCopyNote" class="wb-cnote" aria-live="polite"></span></li>
           <li><b>返ってきた行を貼る</b><br>AIの返事(「問題|答え|よみがな」の行)を、コードブロックのコピーボタンでコピーして下の欄に貼り、「まとめて追加」を押します</li>
         </ol>
