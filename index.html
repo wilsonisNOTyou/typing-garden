@@ -4928,7 +4928,8 @@ function handleKey(rawKey){
   const ch=chunks[chunkIdx];
   // 数字・英字などの直接入力チャンクは大文字小文字を区別する(例: "E"はshift+Eが必要)
   // かな入力チャンクは小文字化して判定する
-  const key = ch.literal ? rawKey : rawKey.toLowerCase();
+  let key = ch.literal ? rawKey : rawKey.toLowerCase();
+  if(ch.literal && diff==="book" && /^[a-z]$/i.test(rawKey) && /^[a-z]$/i.test(ch.kana)) key = ch.kana===ch.kana.toUpperCase() ? rawKey.toUpperCase() : rawKey.toLowerCase();   // 単語帳の英字は、大文字でも小文字でも打てる(元素記号の Li など)
   // 「ん」+ n: 次がナ行なら n単打で確定してキーを次チャンクへ(nna=んな のIME挙動)
   if(ch.nn && buf==="n" && key==="n" && nextChunkStartsWith("n")){
     completeChunk("n");
