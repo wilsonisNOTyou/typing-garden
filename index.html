@@ -1565,8 +1565,9 @@ html.mobile .wb-detail{position:static}
 .wb-wst{position:absolute; top:.45rem; left:2rem; font-size:.78rem; font-weight:700; color:var(--steel); opacity:.9; z-index:2}
 .wb-wst:empty{display:none}
 .wb-wst.good{color:#6ac87a} .wb-wst.weak{color:#e07a7a} .wb-wst.learn{color:#d8b06a} .wb-wst.new{color:#8aa4e0}
-.wb-mempop{position:absolute; top:.35rem; right:2rem; font-size:.9rem; font-weight:800; color:#6ac87a; opacity:0; transition:opacity .25s; pointer-events:none; z-index:2}
+.wb-mempop{position:absolute; bottom:.45rem; right:2rem; font-size:.9rem; font-weight:800; color:#6ac87a; opacity:0; transition:opacity .25s; pointer-events:none; z-index:2}
 .wb-mempop.on{opacity:1}
+.wb4fb{text-align:center; font-size:.95rem; color:#9ad8a4}
 .wq-wait .good{color:#6ac87a; font-weight:700} .wq-wait .weak{color:#e07a7a; font-weight:700} .wq-wait .learn{color:#d8b06a; font-weight:700}
 .word-panel.wb4 #romaji .bq{cursor:pointer}
 .word-panel.wb4 #romaji{display:block; font-family:inherit; letter-spacing:0; font-size:1rem}
@@ -5447,7 +5448,7 @@ function wb4Next(ok,typed,delay){
     const g=wbGift(typed); wbGot.sc+=g.sc; wbGot.min+=g.min;
     sendToGarden(0, g.sc, g.min, true);
     if(g.rose){ wbRose(g.rose); wbGot.rose+=g.rose; }
-    wbMemPop(`キー +${tqNum(g.sc)} ・ 農園の時間 +${tqHours(g.min)}${g.rose?` ・ 🌹 +${tqNum(g.rose)}`:""}`);
+    const fb=document.createElement("div"); fb.className="tq-fb ok wb4fb"; fb.textContent=`キー +${tqNum(g.sc)} ・ 農園の時間 +${tqHours(g.min)}${g.rose?` ・ 🌹 薔薇の種 +${tqNum(g.rose)}`:""}`; $("romaji").appendChild(fb);   // TOEIC と同じく、選んだ答えの下に出す
   }
   if(!ok) wb4WrongList.push({...w});
   $("wordPanel").classList.remove("wbhide");   // 答えを見せる
@@ -20426,7 +20427,7 @@ function tqWordKey(key){
   const g=tqGift(); tqPts+=g.sc; tqMin+=g.min;
   sendToGarden(0, g.sc, g.min, true);
   if(g.rose) tqRose(tqRoseLv(tqLadder[0]), g.rose);
-  $("tqFb").className="tq-fb ok"; $("tqFb").textContent=`打てた! ネジ +${tqNum(g.sc)} ・ 庭の時間 +${tqHours(g.min)}`+(g.rose?` ・ 🌹 薔薇の種 +${tqNum(g.rose)}`:"");
+  $("tqFb").className="tq-fb ok"; $("tqFb").textContent=`打てた! キー +${tqNum(g.sc)} ・ 農園の時間 +${tqHours(g.min)}`+(g.rose?` ・ 🌹 薔薇の種 +${tqNum(g.rose)}`:"");
   if(tqKind==="one") tqOneOk(); else $("tqScore").textContent=tqNum(tqPts);
   sndClear();
   tqI++; tqPhase="wait"; tqTimer=setTimeout(tqNext,800);
