@@ -6956,7 +6956,7 @@ function renderBooks(){
       </div>
     </div></div>` : "";
   list.innerHTML = detail
-    + '<p class="wb-shelfh">わたしの単語帳</p><div class="wb-shelf">' + wbBooks.map(book).join("")
+    + `<p class="wb-shelfh">${playerName?escH(playerName)+"の":"わたしの"}単語帳</p>`+'<div class="wb-shelf">' + wbBooks.map(book).join("")
     + '<div class="wb-newbook" title="新しい単語帳を作る"><span>+</span><small>新しい<br>単語帳</small><span class="kbdh">N</span></div></div>'
     + (wbBooks.length ? "" : '<p class="wb-empty">まだ自分の単語帳がありません。「+ 新しい単語帳」で作るか、下のおためし単語帳で遊んでみましょう</p>')
     + '<p class="wb-shelfh">おためし単語帳</p><div class="wb-shelf">' + WB_PRESETS.map((x,j)=>book(x,wbBooks.length+j)).join("") + '</div>';
