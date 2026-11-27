@@ -1601,6 +1601,9 @@ html.mobile .word-panel.wb4 #romaji .wb4opts .tq-opt{padding:.6rem .8rem; min-he
 .wb-def select, .wb-def input{font-family:inherit; font-size:.9rem; color:var(--ink); background:#0f1511; border:1px solid var(--line); border-radius:5px; padding:.2rem .4rem; margin-left:.3rem}
 .wb-def input{width:4em}
 .wb-ai textarea{font-size:.8rem; color:var(--steel)}
+.wb-cnote{display:block; margin-top:.35rem; font-size:.85rem; min-height:0}
+.wb-cnote.ng{color:#ffb38a}
+.wb-bnote[hidden]{display:none}
 .wb-bnote{margin:.5rem 0; padding:.55rem .7rem; border:1px solid var(--line); border-radius:8px; background:rgba(255,255,255,.03); font-size:.85rem; display:grid; gap:.3rem}
 .wb-bnote .ok{font-weight:700; font-size:.95rem}
 .wb-bnote .ng{color:#ffb38a}
@@ -3895,13 +3898,13 @@ html:not(.mobile) #screen-garden.haslog:has(.modal.open) #g-toasts{top:14px}
       </div>
     </div>
     <div id="wbEditor" class="wb-editor" style="display:none">
-      <label class="wb-lbl">単語帳の名前</label>
-      <input id="wbName" class="wb-in" maxlength="20" placeholder="例: 理科の用語" autocomplete="off">
+      <label class="wb-lbl">単語帳のタイトル</label>
+      <input id="wbTtl" name="wb-ttl" class="wb-in" maxlength="20" placeholder="例: 理科の用語" autocomplete="off" data-lpignore="true" data-1p-ignore>
       <div class="wb-bulk wb-aibox">
         <h4 class="wb-aih">AIでまとめて作る <small>おすすめ ・ 1冊 300語まで(多いときは単語帳を分けてください)</small></h4>
         <ol class="wb-steps">
           <li><b>覚えたい内容を用意する</b><br>教科書や参考書のまとめ、用語集、単語リスト、プリントの文字など。コピーできる文字にしておきます</li>
-          <li><b>AIに変換してもらう</b><br>作りたい単語帳の形を選んでから、頼む文章をコピーして ChatGPT や Claude などのAIに貼ります。その下に①の内容を貼って送ります<br><select id="wbAiKind" class="wb-aikind"></select><br><button class="btn" id="wbAiCopy">AIに頼む文章をコピー</button></li>
+          <li><b>AIに変換してもらう</b><br>作りたい単語帳の形を選んでから、頼む文章をコピーして ChatGPT や Claude などのAIに貼ります。その下に①の内容を貼って送ります<br><select id="wbAiKind" class="wb-aikind"></select><br><button class="btn" id="wbAiCopy">AIに頼む文章をコピー</button><span id="wbAiCopyNote" class="wb-cnote" aria-live="polite"></span></li>
           <li><b>返ってきた行を貼る</b><br>AIの返事(「問題|答え|よみがな」の行)を、コードブロックのコピーボタンでコピーして下の欄に貼り、「まとめて追加」を押します</li>
         </ol>
         <textarea id="wbBulk" class="wb-in" rows="6" placeholder="ここにAIの返事を貼ります。例:&#10;植物が光から栄養を作るはたらき|光合成|こうごうせい&#10;細胞|さいぼう"></textarea>
@@ -3927,10 +3930,11 @@ html:not(.mobile) #screen-garden.haslog:has(.modal.open) #g-toasts{top:14px}
         <input id="wbK" class="wb-in" maxlength="60" placeholder="よみがな(例: こうごうせい)" autocomplete="off">
         <button class="btn" id="wbAdd">追加 (Enter)</button>
       </div>
+      <div id="wbAddNote" class="wb-bnote" hidden></div>
       <p class="wb-hint">よみがなはひらがなで入れてください(カタカナは自動でひらがなに直します)。言葉がひらがなだけなら、よみがなは空でも大丈夫です。英語の熟語や英文は、よみがなを空白入りのまま書けます(打つときは空白のところだけスペースキー)。問題のある言葉は、よみがなを空にすると4択で遊ぶときだけ出ます(打てない文字がある外国語など)。<br>問題を入れると、遊ぶときは問題が出て、答えとよみがなは決めた秒数(単語帳の一覧で変えられます)たつまで隠れます。答えがよみがなと同じなら、答えは空でも大丈夫です。<br>答えが何通りもあるときは、答えとよみがなを「／」で区切って同じ順に並べると、どれを打っても正解になります(例: 問題／発行する ・ もんだい／はっこうする)</p>
-      <p class="wb-note" id="wbNote"></p>
       <ol id="wbWords" class="wb-words"></ol>
       <p class="keynav" id="wbKeys"></p>
+      <p class="wb-note" id="wbNote"></p>
       <div class="btn-row">
         <button class="btn primary" id="wbSave">保存する (S)</button>
         <button class="btn" id="wbCancel">やめる (Esc)</button>
@@ -5765,7 +5769,7 @@ document.addEventListener("keydown",e=>{
     const id=e.target.id;
     if(e.key==="Enter" && (e.ctrlKey||e.metaKey)){
       if(id==="wbBulk"){ e.preventDefault(); wbBulkAdd(); return; }
-      if(id==="wbName"||id==="wbQ"||id==="wbQK"||id==="wbT"||id==="wbK"){ e.preventDefault(); wbSaveBook(); return; }
+      if(id==="wbTtl"||id==="wbQ"||id==="wbQK"||id==="wbT"||id==="wbK"){ e.preventDefault(); wbSaveBook(); return; }
       if(id==="fbText"||id==="fbName"||id==="fbCode"||id==="fbMail"){ e.preventDefault(); fbSend(); return; }
     }
     if(e.key==="Enter"){
@@ -5776,7 +5780,7 @@ document.addEventListener("keydown",e=>{
       else if(id==="wbT"||id==="wbK") wbAddWord();
       else if(id==="wbQ") $("wbQK").focus();
       else if(id==="wbQK") $("wbT").focus();
-      else if(id==="wbName") $("wbT").focus();
+      else if(id==="wbTtl") $("wbT").focus();
       else if(id==="fbName") fbSend();
       else $("regBtn").click();
     }
@@ -7006,12 +7010,12 @@ function editBook(i){
   $("wbListView").style.display="none"; $("wbEditor").style.display="";
   $("wbDefStyle").value = b ? (b.style==="4"||b.style==="4o" ? "4" : "type") : WB_AI_KINDS[wbAiKind].st;   // 新しい単語帳は、AIに頼む形に合わせる $("wbDefMode").value = b && String(b.mode)==="10" ? "10" : "all"; $("wbDefSec").value = b ? wbSec(b) : WB_SEC_DEF;
   wbEditIdx=-1; $("wbAdd").textContent="追加 (Enter)";
-  $("wbName").value=wbEdit.name; $("wbQ").value=""; $("wbQK").value=""; $("wbT").value=""; $("wbK").value=""; $("wbBulk").value="";
-  $("wbNote").textContent=""; $("wbBulkNote").hidden=true;
+  $("wbTtl").value=wbEdit.name; $("wbQ").value=""; $("wbQK").value=""; $("wbT").value=""; $("wbK").value=""; $("wbBulk").value="";
+  $("wbNote").textContent=""; $("wbBulkNote").hidden=true; $("wbAddNote").hidden=true; $("wbAiCopyNote").textContent="";
   $("wbKeys").innerHTML='入力中: <b>Enter</b> 追加 ・ <b>Tab</b> 次の欄 ・ <b>Ctrl+Enter</b> 保存(まとめて追加の欄では追加) ・ <b>Esc</b> 入力をやめる<br>'+
-    '入力していないとき: <b>Q</b> 問題を入力 ・ <b>T</b> 言葉を入力 ・ <b>M</b> 名前を入力 ・ <b>B</b> まとめて追加 ・ <b>↑ ↓</b> 言葉を選ぶ ・ <b>Enter</b> 選んだ言葉を直す ・ <b>Delete</b> 選んだ言葉を外す ・ <b>S</b> 保存 ・ <b>Esc</b> やめる';
+    '入力していないとき: <b>Q</b> 問題を入力 ・ <b>T</b> 言葉を入力 ・ <b>M</b> タイトルを入力 ・ <b>B</b> まとめて追加 ・ <b>↑ ↓</b> 言葉を選ぶ ・ <b>Enter</b> 選んだ言葉を直す ・ <b>Delete</b> 選んだ言葉を外す ・ <b>S</b> 保存 ・ <b>Esc</b> やめる';
   renderWbWords();
-  setTimeout(()=>$(b?"wbT":"wbName").focus(),30);
+  setTimeout(()=>$(b?"wbT":"wbTtl").focus(),30);
 }
 function renderWbWords(){
   const ol=$("wbWords");
@@ -7022,7 +7026,7 @@ function renderWbWords(){
 /* 編集をやめる(変えたところがあれば確かめる) */
 async function wbCancelEdit(){
   if(wbEdit){
-    const ed=wbEdit; ed.name=$("wbName").value.trim();
+    const ed=wbEdit; ed.name=$("wbTtl").value.trim();
     const now=JSON.stringify({ name:ed.name, words:ed.words });
     if(now!==ed.orig && !await uiAsk("変えたところを保存せずに戻ります。よろしいですか?","保存せずに戻る")) return;
     if(wbEdit!==ed) return;
@@ -7040,32 +7044,34 @@ function wbAddOne(t,k,q,qk){
 }
 let wbNoK=0;   // 打てない(よみがなのない)ので4択だけで出す言葉の数(追加したとき知らせる)
 const WB_NOK_TXT="よみがながない言葉や、打てない文字(ä・é など)がある言葉は、4択で遊ぶときだけ出ます";
+function wbAddMsg(html){ const n=$("wbAddNote"); n.innerHTML=html; n.hidden=!html; }   // 1語ずつ追加・直したときの知らせは、追加ボタンのすぐ下に出す
 let wbEditIdx=-1;   // 直している言葉(一覧の番号)。追加のときは -1
 function wbEditWord(j){
   const w=wbEdit && wbEdit.words[j]; if(!w) return;
   wbEditIdx=j; wbWordCur=j;
   $("wbQ").value=w.q||""; $("wbQK").value=w.qk||"";
   $("wbT").value=[w.t,...(w.a||[]).map(x=>x.t)].join("／"); $("wbK").value=[w.k,...(w.a||[]).map(x=>x.k)].join("／");
-  $("wbAdd").textContent="直す (Enter)"; $("wbNote").textContent=`${j+1}番目の言葉を直しています。直したら Enter か「直す」を押します`;
+  $("wbAdd").textContent="直す (Enter)"; wbAddMsg(`<div>${j+1}番目の言葉を直しています。直したら Enter か「直す」を押します</div>`);
   renderWbWords(); $("wbT").focus();
 }
 function wbAddWord(){
   if(!wbEdit) return;
   if(wbEditIdx>=0){   // 直す
     const r=wbCheckWord($("wbT").value,$("wbK").value,$("wbQ").value,$("wbQK").value);
-    if(r.err){ $("wbNote").textContent=r.err; return; }
+    if(r.err){ wbAddMsg(`<div class="ng">${escH(r.err)}</div>`); return; }
     const nk=!r.k; delete r.nk;
     const old=wbEdit.words[wbEditIdx]; if(old){ for(const f of ["k2","t2"]) if(old[f]) r[f]=old[f]; wbEdit.words[wbEditIdx]=r; }
-    wbEditIdx=-1; $("wbAdd").textContent="追加 (Enter)"; $("wbNote").textContent="直しました"+(nk?"。"+WB_NOK_TXT:"");
+    wbEditIdx=-1; $("wbAdd").textContent="追加 (Enter)"; wbAddMsg(`<div class="ok">✅ 「${escH(r.t||r.k)}」を直しました</div>`+(nk?`<div class="ng">${WB_NOK_TXT}</div>`:""));
     $("wbQ").value=""; $("wbQK").value=""; $("wbT").value=""; $("wbK").value=""; renderWbWords(); return;
   }
   wbNoK=0;
   const err=wbAddOne($("wbT").value,$("wbK").value,$("wbQ").value,$("wbQK").value);
-  $("wbNote").textContent=err || (wbNoK ? "追加しました。"+WB_NOK_TXT : "");
-  if(err) return;
+  if(err){ wbAddMsg(`<div class="ng">${escH(err)}</div>`); return; }
+  const nw=wbEdit.words[wbEdit.words.length-1];
+  wbAddMsg(`<div class="ok">✅ 「${escH(nw.t||nw.k)}」を追加しました(この単語帳は今 ${wbEdit.words.length}語)</div>`+(wbNoK?`<div class="ng">${WB_NOK_TXT}</div>`:""));
   $("wbQ").value=""; $("wbQK").value=""; $("wbT").value=""; $("wbK").value="";
   renderWbWords();
-  const ol=$("wbWords"); ol.scrollTop=ol.scrollHeight;
+  const ol=$("wbWords"); ol.scrollTop=ol.scrollHeight; if(ol.lastElementChild) ol.lastElementChild.classList.add("new");
   $(wbEdit.words.some(w=>w.q)?"wbQ":"wbT").focus();
 }
 /* まとめて追加: 1行の区切りは | → タブ → カンマ(, ，)の順に、行にあるものを使う。読点(、)は区切りにしない(言葉の一部) */
@@ -7103,6 +7109,7 @@ const WB_AI_KINDS={
   foreign:{ nm:"英語・外国語の単語と意味(単語を見て意味を答える。4択向き)", st:"4",
     how:`・問題: 英語などの外国語の単語・熟語(もとの表記のまま)
 ・答え: 日本語の意味(短く。資料に意味が書いていなければ、その分野でのふつうの意味を補う)
+・意味は、漢字やひらがなの日本語の訳を使う。英単語をカタカナにしただけの言葉(タイポグラフィ・インターフェースなど)は、ほかに訳がないときだけ使う(例: typography → 文字組み／印刷の体裁、query → 問い合わせ)
 ・答えのよみがな: 意味のよみ(ひらがな)
 ・問題のよみがな: 単語を打つための英字(英語は単語を小文字にしたもの。熟語の空白はそのまま。中国語・韓国語などはローマ字やピンイン)
 ・意味がいくつもあるときは、答えとよみがなを全角の「／」で区切って同じ順に並べる(4つまで)`,
@@ -7175,13 +7182,13 @@ function wbAiSetKind(k){
 }
 function wbAiCopy(){
   const ta=$("wbAiText"), txt=wbAiPrompt(); ta.value=txt;
-  const done=ok=>{ $("wbNote").textContent = ok ? "AIに頼む文章をコピーしました。AIに貼って、その下に変換したい内容を貼って送ってください" : "コピーできませんでした。下の文章を選んでコピーしてください"; if(!ok){ $("wbEditor").querySelector(".wb-ai").open=true; ta.focus(); ta.select(); } };
+  const done=ok=>{ const n=$("wbAiCopyNote"); n.className="wb-cnote"+(ok?"":" ng"); n.textContent = ok ? "✅ コピーしました。AIに貼って、その下に変換したい内容を貼って送ってください" : "コピーできませんでした。下の「AIに頼む文章の中身を見る」から選んでコピーしてください"; if(!ok){ $("wbEditor").querySelector(".wb-ai").open=true; ta.focus(); ta.select(); } };
   try{ navigator.clipboard.writeText(txt).then(()=>done(true),()=>done(false)); }catch(e){ done(false); }
 }
 function wbSaveBook(){
   if(!wbEdit) return;
-  const name=$("wbName").value.trim();
-  if(!name){ $("wbNote").textContent="単語帳の名前を入れてください"; $("wbName").focus(); return; }
+  const name=$("wbTtl").value.trim();
+  if(!name){ $("wbNote").textContent="単語帳のタイトルを入れてください"; $("wbTtl").focus(); return; }
   if(!wbEdit.words.length){ $("wbNote").textContent="言葉を1つ以上入れてください"; $("wbT").focus(); return; }
   const def={ style:$("wbDefStyle").value==="4"?"4":"type", mode:$("wbDefMode").value==="10"?"10":"all", sec:(v=>Number.isFinite(v)?Math.max(WB_SEC_MIN,Math.min(WB_SEC_MAX,Math.round(v))):WB_SEC_DEF)($("wbDefSec").value===""?NaN:+$("wbDefSec").value) };   // 遊び方の初期設定
   if(wbEdit.i>=0){
@@ -7211,7 +7218,7 @@ function booksKey(e){
     if(k==="s"||k==="S"){ e.preventDefault(); wbSaveBook(); return; }
     if(k==="t"||k==="T"){ e.preventDefault(); $("wbT").focus(); return; }
     if(k==="q"||k==="Q"){ e.preventDefault(); $("wbQ").focus(); return; }
-    if(k==="m"||k==="M"){ e.preventDefault(); $("wbName").focus(); return; }
+    if(k==="m"||k==="M"){ e.preventDefault(); $("wbTtl").focus(); return; }
     if(k==="b"||k==="B"){ e.preventDefault(); $("wbBulk").focus(); return; }
     if((k==="ArrowDown"||k==="ArrowUp") && n){
       e.preventDefault();
