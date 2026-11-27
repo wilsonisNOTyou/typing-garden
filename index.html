@@ -4072,6 +4072,19 @@ html:not(.mobile) #screen-garden.haslog:has(.modal.open) #g-toasts{top:14px}
   </div>
 </div>
 
+<div id="wbInfo" class="bk-modal">
+  <div class="bk-panel">
+    <div class="bk-head"><h2>📚 単語帳が大きく変わりました</h2><button class="btn bk-x" id="wbInfoClose">閉じる ✕</button></div>
+    <ul class="news-list" style="line-height:1.8; padding-left:1.2rem">
+      <li>覚えたいノートやプリント、単語リストを、用意された頼む文章といっしょに ChatGPT・Claude・Copilot などのAIに貼るだけで、問題・答え・よみがなの付いた単語帳ができます。英単語だけの一覧でも、意味はAIが補います。</li>
+      <li>問題を見て答えを打つタイピングのほか、打たずに選べる4択や、答えから問題を当てる逆向きでも遊べます。</li>
+      <li>覚えた言葉と苦手な言葉を記録し、苦手な言葉ほどよく出ます。</li>
+      <li>すぐ遊べるおためし単語帳が10冊あります。作った単語帳は、コードで友だちと共有できます。</li>
+    </ul>
+    <div class="btn-row"><button class="btn primary" id="wbInfoGo">単語帳を開く <span class="kbdh">Enter</span></button><button class="btn" id="wbInfoNo">あとで <span class="kbdh">Esc</span></button></div>
+  </div>
+</div>
+
 <div id="mtInfo" class="bk-modal">
   <div class="bk-panel">
     <div class="bk-head"><h2>⚔️ 対戦ができるようになりました</h2><button class="btn bk-x" id="mtInfoClose">閉じる ✕</button></div>
@@ -5062,6 +5075,7 @@ setInterval(()=>{ const d=mtOn()?mtDrunkFx():drunkNowG(),   // 対戦中はお�
 function show(name){
   const prev=scene; scene=name;
   if(name!=="title" && typeof mtInfoOpen!=="undefined" && mtInfoOpen) closeMtInfo(false);
+  if(name!=="title" && typeof wbInfoOpen!=="undefined" && wbInfoOpen) closeWbInfo(false);
   if(name!=="result" && typeof mtRes!=="undefined" && mtRes) mtResultClose();   // 対戦の結果から離れた
   if(prev==="ranking" && name!=="ranking"){ try{ if(syncDirty) syncPush(false); syncMaybePull(); }catch(e){} }   // ランキングを見ているあいだ待っていた同期を、閉じたときに送る
   if(prev!==name){ try{ window.scrollTo(0,0); }catch(e){} }   // 同じ画面のまま(ランキングのタブの切りかえなど)は、上に戻さない
@@ -5126,7 +5140,7 @@ function refreshDaily(){
   const sig=JSON.stringify(bon)+"|"+(()=>{ try{ return Garden.dailySapLeft(); }catch(e){ return ""; } })()+"|"+dbNeji(2);
   const lost=Object.keys(bon).some(d=>{ const b=document.querySelector(`#screen-title .diff-btn[data-diff="${d}"]`); return b && !b.querySelector(".dbtag"); });   // 表示が消えていたら描き直す
   if(sig===dbShown && !lost) return; dbShown=sig;
-  dbInfoMaybe(bon); mtInfoMaybe();
+  dbInfoMaybe(bon); mtInfoMaybe(); wbInfoMaybe();
   document.querySelectorAll("#screen-title .diff-btn[data-diff]").forEach(b=>{
     const x=bon[b.dataset.diff]; b.classList.toggle("dbon",!!x);
     let t=b.querySelector(".dbtag"); if(!x){ if(t) t.remove(); return; }
@@ -5150,6 +5164,14 @@ function mtInfoMaybe(){
   try{ if(Garden.mtInfoSeen()) return; Garden.mtInfoMark(); }catch(e){ return; }
   mtInfoOpen=true; $("mtInfo").classList.add("open");
 }
+/* 単語帳の大型アップデートのお知らせ: 1回だけ(出したかどうかは記録に残す。対戦のお知らせなどが出ているときは、次に回す) */
+var wbInfoOpen=false;
+function wbInfoMaybe(){
+  if(scene!=="title" || document.querySelector(".bk-modal.open") || (typeof tutStep==="function" && tutStep())) return;
+  try{ if(Garden.wbInfoSeen()) return; Garden.wbInfoMark(); }catch(e){ return; }
+  wbInfoOpen=true; $("wbInfo").classList.add("open");
+}
+function closeWbInfo(go){ wbInfoOpen=false; $("wbInfo").classList.remove("open"); if(go) openBooks(); }
 function closeMtInfo(go){ mtInfoOpen=false; $("mtInfo").classList.remove("open"); if(go){ openWorld(); wcPaneShow("wcMatch"); wcMatchPane(""); } }
 function closeDbInfo(){ dbInfoOpen=false; $("dbInfo").classList.remove("open"); }
 setInterval(()=>{ if(scene==="title") refreshDaily(); },5000);
@@ -5752,6 +5774,7 @@ document.addEventListener("keydown",e=>{
   }
   if(dbInfoOpen){ if(e.key==="Enter"||e.key==="Escape"){ e.preventDefault(); closeDbInfo(); } return; }
   if(mtInfoOpen){ if(e.key==="Enter"||e.key==="Escape"){ e.preventDefault(); closeMtInfo(e.key==="Enter"); } return; }
+  if(wbInfoOpen){ if(e.key==="Enter"||e.key==="Escape"){ e.preventDefault(); closeWbInfo(e.key==="Enter"); } return; }
   // 更新情報のウィンドウ
   if(newsOpen){
     if(e.key==="Escape"||e.key==="u"||e.key==="U"){ e.preventDefault(); closeNews(); }
@@ -7771,6 +7794,8 @@ $("newsClose").addEventListener("click",closeNews);
 $("dbInfoClose").addEventListener("click",closeDbInfo);
 $("mtInfoClose").addEventListener("click",()=>closeMtInfo(false)); $("mtInfoNo").addEventListener("click",()=>closeMtInfo(false)); $("mtInfoGo").addEventListener("click",()=>closeMtInfo(true));
 $("mtInfo").addEventListener("click",e=>{ if(e.target===$("mtInfo")) closeMtInfo(false); });
+$("wbInfoClose").addEventListener("click",()=>closeWbInfo(false)); $("wbInfoNo").addEventListener("click",()=>closeWbInfo(false)); $("wbInfoGo").addEventListener("click",()=>closeWbInfo(true));
+$("wbInfo").addEventListener("click",e=>{ if(e.target===$("wbInfo")) closeWbInfo(false); });
 $("dbInfo").addEventListener("click",e=>{ if(e.target===$("dbInfo")) closeDbInfo(); });
 $("news").addEventListener("click",e=>{ if(e.target===$("news")) closeNews(); });
 refreshNewsBadge();
@@ -7881,6 +7906,7 @@ function wcRender(){
   wcSeen=Date.now(); try{ localStorage.setItem("typinggarden:wcSeen",String(wcSeen)); }catch(e){}
 }
 function openWorld(){
+  if(typeof wbInfoOpen!=="undefined" && wbInfoOpen) closeWbInfo(false);
   if(typeof mtInfoOpen!=="undefined" && mtInfoOpen) closeMtInfo(false);   // 対戦のお知らせが出ていたら閉じる
   $("wcPop").hidden=true; document.documentElement.classList.add("wc-lock");
   wcSeen=Date.now(); try{ localStorage.setItem("typinggarden:wcSeen",String(wcSeen)); }catch(e){}   // 開いたら未読は消す
@@ -18331,7 +18357,7 @@ function debugStart2(){
   save();
 }
 function alive(){ if(kitN("fridge")>0){ fridgeKeep(); save(); } }
-return { fmtNum, numStr, fxInfo:()=>({ kyo:!!(S.goals && S.goals.kei), bara:baraSeen() }), yzPress:()=>yzPress(false), yzBtn:()=>({ on:yzHas("button"), gain:yzBtnGain(), auto:yzv("izumi") }), peek:()=>{ consumeInbox(); tick(); return tutState(); }, roseName:roseNameHTML, roseNamePlate, roseRowStyle, roseRowCls, nameDeco, drunkNow, ask:gAsk, tqBoost:()=>({ rose:(1+rgGurPct("sh")/100)*otsuMul("Z2"), sc:1+rgGurPct("pen")/100, min:1+rgGurPct("dial")/100 }), rose:(lv,n)=>{ roseGive(lv,n); S.roseIn=(S.roseIn||0)+Math.floor(n); save(); }, screwMul, charmLives, applyTheme, alive, themeScrewArt, enter, leave, onKey, summary, dailyGive, dailyNeji, dailySapLeft, dailyOpen, btOpen, mtGive, mtInfoSeen:()=>!!S.mtInfoSeen, mtInfoMark:()=>{ S.mtInfoSeen=true; save(); }, dbInfoSeen:()=>!!S.dbInfoSeen, dbInfoMark:()=>{ S.dbInfoSeen=true; save(); }, debugUnlock, debugStart2, tutState, tutGive, tutGrow, tutSeed, tutSandbox, refreshRank, openModal, ownerId, useName, baraOn, baraLeft, baraSeen, debugStart5, debugStart6, debugStart3, debugStart4, wcDishes, wcUse, wcRefund, wcLabel, wcReceive, wcTaken, wcAllDishes:()=>Object.keys(DISH).filter(wcCanThrow), wcCropIds:()=>CROPS.filter(c=>!c.secret && SUPER[c.id]).map(c=>c.id), wcFarmNow:()=>({ m:Math.floor(S.money), h:Math.floor(S.totalHarvest||0) }),
+return { fmtNum, numStr, fxInfo:()=>({ kyo:!!(S.goals && S.goals.kei), bara:baraSeen() }), yzPress:()=>yzPress(false), yzBtn:()=>({ on:yzHas("button"), gain:yzBtnGain(), auto:yzv("izumi") }), peek:()=>{ consumeInbox(); tick(); return tutState(); }, roseName:roseNameHTML, roseNamePlate, roseRowStyle, roseRowCls, nameDeco, drunkNow, ask:gAsk, tqBoost:()=>({ rose:(1+rgGurPct("sh")/100)*otsuMul("Z2"), sc:1+rgGurPct("pen")/100, min:1+rgGurPct("dial")/100 }), rose:(lv,n)=>{ roseGive(lv,n); S.roseIn=(S.roseIn||0)+Math.floor(n); save(); }, screwMul, charmLives, applyTheme, alive, themeScrewArt, enter, leave, onKey, summary, dailyGive, dailyNeji, dailySapLeft, dailyOpen, btOpen, mtGive, mtInfoSeen:()=>!!S.mtInfoSeen, mtInfoMark:()=>{ S.mtInfoSeen=true; save(); }, wbInfoSeen:()=>!!S.wbInfoSeen, wbInfoMark:()=>{ S.wbInfoSeen=true; save(); }, dbInfoSeen:()=>!!S.dbInfoSeen, dbInfoMark:()=>{ S.dbInfoSeen=true; save(); }, debugUnlock, debugStart2, tutState, tutGive, tutGrow, tutSeed, tutSandbox, refreshRank, openModal, ownerId, useName, baraOn, baraLeft, baraSeen, debugStart5, debugStart6, debugStart3, debugStart4, wcDishes, wcUse, wcRefund, wcLabel, wcReceive, wcTaken, wcAllDishes:()=>Object.keys(DISH).filter(wcCanThrow), wcCropIds:()=>CROPS.filter(c=>!c.secret && SUPER[c.id]).map(c=>c.id), wcFarmNow:()=>({ m:Math.floor(S.money), h:Math.floor(S.totalHarvest||0) }),
   wcGoalPicks:()=>[
     { name:"不思議な肥料と摩訶不思議な肥料", ic:ico(GUR.mfert), give:()=>{ S.sfert=(S.sfert||0)+1; S.mfert=(S.mfert||0)+1; } },
     { name:GUR.bento.name, ic:ico(GUR.bento), give:()=>{ S.bento=(S.bento||0)+1; } },
