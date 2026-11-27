@@ -5454,7 +5454,7 @@ function wb4Next(ok,typed,delay){
   setTimeout(()=>{
     wb4Busy=false; if(!running) return;
     wb4Ch=null; $("wordPanel").classList.remove("quiz","wb4");
-    if(remain<=0){ score=wb4Typed+wb4Chose; finishTa(); } else pickWord();   // 正解1つにつき1つ届く
+    if(remain<=0 || (!ok && wbPlayMode==="one")){ score=wb4Typed+wb4Chose; finishTa(); } else pickWord();   // 一本勝負は1問まちがえたら終わり   // 正解1つにつき1つ届く
   },delay);
 }
 function renderNextWord(){
@@ -6900,8 +6900,9 @@ function wbPreStore(){
 }
 const wbAll = () => wbBooks.concat(WB_PRESETS);   // 一覧の並び: 自分の単語帳 → おためし単語帳
 /* 遊び方: 全部(自分の単語帳だけ)/ 10語。ベストは遊び方ごと */
-const WB_MODES = { all:"全部", 10:"10語" };
-const wbModes = b => b.pre ? ["10","all"] : ["all","10"];
+const WB_MODES = { all:"全部", 10:"10語", one:"ノーミス勝負" };
+const wbModes = b => (b.pre ? ["10","all"] : ["all","10"]).concat(wbStyle(b)==="4" ? ["one"] : []);   // 一本勝負は4択のときだけ(1問まちがえたら終わり)
+const wbOneKey = b => "one"+(wbDir(b)==="r"?"r":"");   // 一本勝負のベスト(連続正解の数)は向きごとに
 const wbMode = b => wbModes(b).includes(String(b.mode)) ? String(b.mode) : wbModes(b)[0];
 const wbBests = b => { if(!b.bests || typeof b.bests!=="object") b.bests={}; if(b.best!=null && b.bests.all==null){ b.bests.all=b.best; } return b.bests; };   // 前の「ベスト」は「全部」のベストにする
 const wbBestTxt = (b,m=wbMode(b)) => { const v=wbBests(b)[m]; return v==null ? "" : fmtTime(v); };
@@ -7057,7 +7058,7 @@ function renderBooks(){
     <div class="wb-dcover">${wbIcon(b)}</div>
     <div class="wb-dinfo">
       <b class="wb-dname">${escH(b.name)}${b.pre?'<small class="wb-dtag">おためし</small>':""}</b>
-      <small>${b.pre?`${escH(b.ds)} ・ `:""}${b.words.length}語${wbStyle(b)==="type"&&wbBestTxt(b)?` ・ ${WB_MODES[wbMode(b)]}のベスト ${wbBestTxt(b)}`:""}</small>
+      <small>${b.pre?`${escH(b.ds)} ・ `:""}${b.words.length}語${wbStyle(b)==="type"&&wbBestTxt(b)?` ・ ${WB_MODES[wbMode(b)]}のベスト ${wbBestTxt(b)}`:""}${wbMode(b)==="one"&&wbBests(b)[wbOneKey(b)]!=null?` ・ ${WB_MODES.one}のベスト ${wbBests(b)[wbOneKey(b)]}問`:""}</small>
       ${cnt?`<div class="wb-dprog"><span>覚えた ${cnt.good}/${cnt.all}</span><i><b style="width:${cnt.all?Math.round(cnt.good/cnt.all*100):0}%"></b></i></div>`:""}
       <div class="wb-dopts">
         ${wbCan4(b)&&!window.IS_MOBILE?`<span class="wb-mode">${[["type","タイピング"],["4","4択"]].map(([v,n])=>`<button class="${wbStyle(b)===v?"on":""}" data-style="${v}" title="${v==="4"?"打たずに、4つの答えから選ぶ":"答えを打つ"}">${n}</button>`).join("")}<span class="kbdh">F</span></span>`:""}
@@ -7473,7 +7474,7 @@ function buildBookQueue(){
   if(wbRetry){ pool=wbRetry.map(w=>({...w})); wbRetry=null; wbPlayMode="retry"; }   // まちがえた言葉だけ
   else{
     pool=wbPW.map(w=>({...w}));
-    if(bookPlay.hideGood){ const left=pool.filter(w=>!wbGood(bookPlay,w)); if(left.length) pool=left; }   // 覚えた言葉は出さない(全部覚えていたら全部)
+    if(bookPlay.hideGood && wbPlayMode!=="one"){ const left=pool.filter(w=>!wbGood(bookPlay,w)); if(left.length) pool=left; }   // 一本勝負は全部の言葉から   // 覚えた言葉は出さない(全部覚えていたら全部)
     if(wbPlayMode==="10"){   // 10語を選ぶ: TOEICの10語セットと同じく、苦手・まだの言葉ほど出やすく、覚えた言葉は出にくい
       const wt=w=>{ const st=wbSt(bookPlay,w); return !st ? 3 : st.s>=3 ? .5 : st.s===0 ? 4 : 2; }, out=[];
       while(out.length<10 && pool.length){ let r=Math.random()*pool.reduce((a,w)=>a+wt(w),0), i=0; for(; i<pool.length-1; i++){ r-=wt(pool[i]); if(r<0) break; } out.push(pool.splice(i,1)[0]); }
@@ -7500,6 +7501,7 @@ $("wbWrongBtn").addEventListener("click",()=>wbRetryWrong());
 function endBook4(){
   const b=bookPlay, c=wbMemCount(b), right=wb4Typed+wb4Chose;
   wbAnnAllMem(b);
+  if(wbPlayMode==="one"){ endBookOne(b,c,right); return; }
   $("resultDiff").textContent=`— 単語帳「${b.name}」 4択 ${wbPlayMode==="retry"?"まちがえた言葉":WB_MODES[wbPlayMode]}${wbDir(b)==="r"?" 逆向き":""} —`;
   $("resultCount").classList.remove("ta");
   $("resultCaption").textContent="正解";
@@ -7508,6 +7510,25 @@ function endBook4(){
   $("resultSubLine").textContent=`正解 ${right} ・ はずれ ${wb4Wrong} / 覚えた ${c.good}/${c.all}${wb4New?`(今回 +${wb4New})`:""} / ${elapsed.toFixed(1)}秒`;
   wbReveal();
   $("resultNew").textContent = wb4New ? `★ ${wb4New}語 覚えた! ★` : "";
+  const wl=wb4WrongList.length, wbb=$("wbWrongBtn"); wbb.hidden=!wl; wbb.textContent=`まちがえた${wl}語だけ (W)`;
+  $("registerBox").style.display="none";
+  $("resultKeys").innerHTML=(wl?'<b>W</b> まちがえた言葉だけ ・ ':'')+'<b>Enter</b> もう一回 ・ <b>Esc</b> 単語帳へ ・ <b>G</b> 農園へ';
+  $("titleBtn").textContent="単語帳へ (Esc)";
+  show("result");
+}
+/* 4択の一本勝負: 何問続けて正解できたか。全問正解でクリア */
+function endBookOne(b,c,right){
+  const clear = wb4Wrong===0, bs=wbBests(b), k=wbOneKey(b), had=bs[k]!=null, isNew = !had || right>bs[k];
+  if(isNew){ bs[k]=right; if(b.pre) wbPreStore(); else wbStore(); }
+  if(isNew && had && right>0) wcAnnounce(`${wbAnnName(b)}(4択の${WB_MODES.one})で自己ベストを出しました(${right}問連続正解${clear?"・全問正解":""})`, 5);
+  $("resultDiff").textContent=`— 単語帳「${b.name}」 4択 ${WB_MODES.one}${wbDir(b)==="r"?" 逆向き":""} —`;
+  $("resultCount").classList.remove("ta");
+  $("resultCaption").textContent = clear ? "全問正解でクリア!" : "連続正解";
+  $("resultScore").textContent=`${right}`;
+  $("resultUnit").textContent="問";
+  $("resultSubLine").textContent=`${clear?`全${wb4Ans}問`:`${wb4Ans}問目でまちがえました`} ・ ベスト ${bs[k]}問 / 覚えた ${c.good}/${c.all}${wb4New?`(今回 +${wb4New})`:""} / ${elapsed.toFixed(1)}秒`;
+  wbReveal();
+  $("resultNew").textContent=[isNew && had ? "★ ベスト更新! ★" : "", wb4New?`★ ${wb4New}語 覚えた! ★`:""].filter(Boolean).join(" ");
   const wl=wb4WrongList.length, wbb=$("wbWrongBtn"); wbb.hidden=!wl; wbb.textContent=`まちがえた${wl}語だけ (W)`;
   $("registerBox").style.display="none";
   $("resultKeys").innerHTML=(wl?'<b>W</b> まちがえた言葉だけ ・ ':'')+'<b>Enter</b> もう一回 ・ <b>Esc</b> 単語帳へ ・ <b>G</b> 農園へ';
