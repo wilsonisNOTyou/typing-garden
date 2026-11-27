@@ -1603,6 +1603,13 @@ html.mobile .word-panel.wb4 #romaji .wb4opts .tq-opt{padding:.6rem .8rem; min-he
 .wb-def select, .wb-def input{font-family:inherit; font-size:.9rem; color:var(--ink); background:#0f1511; border:1px solid var(--line); border-radius:5px; padding:.2rem .4rem; margin-left:.3rem}
 .wb-def input{width:4em}
 .wb-ai textarea{font-size:.8rem; color:var(--steel)}
+.wb-src{display:flex; flex-wrap:wrap; gap:.4rem; margin:.35rem 0 .45rem}
+.wb-src .btn{padding:.3rem .8rem; font-size:.85rem}
+.wb-src .btn.on{outline:2px solid var(--amber); outline-offset:1px}
+.wb-srcin{display:grid; grid-template-columns:minmax(0,1fr) 6.5rem; gap:.4rem .6rem; margin:.4rem 0 .2rem}
+.wb-srcin label{display:flex; flex-direction:column; gap:.2rem; font-size:.8rem; min-width:0}
+.wb-srcin label:last-child{grid-column:1/-1}
+.wb-srcin .wb-in{width:100%; box-sizing:border-box}
 .wb-li-note{display:block; margin-top:.25rem; color:var(--steel); font-size:.8rem; line-height:1.5}
 .wb-cnote{display:block; margin-top:.35rem; font-size:.85rem; min-height:0}
 .wb-cnote.ng{color:#ffb38a}
@@ -3906,8 +3913,8 @@ html:not(.mobile) #screen-garden.haslog:has(.modal.open) #g-toasts{top:14px}
       <div class="wb-bulk wb-aibox">
         <h4 class="wb-aih">AIでまとめて作る <small>おすすめ ・ 1冊 300語まで(多いときは単語帳を分けてください)</small></h4>
         <ol class="wb-steps">
-          <li><b>覚えたい内容を用意する</b><br>自分のノートやまとめ、用語集、単語リスト、プリントの文字など。コピーできる文字にしておきます<br><small class="wb-li-note">手元の教材やプリントは、自分の勉強用の単語帳づくりに使えます。共有するときは、ほかの人が作った文章をそのまま写した単語帳にならないようにしてください</small></li>
-          <li><b>AIに変換してもらう</b><br>作りたい単語帳の形を選んでから、頼む文章をコピーして ChatGPT や Claude などのAIに貼ります。その下に①の内容を貼って送ります<br><select id="wbAiKind" class="wb-aikind"></select><br><button class="btn" id="wbAiCopy">AIに頼む文章をコピー</button><span id="wbAiCopyNote" class="wb-cnote" aria-live="polite"></span></li>
+          <li><b>作り方を選ぶ</b><div class="wb-src" role="group"><button type="button" class="btn on" id="wbSrcDoc">資料から作る</button><button type="button" class="btn" id="wbSrcNew">AIで1から作る</button></div><div id="wbSrcDocBox">自分のノートやまとめ、用語集、単語リスト、プリントの文字などを用意します。コピーできる文字にしておきます<br><small class="wb-li-note">手元の教材やプリントは、自分の勉強用の単語帳づくりに使えます。共有するときは、ほかの人が作った文章をそのまま写した単語帳にならないようにしてください</small></div><div id="wbSrcNewBox" hidden>資料がなくても、テーマを書くだけでAIが問題ごと作ります<div class="wb-srcin"><label>テーマ<input id="wbAiTheme" class="wb-in" maxlength="60" placeholder="例: 中学2年の理科の用語、世界の首都、TOEIC によく出る動詞" autocomplete="off"></label><label class="n">語数<input id="wbAiCount" class="wb-in" type="number" min="5" max="300" step="5" value="50"></label><label>難しさ(なくてもよい)<input id="wbAiLevel" class="wb-in" maxlength="30" placeholder="例: 中学生向け、大学入試レベル" autocomplete="off"></label></div><small class="wb-li-note">AIは、それらしくまちがえることがあります。できた単語帳は、答えが正しいかざっと確かめてください</small></div></li>
+          <li><b>AIに頼む</b><br><span id="wbStep2">作りたい単語帳の形を選んでから、頼む文章をコピーして ChatGPT や Claude などのAIに貼ります。その下に①の内容を貼って送ります</span><br><select id="wbAiKind" class="wb-aikind"></select><br><button class="btn" id="wbAiCopy">AIに頼む文章をコピー</button><span id="wbAiCopyNote" class="wb-cnote" aria-live="polite"></span></li>
           <li><b>返ってきた行を貼る</b><br>AIの返事(「問題|答え|よみがな」の行)を、コードブロックのコピーボタンでコピーして下の欄に貼り、「まとめて追加」を押します</li>
         </ol>
         <textarea id="wbBulk" class="wb-in" rows="6" placeholder="ここにAIの返事を貼ります。例:&#10;植物が光から栄養を作るはたらき|光合成|こうごうせい&#10;細胞|さいぼう"></textarea>
@@ -5368,7 +5375,7 @@ function wbShowQ(w){
   const q = diff==="book" && w && w.q ? w.q : "", el=$("wordQ");
   el.hidden=!q; el.textContent=q;
   if(!q) return;
-  if(w.qk && /[ぁ-んァ-ン]/.test(w.qk) && wbNormKana(w.qk).replace(/ /g,"")!==wbNormKana(w.q).replace(/ /g,"")) el.insertAdjacentHTML("beforeend",`<small class="wq-k">${escH(w.qk)}</small>`);   // 問題のよみがな(問題と同じとき・英字だけのときは出さない)
+  if(w.qk && /[ぁ-んァ-ン]/.test(w.qk) && wbNormKana(w.qk).replace(/ /g,"")!==wbNormKana(w.q).replace(/ /g,"") && ![w.k,w.k2,...(w.a||[]).map(x=>x.k)].includes(wbNormKana(w.qk))) el.insertAdjacentHTML("beforeend",`<small class="wq-k">${escH(w.qk)}</small>`);   // 問題のよみがな(問題と同じとき・英字だけのときは出さない)
   wbQN++;
   let left=wbSec(bookPlay);
   if(left<=0 && !wb4){ wbQN--; return; }   // 0秒: 隠さない(「見ずに打てた」にも数えない)
@@ -7206,6 +7213,7 @@ function wbBulkAdd(){
     + (warn ? `<div class="ng">${esc(warn.replace(/^ ・ /,""))}</div>` : "")
     + (wbNoK ? `<div class="ng">そのうち${wbNoK}語は、よみがながないか打てない文字があるので、4択で遊ぶときだけ出ます</div>` : "")
     + (errs.length ? `<div class="ng">追加できなかった行が ${errs.length}行あります(欄に残しました): ${esc(errs.slice(0,3).join(" / "))}${errs.length>3?" ほか":""}</div>` : "")
+    + (ok && wbAiSrc==="new" ? `<div class="ws">AIが1から作った単語帳です。答えが正しいか、ざっと確かめてください</div>` : "")
     + (ok ? `<button type="button" class="btn" id="wbBulkSee">追加した言葉を一覧で見る ↓</button>` : "");
   nb.hidden=false; $("wbNote").textContent="";
   [...$("wbWords").children].slice(n0).forEach(li=>li.classList.add("new"));
@@ -7244,6 +7252,7 @@ look forward to|楽しみに待つ|たのしみにまつ|look forward to
   yomi:{ nm:"漢字・言葉のよみ(言葉を見てよみを打つ)", st:"type",
     how:`・問題: 漢字の言葉
 ・答え: 空のままにする(よみがなが答えになる)
+・問題のよみがな: 書かない(よみがなが答えなので)
 ・よみが2つ以上あるときは、全角の「／」で区切って全部書く(例: 今日 → きょう／こんにち)
 ・答えのよみがな: よみ(ひらがな)`,
     ex:`紫陽花||あじさい` },
@@ -7254,7 +7263,27 @@ look forward to|楽しみに待つ|たのしみにまつ|look forward to
 Practice makes perfect.|practice makes perfect.` },
 };
 let wbAiKind="foreign";
-const wbAiPrompt = (k=wbAiKind) => { const x=WB_AI_KINDS[k]||WB_AI_KINDS.foreign; return `次の内容を、タイピング練習用の単語帳に取り込める形に変換してください。
+let wbAiSrc="doc";   // doc: 資料から作る ・ new: AIで1から作る
+const wbAiNewTail = () => {
+  const th=String(($("wbAiTheme")||{}).value||"").trim(), lv=String(($("wbAiLevel")||{}).value||"").trim();
+  const n=Math.max(5,Math.min(WB_MAX_WORDS,parseInt(($("wbAiCount")||{}).value,10)||50));
+  return `作る単語帳:
+・テーマ: ${th||"(ここにテーマを書いてください)"}
+・語数: ${n}語くらい
+${lv?`・難しさ: ${lv}\n`:""}・正しい内容だけを使う。自信がないものは入れない
+・答えが1つに決まる問題にする。答えが何通りもあるときは、上のきまりどおり「／」で別解にする
+・同じ種類の答え(人物どうし、用語どうし など)がそろうようにする
+・よく出る大事なものから選ぶ。同じ言葉は2回使わず、答えが同じになる問題も2つ作らない
+`;
+};
+function wbAiSetSrc(v){
+  wbAiSrc = v==="new" ? "new" : "doc";
+  $("wbSrcDoc").classList.toggle("on",wbAiSrc==="doc"); $("wbSrcNew").classList.toggle("on",wbAiSrc==="new");
+  $("wbSrcDocBox").hidden = wbAiSrc!=="doc"; $("wbSrcNewBox").hidden = wbAiSrc!=="new";
+  $("wbStep2").textContent = wbAiSrc==="new" ? "作りたい単語帳の形を選んでから、頼む文章をコピーして ChatGPT や Claude などのAIに貼って送ります(①のテーマなどは、頼む文章に入ります)" : "作りたい単語帳の形を選んでから、頼む文章をコピーして ChatGPT や Claude などのAIに貼ります。その下に①の内容を貼って送ります";
+  $("wbAiCopyNote").textContent=""; $("wbAiText").value=wbAiPrompt();
+}
+const wbAiPrompt = (k=wbAiKind) => { const x=WB_AI_KINDS[k]||WB_AI_KINDS.foreign, nw=wbAiSrc==="new"; return `${nw?"次のテーマで、タイピング練習用の単語帳を新しく作ってください。":"次の内容を、タイピング練習用の単語帳に取り込める形に変換してください。"}
 作りたい単語帳: ${x.nm.replace(/[(（].*$/,"")}
 
 形式:
@@ -7274,24 +7303,24 @@ ${x.how}
 ・のばす音は「ー」。句読点「、」「。」や「！」「？」は使ってよい
 
 そのほか:
-・表の番号や単元(Units など)の列、見出しなど、言葉でないものは使わない
+${nw?"":`・表の番号や単元(Units など)の列、見出しなど、言葉でないものは使わない
 ・意味・答え・よみ・説明が書いていない言葉は、あなたが正しいものを考えて補う(例: 英単語だけの表なら、意味とそのよみを書き足す)。わからない言葉は入れない。補うのは、元の内容にある言葉の足りない所だけで、言葉は増やさない
-・同じ言葉は1回だけ
+`}・同じ言葉は1回だけ
+・答えの英字は、もとの大文字・小文字のまま書く(よみがなだけ小文字にする。例: pH、DNA)
 ・1冊 300語まで。多いときは300語ずつに分けて返す
-・返事は、変換した行だけを「\`\`\`」で囲んだコードブロック1つに入れてください(見出し・説明・番号は付けない。1語ごとに必ず改行する)
+・返事は、${nw?"作った":"変換した"}行だけを「\`\`\`」で囲んだコードブロック1つに入れてください(見出し・説明・番号は付けない。1語ごとに必ず改行する)
 
 例:
 ${x.ex}
 
-変換する内容:
-`; };
+${nw?wbAiNewTail():"変換する内容:\n"}`; };
 function wbAiSetKind(k){
   if(!WB_AI_KINDS[k]) return; wbAiKind=k; $("wbAiKind").value=k; $("wbAiText").value=wbAiPrompt();
   if(wbEdit && wbEdit.i<0) $("wbDefStyle").value=WB_AI_KINDS[k].st;   // 新しい単語帳なら、遊び方の初期設定も合わせる
 }
 function wbAiCopy(){
   const ta=$("wbAiText"), txt=wbAiPrompt(); ta.value=txt;
-  const done=ok=>{ const n=$("wbAiCopyNote"); n.className="wb-cnote"+(ok?"":" ng"); n.textContent = ok ? "✅ コピーしました。AIに貼って、その下に変換したい内容を貼って送ってください" : "コピーできませんでした。下の「AIに頼む文章の中身を見る」から選んでコピーしてください"; if(!ok){ $("wbEditor").querySelector(".wb-ai").open=true; ta.focus(); ta.select(); } };
+  const done=ok=>{ const n=$("wbAiCopyNote"); n.className="wb-cnote"+(ok?"":" ng"); n.textContent = ok ? (wbAiSrc==="new" ? (String($("wbAiTheme").value).trim() ? "✅ コピーしました。AIに貼って送ってください" : "✅ コピーしました。テーマが空なので、AIに貼ってから「(ここにテーマを書いてください)」をテーマに書きかえて送ってください") : "✅ コピーしました。AIに貼って、その下に変換したい内容を貼って送ってください") : "コピーできませんでした。下の「AIに頼む文章の中身を見る」から選んでコピーしてください"; if(!ok){ $("wbEditor").querySelector(".wb-ai").open=true; ta.focus(); ta.select(); } };
   try{ navigator.clipboard.writeText(txt).then(()=>done(true),()=>done(false)); }catch(e){ done(false); }
 }
 function wbSaveBook(){
@@ -7409,6 +7438,8 @@ $("wbVTabs").addEventListener("click",e=>{ const t=e.target.closest("[data-vc]")
 $("wbAiCopy").addEventListener("click",wbAiCopy);
 $("wbAiKind").innerHTML=Object.entries(WB_AI_KINDS).map(([k,x])=>`<option value="${k}">${escH(x.nm)}</option>`).join("");
 $("wbAiKind").addEventListener("change",e=>wbAiSetKind(e.target.value));
+$("wbSrcDoc").addEventListener("click",()=>wbAiSetSrc("doc")); $("wbSrcNew").addEventListener("click",()=>{ wbAiSetSrc("new"); $("wbAiTheme").focus(); });
+for(const id of ["wbAiTheme","wbAiCount","wbAiLevel"]) $(id).addEventListener("input",()=>{ $("wbAiText").value=wbAiPrompt(); $("wbAiCopyNote").textContent=""; });
 $("wbAiText").value=wbAiPrompt();
 $("wbSave").addEventListener("click",wbSaveBook);
 $("wbCancel").addEventListener("click",wbCancelEdit);
