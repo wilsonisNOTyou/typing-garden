@@ -1558,7 +1558,16 @@ html.mobile .wb-detail{position:static}
 .wb-vtabs{margin:.4rem 0; flex-wrap:wrap}
 .wb-vnone{color:var(--steel); justify-content:center; display:block!important; text-align:center}
 .wb-vwords li{grid-template-columns:2.4em 1fr 1fr auto}
-.wb-st{font-size:.78rem; color:var(--steel); white-space:nowrap}
+.wb-st{font-size:.8rem; font-weight:700; color:var(--steel); white-space:nowrap}
+.wb-st.good{color:#6ac87a} .wb-st.weak{color:#e07a7a} .wb-st.learn{color:#d8b06a} .wb-st.new{font-weight:400; opacity:.75}
+.wb-vtabs button.good{color:#6ac87a} .wb-vtabs button.weak{color:#e07a7a} .wb-vtabs button.learn{color:#d8b06a}
+.wb-vwords li.good{background:rgba(106,200,122,.06)} .wb-vwords li.weak{background:rgba(224,122,122,.07)}
+.wb-wst{position:absolute; top:.45rem; left:2rem; font-size:.78rem; font-weight:700; color:var(--steel); opacity:.9; z-index:2}
+.wb-wst:empty{display:none}
+.wb-wst.good{color:#6ac87a} .wb-wst.weak{color:#e07a7a} .wb-wst.learn{color:#d8b06a} .wb-wst.new{color:#8aa4e0}
+.wb-mempop{position:absolute; top:.35rem; right:2rem; font-size:.9rem; font-weight:800; color:#6ac87a; opacity:0; transition:opacity .25s; pointer-events:none; z-index:2}
+.wb-mempop.on{opacity:1}
+.wq-wait .good{color:#6ac87a; font-weight:700} .wq-wait .weak{color:#e07a7a; font-weight:700} .wq-wait .learn{color:#d8b06a; font-weight:700}
 .word-panel.wb4 #romaji .bq{cursor:pointer}
 .word-panel.wb4 #romaji{display:block; font-family:inherit; letter-spacing:0; font-size:1rem}
 .wb4opts{width:min(640px,100%); margin:.2rem auto 0}
@@ -3493,6 +3502,7 @@ html:not(.mobile) #screen-garden.haslog:has(.modal.open) #g-toasts{top:14px}
       <div class="mt-pop" id="mtPop"></div>
       <span class="corner"></span>
       <div id="penaltyPop">ミス上限! キーが1個はまった…</div>
+      <div id="wbWst" class="wb-wst"></div><div id="wbMemPop" class="wb-mempop"></div>
       <div id="wordQ" hidden></div>
       <div id="wordText">&nbsp;</div>
       <div id="wordKana">&nbsp;</div>
@@ -5371,7 +5381,7 @@ function wbReveal(){
   const s=$("wordQ").querySelector(".wq-wait"); if(s) s.remove();
 }
 function wbShowQ(w){
-  wbReveal();
+  wbReveal(); wbWstShow(w);
   const q = diff==="book" && w && w.q ? w.q : "", el=$("wordQ");
   el.hidden=!q; el.textContent=q;
   if(!q) return;
@@ -5438,7 +5448,8 @@ function wb4Next(ok,typed,delay){
   const remain=Math.max(taGoal-wb4Ans,0);
   $("score").textContent=remain; $("timefill").style.width=(wb4Ans/taGoal*100)+"%";
   const s=$("wordQ").querySelector(".wq-wait");
-  if(s) s.textContent=(ok?(typed?"○ 打てた!":"○ 正解"):"✕ はずれ")+" ・ "+(st.s>=3?"✓ 覚えた":ok?`${st.s}回続けて正解`:"数え直し");
+  if(s) s.innerHTML=(ok?(typed?"○ 打てた!":"○ 正解"):"✕ はずれ")+" ・ "+(ok && st.s===3 ? `<span class="good">🎉 3回続けて正解! この言葉を覚えた!</span>` : ok && st.s>3 ? `<span class="good">✓ 覚えた言葉</span>` : ok ? `<span class="learn">${st.s}回続けて正解 ・ あと${3-st.s}回で覚えられます</span>` : `<span class="weak">📌 苦手に追加 ・ 3回続けて正解で覚えられます</span>`);
+  $("wbWst").textContent="";   // 答えたあとは、下の知らせだけにする
   wb4Busy=true;
   setTimeout(()=>{
     wb4Busy=false; if(!running) return;
@@ -5949,7 +5960,7 @@ document.addEventListener("keydown",e=>{
     if(r==="done"){
       if(mtOn()) mtWordDone(); else { score++; sndDone(); }   // 対戦: 金・2倍・おじゃま・連鎖・アイテム
       removeScrew();
-      if(diff==="book" && currentWord && currentWord.q && wbHideT){ wbNoPeek++; if(wbCan4(bookPlay) && wbMark(bookPlay,currentWord,true).s===3) wb4New++; }   // 答えが出る前に打てた: 「覚えた」の正解に数える(答えを見たときは数えない)
+      if(diff==="book" && currentWord && currentWord.q && wbHideT){ wbNoPeek++; if(wbCan4(bookPlay) && wbMark(bookPlay,currentWord,true).s===3){ wb4New++; wbMemPop("🎉 覚えた!"); } }   // 答えが出る前に打てた: 「覚えた」の正解に数える(答えを見たときは数えない)
       if(currentWord && currentWord.bara) baraPetalRain();   // バラバラの薔薇(辞典には載せない)
       else if(diff!=="book" && currentWord && !currentWord.oj) unlockWord((currentWord.orig||currentWord).k);   // 単語帳の言葉は辞典に載せない(逆さまの言葉は、もとの言葉で載せる)
       if(isQ(diff)){
@@ -6861,6 +6872,16 @@ function wbAnnAllMem(b){
   if(c.all>0 && c.good===c.all) annAllMemOnce(`wb:${b.id}:${dir}`, `${wbAnnName(b)}${dir==="r"?"(逆向き)":""}の言葉を全部覚えました(${c.all}語)`);
 }
 const wbStTxt = (b,w) => { const st=wbSt(b,w); return !st ? "まだ" : st.s>=3 ? "✓ 覚えた" : st.s>0 ? `${st.s}回続けて正解` : "✕ 苦手"; };
+const wbStCls = (b,w) => { const st=wbSt(b,w); return !st ? "new" : st.s>=3 ? "good" : st.s>0 ? "learn" : "weak"; };
+/* 遊んでいるあいだ: 出題している言葉の覚えぐあい(TOEIC と同じく左上に色つきで) */
+function wbWstShow(w){
+  const el=$("wbWst"); if(!el) return;
+  if(diff!=="book" || !w || !w.q || !bookPlay || !wbCan4(bookPlay)){ el.className="wb-wst"; el.textContent=""; return; }
+  const st=wbSt(bookPlay,w), c=wbStCls(bookPlay,w);
+  el.className="wb-wst "+c;
+  el.textContent = c==="new" ? "はじめて" : c==="good" ? "✓ 覚えた言葉" : c==="weak" ? "✕ 苦手な言葉" : `${st.s}回続けて正解中`;
+}
+function wbMemPop(txt){ const el=$("wbMemPop"); if(!el) return; el.textContent=txt; el.classList.add("on"); clearTimeout(wbMemPop.t); wbMemPop.t=setTimeout(()=>el.classList.remove("on"),1600); }
 /* 向き・覚えた言葉を出さない の切りかえ(単語帳ごとに残す) */
 function wbToggle(i,f){
   const b=wbAll()[i]; if(!b) return;
@@ -7001,9 +7022,9 @@ function wbView(i,keep){
   const can=can0, cat=w=>{ const st=wbSt(b,mw(w)); return !st ? "new" : st.s>=3 ? "good" : st.s===0 ? "weak" : "learn"; };
   const cats=[["all","すべて"],["good","覚えた"],["learn","練習中"],["weak","苦手"],["new","まだ"]];
   const cnt=k=>k==="all" ? b.words.length : b.words.filter(w=>w.q && cat(w)===k).length;
-  $("wbVTabs").innerHTML = can ? cats.map(([k,n])=>`<button class="${wbVCat===k?"on":""}" data-vc="${k}">${n} ${cnt(k)}</button>`).join("") : "";
+  $("wbVTabs").innerHTML = can ? cats.map(([k,n])=>`<button class="${wbVCat===k?"on":""} ${k}" data-vc="${k}">${k==="good"?"✓ ":k==="weak"?"✕ ":""}${n} ${cnt(k)}</button>`).join("") : "";
   const show=b.words.map((w,j)=>[w,j]).filter(([w])=>!can || wbVCat==="all" || (w.q && cat(w)===wbVCat));
-  $("wbVWords").innerHTML=show.length ? show.map(([w,j])=>`<li><span class="no">${j+1}</span><span>${w.q?`<span class="q">${escH(w.q)}</span>`:""}${escH(wbAnsTxt(w))}${w.t2?` / ${escH(w.t2)}`:""}</span><span class="k">${w.k?escH([w.k,...(w.a||[]).map(x=>x.k)].join("／")):"(4択のときだけ)"}${w.k2?`<br>${escH(w.k2)}`:""}</span><span class="wb-st">${w.q&&can?wbStTxt(b,mw(w)):""}</span></li>`).join("") : '<li class="wb-vnone">この中には、まだありません</li>';
+  $("wbVWords").innerHTML=show.length ? show.map(([w,j])=>`<li class="${w.q&&can?wbStCls(b,mw(w)):""}"><span class="no">${j+1}</span><span>${w.q?`<span class="q">${escH(w.q)}</span>`:""}${escH(wbAnsTxt(w))}${w.t2?` / ${escH(w.t2)}`:""}</span><span class="k">${w.k?escH([w.k,...(w.a||[]).map(x=>x.k)].join("／")):"(4択のときだけ)"}${w.k2?`<br>${escH(w.k2)}`:""}</span><span class="wb-st ${w.q&&can?wbStCls(b,mw(w)):""}">${w.q&&can?wbStTxt(b,mw(w)):""}</span></li>`).join("") : '<li class="wb-vnone">この中には、まだありません</li>';
 }
 function openBooks(){
   wbScrCur=null; wbLoad(); wbEdit=null; wbViewI=-1; wbShareMsg("");
