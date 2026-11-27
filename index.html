@@ -5347,12 +5347,29 @@ function wbShowQ(w){
 function wbPeek(){ if(!running || diff!=="book" || !wbHideT) return; if(wb4) wb4Open(); else wbReveal(); }
 /* 単語帳の4択 */
 let wb4=false, wb4Ch=null, wb4Busy=false, wb4Typed=0, wb4Chose=0, wb4Ans=0, wb4Wrong=0, wb4New=0;
+/* 4択の外れ: 正解に似た答え(問題の終わり方・答えの終わり方・文字の種類・長さが近いもの)を先に選び、その中からランダムに3つ */
+function wb4Others(w, mine, mix){
+  const sfx=(a,b)=>{ let n=0; while(n<a.length && n<b.length && a[a.length-1-n]===b[b.length-1-n]) n++; return n; };
+  const qn=q=>String(q||"").replace(/[\s?？!！。、]+$/,"");
+  const kind=t=>/^[\x20-\x7e\u00c0-\u024f]+$/.test(t)?"en":/[\u4e00-\u9fff]/.test(t)?(/[ァ-ヶー]/.test(t)?"mix":"kan"):/[ァ-ヶー]/.test(t)?"kata":"hira";
+  const who=q=>/(人|者|家|将軍|天皇|武将|首相|大臣|宣教師|使節|人物|役人|だれ|誰)は?$/.test(qn(q));   // 人をたずねる問題には、人の答えを並べる
+  const at=wbAnsTxt(w), aq=qn(w.q), ak=kind(at), aw=who(w.q), seen=new Set();
+  const cand=[];
+  for(const x of mix(wbPW.slice())){
+    const t=wbAnsTxt(x); if(seen.has(t) || mine.has(t) || t.split("／").some(y=>mine.has(y))) continue; seen.add(t);
+    const same=[...new Set(t)].filter(c=>c!=="の" && c!=="／" && at.includes(c)).length;   // 同じ文字(戦・詐欺・権など)
+    const sc = Math.min(sfx(aq,qn(x.q)),4)*2 + Math.min(sfx(at,t),3)*2 + Math.min(same,2)*0.8 + (kind(t)===ak?2:0) + (w.q && who(x.q)===aw ? 3 : 0) - Math.min(Math.abs(t.length-at.length),6)*0.4;
+    cand.push({ t, sc });
+  }
+  cand.sort((a,b)=>b.sc-a.sc);
+  return mix(cand.slice(0,5)).slice(0,3).map(c=>c.t);
+}
 function wb4Open(){
   clearTimeout(wbHideT); clearInterval(wbHideI); wbHideT=wbHideI=null; $("wbPeekBtn").hidden=true;
   const w=currentWord; if(!w || wb4Ch || !running) return;
   const mix=a=>{ for(let i=a.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [a[i],a[j]]=[a[j],a[i]]; } return a; };
   const mine=new Set([w.t, w.t2, ...(w.a||[]).map(x=>x.t)].filter(Boolean));
-  const others=mix([...new Set(wbPW.map(x=>wbAnsTxt(x)).filter(t=>!mine.has(t) && !t.split("／").some(x=>mine.has(x))))]).slice(0,3);
+  const others=wb4Others(w, mine, mix);
   wb4Ch={ ch:mix([{ t:wbAnsTxt(w), ok:true }, ...others.map(t=>({ t, ok:false }))]) };
   const s=$("wordQ").querySelector(".wq-wait"); if(s) s.textContent = window.IS_MOBILE ? "答えを選んでください" : "1〜4 で答えを選ぶ";
   $("wordPanel").classList.add("quiz","wb4");
