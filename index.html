@@ -389,6 +389,8 @@ html.mobile .tq-lv small{font-size:.68rem}
 .tq-opt .no{flex:none; width:1.6rem; height:1.6rem; border-radius:50%; display:grid; place-items:center; background:rgba(255,255,255,.1); font-size:.85rem}
 .tq-opt.ok{border-color:#5fbf6a; background:rgba(95,191,106,.22)}
 .tq-opt.ng{border-color:#e05a4a; background:rgba(224,90,74,.22)}
+.wb4opts .tq-opt{flex-wrap:nowrap}   /* 単語帳の4択: 長い答えでも番号の横で折り返す */
+.wb4opts .tq-opt>span:last-child{flex:1; min-width:0; overflow-wrap:anywhere}
 .tq-opt.tq-idk{grid-column:1/-1; justify-content:center; min-height:2.6rem; padding:.5rem .9rem; color:var(--steel); font-size:.92rem}   /* 分からない */
 .tq-fb{min-height:1.6em; margin-top:.7rem; font-size:1.05rem}
 /* 単語の状態(出題時)と、答えたあとの知らせ */
@@ -5369,7 +5371,7 @@ function wb4Others(w, mine, mix){
   for(const x of mix(wbPW.slice())){
     const t=wbAnsTxt(x); if(seen.has(t) || mine.has(t) || t.split("／").some(y=>mine.has(y))) continue; seen.add(t);
     const same=[...new Set(t)].filter(c=>c!=="の" && c!=="／" && at.includes(c)).length;   // 同じ文字(戦・詐欺・権など)
-    const sc = Math.min(sfx(aq,qn(x.q)),4)*2 + Math.min(sfx(at,t),3)*2 + Math.min(same,2)*0.8 + (kind(t)===ak?2:0) + (w.q && who(x.q)===aw ? 3 : 0) - Math.min(Math.abs(t.length-at.length),6)*0.4;
+    const sc = Math.min(sfx(aq,qn(x.q)),4)*2 + Math.min(sfx(at,t),3)*2 + Math.min(same,2)*0.8 + (kind(t)===ak?2:0) + (t.includes("／")===at.includes("／")?1.5:0) + (w.q && who(x.q)===aw ? 3 : 0) - Math.min(Math.abs(t.length-at.length),6)*0.4;
     cand.push({ t, sc });
   }
   cand.sort((a,b)=>b.sc-a.sc);
@@ -7109,7 +7111,8 @@ const WB_AI_KINDS={
   foreign:{ nm:"英語・外国語の単語と意味(単語を見て意味を答える。4択向き)", st:"4",
     how:`・問題: 英語などの外国語の単語・熟語(もとの表記のまま)
 ・答え: 日本語の意味(短く。資料に意味が書いていなければ、その分野でのふつうの意味を補う)
-・意味は、漢字やひらがなの日本語の訳を使う。英単語をカタカナにしただけの言葉(タイポグラフィ・インターフェースなど)は、ほかに訳がないときだけ使う(例: typography → 文字組み／印刷の体裁、query → 問い合わせ)
+・意味は、ふつうの日本語の訳を使う。英単語をカタカナにしただけの言葉(タイポグラフィ・インターフェースなど)は、ほかに訳があればそちらにする(例: typography → 文字組み、query → 問い合わせ)
+・ただし、日本でもカタカナで呼ぶのがふつうの用語(データベース・バイト・ゲームエンジンなど)は、カタカナのままでよい。むりに漢字の言葉を作ったり、説明文にしたりしない
 ・答えのよみがな: 意味のよみ(ひらがな)
 ・問題のよみがな: 単語を打つための英字(英語は単語を小文字にしたもの。熟語の空白はそのまま。中国語・韓国語などはローマ字やピンイン)
 ・意味がいくつもあるときは、答えとよみがなを全角の「／」で区切って同じ順に並べる(4つまで)`,
@@ -7380,6 +7383,17 @@ function endBookGame(){
 /* ---------- 更新情報 ----------
    新しいものを上に足していく。d は YYYY-MM-DD */
 const NEWS=[
+  { d:"2026-11-27", t:"タイピング単語帳 大型アップデート", items:[
+    "AIで単語帳が作れるようになりました。教科書のまとめ・単語リスト・プリントの文字などを、用意された頼む文章といっしょに ChatGPT・Claude・Copilot などのAIに貼るだけで、問題・答え・よみがなの付いた単語帳ができあがります。英単語だけの一覧でも、意味はAIが補います",
+    "作れる形は「英単語と意味」「言葉と意味」「一問一答」「漢字のよみ」「そのまま打つ」の5つです。答えが何通りもある言葉や、読みが2つある漢字にも対応しています",
+    "問題を見て答えを打つ遊び方ができました。答えは決めた秒数まで隠れ、見ずに打てたら「見ずに打てた」に数えます。Enter で待たずに答えを見ることもできます",
+    "4択で遊べるようになりました。TOEIC と同じ大きなボタンで、打ちにくい外国語の単語帳も遊べます。外れは正解に似た答えから選ぶので、しっかり手ごたえがあります",
+    "答えを見て問題を当てる、逆向きでも遊べます",
+    "覚えた・苦手を記録して、単語帳の中身の画面で見られるようになりました。10語は苦手・まだの言葉ほど出やすく、まちがえた言葉だけもう一度遊ぶこともできます",
+    "すぐ遊べるおためし単語帳を10冊入れました。難読漢字・県庁所在地・四字熟語・ことわざ・早口言葉・かんたんドイツ語・元素記号・月の異名・日本の歴史 一問一答・情報モラルです",
+    "作った単語帳は、コードで友だちと共有できます",
+    "単語帳の一覧が本棚になり、単語帳だけの曲もできました",
+  ]},
   { d:"2026-11-25", t:"ガチャとお知らせ", items:[
     "大連ガチャの計算を速くしました。重いスマホでも、ゲージが早く満タンになります。演出の長さも短くしました",
     "大連ガチャの演出中は、画面のどこを押しても早送りできるようになりました",
