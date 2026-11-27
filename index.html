@@ -1601,6 +1601,12 @@ html.mobile .word-panel.wb4 #romaji .wb4opts .tq-opt{padding:.6rem .8rem; min-he
 .wb-def select, .wb-def input{font-family:inherit; font-size:.9rem; color:var(--ink); background:#0f1511; border:1px solid var(--line); border-radius:5px; padding:.2rem .4rem; margin-left:.3rem}
 .wb-def input{width:4em}
 .wb-ai textarea{font-size:.8rem; color:var(--steel)}
+.wb-bnote{margin:.5rem 0; padding:.55rem .7rem; border:1px solid var(--line); border-radius:8px; background:rgba(255,255,255,.03); font-size:.85rem; display:grid; gap:.3rem}
+.wb-bnote .ok{font-weight:700; font-size:.95rem}
+.wb-bnote .ng{color:#ffb38a}
+.wb-bnote .ws{color:var(--steel); overflow-wrap:anywhere}
+.wb-bnote .btn{justify-self:start; padding:.25rem .7rem; font-size:.8rem}
+.wb-words li.new{background:rgba(120,200,140,.1)}
 .wb-note{min-height:1.3em; color:#ffb38a; font-size:.85rem; margin:.5rem 0}
 .wb-words{list-style:none; max-height:40vh; overflow:auto; border:1px solid var(--line); border-radius:8px}
 .wb-words:empty{display:none}
@@ -3900,6 +3906,7 @@ html:not(.mobile) #screen-garden.haslog:has(.modal.open) #g-toasts{top:14px}
         </ol>
         <textarea id="wbBulk" class="wb-in" rows="6" placeholder="ここにAIの返事を貼ります。例:&#10;植物が光から栄養を作るはたらき|光合成|こうごうせい&#10;細胞|さいぼう"></textarea>
         <div class="btn-row" style="margin-top:.4rem"><button class="btn primary" id="wbBulkAdd">まとめて追加</button></div>
+        <div id="wbBulkNote" class="wb-bnote" hidden></div>
         <p class="wb-hint">自分で書くときは、1行に「言葉|よみがな」か「問題|答え|よみがな|問題のよみがな」(問題のよみがなはなくてもよい)。答えが何通りもあるときは、答えとよみがなを「／」で区切って同じ順に並べます(例: issue|問題／発行する|もんだい／はっこうする)。| のかわりにカンマ(,)でもかまいません。Excel やスプレッドシートの表は、列ごとにそのままコピーして貼れます(「問題・答え・よみがな」の順の列)。読点(、)は言葉の一部になります</p>
         <details class="wb-ai"><summary>AIに頼む文章の中身を見る</summary>
           <textarea id="wbAiText" class="wb-in" rows="8" readonly></textarea>
@@ -7000,7 +7007,7 @@ function editBook(i){
   $("wbDefStyle").value = b ? (b.style==="4"||b.style==="4o" ? "4" : "type") : WB_AI_KINDS[wbAiKind].st;   // 新しい単語帳は、AIに頼む形に合わせる $("wbDefMode").value = b && String(b.mode)==="10" ? "10" : "all"; $("wbDefSec").value = b ? wbSec(b) : WB_SEC_DEF;
   wbEditIdx=-1; $("wbAdd").textContent="追加 (Enter)";
   $("wbName").value=wbEdit.name; $("wbQ").value=""; $("wbQK").value=""; $("wbT").value=""; $("wbK").value=""; $("wbBulk").value="";
-  $("wbNote").textContent="";
+  $("wbNote").textContent=""; $("wbBulkNote").hidden=true;
   $("wbKeys").innerHTML='入力中: <b>Enter</b> 追加 ・ <b>Tab</b> 次の欄 ・ <b>Ctrl+Enter</b> 保存(まとめて追加の欄では追加) ・ <b>Esc</b> 入力をやめる<br>'+
     '入力していないとき: <b>Q</b> 問題を入力 ・ <b>T</b> 言葉を入力 ・ <b>M</b> 名前を入力 ・ <b>B</b> まとめて追加 ・ <b>↑ ↓</b> 言葉を選ぶ ・ <b>Enter</b> 選んだ言葉を直す ・ <b>Delete</b> 選んだ言葉を外す ・ <b>S</b> 保存 ・ <b>Esc</b> やめる';
   renderWbWords();
@@ -7070,7 +7077,7 @@ function wbSplitLine(l){
 function wbBulkAdd(){
   if(!wbEdit) return;
   const lines=$("wbBulk").value.split(/\r?\n/).map(l=>l.trim()).filter(l=>l && !/^```/.test(l));
-  let ok=0; const errs=[], bad=[]; wbNoK=0;
+  let ok=0; const errs=[], bad=[]; wbNoK=0; const n0=wbEdit.words.length;
   lines.forEach((l,n)=>{
     const c=wbSplitLine(l); if(!c.join("")) return;
     if(l.split("|").length>5){ errs.push(`${n+1}行目: 1行に何語も続いています(改行が消えています)。AIの返事は、コードブロックのコピーボタンでコピーして貼ってください`); bad.push(l); return; }
@@ -7080,7 +7087,15 @@ function wbBulkAdd(){
   renderWbWords();
   const same=wbAiKind==="plain" ? 0 : lines.map(wbSplitLine).filter(c=>c.length===2 && c[0] && !/\s/.test(c[0].trim()) && c[0].toLowerCase().replace(/[^a-z0-9]/g,"")===String(c[1]||"").toLowerCase().replace(/[^a-z0-9]/g,"") && /[a-z]/i.test(c[0])).length;
   const warn = same>=3 && same>=lines.length*.5 ? " ・ 英字をそのまま打つだけの行が多いようです。英単語の意味で覚えたいときは、AIに頼む文章の形を「英語・外国語の単語と意味」にして、AIに頼み直してください" : "";
-  $("wbNote").textContent = `${ok}語を追加しました${warn}`+(wbNoK?` ・ そのうち${wbNoK}語は、よみがながないか打てない文字があるので、4択で遊ぶときだけ出ます`:"")+(errs.length?` ・ 追加できなかった行が ${errs.length}行あります(欄に残しました): ${errs.slice(0,3).join(" / ")}${errs.length>3?" ほか":""}`:"");
+  const added=wbEdit.words.slice(n0), nb=$("wbBulkNote"), esc=escH;   // 結果は「まとめて追加」のすぐ下に出す(下の一覧は遠いので)
+  nb.innerHTML = (ok ? `<div class="ok">✅ ${ok}語を追加しました(この単語帳は今 ${wbEdit.words.length}語)</div><div class="ws">${added.slice(0,6).map(w=>esc(w.t||w.k)).join("・")}${added.length>6?` ほか${added.length-6}語`:""}</div>` : `<div class="ok ng">追加できた言葉はありません</div>`)
+    + (warn ? `<div class="ng">${esc(warn.replace(/^ ・ /,""))}</div>` : "")
+    + (wbNoK ? `<div class="ng">そのうち${wbNoK}語は、よみがながないか打てない文字があるので、4択で遊ぶときだけ出ます</div>` : "")
+    + (errs.length ? `<div class="ng">追加できなかった行が ${errs.length}行あります(欄に残しました): ${esc(errs.slice(0,3).join(" / "))}${errs.length>3?" ほか":""}</div>` : "")
+    + (ok ? `<button type="button" class="btn" id="wbBulkSee">追加した言葉を一覧で見る ↓</button>` : "");
+  nb.hidden=false; $("wbNote").textContent="";
+  [...$("wbWords").children].slice(n0).forEach(li=>li.classList.add("new"));
+  const sb=$("wbBulkSee"); if(sb) sb.onclick=()=>{ const li=$("wbWords").children[n0]; (li||$("wbWords")).scrollIntoView({ behavior:"smooth", block:"center" }); };
   $("wbBulk").value=bad.join("\n");   // 追加できなかった行だけ残して、直せるようにする
 }
 /* AIに頼む文章: 作りたい単語帳の形を選ぶと、それに合わせた頼み方になる(英単語の一覧だけを渡すと、英単語をそのまま打つ行になりがちなので) */
