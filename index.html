@@ -6752,7 +6752,7 @@ function wbMemCount(b,dir=wbDir(b)){ const qs=dir==="r" ? wbQWords(b).map(wbRevW
 const ANN_MEM_KEY=WB_KEY.replace(/:books$/,":annAllMem");
 function annAllMemOnce(id,text){
   let o=[]; try{ o=JSON.parse(localStorage.getItem(ANN_MEM_KEY)||"[]"); if(!Array.isArray(o)) o=[]; }catch(e){ o=[]; }
-  if(o.includes(id)) return; o.push(id);
+  if(o.includes(id) || !db || !playerName || isDebugSave()) return; o.push(id);   // 知らせを出せないとき(名前がない など)は、出せるようになってから知らせる
   try{ localStorage.setItem(ANN_MEM_KEY,JSON.stringify(o)); }catch(e){ return; }
   wcAnnounce(text,4);
 }
@@ -7110,7 +7110,7 @@ function wbBulkAdd(){
   const same=wbAiKind==="plain" ? 0 : lines.map(wbSplitLine).filter(c=>c.length===2 && c[0] && !/\s/.test(c[0].trim()) && c[0].toLowerCase().replace(/[^a-z0-9]/g,"")===String(c[1]||"").toLowerCase().replace(/[^a-z0-9]/g,"") && /[a-z]/i.test(c[0])).length;
   const warn = same>=3 && same>=lines.length*.5 ? " ・ 英字をそのまま打つだけの行が多いようです。英単語の意味で覚えたいときは、AIに頼む文章の形を「英語・外国語の単語と意味」にして、AIに頼み直してください" : "";
   const added=wbEdit.words.slice(n0), nb=$("wbBulkNote"), esc=escH;   // 結果は「まとめて追加」のすぐ下に出す(下の一覧は遠いので)
-  nb.innerHTML = (ok ? `<div class="ok">✅ ${ok}語を追加しました(この単語帳は今 ${wbEdit.words.length}語)</div><div class="ws">${added.slice(0,6).map(w=>esc(w.t||w.k)).join("・")}${added.length>6?` ほか${added.length-6}語`:""}</div>` : `<div class="ok ng">追加できた言葉はありません</div>`)
+  nb.innerHTML = (ok ? `<div class="ok">✅ ${ok}語を追加しました(この単語帳は今 ${wbEdit.words.length}語)</div><div class="ws">${added.slice(0,6).map(w=>esc(w.t||w.k)).join("、")}${added.length>6?` ほか${added.length-6}語`:""}</div>` : `<div class="ok ng">追加できた言葉はありません</div>`)
     + (warn ? `<div class="ng">${esc(warn.replace(/^ ・ /,""))}</div>` : "")
     + (wbNoK ? `<div class="ng">そのうち${wbNoK}語は、よみがながないか打てない文字があるので、4択で遊ぶときだけ出ます</div>` : "")
     + (errs.length ? `<div class="ng">追加できなかった行が ${errs.length}行あります(欄に残しました): ${esc(errs.slice(0,3).join(" / "))}${errs.length>3?" ほか":""}</div>` : "")
