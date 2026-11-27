@@ -6748,6 +6748,19 @@ const wbStyle = b => wbCan4(b) && (window.IS_MOBILE || b.style==="4" || b.style=
 const wb4o = b => wbStyle(b)==="4";   // 4択は打たずに、すぐ4択(前の「4択だけ」(4o)も4択として扱う)
 const wbStyle3 = wbStyle;   // スマホは4択だけ
 function wbMemCount(b,dir=wbDir(b)){ const qs=dir==="r" ? wbQWords(b).map(wbRevWord) : wbQWords(b); return { all:qs.length, good:qs.filter(w=>wbGood(b,w)).length }; }
+/* 「全部覚えた」をチャットに1回だけ知らせる(単語帳は向きごと、TOEIC はレベルと形式ごと) */
+const ANN_MEM_KEY=WB_KEY.replace(/:books$/,":annAllMem");
+function annAllMemOnce(id,text){
+  let o=[]; try{ o=JSON.parse(localStorage.getItem(ANN_MEM_KEY)||"[]"); if(!Array.isArray(o)) o=[]; }catch(e){ o=[]; }
+  if(o.includes(id)) return; o.push(id);
+  try{ localStorage.setItem(ANN_MEM_KEY,JSON.stringify(o)); }catch(e){ return; }
+  wcAnnounce(text,4);
+}
+const wbAnnName = b => b.pre ? `タイピング単語帳「${b.name}」` : "タイピング単語帳の自分の単語帳";   // 自分で作った単語帳の名前は出さない
+function wbAnnAllMem(b){
+  if(!b || !b.id) return; const dir=wbDir(b), c=wbMemCount(b,dir);
+  if(c.all>0 && c.good===c.all) annAllMemOnce(`wb:${b.id}:${dir}`, `${wbAnnName(b)}${dir==="r"?"(逆向き)":""}の言葉を全部覚えました(${c.all}語)`);
+}
 const wbStTxt = (b,w) => { const st=wbSt(b,w); return !st ? "まだ" : st.s>=3 ? "✓ 覚えた" : st.s>0 ? `${st.s}回続けて正解` : "✕ 苦手"; };
 /* 向き・覚えた言葉を出さない の切りかえ(単語帳ごとに残す) */
 function wbToggle(i,f){
@@ -7342,6 +7355,7 @@ function wbRetryWrong(){ if(!wb4WrongList.length) return; wbRetry=wb4WrongList.s
 $("wbWrongBtn").addEventListener("click",()=>wbRetryWrong());
 function endBook4(){
   const b=bookPlay, c=wbMemCount(b), right=wb4Typed+wb4Chose;
+  wbAnnAllMem(b);
   $("resultDiff").textContent=`— 単語帳「${b.name}」 4択 ${wbPlayMode==="retry"?"まちがえた言葉":WB_MODES[wbPlayMode]}${wbDir(b)==="r"?" 逆向き":""} —`;
   $("resultCount").classList.remove("ta");
   $("resultCaption").textContent="正解";
@@ -7365,7 +7379,10 @@ function endBookGame(){
   const bs=b ? wbBests(b) : {};
   const fair = wbDir(bookPlay)==="f" && !bookPlay.hideGood;   // 逆向き・覚えた言葉を出さないときは、ベストに数えない
   const isNew = fair && !!b && (bs[m]==null || time<bs[m]);
+  const had = !!b && bs[m]!=null;
   if(isNew){ bs[m]=time; delete b.best; if(b.pre) wbPreStore(); else wbStore(); bookPlay=b; }
+  if(isNew && had) wcAnnounce(`${wbAnnName(b)}(${WB_MODES[m]})で自己ベストを出しました(${fmtTime(time)})`, 5);   // はじめて遊んだときは出さない(ほかのモードと同じ)
+  if(b) wbAnnAllMem(b);
   const bestTxt = b ? wbBestTxt(b,m) : "";
   $("resultDiff").textContent=`— 単語帳「${bookPlay.name}」 ${WB_MODES[m]}${wbDir(bookPlay)==="r"?" 逆向き":""}${bookPlay.hideGood?" 覚えた言葉なし":""} —`;
   $("resultCount").classList.add("ta");
@@ -19906,7 +19923,7 @@ function tqMarkFx(en,ok){
   tqMark(en,ok);
   const t=tqSt(en), g1=tqGood(en), w1=tqWeak(en), u = tqFmt==="listen" ? "問題" : "単語";
   let html="";
-  if(ok && !g0 && g1) html=`<span class="good">🎉 3回続けて正解! この${u}を覚えた!</span>`;
+  if(ok && !g0 && g1){ html=`<span class="good">🎉 3回続けて正解! この${u}を覚えた!</span>`; tqAnnAllMem(en); }
   else if(ok && w0 && !w1) html=`<span class="over">💪 苦手を解消しました</span>`;
   else if(ok && w0) html=`<span class="run">正解 ・ あと${2-t.s}回続けて正解すると苦手を解消できます</span>`;
   else if(!ok && w0) html=`<span class="weak">苦手のまま ・ 2回続けて正解すると解消できます</span>`;
@@ -19914,6 +19931,11 @@ function tqMarkFx(en,ok){
   else if(ok && t.s>0 && !g1) html=`<span class="run">${t.s>1?`${t.s}回連続で正解`:"正解"} ・ あと${3-t.s}回続けて正解すると覚えられます</span>`;
   const el=$("tqWmsg"); if(el) el.innerHTML=html;
   if(html){ const w=tqWords[tqI]; if(w) tqWstShow(w); }
+}
+function tqAnnAllMem(en){   // そのレベル(この形式)の単語を全部覚えたら、チャットに1回だけ知らせる
+  const w=(tqFmt==="listen"?TQL:TQ).find(x=>x.en===en); if(!w) return;
+  const pool=tqPool(w.lv); if(!pool.length || !pool.every(x=>tqGood(x.en))) return;
+  annAllMemOnce(`tq:${tqFmt}:${w.lv}`, `TOEIC 英単語の${tqLvName(w.lv)}(${tqFmtName(tqFmt)})の${tqUnit()==="問"?"問題":"単語"}を全部覚えました(${pool.length}${tqUnit()})`);
 }
 function tqMark(en,ok){ const st=tqStore(tqFmt), t=Object.assign({c:0,w:0,s:0},st[en]); if(ok){ t.c++; t.s++; wcGoalAdd("toeic",1); }else{ t.w++; t.s=0; } t.t=Date.now(); st[en]=t; tqSaveStat(); }
 const tqHasSent = w => !!TQ_SENT[w.en];
