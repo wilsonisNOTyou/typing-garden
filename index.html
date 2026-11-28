@@ -16872,7 +16872,18 @@ function cookKey(e){
   if((k==="ArrowLeft"||k==="ArrowRight") && r && r.left){ e.preventDefault(); (k==="ArrowLeft"?r.left:r.right)(); return; }
   if((k==="a"||k==="A") && r && r.auto){ e.preventDefault(); r.auto(); return; }
   if((k==="s"||k==="S") && r && r.d){ e.preventDefault(); cookFav(r.d.id); return; }
-  if(k==="Enter" && r){ e.preventDefault(); if(r.locked){ sfx.nope(); toast("材料が足りません","warn"); return; } (e.shiftKey?r.shift:r.enter)(); }
+  if(k==="Enter" && r){ e.preventDefault(); if(r.locked){ if(!e.repeat){ sfx.nope(); toast("材料が足りません","warn"); } return; } if(rptBusy(e)) return; rptRun(e.shiftKey?r.shift:r.enter); }
+}
+/* Enter の長押し: 前の1回(畑を進める・保存・演出)が終わって画面が描けるまで、続きのキーは捨てる。
+   処理が重いとき(変異の杏仁豆腐で畑が多い など)に、キーがたまって固まらないように */
+let rptUntil=0, rptFrame=false;
+const rptBusy = e => !!e.repeat && (rptFrame || performance.now()<rptUntil);
+function rptRun(fn){
+  const t0=performance.now();
+  try{ fn(); }finally{
+    const t1=performance.now(); rptUntil=t1+(t1-t0);   // かかった時間と同じだけ休む
+    rptFrame=true; requestAnimationFrame(()=>{ rptFrame=false; });
+  }
 }
 /* 料理のお気に入り: 付け外しして並びが変わっても、その料理を選んだままにする */
 function cookFav(id){
