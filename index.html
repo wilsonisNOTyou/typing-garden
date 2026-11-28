@@ -1619,6 +1619,9 @@ html.mobile .word-panel.wb4 #romaji .wb4opts .tq-opt{padding:.6rem .8rem; min-he
 .wb-srcin label{display:flex; flex-direction:column; gap:.2rem; font-size:.8rem; min-width:0}
 .wb-srcin label:last-child{grid-column:1/-1}
 .wb-srcin .wb-in{width:100%; box-sizing:border-box}
+.bk-keep{margin:.6rem 0; padding:.6rem .8rem; border:1px dashed var(--line); border-radius:10px}
+.bk-keep .bk-link{flex:1 1 16rem; min-width:0; font-size:.78rem; text-transform:none; letter-spacing:0}
+#srForm{display:grid; gap:.5rem}
 .wb-li-note{display:block; margin-top:.25rem; color:var(--steel); font-size:.8rem; line-height:1.5}
 .wb-cnote{display:block; margin-top:.35rem; font-size:.85rem; min-height:0}
 .wb-cnote.ng{color:#ffb38a}
@@ -4136,6 +4139,19 @@ html:not(.mobile) #screen-garden.haslog:has(.modal.open) #g-toasts{top:14px}
   </div>
 </div>
 
+<!-- 記録が空で始まったとき: 同期コードで戻せるか聞く -->
+<div id="syncRestore" class="bk-modal">
+  <div class="bk-panel">
+    <div class="bk-head"><h2>前にこのゲームで遊んでいましたか？</h2></div>
+    <p class="bk-p">この画面では、まだ記録がありません。前に「別端末と同期」をしていたなら、同期コードを入れると記録を戻せます。</p>
+    <form id="srForm" autocomplete="off">
+      <input id="srCode" class="bk-codein" maxlength="24" placeholder="英数字16文字のコード" autocomplete="off" autocapitalize="characters" spellcheck="false">
+      <div class="btn-row"><button class="btn primary" type="submit" id="srGo">記録を戻す <span class="kbdh">Enter</span></button><button class="btn" type="button" id="srNew">はじめて遊ぶ <span class="kbdh">Esc</span></button></div>
+    </form>
+    <p class="bk-note" id="srNote"></p>
+  </div>
+</div>
+
 <!-- 記録の引き継ぎ(タイピングガーデン全体) -->
 <div id="backup" class="bk-modal">
   <div class="bk-panel">
@@ -4150,6 +4166,12 @@ html:not(.mobile) #screen-garden.haslog:has(.modal.open) #g-toasts{top:14px}
       <button class="btn" id="bkTake" style="display:none">こちらで遊ぶ (T)</button>
       <button class="btn" id="bkRestore" style="display:none">クラウドのバックアップ (R)</button>
       <span class="bk-note" id="bkSyncNote"></span>
+    </div>
+    <div class="bk-keep" id="bkKeep" hidden>
+      <p class="bk-p"><b>記録が消えても戻せるように</b>(iPhone のホーム画面から遊ぶ人に、とくにおすすめ)</p>
+      <p class="bk-p"><b>ホーム画面用のリンク</b>: このリンクを Safari で開いて、共有ボタン →「ホーム画面に追加」で追加し直すと、そのアイコンは記録が消えても開くだけで自動でつなぎ直します。<b>リンクにはコードが入っているので、人に渡さないでください</b></p>
+      <div class="bk-foot" style="justify-content:flex-start; flex-wrap:wrap"><input class="bk-codein bk-link" id="bkLink" readonly><button class="btn" id="bkLinkCopy">リンクをコピー</button></div>
+      <span class="bk-note" id="bkKeepNote"></span>
     </div>
     <p class="bk-p bk-warn">ご注意: コードを入れて参加すると、この端末の記録はコードの記録に置き換わります(参加前の記録はクラウドのバックアップに残り、R から戻せます)。スマホで始めた記録をパソコンへ移すときは、スマホで「同期を始める」を押して、出たコードをパソコンで入れてください。</p>
     <div id="bkBackups" class="bk-backups"></div>
@@ -7603,6 +7625,12 @@ function endBookGame(){
 /* ---------- 更新情報 ----------
    新しいものを上に足していく。d は YYYY-MM-DD */
 const NEWS=[
+  { d:"2026-11-28", t:"記録が消えたときの戻し方", items:[
+    "iPhone のホーム画面から開いたときなどに、記録が消えてしまうことがあります。同期をしておけば、消えても戻せるようにしました",
+    "「別端末と同期」は、スマホ1台だけで遊んでいる人も使えます。「同期を始める」を押しておくと記録がクラウドに残り、そのとき出る同期コードを入れれば、いつでも記録を戻せます。コードはメモしておいてください",
+    "同期しているときは、ホーム画面用のリンクが出ます。このリンクを Safari で開いてホーム画面に追加し直すと、記録が消えても開くだけで自動でつなぎ直します。リンクにはコードが入っているので、人に渡さないでください",
+    "記録がない状態で始まったときは、前に遊んでいたかを聞くようにしました。同期コードを入れると記録を戻せます。はじめての人は「はじめて遊ぶ」を押してください",
+  ]},
   { d:"2026-11-28", t:"タイピング単語帳 大型アップデート", items:[
     "AIで単語帳が作れるようになりました。ノートやまとめ・単語リスト・プリントの文字などを、用意された頼む文章といっしょに ChatGPT・Claude・Copilot などのAIに貼るだけで、問題・答え・よみがなの付いた単語帳ができあがります。英単語だけの一覧でも、意味はAIが補います。資料がなくても、テーマを書くだけでAIに1から作ってもらうこともできます",
     "作れる形は「英単語と意味」「言葉と意味」「一問一答」「漢字のよみ」「そのまま打つ」の5つです。答えが何通りもある言葉や、読みが2つある漢字にも対応しています",
@@ -19019,7 +19047,7 @@ async function syncBegin(){
   $("bkSyncNote").textContent="同期を始めました。別のブラウザでこのコード(英数字16文字)を入力してください";
   renderSyncState();
 }
-async function syncJoin(inp, noteEl){
+async function syncJoin(inp, noteEl, silent){
   const code=normSyncCode((inp&&inp.value!=null ? inp : $("bkCode")).value);
   const note=noteEl || $("bkSyncNote");
   if(!code){ note.textContent="コードを入れてください"; return; }
@@ -19034,7 +19062,7 @@ async function syncJoin(inp, noteEl){
       // 先に取り込めるか確かめる。だめなら、このブラウザは何も変えない(持ち主にもならない)
       let ok=false; try{ const o=JSON.parse(b64dec(data)); ok=!!o && typeof o==="object"; }catch(e){}
       if(!ok){ note.textContent="※このコードの記録を読めませんでした(形式が違います)。今の記録はそのままです"; return; }
-      if(!confirm("この端末の記録は、コードの記録に置き換わります(今の記録はクラウドのバックアップに残り、あとから戻せます)。参加しますか?")){ note.textContent="やめました。この端末の記録はそのままです"; return; }
+      if(!silent && !confirm("この端末の記録は、コードの記録に置き換わります(今の記録はクラウドのバックアップに残り、あとから戻せます)。参加しますか?")){ note.textContent="やめました。この端末の記録はそのままです"; return; }
       note.textContent="記録を取り込みます…";
       const mine=bundleNow(), t=Date.now();
       saveLocalPrev(mine);                       // 参加前の記録を手元にも残す
@@ -19096,10 +19124,34 @@ function renderSyncState(){
   if(tk) tk.style.display = syncCode && syncReadOnly ? "" : "none";
   const rb=$("bkRestore");
   if(rb) rb.style.display = syncCode ? "" : "none";
+  const kp=$("bkKeep");
+  if(kp){ kp.hidden = !syncCode || syncPreparing; if(syncCode){ $("bkLink").value=syncLinkOf(syncCode); } }
   renderMGate();
 }
 $("bkSyncStart").addEventListener("click",()=>{ syncCode?syncStop():syncBegin(); });
 $("bkJoin").addEventListener("click",()=>syncJoin());
+/* 記録が消えても戻せるように: ホーム画面用のリンク(#sync=コード) */
+const syncLinkOf = code => location.origin+location.pathname+"#sync="+code;
+$("bkLinkCopy").addEventListener("click",()=>{ const v=$("bkLink").value, n=$("bkKeepNote"); try{ navigator.clipboard.writeText(v).then(()=>{ n.textContent="✅ リンクをコピーしました。Safari で開いて、ホーム画面に追加してください"; },()=>{ $("bkLink").select(); n.textContent="リンクを選んだので、コピーしてください"; }); }catch(e){ $("bkLink").select(); } });
+/* 記録が空で始まったとき(はじめてのガイドの前)に、同期コードで戻せるか聞く */
+let srOpen=false;
+function syncRestoreAsk(){
+  srOpen=true; $("syncRestore").classList.add("open"); $("srNote").textContent="";
+  setTimeout(()=>{ try{ $("srCode").focus(); }catch(e){} },60);
+}
+function syncRestoreClose(start){ srOpen=false; $("syncRestore").classList.remove("open"); if(start) tutStart(); }
+$("srForm").addEventListener("submit",e=>{ e.preventDefault(); syncJoin($("srCode"),$("srNote"),true); });
+$("srNew").addEventListener("click",()=>syncRestoreClose(true));
+$("syncRestore").addEventListener("keydown",e=>{ if(e.key==="Escape"){ e.preventDefault(); e.stopPropagation(); syncRestoreClose(true); } else e.stopPropagation(); });
+/* ホーム画面用のリンクから開いたとき: まだ同期していなければ、そのコードで自動でつなぎ直す */
+let syncHashJoining=false;
+function syncHashJoin(){   // syncInit のあとに呼ぶ
+  const m=/^#sync=([A-Za-z0-9]{16})$/.exec(location.hash||""); if(!m) return;
+  try{ history.replaceState(null,"",location.pathname+location.search); }catch(e){}   // アドレス欄からコードを消す(人に見られないように)
+  if(syncCode || !hasDB() || tabInactive) return;
+  syncHashJoining=true;
+  setTimeout(()=>syncJoin({ value:m[1].toUpperCase() }, $("bkSyncNote"), true).finally(()=>{ syncHashJoining=false; }), 300);
+}
 /* スマホは同期される側だけ。同期していないときは同期の画面だけを出す */
 const mGated = () => false;   // スマホも1台目にできる(同期していなくても遊べる。以前は同期の画面だけだった)
 function renderMGate(){
@@ -19468,7 +19520,7 @@ function tutBoot(){
   if(mGated()) return;   // 同期していないスマホは、同期の画面だけ
   tutLoad();
   if(!tut){
-    if(Garden.tutState().fresh){ tutStart(); return; }   // はじめて開いた人には、そのまま始める
+    if(Garden.tutState().fresh){ if(syncHashJoining) return; if(!syncCode && hasDB()){ syncRestoreAsk(); return; } tutStart(); return; }   // はじめて開いた人には、そのまま始める(記録が消えた人のために、先に同期コードで戻せるか聞く)
     tut={ step:0, done:true }; tutSave();
   }
   if(tut.done){
@@ -19569,6 +19621,7 @@ refreshBestLine();
 refreshStatsLine();
 refreshGardenStat();
 syncInit();
+syncHashJoin();   // ホーム画面用のリンクから開いたとき
 // 取り込みで読み直したときは、庭にいたなら庭に戻す
 try{
   if(sessionStorage.getItem("typinggarden:return")==="garden") openGarden();
