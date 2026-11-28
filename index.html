@@ -5487,7 +5487,7 @@ function wb4Next(ok,typed,delay){
   setTimeout(()=>{
     wb4Busy=false; if(!running) return;
     wb4Ch=null; $("wordPanel").classList.remove("quiz","wb4");
-    if(remain<=0 || (!ok && wbPlayMode==="one")){ score=wb4Typed+wb4Chose; finishTa(); } else pickWord();   // 一本勝負は1問まちがえたら終わり   // 正解1つにつき1つ届く
+    if(remain<=0 || (!ok && wbPlayMode==="one")){ score=wb4Typed+wb4Chose; finishTa(); } else if(wbCkptOn() && wb4Ans%WB_CKPT===0) wbCkptShow(); else pickWord();   // 一本勝負は1問まちがえたら終わり   // 正解1つにつき1つ届く
   },delay);
 }
 function renderNextWord(){
@@ -5670,14 +5670,14 @@ function startGame(d){
   // HUD/タイムバーをモードごとに切り替え
   $("scoreLabel").textContent = ta ? "残り " : "外したキー ";
   $("scoreUnit").textContent = ta ? "語" : "個";
-  $("score").textContent = ta ? taGoal : 0;
+  $("score").textContent = ta ? taGoal-(d==="book" ? wbDoneN() : 0) : 0;
   $("missWrap").style.display = oneshot && !osCharm ? "none" : "";
-  $("miss").textContent="0";
+  $("miss").textContent=miss;
   $("timebar").style.visibility = oneshot ? "hidden" : "visible";
   $("timeLabel").textContent = (ta||oneshot) ? "経過 " : "残り ";
-  $("time").textContent = (ta||oneshot) ? 0 : GAME_SECONDS;
+  $("time").textContent = (ta||oneshot) ? elapsed.toFixed(1) : GAME_SECONDS;
   const f=$("timefill");
-  f.style.width = ta ? "0%" : "100%";
+  f.style.width = ta ? (d==="book" && taGoal ? wbDoneN()/taGoal*100 : 0)+"%" : "100%";
   f.classList.toggle("ta",ta);
   f.classList.remove("low");
   buildPlate();
@@ -5693,11 +5693,12 @@ function startGame(d){
       clearInterval(cdId); cdId=null; cd.style.display="none";
       beep(1320,.15,"square",.07);
       running=true; pickWord(); startTimer();
+      if(d==="book" && wbResumeN){ wbMemPop(`⏸ ${wbResumeN}問目から続き`); wbResumeN=0; }
     }
   },700);
 }
 function startTimer(){
-  const t0=Date.now();
+  const t0=Date.now()-(isQ(diff)||diff==="oneshot" ? elapsed*1000 : 0);   // 単語帳の中断から続けるときは、そこまでの時間から
   if(isQ(diff) || diff==="oneshot"){
     // 時間無制限: 経過時間を数え上げるだけ
     timerId=setInterval(()=>{
@@ -5780,7 +5781,7 @@ const SCREW_MULT={ easy:1, normal:2, hard:3, barabara:2, "ta-easy":1, "ta-normal
 function gardenScrews(d,n){
   n=Math.max(0,n|0);
   if(d==="oneshot"){ let t=0; for(let i=0;i<n;i++) t+=2**Math.floor(i/10); return t; }
-  if(d==="book") return wb4 ? 0 : n;   // 4択は1問ごとに TOEIC と同じだけ届け済み
+  if(d==="book") return wb4 ? 0 : Math.max(0, n-wbSentScore);   // 中断のときに届けたぶんは引く   // 4択は1問ごとに TOEIC と同じだけ届け済み
   return n*(SCREW_MULT[d]||1);
 }
 const showGardenScrews = (el,n) => { const m=gardenScrewMul(); $(el).textContent = n>0 ? `農園に ${jpNum(n*m)}キー 届きます${m>1?`(料理で1本 ${jpNum(m)}キー)`:""}` : ""; };
@@ -5937,6 +5938,7 @@ document.addEventListener("keydown",e=>{
   }
   if(mtOn() && e.key==="Escape"){ e.preventDefault(); mtAskOpen(); return; }   // 対戦は、やめる前に聞く
   if(e.key==="Escape"){
+    wbCkpt=false;
     clearInterval(timerId); clearInterval(cdId); cdId=null;   // カウントダウン中に抜けても始まらないように
     $("countdown").style.display="none";
     running=false; resetStage(); clearWordPanel();
@@ -5948,6 +5950,7 @@ document.addEventListener("keydown",e=>{
     if(diff==="book") openBooks(); else show("title");
     return;
   }
+  if(wbCkpt){ e.preventDefault(); if(!e.repeat){ if(e.key==="Enter") wbCkptGo(); else if(e.key==="s"||e.key==="S") wbSuspend(); } return; }   // 単語帳の中断ポイント
   if(!running) return;
   const key=e.key;
   if(diff==="book" && wb4){   // 単語帳の4択: 打たずに、1〜4 で答える
@@ -6007,6 +6010,7 @@ document.addEventListener("keydown",e=>{
         $("score").textContent=remain;
         $("timefill").style.width=(score/taGoal*100)+"%";
         if(remain<=0){ finishTa(); return; }
+        if(diff==="book" && !wb4 && wbCkptOn() && score%WB_CKPT===0){ wbCkptShow(); return; }   // 全部: 10語ごとに中断できる
       }else{
         $("score").textContent=score;
         if(diff==="oneshot") updateOneshotStage();
@@ -7103,7 +7107,7 @@ function renderBooks(){
     <div class="wb-dcover">${wbIcon(b)}</div>
     <div class="wb-dinfo">
       <b class="wb-dname">${escH(b.name)}${b.pre?'<small class="wb-dtag">おためし</small>':""}</b>
-      <small>${b.pre?`${escH(b.ds)} ・ `:""}${b.words.length}語${wbBestLine(b)}</small>
+      <small>${b.pre?`${escH(b.ds)} ・ `:""}${b.words.length}語${wbBestLine(b)}${wbSuspTxt(b)}</small>
       ${cnt?`<div class="wb-dprog"><span>覚えた ${cnt.good}/${cnt.all}</span><i><b style="width:${cnt.all?Math.round(cnt.good/cnt.all*100):0}%"></b></i></div>`:""}
       <div class="wb-dopts">
         ${wbCan4(b)&&!window.IS_MOBILE?`<span class="wb-mode">${[["type","タイピング"],["4","4択"]].map(([v,n])=>`<button class="${wbStyle(b)===v?"on":""}" data-style="${v}" title="${v==="4"?"打たずに、4つの答えから選ぶ":"答えを打つ"}">${n}</button>`).join("")}<span class="kbdh">F</span></span>`:""}
@@ -7134,7 +7138,7 @@ function playBook(i){
   const b=wbAll()[i]; if(!b) return;
   if(window.IS_MOBILE && !wbCan4(b)){ uiTell("タイピングはパソコンで遊べます。スマホでは、問題のある言葉が4つ以上ある単語帳を4択で遊べます(作成・編集・削除もできます)"); return; }
   if(!b.words.length){ uiTell("この単語帳には言葉がありません。編集から追加してください"); return; }
-  bookPlay=b; wb4=wbStyle(b)==="4";
+  bookPlay=b; wb4=wbStyle(b)==="4"; wbShareMsg("");   // 中断のお知らせなどは、遊び始めたら消す
   if(!wbPlayWords(b,wb4).length && wbCan4(b)) wb4=true;   // 逆向きで打てる言葉がないときは、4択で遊ぶ
   if(!wbPlayWords(b,wb4).length){ uiTell("逆向きのタイピングで打てる言葉がありません。問題のよみがなを入れるか、4択で遊んでください"); return; }
   startGame("book");
@@ -7548,9 +7552,57 @@ function buildBookQueue(){
       pool=out;
     } else for(let i=pool.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [pool[i],pool[j]]=[pool[j],pool[i]]; }
   }
-  taGoal=pool.length; taQueue=pool;
+  wbSentScore=0; wbCkpt=false; wbPrevDone=[]; wbResumeN=0;
+  const sv=(wbPlayMode==="all"||wbPlayMode==="one") ? wbSuspGet(bookPlay,wb4,wbPlayMode) : null;
+  if(sv){   // 中断したところから続ける(届け物はもう届いている)
+    wbSuspSet(bookPlay,wb4,wbPlayMode,null);
+    const done=new Set(sv.done||[]), left=pool.filter(w=>!done.has(wbWKey(w)));
+    if(left.length){   // 編集して、出ていない言葉がなくなっていたら、はじめから
+      const by=Object.fromEntries(wbPW.map(w=>[wbWKey(w),w]));
+      pool=left; wbPrevDone=[...done]; wbResumeN=sv.n+1;
+      score=sv.score||0; wbSentScore=score; miss=sv.miss||0; elapsed=sv.el||0;
+      [wb4Typed,wb4Chose,wb4Ans,wb4Wrong,wb4New]=sv.a||[0,0,0,0,0];
+      wb4WrongList=(sv.wrong||[]).map(k=>by[k]).filter(Boolean).map(w=>({...w}));
+      wbGot=Object.assign({ sc:0, min:0, rose:0 }, sv.got||{}); [wbNoPeek,wbQN]=sv.peek||[0,0];
+    }
+  }
+  wbRunKeys=pool.map(wbWKey);
+  taGoal=pool.length+(wbResumeN ? wbResumeN-1 : 0); taQueue=pool;
 }
 let wbPW=[], wbRetry=null, wb4WrongList=[];
+/* 全部・一本勝負: TOEIC と同じく、10問ごとに中断できる(単語帳・向き・出し方・遊び方ごとに1つ)。
+   中断の画面と中断しているあいだは、タイムが止まる */
+const WB_CKPT=10, WB_SUSP_KEY=WB_KEY+":susp";
+let wbCkpt=false, wbSentScore=0, wbPrevDone=[], wbRunKeys=[], wbResumeN=0;
+const wbSuspAll = () => { try{ return JSON.parse(localStorage.getItem(WB_SUSP_KEY)||"{}")||{}; }catch(e){ return {}; } };
+const wbSuspKeyOf = (b,four,m) => `${b.id}:${wbDir(b)}:${four?"4":"t"}:${m}`;
+const wbSuspGet = (b,four,m) => wbSuspAll()[wbSuspKeyOf(b,four,m)] || null;
+function wbSuspSet(b,four,m,v){ const a=wbSuspAll(), k=wbSuspKeyOf(b,four,m); if(v) a[k]=v; else delete a[k]; try{ localStorage.setItem(WB_SUSP_KEY,JSON.stringify(a)); }catch(e){} }
+const wbCkptOn = () => diff==="book" && (wbPlayMode==="all"||wbPlayMode==="one") && !mtOn();
+const wbDoneN = () => wb4 ? wb4Ans : score;
+const wbSuspTxt = b => { const sv=wbSuspGet(b, wbStyle(b)==="4", wbMode(b)); return sv ? ` ・ ⏸ 中断中 ${sv.n+1}問目から続き` : ""; };
+function wbCkptShow(){
+  clearTimeout(wbHideT); clearInterval(wbHideI); wbHideT=wbHideI=null; $("wbPeekBtn").hidden=true;
+  wbCkpt=true; running=false; clearInterval(timerId);
+  clearWordPanel();
+  const n=wbDoneN(), right=wb4Typed+wb4Chose;
+  const head = !wb4 ? `${n}語 打てた!` : wbPlayMode==="one" ? `${right}問 連続正解!` : `${n}問 到達!(正解 ${right}問)`;
+  $("wordText").innerHTML=`<div class="tq-ck"><b>${head}</b><span>ここで中断して、あとで続きから遊べます${wb4?"":"。中断しているあいだは、タイムが止まります"}</span></div>`;
+  $("romaji").innerHTML=`<div class="tq-ckbtns"><button type="button" tabindex="-1" class="btn primary tq-opt" data-ck="go">続ける <span class="kbdh">Enter</span></button><button type="button" tabindex="-1" class="btn tq-opt" data-ck="stop">中断する <span class="kbdh">S</span></button></div>`;
+}
+function wbCkptGo(){ if(!wbCkpt) return; wbCkpt=false; clearWordPanel(); running=true; startTimer(); pickWord(); }
+function wbSuspend(){
+  if(!wbCkpt) return; wbCkpt=false;
+  const b=bookPlay, rest=new Set(taQueue.map(wbWKey)), n=wbDoneN();
+  sendToGarden(gardenKeys,0); gardenKeys=0;
+  if(!wb4 && score>wbSentScore) sendToGarden(0, score-wbSentScore);   // 打ち切った語のネジは、ここで届ける
+  if(wb4) wbRoseEnd(true);   // 全部: 終わった10問ずつの薔薇の種
+  wbSuspSet(b,wb4,wbPlayMode,{ n, done:[...wbPrevDone, ...wbRunKeys.filter(k=>!rest.has(k))], score, miss, el:elapsed, a:[wb4Typed,wb4Chose,wb4Ans,wb4Wrong,wb4New], wrong:wb4WrongList.map(wbWKey), got:wbGot, peek:[wbNoPeek,wbQN], t:Date.now() });
+  running=false; clearInterval(timerId); clearWordPanel(); sndDone();
+  openBooks();
+  wbShareMsg(`⏸ 単語帳「${escH(b.name)}」を ${n}問で中断しました。次にこの単語帳を同じ遊び方で始めると、続きから始まります`);
+}
+$("romaji").addEventListener("click",e=>{ const c=e.target.closest("[data-ck]"); if(c && wbCkpt) (c.dataset.ck==="go" ? wbCkptGo : wbSuspend)(); });
 /* 4択の正解で届くもの: TOEIC と同じ(1問でキー10・農園の時間3時間。一本勝負は出題数で倍々、薔薇の種は1問ごと。
    10語・全部は、10問ごとに薔薇の種(全問正解10個・8問以上3個・それより下1個)。答えを打ち切れたら倍(逆4択で打てたときと同じ)。薔薇の色はランダム) */
 let wbRes=[], wbGot={ sc:0, min:0, rose:0 };
