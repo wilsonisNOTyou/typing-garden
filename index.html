@@ -6991,7 +6991,7 @@ async function wbShare(i){
   for(let n=0;n<6;n++){
     let code=""; for(let j=0;j<6;j++) code+=WB_CODE_CH[Math.floor(Math.random()*WB_CODE_CH.length)];
     try{
-      await db.ref(WB_SHARE_PATH+"/"+code).set({ n:b.name, w:words, t:Date.now(), ...(b.sec!=null?{ sec:wbSec(b) }:{}), ...(b.style==="4"||b.style==="4o"?{ st:"4" }:{}), ...(String(b.mode)==="10"?{ md:"10" }:{}) });
+      await db.ref(WB_SHARE_PATH+"/"+code).set({ n:b.name, w:words, t:Date.now(), ...(b.sec!=null?{ sec:wbSec(b) }:{}), ...(b.style==="4"||b.style==="4o"?{ st:"4" }:{}), ...(String(b.mode)==="10"||(String(b.mode)==="one"&&wbStyle(b)==="4")?{ md:String(b.mode) }:{}) });   // 出す数: 10語と一本勝負(4択のとき)を送る
       b.share=code; b.shareSig=wbShareSig(b); wbStore(); show(code); return;
     }catch(e){ /* 同じコードがもうある(書けない)ときは、別のコードで試す */ }
   }
@@ -7017,7 +7017,7 @@ async function wbImport(){
   }
   if(!words.length){ wbShareMsg("この単語帳には、取り込める言葉がありませんでした"); return; }
   const name=String(v.n||"共有された単語帳").slice(0,20);
-  wbBooks.push({ id:Date.now().toString(36)+Math.random().toString(36).slice(2,6), name, words, best:null, ...(typeof v.sec==="number"?{ sec:Math.max(WB_SEC_MIN,Math.min(WB_SEC_MAX,v.sec|0)) }:{}), ...(v.st==="4"||v.st==="4o"?{ style:"4" }:{}), ...(v.md==="10"?{ mode:"10" }:{}), from:code });
+  wbBooks.push({ id:Date.now().toString(36)+Math.random().toString(36).slice(2,6), name, words, best:null, ...(typeof v.sec==="number"?{ sec:Math.max(WB_SEC_MIN,Math.min(WB_SEC_MAX,v.sec|0)) }:{}), ...(v.st==="4"||v.st==="4o"?{ style:"4" }:{}), ...(v.md==="10"||v.md==="one"?{ mode:v.md }:{}), from:code });
   if(!wbStore()){ wbBooks.pop(); wbShareMsg("保存できませんでした(ブラウザの保存容量がいっぱいかもしれません)"); return; }
   wbCur=wbBooks.length-1; renderBooks();
   wbShareMsg(`単語帳「${escH(name)}」(${words.length}語)を取り込みました`);
