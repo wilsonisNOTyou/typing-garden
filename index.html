@@ -19147,7 +19147,9 @@ $("syncRestore").addEventListener("keydown",e=>{ if(e.key==="Escape"){ e.prevent
 let syncHashJoining=false;
 function syncHashJoin(){   // syncInit のあとに呼ぶ
   const m=/^#sync=([A-Za-z0-9]{16})$/.exec(location.hash||""); if(!m) return;
-  try{ history.replaceState(null,"",location.pathname+location.search); }catch(e){}   // アドレス欄からコードを消す(人に見られないように)
+  // ホーム画面のアプリとして開いたときだけ、アドレスからコードを消す。Safari などで開いたときは、そのまま「ホーム画面に追加」できるように残す
+  let app=false; try{ app = navigator.standalone===true || matchMedia("(display-mode: standalone)").matches; }catch(e){}
+  if(app){ try{ history.replaceState(null,"",location.pathname+location.search); }catch(e){} }
   if(syncCode || !hasDB() || tabInactive) return;
   syncHashJoining=true;
   setTimeout(()=>syncJoin({ value:m[1].toUpperCase() }, $("bkSyncNote"), true).finally(()=>{ syncHashJoining=false; }), 300);
