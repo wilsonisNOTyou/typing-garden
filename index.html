@@ -6976,7 +6976,7 @@ function wbCheckWord(t,k,q,qk){
    置いた単語帳はあとから書きかえない(言葉を変えて共有し直すと、新しいコードになる) */
 const WB_SHARE_PATH="typinggarden/books";
 const WB_CODE_CH="ABCDEFGHJKLMNPQRSTUVWXYZ23456789";   // 見まちがえやすい I O 0 1 は使わない
-const wbShareSig = b => JSON.stringify([b.name,b.words,b.style||"",String(b.mode||""),b.sec||0]);
+const wbShareSig = b => JSON.stringify([b.name,b.words,b.style||"",String(b.mode||""),b.sec||0])+(String(b.mode)==="one"?"#one":"");   // 一本勝負を送れるようになる前に共有した単語帳は、もう一度「共有」すると新しいコードを作る
 function wbShareMsg(html){ const el=$("wbShareNote"); el.hidden=!html; el.innerHTML=html||""; }
 async function wbShare(i){
   const b=wbBooks[i]; if(!b) return;   // おためし単語帳は共有しない(みんな持っている)
