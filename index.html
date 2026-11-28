@@ -5919,6 +5919,7 @@ document.addEventListener("keydown",e=>{
     running=false; resetStage(); clearWordPanel();
     const inMt=mtOn(); if(inMt) mtQuit();   // 対戦をやめる
     typePk=gameBara||inMt?null:dbPk(diff,false); sendToGarden(gardenKeys,0); gardenKeys=0;
+    if(diff==="book"){ if(wb4) wbRoseEnd(true); else if(score>0) sendToGarden(0, gardenScrews("book",score)); }   // 単語帳を途中でやめても、そこまでの分は渡す(4択の種は10問ずつ、タイピングは打ち切った語の数)
     if(diff==="book") openBooks(); else show("title");
     return;
   }
@@ -7510,9 +7511,9 @@ function wbRose(n){
   if(n>1000) per.b1=(per.b1||0)+n-1000;
   try{ for(const lv in per) Garden.rose(lv,per[lv]); }catch(e){}
 }
-function wbRoseEnd(){   // 10語・全部・まちがえた言葉だけ: 10問ごとに、TOEIC の10語セットと同じ数
+function wbRoseEnd(quit){   // 10語・全部・まちがえた言葉だけ: 10問ごとに、TOEIC の10語セットと同じ数(途中でやめたときは、終わった10問ずつの分だけ)
   if(wbPlayMode==="one") return 0; let n=0;
-  for(let i=0;i<wbRes.length;i+=TQ_SET){ const blk=wbRes.slice(i,i+TQ_SET), ok=blk.filter(Boolean).length, r=ok/blk.length; n += (r>=1 ? 10 : r>=TQ_UNLOCK_SET/TQ_SET ? 3 : 1)*Math.round(tqBoost().rose); }
+  for(let i=0;i<wbRes.length;i+=TQ_SET){ if(quit && i+TQ_SET>wbRes.length) break; const blk=wbRes.slice(i,i+TQ_SET), ok=blk.filter(Boolean).length, r=ok/blk.length; n += (r>=1 ? 10 : r>=TQ_UNLOCK_SET/TQ_SET ? 3 : 1)*Math.round(tqBoost().rose); }
   wbRose(n); wbGot.rose+=n; return n;
 }
 const wbGotTxt = () => wbGot.sc||wbGot.min||wbGot.rose ? `農園に キー ${tqNum(wbGot.sc)} を届け、農園の時間を ${tqHours(wbGot.min)} 進めました${wbGot.rose?` ・ 🌹 薔薇の種 ${tqNum(wbGot.rose)}個`:""}` : "";
