@@ -1567,7 +1567,6 @@ html.mobile .wb-detail{position:static}
 .wb-wst.good{color:#6ac87a} .wb-wst.weak{color:#e07a7a} .wb-wst.learn{color:#d8b06a} .wb-wst.new{color:#8aa4e0}
 .wb-mempop{position:absolute; bottom:.45rem; right:2rem; font-size:.9rem; font-weight:800; color:#6ac87a; opacity:0; transition:opacity .25s; pointer-events:none; z-index:2}
 .wb-mempop.on{opacity:1}
-.wb4fb{text-align:center; font-size:.95rem; color:#9ad8a4}
 .wq-wait .good{color:#6ac87a; font-weight:700} .wq-wait .weak{color:#e07a7a; font-weight:700} .wq-wait .learn{color:#d8b06a; font-weight:700}
 .word-panel.wb4 #romaji .bq{cursor:pointer}
 .word-panel.wb4 #romaji{display:block; font-family:inherit; letter-spacing:0; font-size:1rem}
@@ -5443,21 +5442,24 @@ function wb4Next(ok,typed,delay){
   const w=currentWord; if(!w) return;
   wb4Ans++; if(!ok) wb4Wrong++; else if(typed) wb4Typed++; else wb4Chose++;
   const st=wbMark(bookPlay,w,ok); if(ok && st.s===3) wb4New++;
-  wbRes.push(ok);
+  wbRes.push(ok); let gift="";
   if(ok){   // TOEIC と同じく、1問正解ごとに届ける(一本勝負は倍々・薔薇の種も)
     const g=wbGift(typed); wbGot.sc+=g.sc; wbGot.min+=g.min;
     sendToGarden(0, g.sc, g.min, true);
     if(g.rose){ wbRose(g.rose); wbGot.rose+=g.rose; }
-    const fb=document.createElement("div"); fb.className="tq-fb ok wb4fb"; fb.textContent=`キー +${tqNum(g.sc)} ・ 農園の時間 +${tqHours(g.min)}${g.rose?` ・ 🌹 薔薇の種 +${tqNum(g.rose)}`:""}`; $("romaji").appendChild(fb);   // TOEIC と同じく、選んだ答えの下に出す
+    gift=`キー +${tqNum(g.sc)} ・ 農園の時間 +${tqHours(g.min)}${g.rose?` ・ 🌹 薔薇の種 +${tqNum(g.rose)}`:""}`;
   }
   if(!ok) wb4WrongList.push({...w});
   $("wordPanel").classList.remove("wbhide");   // 答えを見せる
   removeScrew();
   const remain=Math.max(taGoal-wb4Ans,0);
   $("score").textContent=remain; $("timefill").style.width=(wb4Ans/taGoal*100)+"%";
-  const s=$("wordQ").querySelector(".wq-wait");
-  if(s) s.innerHTML=(ok?(typed?"○ 打てた!":"○ 正解"):"✕ はずれ")+" ・ "+(ok && st.s===3 ? `<span class="good">🎉 3回続けて正解! この言葉を覚えた!</span>` : ok && st.s>3 ? `<span class="good">✓ 覚えた言葉</span>` : ok ? `<span class="learn">${st.s}回続けて正解 ・ あと${3-st.s}回で覚えられます</span>` : `<span class="weak">📌 苦手に追加 ・ 3回続けて正解で覚えられます</span>`);
-  $("wbWst").textContent="";   // 答えたあとは、下の知らせだけにする
+  const s=$("wordQ").querySelector(".wq-wait"); if(s) s.textContent="";
+  const fb=document.createElement("div"); fb.className="tq-fb "+(ok?"ok":"ng"); fb.textContent=(ok?(typed?"打てた! 倍":"正解!"):"✕ はずれ")+(gift?" ・ "+gift:"");   // TOEIC と同じく、選んだ答えの下に
+  const wm=document.createElement("div"); wm.className="tq-wmsg";
+  wm.innerHTML = ok && st.s===3 ? `<span class="good">🎉 3回続けて正解! この言葉を覚えた!</span>` : ok && st.s>3 ? "" : ok ? `<span class="run">${st.s>1?`${st.s}回連続で正解`:"正解"} ・ あと${3-st.s}回続けて正解すると覚えられます</span>` : `<span class="weak">📌 苦手に追加しました ・ 3回続けて正解すると覚えられます</span>`;
+  $("romaji").appendChild(fb); if(wm.innerHTML) $("romaji").appendChild(wm);
+  wbWstShow(w);   // 左上は、答えたあとの状態に書きかえる(TOEIC と同じ)
   wb4Busy=true;
   setTimeout(()=>{
     wb4Busy=false; if(!running) return;
