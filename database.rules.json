@@ -168,7 +168,7 @@
             ".validate": "newData.val() === '4' || newData.val() === '4o'"
           },
           "md": {
-            ".validate": "newData.val() === '10'"
+            ".validate": "newData.val() === '10' || newData.val() === 'one'"
           },
           "$other": {
             ".validate": false
