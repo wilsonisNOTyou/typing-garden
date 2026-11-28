@@ -5919,6 +5919,8 @@ document.addEventListener("keydown",e=>{
     running=false; resetStage(); clearWordPanel();
     const inMt=mtOn(); if(inMt) mtQuit();   // 対戦をやめる
     typePk=gameBara||inMt?null:dbPk(diff,false); sendToGarden(gardenKeys,0); gardenKeys=0;
+    if(diff==="book" && wb4 && wbPlayMode==="one" && wb4Ans>0 && !inMt){ wbQuit=true; score=wb4Typed+wb4Chose; endGame(); return; }   // 4択の一本勝負: TOEIC と同じく、やめてもそこまでの記録を残す
+    if(!inMt && diff!=="book" && score>0) sendToGarden(0, gardenScrews(diff,score));   // やめても、抜いたネジは届ける(一本勝負の倍々も。日替わりのご褒美と記録はなし)
     if(diff==="book"){ if(wb4) wbRoseEnd(true); else if(score>0) sendToGarden(0, gardenScrews("book",score)); }   // 単語帳を途中でやめても、そこまでの分は渡す(4択の種は10問ずつ、タイピングは打ち切った語の数)
     if(diff==="book") openBooks(); else show("title");
     return;
@@ -7550,8 +7552,10 @@ function endBook4(){
   show("result");
 }
 /* 4択の一本勝負: 何問続けて正解できたか。全問正解でクリア */
+let wbQuit=false;
 function endBookOne(b,c,right){
-  const clear = wb4Wrong===0, bs=wbBests(b), k=wbOneKey(b), had=bs[k]!=null, isNew = !had || right>bs[k];
+  const quit=wbQuit; wbQuit=false;
+  const clear = wb4Wrong===0 && !quit, bs=wbBests(b), k=wbOneKey(b), had=bs[k]!=null, isNew = !had || right>bs[k];
   if(isNew){ bs[k]=right; if(b.pre) wbPreStore(); else wbStore(); }
   if(isNew && had && right>0) wcAnnounce(`${wbAnnName(b)}(4択の${WB_MODES.one})で自己ベストを出しました(${right}問連続正解${clear?"・全問正解":""})`, 5);
   $("resultDiff").textContent=`— 単語帳「${b.name}」 4択 ${WB_MODES.one}${wbDir(b)==="r"?" 逆向き":""} —`;
@@ -7559,7 +7563,7 @@ function endBookOne(b,c,right){
   $("resultCaption").textContent = clear ? "全問正解でクリア!" : "連続正解";
   $("resultScore").textContent=`${right}`;
   $("resultUnit").textContent="問";
-  $("resultSubLine").textContent=`${clear?`全${wb4Ans}問`:`${wb4Ans}問目でまちがえました`} ・ ベスト ${bs[k]}問 / 覚えた ${c.good}/${c.all}${wb4New?`(今回 +${wb4New})`:""} / ${elapsed.toFixed(1)}秒`;
+  $("resultSubLine").textContent=`${clear?`全${wb4Ans}問`:quit?`${wb4Ans}問でやめました`:`${wb4Ans}問目でまちがえました`} ・ ベスト ${bs[k]}問 / 覚えた ${c.good}/${c.all}${wb4New?`(今回 +${wb4New})`:""} / ${elapsed.toFixed(1)}秒`;
   wbReveal();
   $("resultNew").textContent=[isNew && had ? "★ ベスト更新! ★" : "", wb4New?`★ ${wb4New}語 覚えた! ★`:""].filter(Boolean).join(" ");
   const wl=wb4WrongList.length, wbb=$("wbWrongBtn"); wbb.hidden=!wl; wbb.textContent=`まちがえた${wl}語だけ (W)`;
@@ -20811,7 +20815,7 @@ function tqKey(e){
   if(k==="Escape"){   // 途中でやめる(正解ぶんのキーと時間は届いている。ノーミス勝負はそこまでの記録も残る)
     e.preventDefault();
     if(tqKind==="one" && tqLog.length){ tqOver=true; tqFinish(); }
-    else{ gardenKeys=0; tqMenu(); }
+    else{ sendToGarden(gardenKeys,0,0,true); gardenKeys=0; tqMenu(); }   // 逆4択で打った文字の分の時間は届ける
     return;
   }
   if(tqPhase==="ckpt"){
