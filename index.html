@@ -3941,7 +3941,7 @@ html:not(.mobile) #screen-garden.haslog:has(.modal.open) #g-toasts{top:14px}
       <label class="wb-lbl">遊び方の初期設定(一覧でも変えられ、変えたものが残ります)</label>
       <div class="wb-def">
         <label>出し方<select id="wbDefStyle"><option value="type">タイピング</option><option value="4">4択</option></select></label>
-        <label>出す数<select id="wbDefMode"><option value="all">全部</option><option value="10">10語</option></select></label>
+        <label>出す数<select id="wbDefMode"><option value="all">全部</option><option value="10">10語</option><option value="one">ノーミス勝負(4択)</option></select></label>
         <label>答えが出るまで(タイピング)<input id="wbDefSec" type="number" min="0" max="30" step="1">秒</label>
       </div>
       <p class="wb-hint">4択は、問題のある言葉が4つ以上(答えがちがうもの)あるときに遊べます。打たずに、すぐ4つの答えから選びます。英単語の意味のように、答えを1つに決めて打ちにくい単語帳や、打てない文字がある外国語の単語帳は「4択」にしておくのがおすすめです。共有するときも、この設定が一緒に届きます</p>
@@ -3957,6 +3957,7 @@ html:not(.mobile) #screen-garden.haslog:has(.modal.open) #g-toasts{top:14px}
       <p class="wb-hint">よみがなはひらがなで入れてください(カタカナは自動でひらがなに直します)。言葉がひらがなだけなら、よみがなは空でも大丈夫です。英語の熟語や英文は、よみがなを空白入りのまま書けます(打つときは空白のところだけスペースキー)。問題のある言葉は、よみがなを空にすると4択で遊ぶときだけ出ます(打てない文字がある外国語など)。<br>問題を入れると、遊ぶときは問題が出て、答えとよみがなは決めた秒数(単語帳の一覧で変えられます)たつまで隠れます。答えがよみがなと同じなら、答えは空でも大丈夫です。<br>答えが何通りもあるときは、答えとよみがなを「／」で区切って同じ順に並べると、どれを打っても正解になります(例: 問題／発行する ・ もんだい／はっこうする)</p>
       <ol id="wbWords" class="wb-words"></ol>
       <p class="keynav" id="wbKeys"></p>
+      <p class="wb-hint">タイトルを変えたり、言葉を足したり直したりしても、覚えた・苦手や自己ベストの記録は消えません。消した言葉の記録だけは消えます。</p>
       <p class="wb-note" id="wbNote"></p>
       <div class="btn-row">
         <button class="btn primary" id="wbSave">保存する (S)</button>
@@ -6942,6 +6943,13 @@ const wbModes = b => (b.pre ? ["10","all"] : ["all","10"]).concat(wbStyle(b)==="
 const wbOneKey = b => "one"+(wbDir(b)==="r"?"r":"");   // 一本勝負のベスト(連続正解の数)は向きごとに
 const wbMode = b => wbModes(b).includes(String(b.mode)) ? String(b.mode) : wbModes(b)[0];
 const wbBests = b => { if(!b.bests || typeof b.bests!=="object") b.bests={}; if(b.best!=null && b.bests.all==null){ b.bests.all=b.best; } return b.bests; };   // 前の「ベスト」は「全部」のベストにする
+/* 本の一覧に出すベスト: 残っているものは、いまの出し方にかかわらず全部出す */
+function wbBestLine(b){
+  const bs=wbBests(b), out=[];
+  for(const m of (b.pre?["10","all"]:["all","10"])) if(bs[m]!=null) out.push(`${WB_MODES[m]}のベスト ${fmtTime(bs[m])}`);
+  const ok=wbOneKey(b); if(bs[ok]!=null) out.push(`${WB_MODES.one}${wbDir(b)==="r"?"(逆向き)":""}のベスト ${bs[ok]}問`);
+  return out.map(x=>" ・ "+x).join("");
+}
 const wbBestTxt = (b,m=wbMode(b)) => { const v=wbBests(b)[m]; return v==null ? "" : fmtTime(v); };
 function wbSetMode(i,m){
   const b=wbAll()[i]; if(!b) return;
@@ -7095,7 +7103,7 @@ function renderBooks(){
     <div class="wb-dcover">${wbIcon(b)}</div>
     <div class="wb-dinfo">
       <b class="wb-dname">${escH(b.name)}${b.pre?'<small class="wb-dtag">おためし</small>':""}</b>
-      <small>${b.pre?`${escH(b.ds)} ・ `:""}${b.words.length}語${wbStyle(b)==="type"&&wbBestTxt(b)?` ・ ${WB_MODES[wbMode(b)]}のベスト ${wbBestTxt(b)}`:""}${wbMode(b)==="one"&&wbBests(b)[wbOneKey(b)]!=null?` ・ ${WB_MODES.one}のベスト ${wbBests(b)[wbOneKey(b)]}問`:""}</small>
+      <small>${b.pre?`${escH(b.ds)} ・ `:""}${b.words.length}語${wbBestLine(b)}</small>
       ${cnt?`<div class="wb-dprog"><span>覚えた ${cnt.good}/${cnt.all}</span><i><b style="width:${cnt.all?Math.round(cnt.good/cnt.all*100):0}%"></b></i></div>`:""}
       <div class="wb-dopts">
         ${wbCan4(b)&&!window.IS_MOBILE?`<span class="wb-mode">${[["type","タイピング"],["4","4択"]].map(([v,n])=>`<button class="${wbStyle(b)===v?"on":""}" data-style="${v}" title="${v==="4"?"打たずに、4つの答えから選ぶ":"答えを打つ"}">${n}</button>`).join("")}<span class="kbdh">F</span></span>`:""}
@@ -7182,7 +7190,7 @@ function editBook(i){
   wbEdit.orig=JSON.stringify({ name:wbEdit.name, words:wbEdit.words });
   wbWordCur=-1;
   $("wbListView").style.display="none"; $("wbEditor").style.display="";
-  $("wbDefStyle").value = b ? (b.style==="4"||b.style==="4o" ? "4" : "type") : WB_AI_KINDS[wbAiKind].st;   // 新しい単語帳は、AIに頼む形に合わせる $("wbDefMode").value = b && String(b.mode)==="10" ? "10" : "all"; $("wbDefSec").value = b ? wbSec(b) : WB_SEC_DEF;
+  $("wbDefStyle").value = b ? (b.style==="4"||b.style==="4o" ? "4" : "type") : WB_AI_KINDS[wbAiKind].st;   // 新しい単語帳は、AIに頼む形に合わせる $("wbDefMode").value = b && (String(b.mode)==="10"||String(b.mode)==="one") ? String(b.mode) : "all"; $("wbDefSec").value = b ? wbSec(b) : WB_SEC_DEF;
   wbEditIdx=-1; $("wbAdd").textContent="追加 (Enter)";
   $("wbTtl").value=wbEdit.name; $("wbQ").value=""; $("wbQK").value=""; $("wbT").value=""; $("wbK").value=""; $("wbBulk").value="";
   $("wbNote").textContent=""; $("wbBulkNote").hidden=true; $("wbAddNote").hidden=true; $("wbAiCopyNote").textContent="";
@@ -7234,7 +7242,7 @@ function wbAddWord(){
     const r=wbCheckWord($("wbT").value,$("wbK").value,$("wbQ").value,$("wbQK").value);
     if(r.err){ wbAddMsg(`<div class="ng">${escH(r.err)}</div>`); return; }
     const nk=!r.k; delete r.nk;
-    const old=wbEdit.words[wbEditIdx]; if(old){ for(const f of ["k2","t2"]) if(old[f]) r[f]=old[f]; wbEdit.words[wbEditIdx]=r; }
+    const old=wbEdit.words[wbEditIdx]; if(old){ for(const f of ["k2","t2"]) if(old[f]) r[f]=old[f]; r._mk0 = old._mk0 || wbWKey(old); wbEdit.words[wbEditIdx]=r; }   // 直す前の言葉を覚えておき、保存のときに記録を引き継ぐ
     wbEditIdx=-1; $("wbAdd").textContent="追加 (Enter)"; wbAddMsg(`<div class="ok">✅ 「${escH(r.t||r.k)}」を直しました</div>`+(nk?`<div class="ng">${WB_NOK_TXT}</div>`:""));
     $("wbQ").value=""; $("wbQK").value=""; $("wbT").value=""; $("wbK").value=""; renderWbWords(); return;
   }
@@ -7382,18 +7390,40 @@ function wbAiCopy(){
   const done=ok=>{ const n=$("wbAiCopyNote"); n.className="wb-cnote"+(ok?"":" ng"); n.textContent = ok ? (wbAiSrc==="new" ? (String($("wbAiTheme").value).trim() ? "✅ コピーしました。AIに貼って送ってください" : "✅ コピーしました。テーマが空なので、AIに貼ってから「(ここにテーマを書いてください)」をテーマに書きかえて送ってください") : "✅ コピーしました。AIに貼って、その下に変換したい内容を貼って送ってください") : "コピーできませんでした。下の「AIに頼む文章の中身を見る」から選んでコピーしてください"; if(!ok){ $("wbEditor").querySelector(".wb-ai").open=true; ta.focus(); ta.select(); } };
   try{ navigator.clipboard.writeText(txt).then(()=>done(true),()=>done(false)); }catch(e){ done(false); }
 }
+/* 言葉を直したとき、その言葉の覚えた・苦手の記録を新しい言葉へ移す。
+   一覧から直した言葉はそのまま、ほかは「問題」か「答え」が同じで、1つにしぼれるものだけ */
+function wbMemCarry(b, olds, news){
+  const from0=new Map(); for(const w of news) if(w._mk0){ from0.set(w,w._mk0); delete w._mk0; }
+  const m=wbMem[b.id]; if(!m) return;
+  const nkeys=new Set(news.map(wbWKey));
+  const gone=olds.filter(o=>!nkeys.has(wbWKey(o)));   // 新しい一覧にない、前の言葉
+  const snap={...m}, moves=[], used=new Set();
+  for(const w of news){
+    const nk=wbWKey(w), from=from0.get(w);
+    if(snap[nk] || snap["r:"+nk]) continue;
+    let ok=null;
+    if(from && from!==nk && !nkeys.has(from)) ok=from;
+    else if(!from){
+      const c=gone.filter(o=>!used.has(wbWKey(o)) && ((w.q && o.q===w.q) || (w.t && o.t===w.t)));
+      if(c.length===1) ok=wbWKey(c[0]);
+    }
+    if(ok && (snap[ok] || snap["r:"+ok]) && !used.has(ok)){ used.add(ok); moves.push([ok,nk]); }
+  }
+  for(const [a,z] of moves) for(const pre of ["","r:"]){ if(snap[pre+a]){ m[pre+z]=snap[pre+a]; if(!nkeys.has(a)) delete m[pre+a]; } }
+  if(moves.length) wbMemStore();
+}
 function wbSaveBook(){
   if(!wbEdit) return;
   const name=$("wbTtl").value.trim();
   if(!name){ $("wbNote").textContent="単語帳のタイトルを入れてください"; $("wbTtl").focus(); return; }
   if(!wbEdit.words.length){ $("wbNote").textContent="言葉を1つ以上入れてください"; $("wbT").focus(); return; }
-  const def={ style:$("wbDefStyle").value==="4"?"4":"type", mode:$("wbDefMode").value==="10"?"10":"all", sec:(v=>Number.isFinite(v)?Math.max(WB_SEC_MIN,Math.min(WB_SEC_MAX,Math.round(v))):WB_SEC_DEF)($("wbDefSec").value===""?NaN:+$("wbDefSec").value) };   // 遊び方の初期設定
+  const def={ style:$("wbDefStyle").value==="4"?"4":"type", mode:["10","one"].includes($("wbDefMode").value)?$("wbDefMode").value:"all", sec:(v=>Number.isFinite(v)?Math.max(WB_SEC_MIN,Math.min(WB_SEC_MAX,Math.round(v))):WB_SEC_DEF)($("wbDefSec").value===""?NaN:+$("wbDefSec").value) };   // 遊び方の初期設定
   if(wbEdit.i>=0){
     const b=wbBooks[wbEdit.i];
-    const changed=JSON.stringify(b.words)!==JSON.stringify(wbEdit.words);
+    wbMemCarry(b, b.words, wbEdit.words);
     b.name=name; b.words=wbEdit.words; Object.assign(b,def);
-    if(changed) b.best=null;              // 言葉が変わったらベストはリセット
   }else{
+    for(const w of wbEdit.words) delete w._mk0;
     wbBooks.push({ id:Date.now().toString(36)+Math.random().toString(36).slice(2,6), name, words:wbEdit.words, best:null, ...def });
   }
   if(!wbStore()){ $("wbNote").textContent="保存できませんでした(ブラウザの保存容量がいっぱいかもしれません)"; return; }
