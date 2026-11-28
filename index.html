@@ -1565,7 +1565,7 @@ html.mobile .wb-detail{position:static}
 .wb-wst{position:absolute; top:.45rem; left:2rem; font-size:.78rem; font-weight:700; color:var(--steel); opacity:.9; z-index:2}
 .wb-wst:empty{display:none}
 .wb-wst.good{color:#6ac87a} .wb-wst.weak{color:#e07a7a} .wb-wst.learn{color:#d8b06a} .wb-wst.new{color:#8aa4e0}
-.wb-mempop{position:absolute; top:.35rem; right:2rem; font-size:.9rem; font-weight:800; color:#6ac87a; opacity:0; transition:opacity .25s; pointer-events:none; z-index:2}
+.wb-mempop{position:absolute; bottom:.45rem; right:2rem; font-size:.9rem; font-weight:800; color:#6ac87a; opacity:0; transition:opacity .25s; pointer-events:none; z-index:2}
 .wb-mempop.on{opacity:1}
 .wq-wait .good{color:#6ac87a; font-weight:700} .wq-wait .weak{color:#e07a7a; font-weight:700} .wq-wait .learn{color:#d8b06a; font-weight:700}
 .word-panel.wb4 #romaji .bq{cursor:pointer}
@@ -3894,7 +3894,7 @@ html:not(.mobile) #screen-garden.haslog:has(.modal.open) #g-toasts{top:14px}
   <!-- タイピング単語帳 -->
   <section id="screen-books" class="screen">
     <h2 class="rank-title">タイピング単語帳</h2>
-    <p class="reg-status">言葉とよみがなを登録して、自分だけの単語帳でタイピングや4択の練習ができます。おためし単語帳もあり、コードで人と共有もできます</p>
+    <p class="reg-status">言葉とよみがなを登録して、自分だけの単語帳でタイピングや4択の練習ができます。おためし単語帳もあり、コードで人と共有もできます。4択で正解すると、TOEIC と同じく農園にキーと薔薇の種が届き、農園の時間が進みます</p>
     <div id="wbListView">
       <p class="wb-share-note" id="wbShareNote" hidden></p>
       <div id="wbList" class="wb-list"></div>
@@ -5442,14 +5442,24 @@ function wb4Next(ok,typed,delay){
   const w=currentWord; if(!w) return;
   wb4Ans++; if(!ok) wb4Wrong++; else if(typed) wb4Typed++; else wb4Chose++;
   const st=wbMark(bookPlay,w,ok); if(ok && st.s===3) wb4New++;
+  wbRes.push(ok); let gift="";
+  if(ok){   // TOEIC と同じく、1問正解ごとに届ける(一本勝負は倍々・薔薇の種も)
+    const g=wbGift(typed); wbGot.sc+=g.sc; wbGot.min+=g.min;
+    sendToGarden(0, g.sc, g.min, true);
+    if(g.rose){ wbRose(g.rose); wbGot.rose+=g.rose; }
+    gift=`キー +${tqNum(g.sc)} ・ 農園の時間 +${tqHours(g.min)}${g.rose?` ・ 🌹 薔薇の種 +${tqNum(g.rose)}`:""}`;
+  }
   if(!ok) wb4WrongList.push({...w});
   $("wordPanel").classList.remove("wbhide");   // 答えを見せる
   removeScrew();
   const remain=Math.max(taGoal-wb4Ans,0);
   $("score").textContent=remain; $("timefill").style.width=(wb4Ans/taGoal*100)+"%";
-  const s=$("wordQ").querySelector(".wq-wait");
-  if(s) s.innerHTML=(ok?(typed?"○ 打てた!":"○ 正解"):"✕ はずれ")+" ・ "+(ok && st.s===3 ? `<span class="good">🎉 3回続けて正解! この言葉を覚えた!</span>` : ok && st.s>3 ? `<span class="good">✓ 覚えた言葉</span>` : ok ? `<span class="learn">${st.s}回続けて正解 ・ あと${3-st.s}回で覚えられます</span>` : `<span class="weak">📌 苦手に追加 ・ 3回続けて正解で覚えられます</span>`);
-  $("wbWst").textContent="";   // 答えたあとは、下の知らせだけにする
+  const s=$("wordQ").querySelector(".wq-wait"); if(s) s.textContent="";
+  const fb=document.createElement("div"); fb.className="tq-fb "+(ok?"ok":"ng"); fb.textContent=(ok?(typed?"打てた! 倍":"正解!"):"✕ はずれ")+(gift?" ・ "+gift:"");   // TOEIC と同じく、選んだ答えの下に
+  const wm=document.createElement("div"); wm.className="tq-wmsg";
+  wm.innerHTML = ok && st.s===3 ? `<span class="good">🎉 3回続けて正解! この言葉を覚えた!</span>` : ok && st.s>3 ? "" : ok ? `<span class="run">${st.s>1?`${st.s}回連続で正解`:"正解"} ・ あと${3-st.s}回続けて正解すると覚えられます</span>` : `<span class="weak">📌 苦手に追加しました ・ 3回続けて正解すると覚えられます</span>`;
+  $("romaji").appendChild(fb); if(wm.innerHTML) $("romaji").appendChild(wm);
+  wbWstShow(w);   // 左上は、答えたあとの状態に書きかえる(TOEIC と同じ)
   wb4Busy=true;
   setTimeout(()=>{
     wb4Busy=false; if(!running) return;
@@ -5745,7 +5755,7 @@ const SCREW_MULT={ easy:1, normal:2, hard:3, barabara:2, "ta-easy":1, "ta-normal
 function gardenScrews(d,n){
   n=Math.max(0,n|0);
   if(d==="oneshot"){ let t=0; for(let i=0;i<n;i++) t+=2**Math.floor(i/10); return t; }
-  if(d==="book") return n;
+  if(d==="book") return wb4 ? 0 : n;   // 4択は1問ごとに TOEIC と同じだけ届け済み
   return n*(SCREW_MULT[d]||1);
 }
 const showGardenScrews = (el,n) => { const m=gardenScrewMul(); $(el).textContent = n>0 ? `農園に ${jpNum(n*m)}キー 届きます${m>1?`(料理で1本 ${jpNum(m)}キー)`:""}` : ""; };
@@ -7467,7 +7477,7 @@ $("wbSave").addEventListener("click",wbSaveBook);
 $("wbCancel").addEventListener("click",wbCancelEdit);
 /* プレイ: 単語帳の言葉を全部、順番を混ぜて出す */
 function buildBookQueue(){
-  wb4Ch=null; wb4Busy=false; wb4Typed=wb4Chose=wb4Ans=wb4Wrong=wb4New=0; wb4WrongList=[];
+  wb4Ch=null; wb4Busy=false; wb4Typed=wb4Chose=wb4Ans=wb4Wrong=wb4New=0; wb4WrongList=[]; wbRes=[]; wbGot={ sc:0, min:0, rose:0 };
   wbNoPeek=0; wbQN=0; wbPlayMode=wbMode(bookPlay);
   wbPW=wbPlayWords(bookPlay,wb4);   // この回に使う言葉(逆向きなら、問題と答えを入れかえたもの)
   let pool;
@@ -7484,6 +7494,26 @@ function buildBookQueue(){
   taGoal=pool.length; taQueue=pool;
 }
 let wbPW=[], wbRetry=null, wb4WrongList=[];
+/* 4択の正解で届くもの: TOEIC と同じ(1問でキー10・農園の時間3時間。一本勝負は出題数で倍々、薔薇の種は1問ごと。
+   10語・全部は、10問ごとに薔薇の種(全問正解10個・8問以上3個・それより下1個)。答えを打ち切れたら倍(逆4択で打てたときと同じ)。薔薇の色はランダム) */
+let wbRes=[], wbGot={ sc:0, min:0, rose:0 };
+const WB_ROSE_LV=["b1","b2","b3","470","630","730","860","990","i1","i2","ls","lt"];
+function wbGift(typed){
+  const b=tqBoost(), one=wbPlayMode==="one", k=Math.min(Math.max(wb4Ans-1,0), TQ_UP_MAX-1), t=typed?2:1, x=(one ? 2**Math.floor(k/TQ_UP_N) : 1)*t;
+  return { sc:Math.round(TQ_GIFT_SC*x*b.sc), min:Math.round(TQ_GIFT_MIN*t*(one ? 2**Math.floor(k/TQ_UP_MIN) : 1)*b.min), rose: one ? Math.round(x*b.rose) : 0 };
+}
+function wbRose(n){
+  n=Math.max(0,Math.floor(n)); if(!n) return; const per={};
+  for(let i=0;i<n && i<1000;i++){ const lv=WB_ROSE_LV[Math.floor(Math.random()*WB_ROSE_LV.length)]; per[lv]=(per[lv]||0)+1; }
+  if(n>1000) per.b1=(per.b1||0)+n-1000;
+  try{ for(const lv in per) Garden.rose(lv,per[lv]); }catch(e){}
+}
+function wbRoseEnd(){   // 10語・全部・まちがえた言葉だけ: 10問ごとに、TOEIC の10語セットと同じ数
+  if(wbPlayMode==="one") return 0; let n=0;
+  for(let i=0;i<wbRes.length;i+=TQ_SET){ const blk=wbRes.slice(i,i+TQ_SET), ok=blk.filter(Boolean).length, r=ok/blk.length; n += (r>=1 ? 10 : r>=TQ_UNLOCK_SET/TQ_SET ? 3 : 1)*Math.round(tqBoost().rose); }
+  wbRose(n); wbGot.rose+=n; return n;
+}
+const wbGotTxt = () => wbGot.sc||wbGot.min||wbGot.rose ? `農園に キー ${tqNum(wbGot.sc)} を届け、農園の時間を ${tqHours(wbGot.min)} 進めました${wbGot.rose?` ・ 🌹 薔薇の種 ${tqNum(wbGot.rose)}個`:""}` : "";
 /* 向き: 問題 → 答え(ふつう)/ 答え → 問題(逆向き)。逆向きでは答えを見せ、問題を答える。
    打つときのよみは「問題のよみがな」、なければ問題そのもの(打てる文字だけのとき)。打てない言葉は4択だけで出す */
 const wbDir = b => wbHasQ(b) && b.dir==="r" ? "r" : "f";
@@ -7500,7 +7530,7 @@ function wbRetryWrong(){ if(!wb4WrongList.length) return; wbRetry=wb4WrongList.s
 $("wbWrongBtn").addEventListener("click",()=>wbRetryWrong());
 function endBook4(){
   const b=bookPlay, c=wbMemCount(b), right=wb4Typed+wb4Chose;
-  wbAnnAllMem(b);
+  wbAnnAllMem(b); wbRoseEnd(); $("resultGarden").textContent=wbGotTxt();
   if(wbPlayMode==="one"){ endBookOne(b,c,right); return; }
   $("resultDiff").textContent=`— 単語帳「${b.name}」 4択 ${wbPlayMode==="retry"?"まちがえた言葉":WB_MODES[wbPlayMode]}${wbDir(b)==="r"?" 逆向き":""} —`;
   $("resultCount").classList.remove("ta");
@@ -20399,7 +20429,7 @@ function tqWordKey(key){
   const g=tqGift(); tqPts+=g.sc; tqMin+=g.min;
   sendToGarden(0, g.sc, g.min, true);
   if(g.rose) tqRose(tqRoseLv(tqLadder[0]), g.rose);
-  $("tqFb").className="tq-fb ok"; $("tqFb").textContent=`打てた! ネジ +${tqNum(g.sc)} ・ 庭の時間 +${tqHours(g.min)}`+(g.rose?` ・ 🌹 薔薇の種 +${tqNum(g.rose)}`:"");
+  $("tqFb").className="tq-fb ok"; $("tqFb").textContent=`打てた! キー +${tqNum(g.sc)} ・ 農園の時間 +${tqHours(g.min)}`+(g.rose?` ・ 🌹 薔薇の種 +${tqNum(g.rose)}`:"");
   if(tqKind==="one") tqOneOk(); else $("tqScore").textContent=tqNum(tqPts);
   sndClear();
   tqI++; tqPhase="wait"; tqTimer=setTimeout(tqNext,800);
