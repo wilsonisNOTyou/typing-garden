@@ -1621,10 +1621,7 @@ html.mobile .word-panel.wb4 #romaji .wb4opts .tq-opt{padding:.6rem .8rem; min-he
 .wb-srcin .wb-in{width:100%; box-sizing:border-box}
 .bk-keep{margin:.6rem 0; padding:.6rem .8rem; border:1px dashed var(--line); border-radius:10px}
 .bk-keep .bk-link{flex:1 1 16rem; min-width:0; font-size:.78rem; text-transform:none; letter-spacing:0}
-.bk-keepform{display:flex; flex-wrap:wrap; gap:.4rem; align-items:center}
-.bk-keepform input{position:absolute; left:-9999px; width:1px; height:1px; opacity:0}   /* 保存するためだけの欄(見えない) */
 #srForm{display:grid; gap:.5rem}
-#srForm .sr-user{position:absolute; left:-9999px; width:1px; height:1px; opacity:0}
 .wb-li-note{display:block; margin-top:.25rem; color:var(--steel); font-size:.8rem; line-height:1.5}
 .wb-cnote{display:block; margin-top:.35rem; font-size:.85rem; min-height:0}
 .wb-cnote.ng{color:#ffb38a}
@@ -4146,10 +4143,9 @@ html:not(.mobile) #screen-garden.haslog:has(.modal.open) #g-toasts{top:14px}
 <div id="syncRestore" class="bk-modal">
   <div class="bk-panel">
     <div class="bk-head"><h2>前にこのゲームで遊んでいましたか？</h2></div>
-    <p class="bk-p">この画面では、まだ記録がありません。前に「別端末と同期」をしていたなら、同期コードを入れると記録を戻せます。iPhone などにコードを保存していれば、下の欄を押すと選べます。</p>
-    <form id="srForm" autocomplete="on">
-      <input name="username" autocomplete="username" value="タイピングガーデン 同期コード" readonly class="sr-user">
-      <input type="password" name="password" id="srCode" class="bk-codein" maxlength="24" placeholder="英数字16文字のコード" autocomplete="current-password" autocapitalize="characters">
+    <p class="bk-p">この画面では、まだ記録がありません。前に「別端末と同期」をしていたなら、同期コードを入れると記録を戻せます。</p>
+    <form id="srForm" autocomplete="off">
+      <input id="srCode" class="bk-codein" maxlength="24" placeholder="英数字16文字のコード" autocomplete="off" autocapitalize="characters" spellcheck="false">
       <div class="btn-row"><button class="btn primary" type="submit" id="srGo">記録を戻す <span class="kbdh">Enter</span></button><button class="btn" type="button" id="srNew">はじめて遊ぶ <span class="kbdh">Esc</span></button></div>
     </form>
     <p class="bk-note" id="srNote"></p>
@@ -4173,10 +4169,8 @@ html:not(.mobile) #screen-garden.haslog:has(.modal.open) #g-toasts{top:14px}
     </div>
     <div class="bk-keep" id="bkKeep" hidden>
       <p class="bk-p"><b>記録が消えても戻せるように</b>(iPhone のホーム画面から遊ぶ人に、とくにおすすめ)</p>
-      <p class="bk-p">① <b>ホーム画面用のリンク</b>: このリンクを Safari で開いて、共有ボタン →「ホーム画面に追加」で追加し直すと、そのアイコンは記録が消えても開くだけで自動でつなぎ直します。<b>リンクにはコードが入っているので、人に渡さないでください</b></p>
+      <p class="bk-p"><b>ホーム画面用のリンク</b>: このリンクを Safari で開いて、共有ボタン →「ホーム画面に追加」で追加し直すと、そのアイコンは記録が消えても開くだけで自動でつなぎ直します。<b>リンクにはコードが入っているので、人に渡さないでください</b></p>
       <div class="bk-foot" style="justify-content:flex-start; flex-wrap:wrap"><input class="bk-codein bk-link" id="bkLink" readonly><button class="btn" id="bkLinkCopy">リンクをコピー</button></div>
-      <p class="bk-p">② <b>パスワードとして保存</b>: 押すと、iPhone などがコードをパスワードとして保存できます。記録が消えたときは、コードの欄を押すと保存したコードを選べます</p>
-      <form id="bkKeepForm" class="bk-keepform" autocomplete="on"><input name="username" autocomplete="username" value="タイピングガーデン 同期コード" readonly><input type="password" name="password" id="bkKeepPw" autocomplete="new-password" readonly><button class="btn" id="bkKeepSave" type="submit">パスワードとして保存</button></form>
       <span class="bk-note" id="bkKeepNote"></span>
     </div>
     <p class="bk-p bk-warn">ご注意: コードを入れて参加すると、この端末の記録はコードの記録に置き換わります(参加前の記録はクラウドのバックアップに残り、R から戻せます)。スマホで始めた記録をパソコンへ移すときは、スマホで「同期を始める」を押して、出たコードをパソコンで入れてください。</p>
@@ -7632,9 +7626,9 @@ function endBookGame(){
    新しいものを上に足していく。d は YYYY-MM-DD */
 const NEWS=[
   { d:"2026-11-28", t:"記録が消えたときの戻し方", items:[
-    "iPhone のホーム画面から開いたときなどに記録が消えてしまっても、同期コードで戻しやすくしました",
-    "「別端末と同期」で同期しているときは、ホーム画面用のリンクが出ます。このリンクを Safari で開いてホーム画面に追加し直すと、記録が消えても開くだけで自動でつなぎ直します。リンクにはコードが入っているので、人に渡さないでください",
-    "同期コードを、iPhone などにパスワードとして保存できるようにしました。記録が消えたときは、コードの欄を押すと選べます",
+    "iPhone のホーム画面から開いたときなどに、記録が消えてしまうことがあります。同期をしておけば、消えても戻せるようにしました",
+    "「別端末と同期」は、スマホ1台だけで遊んでいる人も使えます。「同期を始める」を押しておくと記録がクラウドに残り、そのとき出る同期コードを入れれば、いつでも記録を戻せます。コードはメモしておいてください",
+    "同期しているときは、ホーム画面用のリンクが出ます。このリンクを Safari で開いてホーム画面に追加し直すと、記録が消えても開くだけで自動でつなぎ直します。リンクにはコードが入っているので、人に渡さないでください",
     "記録がない状態で始まったときは、前に遊んでいたかを聞くようにしました。同期コードを入れると記録を戻せます。はじめての人は「はじめて遊ぶ」を押してください",
   ]},
   { d:"2026-11-28", t:"タイピング単語帳 大型アップデート", items:[
@@ -19131,15 +19125,14 @@ function renderSyncState(){
   const rb=$("bkRestore");
   if(rb) rb.style.display = syncCode ? "" : "none";
   const kp=$("bkKeep");
-  if(kp){ kp.hidden = !syncCode || syncPreparing; if(syncCode){ $("bkLink").value=syncLinkOf(syncCode); $("bkKeepPw").value=syncCode; } }
+  if(kp){ kp.hidden = !syncCode || syncPreparing; if(syncCode){ $("bkLink").value=syncLinkOf(syncCode); } }
   renderMGate();
 }
 $("bkSyncStart").addEventListener("click",()=>{ syncCode?syncStop():syncBegin(); });
 $("bkJoin").addEventListener("click",()=>syncJoin());
-/* 記録が消えても戻せるように: ホーム画面用のリンク(#sync=コード)と、パスワードとしての保存 */
+/* 記録が消えても戻せるように: ホーム画面用のリンク(#sync=コード) */
 const syncLinkOf = code => location.origin+location.pathname+"#sync="+code;
 $("bkLinkCopy").addEventListener("click",()=>{ const v=$("bkLink").value, n=$("bkKeepNote"); try{ navigator.clipboard.writeText(v).then(()=>{ n.textContent="✅ リンクをコピーしました。Safari で開いて、ホーム画面に追加してください"; },()=>{ $("bkLink").select(); n.textContent="リンクを選んだので、コピーしてください"; }); }catch(e){ $("bkLink").select(); } });
-$("bkKeepForm").addEventListener("submit",e=>{ e.preventDefault(); $("bkKeepNote").textContent="保存をたずねる画面が出たら「保存」を選んでください(出ないブラウザもあります)"; });
 /* 記録が空で始まったとき(はじめてのガイドの前)に、同期コードで戻せるか聞く */
 let srOpen=false;
 function syncRestoreAsk(){
