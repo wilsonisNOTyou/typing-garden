@@ -5435,7 +5435,7 @@ function wb4Answer(i){
   const ok=q.ch[i].ok;
   $("romaji").querySelectorAll(".bq").forEach((b,j)=>b.classList.add(q.ch[j].ok?"ok":j===i?"ng":"x"));
   if(ok) sndDone(); else { sndMiss(); miss++; $("miss").textContent=miss; }
-  wb4Next(ok,false, ok?600:1500);
+  wb4Next(ok,false, ok?900:3500);   // TOEIC と同じ(不正解は、答えを確かめられるように長め)
 }
 /* 1問終わり: 記録して、答えを見せてから次へ */
 function wb4Next(ok,typed,delay){
@@ -5518,6 +5518,7 @@ function clearWordPanel(){
   $("wordText").innerHTML="&nbsp;";
   $("wordKana").innerHTML="&nbsp;";
   $("romaji").innerHTML="&nbsp;";
+  $("wbWst").className="wb-wst"; $("wbWst").textContent=""; $("wbMemPop").classList.remove("on");   // 単語帳の覚えぐあいも消す(3・2・1 のあいだに前の言葉の状態が残らないように)
   $("nextWord").innerHTML="&nbsp;";
   wbReveal(); $("wordQ").hidden=true; $("wordQ").textContent=""; wbCands=null;
 }
@@ -5628,6 +5629,7 @@ function startGame(d){
   gameBara = baraOn() && d!=="book" && !mtOn(); baraQ=null; baraN=0;   // 対戦中はバラバラにしない
   diff=d;
   $("wordPanel").classList.toggle("bara", gameBara); $("wordPanel").classList.remove("quiz");
+  $("wbWst").className="wb-wst"; $("wbWst").textContent=""; $("wbMemPop").classList.remove("on");
   const ta=isQ(d), oneshot=(d==="oneshot");
   osLives = oneshot ? (()=>{ try{ return Garden.charmLives(); }catch(e){ return 0; } })() : 0;
   osCharm = osLives>0;
@@ -5966,7 +5968,7 @@ document.addEventListener("keydown",e=>{
     gardenKeys++;
     if(diff==="oneshot") sndTypeStage(); else sndType();
     renderRomaji();
-    if(r==="done" && diff==="book" && wb4){ sndDone(); wb4Next(true,true,500); return; }   // 4択の前に打ち切れた: 正解
+    if(r==="done" && diff==="book" && wb4){ sndDone(); wb4Next(true,true,800); return; }   // 4択の前に打ち切れた: 正解
     if(r==="done"){
       if(mtOn()) mtWordDone(); else { score++; sndDone(); }   // 対戦: 金・2倍・おじゃま・連鎖・アイテム
       removeScrew();
